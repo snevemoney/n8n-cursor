@@ -20,6 +20,7 @@ from learning_engine.adapters.common import (
     clean_transcript,
     clip_source_text,
     collect_packet,
+    content_first_gap,
     convert_summary,
     empty_convert_report,
     existing_frames,
@@ -29,6 +30,7 @@ from learning_engine.adapters.common import (
     map_status,
     meta_denies_transcript,
     pick_source_transcript,
+    read_transcript_payload,
     rel_ref,
     split_transcripts,
 )
@@ -58,18 +60,7 @@ def _completeness_flag(completeness: dict[str, Any] | None, key: str) -> bool | 
 
 
 def _read_transcript_text(path: Path) -> str:
-    raw = path.read_text(encoding="utf-8", errors="replace")
-    if path.suffix.lower() == ".json":
-        try:
-            obj = json.loads(raw)
-        except json.JSONDecodeError:
-            return raw
-        if isinstance(obj, dict):
-            for key in ("text", "transcript", "source_text"):
-                if isinstance(obj.get(key), str):
-                    return obj[key]
-        return raw
-    return raw
+    return read_transcript_payload(path)
 
 
 def _resolve_declared_raw(folder: Path, name: str) -> Path | None:
@@ -95,17 +86,23 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
         discovered, _read_transcript_text
     )
     denies_transcript = meta_denies_transcript(meta, has_transcript_flag)
-    usable_transcripts = [] if denies_transcript else real_transcripts
-
-    caption_gap = file_gap
+    usable_transcripts = real_transcripts
+    declared_label = None
     classification = meta.get("classification")
     if isinstance(classification, str) and "CAPTION_GAP" in classification.upper():
-        caption_gap = caption_gap or classification
-    if denies_transcript and not caption_gap:
-        if has_transcript_flag is False:
-            caption_gap = "META:has_transcript=false"
-        else:
-            caption_gap = "META:transcript_chars=0"
+        declared_label = classification
+    elif denies_transcript:
+        declared_label = (
+            "META:has_transcript=false"
+            if has_transcript_flag is False
+            else "META:transcript_chars=0"
+        )
+    caption_gap, disagreement, gap_notes = content_first_gap(
+        usable=usable_transcripts,
+        declared_gap=denies_transcript or bool(declared_label),
+        declared_label=declared_label,
+        file_gap=file_gap,
+    )
 
     evidence: list[dict[str, Any]] = [
         evidence_item(kind="metadata", source_ref=rel_ref(folder, meta_path), note="META.json")
@@ -125,15 +122,6 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
                 note="caption_gap_placeholder",
             )
         )
-    if denies_transcript:
-        for path in real_transcripts:
-            evidence.append(
-                evidence_item(
-                    kind="file",
-                    source_ref=rel_ref(folder, path),
-                    note="meta_has_no_transcript",
-                )
-            )
     cited: set[str] = {
         rel_ref(folder, p)
         for p in [*frames, *usable_transcripts, *placeholders, *real_transcripts, meta_path]
@@ -225,9 +213,14 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
     }
 
     extra: dict[str, Any] = {"completeness": extra_completeness}
+    notes = list(gap_notes)
     if caption_gap:
         extra["caption_gap"] = caption_gap
-        extra["notes"] = [f"caption_gap: {caption_gap}"]
+        notes.append(f"caption_gap: {caption_gap}")
+    if disagreement:
+        extra["transcript_disagreement"] = disagreement
+    if notes:
+        extra["notes"] = notes
 
     processing = map_status(str(meta.get("status")) if meta.get("status") is not None else None)
     if isinstance(meta.get("classification"), str) and "PARTIAL" in meta["classification"].upper():

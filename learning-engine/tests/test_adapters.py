@@ -81,7 +81,11 @@ class AdapterTest(unittest.TestCase):
                     ),
                     encoding="utf-8",
                 )
-                (folder / "transcript.txt").write_text("synthetic transcript", encoding="utf-8")
+                (folder / "transcript.txt").write_text(
+                    "synthetic transcript The synthetic verifier runs in a fresh context "
+                    "and checks every step of the agent loop before anyone commits a change.",
+                    encoding="utf-8",
+                )
                 if i % 4 == 0:
                     (folder / "frame-t001.jpg").write_bytes(PNG_1X1)
             corpus = corpus_reingest.convert(dest / "corpus")
@@ -104,7 +108,11 @@ class AdapterTest(unittest.TestCase):
                     encoding="utf-8",
                 )
                 (folder / "frame-t001.jpg").write_bytes(PNG_1X1)
-                (folder / "ocr-frames.txt").write_text("synthetic caption", encoding="utf-8")
+                (folder / "ocr-frames.txt").write_text(
+                    "synthetic caption The synthetic verifier runs in a fresh context "
+                    "and checks every step of the agent loop before anyone commits a change.",
+                    encoding="utf-8",
+                )
             yt = youtube_l2.convert(l2)
             self.assertGreaterEqual(len(yt), 50)
             validate_packets(yt)

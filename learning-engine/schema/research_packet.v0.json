@@ -134,7 +134,12 @@
     "caption_gap": {
       "type": "string",
       "minLength": 1,
-      "description": "Present when META or the on-disk file is a caption gap / placeholder, not speech. Not transcript evidence."
+      "description": "Present only when no candidate transcript file has substantive cleaned speech."
+    },
+    "transcript_disagreement": {
+      "type": "string",
+      "minLength": 1,
+      "description": "AE/META said no transcript but cleaned file content is substantive. Content wins."
     }
   },
   "$defs": {

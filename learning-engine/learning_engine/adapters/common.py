@@ -29,6 +29,15 @@ TRANSCRIPT_EXACT = {
     "whisper.txt",
 }
 SOURCE_TEXT_MAX_CHARS = 50_000
+# Cleaned speech is substantive at this many non-hallucination words. Documented in README.
+MIN_SPEECH_WORDS = 20
+SPEECH_WORD = re.compile(r"[A-Za-z]+(?:'[A-Za-z]+)?")
+HALLUCINATION_WORDS = frozenset({"you", "thank", "thanks"})
+OPERATOR_LINE = re.compile(r"^(?:Source|Fetched)\s*:", re.IGNORECASE)
+DIAGNOSTIC_LINE = re.compile(
+    r"^(?:yt-dlp\b|whisper(?:\+subs)?\b|MemAvailable\b|timedtext\b)",
+    re.IGNORECASE,
+)
 ARROW_TIMESTAMP = re.compile(
     r"^\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?\s+-->\s+\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?\s*"
 )
@@ -208,6 +217,10 @@ def clean_transcript(raw: str) -> dict[str, Any]:
             continue
         if MD_HEADING.match(stripped):
             continue
+        if OPERATOR_LINE.match(stripped):
+            continue
+        if DIAGNOSTIC_LINE.match(stripped):
+            continue
         if contains_caption_gap_token(stripped):
             continue
         body = strip_leading_timestamp(stripped)
@@ -232,6 +245,26 @@ def spoken_text(raw: str) -> str:
     return str(clean_transcript(raw)["text"])
 
 
+def speech_words(text: str) -> list[str]:
+    return SPEECH_WORD.findall(text)
+
+
+def is_hallucination_noise(text: str) -> bool:
+    """Repeated Whisper leftovers like 'you' / 'Thank you.' are not speech."""
+    words = [word.lower() for word in speech_words(text)]
+    if not words:
+        return False
+    return all(word in HALLUCINATION_WORDS for word in words)
+
+
+def is_substantive_speech(text: str) -> bool:
+    """True when cleaned text has MIN_SPEECH_WORDS non-hallucination words."""
+    if is_hallucination_noise(text):
+        return False
+    content = [word for word in speech_words(text) if word.lower() not in HALLUCINATION_WORDS]
+    return len(content) >= MIN_SPEECH_WORDS
+
+
 def contains_caption_gap_token(raw: str) -> bool:
     return bool(CAPTION_GAP_TOKEN.search(raw))
 
@@ -252,22 +285,44 @@ def extract_caption_gap(raw: str) -> str | None:
 
 
 def is_placeholder_transcript(raw: str) -> bool:
-    """Gap notes or empty-after-clean bodies are not transcript evidence.
+    """A file is a placeholder when cleaned speech is not substantive."""
+    return not is_substantive_speech(spoken_text(raw))
 
-    Placeholder detection runs on cleaned text so a timeline of real words
-    is never called a placeholder. A CAPTION_GAP token anywhere still wins:
-    that file is a pipeline note, including diagnostic dumps.
-    """
-    if contains_caption_gap_token(raw):
-        return True
-    return not spoken_text(raw)
+
+def json_string_fields(obj: Any) -> list[str]:
+    if isinstance(obj, str):
+        return [obj]
+    if isinstance(obj, dict):
+        out: list[str] = []
+        for value in obj.values():
+            out.extend(json_string_fields(value))
+        return out
+    if isinstance(obj, list):
+        out = []
+        for value in obj:
+            out.extend(json_string_fields(value))
+        return out
+    return []
+
+
+def read_transcript_payload(path: Path) -> str:
+    """File body, or every string field from a JSON caption object."""
+    raw = path.read_text(encoding="utf-8", errors="replace")
+    if path.suffix.lower() != ".json":
+        return raw
+    try:
+        obj = json.loads(raw)
+    except json.JSONDecodeError:
+        return raw
+    fields = json_string_fields(obj)
+    return "\n".join(fields) if fields else raw
 
 
 def split_transcripts(
     paths: list[Path],
     read_text: Callable[[Path], str],
 ) -> tuple[list[Path], list[Path], str | None]:
-    """Separate real speech files from placeholder / gap-marker files."""
+    """Judge each file on cleaned speech. Token mentions do not classify the file."""
     real: list[Path] = []
     placeholders: list[Path] = []
     gap: str | None = None
@@ -276,10 +331,10 @@ def split_transcripts(
         extracted = extract_caption_gap(raw)
         if extracted:
             gap = gap or extracted
-        if is_placeholder_transcript(raw):
-            placeholders.append(path)
-        else:
+        if is_substantive_speech(spoken_text(raw)):
             real.append(path)
+        else:
+            placeholders.append(path)
     return real, placeholders, gap
 
 
@@ -288,7 +343,7 @@ def source_declares_caption_gap(value: Any) -> bool:
 
 
 def meta_denies_transcript(meta: dict[str, Any], has_transcript_flag: bool | None) -> bool:
-    """META is the filter: has_transcript false or transcript_chars 0 means no speech."""
+    """META cross-check: has_transcript false or transcript_chars 0."""
     if has_transcript_flag is False:
         return True
     chars = meta.get("transcript_chars")
@@ -298,11 +353,36 @@ def meta_denies_transcript(meta: dict[str, Any], has_transcript_flag: bool | Non
 
 
 def ae_denies_transcript(ae: dict[str, Any]) -> bool:
-    """AE_STATUS is the filter: transcript_source CAPTION_GAP means no speech."""
+    """AE cross-check: transcript_source mentions CAPTION_GAP. Does not wipe speech."""
     if source_declares_caption_gap(ae.get("transcript_source")):
         return True
     overall = ae.get("overall") if isinstance(ae.get("overall"), dict) else {}
     return source_declares_caption_gap(overall.get("transcript_source"))
+
+
+def content_first_gap(
+    *,
+    usable: list[Path],
+    declared_gap: bool,
+    declared_label: str | None,
+    file_gap: str | None,
+) -> tuple[str | None, str | None, list[str]]:
+    """Prefer file content. Pack caption_gap only when no file is substantive.
+
+    Returns (caption_gap, disagreement, notes).
+    """
+    notes: list[str] = []
+    if declared_label and contains_caption_gap_token(declared_label):
+        notes.append(f"metadata_caption_gap: {declared_label}")
+    if usable:
+        disagreement = None
+        if declared_gap:
+            label = declared_label or "declared_no_transcript"
+            disagreement = f"declared no transcript ({label}); content is substantive"
+            notes.append(disagreement)
+        return None, disagreement, notes
+    caption_gap = file_gap or declared_label or "no_substantive_speech"
+    return caption_gap, None, notes
 
 
 def clip_source_text(text: str, limit: int = SOURCE_TEXT_MAX_CHARS) -> tuple[str, int, bool]:

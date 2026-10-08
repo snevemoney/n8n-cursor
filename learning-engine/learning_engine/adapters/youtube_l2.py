@@ -19,12 +19,14 @@ from learning_engine.adapters.common import (
     clean_transcript,
     clip_source_text,
     collect_packet,
+    content_first_gap,
     convert_summary,
     empty_convert_report,
     existing_frames,
     existing_transcripts,
     existing_videos,
     pick_source_transcript,
+    read_transcript_payload,
     rel_ref,
     split_transcripts,
 )
@@ -132,31 +134,7 @@ def _info_json(folder: Path) -> dict[str, Any]:
 
 
 def _read_transcript_text(path: Path) -> str:
-    raw = path.read_text(encoding="utf-8", errors="replace")
-    if path.suffix.lower() != ".json":
-        return raw
-    try:
-        obj = json.loads(raw)
-    except json.JSONDecodeError:
-        return raw
-    if isinstance(obj, dict):
-        for key in ("text", "transcript", "captions"):
-            value = obj.get(key)
-            if isinstance(value, str):
-                return value
-            if isinstance(value, list):
-                parts = [
-                    str(item.get("text"))
-                    for item in value
-                    if isinstance(item, dict) and item.get("text")
-                ]
-                if parts:
-                    return "\n".join(parts)
-    if isinstance(obj, list):
-        parts = [str(item.get("text")) for item in obj if isinstance(item, dict) and item.get("text")]
-        if parts:
-            return "\n".join(parts)
-    return raw
+    return read_transcript_payload(path)
 
 
 def _source_text(transcripts: list[Path]) -> str:
@@ -191,10 +169,14 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
         discovered, _read_transcript_text
     )
     denies_transcript = ae_denies_transcript(ae)
-    usable_transcripts = [] if denies_transcript else real_transcripts
-    caption_gap = file_gap
-    if denies_transcript:
-        caption_gap = caption_gap or str(ae.get("transcript_source") or "CAPTION_GAP")
+    usable_transcripts = real_transcripts
+    declared_label = str(ae["transcript_source"]) if ae.get("transcript_source") else None
+    caption_gap, disagreement, gap_notes = content_first_gap(
+        usable=usable_transcripts,
+        declared_gap=denies_transcript,
+        declared_label=declared_label,
+        file_gap=file_gap,
+    )
     videos = existing_videos(folder)
     evidence: list[dict[str, Any]] = [
         evidence_item(kind="file", source_ref=rel_ref(folder, ae_path), note="AE_STATUS.md")
@@ -222,15 +204,6 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
                 note="caption_gap_placeholder",
             )
         )
-    if denies_transcript:
-        for path in real_transcripts:
-            evidence.append(
-                evidence_item(
-                    kind="file",
-                    source_ref=rel_ref(folder, path),
-                    note="ae_has_no_transcript",
-                )
-            )
     for path in videos:
         ref = rel_ref(folder, path)
         if ref not in cited:
@@ -312,9 +285,14 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
     extra: dict[str, Any] = {}
     if ae:
         extra["ae_status"] = ae
+    notes = list(gap_notes)
     if caption_gap:
         extra["caption_gap"] = caption_gap
-        extra["notes"] = [f"caption_gap: {caption_gap}"]
+        notes.append(f"caption_gap: {caption_gap}")
+    if disagreement:
+        extra["transcript_disagreement"] = disagreement
+    if notes:
+        extra["notes"] = notes
     return base_packet(
         signal_id=signal_id,
         source_type="youtube_l2",

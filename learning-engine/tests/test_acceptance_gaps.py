@@ -15,12 +15,19 @@ from tests.helpers import ROOT
 from fixtures.tiny_png import PNG_1X1
 from learning_engine.adapters import bookmark_review, corpus_reingest, youtube_l2
 from learning_engine.adapters.common import (
+    MIN_SPEECH_WORDS,
     SOURCE_TEXT_MAX_CHARS,
     ae_denies_transcript,
     clip_source_text,
     convert_summary,
     is_placeholder_transcript,
+    is_substantive_speech,
     spoken_text,
+)
+
+SPEECH_PAD = (
+    "The synthetic verifier runs in a fresh context and checks every "
+    "step of the agent loop before anyone commits a change."
 )
 from learning_engine.cli import main as cli_main
 from learning_engine.errors import ProviderRefused
@@ -218,9 +225,8 @@ class N1CaptionGapHonesty(unittest.TestCase):
             self.assertEqual(pack["source_text"], "")
             self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
             self.assertTrue(pack.get("caption_gap"))
-            self.assertTrue(
-                any(e.get("note") == "meta_has_no_transcript" for e in pack["evidence"])
-            )
+            self.assertNotIn("transcript_disagreement", pack)
+            self.assertTrue(any(e["kind"] == "file" for e in pack["evidence"]))
 
     def test_heading_only_body_is_placeholder(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -269,7 +275,7 @@ class D4LetterBullets(unittest.TestCase):
         self.assertEqual(pack["processing_status"], "partial")
         refs = [e["source_ref"] for e in pack["evidence"] if e["kind"] == "transcript"]
         self.assertTrue(any(r.endswith(".en.vtt") for r in refs))
-        self.assertEqual(pack["source_text"], "spoken letter pack line")
+        self.assertIn("spoken letter pack line", pack["source_text"])
         self.assertNotIn("WEBVTT", pack["source_text"])
         self.assertEqual(count_false_full_visual(packets), 0)
 
@@ -379,10 +385,11 @@ class R3YoutubeCaptionGap(unittest.TestCase):
         self.assertEqual(pack["source_text"], "")
         self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
         self.assertIn("CAPTION_GAP", pack.get("caption_gap", "").upper())
-        self.assertFalse(is_placeholder_transcript("# Transcript\n\nreal spoken words\n"))
+        self.assertFalse(is_placeholder_transcript("# Transcript\n\n" + SPEECH_PAD + "\n"))
         self.assertTrue(is_placeholder_transcript("Source: CAPTION_GAP\nyt-dlp: no subs\n"))
+        self.assertGreaterEqual(MIN_SPEECH_WORDS, 20)
 
-    def test_ae_gap_ignores_file_that_looks_like_speech(self) -> None:
+    def test_ae_gap_note_with_short_file_is_still_a_gap(self) -> None:
         parsed = youtube_l2.parse_ae_status(
             "- **status**: PARTIAL\n\n## Notes\n- transcript_source=CAPTION_GAP\n"
         )
@@ -397,15 +404,15 @@ class R3YoutubeCaptionGap(unittest.TestCase):
                 encoding="utf-8",
             )
             (folder / "TRANSCRIPT.md").write_text(
-                "# Transcript\n\nthis looks like speech but AE said no\n",
+                "# Transcript\n\nthis looks like speech but is only eight words long\n",
                 encoding="utf-8",
             )
             pack = youtube_l2.convert(folder)[0]
             validate_packets([pack])
             self.assertEqual(pack["source_text"], "")
             self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
-            self.assertTrue(any(e.get("note") == "ae_has_no_transcript" for e in pack["evidence"]))
             self.assertTrue(pack.get("caption_gap"))
+            self.assertNotIn("transcript_disagreement", pack)
 
     def test_table_mention_of_caption_gap_is_not_pack_gap(self) -> None:
         packets = youtube_l2.convert(ROOT / "fixtures" / "youtube_l2")
@@ -440,7 +447,9 @@ class R3TimelineKeepsWords(unittest.TestCase):
     def test_timestamp_prefix_keeps_words_and_is_not_placeholder(self) -> None:
         raw = "00:00:01.000 --> 00:00:03.000 actual words\n[00:01] more words\n"
         self.assertEqual(spoken_text(raw), "actual words\nmore words")
-        self.assertFalse(is_placeholder_transcript(raw))
+        self.assertTrue(is_placeholder_transcript(raw))
+        padded = raw + SPEECH_PAD + "\n"
+        self.assertFalse(is_placeholder_transcript(padded))
         self.assertTrue(is_placeholder_transcript("00:00:01.000 --> 00:00:03.000\n# Transcript\n"))
 
     def test_captions_timeline_file_is_speech(self) -> None:
@@ -453,7 +462,8 @@ class R3TimelineKeepsWords(unittest.TestCase):
             )
             (folder / "captions_timeline.txt").write_text(
                 "00:00:01.000 --> 00:00:03.000 actual words on the timeline\n"
-                "[00:01] second spoken line\n",
+                "[00:01] second spoken line\n"
+                f"{SPEECH_PAD}\n",
                 encoding="utf-8",
             )
             pack = youtube_l2.convert(folder)[0]
@@ -495,12 +505,12 @@ class R3ProvenanceAndTags(unittest.TestCase):
             (folder / "TRANSCRIPT.md").write_text(
                 "_source: yt-dlp auto/subs (CAPTION_SOURCE)_\n"
                 "# Transcript\n\n"
-                "spoken after provenance\n",
+                f"spoken after provenance\n{SPEECH_PAD}\n",
                 encoding="utf-8",
             )
             pack = youtube_l2.convert(folder)[0]
             validate_packets([pack])
-            self.assertEqual(pack["source_text"], "spoken after provenance")
+            self.assertIn("spoken after provenance", pack["source_text"])
             self.assertIn("yt-dlp", pack["scores"].get("transcript_source", ""))
             self.assertNotIn("_source:", pack["source_text"])
 
@@ -513,3 +523,113 @@ class R3LetterParenthetical(unittest.TestCase):
         self.assertEqual(parsed["E"]["status"], "PASS (file store)")
         self.assertEqual(parsed["E"]["artifact"], "SKILL_DELTA.md")
         self.assertEqual(parsed["A"]["artifact"], "COVERAGE.md")
+
+
+class B1RecoveredVttNotWiped(unittest.TestCase):
+    def test_ae_caption_gap_mention_does_not_wipe_real_speech(self) -> None:
+        packets = youtube_l2.convert(ROOT / "fixtures" / "youtube_repass_recovered")
+        pack = next(p for p in packets if p["signal_id"] == "SYNTHETIC06")
+        validate_packets([pack])
+        kinds = [(e["kind"], e["source_ref"]) for e in pack["evidence"]]
+        self.assertTrue(any(k == "transcript" and r.endswith("TRANSCRIPT.md") for k, r in kinds))
+        self.assertTrue(any(k == "transcript" and r.endswith(".en.vtt") for k, r in kinds))
+        self.assertTrue(pack["source_text"])
+        self.assertIn("recovered speech", pack["source_text"])
+        self.assertNotIn("caption_gap", pack)
+        self.assertIn("transcript_disagreement", pack)
+        self.assertTrue(any("CAPTION_GAP" in n for n in pack.get("notes", [])))
+        self.assertEqual(count_false_full_visual(packets), 0)
+
+
+class B2StillsCaptionsJson(unittest.TestCase):
+    def test_stills_captions_with_gap_field_is_still_speech(self) -> None:
+        lexicon = "alpha bravo charlie delta echo foxtrot golf hotel india juliet".split()
+        words = [lexicon[i % len(lexicon)] for i in range(1000)]
+        payload = {
+            "note": "(CAPTION_GAP: timedtext 429)",
+            "stills": [{"text": " ".join(words[i : i + 50])} for i in range(0, 1000, 50)],
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "SYNSTILLS"
+            folder.mkdir()
+            (folder / "AE_STATUS.md").write_text(
+                "# AE_STATUS — SYNSTILLS\n\n- **status**: PASS\n",
+                encoding="utf-8",
+            )
+            (folder / "stills_captions.json").write_text(json.dumps(payload), encoding="utf-8")
+            pack = youtube_l2.convert(folder)[0]
+            validate_packets([pack])
+            self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertGreaterEqual(len(pack["source_text"].split()), MIN_SPEECH_WORDS)
+            self.assertNotIn("caption_gap", pack)
+            self.assertIn("alpha", pack["source_text"])
+            self.assertNotIn("CAPTION_GAP", pack["source_text"])
+            self.assertTrue(is_substantive_speech(pack["source_text"]))
+
+
+class B3WhisperNoise(unittest.TestCase):
+    def test_you_you_vtt_is_not_transcript_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "SYNNOISE"
+            folder.mkdir()
+            (folder / "AE_STATUS.md").write_text(
+                "# AE_STATUS — SYNNOISE\n\n- **status**: PASS\n",
+                encoding="utf-8",
+            )
+            (folder / "SYNNOISE.en.vtt").write_text(
+                "WEBVTT\n\n1\n00:00:00.000 --> 00:00:01.000\nyou\n\n2\n00:00:01.000 --> 00:00:02.000\nyou\n",
+                encoding="utf-8",
+            )
+            pack = youtube_l2.convert(folder)[0]
+            validate_packets([pack])
+            self.assertEqual(pack["source_text"], "")
+            self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertTrue(pack.get("caption_gap"))
+            self.assertNotIn("transcript_disagreement", pack)
+
+
+class M1OperatorLines(unittest.TestCase):
+    def test_strips_leading_source_and_fetched_lines(self) -> None:
+        raw = (
+            "Source: youtube-auto-captions-vtt\n"
+            "Fetched: 2026-09-29T09:00:00Z\n"
+            f"{SPEECH_PAD}\n"
+        )
+        spoken = spoken_text(raw)
+        self.assertNotIn("Source:", spoken)
+        self.assertNotIn("Fetched:", spoken)
+        self.assertIn("synthetic verifier", spoken)
+        packets = youtube_l2.convert(ROOT / "fixtures" / "youtube_repass_recovered")
+        pack = next(p for p in packets if p["signal_id"] == "SYNTHETIC06")
+        self.assertNotIn("Source:", pack["source_text"])
+        self.assertNotIn("Fetched:", pack["source_text"])
+
+
+class ContentWinsDisagreement(unittest.TestCase):
+    def test_meta_no_transcript_but_substantive_file_keeps_speech(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "meta-disagree"
+            folder.mkdir()
+            (folder / "META.json").write_text(
+                json.dumps(
+                    {
+                        "id": "syn-meta-disagree",
+                        "url": "https://example.com/synthetic/meta-disagree",
+                        "status": "OK",
+                        "classification": "CAPTION_GAP",
+                        "transcript_chars": 0,
+                        "completeness": {"has_transcript": False},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (folder / "TRANSCRIPT.md").write_text(
+                f"# Transcript\n\n{SPEECH_PAD}\n",
+                encoding="utf-8",
+            )
+            pack = corpus_reingest.convert(folder)[0]
+            validate_packets([pack])
+            self.assertIn("synthetic verifier", pack["source_text"])
+            self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertNotIn("caption_gap", pack)
+            self.assertIn("transcript_disagreement", pack)
