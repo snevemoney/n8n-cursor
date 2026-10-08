@@ -9,9 +9,16 @@ high-only recall = |flagged ∩ high| / |high|
 
 from __future__ import annotations
 
+import hashlib
 from typing import Any, Iterable
 
 from learning_engine.constants import KW_UNCLASSIFIED, USEFUL_VALUES
+
+
+def held_out_is_dev(signal_id: str, *, seed: int = 0, train_frac: float = 0.7) -> bool:
+    """Deterministic 70/30 split from a seeded hash of id."""
+    digest = hashlib.sha256(f"{seed}:{signal_id}".encode("utf-8")).digest()
+    return int.from_bytes(digest[:8], "big") / float(2**64) < train_frac
 
 
 def is_flagged(kw_category: Any) -> bool:
@@ -70,3 +77,14 @@ def score_rows(rows: Iterable[dict[str, Any]]) -> dict[str, Any]:
 def split_done(rows: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     done = [r for r in rows if is_done(r.get("status"))]
     return rows, done
+
+
+def split_held_out(
+    rows: list[dict[str, Any]],
+    *,
+    seed: int = 0,
+    train_frac: float = 0.7,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    dev = [r for r in rows if held_out_is_dev(str(r.get("signal_id") or ""), seed=seed, train_frac=train_frac)]
+    held = [r for r in rows if r not in dev]
+    return dev, held

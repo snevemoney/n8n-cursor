@@ -7,25 +7,19 @@ from typing import Any
 
 from learning_engine.stage_c.contract import Judgment
 
+# Generic building words only. No project/repo/desk names (cursor, n8n, …).
 CHEAP_USEFUL = (
     "agent",
-    "harness",
     "verifier",
     "eval",
     "workflow",
-    "cursor",
-    "n8n",
     "api",
     "model",
-    "skill",
-    "packet",
     "transcript",
     "keyframe",
     "prompt",
     "cli",
     "schema",
-    "adapter",
-    "baseline",
 )
 NOISE = (
     "tv series",
@@ -41,6 +35,7 @@ NOISE = (
 
 class LexiconProvider:
     name = "lexicon_gate"
+    reads = ("source_text",)
 
     def evaluate(self, packet: dict[str, Any]) -> Judgment:
         started = time.perf_counter()

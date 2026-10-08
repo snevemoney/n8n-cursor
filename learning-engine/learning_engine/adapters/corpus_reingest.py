@@ -4,6 +4,10 @@ Looks for TRANSCRIPT.md (any case), *.vtt, caption files, stills/, and raw/.
 full_visual is claimed only when frame evidence refs AND a video file exist
 on disk. META completeness keys that are missing stay unknown, not true.
 
+META is authoritative when has_transcript or transcript_chars is present.
+When META has neither signal, fall back to TRANSCRIPT.md speech lines
+(≥5 Unicode tokens) and set transcript_quality="meta_missing".
+
 status OK maps to processing_status ok, then becomes partial when
 classification contains PARTIAL — a cautious choice, documented in README.
 """
@@ -28,12 +32,16 @@ from learning_engine.adapters.common import (
     existing_videos,
     extract_caption_gap,
     is_suspect_hallucination,
+    is_transcript_md,
     map_status,
     meta_affirms_transcript,
     meta_denies_transcript,
+    meta_signals_absent,
     pick_source_transcript,
     read_transcript_payload,
     rel_ref,
+    spoken_text,
+    unicode_word_tokens,
 )
 from learning_engine.io_util import write_jsonl
 from learning_engine.packet import base_packet, evidence_item
@@ -85,8 +93,28 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
     raw_on_disk = existing_raw_files(folder)
     affirms = meta_affirms_transcript(meta, has_transcript_flag)
     denies = meta_denies_transcript(meta, has_transcript_flag)
-    usable_transcripts = list(discovered) if affirms else []
-    placeholders = [] if affirms else list(discovered)
+    meta_missing = meta_signals_absent(meta, has_transcript_flag)
+    usable_transcripts: list[Path] = []
+    placeholders: list[Path] = []
+    quality: str | None = None
+    if affirms:
+        usable_transcripts = list(discovered)
+    elif denies:
+        placeholders = list(discovered)
+    elif meta_missing:
+        for path in discovered:
+            if not is_transcript_md(path):
+                placeholders.append(path)
+                continue
+            tokens = unicode_word_tokens(spoken_text(_read_transcript_text(path)))
+            if len(tokens) >= 5:
+                usable_transcripts.append(path)
+            else:
+                placeholders.append(path)
+        if usable_transcripts:
+            quality = "meta_missing"
+    else:
+        placeholders = list(discovered)
     file_gap = None
     for path in discovered:
         file_gap = file_gap or extract_caption_gap(_read_transcript_text(path))
@@ -100,7 +128,7 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
             if has_transcript_flag is False
             else "META:transcript_chars=0"
         )
-    caption_gap = None if affirms else (file_gap or declared_label or "CAPTION_GAP")
+    caption_gap = None if usable_transcripts else (file_gap or declared_label or "CAPTION_GAP")
     disagreement = None
     gap_notes: list[str] = []
     if denies and affirms:
@@ -221,7 +249,11 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
         notes.append(f"caption_gap: {caption_gap}")
     if disagreement:
         extra["transcript_disagreement"] = disagreement
-    if affirms and is_suspect_hallucination(source_text):
+    if quality:
+        extra["transcript_quality"] = quality
+        notes.append(f"transcript_quality: {quality}")
+        scores["transcript_quality"] = quality
+    elif affirms and is_suspect_hallucination(source_text):
         extra["transcript_quality"] = "suspect_hallucination"
         notes.append("transcript_quality: suspect_hallucination")
         scores["transcript_quality"] = "suspect_hallucination"

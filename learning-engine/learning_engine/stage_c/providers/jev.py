@@ -61,6 +61,7 @@ def flagged_from_answers(payload: dict[str, Any]) -> tuple[bool, float | None]:
 
 class JevOpenRouterProvider:
     name = "jev_openrouter"
+    reads = ("source_text",)
 
     def __init__(
         self,

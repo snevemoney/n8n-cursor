@@ -12,6 +12,21 @@ EVIDENCE_KINDS = frozenset(
     {"frame", "still", "transcript", "caption", "file", "field", "metadata"}
 )
 FRAME_EVIDENCE_KINDS = frozenset({"frame", "still"})
+IMAGE_EXTENSIONS = frozenset({".jpg", ".jpeg", ".png", ".webp"})
+VIDEO_EXTENSIONS = frozenset({".mp4", ".webm", ".mov", ".mkv"})
+SOURCE_TEXT_STATUSES = frozenset({"available", "unavailable"})
+KEYWORD_REPLAY_KIND = "replay of stored kw_category (not a classifier)"
+KEYWORD_REPLAY_REFERENCE = {
+    "flagged": 569,
+    "useful": 180,
+    "tp": 127,
+    "recall": 0.7056,
+    "precision": 0.2232,
+}
+LIVE_MAX_ITEMS_DEFAULT = 25
+INJECTION_RE = (
+    r"ignore\s+(?:(?:all|any|previous|prior|above)\s+)+(?:instructions|prompts|rules)"
+)
 VERIFICATION_STATES = frozenset(
     {"verified", "partial", "unverified", "not_applicable", "unknown"}
 )

@@ -88,7 +88,10 @@ class ValidatorTest(unittest.TestCase):
         packet = _ok(
             content_access="full_visual",
             analysis_scope="full_visual",
-            evidence=[evidence_item(kind="frame", source_ref="frames/frame-t001.jpg")],
+            evidence=[
+                evidence_item(kind="frame", source_ref="frames/frame-t001.jpg"),
+                evidence_item(kind="file", source_ref="source.mp4", note="video"),
+            ],
         )
         validate_packet(packet)
 

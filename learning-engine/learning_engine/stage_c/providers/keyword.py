@@ -28,9 +28,11 @@ RULE_CATEGORIES: list[tuple[str, tuple[str, ...]]] = [
 
 
 class KeywordReplayProvider:
-    """Replay the stored kw_category. flagged := category != unclassified."""
+    """Replay of stored kw_category (not a classifier)."""
 
     name = "keyword_replay"
+    reads = ("scores.kw_category",)
+    kind = "replay of stored kw_category (not a classifier)"
 
     def evaluate(self, packet: dict[str, Any]) -> Judgment:
         started = time.perf_counter()
@@ -49,7 +51,7 @@ class KeywordReplayProvider:
             latency_ms=latency,
             cost_usd=0.0,
             raw={"mode": "replay", "kw_category": kw},
-            notes="replay of stored kw_category; not a live classifier",
+            notes="replay of stored kw_category (not a classifier)",
         )
 
 
@@ -57,6 +59,7 @@ class KeywordRulesProvider:
     """Optional rules baseline. Report separately from keyword_replay."""
 
     name = "keyword_rules"
+    reads = ("source_text",)
 
     def evaluate(self, packet: dict[str, Any]) -> Judgment:
         started = time.perf_counter()

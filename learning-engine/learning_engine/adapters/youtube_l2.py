@@ -160,9 +160,11 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
 
     frames = existing_frames(folder)
     discovered = existing_transcripts(folder)
-    usable_transcripts, placeholders, clean_md, file_gap = youtube_speech_files(
-        discovered, _read_transcript_text
-    )
+    scan = youtube_speech_files(discovered, _read_transcript_text)
+    usable_transcripts = scan.speech
+    placeholders = scan.other
+    clean_md = scan.clean_md
+    file_gap = scan.gap_note
     declared_label = str(ae["transcript_source"]) if ae.get("transcript_source") else None
     has_speech = bool(usable_transcripts)
     caption_gap = None if has_speech else (file_gap or declared_label or "no_speech")
@@ -172,6 +174,12 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
         declared_speech=ae_affirms_transcript(ae),
         declared_label=declared_label,
     )
+    if scan.content_disagreement:
+        disagreement = (
+            f"{disagreement}; {scan.content_disagreement}"
+            if disagreement
+            else scan.content_disagreement
+        )
     gap_notes: list[str] = []
     if declared_label and ae_denies_transcript(ae):
         gap_notes.append(f"metadata_caption_gap: {declared_label}")
@@ -194,10 +202,19 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
         evidence.append(evidence_item(kind="frame", source_ref=rel_ref(folder, path)))
     for path in usable_transcripts:
         evidence.append(evidence_item(kind="transcript", source_ref=rel_ref(folder, path)))
+    for path in scan.gap_note_paths:
+        if path in usable_transcripts:
+            evidence.append(
+                evidence_item(
+                    kind="file",
+                    source_ref=rel_ref(folder, path),
+                    note="gap_note",
+                )
+            )
     for path in placeholders:
         note = (
             "caption_gap_placeholder"
-            if is_transcript_md(path) or is_caption_format_file(path)
+            if is_transcript_md(path) or is_caption_format_file(path) or path in scan.gap_note_paths
             else None
         )
         evidence.append(
@@ -298,6 +315,17 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
         extra["transcript_disagreement"] = disagreement
     if file_gap:
         extra["gap_note"] = file_gap
+    if scan.short_paths and (not usable_transcripts or all(p in scan.short_paths for p in usable_transcripts)):
+        extra["transcript_quality"] = "short"
+        scores["transcript_quality"] = "short"
+        notes.append("transcript_quality: short")
+    elif scan.short_paths:
+        scores["short_caption_files"] = len(scan.short_paths)
+    if scan.preferred is not None:
+        extra["preferred_source"] = rel_ref(folder, scan.preferred)
+        scores["preferred_source"] = rel_ref(folder, scan.preferred)
+    if scan.disagreement_refs:
+        scores["disagreement_refs"] = list(scan.disagreement_refs)
     if notes:
         extra["notes"] = notes
     return base_packet(

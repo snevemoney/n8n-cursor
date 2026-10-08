@@ -1,13 +1,15 @@
 """Research-packet v0 validator.
 
 Schema file is the contract. This module enforces required fields, enums, and
-the honesty rules the schema cannot express: full_visual needs frame evidence,
-every evidence item names kind + source_ref, and source_text is not a prompt.
+the honesty rules the schema cannot express: full_visual needs image + video
+evidence (by extension), every evidence item names kind + source_ref, and
+source_text is not mixed with operator delimiters.
 """
 
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -15,7 +17,8 @@ from learning_engine.constants import (
     ANALYSIS_SCOPE,
     CONTENT_ACCESS,
     EVIDENCE_KINDS,
-    FRAME_EVIDENCE_KINDS,
+    IMAGE_EXTENSIONS,
+    INJECTION_RE,
     INSTRUCTION_KEYS,
     INSTRUCTION_MARKERS,
     LIFECYCLE_STATES,
@@ -24,40 +27,100 @@ from learning_engine.constants import (
     SCHEMA_VERSION,
     SOURCE_TYPES,
     VERIFICATION_STATES,
+    VIDEO_EXTENSIONS,
 )
 from learning_engine.errors import PacketValidationError
 
 SCHEMA_PATH = Path(__file__).resolve().parents[1] / "schema" / "research_packet.v0.json"
+INJECTION_PATTERN = re.compile(INJECTION_RE, re.IGNORECASE)
 
 
 def load_schema() -> dict[str, Any]:
     return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
 
 
-def _is_frame_evidence(item: dict[str, Any]) -> bool:
-    kind = item.get("kind")
-    if kind in FRAME_EVIDENCE_KINDS:
+def evidence_suffix(item: dict[str, Any]) -> str:
+    ref = str(item.get("source_ref") or "")
+    return Path(ref).suffix.lower()
+
+
+def evidence_exists_true(item: dict[str, Any]) -> bool:
+    return item.get("exists") is True
+
+
+def is_image_evidence(item: dict[str, Any]) -> bool:
+    return evidence_exists_true(item) and evidence_suffix(item) in IMAGE_EXTENSIONS
+
+
+def is_video_evidence(item: dict[str, Any]) -> bool:
+    return evidence_exists_true(item) and evidence_suffix(item) in VIDEO_EXTENSIONS
+
+
+def _resolve_evidence_path(ref: str, root: Path | None) -> Path:
+    path = Path(ref)
+    if path.is_absolute():
+        return path
+    if root is not None:
+        return (root / path).resolve()
+    return path
+
+
+def evidence_on_disk(item: dict[str, Any], root: Path | None) -> bool:
+    if root is None:
         return True
-    if kind == "file":
-        ref = str(item.get("source_ref") or "").lower()
-        return any(token in ref for token in ("frame", "still", ".jpg", ".jpeg", ".png"))
-    return False
+    return _resolve_evidence_path(str(item.get("source_ref") or ""), root).is_file()
 
 
 def has_frame_evidence(packet: dict[str, Any]) -> bool:
     evidence = packet.get("evidence")
     if not isinstance(evidence, list):
         return False
-    return any(isinstance(item, dict) and _is_frame_evidence(item) for item in evidence)
+    return any(isinstance(item, dict) and is_image_evidence(item) for item in evidence)
 
 
-def count_false_full_visual(packets: Iterable[dict[str, Any]]) -> int:
+def has_video_evidence(packet: dict[str, Any]) -> bool:
+    evidence = packet.get("evidence")
+    if not isinstance(evidence, list):
+        return False
+    return any(isinstance(item, dict) and is_video_evidence(item) for item in evidence)
+
+
+def has_full_visual_media(
+    packet: dict[str, Any],
+    *,
+    root: Path | None = None,
+) -> bool:
+    evidence = packet.get("evidence")
+    if not isinstance(evidence, list):
+        return False
+    image = False
+    video = False
+    for item in evidence:
+        if not isinstance(item, dict):
+            continue
+        if not evidence_exists_true(item):
+            continue
+        if root is not None and not evidence_on_disk(item, root):
+            continue
+        suffix = evidence_suffix(item)
+        if suffix in IMAGE_EXTENSIONS:
+            image = True
+        if suffix in VIDEO_EXTENSIONS:
+            video = True
+    return image and video
+
+
+def count_false_full_visual(
+    packets: Iterable[dict[str, Any]],
+    *,
+    root: Path | None = None,
+) -> int:
     n = 0
     for packet in packets:
         access = packet.get("content_access")
         scope = packet.get("analysis_scope")
         if access == "full_visual" or scope == "full_visual":
-            if not has_frame_evidence(packet):
+            if not has_full_visual_media(packet, root=root):
                 n += 1
     return n
 
@@ -92,9 +155,29 @@ def _reject_markers(text: str, path: str) -> None:
             )
 
 
-def validate_packet(packet: Any, *, path: str = "$") -> dict[str, Any]:
+def _source_text_str(source_text: Any) -> str:
+    if isinstance(source_text, str):
+        return source_text
+    if isinstance(source_text, dict) and isinstance(source_text.get("text"), str):
+        return str(source_text["text"])
+    return ""
+
+
+def validate_packet(
+    packet: Any,
+    *,
+    path: str = "$",
+    root: Path | str | None = None,
+    warnings: list[str] | None = None,
+    evidence_root: Path | str | None = None,
+) -> dict[str, Any]:
     if not isinstance(packet, dict):
         raise PacketValidationError("packet must be an object", path)
+    warn = warnings if warnings is not None else []
+    disk_root: Path | None = None
+    raw_root = root if root is not None else evidence_root
+    if raw_root is not None:
+        disk_root = Path(raw_root)
     for field in REQUIRED_PACKET_FIELDS:
         if field not in packet:
             raise PacketValidationError(f"missing required field {field}", path)
@@ -126,6 +209,17 @@ def validate_packet(packet: Any, *, path: str = "$") -> dict[str, Any]:
             )
 
     _reject_mixed_source(packet.get("source_text"), f"{path}.source_text")
+    derived = packet.get("derived") if isinstance(packet.get("derived"), dict) else {}
+    reviewer = derived.get("reviewer_summary")
+    if isinstance(reviewer, str) and reviewer:
+        _reject_markers(reviewer, f"{path}.derived.reviewer_summary")
+    source_blob = _source_text_str(packet.get("source_text"))
+    if INJECTION_PATTERN.search(source_blob):
+        packet["injection_suspect"] = True
+        warn.append(f"{path}: injection_suspect (jailbreak phrasing in source_text)")
+
+    if packet.get("transcript_quality") == "suspect_hallucination":
+        warn.append(f"{path}: transcript_quality=suspect_hallucination")
 
     scores = packet.get("scores")
     if not isinstance(scores, dict):
@@ -166,17 +260,31 @@ def validate_packet(packet: Any, *, path: str = "$") -> dict[str, Any]:
             )
 
     if packet.get("content_access") == "full_visual" or packet.get("analysis_scope") == "full_visual":
-        if not has_frame_evidence(packet):
+        if not has_full_visual_media(packet, root=disk_root):
             raise PacketValidationError(
-                "full_visual requires at least one frame/still evidence ref",
+                "full_visual requires at least one image-extension evidence ref "
+                "(jpg/jpeg/png/webp) and one video-extension evidence ref "
+                "(mp4/webm/mov/mkv), both exists=true"
+                + (" and present on disk" if disk_root is not None else ""),
                 path,
             )
 
+    if warnings is None and warn:
+        packet.setdefault("notes", [])
+        if isinstance(packet.get("notes"), list):
+            for item in warn:
+                if item not in packet["notes"]:
+                    packet["notes"].append(item)
     return packet
 
 
-def validate_packets(packets: Iterable[Any]) -> list[dict[str, Any]]:
+def validate_packets(
+    packets: Iterable[Any],
+    *,
+    root: Path | str | None = None,
+    warnings: list[str] | None = None,
+) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for i, packet in enumerate(packets):
-        out.append(validate_packet(packet, path=f"$[{i}]"))
+        out.append(validate_packet(packet, path=f"$[{i}]", root=root, warnings=warnings))
     return out

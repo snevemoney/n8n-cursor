@@ -72,6 +72,7 @@ def flagged_from_answers(payload: dict[str, Any]) -> tuple[bool, float | None]:
 
 class OpenAIDecisionsProvider:
     name = "openai_decisions"
+    reads = ("source_text",)
 
     def __init__(
         self,

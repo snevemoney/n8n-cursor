@@ -23,8 +23,17 @@ class AdapterTest(unittest.TestCase):
         self.assertEqual(by_id["9000000000000000003"]["content_access"], "preview_only")
         self.assertEqual(by_id["9000000000000000001"]["scores"]["kw_category"], "harness")
         self.assertNotIn("kw_category", by_id["9000000000000000002"]["scores"])
-        self.assertTrue(by_id["9000000000000000001"]["source_text"].startswith("Post shows"))
+        self.assertEqual(by_id["9000000000000000001"]["source_text"], "")
+        self.assertEqual(by_id["9000000000000000001"]["source_text_status"], "unavailable")
+        self.assertTrue(
+            by_id["9000000000000000001"]["derived"]["reviewer_summary"].startswith("Post shows")
+        )
+        self.assertTrue(by_id["9000000000000000001"]["derived"]["reviewer_authored"])
         self.assertNotIn("<<<INSTRUCTIONS>>>", by_id["9000000000000000001"]["source_text"])
+        self.assertNotIn(
+            "<<<INSTRUCTIONS>>>",
+            by_id["9000000000000000001"]["derived"]["reviewer_summary"],
+        )
         self.assertEqual(count_false_full_visual(packets), 0)
 
     def test_bookmark_missing_state_is_unknown_not_guessed(self) -> None:

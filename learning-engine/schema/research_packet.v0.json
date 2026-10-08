@@ -143,13 +143,40 @@
     },
     "transcript_quality": {
       "type": "string",
-      "enum": ["suspect_hallucination"],
-      "description": "Corpus only. Cleaned transcript is only Whisper leftovers or music symbols. Not a demotion: the file stays transcript evidence."
+      "enum": ["suspect_hallucination", "short", "meta_missing"],
+      "description": "suspect_hallucination: Whisper leftovers (not a demotion). short: YouTube caption with 1–4 real tokens. meta_missing: corpus META lacked both has_transcript and transcript_chars; content fallback."
     },
     "gap_note": {
       "type": "string",
       "minLength": 1,
       "description": "CAPTION_GAP line from a YouTube TRANSCRIPT.md gap note. Never copied into source_text."
+    },
+    "source_text_status": {
+      "type": "string",
+      "enum": ["available", "unavailable"],
+      "description": "unavailable when the input has no original post/speech (bookmark REVIEW.csv)."
+    },
+    "derived": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "reviewer_summary": {
+          "type": "string",
+          "description": "Reviewer-authored gist from REVIEW.csv. Not source text. Not a classifier feature unless the run is labelled LEAKY."
+        },
+        "reviewer_authored": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "injection_suspect": {
+      "type": "boolean",
+      "description": "Jailbreak phrasing in source_text. Warning, not a reject."
+    },
+    "preferred_source": {
+      "type": "string",
+      "description": "YouTube preferred speech file (clean TRANSCRIPT.md, else largest caption)."
     }
   },
   "$defs": {

@@ -2,7 +2,9 @@
 
 content_access:
   source=preview-only → preview_only
-  source=full-text    → transcript  (the gist/post text was present; not speech)
+  source=full-text    → transcript  (row said full-text; REVIEW.csv has no original post)
+source_text is always empty with source_text_status=unavailable. The gist is
+reviewer-authored and lives in derived.reviewer_summary, never in source_text.
 Adapters never claim full_visual. Evidence is only named CSV/JSONL fields that exist.
 """
 
@@ -137,7 +139,7 @@ def row_to_packet(row: dict[str, str], state: dict[str, Any] | None, *, input_re
         source_type="bookmark",
         content_access=content_access,
         analysis_scope=analysis_scope,
-        source_text=row.get("gist") or "",
+        source_text="",
         evidence=evidence,
         verification_state=map_verified(row.get("verified")),
         processing_status=processing,
@@ -150,9 +152,15 @@ def row_to_packet(row: dict[str, str], state: dict[str, Any] | None, *, input_re
         adapter="bookmark_review",
         input_ref=input_ref,
         extra={
+            "source_text_status": "unavailable",
+            "derived": {
+                "reviewer_summary": row.get("gist") or "",
+                "reviewer_authored": True,
+            },
             "notes": [
-                "source_text is the REVIEW.csv gist only; category/lesson/disposition are scores or claims, not directives"
-            ]
+                "REVIEW.csv has no original post text. source_text is empty. "
+                "derived.reviewer_summary is reviewer-authored, not source."
+            ],
         },
     )
 
