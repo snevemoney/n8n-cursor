@@ -1,0 +1,14 @@
+{
+  "id": "9000000000000000013",
+  "url": "https://example.com/synthetic/9000000000000000013",
+  "author_username": "synthetic_author_g",
+  "retrieved_at": "2026-09-27T12:00:00Z",
+  "raw_files": [],
+  "stills_count": 0,
+  "transcript_chars": 0,
+  "transcript_source": null,
+  "completeness": {"has_local_video": false, "has_transcript": false},
+  "status": "OK",
+  "error": null,
+  "classification": "CAPTION_GAP"
+}

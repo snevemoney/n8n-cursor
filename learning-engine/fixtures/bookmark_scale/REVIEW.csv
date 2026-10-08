@@ -1,0 +1,55 @@
+id,author,date,gist,category,lesson,usefulness,disposition,verified,links,source
+syn-bm-001,synth_1,2026-09-01,List entry: a TV series recommendation,harness,,med,keep,n.a.,https://example.com/bm/1,full-text
+syn-bm-002,synth_2,2026-09-01,Workflow CLI that writes a packet schema,harness,,low,keep,n.a.,,full-text
+syn-bm-003,synth_3,2026-09-01,Model API changelog for a local eval harness,leisure,,none,keep,n.a.,https://example.com/bm/3,full-text
+syn-bm-004,synth_4,2026-09-01,UI layout notes for a design system,harness,,high,keep,n.a.,,full-text
+syn-bm-005,synth_5,2026-09-01,Leisure concert mention,harness,,med,keep,n.a.,https://example.com/bm/5,full-text
+syn-bm-006,synth_6,2026-09-01,Skill enrich proposal about adapters,leisure,,low,keep,n.a.,,full-text
+syn-bm-007,synth_7,2026-09-01,Voice over tool list,harness,Keep source text separate,none,keep,n.a.,https://example.com/bm/7,full-text
+syn-bm-008,synth_8,2026-09-01,Post shows an agent loop with a fresh-context verifier step,harness,,high,keep,n.a.,,full-text
+syn-bm-009,synth_9,2026-09-01,List entry: a TV series recommendation,leisure,,med,keep,n.a.,https://example.com/bm/9,full-text
+syn-bm-010,synth_10,2026-09-01,Workflow CLI that writes a packet schema,harness,,low,keep,n.a.,,full-text
+syn-bm-011,synth_11,2026-09-01,Model API changelog for a local eval harness,harness,,none,keep,n.a.,https://example.com/bm/11,full-text
+syn-bm-012,synth_12,2026-09-01,UI layout notes for a design system,leisure,,high,keep,n.a.,,full-text
+syn-bm-013,synth_13,2026-09-01,Leisure concert mention,harness,,med,keep,n.a.,https://example.com/bm/13,preview-only
+syn-bm-014,synth_14,2026-09-01,Skill enrich proposal about adapters,harness,Keep source text separate,low,keep,n.a.,,full-text
+syn-bm-015,synth_15,2026-09-01,Voice over tool list,leisure,,none,keep,n.a.,https://example.com/bm/15,full-text
+syn-bm-016,synth_16,2026-09-01,Post shows an agent loop with a fresh-context verifier step,harness,,high,keep,n.a.,,full-text
+syn-bm-017,synth_17,2026-09-01,List entry: a TV series recommendation,harness,,med,keep,n.a.,https://example.com/bm/17,full-text
+syn-bm-018,synth_18,2026-09-01,Workflow CLI that writes a packet schema,leisure,,low,keep,n.a.,,full-text
+syn-bm-019,synth_19,2026-09-01,Model API changelog for a local eval harness,harness,,none,keep,n.a.,https://example.com/bm/19,full-text
+syn-bm-020,synth_20,2026-09-01,UI layout notes for a design system,harness,,high,keep,n.a.,,full-text
+syn-bm-021,synth_21,2026-09-01,Leisure concert mention,leisure,Keep source text separate,med,keep,n.a.,https://example.com/bm/21,full-text
+syn-bm-022,synth_22,2026-09-01,Skill enrich proposal about adapters,harness,,low,keep,n.a.,,full-text
+syn-bm-023,synth_23,2026-09-01,Voice over tool list,harness,,none,keep,n.a.,https://example.com/bm/23,full-text
+syn-bm-024,synth_24,2026-09-01,Post shows an agent loop with a fresh-context verifier step,leisure,,high,keep,n.a.,,full-text
+syn-bm-025,synth_25,2026-09-01,List entry: a TV series recommendation,harness,,med,keep,n.a.,https://example.com/bm/25,full-text
+syn-bm-026,synth_26,2026-09-01,Workflow CLI that writes a packet schema,harness,,low,keep,n.a.,,preview-only
+syn-bm-027,synth_27,2026-09-01,Model API changelog for a local eval harness,leisure,,none,keep,n.a.,https://example.com/bm/27,full-text
+syn-bm-028,synth_28,2026-09-01,UI layout notes for a design system,harness,Keep source text separate,high,keep,n.a.,,full-text
+syn-bm-029,synth_29,2026-09-01,Leisure concert mention,harness,,med,keep,n.a.,https://example.com/bm/29,full-text
+syn-bm-030,synth_30,2026-09-01,Skill enrich proposal about adapters,leisure,,low,keep,n.a.,,full-text
+syn-bm-031,synth_31,2026-09-01,Voice over tool list,harness,,none,keep,n.a.,https://example.com/bm/31,full-text
+syn-bm-032,synth_32,2026-09-01,Post shows an agent loop with a fresh-context verifier step,harness,,high,keep,n.a.,,full-text
+syn-bm-033,synth_33,2026-09-01,List entry: a TV series recommendation,leisure,,med,keep,n.a.,https://example.com/bm/33,full-text
+syn-bm-034,synth_34,2026-09-01,Workflow CLI that writes a packet schema,harness,,low,keep,n.a.,,full-text
+syn-bm-035,synth_35,2026-09-01,Model API changelog for a local eval harness,harness,Keep source text separate,none,keep,n.a.,https://example.com/bm/35,full-text
+syn-bm-036,synth_36,2026-09-01,UI layout notes for a design system,leisure,,high,keep,n.a.,,full-text
+syn-bm-037,synth_37,2026-09-01,Leisure concert mention,harness,,med,keep,n.a.,https://example.com/bm/37,full-text
+syn-bm-038,synth_38,2026-09-01,Skill enrich proposal about adapters,harness,,low,keep,n.a.,,full-text
+syn-bm-039,synth_39,2026-09-01,Voice over tool list,leisure,,none,keep,n.a.,https://example.com/bm/39,preview-only
+syn-bm-040,synth_40,2026-09-01,Post shows an agent loop with a fresh-context verifier step,harness,,high,keep,n.a.,,full-text
+syn-bm-041,synth_41,2026-09-01,List entry: a TV series recommendation,harness,,med,keep,n.a.,https://example.com/bm/41,full-text
+syn-bm-042,synth_42,2026-09-01,Workflow CLI that writes a packet schema,leisure,Keep source text separate,low,keep,n.a.,,full-text
+syn-bm-043,synth_43,2026-09-01,Model API changelog for a local eval harness,harness,,none,keep,n.a.,https://example.com/bm/43,full-text
+syn-bm-044,synth_44,2026-09-01,UI layout notes for a design system,harness,,high,keep,n.a.,,full-text
+syn-bm-045,synth_45,2026-09-01,Leisure concert mention,leisure,,med,keep,n.a.,https://example.com/bm/45,full-text
+syn-bm-046,synth_46,2026-09-01,Skill enrich proposal about adapters,harness,,low,keep,n.a.,,full-text
+syn-bm-047,synth_47,2026-09-01,Voice over tool list,harness,,none,keep,n.a.,https://example.com/bm/47,full-text
+syn-bm-048,synth_48,2026-09-01,Post shows an agent loop with a fresh-context verifier step,leisure,,high,keep,n.a.,,full-text
+syn-bm-049,synth_49,2026-09-01,List entry: a TV series recommendation,harness,Keep source text separate,med,keep,n.a.,https://example.com/bm/49,full-text
+syn-bm-050,synth_50,2026-09-01,Workflow CLI that writes a packet schema,harness,,low,keep,n.a.,,full-text
+syn-bm-051,synth_51,2026-09-01,Model API changelog for a local eval harness,leisure,,none,keep,n.a.,https://example.com/bm/51,full-text
+syn-bm-052,synth_52,2026-09-01,UI layout notes for a design system,harness,,high,keep,n.a.,,preview-only
+syn-bm-053,synth_53,2026-09-01,Leisure concert mention,harness,,med,keep,n.a.,https://example.com/bm/53,full-text
+syn-bm-054,synth_54,2026-09-01,Skill enrich proposal about adapters,leisure,,low,keep,n.a.,,full-text

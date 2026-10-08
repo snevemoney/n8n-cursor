@@ -1,0 +1,2 @@
+synthetic transcript: an agent loop with a verifier step
+The synthetic verifier runs in a fresh context and checks every step of the agent loop before anyone commits a change.

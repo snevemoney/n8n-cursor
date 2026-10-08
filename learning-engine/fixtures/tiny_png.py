@@ -1,0 +1,9 @@
+"""1x1 PNG bytes and a minimal MP4 ftyp box for synthetic media. Not photographs."""
+
+PNG_1X1 = bytes.fromhex(
+    "89504e470d0a1a0a0000000d4948445200000001000000010802000000907753de"
+    "0000000c49444154789c63606060000000040001f61738550000000049454e44ae426082"
+)
+
+# 24-byte ISO BMFF ftyp (isom). Not a playable movie.
+MINIMAL_FTYP_MP4 = bytes.fromhex("000000186674797069736f6d0000000069736f6d")
