@@ -34,5 +34,5 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git diff --name-only origin/${{ github.base_ref || 'main' }}...HEAD \
+          git diff --raw --no-renames -z origin/${{ github.base_ref || 'main' }}...HEAD \
             | python3 -m learning_engine.isolation

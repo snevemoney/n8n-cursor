@@ -21,7 +21,7 @@ from learning_engine.constants import (
     LIVE_MAX_ITEMS_DEFAULT,
     SOURCE_TEXT_UNAVAILABLE,
 )
-from learning_engine.errors import IndexSchemaError, ProviderRefused
+from learning_engine.errors import IndexSchemaError, LockedError, ProviderRefused
 from learning_engine.io_util import read_jsonl, write_json, write_jsonl
 from learning_engine.network import require_live_call
 from learning_engine.stage_c.contract import Judgment, Provider, evaluate
@@ -284,19 +284,24 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("provide --review REVIEW.csv or --packets packets.jsonl")
     try:
         result = run_eval(provider, rows, max_items=max_items, run_id=args.run_id)
-    except ProviderRefused as exc:
-        return _refuse(str(exc))
-    write_json(Path(args.output), result["report"])
-    if args.judgments:
-        write_jsonl(Path(args.judgments), result["judgments"])
-    if args.sqlite:
-        try:
+        if args.sqlite:
             start_run(Path(args.sqlite), result["run_id"], provider=result["report"]["provider"])
             index_judgments(Path(args.sqlite), result["judgments"], run_id=result["run_id"])
             index_harness_result(Path(args.sqlite), result["run_id"], result["report"])
-        except (IndexSchemaError, sqlite3.OperationalError) as exc:
-            print(json.dumps({"ok": False, "error": str(exc)}), file=sys.stderr)
-            return 1
+    except ProviderRefused as exc:
+        return _refuse(str(exc))
+    except LockedError as exc:
+        payload: dict[str, Any] = {"ok": False, "error": "locked"}
+        if exc.path:
+            payload["path"] = exc.path
+        print(json.dumps(payload, ensure_ascii=False), file=sys.stderr)
+        return 1
+    except (IndexSchemaError, sqlite3.OperationalError) as exc:
+        print(json.dumps({"ok": False, "error": str(exc)}), file=sys.stderr)
+        return 1
+    write_json(Path(args.output), result["report"])
+    if args.judgments:
+        write_jsonl(Path(args.judgments), result["judgments"])
     summary = {
         "ok": True,
         "output": args.output,

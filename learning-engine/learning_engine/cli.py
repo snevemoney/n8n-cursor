@@ -58,12 +58,15 @@ def _emit_cli_error(exc: BaseException, *, path: Path | str | None = None) -> in
 
 def cmd_validate(args: argparse.Namespace) -> int:
     input_path = Path(args.input)
-    root = Path(args.root) if getattr(args, "root", None) else None
-    if root is not None and not root.is_dir():
-        return _emit_cli_error(
-            ValueError(f"--root is not a directory: {root}"),
-            path=root,
-        )
+    raw_root = getattr(args, "root", None)
+    root: Path | None = None
+    if raw_root is not None:
+        if raw_root == "" or not Path(raw_root).is_dir():
+            return _emit_cli_error(
+                ValueError(f"--root is not a directory: {raw_root or repr(raw_root)}"),
+                path=raw_root,
+            )
+        root = Path(raw_root)
     try:
         packets = list(read_jsonl(input_path))
     except Exception as exc:

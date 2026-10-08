@@ -11,8 +11,8 @@ from __future__ import annotations
 import fcntl
 import json
 import os
+import re
 import secrets
-import shutil
 import sqlite3
 import time
 from contextlib import contextmanager
@@ -36,6 +36,7 @@ REBUILD_SIDE_SUFFIXES = (
     ".rebuilding-shm",
 )
 PROTECTED_DB_SIDES = ("-journal", "-wal", "-shm")
+TEST_HOOKS_ENV = "LEARNING_ENGINE_TEST_HOOKS"
 
 _lock_depth: dict[str, int] = {}
 _lock_fds: dict[str, int] = {}
@@ -82,12 +83,18 @@ CREATE INDEX IF NOT EXISTS idx_judgments_run ON judgments(run_id);
 """
 
 
+def resolve_index_path(sqlite_path: Path | str) -> Path:
+    """Lock, temp, and replace names follow the real file, not a symlink alias."""
+    return Path(os.path.realpath(sqlite_path))
+
+
 def _lock_key(sqlite_path: Path) -> str:
-    return str(sqlite_path.absolute())
+    return str(resolve_index_path(sqlite_path))
 
 
 def _lock_file(sqlite_path: Path) -> Path:
-    return sqlite_path.with_name(sqlite_path.name + ".lock")
+    real = resolve_index_path(sqlite_path)
+    return real.with_name(real.name + ".lock")
 
 
 def acquire_index_lock(sqlite_path: Path) -> None:
@@ -134,6 +141,9 @@ def index_lock(sqlite_path: Path) -> Iterator[None]:
 
 
 def _maybe_pause_rebuild(point: str) -> None:
+    """Inert unless LEARNING_ENGINE_TEST_HOOKS=1. Test-only pause after backup."""
+    if os.environ.get(TEST_HOOKS_ENV) != "1":
+        return
     if os.environ.get("LEARNING_ENGINE_PAUSE_REBUILD") != point:
         return
     gate = os.environ.get("LEARNING_ENGINE_REBUILD_GATE")
@@ -343,11 +353,13 @@ def _migrate_legacy_txn(conn: sqlite3.Connection) -> None:
 
 def _migrate_legacy_file(path: Path) -> None:
     """Migrate on a copy. Original bytes stay until the transaction commits."""
+    path = resolve_index_path(path)
     with index_lock(path):
         _migrate_legacy_file_locked(path)
 
 
 def _migrate_legacy_file_locked(path: Path) -> None:
+    path = resolve_index_path(path)
     tmp = path.with_name(path.name + ".migrating")
     if tmp.exists() and (tmp.is_dir() or not tmp.is_file()):
         raise IndexSchemaError(
@@ -355,7 +367,7 @@ def _migrate_legacy_file_locked(path: Path) -> None:
             path=str(tmp),
         )
     try:
-        shutil.copy2(path, tmp)
+        _backup_sqlite(path, tmp)
         conn = sqlite3.connect(str(tmp))
         conn.isolation_level = None
         try:
@@ -373,7 +385,7 @@ def _migrate_legacy_file_locked(path: Path) -> None:
                 f"SQLite migration failed; database left unchanged. {exc}"
             ) from exc
         conn.close()
-        tmp.replace(path)
+        os.replace(str(tmp), str(path))
     except IndexSchemaError:
         raise
     except Exception as exc:
@@ -384,6 +396,7 @@ def _migrate_legacy_file_locked(path: Path) -> None:
 
 
 def connect(path: Path) -> sqlite3.Connection:
+    path = resolve_index_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(path))
     names = _table_names(conn)
@@ -405,6 +418,7 @@ def connect(path: Path) -> sqlite3.Connection:
 
 
 def index_packets(path: Path, packets: Iterable[dict[str, Any]]) -> int:
+    path = resolve_index_path(path)
     with index_lock(path):
         return _index_packets_locked(path, packets)
 
@@ -435,6 +449,7 @@ def _index_packets_locked(path: Path, packets: Iterable[dict[str, Any]]) -> int:
 
 
 def packet_counts_by_source_type(path: Path) -> dict[str, int]:
+    path = resolve_index_path(path)
     with index_lock(path):
         return _packet_counts_locked(path)
 
@@ -511,34 +526,42 @@ def _create_rebuild_tmp(sqlite_path: Path) -> Path:
     return tmp
 
 
-def _stale_rebuild_candidates(sqlite_path: Path) -> list[Path]:
-    """Legacy exact names plus this tool's <db>.rebuilding.* temps. Never DB journals."""
-    parent = sqlite_path.parent
+def rebuild_tmp_name_re(db_name: str) -> re.Pattern[str]:
+    """Exact generated temps only: <db>.rebuilding.<pid>.<16 hex>[sidecar]."""
+    return re.compile(
+        rf"^{re.escape(db_name)}\.rebuilding\.\d+\.[0-9a-f]{{16}}"
+        rf"(-journal|-wal|-shm|\.lock)?$"
+    )
+
+
+def _legacy_exact_temps(sqlite_path: Path) -> list[Path]:
     name = sqlite_path.name
+    return [sqlite_path.with_name(name + suffix) for suffix in REBUILD_SIDE_SUFFIXES]
+
+
+def _generated_rebuild_temps(sqlite_path: Path) -> list[Path]:
+    parent = sqlite_path.parent
+    if not parent.is_dir():
+        return []
+    pat = rebuild_tmp_name_re(sqlite_path.name)
+    return [child for child in parent.iterdir() if pat.fullmatch(child.name)]
+
+
+def _stale_rebuild_candidates(sqlite_path: Path) -> list[Path]:
+    """Legacy exact names plus generated temps that match the strict regex."""
     found: list[Path] = []
     seen: set[str] = set()
-    for suffix in REBUILD_SIDE_SUFFIXES:
-        path = parent / f"{name}{suffix}"
-        if path.name in {f"{name}{side}" for side in PROTECTED_DB_SIDES}:
-            continue
-        found.append(path)
-        seen.add(str(path))
-    prefix = name + ".rebuilding."
-    if parent.is_dir():
-        for child in parent.iterdir():
-            if not child.name.startswith(prefix):
-                continue
-            if child.name in {f"{name}{side}" for side in PROTECTED_DB_SIDES}:
-                continue
-            if str(child) not in seen:
-                found.append(child)
-                seen.add(str(child))
+    for path in _legacy_exact_temps(sqlite_path) + _generated_rebuild_temps(sqlite_path):
+        key = str(path)
+        if key not in seen:
+            found.append(path)
+            seen.add(key)
     return found
 
 
 def _first_non_file_temp(sqlite_path: Path) -> Path | None:
-    """Return the first expected temp path that exists and is not a regular file."""
-    for path in _stale_rebuild_candidates(sqlite_path):
+    """Abort only when a legacy exact name exists and is not a regular file."""
+    for path in _legacy_exact_temps(sqlite_path):
         try:
             if not path.exists() and not path.is_symlink():
                 continue
@@ -547,6 +570,37 @@ def _first_non_file_temp(sqlite_path: Path) -> Path | None:
         if path.is_dir() or not path.is_file():
             return path
     return None
+
+
+def _pragma_integrity(conn: sqlite3.Connection) -> str:
+    row = conn.execute("PRAGMA integrity_check").fetchone()
+    return str(row[0]) if row else "empty"
+
+
+def _backup_sqlite(src_path: Path, dst_path: Path) -> None:
+    """Open src (rolls back a hot journal) and copy via the sqlite3 backup API."""
+    src: sqlite3.Connection | None = None
+    dst: sqlite3.Connection | None = None
+    try:
+        src = sqlite3.connect(str(src_path))
+        dst = sqlite3.connect(str(dst_path))
+        src.backup(dst)
+        check = _pragma_integrity(dst)
+        if check != "ok":
+            raise IndexSchemaError(
+                f"SQLite integrity_check failed after backup: {check}",
+                path=str(src_path),
+            )
+    finally:
+        if dst is not None:
+            dst.close()
+        if src is not None:
+            src.close()
+
+
+def _drop_tmp_sidecars(tmp: Path) -> None:
+    for suffix in ("-journal", "-wal", "-shm", ".lock"):
+        _safe_remove(Path(str(tmp) + suffix))
 
 
 def _safe_remove(path: Path) -> str | None:
@@ -569,8 +623,24 @@ def _safe_remove(path: Path) -> str | None:
 
 
 def _clear_stale_rebuild_temps(sqlite_path: Path) -> str | None:
-    warnings = [_safe_remove(path) for path in _stale_rebuild_candidates(sqlite_path)]
-    notes = [item for item in warnings if item]
+    notes: list[str] = []
+    for path in _legacy_exact_temps(sqlite_path):
+        warning = _safe_remove(path)
+        if warning:
+            notes.append(warning)
+    for path in _generated_rebuild_temps(sqlite_path):
+        try:
+            is_file = path.is_file() or path.is_symlink()
+            is_dir = path.is_dir()
+        except OSError as exc:
+            notes.append(f"{path}: {exc}")
+            continue
+        if is_dir or not is_file:
+            notes.append(f"{path}: not a regular file; left in place")
+            continue
+        warning = _safe_remove(path)
+        if warning:
+            notes.append(warning)
     return "; ".join(notes) if notes else None
 
 
@@ -604,13 +674,19 @@ def _rebuild_error(
 def rebuild_from_jsonl(sqlite_path: Path, jsonl_path: Path) -> dict[str, Any]:
     """Replace packet rows only for source_types present in JSONL. Judgments stay.
 
-    Exclusive lock, unique temp copy, replace only after commit.
+    Exclusive lock on the realpath, sqlite3 backup into a unique temp, replace
+    only after integrity_check. A symlink alias stays a symlink.
     """
+    requested = Path(sqlite_path)
+    sqlite_path = resolve_index_path(sqlite_path)
     with index_lock(sqlite_path):
-        return _rebuild_from_jsonl_locked(sqlite_path, jsonl_path)
+        result = _rebuild_from_jsonl_locked(sqlite_path, jsonl_path)
+    result["sqlite"] = str(requested)
+    return result
 
 
 def _rebuild_from_jsonl_locked(sqlite_path: Path, jsonl_path: Path) -> dict[str, Any]:
+    sqlite_path = resolve_index_path(sqlite_path)
     existed = sqlite_path.exists()
     blocked = _first_non_file_temp(sqlite_path)
     if blocked is not None:
@@ -626,15 +702,28 @@ def _rebuild_from_jsonl_locked(sqlite_path: Path, jsonl_path: Path) -> dict[str,
         types = sorted({str(packet.get("source_type") or "unknown") for packet in packets})
         tmp = _create_rebuild_tmp(sqlite_path)
         if existed:
-            shutil.copy2(sqlite_path, tmp)
+            _backup_sqlite(sqlite_path, tmp)
         _maybe_pause_rebuild("after_copy")
         indexed = _rebuild_into(tmp, packets, types)
-        tmp.replace(sqlite_path)
+        check_conn = sqlite3.connect(str(tmp))
+        try:
+            check = _pragma_integrity(check_conn)
+        finally:
+            check_conn.close()
+        if check != "ok":
+            raise IndexSchemaError(
+                f"SQLite integrity_check failed before replace: {check}",
+                path=str(sqlite_path),
+            )
+        _drop_tmp_sidecars(tmp)
+        os.replace(str(tmp), str(sqlite_path))
         tmp = None
     except JsonlError as exc:
         extra = _clear_stale_rebuild_temps(sqlite_path)
         if tmp is not None:
-            extra = "; ".join(item for item in (extra, _safe_remove(tmp)) if item) or extra
+            extra = "; ".join(
+                item for item in (extra, _safe_remove(tmp), _drop_tmp_sidecars_note(tmp)) if item
+            ) or extra
         warning = "; ".join(item for item in (stale_warning, extra) if item) or None
         if warning:
             exc.cleanup_warning = warning
@@ -642,7 +731,9 @@ def _rebuild_from_jsonl_locked(sqlite_path: Path, jsonl_path: Path) -> dict[str,
     except Exception as exc:
         extra = _clear_stale_rebuild_temps(sqlite_path)
         if tmp is not None:
-            extra = "; ".join(item for item in (extra, _safe_remove(tmp)) if item) or extra
+            extra = "; ".join(
+                item for item in (extra, _safe_remove(tmp), _drop_tmp_sidecars_note(tmp)) if item
+            ) or extra
         warning = "; ".join(item for item in (stale_warning, extra) if item) or None
         raise _rebuild_error(
             exc,
@@ -667,6 +758,11 @@ def _rebuild_from_jsonl_locked(sqlite_path: Path, jsonl_path: Path) -> dict[str,
     }
 
 
+def _drop_tmp_sidecars_note(tmp: Path) -> str | None:
+    _drop_tmp_sidecars(tmp)
+    return None
+
+
 def start_run(
     path: Path,
     run_id: str,
@@ -674,6 +770,7 @@ def start_run(
     provider: str = "",
     notes: str = "",
 ) -> str:
+    path = resolve_index_path(path)
     with index_lock(path):
         return _start_run_locked(path, run_id, provider=provider, notes=notes)
 
@@ -705,6 +802,7 @@ def index_judgments(
     *,
     run_id: str,
 ) -> int:
+    path = resolve_index_path(path)
     with index_lock(path):
         return _index_judgments_locked(path, judgments, run_id=run_id)
 
@@ -745,6 +843,7 @@ def _index_judgments_locked(
 
 
 def index_harness_result(path: Path, run_id: str, report: dict[str, Any]) -> None:
+    path = resolve_index_path(path)
     with index_lock(path):
         _index_harness_result_locked(path, run_id, report)
 
