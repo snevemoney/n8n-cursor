@@ -1,0 +1,12 @@
+{"id": "syn-01", "kw_category": "harness", "ledger_date": "2026-09-01", "author": "synth_a", "status": "DONE"}
+{"id": "syn-02", "kw_category": "unclassified", "ledger_date": "2026-09-02", "author": "synth_b", "status": "DONE"}
+{"id": "syn-03", "kw_category": "business", "ledger_date": "2026-09-03", "author": "synth_c", "status": "DONE"}
+{"id": "syn-04", "kw_category": "unclassified", "ledger_date": "2026-09-04", "author": "synth_d", "status": "DONE"}
+{"id": "syn-05", "kw_category": "harness", "ledger_date": "2026-09-05", "author": "synth_e", "status": "DONE"}
+{"id": "syn-06", "kw_category": "model/api", "ledger_date": "2026-09-06", "author": "synth_f", "status": "DONE"}
+{"id": "syn-07", "kw_category": "unclassified", "ledger_date": "2026-09-07", "author": "synth_g", "status": "DONE"}
+{"id": "syn-08", "kw_category": "ui/design", "ledger_date": "2026-09-08", "author": "synth_h", "status": "DONE"}
+{"id": "syn-09", "kw_category": "unclassified", "ledger_date": "2026-09-09", "author": "synth_i", "status": "DONE"}
+{"id": "syn-10", "kw_category": "harness", "ledger_date": "2026-09-10", "author": "synth_j", "status": "FAILED"}
+{"id": "syn-11", "kw_category": "unclassified", "ledger_date": "2026-09-11", "author": "synth_k", "status": "FAILED"}
+{"id": "syn-12", "kw_category": "builder-tool", "ledger_date": "2026-09-12", "author": "synth_l", "status": "DONE"}

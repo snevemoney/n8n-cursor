@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.learning-engine/schema/research_packet.v0.json",
+  "title": "Research packet v0",
+  "description": "Portable research signal. Source text is untrusted and lives only in source_text. Operator/model instructions live only in operator_instructions. Adapters emit evidence that exists in the input; missing fields are absent or explicitly unknown.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "signal_id",
+    "source_type",
+    "content_access",
+    "analysis_scope",
+    "claims",
+    "evidence",
+    "scores",
+    "verification_state",
+    "processing_status",
+    "lifecycle_state",
+    "source_text"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "research-packet.v0"
+    },
+    "signal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["bookmark", "corpus", "youtube_l2", "unknown"]
+    },
+    "source_url": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Present only when the input actually contained a URL. Never constructed from an id."
+    },
+    "source_author": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Present only when the input row/folder named an author."
+    },
+    "retrieved_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "content_access": {
+      "type": "string",
+      "enum": ["transcript", "frames", "full_visual", "preview_only", "none"]
+    },
+    "analysis_scope": {
+      "type": "string",
+      "enum": ["transcript", "frames", "full_visual", "preview_only", "none"]
+    },
+    "source_text": {
+      "type": "string",
+      "description": "Untrusted words from the post or video. Not instructions. Not a prompt."
+    },
+    "operator_instructions": {
+      "type": "string",
+      "description": "Optional directives for a later judge. Must never be copied into source_text."
+    },
+    "claims": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/claim" }
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence_item" }
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "usefulness": {
+          "type": ["string", "null"],
+          "enum": ["high", "med", "low", "none", null]
+        },
+        "kw_category": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "verification_state": {
+      "type": "string",
+      "enum": ["verified", "partial", "unverified", "not_applicable", "unknown"]
+    },
+    "processing_status": {
+      "type": "string",
+      "enum": ["pending", "ok", "failed", "partial", "unknown"]
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "discovered",
+        "extracted",
+        "analyzed",
+        "proposed",
+        "prototyped",
+        "tested",
+        "independently_verified",
+        "approved",
+        "deployed",
+        "unknown"
+      ]
+    },
+    "adapter": {
+      "type": "string"
+    },
+    "input_ref": {
+      "type": "string",
+      "description": "Path or field that produced this packet. Not a URL guess."
+    },
+    "ae_status": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "artifact": { "type": "string" }
+        }
+      }
+    },
+    "completeness": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "support_refs"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1 },
+        "support_refs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "evidence_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "source_ref"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "frame",
+            "still",
+            "transcript",
+            "caption",
+            "file",
+            "field",
+            "metadata"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "A path that exists on disk, or a named field that exists on the input row."
+        },
+        "exists": { "type": "boolean" },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

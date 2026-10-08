@@ -1,0 +1,39 @@
+name: learning-engine
+
+on:
+  pull_request:
+    paths:
+      - "learning-engine/**"
+      - ".github/workflows/learning-engine.yml"
+  push:
+    paths:
+      - "learning-engine/**"
+      - ".github/workflows/learning-engine.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: learning-engine
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Unit tests (no network, no keys)
+        env:
+          PYTHONPATH: .
+        run: python3 -m unittest discover -s tests -v
+      - name: Isolation guard
+        working-directory: ${{ github.workspace }}
+        run: |
+          git diff --stat origin/${{ github.base_ref || 'main' }}... -- . ':!learning-engine' ':!.github/workflows/learning-engine.yml' \
+            | tee /tmp/le-outside.txt
+          if [ -s /tmp/le-outside.txt ]; then
+            echo "learning-engine CI may only change learning-engine/ and this workflow"
+            cat /tmp/le-outside.txt
+            exit 1
+          fi

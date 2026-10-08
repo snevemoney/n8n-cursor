@@ -1,0 +1,45 @@
+{
+  "definition": {
+    "flagged": "kw_category from STATE.jsonl is present and != unclassified",
+    "useful": "usefulness in {high, med}",
+    "recall": "|flagged ∩ useful| / |useful|",
+    "precision": "|flagged ∩ useful| / |flagged|",
+    "high_recall": "|flagged ∩ high| / |high|"
+  },
+  "hand_count": {
+    "all": {
+      "rows": ["syn-01", "syn-02", "syn-03", "syn-04", "syn-05", "syn-06", "syn-07", "syn-08", "syn-09", "syn-10", "syn-11", "syn-12"],
+      "flagged": ["syn-01", "syn-03", "syn-05", "syn-06", "syn-08", "syn-10", "syn-12"],
+      "useful": ["syn-01", "syn-02", "syn-03", "syn-04", "syn-05", "syn-10", "syn-11"],
+      "tp": ["syn-01", "syn-03", "syn-05", "syn-10"],
+      "high": ["syn-01", "syn-02", "syn-10"],
+      "tp_high": ["syn-01", "syn-10"],
+      "n": 12,
+      "flagged_n": 7,
+      "useful_n": 7,
+      "tp_n": 4,
+      "high_n": 3,
+      "tp_high_n": 2,
+      "recall": 0.5714285714285714,
+      "precision": 0.5714285714285714,
+      "high_recall": 0.6666666666666666
+    },
+    "done_only": {
+      "rows": ["syn-01", "syn-02", "syn-03", "syn-04", "syn-05", "syn-06", "syn-07", "syn-08", "syn-09", "syn-12"],
+      "flagged": ["syn-01", "syn-03", "syn-05", "syn-06", "syn-08", "syn-12"],
+      "useful": ["syn-01", "syn-02", "syn-03", "syn-04", "syn-05"],
+      "tp": ["syn-01", "syn-03", "syn-05"],
+      "high": ["syn-01", "syn-02"],
+      "tp_high": ["syn-01"],
+      "n": 10,
+      "flagged_n": 6,
+      "useful_n": 5,
+      "tp_n": 3,
+      "high_n": 2,
+      "tp_high_n": 1,
+      "recall": 0.6,
+      "precision": 0.5,
+      "high_recall": 0.5
+    }
+  }
+}

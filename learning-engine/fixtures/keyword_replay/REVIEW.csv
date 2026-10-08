@@ -1,0 +1,13 @@
+id,author,date,gist,category,lesson,usefulness,disposition,verified,links,source
+syn-01,synth_a,2026-09-01,"Agent loop with a fresh-context verifier step",harness,"Run the verifier in a fresh context",high,keep,partial,https://example.com/s1,full-text
+syn-02,synth_b,2026-09-02,"High usefulness row with no keyword flag",harness,,high,keep,no,,full-text
+syn-03,synth_c,2026-09-03,"Offer page mentions a checkout invoice",business,,med,keep,n.a.,,full-text
+syn-04,synth_d,2026-09-04,"Model card a reviewer marked useful",model/api,,med,keep,n.a.,,full-text
+syn-05,synth_e,2026-09-05,"Another verifier harness writeup",harness,,med,keep,n.a.,,full-text
+syn-06,synth_f,2026-09-06,"API changelog that is low usefulness",model/api,,low,skim,n.a.,,full-text
+syn-07,synth_g,2026-09-07,"Unclassified low item",unclassified,,low,skip,n.a.,,full-text
+syn-08,synth_h,2026-09-08,"UI layout screenshot dump",ui/design,,none,leisure,n.a.,,full-text
+syn-09,synth_i,2026-09-09,"Empty leisure note",leisure,,none,leisure,n.a.,,full-text
+syn-10,synth_j,2026-09-10,"[FAILED: deleted] preview: (link only)",unclassified,,high,held,n.a.,https://example.com/s10,preview-only
+syn-11,synth_k,2026-09-11,"[FAILED: deleted] preview: (link only)",unclassified,,med,held,n.a.,,preview-only
+syn-12,synth_l,2026-09-12,"Builder tool list, low usefulness",builder-tool,,low,skim,n.a.,,full-text
