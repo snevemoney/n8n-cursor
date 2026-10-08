@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import posixpath
 import sys
 from typing import Iterable
 
@@ -13,18 +14,34 @@ ALLOWED_OUTSIDE = frozenset(
 )
 
 
+def _normalize_repo_path(raw: str) -> str:
+    path = raw.strip().replace("\\", "/")
+    while path.startswith("./"):
+        path = path[2:]
+    return path
+
+
 def forbidden_outside_paths(paths: Iterable[str]) -> list[str]:
     """Return changed paths that are outside the allowlist."""
     bad: list[str] = []
     for raw in paths:
-        path = raw.strip()
-        while path.startswith("./"):
-            path = path[2:]
+        path = _normalize_repo_path(raw)
         if not path:
             continue
-        if path == "learning-engine" or path.startswith("learning-engine/"):
+        normalized = posixpath.normpath(path)
+        parts = path.split("/")
+        norm_parts = normalized.split("/")
+        if (
+            ".." in parts
+            or ".." in norm_parts
+            or path.startswith("/")
+            or normalized.startswith("/")
+        ):
+            bad.append(path)
             continue
-        if path in ALLOWED_OUTSIDE:
+        if normalized == "learning-engine" or normalized.startswith("learning-engine/"):
+            continue
+        if normalized in ALLOWED_OUTSIDE:
             continue
         bad.append(path)
     return bad

@@ -19,3 +19,26 @@ class ProviderRefused(RuntimeError):
 
 class IndexSchemaError(RuntimeError):
     """SQLite index schema is older or unknown. Never drop tables silently."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        path: str | None = None,
+        line: int | None = None,
+        cleanup_warning: str | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.path = path
+        self.line = line
+        self.cleanup_warning = cleanup_warning
+
+
+class JsonlError(ValueError):
+    """JSONL read/parse failure with a path and optional line number."""
+
+    def __init__(self, message: str, *, path: str, line: int | None = None) -> None:
+        super().__init__(message)
+        self.path = path
+        self.line = line
+        self.cleanup_warning: str | None = None

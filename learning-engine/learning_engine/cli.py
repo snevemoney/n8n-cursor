@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sqlite3
 import sys
 from pathlib import Path
 from typing import Any
@@ -14,8 +13,8 @@ from learning_engine.adapters.common import convert_summary
 from learning_engine.io_util import read_jsonl, write_json, write_jsonl
 from learning_engine.constants import DISK_CHECK_SKIPPED
 from learning_engine.storage.sqlite_index import index_packets, rebuild_from_jsonl
-from learning_engine.validator import count_false_full_visual, validate_packet
-from learning_engine.errors import IndexSchemaError, PacketValidationError
+from learning_engine.validator import FULL_VISUAL_NEEDS_ROOT, count_false_full_visual, validate_packet
+from learning_engine.errors import PacketValidationError
 
 
 def cmd_adapt(args: argparse.Namespace) -> int:
@@ -41,8 +40,27 @@ def cmd_adapt(args: argparse.Namespace) -> int:
     return 0 if report["packets"] or not report["invalid"] else 1
 
 
+def _emit_cli_error(exc: BaseException, *, path: Path | str | None = None) -> int:
+    payload: dict[str, Any] = {"ok": False, "error": str(exc)}
+    src = getattr(exc, "path", None) or path
+    if src is not None:
+        payload["path"] = str(src)
+    line = getattr(exc, "line", None)
+    if line is not None:
+        payload["line"] = line
+    warning = getattr(exc, "cleanup_warning", None)
+    if warning:
+        payload["cleanup_warning"] = warning
+    print(json.dumps(payload, ensure_ascii=False), file=sys.stderr)
+    return 1
+
+
 def cmd_validate(args: argparse.Namespace) -> int:
-    packets = list(read_jsonl(Path(args.input)))
+    input_path = Path(args.input)
+    try:
+        packets = list(read_jsonl(input_path))
+    except Exception as exc:
+        return _emit_cli_error(exc, path=input_path)
     errors: list[str] = []
     warnings: list[str] = []
     valid: list[dict[str, Any]] = []
@@ -54,7 +72,12 @@ def cmd_validate(args: argparse.Namespace) -> int:
             valid.append(validate_packet(packet, path=f"$[{i}]", root=root, warnings=warnings))
         except PacketValidationError as exc:
             errors.append(str(exc))
-    false_fv = count_false_full_visual(packets, root=root)
+    fv_needs_root = root is None and any(FULL_VISUAL_NEEDS_ROOT in err for err in errors)
+    false_fv: Any
+    if fv_needs_root:
+        false_fv = "unchecked_no_root"
+    else:
+        false_fv = count_false_full_visual(packets, root=root)
     report = {
         "ok": not errors and false_fv == 0 and len(valid) >= args.min_packets,
         "packets": len(packets),
@@ -82,9 +105,8 @@ def cmd_store(args: argparse.Namespace) -> int:
         n = index_packets(sqlite_path, packets)
         print(json.dumps({"ok": True, "indexed": n, "sqlite": args.sqlite}))
         return 0
-    except (IndexSchemaError, sqlite3.OperationalError) as exc:
-        print(json.dumps({"ok": False, "error": str(exc)}), file=sys.stderr)
-        return 1
+    except Exception as exc:
+        return _emit_cli_error(exc, path=packets_path)
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -13,7 +13,7 @@ EVIDENCE_KINDS = frozenset(
 )
 FRAME_EVIDENCE_KINDS = frozenset({"frame", "still"})
 IMAGE_EXTENSIONS = frozenset({".jpg", ".jpeg", ".png", ".webp"})
-VIDEO_EXTENSIONS = frozenset({".mp4", ".webm", ".mov", ".mkv"})
+VIDEO_EXTENSIONS = frozenset({".mp4", ".webm", ".mov", ".mkv", ".m4v", ".avi"})
 SOURCE_TEXT_STATUSES = frozenset({"available", "unavailable"})
 KEYWORD_REPLAY_KIND = "replay of stored kw_category (not a classifier)"
 KEYWORD_REPLAY_REFERENCE = {

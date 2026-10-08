@@ -15,12 +15,20 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
-from learning_engine.errors import IndexSchemaError
+from learning_engine.errors import IndexSchemaError, JsonlError
 from learning_engine.io_util import read_jsonl
 
 LEGACY_MIGRATED_RUN_ID = "legacy-migrated"
 FAIL_MIGRATION_AFTER: str | None = None
 FAIL_REBUILD_AFTER: str | None = None
+FAIL_CLEANUP: bool = False
+REBUILD_TMP_SUFFIX = ".rebuilding"
+REBUILD_SIDE_SUFFIXES = (
+    ".rebuilding",
+    ".rebuilding-journal",
+    ".rebuilding-wal",
+    ".rebuilding-shm",
+)
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS packets (
@@ -401,17 +409,110 @@ def _rebuild_into(path: Path, packets: list[dict[str, Any]], types: list[str]) -
     return len(packets)
 
 
+def _rebuild_tmp_path(sqlite_path: Path) -> Path:
+    return sqlite_path.with_name(sqlite_path.name + REBUILD_TMP_SUFFIX)
+
+
+def _stale_rebuild_candidates(sqlite_path: Path) -> list[Path]:
+    """Exact temp/journal names only: <db>.rebuilding{,-journal,-wal,-shm} and <db>.tmp*."""
+    parent = sqlite_path.parent
+    name = sqlite_path.name
+    found: list[Path] = []
+    seen: set[str] = set()
+    for suffix in REBUILD_SIDE_SUFFIXES:
+        path = parent / f"{name}{suffix}"
+        key = str(path)
+        if key not in seen:
+            found.append(path)
+            seen.add(key)
+    if parent.is_dir():
+        prefix = name + ".tmp"
+        for child in parent.iterdir():
+            if child.name.startswith(prefix) and str(child) not in seen:
+                found.append(child)
+                seen.add(str(child))
+    return found
+
+
+def _safe_remove(path: Path) -> str | None:
+    """Unlink a temp file or rmtree an exact leftover dir. Never raise."""
+    try:
+        exists = path.exists() or path.is_symlink()
+    except OSError as exc:
+        return f"{path}: {exc}"
+    if not exists:
+        return None
+    if FAIL_CLEANUP:
+        return f"{path}: simulated cleanup failure"
+    try:
+        if path.is_symlink() or path.is_file():
+            path.unlink(missing_ok=True)
+            return None
+        if path.is_dir():
+            shutil.rmtree(path)
+            return None
+        path.unlink(missing_ok=True)
+        return None
+    except OSError as exc:
+        return f"{path}: {exc}"
+
+
+def _clear_stale_rebuild_temps(sqlite_path: Path) -> str | None:
+    warnings = [_safe_remove(path) for path in _stale_rebuild_candidates(sqlite_path)]
+    notes = [item for item in warnings if item]
+    return "; ".join(notes) if notes else None
+
+
+def _remove_new_db(sqlite_path: Path) -> str | None:
+    notes = [_safe_remove(sqlite_path)]
+    for side in ("-journal", "-wal", "-shm"):
+        notes.append(_safe_remove(Path(str(sqlite_path) + side)))
+    leftover = [item for item in notes if item]
+    return "; ".join(leftover) if leftover else None
+
+
+def _rebuild_error(
+    exc: BaseException,
+    *,
+    existed: bool,
+    jsonl_path: Path,
+    sqlite_path: Path,
+    cleanup_warning: str | None,
+) -> IndexSchemaError:
+    if isinstance(exc, IndexSchemaError):
+        msg = str(exc)
+    elif existed:
+        msg = f"SQLite rebuild failed; database left unchanged. {exc}"
+    else:
+        msg = f"SQLite rebuild failed; no database was created. {exc}"
+    return IndexSchemaError(
+        msg,
+        path=str(getattr(exc, "path", None) or jsonl_path),
+        line=getattr(exc, "line", None),
+        cleanup_warning=cleanup_warning,
+    )
+
+
 def rebuild_from_jsonl(sqlite_path: Path, jsonl_path: Path) -> dict[str, Any]:
     """Replace packet rows only for source_types present in JSONL. Judgments stay.
 
     Delete + reinsert run on a temp copy. The original file is replaced only
-    after commit. Any failure leaves the original byte-identical.
+    after commit. Any failure leaves the original byte-identical, or creates
+    no file if the target did not exist.
     """
-    packets = list(read_jsonl(jsonl_path))
-    types = sorted({str(packet.get("source_type") or "unknown") for packet in packets})
     existed = sqlite_path.exists()
-    tmp = sqlite_path.with_name(sqlite_path.name + ".rebuilding")
+    stale_warning = _clear_stale_rebuild_temps(sqlite_path)
+    tmp = _rebuild_tmp_path(sqlite_path)
+    packets: list[dict[str, Any]] = []
     try:
+        if tmp.exists() and tmp.is_dir():
+            raise IndexSchemaError(
+                f"SQLite rebuild failed; leftover temp path is a directory: {tmp}",
+                path=str(tmp),
+                cleanup_warning=stale_warning,
+            )
+        packets = list(read_jsonl(jsonl_path))
+        types = sorted({str(packet.get("source_type") or "unknown") for packet in packets})
         if existed:
             shutil.copy2(sqlite_path, tmp)
             target = tmp
@@ -420,10 +521,27 @@ def rebuild_from_jsonl(sqlite_path: Path, jsonl_path: Path) -> dict[str, Any]:
         indexed = _rebuild_into(target, packets, types)
         if existed:
             tmp.replace(sqlite_path)
+    except JsonlError as exc:
+        extra = _clear_stale_rebuild_temps(sqlite_path)
+        if not existed:
+            created = _remove_new_db(sqlite_path)
+            extra = "; ".join(item for item in (extra, created) if item) or extra
+        warning = "; ".join(item for item in (stale_warning, extra) if item) or None
+        if warning:
+            exc.cleanup_warning = warning
+        raise
     except Exception as exc:
-        tmp.unlink(missing_ok=True)
-        raise IndexSchemaError(
-            f"SQLite rebuild failed; database left unchanged. {exc}"
+        extra = _clear_stale_rebuild_temps(sqlite_path)
+        if not existed:
+            created = _remove_new_db(sqlite_path)
+            extra = "; ".join(item for item in (extra, created) if item) or extra
+        warning = "; ".join(item for item in (stale_warning, extra) if item) or None
+        raise _rebuild_error(
+            exc,
+            existed=existed,
+            jsonl_path=jsonl_path,
+            sqlite_path=sqlite_path,
+            cleanup_warning=warning,
         ) from exc
     counts: dict[str, int] = {}
     for packet in packets:

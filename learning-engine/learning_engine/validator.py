@@ -344,7 +344,7 @@ def validate_packet(
             raise PacketValidationError(
                 "full_visual requires at least one image-extension evidence ref "
                 "(jpg/jpeg/png/webp) and one video-extension evidence ref "
-                "(mp4/webm/mov/mkv), both exists=true, present on disk, non-empty, "
+                "(mp4/webm/mov/mkv/m4v/avi), both exists=true, present on disk, non-empty, "
                 "and with recognisable media bytes "
                 "(image: PNG/JPEG/GIF/WebP magic; video: MP4/MOV ftyp, WebM/MKV EBML, "
                 "AVI RIFF; other video extensions: non-empty)",
