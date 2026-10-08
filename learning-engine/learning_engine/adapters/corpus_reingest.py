@@ -20,19 +20,20 @@ from learning_engine.adapters.common import (
     clean_transcript,
     clip_source_text,
     collect_packet,
-    content_first_gap,
     convert_summary,
     empty_convert_report,
     existing_frames,
     existing_raw_files,
     existing_transcripts,
     existing_videos,
+    extract_caption_gap,
+    is_suspect_hallucination,
     map_status,
+    meta_affirms_transcript,
     meta_denies_transcript,
     pick_source_transcript,
     read_transcript_payload,
     rel_ref,
-    split_transcripts,
 )
 from learning_engine.io_util import write_jsonl
 from learning_engine.packet import base_packet, evidence_item
@@ -82,27 +83,28 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
     discovered = existing_transcripts(folder)
     videos = existing_videos(folder)
     raw_on_disk = existing_raw_files(folder)
-    real_transcripts, placeholders, file_gap = split_transcripts(
-        discovered, _read_transcript_text
-    )
-    denies_transcript = meta_denies_transcript(meta, has_transcript_flag)
-    usable_transcripts = real_transcripts
-    declared_label = None
+    affirms = meta_affirms_transcript(meta, has_transcript_flag)
+    denies = meta_denies_transcript(meta, has_transcript_flag)
+    usable_transcripts = list(discovered) if affirms else []
+    placeholders = [] if affirms else list(discovered)
+    file_gap = None
+    for path in discovered:
+        file_gap = file_gap or extract_caption_gap(_read_transcript_text(path))
     classification = meta.get("classification")
+    declared_label = None
     if isinstance(classification, str) and "CAPTION_GAP" in classification.upper():
         declared_label = classification
-    elif denies_transcript:
+    elif denies:
         declared_label = (
             "META:has_transcript=false"
             if has_transcript_flag is False
             else "META:transcript_chars=0"
         )
-    caption_gap, disagreement, gap_notes = content_first_gap(
-        usable=usable_transcripts,
-        declared_gap=denies_transcript or bool(declared_label),
-        declared_label=declared_label,
-        file_gap=file_gap,
-    )
+    caption_gap = None if affirms else (file_gap or declared_label or "CAPTION_GAP")
+    disagreement = None
+    gap_notes: list[str] = []
+    if denies and affirms:
+        disagreement = "META signals disagree; content follows has_transcript/transcript_chars"
 
     evidence: list[dict[str, Any]] = [
         evidence_item(kind="metadata", source_ref=rel_ref(folder, meta_path), note="META.json")
@@ -124,7 +126,7 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
         )
     cited: set[str] = {
         rel_ref(folder, p)
-        for p in [*frames, *usable_transcripts, *placeholders, *real_transcripts, meta_path]
+        for p in [*frames, *usable_transcripts, *placeholders, *discovered, meta_path]
     }
     raw_files = meta.get("raw_files") if isinstance(meta.get("raw_files"), list) else []
     for name in raw_files:
@@ -219,6 +221,10 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
         notes.append(f"caption_gap: {caption_gap}")
     if disagreement:
         extra["transcript_disagreement"] = disagreement
+    if affirms and is_suspect_hallucination(source_text):
+        extra["transcript_quality"] = "suspect_hallucination"
+        notes.append("transcript_quality: suspect_hallucination")
+        scores["transcript_quality"] = "suspect_hallucination"
     if notes:
         extra["notes"] = notes
 

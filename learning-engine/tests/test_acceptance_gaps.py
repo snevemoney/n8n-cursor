@@ -15,14 +15,16 @@ from tests.helpers import ROOT
 from fixtures.tiny_png import PNG_1X1
 from learning_engine.adapters import bookmark_review, corpus_reingest, youtube_l2
 from learning_engine.adapters.common import (
-    MIN_SPEECH_WORDS,
     SOURCE_TEXT_MAX_CHARS,
+    YT_CAPTION_MIN_TOKENS,
     ae_denies_transcript,
+    caption_file_is_speech,
     clip_source_text,
     convert_summary,
-    is_placeholder_transcript,
-    is_substantive_speech,
+    is_suspect_hallucination,
+    json_caption_texts,
     spoken_text,
+    unicode_word_tokens,
 )
 
 SPEECH_PAD = (
@@ -228,7 +230,7 @@ class N1CaptionGapHonesty(unittest.TestCase):
             self.assertNotIn("transcript_disagreement", pack)
             self.assertTrue(any(e["kind"] == "file" for e in pack["evidence"]))
 
-    def test_heading_only_body_is_placeholder(self) -> None:
+    def test_heading_only_body_stays_transcript_when_meta_affirms(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp) / "empty-body"
             folder.mkdir()
@@ -248,8 +250,9 @@ class N1CaptionGapHonesty(unittest.TestCase):
             pack = corpus_reingest.convert(folder)[0]
             validate_packets([pack])
             self.assertEqual(pack["source_text"], "")
-            self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
-            self.assertTrue(is_placeholder_transcript("# Transcript\n\n"))
+            self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertNotIn("caption_gap", pack)
+            self.assertNotEqual(pack.get("transcript_quality"), "suspect_hallucination")
 
     def test_failed_caption_gap_meta_without_file_records_gap(self) -> None:
         packets = corpus_reingest.convert(ROOT / "fixtures" / "corpus")
@@ -385,11 +388,10 @@ class R3YoutubeCaptionGap(unittest.TestCase):
         self.assertEqual(pack["source_text"], "")
         self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
         self.assertIn("CAPTION_GAP", pack.get("caption_gap", "").upper())
-        self.assertFalse(is_placeholder_transcript("# Transcript\n\n" + SPEECH_PAD + "\n"))
-        self.assertTrue(is_placeholder_transcript("Source: CAPTION_GAP\nyt-dlp: no subs\n"))
-        self.assertGreaterEqual(MIN_SPEECH_WORDS, 20)
+        self.assertTrue(pack.get("gap_note"))
+        self.assertEqual(pack["source_text"], "")
 
-    def test_ae_gap_note_with_short_file_is_still_a_gap(self) -> None:
+    def test_ae_gap_note_with_clean_short_transcript_is_speech(self) -> None:
         parsed = youtube_l2.parse_ae_status(
             "- **status**: PARTIAL\n\n## Notes\n- transcript_source=CAPTION_GAP\n"
         )
@@ -409,10 +411,10 @@ class R3YoutubeCaptionGap(unittest.TestCase):
             )
             pack = youtube_l2.convert(folder)[0]
             validate_packets([pack])
-            self.assertEqual(pack["source_text"], "")
-            self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
-            self.assertTrue(pack.get("caption_gap"))
-            self.assertNotIn("transcript_disagreement", pack)
+            self.assertIn("eight words long", pack["source_text"])
+            self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertNotIn("caption_gap", pack)
+            self.assertIn("transcript_disagreement", pack)
 
     def test_table_mention_of_caption_gap_is_not_pack_gap(self) -> None:
         packets = youtube_l2.convert(ROOT / "fixtures" / "youtube_l2")
@@ -444,13 +446,13 @@ class R3SpokenNoteNotDropped(unittest.TestCase):
 
 
 class R3TimelineKeepsWords(unittest.TestCase):
-    def test_timestamp_prefix_keeps_words_and_is_not_placeholder(self) -> None:
+    def test_timestamp_prefix_keeps_words_and_counts_tokens(self) -> None:
         raw = "00:00:01.000 --> 00:00:03.000 actual words\n[00:01] more words\n"
         self.assertEqual(spoken_text(raw), "actual words\nmore words")
-        self.assertTrue(is_placeholder_transcript(raw))
+        self.assertFalse(caption_file_is_speech(raw))
         padded = raw + SPEECH_PAD + "\n"
-        self.assertFalse(is_placeholder_transcript(padded))
-        self.assertTrue(is_placeholder_transcript("00:00:01.000 --> 00:00:03.000\n# Transcript\n"))
+        self.assertTrue(caption_file_is_speech(padded))
+        self.assertFalse(caption_file_is_speech("00:00:01.000 --> 00:00:03.000\n# Transcript\n"))
 
     def test_captions_timeline_file_is_speech(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -543,11 +545,16 @@ class B1RecoveredVttNotWiped(unittest.TestCase):
 
 class B2StillsCaptionsJson(unittest.TestCase):
     def test_stills_captions_with_gap_field_is_still_speech(self) -> None:
-        lexicon = "alpha bravo charlie delta echo foxtrot golf hotel india juliet".split()
-        words = [lexicon[i % len(lexicon)] for i in range(1000)]
         payload = {
+            "video_id": "SYNSTILLS",
+            "id": "still-001",
+            "description": "Operator description must not leak https://example.com/watch?v=leak",
+            "url": "https://example.com/watch?v=leak",
             "note": "(CAPTION_GAP: timedtext 429)",
-            "stills": [{"text": " ".join(words[i : i + 50])} for i in range(0, 1000, 50)],
+            "stills": [
+                {"id": "s1", "text": "first spoken caption line from the still"},
+                {"id": "s2", "text": "second spoken caption line from the still"},
+            ],
         }
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp) / "SYNSTILLS"
@@ -560,11 +567,14 @@ class B2StillsCaptionsJson(unittest.TestCase):
             pack = youtube_l2.convert(folder)[0]
             validate_packets([pack])
             self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
-            self.assertGreaterEqual(len(pack["source_text"].split()), MIN_SPEECH_WORDS)
+            self.assertGreaterEqual(len(unicode_word_tokens(pack["source_text"])), YT_CAPTION_MIN_TOKENS)
             self.assertNotIn("caption_gap", pack)
-            self.assertIn("alpha", pack["source_text"])
+            self.assertIn("first spoken caption", pack["source_text"])
+            self.assertIn("second spoken caption", pack["source_text"])
             self.assertNotIn("CAPTION_GAP", pack["source_text"])
-            self.assertTrue(is_substantive_speech(pack["source_text"]))
+            self.assertNotIn("SYNSTILLS", pack["source_text"])
+            self.assertNotIn("example.com", pack["source_text"])
+            self.assertNotIn("Operator description", pack["source_text"])
 
 
 class B3WhisperNoise(unittest.TestCase):
@@ -574,6 +584,11 @@ class B3WhisperNoise(unittest.TestCase):
             folder.mkdir()
             (folder / "AE_STATUS.md").write_text(
                 "# AE_STATUS — SYNNOISE\n\n- **status**: PASS\n",
+                encoding="utf-8",
+            )
+            (folder / "TRANSCRIPT.md").write_text(
+                "# Transcript\n\nSource: CAPTION_GAP\nyt-dlp: no subs\n"
+                "- operator note: whisper returned you/you\n",
                 encoding="utf-8",
             )
             (folder / "SYNNOISE.en.vtt").write_text(
@@ -605,8 +620,8 @@ class M1OperatorLines(unittest.TestCase):
         self.assertNotIn("Fetched:", pack["source_text"])
 
 
-class ContentWinsDisagreement(unittest.TestCase):
-    def test_meta_no_transcript_but_substantive_file_keeps_speech(self) -> None:
+class MetaAuthoritativeGap(unittest.TestCase):
+    def test_meta_no_transcript_file_prose_cannot_override(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp) / "meta-disagree"
             folder.mkdir()
@@ -629,7 +644,209 @@ class ContentWinsDisagreement(unittest.TestCase):
             )
             pack = corpus_reingest.convert(folder)[0]
             validate_packets([pack])
-            self.assertIn("synthetic verifier", pack["source_text"])
+            self.assertEqual(pack["source_text"], "")
+            self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertTrue(pack.get("caption_gap"))
+            self.assertNotIn("transcript_disagreement", pack)
+
+
+def _write_corpus(folder: Path, *, has_transcript: bool, transcript: str, signal_id: str) -> None:
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "META.json").write_text(
+        json.dumps(
+            {
+                "id": signal_id,
+                "url": f"https://example.com/synthetic/{signal_id}",
+                "status": "OK",
+                "transcript_chars": len(transcript) if has_transcript else 0,
+                "completeness": {"has_transcript": has_transcript},
+                **({} if has_transcript else {"classification": "CAPTION_GAP"}),
+            }
+        ),
+        encoding="utf-8",
+    )
+    (folder / "TRANSCRIPT.md").write_text(transcript, encoding="utf-8")
+
+
+def _write_youtube(folder: Path, *, ae: str, files: dict[str, str]) -> None:
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "AE_STATUS.md").write_text(ae, encoding="utf-8")
+    for name, body in files.items():
+        (folder / name).write_text(body, encoding="utf-8")
+
+
+class R5ExactRules(unittest.TestCase):
+    """Lock the corpus-META / YouTube-format split. Do not retune thresholds."""
+
+    def test_r5_1_corpus_short_japanese_kept(self) -> None:
+        japanese = "こんにちは世界\n今日は晴れです\n字幕があります\n"
+        self.assertGreaterEqual(len(unicode_word_tokens(japanese)), 3)
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "r5-ja"
+            _write_corpus(
+                folder,
+                has_transcript=True,
+                transcript=f"# Transcript\n\n{japanese}",
+                signal_id="syn-r5-ja",
+            )
+            pack = corpus_reingest.convert(folder)[0]
+            validate_packets([pack])
             self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertIn("こんにちは世界", pack["source_text"])
+            self.assertIn("字幕があります", pack["source_text"])
             self.assertNotIn("caption_gap", pack)
-            self.assertIn("transcript_disagreement", pack)
+            self.assertNotEqual(pack.get("transcript_quality"), "suspect_hallucination")
+
+    def test_r5_2_corpus_thanks_for_watching_is_suspect_not_demoted(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "r5-halluc"
+            _write_corpus(
+                folder,
+                has_transcript=True,
+                transcript="# Transcript\n\nThanks for watching!\n",
+                signal_id="syn-r5-halluc",
+            )
+            pack = corpus_reingest.convert(folder)[0]
+            validate_packets([pack])
+            self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertIn("Thanks for watching", pack["source_text"])
+            self.assertNotIn("caption_gap", pack)
+            self.assertEqual(pack.get("transcript_quality"), "suspect_hallucination")
+            self.assertTrue(is_suspect_hallucination(pack["source_text"]))
+
+    def test_r5_3_corpus_meta_false_gap_note_is_n1(self) -> None:
+        packets = corpus_reingest.convert(ROOT / "fixtures" / "corpus")
+        pack = next(p for p in packets if p["signal_id"].endswith("0013"))
+        validate_packets([pack])
+        self.assertEqual(pack["source_text"], "")
+        self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+        self.assertIn("CAPTION_GAP", pack.get("caption_gap", ""))
+        self.assertTrue(
+            any(
+                e.get("note") == "caption_gap_placeholder"
+                and e["source_ref"].upper().endswith("TRANSCRIPT.MD")
+                for e in pack["evidence"]
+            )
+        )
+
+    def test_r5_4_youtube_gap_note_no_vtt_is_gap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "R5GAP"
+            _write_youtube(
+                folder,
+                ae="# AE_STATUS — R5GAP\n\n- **status**: PARTIAL\n",
+                files={
+                    "TRANSCRIPT.md": (
+                        "# Transcript\n\n"
+                        "Source: CAPTION_GAP\n"
+                        "yt-dlp: no subs\n"
+                        "whisper: failed\n"
+                        "- operator: no auto captions on this tape\n"
+                        "- operator: music bed only\n"
+                    )
+                },
+            )
+            pack = youtube_l2.convert(folder)[0]
+            validate_packets([pack])
+            self.assertEqual(pack["source_text"], "")
+            self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertTrue(pack.get("caption_gap"))
+            self.assertIn("CAPTION_GAP", pack.get("gap_note", "").upper())
+            self.assertTrue(
+                any(
+                    e.get("note") == "caption_gap_placeholder"
+                    and e["source_ref"].upper().endswith("TRANSCRIPT.MD")
+                    for e in pack["evidence"]
+                )
+            )
+
+    def test_r5_5_youtube_gap_note_plus_you_you_vtt_is_gap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "R5B3"
+            _write_youtube(
+                folder,
+                ae="# AE_STATUS — R5B3\n\n- **status**: PASS\n",
+                files={
+                    "TRANSCRIPT.md": (
+                        "# Transcript\n\nSource: CAPTION_GAP\n"
+                        "- operator bullets survive cleaning\n"
+                    ),
+                    "R5B3.en.vtt": (
+                        "WEBVTT\n\n1\n00:00:00.000 --> 00:00:01.000\nyou\n\n"
+                        "2\n00:00:01.000 --> 00:00:02.000\nyou\n"
+                    ),
+                },
+            )
+            pack = youtube_l2.convert(folder)[0]
+            validate_packets([pack])
+            self.assertEqual(pack["source_text"], "")
+            self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertTrue(pack.get("caption_gap"))
+            self.assertNotIn("operator bullets", pack["source_text"])
+
+    def test_r5_6_youtube_recovered_vtt_is_speech_with_disagreement(self) -> None:
+        packets = youtube_l2.convert(ROOT / "fixtures" / "youtube_repass_recovered")
+        pack = next(p for p in packets if p["signal_id"] == "SYNTHETIC06")
+        validate_packets([pack])
+        self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
+        self.assertIn("recovered speech", pack["source_text"])
+        self.assertNotIn("caption_gap", pack)
+        self.assertIn("transcript_disagreement", pack)
+
+    def test_r5_7_stills_json_caption_text_only(self) -> None:
+        payload = {
+            "video_id": "R5STILLS",
+            "description": "do not leak this description",
+            "url": "https://example.com/watch?v=r5-leak",
+            "stills": [
+                {"id": "frame-1", "text": "caption one from the stills file"},
+                {"id": "frame-2", "text": "caption two from the stills file"},
+            ],
+        }
+        leaked = json_caption_texts(payload)
+        self.assertEqual(
+            leaked,
+            ["caption one from the stills file", "caption two from the stills file"],
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "R5STILLS"
+            _write_youtube(
+                folder,
+                ae="# AE_STATUS — R5STILLS\n\n- **status**: PASS\n",
+                files={"stills_captions.json": json.dumps(payload)},
+            )
+            pack = youtube_l2.convert(folder)[0]
+            validate_packets([pack])
+            self.assertTrue(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertIn("caption one from the stills file", pack["source_text"])
+            self.assertNotIn("R5STILLS", pack["source_text"])
+            self.assertNotIn("do not leak", pack["source_text"])
+            self.assertNotIn("example.com", pack["source_text"])
+            self.assertNotIn("caption_gap", pack)
+
+    def test_r5_8_kind_language_bold_source_stripped(self) -> None:
+        raw = (
+            "Kind: captions\n"
+            "Language: en\n"
+            "**Source:** youtube-auto-captions-vtt\n"
+            "spoken line after the header block\n"
+        )
+        spoken = spoken_text(raw)
+        self.assertEqual(spoken, "spoken line after the header block")
+        self.assertNotIn("Kind:", spoken)
+        self.assertNotIn("Language:", spoken)
+        self.assertNotIn("Source:", spoken)
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "R5HDR"
+            _write_youtube(
+                folder,
+                ae="# AE_STATUS — R5HDR\n\n- **status**: PASS\n",
+                files={"TRANSCRIPT.md": raw},
+            )
+            pack = youtube_l2.convert(folder)[0]
+            validate_packets([pack])
+            self.assertEqual(pack["source_text"], "spoken line after the header block")
+            self.assertNotIn("Kind:", pack["source_text"])
+            self.assertNotIn("Language:", pack["source_text"])
+            self.assertNotIn("Source:", pack["source_text"])
+            self.assertNotIn("caption_gap", pack)

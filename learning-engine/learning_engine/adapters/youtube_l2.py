@@ -15,20 +15,22 @@ from pathlib import Path
 from typing import Any
 
 from learning_engine.adapters.common import (
+    ae_affirms_transcript,
     ae_denies_transcript,
-    clean_transcript,
+    bidirectional_disagreement,
     clip_source_text,
     collect_packet,
-    content_first_gap,
     convert_summary,
     empty_convert_report,
     existing_frames,
     existing_transcripts,
     existing_videos,
-    pick_source_transcript,
+    is_caption_format_file,
+    is_transcript_md,
+    pick_youtube_cleaned,
     read_transcript_payload,
     rel_ref,
-    split_transcripts,
+    youtube_speech_files,
 )
 from learning_engine.io_util import write_jsonl
 from learning_engine.packet import base_packet, claim, evidence_item
@@ -137,13 +139,6 @@ def _read_transcript_text(path: Path) -> str:
     return read_transcript_payload(path)
 
 
-def _source_text(transcripts: list[Path]) -> str:
-    picked = pick_source_transcript(transcripts)
-    if picked is None:
-        return ""
-    return _read_transcript_text(picked)
-
-
 def _signal_id(ae_text: str, folder: Path, info: dict[str, Any]) -> str:
     title_hit = TITLE_RE.search(ae_text)
     if title_hit:
@@ -165,18 +160,21 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
 
     frames = existing_frames(folder)
     discovered = existing_transcripts(folder)
-    real_transcripts, placeholders, file_gap = split_transcripts(
+    usable_transcripts, placeholders, clean_md, file_gap = youtube_speech_files(
         discovered, _read_transcript_text
     )
-    denies_transcript = ae_denies_transcript(ae)
-    usable_transcripts = real_transcripts
     declared_label = str(ae["transcript_source"]) if ae.get("transcript_source") else None
-    caption_gap, disagreement, gap_notes = content_first_gap(
-        usable=usable_transcripts,
-        declared_gap=denies_transcript,
+    has_speech = bool(usable_transcripts)
+    caption_gap = None if has_speech else (file_gap or declared_label or "no_speech")
+    disagreement = bidirectional_disagreement(
+        has_speech=has_speech,
+        declared_gap=ae_denies_transcript(ae),
+        declared_speech=ae_affirms_transcript(ae),
         declared_label=declared_label,
-        file_gap=file_gap,
     )
+    gap_notes: list[str] = []
+    if declared_label and ae_denies_transcript(ae):
+        gap_notes.append(f"metadata_caption_gap: {declared_label}")
     videos = existing_videos(folder)
     evidence: list[dict[str, Any]] = [
         evidence_item(kind="file", source_ref=rel_ref(folder, ae_path), note="AE_STATUS.md")
@@ -197,11 +195,16 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
     for path in usable_transcripts:
         evidence.append(evidence_item(kind="transcript", source_ref=rel_ref(folder, path)))
     for path in placeholders:
+        note = (
+            "caption_gap_placeholder"
+            if is_transcript_md(path) or is_caption_format_file(path)
+            else None
+        )
         evidence.append(
             evidence_item(
                 kind="file",
                 source_ref=rel_ref(folder, path),
-                note="caption_gap_placeholder",
+                note=note,
             )
         )
     for path in videos:
@@ -210,7 +213,7 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
             evidence.append(evidence_item(kind="file", source_ref=ref, note="video"))
             cited.add(ref)
 
-    cleaned = clean_transcript(_source_text(usable_transcripts))
+    cleaned = pick_youtube_cleaned(clean_md, usable_transcripts, _read_transcript_text)
     source_text, source_chars, truncated = clip_source_text(str(cleaned["text"]))
 
     if frames and videos:
@@ -265,6 +268,8 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
         scores["transcript_source"] = cleaned["transcript_source"]
     if caption_gap:
         scores["caption_gap"] = caption_gap
+    if file_gap:
+        scores["gap_note"] = file_gap
 
     processing = "unknown"
     if letters:
@@ -291,6 +296,8 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
         notes.append(f"caption_gap: {caption_gap}")
     if disagreement:
         extra["transcript_disagreement"] = disagreement
+    if file_gap:
+        extra["gap_note"] = file_gap
     if notes:
         extra["notes"] = notes
     return base_packet(

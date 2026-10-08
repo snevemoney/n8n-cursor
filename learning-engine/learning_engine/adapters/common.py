@@ -29,11 +29,25 @@ TRANSCRIPT_EXACT = {
     "whisper.txt",
 }
 SOURCE_TEXT_MAX_CHARS = 50_000
-# Cleaned speech is substantive at this many non-hallucination words. Documented in README.
-MIN_SPEECH_WORDS = 20
-SPEECH_WORD = re.compile(r"[A-Za-z]+(?:'[A-Za-z]+)?")
-HALLUCINATION_WORDS = frozenset({"you", "thank", "thanks"})
-OPERATOR_LINE = re.compile(r"^(?:Source|Fetched)\s*:", re.IGNORECASE)
+YT_CAPTION_MIN_TOKENS = 5
+CAPTION_JSON_TEXT_KEYS = frozenset({"text", "caption", "transcript", "source_text"})
+HALLUCINATION_PHRASES = (
+    "thank you for watching",
+    "thanks for watching",
+    "thank you",
+    "thanks",
+    "you",
+    "music",
+)
+HALLUCINATION_SYMBOLS = frozenset("🎵🎶♪♫")
+OPERATOR_LINE = re.compile(
+    r"^(?:\*{1,2}|_+)?\s*(?:Source|Fetched|_?source)\s*(?:\*{1,2}|_+)?\s*:",
+    re.IGNORECASE,
+)
+KIND_LANGUAGE_LINE = re.compile(
+    r"^(?:\*{1,2}|_+)?\s*(?:Kind|Language)\s*(?:\*{1,2}|_+)?\s*:",
+    re.IGNORECASE,
+)
 DIAGNOSTIC_LINE = re.compile(
     r"^(?:yt-dlp\b|whisper(?:\+subs)?\b|MemAvailable\b|timedtext\b)",
     re.IGNORECASE,
@@ -46,7 +60,6 @@ VTT_CUE_NUMBER = re.compile(r"^\d+$")
 MD_HEADING = re.compile(r"^#{1,6}\s+\S")
 CAPTION_GAP_TOKEN = re.compile(r"CAPTION_GAP", re.IGNORECASE)
 PROVENANCE_LINE = re.compile(r"^_source:\s*(.+?)_\s*$", re.IGNORECASE)
-VTT_KIND_OR_LANGUAGE = re.compile(r"^(?:Kind|Language)\s*:", re.IGNORECASE)
 INLINE_VTT_TAGS = re.compile(
     r"<\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?>|"
     r"</?(?:c|v|lang|ruby|rt)(?:\s+[^>]*)?>",
@@ -192,6 +205,7 @@ def clean_transcript(raw: str) -> dict[str, Any]:
     lines_out: list[str] = []
     provenance: list[str] = []
     skip_until_blank = False
+    in_header = True
     for line in raw.replace("\r\n", "\n").split("\n"):
         stripped = line.strip()
         if skip_until_blank:
@@ -207,7 +221,9 @@ def clean_transcript(raw: str) -> dict[str, Any]:
         upper = stripped.upper()
         if upper.startswith("WEBVTT"):
             continue
-        if in_vtt and VTT_KIND_OR_LANGUAGE.match(stripped):
+        if in_header and KIND_LANGUAGE_LINE.match(stripped):
+            continue
+        if OPERATOR_LINE.match(stripped):
             continue
         if in_vtt and is_vtt_block_header(stripped):
             if stripped.upper() in {"NOTE", "STYLE", "REGION"}:
@@ -216,8 +232,6 @@ def clean_transcript(raw: str) -> dict[str, Any]:
         if in_vtt and VTT_CUE_NUMBER.match(stripped):
             continue
         if MD_HEADING.match(stripped):
-            continue
-        if OPERATOR_LINE.match(stripped):
             continue
         if DIAGNOSTIC_LINE.match(stripped):
             continue
@@ -232,6 +246,7 @@ def clean_transcript(raw: str) -> dict[str, Any]:
         stripped = INLINE_VTT_TAGS.sub("", stripped)
         stripped = re.sub(r"\s+", " ", stripped).strip()
         if stripped:
+            in_header = False
             lines_out.append(stripped)
     return {
         "text": "\n".join(lines_out).strip(),
@@ -245,24 +260,56 @@ def spoken_text(raw: str) -> str:
     return str(clean_transcript(raw)["text"])
 
 
-def speech_words(text: str) -> list[str]:
-    return SPEECH_WORD.findall(text)
+def is_cjk_char(char: str) -> bool:
+    code = ord(char)
+    return (
+        0x3040 <= code <= 0x30FF
+        or 0x3400 <= code <= 0x4DBF
+        or 0x4E00 <= code <= 0x9FFF
+        or 0xF900 <= code <= 0xFAFF
+        or 0xAC00 <= code <= 0xD7AF
+        or 0x20000 <= code <= 0x2A6DF
+    )
 
 
-def is_hallucination_noise(text: str) -> bool:
-    """Repeated Whisper leftovers like 'you' / 'Thank you.' are not speech."""
-    words = [word.lower() for word in speech_words(text)]
-    if not words:
+def unicode_word_tokens(text: str) -> list[str]:
+    """Unicode words. CJK runs count each character, not spaces."""
+    tokens: list[str] = []
+    buf: list[str] = []
+
+    def flush_latin() -> None:
+        if buf:
+            tokens.append("".join(buf))
+            buf.clear()
+
+    for char in text:
+        if is_cjk_char(char):
+            flush_latin()
+            tokens.append(char)
+        elif char.isalpha():
+            buf.append(char)
+        else:
+            flush_latin()
+    flush_latin()
+    return tokens
+
+
+def is_suspect_hallucination(text: str) -> bool:
+    """True when cleaned text is only Whisper leftovers or music symbols."""
+    stripped = text.strip()
+    if not stripped:
         return False
-    return all(word in HALLUCINATION_WORDS for word in words)
-
-
-def is_substantive_speech(text: str) -> bool:
-    """True when cleaned text has MIN_SPEECH_WORDS non-hallucination words."""
-    if is_hallucination_noise(text):
+    had_signal = bool(unicode_word_tokens(stripped)) or any(
+        symbol in stripped for symbol in HALLUCINATION_SYMBOLS
+    )
+    if not had_signal:
         return False
-    content = [word for word in speech_words(text) if word.lower() not in HALLUCINATION_WORDS]
-    return len(content) >= MIN_SPEECH_WORDS
+    remaining = stripped.lower()
+    for symbol in HALLUCINATION_SYMBOLS:
+        remaining = remaining.replace(symbol, " ")
+    for phrase in HALLUCINATION_PHRASES:
+        remaining = remaining.replace(phrase, " ")
+    return not unicode_word_tokens(remaining)
 
 
 def contains_caption_gap_token(raw: str) -> bool:
@@ -284,29 +331,31 @@ def extract_caption_gap(raw: str) -> str | None:
     return None
 
 
-def is_placeholder_transcript(raw: str) -> bool:
-    """A file is a placeholder when cleaned speech is not substantive."""
-    return not is_substantive_speech(spoken_text(raw))
-
-
-def json_string_fields(obj: Any) -> list[str]:
-    if isinstance(obj, str):
-        return [obj]
+def json_caption_texts(obj: Any) -> list[str]:
+    """Only caption-text fields. Never ids, descriptions, URLs, or source labels."""
+    out: list[str] = []
     if isinstance(obj, dict):
-        out: list[str] = []
-        for value in obj.values():
-            out.extend(json_string_fields(value))
-        return out
-    if isinstance(obj, list):
-        out = []
-        for value in obj:
-            out.extend(json_string_fields(value))
-        return out
-    return []
+        for key, value in obj.items():
+            name = str(key).lower()
+            if name in CAPTION_JSON_TEXT_KEYS:
+                if isinstance(value, str):
+                    out.append(value)
+                elif isinstance(value, list):
+                    for item in value:
+                        if isinstance(item, str):
+                            out.append(item)
+                        else:
+                            out.extend(json_caption_texts(item))
+            elif isinstance(value, (dict, list)):
+                out.extend(json_caption_texts(value))
+    elif isinstance(obj, list):
+        for item in obj:
+            out.extend(json_caption_texts(item))
+    return out
 
 
 def read_transcript_payload(path: Path) -> str:
-    """File body, or every string field from a JSON caption object."""
+    """File body, or caption-text fields only from JSON."""
     raw = path.read_text(encoding="utf-8", errors="replace")
     if path.suffix.lower() != ".json":
         return raw
@@ -314,75 +363,133 @@ def read_transcript_payload(path: Path) -> str:
         obj = json.loads(raw)
     except json.JSONDecodeError:
         return raw
-    fields = json_string_fields(obj)
-    return "\n".join(fields) if fields else raw
+    fields = json_caption_texts(obj)
+    return "\n".join(fields) if fields else ""
 
 
-def split_transcripts(
-    paths: list[Path],
-    read_text: Callable[[Path], str],
-) -> tuple[list[Path], list[Path], str | None]:
-    """Judge each file on cleaned speech. Token mentions do not classify the file."""
-    real: list[Path] = []
-    placeholders: list[Path] = []
-    gap: str | None = None
-    for path in paths:
-        raw = read_text(path)
-        extracted = extract_caption_gap(raw)
-        if extracted:
-            gap = gap or extracted
-        if is_substantive_speech(spoken_text(raw)):
-            real.append(path)
-        else:
-            placeholders.append(path)
-    return real, placeholders, gap
+def is_caption_format_file(path: Path) -> bool:
+    name = path.name.lower()
+    if name.endswith(".vtt"):
+        return True
+    if name in {"captions_timeline.txt", "stills_captions.json", "player-caption-samples.json"}:
+        return True
+    return name.startswith("captions") and path.suffix.lower() in CAPTION_SUFFIXES
+
+
+def is_transcript_md(path: Path) -> bool:
+    return path.name.lower() == "transcript.md"
+
+
+def caption_file_is_speech(raw: str) -> bool:
+    cleaned = spoken_text(raw)
+    tokens = unicode_word_tokens(cleaned)
+    if len(tokens) < YT_CAPTION_MIN_TOKENS:
+        return False
+    return not is_suspect_hallucination(cleaned)
 
 
 def source_declares_caption_gap(value: Any) -> bool:
     return isinstance(value, str) and contains_caption_gap_token(value)
 
 
+def meta_affirms_transcript(meta: dict[str, Any], has_transcript_flag: bool | None) -> bool:
+    if has_transcript_flag is True:
+        return True
+    chars = meta.get("transcript_chars")
+    return isinstance(chars, (int, float)) and chars > 0
+
+
 def meta_denies_transcript(meta: dict[str, Any], has_transcript_flag: bool | None) -> bool:
-    """META cross-check: has_transcript false or transcript_chars 0."""
+    """META is authoritative. Affirm wins when both signals are present."""
+    if meta_affirms_transcript(meta, has_transcript_flag):
+        return False
     if has_transcript_flag is False:
         return True
     chars = meta.get("transcript_chars")
-    if isinstance(chars, (int, float)) and chars == 0:
-        return True
-    return False
+    return isinstance(chars, (int, float)) and chars == 0
 
 
 def ae_denies_transcript(ae: dict[str, Any]) -> bool:
-    """AE cross-check: transcript_source mentions CAPTION_GAP. Does not wipe speech."""
     if source_declares_caption_gap(ae.get("transcript_source")):
         return True
     overall = ae.get("overall") if isinstance(ae.get("overall"), dict) else {}
     return source_declares_caption_gap(overall.get("transcript_source"))
 
 
-def content_first_gap(
-    *,
-    usable: list[Path],
-    declared_gap: bool,
-    declared_label: str | None,
-    file_gap: str | None,
-) -> tuple[str | None, str | None, list[str]]:
-    """Prefer file content. Pack caption_gap only when no file is substantive.
+def ae_affirms_transcript(ae: dict[str, Any]) -> bool:
+    value = ae.get("transcript_source")
+    if not isinstance(value, str) or not value.strip():
+        return False
+    return not source_declares_caption_gap(value)
 
-    Returns (caption_gap, disagreement, notes).
-    """
-    notes: list[str] = []
-    if declared_label and contains_caption_gap_token(declared_label):
-        notes.append(f"metadata_caption_gap: {declared_label}")
-    if usable:
-        disagreement = None
-        if declared_gap:
-            label = declared_label or "declared_no_transcript"
-            disagreement = f"declared no transcript ({label}); content is substantive"
-            notes.append(disagreement)
-        return None, disagreement, notes
-    caption_gap = file_gap or declared_label or "no_substantive_speech"
-    return caption_gap, None, notes
+
+def youtube_speech_files(
+    paths: list[Path],
+    read_text: Callable[[Path], str],
+) -> tuple[list[Path], list[Path], Path | None, str | None]:
+    """Return (speech files, non-speech files, clean TRANSCRIPT.md, gap_note)."""
+    speech: list[Path] = []
+    other: list[Path] = []
+    clean_md: Path | None = None
+    gap_note: str | None = None
+    for path in paths:
+        raw = read_text(path)
+        if is_transcript_md(path):
+            if contains_caption_gap_token(raw):
+                other.append(path)
+                gap_note = gap_note or extract_caption_gap(raw) or "CAPTION_GAP"
+            else:
+                speech.append(path)
+                clean_md = path
+            continue
+        if is_caption_format_file(path):
+            if caption_file_is_speech(raw):
+                speech.append(path)
+            else:
+                other.append(path)
+            continue
+        other.append(path)
+    return speech, other, clean_md, gap_note
+
+
+def pick_youtube_cleaned(
+    clean_md: Path | None,
+    speech: list[Path],
+    read_text: Callable[[Path], str],
+) -> dict[str, Any]:
+    empty: dict[str, Any] = {"text": "", "transcript_source": None, "provenance": []}
+    if clean_md is not None:
+        return clean_transcript(read_text(clean_md))
+    best = empty
+    for path in speech:
+        cleaned = clean_transcript(read_text(path))
+        if len(str(cleaned["text"])) > len(str(best["text"])):
+            best = cleaned
+    return best
+
+
+def pick_youtube_source_text(
+    clean_md: Path | None,
+    speech: list[Path],
+    read_text: Callable[[Path], str],
+) -> str:
+    return str(pick_youtube_cleaned(clean_md, speech, read_text)["text"])
+
+
+def bidirectional_disagreement(
+    *,
+    has_speech: bool,
+    declared_gap: bool,
+    declared_speech: bool,
+    declared_label: str | None,
+) -> str | None:
+    if declared_gap and has_speech:
+        label = declared_label or "declared_no_transcript"
+        return f"declared no transcript ({label}); content has speech"
+    if declared_speech and not has_speech:
+        label = declared_label or "declared_transcript"
+        return f"declared transcript ({label}); content has no speech"
+    return None
 
 
 def clip_source_text(text: str, limit: int = SOURCE_TEXT_MAX_CHARS) -> tuple[str, int, bool]:

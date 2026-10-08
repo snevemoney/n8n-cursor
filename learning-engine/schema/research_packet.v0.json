@@ -134,12 +134,22 @@
     "caption_gap": {
       "type": "string",
       "minLength": 1,
-      "description": "Present only when no candidate transcript file has substantive cleaned speech."
+      "description": "Present only when the pack has no speech. Corpus: META denies transcript. YouTube: no qualifying caption file and no clean TRANSCRIPT.md."
     },
     "transcript_disagreement": {
       "type": "string",
       "minLength": 1,
-      "description": "AE/META said no transcript but cleaned file content is substantive. Content wins."
+      "description": "Metadata and content disagree. YouTube both directions (declared gap but speech, or declared speech but none). Corpus only when META signals conflict."
+    },
+    "transcript_quality": {
+      "type": "string",
+      "enum": ["suspect_hallucination"],
+      "description": "Corpus only. Cleaned transcript is only Whisper leftovers or music symbols. Not a demotion: the file stays transcript evidence."
+    },
+    "gap_note": {
+      "type": "string",
+      "minLength": 1,
+      "description": "CAPTION_GAP line from a YouTube TRANSCRIPT.md gap note. Never copied into source_text."
     }
   },
   "$defs": {
