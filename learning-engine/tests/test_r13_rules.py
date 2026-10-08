@@ -166,11 +166,14 @@ class N123PlainStoreNoEmptyDb(unittest.TestCase):
 
 class N125ReadonlySkipReason(unittest.TestCase):
     def test_readonly_test_skips_when_root(self) -> None:
-        import test_r12_rules as r12
+        try:
+            import test_r12_rules as r12
+        except ImportError:
+            from tests import test_r12_rules as r12
 
         method = r12.N111JsonlErrors.test_readonly_directory_is_json
         skip = getattr(method, "__unittest_skip__", False)
-        reason = getattr(method, "__unittest_skip_reason__", "")
+        reason = getattr(method, "__unittest_skip_why__", "")
         if os.geteuid() == 0:
             self.assertTrue(skip)
             self.assertIn("geteuid", reason)

@@ -14,7 +14,7 @@ from learning_engine.io_util import read_jsonl, write_json, write_jsonl
 from learning_engine.constants import DISK_CHECK_SKIPPED
 from learning_engine.storage.sqlite_index import index_packets, rebuild_from_jsonl
 from learning_engine.validator import FULL_VISUAL_NEEDS_ROOT, count_false_full_visual, validate_packet
-from learning_engine.errors import PacketValidationError
+from learning_engine.errors import LockedError, PacketValidationError
 
 
 def cmd_adapt(args: argparse.Namespace) -> int:
@@ -41,7 +41,8 @@ def cmd_adapt(args: argparse.Namespace) -> int:
 
 
 def _emit_cli_error(exc: BaseException, *, path: Path | str | None = None) -> int:
-    payload: dict[str, Any] = {"ok": False, "error": str(exc)}
+    message = "locked" if isinstance(exc, LockedError) else str(exc)
+    payload: dict[str, Any] = {"ok": False, "error": message}
     src = getattr(exc, "path", None) or path
     if src is not None:
         payload["path"] = str(src)
@@ -57,6 +58,12 @@ def _emit_cli_error(exc: BaseException, *, path: Path | str | None = None) -> in
 
 def cmd_validate(args: argparse.Namespace) -> int:
     input_path = Path(args.input)
+    root = Path(args.root) if getattr(args, "root", None) else None
+    if root is not None and not root.is_dir():
+        return _emit_cli_error(
+            ValueError(f"--root is not a directory: {root}"),
+            path=root,
+        )
     try:
         packets = list(read_jsonl(input_path))
     except Exception as exc:
@@ -64,7 +71,6 @@ def cmd_validate(args: argparse.Namespace) -> int:
     errors: list[str] = []
     warnings: list[str] = []
     valid: list[dict[str, Any]] = []
-    root = Path(args.root) if getattr(args, "root", None) else None
     if root is None:
         warnings.append(DISK_CHECK_SKIPPED)
     for i, packet in enumerate(packets):

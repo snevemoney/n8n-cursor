@@ -8,14 +8,19 @@ youtube_l2 are three rows. Judgments are unique per
 
 from __future__ import annotations
 
+import fcntl
 import json
+import os
+import secrets
 import shutil
 import sqlite3
+import time
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Iterator
 
-from learning_engine.errors import IndexSchemaError, JsonlError
+from learning_engine.errors import IndexSchemaError, JsonlError, LockedError
 from learning_engine.io_util import read_jsonl
 
 LEGACY_MIGRATED_RUN_ID = "legacy-migrated"
@@ -30,6 +35,10 @@ REBUILD_SIDE_SUFFIXES = (
     ".rebuilding-wal",
     ".rebuilding-shm",
 )
+PROTECTED_DB_SIDES = ("-journal", "-wal", "-shm")
+
+_lock_depth: dict[str, int] = {}
+_lock_fds: dict[str, int] = {}
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS packets (
@@ -71,6 +80,72 @@ CREATE TABLE IF NOT EXISTS harness_results (
 CREATE INDEX IF NOT EXISTS idx_packets_source ON packets(source_type);
 CREATE INDEX IF NOT EXISTS idx_judgments_run ON judgments(run_id);
 """
+
+
+def _lock_key(sqlite_path: Path) -> str:
+    return str(sqlite_path.absolute())
+
+
+def _lock_file(sqlite_path: Path) -> Path:
+    return sqlite_path.with_name(sqlite_path.name + ".lock")
+
+
+def acquire_index_lock(sqlite_path: Path) -> None:
+    key = _lock_key(sqlite_path)
+    depth = _lock_depth.get(key, 0)
+    if depth > 0:
+        _lock_depth[key] = depth + 1
+        return
+    lock_path = _lock_file(sqlite_path)
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR, 0o644)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        os.close(fd)
+        raise LockedError(str(lock_path)) from None
+    _lock_fds[key] = fd
+    _lock_depth[key] = 1
+
+
+def release_index_lock(sqlite_path: Path) -> None:
+    key = _lock_key(sqlite_path)
+    depth = _lock_depth.get(key, 0)
+    if depth <= 1:
+        fd = _lock_fds.pop(key, None)
+        _lock_depth.pop(key, None)
+        if fd is not None:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            except OSError:
+                pass
+            os.close(fd)
+        return
+    _lock_depth[key] = depth - 1
+
+
+@contextmanager
+def index_lock(sqlite_path: Path) -> Iterator[None]:
+    acquire_index_lock(sqlite_path)
+    try:
+        yield
+    finally:
+        release_index_lock(sqlite_path)
+
+
+def _maybe_pause_rebuild(point: str) -> None:
+    if os.environ.get("LEARNING_ENGINE_PAUSE_REBUILD") != point:
+        return
+    gate = os.environ.get("LEARNING_ENGINE_REBUILD_GATE")
+    if not gate:
+        return
+    Path(gate).write_text(point, encoding="utf-8")
+    resume = Path(str(gate) + ".resume")
+    deadline = time.time() + 30
+    while not resume.exists():
+        if time.time() > deadline:
+            raise TimeoutError(f"rebuild pause at {point} timed out")
+        time.sleep(0.02)
 
 
 def _table_names(conn: sqlite3.Connection) -> set[str]:
@@ -268,7 +343,17 @@ def _migrate_legacy_txn(conn: sqlite3.Connection) -> None:
 
 def _migrate_legacy_file(path: Path) -> None:
     """Migrate on a copy. Original bytes stay until the transaction commits."""
+    with index_lock(path):
+        _migrate_legacy_file_locked(path)
+
+
+def _migrate_legacy_file_locked(path: Path) -> None:
     tmp = path.with_name(path.name + ".migrating")
+    if tmp.exists() and (tmp.is_dir() or not tmp.is_file()):
+        raise IndexSchemaError(
+            f"SQLite migration aborted; leftover temp path is not a regular file: {tmp}",
+            path=str(tmp),
+        )
     try:
         shutil.copy2(path, tmp)
         conn = sqlite3.connect(str(tmp))
@@ -320,6 +405,11 @@ def connect(path: Path) -> sqlite3.Connection:
 
 
 def index_packets(path: Path, packets: Iterable[dict[str, Any]]) -> int:
+    with index_lock(path):
+        return _index_packets_locked(path, packets)
+
+
+def _index_packets_locked(path: Path, packets: Iterable[dict[str, Any]]) -> int:
     existed = path.exists()
     conn: sqlite3.Connection | None = None
     try:
@@ -345,6 +435,11 @@ def index_packets(path: Path, packets: Iterable[dict[str, Any]]) -> int:
 
 
 def packet_counts_by_source_type(path: Path) -> dict[str, int]:
+    with index_lock(path):
+        return _packet_counts_locked(path)
+
+
+def _packet_counts_locked(path: Path) -> dict[str, int]:
     conn = connect(path)
     rows = conn.execute(
         "SELECT source_type, COUNT(*) FROM packets GROUP BY source_type"
@@ -408,11 +503,37 @@ def _rebuild_tmp_path(sqlite_path: Path) -> Path:
     return sqlite_path.with_name(sqlite_path.name + REBUILD_TMP_SUFFIX)
 
 
+def _create_rebuild_tmp(sqlite_path: Path) -> Path:
+    token = f"{os.getpid()}.{secrets.token_hex(8)}"
+    tmp = sqlite_path.with_name(f"{sqlite_path.name}.rebuilding.{token}")
+    fd = os.open(str(tmp), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+    os.close(fd)
+    return tmp
+
+
 def _stale_rebuild_candidates(sqlite_path: Path) -> list[Path]:
-    """Exact names this code creates: <db>.rebuilding{,-journal,-wal,-shm}."""
+    """Legacy exact names plus this tool's <db>.rebuilding.* temps. Never DB journals."""
     parent = sqlite_path.parent
     name = sqlite_path.name
-    return [parent / f"{name}{suffix}" for suffix in REBUILD_SIDE_SUFFIXES]
+    found: list[Path] = []
+    seen: set[str] = set()
+    for suffix in REBUILD_SIDE_SUFFIXES:
+        path = parent / f"{name}{suffix}"
+        if path.name in {f"{name}{side}" for side in PROTECTED_DB_SIDES}:
+            continue
+        found.append(path)
+        seen.add(str(path))
+    prefix = name + ".rebuilding."
+    if parent.is_dir():
+        for child in parent.iterdir():
+            if not child.name.startswith(prefix):
+                continue
+            if child.name in {f"{name}{side}" for side in PROTECTED_DB_SIDES}:
+                continue
+            if str(child) not in seen:
+                found.append(child)
+                seen.add(str(child))
+    return found
 
 
 def _first_non_file_temp(sqlite_path: Path) -> Path | None:
@@ -454,11 +575,8 @@ def _clear_stale_rebuild_temps(sqlite_path: Path) -> str | None:
 
 
 def _remove_new_db(sqlite_path: Path) -> str | None:
-    notes = [_safe_remove(sqlite_path)]
-    for side in ("-journal", "-wal", "-shm"):
-        notes.append(_safe_remove(Path(str(sqlite_path) + side)))
-    leftover = [item for item in notes if item]
-    return "; ".join(leftover) if leftover else None
+    """Unlink only the DB file we created. Never touch -journal/-wal/-shm."""
+    return _safe_remove(sqlite_path)
 
 
 def _rebuild_error(
@@ -486,10 +604,13 @@ def _rebuild_error(
 def rebuild_from_jsonl(sqlite_path: Path, jsonl_path: Path) -> dict[str, Any]:
     """Replace packet rows only for source_types present in JSONL. Judgments stay.
 
-    Delete + reinsert run on a temp copy. The original file is replaced only
-    after commit. Any failure leaves the original byte-identical, or creates
-    no file if the target did not exist.
+    Exclusive lock, unique temp copy, replace only after commit.
     """
+    with index_lock(sqlite_path):
+        return _rebuild_from_jsonl_locked(sqlite_path, jsonl_path)
+
+
+def _rebuild_from_jsonl_locked(sqlite_path: Path, jsonl_path: Path) -> dict[str, Any]:
     existed = sqlite_path.exists()
     blocked = _first_non_file_temp(sqlite_path)
     if blocked is not None:
@@ -498,33 +619,30 @@ def rebuild_from_jsonl(sqlite_path: Path, jsonl_path: Path) -> dict[str, Any]:
             path=str(blocked),
         )
     stale_warning = _clear_stale_rebuild_temps(sqlite_path)
-    tmp = _rebuild_tmp_path(sqlite_path)
+    tmp: Path | None = None
     packets: list[dict[str, Any]] = []
     try:
         packets = list(read_jsonl(jsonl_path))
         types = sorted({str(packet.get("source_type") or "unknown") for packet in packets})
+        tmp = _create_rebuild_tmp(sqlite_path)
         if existed:
             shutil.copy2(sqlite_path, tmp)
-            target = tmp
-        else:
-            target = sqlite_path
-        indexed = _rebuild_into(target, packets, types)
-        if existed:
-            tmp.replace(sqlite_path)
+        _maybe_pause_rebuild("after_copy")
+        indexed = _rebuild_into(tmp, packets, types)
+        tmp.replace(sqlite_path)
+        tmp = None
     except JsonlError as exc:
         extra = _clear_stale_rebuild_temps(sqlite_path)
-        if not existed:
-            created = _remove_new_db(sqlite_path)
-            extra = "; ".join(item for item in (extra, created) if item) or extra
+        if tmp is not None:
+            extra = "; ".join(item for item in (extra, _safe_remove(tmp)) if item) or extra
         warning = "; ".join(item for item in (stale_warning, extra) if item) or None
         if warning:
             exc.cleanup_warning = warning
         raise
     except Exception as exc:
         extra = _clear_stale_rebuild_temps(sqlite_path)
-        if not existed:
-            created = _remove_new_db(sqlite_path)
-            extra = "; ".join(item for item in (extra, created) if item) or extra
+        if tmp is not None:
+            extra = "; ".join(item for item in (extra, _safe_remove(tmp)) if item) or extra
         warning = "; ".join(item for item in (stale_warning, extra) if item) or None
         raise _rebuild_error(
             exc,
@@ -556,6 +674,17 @@ def start_run(
     provider: str = "",
     notes: str = "",
 ) -> str:
+    with index_lock(path):
+        return _start_run_locked(path, run_id, provider=provider, notes=notes)
+
+
+def _start_run_locked(
+    path: Path,
+    run_id: str,
+    *,
+    provider: str = "",
+    notes: str = "",
+) -> str:
     conn = connect(path)
     started = datetime.now(timezone.utc).isoformat()
     with conn:
@@ -571,6 +700,16 @@ def start_run(
 
 
 def index_judgments(
+    path: Path,
+    judgments: Iterable[dict[str, Any]],
+    *,
+    run_id: str,
+) -> int:
+    with index_lock(path):
+        return _index_judgments_locked(path, judgments, run_id=run_id)
+
+
+def _index_judgments_locked(
     path: Path,
     judgments: Iterable[dict[str, Any]],
     *,
@@ -606,6 +745,11 @@ def index_judgments(
 
 
 def index_harness_result(path: Path, run_id: str, report: dict[str, Any]) -> None:
+    with index_lock(path):
+        _index_harness_result_locked(path, run_id, report)
+
+
+def _index_harness_result_locked(path: Path, run_id: str, report: dict[str, Any]) -> None:
     conn = connect(path)
     with conn:
         conn.execute(

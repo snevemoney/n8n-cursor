@@ -9,6 +9,7 @@ source_text is not mixed with operator delimiters.
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any, Iterable
@@ -18,6 +19,7 @@ JPEG_MAGIC = b"\xff\xd8\xff"
 GIF87_MAGIC = b"GIF87a"
 GIF89_MAGIC = b"GIF89a"
 EBML_MAGIC = b"\x1a\x45\xdf\xa3"
+MEDIA_HEAD_BYTES = 64
 FULL_VISUAL_NEEDS_ROOT = (
     "full_visual requires --root so image and video evidence can be checked on disk"
 )
@@ -79,8 +81,46 @@ def _resolve_evidence_path(
     base = evidence_base or "."
     base_path = Path(base)
     if base_path.is_absolute():
-        return (base_path / path).resolve()
-    return (root / base_path / path).resolve()
+        return base_path / path
+    return root / base_path / path
+
+
+def _path_under_root(resolved: Path, root: Path) -> bool:
+    try:
+        Path(os.path.realpath(resolved)).relative_to(Path(os.path.realpath(root)))
+        return True
+    except (ValueError, OSError):
+        return False
+
+
+def confine_evidence_ref(
+    ref: str,
+    root: Path,
+    evidence_base: str | None = None,
+    *,
+    path: str = "$",
+) -> Path:
+    """Resolve ref under root. Reject .., absolute escapes, and outside symlinks."""
+    if ".." in Path(ref).parts:
+        raise PacketValidationError(f"evidence source_ref escapes --root: {ref}", path)
+    resolved = _resolve_evidence_path(ref, root, evidence_base)
+    try:
+        real = Path(os.path.realpath(resolved))
+        root_real = Path(os.path.realpath(root))
+    except OSError as exc:
+        raise PacketValidationError(
+            f"evidence source_ref cannot be resolved: {ref}", path
+        ) from exc
+    try:
+        real.relative_to(root_real)
+    except ValueError:
+        raise PacketValidationError(f"evidence source_ref escapes --root: {ref}", path)
+    return real
+
+
+def _read_media_head(path: Path, n: int = MEDIA_HEAD_BYTES) -> bytes:
+    with path.open("rb") as handle:
+        return handle.read(n)
 
 
 def evidence_on_disk(
@@ -133,7 +173,9 @@ def evidence_media_ok(
     )
     if not path.is_file():
         return False
-    data = path.read_bytes()
+    if root is not None and not _path_under_root(path, root):
+        return False
+    data = _read_media_head(path)
     if not data:
         return False
     suffix = evidence_suffix(item)
@@ -253,6 +295,8 @@ def validate_packet(
     raw_root = root if root is not None else evidence_root
     if raw_root is not None:
         disk_root = Path(raw_root)
+        if not disk_root.is_dir():
+            raise PacketValidationError(f"--root is not a directory: {disk_root}", path)
     elif warnings is not None:
         if DISK_CHECK_SKIPPED not in warn:
             warn.append(DISK_CHECK_SKIPPED)
@@ -335,6 +379,13 @@ def validate_packet(
             raise PacketValidationError(
                 "fabricated evidence: source_ref marked exists=false",
                 epath,
+            )
+        if disk_root is not None:
+            confine_evidence_ref(
+                str(ref),
+                disk_root,
+                packet.get("evidence_base") if isinstance(packet.get("evidence_base"), str) else None,
+                path=epath,
             )
 
     if packet.get("content_access") == "full_visual" or packet.get("analysis_scope") == "full_visual":

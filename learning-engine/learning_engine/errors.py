@@ -34,6 +34,13 @@ class IndexSchemaError(RuntimeError):
         self.cleanup_warning = cleanup_warning
 
 
+class LockedError(IndexSchemaError):
+    """Another process holds the index lock. Do not touch the database."""
+
+    def __init__(self, path: str | None = None) -> None:
+        super().__init__("locked", path=path)
+
+
 class JsonlError(ValueError):
     """JSONL read/parse failure with a path and optional line number."""
 

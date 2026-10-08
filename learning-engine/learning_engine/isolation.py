@@ -14,8 +14,27 @@ ALLOWED_OUTSIDE = frozenset(
 )
 
 
+def _has_control_chars(raw: str) -> bool:
+    return any(ord(ch) < 32 or ord(ch) == 127 for ch in raw)
+
+
+def _rejected_raw_path(raw: str) -> bool:
+    """Reject empty, padded, control, traversal, or absolute paths. No strip()."""
+    if raw == "":
+        return True
+    if raw != raw.strip():
+        return True
+    if _has_control_chars(raw):
+        return True
+    if raw.startswith("/"):
+        return True
+    if ".." in raw.split("/") or ".." in raw.split("\\"):
+        return True
+    return False
+
+
 def _normalize_repo_path(raw: str) -> str:
-    path = raw.strip().replace("\\", "/")
+    path = raw.replace("\\", "/")
     while path.startswith("./"):
         path = path[2:]
     return path
@@ -25,8 +44,12 @@ def forbidden_outside_paths(paths: Iterable[str]) -> list[str]:
     """Return changed paths that are outside the allowlist."""
     bad: list[str] = []
     for raw in paths:
+        if _rejected_raw_path(raw):
+            bad.append(raw)
+            continue
         path = _normalize_repo_path(raw)
-        if not path:
+        if path == "":
+            bad.append(raw)
             continue
         normalized = posixpath.normpath(path)
         parts = path.split("/")
@@ -37,18 +60,29 @@ def forbidden_outside_paths(paths: Iterable[str]) -> list[str]:
             or path.startswith("/")
             or normalized.startswith("/")
         ):
-            bad.append(path)
+            bad.append(raw)
             continue
         if normalized == "learning-engine" or normalized.startswith("learning-engine/"):
             continue
         if normalized in ALLOWED_OUTSIDE:
             continue
-        bad.append(path)
+        bad.append(raw)
     return bad
 
 
 def main(argv: list[str] | None = None) -> int:
-    lines = argv if argv is not None else [line.rstrip("\n") for line in sys.stdin]
+    if argv is None:
+        flags = sys.argv[1:]
+        allow_empty = "--allow-empty" in flags
+        lines = [line.rstrip("\n") for line in sys.stdin]
+    else:
+        allow_empty = "--allow-empty" in argv
+        lines = [item for item in argv if item != "--allow-empty"]
+    if not lines or all(item == "" for item in lines):
+        if allow_empty:
+            return 0
+        print("isolation guard: empty path list")
+        return 1
     bad = forbidden_outside_paths(lines)
     if not bad:
         return 0
