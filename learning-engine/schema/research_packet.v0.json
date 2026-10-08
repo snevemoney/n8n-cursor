@@ -130,6 +130,11 @@
     "notes": {
       "type": "array",
       "items": { "type": "string" }
+    },
+    "caption_gap": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Present when META or the on-disk file is a caption gap / placeholder, not speech. Not transcript evidence."
     }
   },
   "$defs": {

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from learning_engine.adapters import bookmark_review, corpus_reingest, youtube_l2
+from learning_engine.adapters.common import convert_summary
 from learning_engine.io_util import read_jsonl, write_json, write_jsonl
 from learning_engine.storage.sqlite_index import index_packets
 from learning_engine.validator import count_false_full_visual, validate_packet
@@ -30,18 +31,9 @@ def cmd_adapt(args: argparse.Namespace) -> int:
     else:
         raise SystemExit(f"unknown adapter {args.kind}")
     n = write_jsonl(Path(args.output), report["packets"])
-    print(
-        json.dumps(
-            {
-                "ok": True,
-                "adapter": adapter,
-                "packets": n,
-                "invalid": len(report["invalid"]),
-                "invalid_items": report["invalid"],
-                "output": args.output,
-            }
-        )
-    )
+    summary = convert_summary(adapter, report, args.output, strict=strict)
+    summary["packets"] = n
+    print(json.dumps(summary))
     if strict and report["invalid"]:
         return 1
     return 0 if report["packets"] or not report["invalid"] else 1

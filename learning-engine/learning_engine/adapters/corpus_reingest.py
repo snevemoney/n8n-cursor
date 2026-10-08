@@ -26,8 +26,11 @@ from learning_engine.adapters.common import (
     existing_transcripts,
     existing_videos,
     map_status,
+    meta_denies_transcript,
     pick_source_transcript,
     rel_ref,
+    spoken_text,
+    split_transcripts,
 )
 from learning_engine.io_util import write_jsonl
 from learning_engine.packet import base_packet, evidence_item
@@ -85,9 +88,24 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
     has_keyframes_flag = _completeness_flag(completeness, "has_keyframes")
 
     frames = existing_frames(folder)
-    transcripts = existing_transcripts(folder)
+    discovered = existing_transcripts(folder)
     videos = existing_videos(folder)
     raw_on_disk = existing_raw_files(folder)
+    real_transcripts, placeholders, file_gap = split_transcripts(
+        discovered, _read_transcript_text
+    )
+    denies_transcript = meta_denies_transcript(meta, has_transcript_flag)
+    usable_transcripts = [] if denies_transcript else real_transcripts
+
+    caption_gap = file_gap
+    classification = meta.get("classification")
+    if isinstance(classification, str) and "CAPTION_GAP" in classification.upper():
+        caption_gap = caption_gap or classification
+    if denies_transcript and not caption_gap:
+        if has_transcript_flag is False:
+            caption_gap = "META:has_transcript=false"
+        else:
+            caption_gap = "META:transcript_chars=0"
 
     evidence: list[dict[str, Any]] = [
         evidence_item(kind="metadata", source_ref=rel_ref(folder, meta_path), note="META.json")
@@ -97,9 +115,29 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
         evidence.append(evidence_item(kind="file", source_ref=rel_ref(folder, index_md)))
     for path in frames:
         evidence.append(evidence_item(kind="frame", source_ref=rel_ref(folder, path)))
-    for path in transcripts:
+    for path in usable_transcripts:
         evidence.append(evidence_item(kind="transcript", source_ref=rel_ref(folder, path)))
-    cited: set[str] = {rel_ref(folder, p) for p in [*frames, *transcripts, meta_path]}
+    for path in placeholders:
+        evidence.append(
+            evidence_item(
+                kind="file",
+                source_ref=rel_ref(folder, path),
+                note="caption_gap_placeholder",
+            )
+        )
+    if denies_transcript:
+        for path in real_transcripts:
+            evidence.append(
+                evidence_item(
+                    kind="file",
+                    source_ref=rel_ref(folder, path),
+                    note="meta_has_no_transcript",
+                )
+            )
+    cited: set[str] = {
+        rel_ref(folder, p)
+        for p in [*frames, *usable_transcripts, *placeholders, *real_transcripts, meta_path]
+    }
     raw_files = meta.get("raw_files") if isinstance(meta.get("raw_files"), list) else []
     for name in raw_files:
         if not isinstance(name, str):
@@ -128,20 +166,20 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
         evidence.append(evidence_item(kind="file", source_ref=ref, note="video"))
         cited.add(ref)
 
-    picked = pick_source_transcript(transcripts)
-    source_text = _read_transcript_text(picked) if picked else ""
+    picked = pick_source_transcript(usable_transcripts)
+    source_text = spoken_text(_read_transcript_text(picked)) if picked else ""
     source_text, source_chars, truncated = clip_source_text(source_text)
 
     if frames and videos:
         content_access = "full_visual"
         analysis_scope = "full_visual"
-    elif frames and transcripts:
+    elif frames and usable_transcripts:
         content_access = "frames"
         analysis_scope = "frames"
     elif frames:
         content_access = "frames"
         analysis_scope = "frames"
-    elif transcripts or has_transcript_flag is True:
+    elif usable_transcripts:
         content_access = "transcript"
         analysis_scope = "transcript"
     elif (meta.get("status") or "").upper() == "FAILED":
@@ -166,19 +204,28 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
     if isinstance(meta.get("stills_count"), (int, float)):
         scores["stills_count_declared"] = meta["stills_count"]
     scores["frames_on_disk"] = len(frames)
-    scores["transcripts_on_disk"] = len(transcripts)
+    scores["transcripts_on_disk"] = len(discovered)
+    scores["transcripts_usable"] = len(usable_transcripts)
     scores["videos_on_disk"] = len(videos)
     scores["source_text_chars"] = source_chars
     scores["source_text_truncated"] = truncated
+    if caption_gap:
+        scores["caption_gap"] = caption_gap
 
     extra_completeness = {
         "has_local_video": has_video if has_video is not None else "unknown",
         "has_transcript": has_transcript_flag if has_transcript_flag is not None else "unknown",
         "has_keyframes": has_keyframes_flag if has_keyframes_flag is not None else "unknown",
         "frames_found": len(frames),
-        "transcripts_found": len(transcripts),
+        "transcripts_found": len(discovered),
+        "transcripts_usable": len(usable_transcripts),
         "videos_found": len(videos),
     }
+
+    extra: dict[str, Any] = {"completeness": extra_completeness}
+    if caption_gap:
+        extra["caption_gap"] = caption_gap
+        extra["notes"] = [f"caption_gap: {caption_gap}"]
 
     processing = map_status(str(meta.get("status")) if meta.get("status") is not None else None)
     if isinstance(meta.get("classification"), str) and "PARTIAL" in meta["classification"].upper():
@@ -201,7 +248,7 @@ def meta_to_packet(meta_path: Path, meta: dict[str, Any]) -> dict[str, Any]:
         retrieved_at=retrieved_at,
         adapter="corpus_reingest",
         input_ref=str(meta_path),
-        extra={"completeness": extra_completeness},
+        extra=extra,
     )
 
 
@@ -235,7 +282,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     report = convert_report(Path(args.input), strict=args.strict)
     n = write_jsonl(Path(args.output), report["packets"])
-    summary = convert_summary("corpus_reingest", report, args.output)
+    summary = convert_summary("corpus_reingest", report, args.output, strict=args.strict)
     summary["packets"] = n
     print(json.dumps(summary))
     if args.strict and report["invalid"]:

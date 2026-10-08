@@ -198,7 +198,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     report = convert_report(Path(args.input), strict=args.strict)
     n = write_jsonl(Path(args.output), report["packets"])
-    summary = convert_summary("bookmark_review", report, args.output)
+    summary = convert_summary("bookmark_review", report, args.output, strict=args.strict)
     summary["packets"] = n
     print(json.dumps(summary))
     if args.strict and report["invalid"]:

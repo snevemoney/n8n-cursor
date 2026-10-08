@@ -28,9 +28,13 @@ Bookmark `source=full-text` maps to `content_access=transcript` (the gist/post t
 
 Corpus `status=OK` maps to `processing_status=ok`, then becomes `partial` when `classification` contains `PARTIAL` (for example `INGEST_PARTIAL`). That is a cautious choice: META said OK and also said the ingest was incomplete. It is not a guess that the job failed.
 
-Transcript discovery is case-insensitive. `TRANSCRIPT.md`, `*.vtt`, and caption files (`captions.json`, `captions_clean.txt`, `captions_timeline.txt`, `captions_w1.txt`, …) are cited as transcript evidence. Their text is copied into `source_text` (truncated at 50k characters, with `scores.source_text_chars` / `source_text_truncated`). Corpus `raw/` files that exist on disk are cited. YouTube `full_visual` requires frame evidence refs **and** a video file that exists in the pack (`source.mp4`, `source_vid.mp4`, section clips, or any other local video). Missing files are omitted, never invented.
+Transcript discovery is case-insensitive. `TRANSCRIPT.md`, `*.vtt`, and caption files (`captions.json`, `captions_clean.txt`, `captions_timeline.txt`, `captions_w1.txt`, …) are cited as transcript evidence only when they contain speech. A file that is only a placeholder or gap marker is not transcript evidence: underscore-wrapped `CAPTION_GAP` lines, or a body that is empty after stripping headings, stay off `source_text` and are recorded as `caption_gap` (and cited as `kind=file` with note `caption_gap_placeholder`). When META says `completeness.has_transcript` is false or `transcript_chars` is 0, the adapter does not emit transcript evidence or `source_text` from that file.
 
-Adapters collect invalid packets and keep going. Pass `--strict` to stop after the first invalid item. The JSON summary always includes `packets`, `invalid`, and `invalid_items` with reasons.
+`source_text` is spoken words only. Markdown headings (`# Transcript`) and WEBVTT headers, timestamps, and cue numbers are stripped. Evidence `source_ref` still points at the original file. Text is truncated at 50k characters, with `scores.source_text_chars` / `source_text_truncated`. Corpus `raw/` files that exist on disk are cited. YouTube `full_visual` requires frame evidence refs **and** a video file that exists in the pack (`source.mp4`, `source_vid.mp4`, section clips, or any other local video). Missing files are omitted, never invented.
+
+YouTube `AE_STATUS.md` accepts the A–E table, `**key**: value` bullets, and letter bullets (`- A PASS — COVERAGE.md`).
+
+Adapters collect invalid packets and keep going. Pass `--strict` to stop after the first invalid item. The JSON summary always includes `ok`, `packets`, `invalid`, and `invalid_items` with reasons. Under `--strict`, a run that hits an invalid item sets `ok` to false (and still exits 1).
 
 ## Setup
 

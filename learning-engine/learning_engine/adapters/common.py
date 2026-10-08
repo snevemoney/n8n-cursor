@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Callable
 
@@ -28,6 +29,12 @@ TRANSCRIPT_EXACT = {
     "whisper.txt",
 }
 SOURCE_TEXT_MAX_CHARS = 50_000
+VTT_TIMESTAMP = re.compile(
+    r"^\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?\s+-->\s+\d{1,2}:\d{2}(?::\d{2})?(?:[.,]\d+)?"
+)
+VTT_CUE_NUMBER = re.compile(r"^\d+$")
+MD_HEADING = re.compile(r"^#{1,6}\s+\S")
+CAPTION_GAP_LINE = re.compile(r"^_+\s*CAPTION_GAP\b.*_+\s*$", re.IGNORECASE)
 
 
 def existing_files(folder: Path, suffixes: set[str] | None = None) -> list[Path]:
@@ -133,6 +140,78 @@ def pick_source_transcript(paths: list[Path]) -> Path | None:
     return sorted(paths, key=rank)[0]
 
 
+def spoken_text(raw: str) -> str:
+    """Spoken words only. Evidence refs still point at the original file."""
+    lines_out: list[str] = []
+    for line in raw.replace("\r\n", "\n").split("\n"):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        upper = stripped.upper()
+        if upper.startswith("WEBVTT"):
+            continue
+        if upper.startswith("NOTE") or upper.startswith("STYLE") or upper.startswith("REGION"):
+            continue
+        if VTT_TIMESTAMP.match(stripped):
+            continue
+        if VTT_CUE_NUMBER.match(stripped):
+            continue
+        if MD_HEADING.match(stripped):
+            continue
+        lines_out.append(stripped)
+    return "\n".join(lines_out).strip()
+
+
+def is_caption_gap_line(line: str) -> bool:
+    return bool(CAPTION_GAP_LINE.match(line.strip()))
+
+
+def extract_caption_gap(raw: str) -> str | None:
+    for line in raw.replace("\r\n", "\n").split("\n"):
+        stripped = line.strip()
+        if is_caption_gap_line(stripped):
+            return stripped.strip("_").strip()
+    return None
+
+
+def is_placeholder_transcript(raw: str) -> bool:
+    """Gap markers or heading-only bodies are not transcript evidence."""
+    spoken = spoken_text(raw)
+    if not spoken:
+        return True
+    return all(is_caption_gap_line(line) or extract_caption_gap(line) for line in spoken.splitlines())
+
+
+def split_transcripts(
+    paths: list[Path],
+    read_text: Callable[[Path], str],
+) -> tuple[list[Path], list[Path], str | None]:
+    """Separate real speech files from placeholder / gap-marker files."""
+    real: list[Path] = []
+    placeholders: list[Path] = []
+    gap: str | None = None
+    for path in paths:
+        raw = read_text(path)
+        extracted = extract_caption_gap(raw)
+        if extracted:
+            gap = gap or extracted
+        if is_placeholder_transcript(raw):
+            placeholders.append(path)
+        else:
+            real.append(path)
+    return real, placeholders, gap
+
+
+def meta_denies_transcript(meta: dict[str, Any], has_transcript_flag: bool | None) -> bool:
+    """META is the filter: has_transcript false or transcript_chars 0 means no speech."""
+    if has_transcript_flag is False:
+        return True
+    chars = meta.get("transcript_chars")
+    if isinstance(chars, (int, float)) and chars == 0:
+        return True
+    return False
+
+
 def clip_source_text(text: str, limit: int = SOURCE_TEXT_MAX_CHARS) -> tuple[str, int, bool]:
     n = len(text)
     if n <= limit:
@@ -199,12 +278,22 @@ def collect_packet(
         return False if strict else True
 
 
-def convert_summary(adapter: str, report: dict[str, Any], output: str | None = None) -> dict[str, Any]:
+def convert_summary(
+    adapter: str,
+    report: dict[str, Any],
+    output: str | None = None,
+    *,
+    strict: bool = False,
+) -> dict[str, Any]:
+    invalid_n = len(report["invalid"])
+    ok = True
+    if invalid_n and (strict or not report["packets"]):
+        ok = False
     payload: dict[str, Any] = {
-        "ok": True,
+        "ok": ok,
         "adapter": adapter,
         "packets": len(report["packets"]),
-        "invalid": len(report["invalid"]),
+        "invalid": invalid_n,
         "invalid_items": report["invalid"],
     }
     if output is not None:

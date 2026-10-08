@@ -14,7 +14,14 @@ from tests.helpers import ROOT
 
 from fixtures.tiny_png import PNG_1X1
 from learning_engine.adapters import bookmark_review, corpus_reingest, youtube_l2
-from learning_engine.adapters.common import SOURCE_TEXT_MAX_CHARS, clip_source_text
+from learning_engine.adapters.common import (
+    SOURCE_TEXT_MAX_CHARS,
+    clip_source_text,
+    convert_summary,
+    is_placeholder_transcript,
+    spoken_text,
+)
+from learning_engine.cli import main as cli_main
 from learning_engine.errors import ProviderRefused
 from learning_engine.network import require_live_call
 from learning_engine.stage_c.harness import main as harness_main
@@ -29,6 +36,7 @@ class D1TranscriptDiscovery(unittest.TestCase):
         refs = [e["source_ref"] for e in pack["evidence"] if e["kind"] == "transcript"]
         self.assertTrue(any(r.upper().endswith("TRANSCRIPT.MD") or r.endswith("TRANSCRIPT.md") for r in refs))
         self.assertIn("uppercase transcript", pack["source_text"])
+        self.assertNotIn("# Transcript", pack["source_text"])
         self.assertGreater(pack["scores"]["source_text_chars"], 0)
         self.assertFalse(pack["scores"]["source_text_truncated"])
         self.assertEqual(count_false_full_visual([pack]), 0)
@@ -93,6 +101,7 @@ class D4BulletAeStatus(unittest.TestCase):
         self.assertTrue(any(r.endswith(".en-orig.vtt") for r in refs))
         self.assertTrue(any(r.endswith("captions_clean.txt") for r in refs))
         self.assertIn("repass transcript", pack["source_text"])
+        self.assertNotIn("# Transcript", pack["source_text"])
         self.assertEqual(pack["processing_status"], "partial")
         self.assertEqual(pack["content_access"], "frames")
         self.assertEqual(count_false_full_visual(packets), 0)
@@ -160,3 +169,183 @@ class D7CollectInvalid(unittest.TestCase):
         strict = bookmark_review.convert_report(mixed, strict=True)
         self.assertEqual([p["signal_id"] for p in strict["packets"]], ["syn-ok-1"])
         self.assertEqual(len(strict["invalid"]), 1)
+
+
+class N1CaptionGapHonesty(unittest.TestCase):
+    def test_caption_gap_placeholder_is_not_transcript_evidence(self) -> None:
+        packets = corpus_reingest.convert(ROOT / "fixtures" / "corpus")
+        pack = next(p for p in packets if p["signal_id"].endswith("0013"))
+        validate_packets([pack])
+        self.assertEqual(pack["source_text"], "")
+        self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+        self.assertIn("CAPTION_GAP", pack.get("caption_gap", ""))
+        self.assertIn("music-only", pack["caption_gap"])
+        placeholder_refs = [
+            e for e in pack["evidence"] if e.get("note") == "caption_gap_placeholder"
+        ]
+        self.assertTrue(placeholder_refs)
+        self.assertTrue(
+            any(e["source_ref"].upper().endswith("TRANSCRIPT.MD") for e in placeholder_refs)
+        )
+        self.assertEqual(pack["content_access"], "none")
+        self.assertEqual(pack["scores"]["transcripts_usable"], 0)
+        self.assertEqual(count_false_full_visual([pack]), 0)
+
+    def test_meta_has_transcript_false_ignores_file_text(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "gap"
+            folder.mkdir()
+            (folder / "META.json").write_text(
+                json.dumps(
+                    {
+                        "id": "syn-gap-meta",
+                        "url": "https://example.com/synthetic/gap-meta",
+                        "status": "OK",
+                        "classification": "CAPTION_GAP",
+                        "transcript_chars": 0,
+                        "completeness": {"has_transcript": False},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (folder / "TRANSCRIPT.md").write_text(
+                "# Transcript\n\nthis looks like speech but META said no\n",
+                encoding="utf-8",
+            )
+            pack = corpus_reingest.convert(folder)[0]
+            validate_packets([pack])
+            self.assertEqual(pack["source_text"], "")
+            self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertTrue(pack.get("caption_gap"))
+            self.assertTrue(
+                any(e.get("note") == "meta_has_no_transcript" for e in pack["evidence"])
+            )
+
+    def test_heading_only_body_is_placeholder(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "empty-body"
+            folder.mkdir()
+            (folder / "META.json").write_text(
+                json.dumps(
+                    {
+                        "id": "syn-heading-only",
+                        "url": "https://example.com/synthetic/heading-only",
+                        "status": "OK",
+                        "transcript_chars": 12,
+                        "completeness": {"has_transcript": True},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (folder / "TRANSCRIPT.md").write_text("# Transcript\n\n", encoding="utf-8")
+            pack = corpus_reingest.convert(folder)[0]
+            validate_packets([pack])
+            self.assertEqual(pack["source_text"], "")
+            self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+            self.assertTrue(is_placeholder_transcript("# Transcript\n\n"))
+
+    def test_failed_caption_gap_meta_without_file_records_gap(self) -> None:
+        packets = corpus_reingest.convert(ROOT / "fixtures" / "corpus")
+        pack = next(p for p in packets if p["signal_id"].endswith("0011"))
+        self.assertEqual(pack["source_text"], "")
+        self.assertFalse(any(e["kind"] == "transcript" for e in pack["evidence"]))
+        self.assertEqual(pack.get("caption_gap"), "CAPTION_GAP")
+
+
+class D4LetterBullets(unittest.TestCase):
+    def test_parses_letter_bullets_a_through_e(self) -> None:
+        packets = youtube_l2.convert(ROOT / "fixtures" / "youtube_letters")
+        self.assertEqual(len(packets), 1)
+        pack = packets[0]
+        validate_packets(packets)
+        self.assertEqual(pack["signal_id"], "SYNTHETIC03")
+        self.assertEqual(pack["scores"]["ae_letters_parsed"], 5)
+        self.assertEqual(pack["ae_status"]["A"]["status"], "PASS")
+        self.assertEqual(pack["ae_status"]["A"]["artifact"], "COVERAGE.md")
+        self.assertEqual(pack["ae_status"]["B"]["status"], "PARTIAL")
+        self.assertEqual(pack["ae_status"]["D"]["status"], "FAIL")
+        self.assertEqual(pack["processing_status"], "partial")
+        refs = [e["source_ref"] for e in pack["evidence"] if e["kind"] == "transcript"]
+        self.assertTrue(any(r.endswith(".en.vtt") for r in refs))
+        self.assertEqual(pack["source_text"], "spoken letter pack line")
+        self.assertNotIn("WEBVTT", pack["source_text"])
+        self.assertEqual(count_false_full_visual(packets), 0)
+
+    def test_parse_ae_status_letter_form(self) -> None:
+        parsed = youtube_l2.parse_ae_status(
+            "- A PASS — COVERAGE.md\n- B PARTIAL — METHOD.md\n"
+        )
+        self.assertEqual(parsed["A"]["artifact"], "COVERAGE.md")
+        self.assertEqual(parsed["B"]["status"], "PARTIAL")
+
+
+class N2SpokenText(unittest.TestCase):
+    def test_strips_markdown_heading_and_vtt_chrome(self) -> None:
+        md = "# Transcript\n\nsynthetic spoken line\n"
+        self.assertEqual(spoken_text(md), "synthetic spoken line")
+        vtt = (
+            "WEBVTT\n\n"
+            "1\n"
+            "00:00:00.000 --> 00:00:01.000\n"
+            "hello from the cue\n"
+        )
+        self.assertEqual(spoken_text(vtt), "hello from the cue")
+        self.assertNotIn("WEBVTT", spoken_text(vtt))
+        self.assertNotIn("-->", spoken_text(vtt))
+
+    def test_corpus_source_text_drops_heading(self) -> None:
+        packets = corpus_reingest.convert(ROOT / "fixtures" / "corpus")
+        pack = next(p for p in packets if p["signal_id"].endswith("0012"))
+        self.assertTrue(pack["source_text"].startswith("synthetic uppercase"))
+        self.assertNotIn("#", pack["source_text"])
+        self.assertTrue(
+            any(
+                e["kind"] == "transcript"
+                and e["source_ref"].upper().endswith("TRANSCRIPT.MD")
+                for e in pack["evidence"]
+            )
+        )
+
+
+class N3StrictOkFalse(unittest.TestCase):
+    def test_convert_summary_strict_is_not_ok(self) -> None:
+        report = {
+            "packets": [{"signal_id": "ok"}],
+            "invalid": [{"ref": "bad", "reason": "nope"}],
+        }
+        loose = convert_summary("bookmark_review", report)
+        self.assertTrue(loose["ok"])
+        strict = convert_summary("bookmark_review", report, strict=True)
+        self.assertFalse(strict["ok"])
+
+    def test_strict_cli_json_ok_false(self) -> None:
+        mixed = ROOT / "fixtures" / "bookmark_mixed"
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "out.jsonl"
+            buf = io.StringIO()
+            with mock.patch("sys.stdout", buf):
+                rc = bookmark_review.main(
+                    ["--input", str(mixed), "--output", str(out), "--strict"]
+                )
+            self.assertEqual(rc, 1)
+            payload = json.loads(buf.getvalue())
+            self.assertFalse(payload["ok"])
+            self.assertEqual(payload["invalid"], 1)
+
+            buf2 = io.StringIO()
+            with mock.patch("sys.stdout", buf2):
+                rc2 = cli_main(
+                    [
+                        "adapt",
+                        "bookmark",
+                        "--input",
+                        str(mixed),
+                        "--output",
+                        str(Path(tmp) / "cli.jsonl"),
+                        "--strict",
+                    ]
+                )
+            self.assertEqual(rc2, 1)
+            cli_payload = json.loads(buf2.getvalue())
+            self.assertFalse(cli_payload["ok"])
+            self.assertEqual(cli_payload["invalid"], 1)

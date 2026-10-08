@@ -24,6 +24,8 @@ from learning_engine.adapters.common import (
     existing_videos,
     pick_source_transcript,
     rel_ref,
+    spoken_text,
+    split_transcripts,
 )
 from learning_engine.io_util import write_jsonl
 from learning_engine.packet import base_packet, claim, evidence_item
@@ -42,6 +44,10 @@ BULLET_FIELD = re.compile(
     re.MULTILINE,
 )
 NOTE_LINE = re.compile(r"^-\s+(?P<note>.+?)\s*$", re.MULTILINE)
+LETTER_BULLET = re.compile(
+    r"^-\s+(?P<letter>[A-E])\s+(?P<status>[A-Za-z]+)\s+[—–\-]+\s+(?P<artifact>\S.+?)\s*$",
+    re.MULTILINE,
+)
 
 
 def find_pack_dirs(input_path: Path) -> list[Path]:
@@ -57,6 +63,14 @@ def parse_ae_status(text: str) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for match in AE_ROW.finditer(text):
         letter = match.group("letter")
+        out[letter] = {
+            "status": match.group("status").strip(),
+            "artifact": match.group("artifact").strip(),
+        }
+    for match in LETTER_BULLET.finditer(text):
+        letter = match.group("letter").upper()
+        if letter in out:
+            continue
         out[letter] = {
             "status": match.group("status").strip(),
             "artifact": match.group("artifact").strip(),
@@ -161,7 +175,10 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
     signal_id = _signal_id(ae_text, folder, info)
 
     frames = existing_frames(folder)
-    transcripts = existing_transcripts(folder)
+    discovered = existing_transcripts(folder)
+    real_transcripts, placeholders, file_gap = split_transcripts(
+        discovered, _read_transcript_text
+    )
     videos = existing_videos(folder)
     evidence: list[dict[str, Any]] = [
         evidence_item(kind="file", source_ref=rel_ref(folder, ae_path), note="AE_STATUS.md")
@@ -179,15 +196,25 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
                 cited.add(ref)
     for path in frames:
         evidence.append(evidence_item(kind="frame", source_ref=rel_ref(folder, path)))
-    for path in transcripts:
+    for path in real_transcripts:
         evidence.append(evidence_item(kind="transcript", source_ref=rel_ref(folder, path)))
+    for path in placeholders:
+        evidence.append(
+            evidence_item(
+                kind="file",
+                source_ref=rel_ref(folder, path),
+                note="caption_gap_placeholder",
+            )
+        )
     for path in videos:
         ref = rel_ref(folder, path)
         if ref not in cited:
             evidence.append(evidence_item(kind="file", source_ref=ref, note="video"))
             cited.add(ref)
 
-    source_text, source_chars, truncated = clip_source_text(_source_text(transcripts))
+    source_text, source_chars, truncated = clip_source_text(
+        spoken_text(_source_text(real_transcripts))
+    )
 
     if frames and videos:
         content_access = "full_visual"
@@ -195,7 +222,7 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
     elif frames:
         content_access = "frames"
         analysis_scope = "frames"
-    elif transcripts or source_text:
+    elif real_transcripts or source_text:
         content_access = "transcript"
         analysis_scope = "transcript"
     else:
@@ -218,7 +245,8 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
     scores: dict[str, Any] = {
         "frames_on_disk": len(frames),
         "videos_on_disk": len(videos),
-        "transcripts_on_disk": len(transcripts),
+        "transcripts_on_disk": len(discovered),
+        "transcripts_usable": len(real_transcripts),
         "ae_letters_parsed": len(letters),
         "source_text_chars": source_chars,
         "source_text_truncated": truncated,
@@ -236,6 +264,8 @@ def pack_to_packet(folder: Path) -> dict[str, Any]:
         scores["ae_batch"] = overall["batch"]
     if ae.get("transcript_source"):
         scores["ae_transcript_source"] = ae["transcript_source"]
+    if file_gap:
+        scores["caption_gap"] = file_gap
 
     processing = "unknown"
     if letters:
@@ -297,7 +327,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     report = convert_report(Path(args.input), strict=args.strict)
     n = write_jsonl(Path(args.output), report["packets"])
-    summary = convert_summary("youtube_l2", report, args.output)
+    summary = convert_summary("youtube_l2", report, args.output, strict=args.strict)
     summary["packets"] = n
     print(json.dumps(summary))
     if args.strict and report["invalid"]:
