@@ -1,0 +1,11 @@
+{
+  "upgrade_id": "UPG-fullstack-agent-adopt-existing-os",
+  "type": "Agent infrastructure",
+  "discovery": "A living agent is memory + voice + face wired by paths and a file bus — but only if you adopt the home you already have. Installing a Claude Code wizard beside the hive is a second OS.",
+  "applicability": "ALL desks. The agentic OS (obsidianOS + vault + jobs.json) is the face/memory we already run.",
+  "proposed_change": "Conductor writes .hive/agent-stack.json + .hive/bus/state.json via vault-config.py. Memory=adopted. Mouth/face park until their sittings. Observe-pane job_status shares the bus. Do not clone upstream. Do not write CLAUDE.md.",
+  "evidence": "https://github.com/jaredrhod/fullstack-agent fullstack-agent.md Phases 0–4 + tour tape FiOTrxq9ckM (caption-only, unwatched this sitting) + Cursor session adb853dc (one brain = vault + repo) + Grok 2026-09-04 (not hive face; Claude Code operate-never)",
+  "source_video_id": "FiOTrxq9ckM",
+  "status": "WIRED",
+  "next": "Mouth sitting writes the bus. Face sitting reads it on localhost. Watchdog GRADE the adopt dry-run. No live /."
+}
