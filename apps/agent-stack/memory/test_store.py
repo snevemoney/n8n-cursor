@@ -45,6 +45,35 @@ class StorePackTest(unittest.TestCase):
         self.assertEqual(MOD.sessions_block(live=False), "")
 
 
+class FleetContextTest(unittest.TestCase):
+    def test_repo_fleet_context_file_loads(self) -> None:
+        self.assertTrue(MOD.FLEET_CONTEXT.is_file(), MOD.FLEET_CONTEXT)
+        text = MOD.fleet_context_block()
+        self.assertTrue(text.startswith("Fleet context (shared, read-only):"))
+        body = MOD.FLEET_CONTEXT.read_text(encoding="utf-8").strip().splitlines()
+        self.assertGreater(len(body), 10)
+        self.assertIn(body[0], text)
+        self.assertIn(body[-1], text)
+
+    def test_store_pack_includes_fleet_context(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-fleet-") as tmp:
+            pack = MOD.store_pack(Path(tmp), live_sessions=False)
+        self.assertIn("Fleet context (shared, read-only):", pack)
+
+    def test_missing_or_disabled_is_empty(self) -> None:
+        self.assertEqual(MOD.fleet_context_block(Path("/tmp/no-such-fleet-ctx.md")), "")
+        import os
+        old = os.environ.get("JARVIS_FLEET_CONTEXT")
+        os.environ["JARVIS_FLEET_CONTEXT"] = "0"
+        try:
+            self.assertEqual(MOD.fleet_context_block(), "")
+        finally:
+            if old is None:
+                os.environ.pop("JARVIS_FLEET_CONTEXT", None)
+            else:
+                os.environ["JARVIS_FLEET_CONTEXT"] = old
+
+
 class LifeCardTest(unittest.TestCase):
     def test_life_card_uses_lanes_and_never_invents_age(self) -> None:
         retrieve = Path(__file__).resolve().parent / "retrieve.py"
