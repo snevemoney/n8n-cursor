@@ -23,12 +23,36 @@
       background: var(--void); color: var(--mint);
       font-family: "Share Tech Mono", ui-monospace, monospace;
     }
-    #board { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+    #board { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+    #graph {
+      position: fixed; inset: 0; z-index: 1; width: 100%; height: 100%;
+      pointer-events: auto; /* dock sits above; do not set none to save MIC */
+    }
+    body.has-graph #board { display: none; }
+    body.has-graph:not(.widget) #orb3d { display: none; }
     .hud {
       position: fixed; z-index: 2; pointer-events: none;
       letter-spacing: .18em; font-size: 12px; color: #d8ffe4;
       text-shadow: 0 0 10px rgba(61, 255, 106, .35);
     }
+    .sense, #dock {
+      pointer-events: auto; display: flex; gap: 8px;
+      position: fixed; z-index: 8; top: 228px; left: 28px;
+    }
+    .sense button, #dock button, #micBtn {
+      pointer-events: auto; position: relative; z-index: 1;
+      background: rgba(2, 10, 6, .72); color: var(--mint);
+      border: 1px solid rgba(61, 255, 106, .45);
+      font: 10px "Share Tech Mono", ui-monospace, monospace;
+      letter-spacing: .2em; padding: 6px 10px; cursor: pointer;
+    }
+    .sense button.on { border-color: var(--amber); color: var(--amber); }
+    #eyesPreview {
+      display: none; margin-top: 8px; width: 132px; height: 88px;
+      object-fit: cover; border: 1px solid rgba(61, 255, 106, .35);
+      background: #020805;
+    }
+    #eyesPreview.on { display: block; }
     .hud.tl { top: 22px; left: 28px; }
     .hud.tr { top: 22px; right: 28px; text-align: right; display: flex; align-items: flex-start; gap: 14px; }
     .hud.bl { bottom: 22px; left: 28px; }
@@ -37,7 +61,9 @@
     .hud .sub { opacity: .7; margin-top: 6px; letter-spacing: .22em; font-size: 10px; }
     .dots { display: flex; gap: 10px; margin-top: 8px; }
     .dots span { display: inline-flex; align-items: center; gap: 5px; letter-spacing: .16em; font-size: 10px; }
-    .dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--neon); box-shadow: 0 0 8px var(--neon); }
+    .dots i { width: 6px; height: 6px; border-radius: 50%; background: #1a3a22; box-shadow: none; }
+    .dots span.on i { background: var(--neon); box-shadow: 0 0 8px var(--neon); }
+    .dots span.off i { background: #3a2018; }
     .phase { font-size: 18px; letter-spacing: .34em; }
     .clock { opacity: .75; margin-top: 6px; letter-spacing: .2em; }
     .orb {
@@ -54,9 +80,10 @@
       transform: translate(-50%, -50%);
       min-width: min(72vw, 640px); min-height: 88px;
       padding: 22px 36px; text-align: center;
-      background: rgba(2, 10, 6, .78);
+      background: rgba(2, 10, 6, .62);
       border: 1px solid rgba(61, 255, 106, .55);
       box-shadow: 0 0 40px rgba(61, 255, 106, .22), inset 0 0 40px rgba(61, 255, 106, .06);
+      pointer-events: auto; cursor: pointer;
     }
     .chip .mark {
       font-size: clamp(28px, 5vw, 48px); letter-spacing: .42em;
@@ -64,12 +91,23 @@
       text-shadow: 0 0 18px rgba(61, 255, 106, .55);
     }
     body.listen .chip { border-color: #7dcea0; }
-    body.think .chip { border-color: var(--amber); }
+    body.think .chip {
+      border-color: var(--amber);
+      animation: thinkGlow .55s ease-in-out infinite alternate;
+    }
     body.speak .chip { box-shadow: 0 0 70px rgba(61, 255, 106, .38); }
-    .chip .line { margin-top: 10px; font-size: 12px; letter-spacing: .12em; color: rgba(184, 255, 201, .72); }
+    body.think #graph { opacity: .7; filter: saturate(1.25); }
+    @keyframes thinkGlow {
+      from { box-shadow: 0 0 22px rgba(224, 162, 74, .28); }
+      to { box-shadow: 0 0 64px rgba(224, 162, 74, .72); border-color: #ffd27a; }
+    }
+    .chip .line {
+      margin-top: 12px; font-size: 16px; letter-spacing: .03em; line-height: 1.4;
+      color: #e8ffe8; max-width: 36em; margin-left: auto; margin-right: auto;
+    }
     .chip .ask { color: var(--amber); }
     #wave { width: 100%; height: 46px; display: none; }
-    body.listen #wave { display: block; }
+    body.listen #wave, body.think #wave, body.speak #wave { display: block; }
     body.think .mark { letter-spacing: .18em; font-size: 22px; }
     input#typed {
       position: fixed; z-index: 4; left: 50%; bottom: 64px;
@@ -80,12 +118,204 @@
       display: none;
     }
     input#typed.on { display: block; }
+    #orb3d {
+      position: fixed; z-index: 2; left: 50%; top: 50%;
+      width: min(72vw, 420px); height: min(72vw, 420px);
+      transform: translate(-50%, -58%); pointer-events: none;
+    }
+    .sense .ico { display: none; width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+    html.widget, html.widget body {
+      background: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      cursor: grab;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+      letter-spacing: 0;
+      text-shadow: none;
+    }
+    html.widget body, html.widget button, html.widget input, html.widget #spoken {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace !important;
+      letter-spacing: 0 !important;
+      text-shadow: none !important;
+      -webkit-text-stroke: 0 !important;
+    }
+    html.widget .sense, html.widget .sense button, html.widget #dock, html.widget #dock button { cursor: pointer; }
+    html.widget #board, html.widget #graph, html.widget .hud,
+    html.widget .chip .mark, html.widget #wave,
+    html.widget .orb, html.widget #eyesPreview { display: none !important; }
+    html.widget #typed,
+    html.widget #typed.on {
+      display: block !important;
+      pointer-events: auto;
+      z-index: 42;
+      left: 0; right: 0; bottom: 70px; transform: none;
+      margin: 0 auto;
+      width: min(220px, 78vw);
+      font-size: 11px;
+      padding: 6px 8px;
+      border: 1px solid rgba(244, 246, 248, .85);
+      background: rgba(8, 10, 12, .82);
+      -webkit-user-select: text;
+      user-select: text;
+      cursor: text;
+    }
+    html.widget #typed::placeholder { color: rgba(244, 246, 248, .72); }
+    html.widget .chip {
+      background: #020805; border: 0; box-shadow: none !important; animation: none !important;
+      top: auto; bottom: 104px; min-height: 0; min-width: 0;
+      left: 0; right: 0;
+      width: min(220px, 78vw); max-height: 64px;
+      margin: 0 auto;
+      padding: 6px 8px; border-radius: 8px;
+      transform: none;
+      overflow-x: hidden;
+      overflow-y: auto;
+      isolation: isolate;
+      pointer-events: auto;
+      cursor: default;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    html.widget body.speak .chip,
+    html.widget body.think .chip,
+    html.widget body.listen .chip {
+      box-shadow: none !important;
+      animation: none !important;
+      filter: none !important;
+    }
+    html.widget .chip .line,
+    html.widget .chip #browserResults {
+      margin: 0;
+      letter-spacing: 0; font-size: 12px; line-height: 1.45;
+      max-height: none;
+      overflow: visible;
+      overflow-wrap: break-word;
+      word-break: normal;
+      text-shadow: none;
+      -webkit-text-stroke: 0;
+      pointer-events: auto;
+    }
+    html.widget #browserResults p { margin: 0 0 8px; }
+    html.widget #browserResults p:last-child { margin-bottom: 0; }
+    html.widget #orb3d {
+      width: 240px; height: 240px; top: 40%; transform: translate(-50%, -50%);
+      background: radial-gradient(circle at 50% 48%, rgba(2, 8, 5, .62) 0%, rgba(2, 8, 5, 0) 72%);
+      border-radius: 50%;
+      pointer-events: none !important;
+    }
+    html.widget #dock.sense,
+    html.widget #dock {
+      position: fixed;
+      z-index: 40;
+      top: auto;
+      left: 50%;
+      right: auto;
+      bottom: 10px;
+      transform: translateX(-50%);
+      pointer-events: auto;
+      width: auto;
+      max-width: calc(100% - 12px);
+      box-sizing: border-box;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: clamp(3px, 2.1vw, 14px);
+      overflow: visible;
+      padding: 18px 2px 0;
+    }
+    html.widget #dock button {
+      width: clamp(24px, 10.4vw, 44px); height: clamp(24px, 10.4vw, 44px);
+      flex: 0 0 auto;
+      border-radius: 50%; padding: 0;
+      display: grid; place-items: center;
+      background: rgba(8, 10, 12, .55); color: #f4f6f8;
+      border: 1px solid rgba(244, 246, 248, .55);
+      pointer-events: auto; z-index: 41;
+    }
+    html.widget .sense button.on { border-color: var(--amber); color: var(--amber); }
+    html.widget .sense .ico {
+      display: block; pointer-events: none;
+      width: clamp(13px, 5.2vw, 22px); height: clamp(13px, 5.2vw, 22px);
+    }
+    html.widget .sense .btn-label { display: none; }
+    html.widget #dock #stopBtn {
+      width: clamp(24px, 10.4vw, 44px); height: clamp(24px, 10.4vw, 44px);
+      min-width: 0; padding: 0; border-radius: 50%;
+      border-color: var(--amber); color: var(--amber);
+    }
+    html.widget #dock #stopBtn .btn-label { display: none !important; }
+    #hideBtn { min-width: 28px; }
+    html.widget #dock #focusBtn { display: none !important; }
+    html.widget #dock #hideBtn {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 20px;
+      height: 14px;
+      min-width: 0;
+      padding: 0;
+      border-radius: 3px;
+      background: transparent;
+      color: #e24b4b;
+      border: 1px solid #e24b4b;
+      z-index: 42;
+    }
+    html.widget #dock #hideBtn .ico {
+      width: 10px;
+      height: 10px;
+      stroke-width: 2.4;
+    }
+    html.widget #dock.slim {
+      padding-top: 0;
+      width: auto;
+      min-height: 16px;
+    }
+    html.widget #dock.slim #hideBtn {
+      position: relative;
+      top: auto;
+      left: auto;
+    }
+    html.widget #dock.slim #eyesBtn,
+    html.widget #dock.slim #watchBtn,
+    html.widget #dock.slim #micBtn,
+    html.widget #dock.slim #focusBtn,
+    html.widget #dock.slim #stopBtn {
+      display: none !important;
+    }
+    @media (min-width: 400px) {
+      html.widget #dock #stopBtn {
+        width: auto; min-width: clamp(36px, 11vw, 44px); height: auto;
+        padding: 6px 8px 4px; border-radius: 12px; gap: 2px;
+      }
+      html.widget #dock #stopBtn .btn-label {
+        display: block !important;
+        font-size: 8px;
+        letter-spacing: .14em;
+      }
+    }
+    #dock.slim #eyesBtn, #dock.slim #watchBtn, #dock.slim #micBtn, #dock.slim #focusBtn { display: none; }
+    #focusline {
+      display: none; position: fixed; z-index: 8; top: 262px; left: 28px;
+      font: 10px/1.6 "Share Tech Mono", ui-monospace, monospace; letter-spacing: 0.14em;
+      color: var(--amber); text-shadow: 0 0 8px rgba(255, 179, 71, 0.35);
+      pointer-events: none;
+    }
+    #focusline.on { display: block; }
+    html.widget #focusline {
+      top: auto; left: 50%; right: auto; bottom: 70px;
+      transform: translateX(-50%); z-index: 40; text-align: center;
+    }
+    #dock.slim #stopBtn { display: grid; }
+    @media (prefers-reduced-motion: reduce) {
+      .orb, #board { animation: none !important; }
+    }
+    /* Ported from main: Face controls (Mic / Stop / Hide). */
     .controls {
       position: fixed; z-index: 6; left: 28px; bottom: 48px;
       display: flex; gap: 8px; pointer-events: auto;
     }
     .controls button {
-      background: rgba(2, 10, 6, .8); color: var(--mint);
+      background: rgba(2, 10, 6, .8); color: var(--mint, #3dff6a);
       border: 1px solid rgba(61, 255, 106, .45);
       font: 11px "Share Tech Mono", ui-monospace, monospace;
       letter-spacing: .16em; padding: 6px 10px; cursor: pointer;
@@ -95,24 +325,51 @@
     body.presentation-hidden .chip,
     body.presentation-hidden #typed { visibility: hidden; }
     body.presentation-hidden .controls { visibility: visible; }
-    @media (prefers-reduced-motion: reduce) {
-      .orb, #board { animation: none !important; }
-    }
   </style>
 </head>
 <body class="idle">
   <canvas id="board" aria-hidden="true"></canvas>
+  <div id="graph" aria-hidden="true"></div>
   <div class="hud tl">
     <div class="name" id="hudName">J.A.R.V.I.S.</div>
     <div class="sub" id="link">NEURAL LINK - CHECKING WIRES</div>
-    <div class="sub" id="mode">MODE - AGENT</div>
+    <div class="sub" id="mode">MODE - CHECKING</div>
     <div class="sub" id="voice">VOICE - CHECKING</div>
+    <div class="sub" id="graphline">GRAPH - LOADING</div>
     <div class="dots">
-      <span><i></i>ONLINE</span>
-      <span><i></i>LIVE</span>
-      <span><i></i>CONNECTED</span>
+      <span id="dotOnline" title="face /healthz"><i></i>ONLINE</span>
+      <span id="dotLive" title="mic armed or bus listen"><i></i>LIVE</span>
+      <span id="dotConnected" title="talk wire up"><i></i>CONNECTED</span>
     </div>
+    <video id="eyesPreview" muted playsinline></video>
   </div>
+  <div class="sense" id="dock">
+    <button type="button" id="eyesBtn" aria-label="Eyes">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span class="btn-label">EYES</span>
+    </button>
+    <button type="button" id="watchBtn" aria-label="Desktop">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.4"/><path d="M8 20h8M12 16v4"/></svg>
+      <span class="btn-label">WATCH</span>
+    </button>
+    <button type="button" id="focusBtn" aria-label="Focus session">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.6"/><path d="M12 4V2M12 22v-2M4 12H2M22 12h-2"/></svg>
+      <span class="btn-label">FOCUS</span>
+    </button>
+    <button type="button" id="micBtn" aria-label="Microphone" aria-pressed="false">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M8 21h8"/></svg>
+      <span class="btn-label">MIC</span>
+    </button>
+    <button type="button" id="stopBtn" aria-label="Stop talking">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.4"/></svg>
+      <span class="btn-label">STOP</span>
+    </button>
+    <button type="button" id="hideBtn" aria-label="Hide icons" aria-pressed="false">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg>
+      <span class="btn-label">HIDE</span>
+    </button>
+  </div>
+  <div id="focusline" role="status"></div>
   <div class="hud tr">
     <div>
       <div class="phase" id="phase">IDLE</div>
@@ -120,48 +377,110 @@
     </div>
     <div class="orb" aria-hidden="true"></div>
   </div>
+  <div class="hud bl" id="micline">MIC - TAP TO ARM</div>
+  <div class="hud br" id="hint">TAP BOARD OR SPACE TO TALK</div>
+  <canvas id="orb3d" aria-hidden="true"></canvas>
+  <div class="chip" id="chip" role="status">
+    <canvas id="wave" width="640" height="46"></canvas>
+    <div class="mark" id="mark">J.A.R.V.I.S.</div>
+    <div class="line" id="spoken"></div>
+      <div id="browserResults" aria-live="polite"></div>
+  </div>
   <div class="controls" id="controls">
     <button type="button" id="mic">Mic</button>
     <button type="button" id="stop">Stop</button>
     <button type="button" id="hide">Hide</button>
   </div>
-  <div class="hud bl" id="micline">MIC - TAP TO ARM</div>
-  <div class="hud br" id="hint">TAP BOARD OR SPACE TO TALK</div>
-  <div class="chip" id="chip" role="status">
-    <canvas id="wave" width="640" height="46"></canvas>
-    <div class="mark" id="mark">J.A.R.V.I.S.</div>
-    <div class="line" id="spoken"></div>
-  </div>
   <input id="typed" placeholder="/ type fallback · enter to send" autocomplete="off" />
+  <script src="/vendor/3d-force-graph.min.js"></script>
+  <script src="/orb.js"></script>
   <script>
     const $ = (id) => document.getElementById(id);
     const synth = window.speechSynthesis;
     const YES_RE = /^(yes|yeah|yep|do it|approve|ok|okay)\s*[.!]?\s*$/i;
-    const STOP_RE = /^(?:hey\s+)?(?:jarvis[,.]?\s*)?(stop|cancel|never mind|forget it|shut up)\s*[.!]?\s*$/i;
+    const STOP_RE = /^(?:hey\s+)?(?:jarvis[,.]?\s*)?(stop|cancel|never mind|forget it|shut up)\s*[.!?]?\s*$/i;
     const WAKE_RE = /^(?:hey\s+)?jarvis[,.]?\s*/i;
     const RESTART_MIN = 400;
     const RESTART_MAX = 800;
     const TTS_COOLDOWN = 700;
+    const PLAY_SPEED = 1.1;
+    const WIDGET = location.pathname === "/widget" || /(?:\?|&)widget=1(?:&|$)/.test(location.search);
+    if (WIDGET) {
+      document.documentElement.classList.add("widget");
+      document.body.classList.add("widget");
+      const typedBoot = $("typed");
+      if (typedBoot) {
+        typedBoot.classList.add("on");
+        typedBoot.setAttribute("aria-label", "Type to Jarvis");
+        typedBoot.placeholder = "type · enter";
+      }
+    }
     const state = {
       phase: "idle", rec: null, stream: null, live: true, armed: false, arming: false,
       listening: false, starting: false, turning: false, pending: null, greeted: false,
-      recGen: 0, restartTimer: 0, lastStartAt: 0, failStreak: 0,
+      recGen: 0, restartTimer: 0, lastStartAt: 0, turnStartedAt: 0, failStreak: 0,
       stack: { name: "J.A.R.V.I.S.", operator: "Evens" },
-      watchNoticeId: "",
     };
+    let vaultGraph = null;
+    let watchBusy = false;
+    let watchArmed = false;
+    let faceOrb = null;
     const dotted = (name) => String(name || "JARVIS").replace(/[^A-Za-z0-9]/g, "").toUpperCase().split("").join(".") || "J.A.R.V.I.S.";
     const hasSR = () => !!(window.SpeechRecognition || window.webkitSpeechRecognition);
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent || "");
     const streamLive = () => !!(state.stream && state.stream.getTracks().some((t) => t.readyState === "live"));
     let jarvisVoice = null;
     let ttsAudio = null;
+    let ttsSource = null;
+    let audioCtx = null;
+    let ttsAnalyser = null;
+    const voiceSamples = new Uint8Array(256);
+    let voiceSmooth = 0;
+    let actionSmooth = 0;
+    let mouthOpen = false;
     let voiceEngine = "dark";
     const ttsQueue = [];
+    const ttsCloud = new Map();
     let ttsBusy = false;
     let ttsGen = 0;
+    let speakHeld = false;
+    let watchNoticeId = "";
+    const ttsAborts = new Set();
+    const TTS_FETCH_MS = 15000;
     let lastSpoken = "";
+    let nextHandle = "";
+    let busGen = 0;
     const ECHO_RE = /adopted path missing|agentic os|i already said cursor|i heard you:|before that you said:|structured long-term memory/i;
-    const ttsSpeaking = () => ttsBusy || !!(synth && synth.speaking) || !!(ttsAudio && !ttsAudio.paused && !ttsAudio.ended);
+    const ttsSpeaking = () => ttsBusy || !!(synth && synth.speaking) || !!(ttsSource) || !!(ttsAudio && !ttsAudio.paused && !ttsAudio.ended);
+    function pageVisible() {
+      return document.visibilityState !== "hidden";
+    }
+    function postStop() {
+      try {
+        fetch("/api/turn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ utterance: "stop", gen: busGen }),
+          keepalive: true,
+        });
+      } catch (e) {}
+    }
+    function retireHidden() {
+      if (state.turning) postStop();
+      stopListen();
+      stopSpeech();
+      if (synth) try { synth.cancel(); } catch (e) {}
+    }
+    function pageExit() {
+      if (state.turning) postStop();
+      stopListen();
+      if (state.stream) {
+        for (const track of state.stream.getTracks()) track.stop();
+        state.stream = null;
+      }
+      stopSpeech();
+      if (synth) try { synth.cancel(); } catch (e) {}
+    }
 
     function voiceLang(v) {
       return String((v && v.lang) || "").toLowerCase().replace(/_/g, "-");
@@ -207,14 +526,28 @@
 
     function paintPhase(phase) {
       state.phase = phase || "idle";
-      document.body.className = state.phase;
-      $("phase").textContent = state.phase.toUpperCase();
+      const extras = [];
+      if (WIDGET) extras.push("widget");
+      if (vaultGraph) extras.push("has-graph");
+      document.body.className = [state.phase].concat(extras).join(" ");
+      if ($("phase")) $("phase").textContent = state.phase.toUpperCase();
       if (state.phase === "think") $("hint").textContent = "PROCESSING...";
       else if (!state.armed) $("hint").textContent = "TAP BOARD OR SPACE TO TALK";
       else $("hint").textContent = 'SAY "JARVIS" OR TAP SPACE · MIC LIVE';
       if (state.listening || state.phase === "listen") $("micline").textContent = "MIC - LISTENING";
       else if (state.armed) $("micline").textContent = 'MIC - LISTENING FOR "JARVIS"';
       else $("micline").textContent = "MIC - TAP TO ARM";
+      if ($("micBtn")) {
+        $("micBtn").classList.toggle("on", !!state.armed);
+        $("micBtn").setAttribute("aria-pressed", state.armed ? "true" : "false");
+      }
+      if (WIDGET && state.listening && state.phase === "listen") {
+        const line = ($("spoken").textContent || "").trim();
+        if (!line || /^listening\.?$/i.test(line)) {
+          $("spoken").textContent = "Listening.";
+        }
+      }
+      paintLights({});
     }
 
     function tickClock() {
@@ -223,26 +556,87 @@
     }
 
     async function api(path, body) {
-      const opt = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
+      let payload = body;
+      if (payload && typeof payload === "object" && payload.gen === undefined && path !== "/api/turn") {
+        payload = Object.assign({}, payload, { gen: busGen });
+      }
+      const opt = payload ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) } : {};
       const res = await fetch(path, opt);
       return res.json();
     }
 
     function afterSpeak() {
+      mouthOpen = false;
       if (!state.turning) paintPhase(state.armed ? "listen" : "idle");
+      if (nextHandle && !state.turning) {
+        $("hint").textContent = nextHandle;
+        nextHandle = "";
+      }
+      deliverNudge();
       if (state.armed && state.live) scheduleRestart(TTS_COOLDOWN);
     }
-    function speakLocal(text) {
-      if (!text || !synth) return;
-      synth.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = "en-GB";
-      const voice = jarvisVoice || pickEnglishVoice();
-      if (voice && !isFrenchVoice(voice)) u.voice = voice;
-      u.rate = 1.02;
-      u.onstart = () => paintPhase("speak");
-      u.onend = afterSpeak;
-      synth.speak(u);
+    function unlockAudio() {
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx && !audioCtx) audioCtx = new Ctx();
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      } catch (e) {}
+    }
+    function ensureAnalyser() {
+      unlockAudio();
+      if (!audioCtx) return null;
+      if (!ttsAnalyser) {
+        ttsAnalyser = audioCtx.createAnalyser();
+        ttsAnalyser.fftSize = 256;
+        ttsAnalyser.smoothingTimeConstant = 0.72;
+      }
+      return ttsAnalyser;
+    }
+    function revealSpoken(text, gen) {
+      if (gen !== undefined && gen !== ttsGen) return;
+      const line = String(text || "").trim();
+      if (!line) return;
+      if (spokenLock && line !== spokenLock) return;
+      const keep = lastSpoken && lastSpoken.length > line.length && lastSpoken.indexOf(line) >= 0;
+      if (!keep) lastSpoken = line;
+      $("spoken").textContent = lastSpoken;
+      paintPhase("speak");
+    }
+    function speakLocal(text, gen) {
+      return new Promise((resolve) => {
+        if (!text || !synth) {
+          if (text) revealSpoken(text, gen);
+          resolve(false);
+          return;
+        }
+        if (gen !== undefined && gen !== ttsGen) { resolve(false); return; }
+        synth.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = "en-GB";
+        const voice = jarvisVoice || pickEnglishVoice();
+        if (voice && !isFrenchVoice(voice)) u.voice = voice;
+        u.rate = PLAY_SPEED;
+        u.onstart = () => revealSpoken(text, gen);
+        u.onend = () => resolve(true);
+        u.onerror = () => {
+          revealSpoken(text, gen);
+          resolve(false);
+        };
+        paintPhase("speak");
+        try { synth.speak(u); } catch (e) {
+          revealSpoken(text, gen);
+          resolve(false);
+        }
+      });
+    }
+    function isWireMissLine(text) {
+      const low = String(text || "").toLowerCase();
+      return (
+        low.includes("returned no text") ||
+        low.includes("http 429") ||
+        low.includes("no live mouth") ||
+        /^\s*(sir\.\s*)?unknown\./i.test(String(text || ""))
+      );
     }
     function stopListen() {
       state.recGen += 1;
@@ -257,21 +651,33 @@
         }
       }
     }
-    let speakHeld = false;
-    function clearSpeechAudio() {
+    function abortTtsFetches() {
+      ttsAborts.forEach((ac) => { try { ac.abort(); } catch (e) {} });
+      ttsAborts.clear();
+    }
+    function stopSpeech() {
       ttsGen += 1;
       ttsQueue.length = 0;
-      ttsBusy = false;
+      ttsCloud.clear();
+      abortTtsFetches();
+      mouthOpen = false;
+      pendingNudge = "";
+      clearHeardBuffer();
+      stopListen();
+      if (ttsSource) { try { ttsSource.stop(); } catch (e) {} ttsSource = null; }
       if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} ttsAudio = null; }
       if (synth) synth.cancel();
     }
+    // Ported from main: speak-only stop, presentation hide, and mic button.
     function stopSpeakingOnly() {
       speakHeld = true;
-      clearSpeechAudio();
-    }
-    function stopSpeech() {
-      clearSpeechAudio();
-      stopListen();
+      ttsGen += 1;
+      ttsQueue.length = 0;
+      abortTtsFetches();
+      mouthOpen = false;
+      if (ttsSource) { try { ttsSource.stop(); } catch (e) {} ttsSource = null; }
+      if (ttsAudio) { try { ttsAudio.pause(); } catch (e) {} ttsAudio = null; }
+      if (synth) synth.cancel();
     }
     function pressStop() {
       stopSpeakingOnly();
@@ -306,21 +712,80 @@
     function productMouth() {
       return voiceEngine === "elevenlabs" || voiceEngine === "kokoro" || voiceEngine === "kokoro-dark-python";
     }
-    async function speakCloud(text, gen) {
-      const res = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-      if (!res.ok || res.status === 204) return false;
+    async function playViaContext(buf, gen, text) {
+      unlockAudio();
+      if (!audioCtx) return false;
+      if (audioCtx.state === "suspended") await audioCtx.resume();
+      const decoded = await audioCtx.decodeAudioData(buf.slice(0));
       if (gen !== undefined && gen !== ttsGen) return false;
-      const blob = await res.blob();
-      if (!blob || blob.size < 32) return false;
+      const src = audioCtx.createBufferSource();
+      src.buffer = decoded;
+      src.playbackRate.value = PLAY_SPEED;
+      const analyser = ensureAnalyser();
+      if (analyser) {
+        src.connect(analyser);
+        if (!analyser.wired) {
+          analyser.connect(audioCtx.destination);
+          analyser.wired = true;
+        }
+      } else {
+        src.connect(audioCtx.destination);
+      }
+      ttsSource = src;
+      try {
+        src.start();
+      } catch (e) {
+        if (ttsSource === src) ttsSource = null;
+        return false;
+      }
+      revealSpoken(text, gen);
+      await new Promise((resolve) => {
+        src.onended = resolve;
+      });
+      if (ttsSource === src) ttsSource = null;
+      return true;
+    }
+    async function fetchTtsBuf(text, gen) {
+      if (gen !== undefined && gen !== ttsGen) return null;
+      const ac = new AbortController();
+      ttsAborts.add(ac);
+      const timer = setTimeout(() => { try { ac.abort(); } catch (e) {} }, TTS_FETCH_MS);
+      try {
+        const res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, gen: busGen }),
+          signal: ac.signal,
+        });
+        if (!res.ok || res.status === 204) return null;
+        if (gen !== undefined && gen !== ttsGen) return null;
+        const buf = await res.arrayBuffer();
+        if (!buf || buf.byteLength < 32) return null;
+        return buf;
+      } catch (e) {
+        return null;
+      } finally {
+        clearTimeout(timer);
+        ttsAborts.delete(ac);
+      }
+    }
+    async function playCloudBuf(buf, text, gen) {
+      if (gen !== undefined && gen !== ttsGen) return false;
+      try {
+        const via = await playViaContext(buf, gen, text);
+        if (gen !== undefined && gen !== ttsGen) return false;
+        if (via) {
+          return true;
+        }
+      } catch (e) {
+        if (gen !== undefined && gen !== ttsGen) return false;
+      }
+      if (gen !== undefined && gen !== ttsGen) return false;
       if (synth) synth.cancel();
-      const url = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
       const audio = new Audio(url);
+      audio.playbackRate = PLAY_SPEED;
       ttsAudio = audio;
-      paintPhase("speak");
       try {
         await audio.play();
       } catch (e) {
@@ -328,6 +793,13 @@
         ttsAudio = null;
         return false;
       }
+      if (gen !== undefined && gen !== ttsGen) {
+        try { audio.pause(); } catch (e) {}
+        ttsAudio = null;
+        URL.revokeObjectURL(url);
+        return false;
+      }
+      revealSpoken(text, gen);
       await new Promise((resolve) => {
         audio.onended = resolve;
         audio.onerror = resolve;
@@ -336,26 +808,75 @@
       URL.revokeObjectURL(url);
       return true;
     }
+    async function speakCloud(text, gen) {
+      const buf = await fetchTtsBuf(text, gen);
+      if (!buf) return false;
+      return playCloudBuf(buf, text, gen);
+    }
+    function prefetchCloud(text, gen) {
+      if (!text || !productMouth() || ttsCloud.has(text)) return;
+      const row = { ready: false, value: null };
+      row.promise = fetchTtsBuf(text, gen).then((buf) => {
+        row.value = buf;
+        row.ready = true;
+        return buf;
+      }, () => {
+        row.value = null;
+        row.ready = true;
+        return null;
+      });
+      ttsCloud.set(text, row);
+    }
+    function takeReadyCloud(text) {
+      const row = ttsCloud.get(text);
+      if (!row) return null;
+      ttsCloud.delete(text);
+      return row;
+    }
     function enqueueSpeak(text) {
       if (speakHeld || !text) return;
-      ttsQueue.push(text);
+      const gen = ttsGen;
+      mouthOpen = true;
+      paintPhase("speak");
+      const local = isWireMissLine(text);
+      ttsQueue.push({ text, gen, local });
+      if (!local) prefetchCloud(text, gen);
       pumpTts();
     }
     async function pumpTts() {
       if (ttsBusy) return;
-      const gen = ttsGen;
       ttsBusy = true;
-      while (ttsQueue.length && gen === ttsGen) {
-        const next = ttsQueue.shift();
-        paintPhase("speak");
-        let ok = false;
-        try { ok = await speakCloud(next, gen); } catch (e) { ok = false; }
-        if (!ok && gen === ttsGen && productMouth()) {
-          try { ok = await speakCloud(next, gen); } catch (e) { ok = false; }
+      let gen = ttsGen;
+      try {
+        while (ttsQueue.length) {
+          const item = ttsQueue.shift();
+          if (!item || item.gen === undefined || item.gen !== ttsGen) continue;
+          const next = item.text;
+          gen = item.gen;
+          if (item.local) {
+            await speakLocal(next, gen);
+            continue;
+          }
+          prefetchCloud(next, gen);
+          if (gen !== ttsGen) break;
+          let ok = false;
+          let buf = null;
+          const row = takeReadyCloud(next);
+          if (row) {
+            try { buf = row.ready ? row.value : await row.promise; } catch (e) { buf = null; }
+          }
+          if (buf && gen === ttsGen) {
+            try { ok = await playCloudBuf(buf, next, gen); } catch (e) { ok = false; }
+          }
+          if (!ok && gen === ttsGen && productMouth()) {
+            try { ok = await speakCloud(next, gen); } catch (e) { ok = false; }
+          }
+          if (!ok && gen === ttsGen) ok = await speakLocal(next, gen);
+          if (!ok && gen === ttsGen) revealSpoken(next, gen);
         }
-        if (!ok && gen === ttsGen && !productMouth()) speakLocal(next);
+      } finally {
+        ttsBusy = false;
       }
-      ttsBusy = false;
       if (gen === ttsGen) afterSpeak();
     }
     function speak(text) {
@@ -363,55 +884,68 @@
       enqueueSpeak(text);
     }
 
+    // Wit without claims: no line asserts a fact the page has not computed.
+    // The one live fact in the greeting is the note count from /api/stack.
+    const BOOT_LINES = [
+      "Do try to keep up, sir.",
+      "I counted the notes so you don't have to, sir.",
+      "We build, sir. The selling can wait for your word.",
+      "The kettle is metaphorical, sir. The readiness is not.",
+      "At your service, sir — and mildly judgmental about your tabs.",
+      "Standing by, sir. The graph missed you.",
+    ];
+    function bootLine() {
+      let i = 0;
+      try { i = parseInt(localStorage.getItem("jarvis_boot_i") || "0", 10) || 0; } catch (e) {}
+      const line = BOOT_LINES[((i % BOOT_LINES.length) + BOOT_LINES.length) % BOOT_LINES.length];
+      try { localStorage.setItem("jarvis_boot_i", String((i + 1) % BOOT_LINES.length)); } catch (e) {}
+      return line;
+    }
+    function timeOfDay() {
+      const h = new Date().getHours();
+      if (h < 5) return "evening";
+      if (h < 12) return "morning";
+      if (h < 18) return "afternoon";
+      return "evening";
+    }
     async function greet() {
       if (state.greeted) return;
       state.greeted = true;
       const who = state.stack.operator || "Evens";
-      const line = `Hello ${who}, what are we working on today?`;
+      const n = state.stack.notes_indexed;
+      const fact = typeof n === "number" && n > 0
+        ? `${n} notes indexed, all present and accounted for.`
+        : "The vault is on the wire.";
+      const line = `Good ${timeOfDay()}, ${who}. ${fact} ${bootLine()}`;
       $("spoken").textContent = line;
       speak(line);
     }
 
     let turnAbort = null;
     let turnGen = 0;
-    async function turn(utterance, approved) {
-      const scoped = stopScope(utterance || "");
-      if (scoped) {
-        if (scoped.scope === "speak") {
-          pressStop();
-          if (scoped.verb === "stop" || scoped.verb === "cancel") {
-            fetch("/api/stop", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ scope: "watch" }),
-            }).catch(() => {});
-          }
-          return;
-        }
-        stopSpeakingOnly();
-        if (scoped.scope === "tool" && turnAbort) {
-          try { turnAbort.abort(); } catch (e) {}
-        }
-        const payload = { scope: scoped.scope };
-        if (scoped.target) payload.target = scoped.target;
-        fetch("/api/stop", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }).catch(() => {});
-        $("spoken").textContent = "Stopped that " + scoped.scope + ".";
-        return;
-      }
-      const isStop = STOP_RE.test(utterance || "");
+    let spokenLock = "";
+    async function turn(utterance, approved, voice = false) {
       if (!utterance) return;
       speakHeld = false;
+      const isStop = STOP_RE.test(utterance || "");
       if (state.turning && turnAbort) {
         try { turnAbort.abort(); } catch (e) {}
       }
       turnGen += 1;
       const gen = turnGen;
+      spokenLock = "";
+      if (voice) unlockAudio();
       stopSpeech();
+      if (!isStop && eyesStream) {
+        try {
+          const image = await snapEyes();
+          if (turnGen !== gen) return;
+          if (image) await api("/api/eyes", { image });
+        } catch (e) {}
+        if (turnGen !== gen) return;
+      }
       state.turning = true;
+      state.turnStartedAt = Date.now();
       lastSpoken = "";
       paintPhase("think");
       if (!isStop) $("spoken").textContent = "";
@@ -431,54 +965,115 @@
           let buf = "";
           let last = null;
           let heardDelta = false;
+          let terminalSeen = false;
           while (true) {
+            if (turnGen !== gen) {
+              try { await reader.cancel(); } catch (e) {}
+              return;
+            }
             const { value, done } = await reader.read();
             if (done) break;
+            if (turnGen !== gen) {
+              try { await reader.cancel(); } catch (e) {}
+              return;
+            }
             buf += dec.decode(value, { stream: true });
             const parts = buf.split("\n\n");
             buf = parts.pop() || "";
             for (const part of parts) {
+              if (turnGen !== gen) {
+                try { await reader.cancel(); } catch (e) {}
+                return;
+              }
               const line = part.split("\n").filter((l) => l.startsWith("data:")).map((l) => l.slice(5).trim()).join("");
               if (!line) continue;
+              if (terminalSeen) continue;
               try { last = JSON.parse(line); } catch (err) { continue; }
+              if (last.done) terminalSeen = true;
+              if (typeof last.turn_gen === "number" && last.turn_gen > 0) busGen = last.turn_gen;
+              else if (typeof last.gen === "number" && last.gen > 0) busGen = last.gen;
               if (last.ask) state.pending = utterance;
               else state.pending = null;
               $("spoken").className = "line" + (last.ask ? " ask" : "");
-              if (last.spoken) {
-                lastSpoken = last.spoken;
-                $("spoken").textContent = last.spoken;
+              const lineText = productLine(last.spoken);
+              const delta = productLine(last.spoken_delta);
+              if (lineText) {
+                lastSpoken = lineText;
+                $("spoken").textContent = lineText;
               }
-              if (last.spoken_delta) {
+              if (last.done && lineText) {
+                spokenLock = lineText;
+                state.renderedBusGen = busGen;
+              }
+              if (delta) {
                 heardDelta = true;
-                enqueueSpeak(last.spoken_delta);
+                if (voice) enqueueSpeak(delta);
               }
-              if (last.done && !heardDelta && last.spoken) enqueueSpeak(last.spoken);
+              if (voice && last.done && !heardDelta && lineText) enqueueSpeak(lineText);
+              if (last.done) {
+                nextHandle = Array.isArray(last.cites) && last.cites.length && !last.ask
+                  ? 'ASK "WHY" — I WILL UNPACK IT'
+                  : "";
+              }
+            }
+            if (terminalSeen) {
+              // The terminal receipt owns completion; EOF and cleanup may be delayed.
+              try { Promise.resolve(reader.cancel()).catch(() => {}); } catch (e) {}
+              break;
             }
           }
         } else {
+          if (turnGen !== gen) return;
           const out = await res.json();
-          $("spoken").textContent = out.spoken || "";
+          if (turnGen !== gen) return;
+          if (typeof out.turn_gen === "number" && out.turn_gen > 0) busGen = out.turn_gen;
+          else if (typeof out.gen === "number" && out.gen > 0) busGen = out.gen;
+          const lineText = productLine(out.spoken);
+          if (lineText) lastSpoken = lineText;
           $("spoken").className = "line" + (out.ask ? " ask" : "");
           if (out.ask) state.pending = utterance;
           else state.pending = null;
-          enqueueSpeak(out.spoken || "");
+          nextHandle = Array.isArray(out.cites) && out.cites.length && !out.ask
+            ? 'ASK "WHY" — I WILL UNPACK IT'
+            : "";
+          spokenLock = lineText;
+          state.renderedBusGen = busGen;
+          $("spoken").textContent = lineText;
+          if (voice) enqueueSpeak(lineText);
         }
       } catch (e) {
-        if (e && e.name === "AbortError") {
-          $("spoken").textContent = "Stopped. Standing by.";
-        } else {
-          $("spoken").textContent = "Turn failed. Type and enter, or tap the board.";
+        if (turnGen === gen) {
+          if (e && e.name === "AbortError") {
+            $("spoken").textContent = "Stopped. Standing by.";
+          } else {
+            let dark = false;
+            try {
+              const health = await fetch("/healthz", { cache: "no-store" });
+              dark = !health.ok;
+            } catch (err) {
+              dark = true;
+            }
+            $("spoken").textContent = dark
+              ? "Face is dark on 127.0.0.1:4018. Start the Face, then type again."
+              : "Turn failed. Type and enter, or tap the board.";
+          }
+        }
+      } finally {
+        if (turnGen === gen) {
+          if (turnAbort === ac) turnAbort = null;
+          state.turning = false;
+          if (state.phase === "think" && !ttsSpeaking()) {
+            paintPhase(state.armed ? "listen" : "idle");
+          }
+          if (state.armed && state.live && !state.listening && !ttsSpeaking()) scheduleRestart(TTS_COOLDOWN);
         }
       }
-      if (turnGen !== gen) return;
-      if (turnAbort === ac) turnAbort = null;
-      state.turning = false;
-      if (state.armed && state.live && !state.listening && !ttsSpeaking()) scheduleRestart(TTS_COOLDOWN);
     }
 
     function isMouthEcho(said) {
       const text = (said || "").trim();
       if (!text) return false;
+      if (STOP_RE.test(text)) return false;
       if (ttsSpeaking() || state.turning) return true;
       if (ECHO_RE.test(text)) return true;
       if (lastSpoken && text.length > 20 && lastSpoken.toLowerCase().indexOf(text.toLowerCase().slice(0, 40)) >= 0) return true;
@@ -491,8 +1086,31 @@
       const woke = WAKE_RE.test(said);
       said = said.replace(WAKE_RE, "").trim() || (woke ? "" : said);
       if (!said) { greet(); return; }
-      if (state.pending && YES_RE.test(said)) turn(state.pending, true);
-      else turn(said, false);
+      if (state.pending && YES_RE.test(said)) turn(state.pending, true, true);
+      else turn(said, false, true);
+    }
+
+    // FINISH_MS: a pause mid-sentence is not the end of the thought.
+    // Buffer final results; interjections (stop / wait) bypass instantly.
+    const FINISH_MS = 900;
+    let finishTimer = 0;
+    let pendingHeard = "";
+    function clearHeardBuffer() {
+      clearTimeout(finishTimer);
+      finishTimer = 0;
+      pendingHeard = "";
+    }
+    function queueHeard(t) {
+      const bit = (t || "").trim();
+      if (!bit) return;
+      pendingHeard = pendingHeard ? `${pendingHeard} ${bit}` : bit;
+      clearTimeout(finishTimer);
+      finishTimer = setTimeout(() => {
+        const said = pendingHeard;
+        pendingHeard = "";
+        finishTimer = 0;
+        if (said) handleHeard(said);
+      }, FINISH_MS);
     }
 
     function scheduleRestart(ms) {
@@ -507,14 +1125,21 @@
     }
 
     function showTypeFallback(line) {
-      $("spoken").textContent = line;
       $("typed").classList.add("on");
       $("hint").textContent = "TYPE AND ENTER · OR TAP THE BOARD";
+      const now = ($("spoken").textContent || "").trim();
+      if (!now || isStatusLine(now) || isFallbackLine(now) || /^listening\.?$/i.test(now)) {
+        $("spoken").textContent = line;
+      }
     }
 
     async function holdMic() {
       if (streamLive()) return true;
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return true;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        const err = new Error("no-media");
+        err.name = "NotFoundError";
+        throw err;
+      }
       state.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       return streamLive();
     }
@@ -522,7 +1147,7 @@
     function startListen() {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) {
-        showTypeFallback("Type here, or tap the board and allow the microphone.");
+        showTypeFallback("Speech recognition unsupported here. Type instead.");
         return;
       }
       if (!state.live || !state.armed) return;
@@ -548,11 +1173,16 @@
         if (!state.turning) paintPhase("listen");
       };
       rec.onresult = (e) => {
-        if (ttsSpeaking() || state.turning) return;
         const last = e.results[e.results.length - 1];
         const t = last[0].transcript;
-        $("spoken").textContent = t;
-        if (last.isFinal) handleHeard(t);
+        if (last.isFinal && STOP_RE.test((t || "").trim())) {
+          clearHeardBuffer();
+          handleHeard(t);
+          return;
+        }
+        if (ttsSpeaking() || state.turning) return;
+        $("spoken").textContent = pendingHeard ? `${pendingHeard} ${t}` : t;
+        if (last.isFinal) queueHeard(t);
       };
       rec.onerror = (e) => {
         const err = (e && e.error) || "";
@@ -560,7 +1190,10 @@
           state.armed = false;
           state.listening = false;
           state.starting = false;
-          showTypeFallback("Allow the microphone, then tap the board.");
+          showTypeFallback(streamLive()
+            ? "Speech recognition blocked. Type instead."
+            : "Allow the microphone, then tap the board.");
+          paintPhase("idle");
           return;
         }
         if (err === "network") {
@@ -595,15 +1228,37 @@
       }
     }
 
-    async function armMic() {
-      if (state.arming) return;
-      if (state.armed && streamLive()) {
-        if (!state.listening && !state.starting && !state.rec) startListen();
+    function disarmMic() {
+      state.armed = false;
+      state.live = false;
+      state.arming = false;
+      stopListen();
+      if (state.stream) {
+        for (const track of state.stream.getTracks()) track.stop();
+        state.stream = null;
+      }
+      try { api("/api/listen", { live: false }); } catch (e) {}
+      paintPhase("idle");
+    }
+    async function toggleMic() {
+      if (state.listening) {
+        disarmMic();
         return;
       }
+      await armMic();
+    }
+    async function armMic() {
+      unlockAudio();
+      if (state.arming) return;
       if (!hasSR()) {
-        showTypeFallback("Type here, or tap the board and allow the microphone.");
-        state.armed = true;
+        showTypeFallback("Speech recognition unsupported here. Type instead.");
+        return;
+      }
+      state.armed = true;
+      state.live = true;
+      startListen();
+      if (state.armed && streamLive() && (state.listening || state.starting || state.rec)) {
+        paintPhase("listen");
         return;
       }
       state.arming = true;
@@ -611,14 +1266,19 @@
         await holdMic();
       } catch (e) {
         state.arming = false;
+        state.armed = false;
+        state.live = false;
         showTypeFallback("Allow the microphone, then tap the board.");
+        paintPhase("idle");
         return;
       }
-      state.armed = true;
-      state.live = true;
       state.arming = false;
+      if (!state.listening && !state.starting && !state.rec) startListen();
+      if (!(state.listening || state.starting || state.rec)) {
+        paintPhase("idle");
+        return;
+      }
       try { await api("/api/listen", { live: true }); } catch (e) {}
-      startListen();
       paintPhase("listen");
     }
 
@@ -709,10 +1369,26 @@
 
     const wave = $("wave");
     const wctx = wave.getContext("2d");
+    function isStatusLine(text) {
+      const line = String(text || "").trim();
+      if (!line) return true;
+      return /^(sir\.\s*)?(calling the model|calling cursor|thinking|looking)\.?$/i.test(line);
+    }
+    function isFallbackLine(text) {
+      return /speech (needs network|recognition)|type is a fallback|type instead|allow the microphone/i.test(
+        String(text || "")
+      );
+    }
+    function productLine(text) {
+      const line = String(text || "").replace(/\*\*/g, "").trim();
+      if (!line || isStatusLine(line)) return "";
+      return line;
+    }
     function drawWave(t) {
       if (!wctx) return;
       wctx.clearRect(0, 0, wave.width, wave.height);
-      wctx.strokeStyle = "#7dcea0";
+      const [r, g, b] = pal();
+      wctx.strokeStyle = "rgb(" + r + "," + g + "," + b + ")";
       wctx.lineWidth = 2;
       wctx.beginPath();
       for (let x = 0; x < wave.width; x++) {
@@ -726,6 +1402,7 @@
 
     const SCRAMBLE = "/#R0?BU&CN1A%X7*Q";
     function paintChip() {
+      if (WIDGET) return;
       if (state.phase === "think") {
         $("mark").textContent = Array.from({ length: 12 }, () => SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)]).join(" ");
       } else if (state.listening || state.phase === "listen") {
@@ -735,34 +1412,410 @@
       }
     }
 
+    let lastHud = { health: null, bus: null, wires: null };
+    function setDot(id, on) {
+      const el = $(id);
+      if (!el) return;
+      el.classList.toggle("on", !!on);
+      el.classList.toggle("off", !on);
+    }
+    function paintLights(parts) {
+      lastHud = { ...lastHud, ...(parts || {}) };
+      const health = lastHud.health;
+      const bus = lastHud.bus;
+      const report = lastHud.wires || {};
+      const wires = report.wires || {};
+      const talk = String(report.talk || "");
+      // ONLINE = this face /healthz answered ok
+      setDot("dotOnline", !!(health && health.ok && health.online !== false));
+      // LIVE = this pane armed the mic, or /api/bus listen is written
+      setDot("dotLive", !!(state.armed || (bus && (bus.mic === "live" || bus.phase === "listen"))));
+      // CONNECTED = a talk wire is actually up
+      setDot("dotConnected", talk === "openrouter" || talk === "xai" || talk === "grokbot" || wires.openrouter === "talk" || wires.grok === "talk" || wires.grokbot === "live");
+    }
     function paintWires(report) {
       const wires = (report && report.wires) || {};
-      const live = wires.cursor === "harness" || wires.cursor === "print" || wires.cursor === "hand";
-      $("link").textContent = live ? "NEURAL LINK - CURSOR" : "NEURAL LINK - CURSOR DARK";
+      const talk = String((report && report.talk) || "");
+      const model = String((report && report.talk_model) || "").trim();
+      let mouth = "DARK";
+      if (talk === "openrouter" || wires.openrouter === "talk") mouth = "OPENROUTER";
+      else if (talk === "xai" || wires.grok === "talk") mouth = "XAI";
+      else if (talk === "grokbot" || wires.grokbot === "live") mouth = "GROKBOT";
+      $("link").textContent = "NEURAL LINK - " + mouth + (model && mouth !== "DARK" ? " · " + model : "");
+    }
+    function paintMode(bus, report) {
+      if (!$("mode")) return;
+      const harness = String((bus && bus.harness_mode) || "").trim();
+      const mode = String((report && report.mode) || "").trim();
+      const shown = (mode === "harness" && harness) ? harness : (mode || harness || "unset");
+      $("mode").textContent = "MODE - " + shown.toUpperCase();
     }
     function paintVoice(report) {
       if (!$("voice")) return;
-      voiceEngine = String((report && report.engine) || "dark");
-      const name = String((report && report.voice) || "bm_lewis").replace(/_/g, " ").toUpperCase();
-      $("voice").textContent = "VOICE - " + name;
+      const engine = String((report && (report.speak_engine || report.engine)) || "dark");
+      voiceEngine = engine;
+      const voiceId = String((report && (report.speak_voice_id || report.voice)) || "dark");
+      const speakModel = String((report && report.speak_model) || "");
+      const reason = String((report && report.fallback_reason) || "").trim();
+      let line = "VOICE - " + engine.toUpperCase() + " · " + voiceId;
+      if (engine === "elevenlabs" && speakModel) line += " · " + speakModel;
+      else if (engine !== "elevenlabs" && reason) line += " · " + reason;
+      $("voice").textContent = line;
+    }
+    function paintGraphLine(data) {
+      const line = $("graphline");
+      if (!line) return;
+      if (!data || data.ok === false) {
+        line.textContent = "GRAPH - DARK";
+        return;
+      }
+      const n = Number(data.nodeCount != null ? data.nodeCount : ((data.nodes || []).length)) || 0;
+      const e = Number(data.linkCount != null ? data.linkCount : ((data.links || []).length)) || 0;
+      line.textContent = "GRAPH - " + n + " NODES · " + e + " EDGES";
+    }
+
+    let eyesStream = null;
+    async function mountVaultGraph() {
+      const host = $("graph");
+      let data = { nodes: [], links: [], nodeCount: 0, linkCount: 0 };
+      try { data = await api("/api/graph"); } catch (e) {
+        paintGraphLine(null);
+        return;
+      }
+      paintGraphLine(data);
+      if (!host || typeof ForceGraph3D !== "function") return;
+      if (!data || !data.nodes || !data.nodes.length) return;
+      document.body.classList.add("has-graph");
+      // ?nographblock=1 is a connection-probe query, not a sim freeze.
+      vaultGraph = ForceGraph3D({ controlType: "orbit" })(host)
+        .backgroundColor("#020805")
+        .showNavInfo(false)
+        .graphData({ nodes: data.nodes, links: data.links })
+        .nodeLabel((n) => n.name || n.id)
+        .nodeColor((n) => n.color || "#3dff6a")
+        .nodeRelSize(4)
+        .linkColor(() => "rgba(61,255,106,0.28)")
+        .linkOpacity(0.35)
+        .enablePointerInteraction(true)
+        .enableNavigationControls(true)
+        .warmupTicks(0)
+        .cooldownTicks(Infinity)
+        .cooldownTime(Infinity)
+        .d3AlphaDecay(0.006)
+        .d3VelocityDecay(0.28)
+        .onNodeClick((n) => {
+          if ($("spoken") && n && n.name) $("spoken").textContent = n.name;
+        });
+      const ctrls = vaultGraph.controls && vaultGraph.controls();
+      if (ctrls) {
+        ctrls.autoRotate = true;
+        ctrls.autoRotateSpeed = 0.4;
+      }
+      if (typeof vaultGraph.resumeAnimation === "function") vaultGraph.resumeAnimation();
+      const fit = () => {
+        if (!vaultGraph) return;
+        vaultGraph.width(host.clientWidth || innerWidth).height(host.clientHeight || innerHeight);
+      };
+      fit();
+      window.addEventListener("resize", fit);
+    }
+    async function snapEyes() {
+      const video = $("eyesPreview");
+      if (!video || !video.videoWidth) return "";
+      const c = document.createElement("canvas");
+      const w = Math.min(640, video.videoWidth || 320);
+      const h = Math.round(w * ((video.videoHeight || 240) / (video.videoWidth || 320)));
+      c.width = w;
+      c.height = h;
+      const cx = c.getContext("2d");
+      if (!cx) return "";
+      cx.drawImage(video, 0, 0, w, h);
+      return c.toDataURL("image/jpeg", 0.72);
+    }
+    // Eyes booleans: frames stay in the browser; only present/absent rides the bus.
+    let eyesPresenceTimer = 0;
+    let eyesPrevLuma = null;
+    let eyesMotionAt = 0;
+    let eyesLastPresent = null;
+    function eyesLuma() {
+      const video = $("eyesPreview");
+      if (!video || !video.videoWidth) return null;
+      const c = eyesLuma.c || (eyesLuma.c = document.createElement("canvas"));
+      c.width = 32;
+      c.height = 24;
+      const cx = c.getContext("2d");
+      if (!cx) return null;
+      cx.drawImage(video, 0, 0, 32, 24);
+      const d = cx.getImageData(0, 0, 32, 24).data;
+      const out = new Float32Array(32 * 24);
+      for (let i = 0; i < out.length; i++) {
+        const j = i * 4;
+        out[i] = 0.299 * d[j] + 0.587 * d[j + 1] + 0.114 * d[j + 2];
+      }
+      return out;
+    }
+    function stopPresence() {
+      clearTimeout(eyesPresenceTimer);
+      eyesPresenceTimer = 0;
+      eyesPrevLuma = null;
+      eyesLastPresent = null;
+    }
+    function pumpPresence() {
+      if (!eyesStream) { stopPresence(); return; }
+      const cur = eyesLuma();
+      if (cur && eyesPrevLuma) {
+        let diff = 0;
+        for (let i = 0; i < cur.length; i++) diff += Math.abs(cur[i] - eyesPrevLuma[i]);
+        if (diff / cur.length > 3.5) eyesMotionAt = Date.now();
+      }
+      if (cur) eyesPrevLuma = cur;
+      // Honest boolean: motion only. Stillness is not absence; never nudge on it.
+      const motion = Date.now() - eyesMotionAt < 10000;
+      if (motion !== eyesLastPresent) {
+        eyesLastPresent = motion;
+        try { api("/api/eyes", { motion }); } catch (e) {}
+      }
+      eyesPresenceTimer = setTimeout(pumpPresence, 2500);
+    }
+    async function toggleEyes() {
+      const btn = $("eyesBtn");
+      const video = $("eyesPreview");
+      if (eyesStream) {
+        eyesStream.getTracks().forEach((track) => track.stop());
+        eyesStream = null;
+        stopPresence();
+        if (video) { video.srcObject = null; video.classList.remove("on"); }
+        if (btn) btn.classList.remove("on");
+        try { await api("/api/eyes", { active: false }); } catch (e) {}
+        return;
+      }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        $("spoken").textContent = "Camera API dark on this browser.";
+        return;
+      }
+      try {
+        eyesStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      } catch (e) {
+        $("spoken").textContent = "Allow the camera, then tap Eyes.";
+        return;
+      }
+      if (video) {
+        video.srcObject = eyesStream;
+        video.classList.add("on");
+        try { await video.play(); } catch (e) {}
+      }
+      if (btn) btn.classList.add("on");
+      eyesMotionAt = Date.now();
+      pumpPresence();
+      await new Promise((r) => setTimeout(r, 350));
+      const image = await snapEyes();
+      if (!image) return;
+      try {
+        const out = await api("/api/eyes", { image });
+        $("spoken").textContent = out.spoken || "Eyes still is on disk.";
+      } catch (e) {
+        $("spoken").textContent = "Eyes still failed to reach the face.";
+      }
+    }
+    let focusArmed = false;
+    let lastFocusCalloutGen = null;
+    let pendingNudge = "";
+    function reliefActive(focus) {
+      return !!(focus && Number(focus.relief_until || 0) > Date.now() / 1000);
+    }
+    function deliverNudge() {
+      if (!pendingNudge) return;
+      if (state.turning || ttsSpeaking()) return;
+      const line = pendingNudge;
+      pendingNudge = "";
+      $("spoken").textContent = line;
+      if (state.armed) enqueueSpeak(line);
+    }
+    async function clickFocus() {
+      const arm = !focusArmed;
+      try {
+        const out = await api("/api/focus", { arm, gen: busGen });
+        const line = out.spoken || (arm ? "Focus armed." : "Focus off.");
+        $("spoken").textContent = line;
+        if (out.ok !== false) focusArmed = arm;
+        const btn = $("focusBtn");
+        if (btn) btn.classList.toggle("on", focusArmed);
+        if (state.armed) enqueueSpeak(line);
+      } catch (e) {
+        $("spoken").textContent = "Focus failed to reach the face.";
+      }
+    }
+    function paintFocus(bus) {
+      const focus = bus && bus.focus && typeof bus.focus === "object" ? bus.focus : null;
+      const armed = !!(focus && focus.armed);
+      focusArmed = armed;
+      const btn = $("focusBtn");
+      if (btn) btn.classList.toggle("on", armed);
+      const lineEl = $("focusline");
+      if (lineEl) {
+        if (armed) {
+          const total = (focus.minutes || 30) * 60;
+          const started = Number(focus.started_ts || 0);
+          const left = Math.max(0, Math.round(started + total - Date.now() / 1000));
+          const mm = String(Math.floor(left / 60)).padStart(2, "0");
+          const ss = String(left % 60).padStart(2, "0");
+          lineEl.textContent = `FOCUS ${mm}:${ss} · DRIFT ${focus.drifts || 0}`;
+          lineEl.classList.add("on");
+        } else {
+          lineEl.textContent = "";
+          lineEl.classList.remove("on");
+        }
+      }
+      const gen = focus ? Number(focus.callout_gen || 0) : 0;
+      if (lastFocusCalloutGen === null) {
+        lastFocusCalloutGen = gen;
+        return;
+      }
+      if (gen > lastFocusCalloutGen) {
+        lastFocusCalloutGen = gen;
+        const callout = String((focus && focus.callout) || "").trim();
+        // Nudges wait for idle and respect relief. A mid-session nudge during
+        // relief is dropped; a stand-down summary is delivered once idle.
+        if (callout && !(armed && reliefActive(focus))) {
+          pendingNudge = callout;
+        }
+      }
+      deliverNudge();
+    }
+    async function clickWatch() {
+      const btn = $("watchBtn");
+      const next = !watchArmed;
+      watchBusy = true;
+      watchArmed = next;
+      if (btn) btn.classList.toggle("on", next);
+      $("spoken").textContent = next ? "Watch…" : "Watch off.";
+      try {
+        const out = await api("/api/watch", { grab: next, arm: next, gen: busGen, evens: true });
+        $("spoken").textContent = out.spoken || (next
+          ? "Watch is on. Switch to the app you want me to use, then tell me."
+          : "Watch off.");
+      } catch (e) {
+        $("spoken").textContent = "Watch failed. Screen Recording may be dark.";
+        watchArmed = false;
+        if (btn) btn.classList.remove("on");
+      }
+      watchBusy = false;
+    }
+    function toggleChrome() {
+      const dock = $("dock");
+      const btn = $("hideBtn");
+      if (!dock) return;
+      dock.classList.toggle("slim");
+      const hidden = dock.classList.contains("slim");
+      if (btn) {
+        btn.setAttribute("aria-pressed", hidden ? "true" : "false");
+        btn.setAttribute("aria-label", hidden ? "Show icons" : "Hide icons");
+      }
+    }
+    const DROP_API = "/api/drop";
+    window.jarvisDropped = (line) => {
+      if (!line) return;
+      $("spoken").textContent = line;
+      unlockAudio();
+      if (state.armed) enqueueSpeak(line);
+    };
+    void DROP_API;
+
+    function voiceEnergy() {
+      const talking = mouthOpen || state.phase === "speak" || ttsSpeaking();
+      let raw = 0;
+      if (ttsAnalyser && ttsSpeaking()) {
+        ttsAnalyser.getByteTimeDomainData(voiceSamples);
+        let sum = 0;
+        for (let i = 0; i < voiceSamples.length; i++) {
+          const v = (voiceSamples[i] - 128) / 128;
+          sum += v * v;
+        }
+        raw = Math.min(1, Math.sqrt(sum / voiceSamples.length) * 2.3);
+      } else if (talking) {
+        raw = 0.34;
+      } else if (state.listening) {
+        raw = 0.14;
+      }
+      const rise = raw > voiceSmooth;
+      voiceSmooth += (raw - voiceSmooth) * (rise ? 0.22 : 0.07);
+      return voiceSmooth;
+    }
+    function actionEnergy() {
+      let raw = 0;
+      if (state.turning || state.phase === "think") raw = 0.88;
+      else if (eyesStream) raw = 0.5;
+      else if (watchBusy) raw = 0.62;
+      const rise = raw > actionSmooth;
+      actionSmooth += (raw - actionSmooth) * (rise ? 0.18 : 0.08);
+      return actionSmooth;
+    }
+    function mountOrb() {
+      const host = $("orb3d");
+      if (!host || typeof JarvisOrb !== "function") return;
+      faceOrb = new JarvisOrb(host);
+      const pump = () => {
+        if (faceOrb) faceOrb.setEnergy(voiceEnergy(), actionEnergy());
+        requestAnimationFrame(pump);
+      };
+      faceOrb.start();
+      requestAnimationFrame(pump);
+    }
+
+    function reconcilePhase(bus) {
+      if (!bus) return;
+      if (typeof bus.turn_gen === "number") {
+        if (bus.turn_gen < busGen) return;
+        busGen = bus.turn_gen;
+      }
+      const done = bus.job_status !== "working";
+      if (done) {
+        if (state.turning || ttsSpeaking()) return;
+        state.turning = false;
+        const line = productLine(bus.spoken);
+        const now = ($("spoken").textContent || "").trim();
+        const newerReply = Number(bus.turn_gen || 0) > Number(state.renderedBusGen || 0);
+        if (line && !bus.mission_delivery_pending && !(bus.tool === "browser_mission" && bus.browser_mission_id && Array.from($("browserResults").children).some(el => el.dataset.missionId === bus.browser_mission_id)) && (newerReply || !now || isStatusLine(now) || isFallbackLine(now) || /^listening\.?$/i.test(now))) {
+          $("spoken").textContent = line;
+          state.renderedBusGen = Number(bus.turn_gen || 0);
+        }
+        if (bus.tool === "browser_mission" && bus.browser_mission_id &&
+            Array.from($("browserResults").children).some(el => el.dataset.missionId === bus.browser_mission_id) &&
+            $("spoken").textContent === line) $("spoken").textContent = "";
+        const pending = bus.mission_delivery_pending;
+        if (pending && pending.spoken) {
+          const results = $("browserResults");
+          if (results && !Array.from(results.children).some(el => el.dataset.missionId === pending.mission_id)) {
+            const answer = document.createElement("p");
+            answer.dataset.missionId = pending.mission_id;
+            answer.textContent = pending.spoken;
+            results.appendChild(answer);
+            if (bus.browser_mission_id === pending.mission_id) $("spoken").textContent = "";
+            if (state.armed) { enqueueSpeak(pending.spoken); return; }
+          }
+          api("/api/browser-mission/ack", {mission_id: pending.mission_id, gen: pending.gen}).catch(() => {});
+        }
+        if (state.phase === "think") {
+          paintPhase(state.listening || state.armed ? "listen" : "idle");
+        }
+        return;
+      }
+      if (ttsSpeaking() || state.listening) return;
+      if (bus.phase && bus.phase !== "speak" && bus.phase !== "listen" && !state.armed && !state.turning && !state.listening) {
+        paintPhase(bus.phase);
+      }
     }
 
     async function refresh() {
       try {
+        const health = await api("/healthz");
         const bus = await api("/api/bus");
-        if (bus.phase && !state.armed && !state.turning && !state.listening) paintPhase(bus.phase);
-        const notice = bus.watch_notice;
-        if (
-          notice &&
-          notice.event_id &&
-          !notice.delivered &&
-          notice.event_id !== state.watchNoticeId &&
-          !state.turning
-        ) {
-          state.watchNoticeId = notice.event_id;
+        // Ported from main: speak one Face Watch notice, then ack it.
+        const notice = bus && bus.watch_notice;
+        if (notice && notice.event_id && !notice.delivered && notice.event_id !== watchNoticeId && !state.turning) {
+          watchNoticeId = notice.event_id;
           const line = String(notice.spoken || "");
           if (line) {
-            lastSpoken = line;
             $("spoken").textContent = line;
             enqueueSpeak(line);
             fetch("/api/watch/ack", {
@@ -772,18 +1825,29 @@
             }).catch(() => {});
           }
         }
-        if ($("mode")) $("mode").textContent = "MODE - " + String(bus.harness_mode || "agent").toUpperCase();
+        reconcilePhase(bus);
         const wires = await api("/api/wires");
         paintWires(wires);
+        paintMode(bus, wires);
         const voice = await api("/api/voice");
         paintVoice(voice);
+        try { paintGraphLine(await api("/api/graph")); } catch (g) {}
+        const watch = bus.watch && typeof bus.watch === "object" ? bus.watch : {};
+        watchArmed = !!watch.armed;
+        if ($("watchBtn") && !watchBusy) $("watchBtn").classList.toggle("on", watchArmed);
+        paintFocus(bus);
+        paintLights({ health, bus, wires });
       } catch (e) {
         $("link").textContent = "NEURAL LINK - LOCAL FACE ONLY";
+        paintLights({ health: null, wires: null });
       }
     }
 
     function onArmGesture(e) {
+      if (WIDGET) return;
       if (e && e.target === $("typed")) return;
+      if (e && e.target && e.target.closest && e.target.closest(".sense")) return;
+      if (e && e.target && (e.target.id === "graph" || (e.target.closest && e.target.closest("#graph")))) return;
       if (e && e.preventDefault) e.preventDefault();
       armMic();
     }
@@ -798,7 +1862,7 @@
         $("typed").classList.add("on");
         $("typed").focus();
       }
-      if (e.key === "Escape") $("typed").classList.remove("on");
+      if (e.key === "Escape" && !WIDGET) $("typed").classList.remove("on");
     });
     $("typed").addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -806,23 +1870,32 @@
         $("typed").value = "";
       }
     });
+    if (WIDGET) {
+      document.addEventListener("pointerdown", unlockAudio, true);
+    }
     $("chip").addEventListener("click", onArmGesture);
     $("board").addEventListener("click", onArmGesture);
-    $("mic").addEventListener("click", (e) => {
-      e.stopPropagation();
+    $("mic").addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); pressMic(); });
+    $("stop").addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); pressStop(); });
+    $("hide").addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); hidePresentation(); });
+    if ($("eyesBtn")) $("eyesBtn").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); toggleEyes(); });
+    if ($("watchBtn")) $("watchBtn").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); clickWatch(); });
+    if ($("focusBtn")) $("focusBtn").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); unlockAudio(); clickFocus(); });
+    if ($("stopBtn")) $("stopBtn").addEventListener("click", (e) => {
       e.preventDefault();
-      pressMic();
-    });
-    $("stop").addEventListener("click", (e) => {
       e.stopPropagation();
-      e.preventDefault();
-      pressStop();
+      turn("stop", false);
     });
-    $("hide").addEventListener("click", (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      hidePresentation();
-    });
+    if ($("hideBtn")) $("hideBtn").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); toggleChrome(); });
+    if ($("micBtn")) {
+      $("micBtn").addEventListener("pointerdown", (e) => { e.stopPropagation(); }, true);
+      $("micBtn").addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        toggleMic();
+      }, true);
+    }
 
     (async () => {
       try {
@@ -833,17 +1906,28 @@
       } catch (e) {}
       layout();
       window.addEventListener("resize", layout);
-      if (!reduce) {
+      if (WIDGET) mountOrb();
+      if (!WIDGET) mountVaultGraph();
+      if (!reduce && !WIDGET) {
         requestAnimationFrame(drawBoard);
         requestAnimationFrame(drawWave);
       }
       tickClock();
       setInterval(tickClock, 1000);
-      setInterval(paintChip, 160);
+      setInterval(paintChip, 90);
       refresh();
-      setInterval(refresh, 4000);
+      setInterval(refresh, 800);
+      document.addEventListener("visibilitychange", () => {
+        if (pageVisible()) {
+          if (vaultGraph && typeof vaultGraph.resumeAnimation === "function") vaultGraph.resumeAnimation();
+        } else if (!WIDGET) {
+          retireHidden();
+        }
+      });
+      window.addEventListener("pagehide", pageExit);
+      window.addEventListener("beforeunload", pageExit);
       if (!hasSR()) {
-        showTypeFallback("Type here, or tap the board and allow the microphone.");
+        showTypeFallback("Speech recognition unsupported here. Type instead.");
         return;
       }
       let granted = false;
@@ -851,11 +1935,12 @@
         const perm = await navigator.permissions.query({ name: "microphone" });
         granted = perm.state === "granted";
       } catch (e) {}
-      if (granted) armMic();
+      if (granted && !WIDGET) armMic();
       else {
         paintPhase("idle");
         $("hint").textContent = "TAP BOARD OR SPACE TO TALK";
       }
+      window.jarvisArmMic = armMic;
     })();
   </script>
 </body>

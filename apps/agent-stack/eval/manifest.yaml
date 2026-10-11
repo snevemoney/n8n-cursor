@@ -1,0 +1,92 @@
+schema_version: 1
+lane: hive-os
+isolation: wave-a-no-face
+fail_classes:
+  - user_visible_surprise
+  - manual_context_transfers
+  - whole_transcript_handoff
+  - blended_authorities
+  - session_read_as_harness_pass
+  - stale_index_as_current
+  - native_resume_lie
+claims:
+  - id: conversation
+    claim: Evens can talk naturally without seeing wires
+    sut: Face 127.0.0.1:4018 + Orb
+    test: casual hello and follow-up
+    expected: spoken product line; no provider names
+    observed: null
+    validity: test-speak fails
+    verdict: UNPROVEN
+  - id: stop_repeat
+    claim: Stop rejects stale generation 100/100
+    sut: eval/races.py dry
+    test: writer_gen <= cancel_gen
+    expected: n_ok == n_runs
+    observed: dry harness
+    validity: not live Face
+    verdict: dry-only
+  - id: vault_research_synthesis
+    claim: Multi-note research answers a question one keyword cannot
+    sut: vault.research contract
+    test: How has Jarvis architecture changed from the original OpenClaw idea
+    expected: cited live-vault notes; live beats replica
+    observed: null
+    validity: single-hit retrieve is not this claim
+    verdict: UNPROVEN
+  - id: conflict_authorities
+    claim: Cursor A + stale Grok B + live vault C surfaces conflict and picks C
+    sut: contracts.resolve_authority
+    test: federation/conflict_case.yaml
+    expected: chosen C; blended false
+    observed: unit
+    validity: fixture not live sittings
+    verdict: contract
+  - id: session_not_harness
+    claim: ChatGPT/Claude/Codex session PASS is not job.start PASS
+    sut: scoreboard rows
+    test: validate_scoreboard
+    expected: illegal 9A-as-9B rejected
+    observed: unit
+    validity: schema only
+    verdict: contract
+  - id: continuation_mode
+    claim: continuation_available matches an executable continuation_mode
+    sut: ExternalSession
+    test: file history cannot be native_session
+    expected: new_handoff or unavailable
+    observed: unit
+    validity: none
+    verdict: contract
+  - id: session_freshness
+    claim: indexed_at older than source_mtime is stale
+    sut: freshness_status
+    test: source newer than index
+    expected: freshness_status stale; must not speak as current
+    observed: unit
+    validity: none
+    verdict: contract
+  - id: authority_chain
+    claim: Every result names requested_by routed_by executed_by evidence_from verified_by
+    sut: result envelope
+    test: validate_authority_chain
+    expected: all five present
+    observed: unit
+    validity: none
+    verdict: contract
+  - id: manual_context_transfers
+    claim: Evens never pastes context between supported surfaces
+    sut: Wave D journeys
+    test: KPI target 0
+    expected: 0
+    observed: null
+    validity: journeys not run
+    verdict: UNPROVEN
+  - id: handoff_efficiency
+    claim: Next worker gets selected facts under cap, not the whole transcript
+    sut: handoff_efficient
+    test: selected subset contains required facts
+    expected: ok true
+    observed: unit
+    validity: live handoff UNPROVEN
+    verdict: contract

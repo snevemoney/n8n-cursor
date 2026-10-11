@@ -1,0 +1,8 @@
+id: that_one
+claim: Jarvis resolves “that one” from the active sitting
+ask:
+  - Show me the last two sittings
+  - Open that one
+forbidden: asking which sitting without using sitting evidence
+verdict: UNPROVEN
+validity: magic wording not allowed
