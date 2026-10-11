@@ -50,3 +50,4 @@ apps/scorpion/audit/out/
 *.har
 .env.bak
 apps/scorpion/.env.local.bak
+__pycache__/
