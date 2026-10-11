@@ -286,9 +286,35 @@ def talk_ssl_context() -> ssl.SSLContext:
     ctx = ssl.create_default_context()
     if ctx.get_ca_certs():
         return ctx
-    if os.path.isfile(_SSL_SYSTEM_CA):
-        ctx.load_verify_locations(cafile=_SSL_SYSTEM_CA)
+    for cafile in _ssl_ca_candidates():
+        try:
+            ctx.load_verify_locations(cafile=cafile)
+        except (OSError, ssl.SSLError):
+            continue
+        if ctx.get_ca_certs():
+            break
     return ctx
+
+
+def _ssl_ca_candidates() -> list[str]:
+    """CA bundles to try: macOS path first, then OpenSSL's default, then certifi."""
+    out: list[str] = []
+    paths = [_SSL_SYSTEM_CA]
+    try:
+        paths.append(ssl.get_default_verify_paths().cafile or "")
+        paths.append(ssl.get_default_verify_paths().openssl_cafile or "")
+    except Exception:
+        pass
+    try:
+        import certifi  # type: ignore
+
+        paths.append(certifi.where())
+    except Exception:
+        pass
+    for path in paths:
+        if path and path not in out and os.path.isfile(path):
+            out.append(path)
+    return out
 
 
 def _http_open(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0):

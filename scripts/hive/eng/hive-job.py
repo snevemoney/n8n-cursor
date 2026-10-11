@@ -364,7 +364,7 @@ def party(value: object) -> dict | None:
 
 
 def load_permissions() -> dict:
-    path = ROOT / "roles" / "permissions.json"
+    path = ROOT / "docs" / "roles" / "permissions.json"
     return json.loads(path.read_text(encoding="utf-8"))
 
 

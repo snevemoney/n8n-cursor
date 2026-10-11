@@ -35,7 +35,7 @@ class HiveRulesTest(unittest.TestCase):
 
     def test_roles_exist_and_stay_short(self) -> None:
         for name in ("BIG-BOSS.md", "BUILDER.md", "VERIFIER.md", "REVIEWER.md"):
-            path = ROOT / "roles" / name
+            path = ROOT / "docs" / "roles" / name
             lines = path.read_text(encoding="utf-8").splitlines()
             self.assertGreater(len(lines), 3)
             self.assertLess(len(lines), 30, name)

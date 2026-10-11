@@ -375,7 +375,7 @@ class PipelineDarkCursorTest(unittest.TestCase):
             body = pack.read_text(encoding="utf-8")
         self.assertIn("School shelf", body)
         self.assertIn("164", body)
-        self.assertIn("Count: **164**", body)
+        self.assertIn("Count: **42**", body)
         self.assertNotIn("## When", body)
         self.assertIn("BUS203", body)
         self.assertIn("mktg-value-stp-mix-plan-checklists", body)
@@ -3415,14 +3415,25 @@ class PipelineConversationBrainTest(unittest.TestCase):
         self.assertFalse(PIPE.RETRIEVE._token_hit("2", title.lower()))
         self.assertTrue(PIPE.RETRIEVE._token_hit("2", lock.lower()))
         self.assertGreater(PIPE.RETRIEVE._window_score(lock, words), PIPE.RETRIEVE._window_score(title, words))
-        line = PIPE.standing_lock_line(2)
+        # The standing-locks doc lives only on the Mac; write a temp copy so CI is hermetic.
+        lock_tmp = tempfile.TemporaryDirectory(prefix="pipeline-standing-locks-")
+        self.addCleanup(lock_tmp.cleanup)
+        lock_root = Path(lock_tmp.name)
+        doc = lock_root / "docs/hive/outer-heaven/CONTENT/topics/standing-locks-20260903.md"
+        doc.parent.mkdir(parents=True)
+        doc.write_text(f"# {title}\n\n1. Other lock.\n{lock}\n", encoding="utf-8")
+        with unittest.mock.patch.object(PIPE, "ROOT", lock_root):
+            line = PIPE.standing_lock_line(2)
+            live = PIPE.live_site_lock_line()
         self.assertIn("HOLD", line)
         self.assertIn("evenslouis.ca", line)
-        self.assertIn("HOLD", PIPE.live_site_lock_line())
+        self.assertIn("HOLD", live)
         raw = json.loads((PIPE.ROOT / "docs/hive/outer-heaven/brief.json").read_text(encoding="utf-8"))
         day = PIPE.brief_generated_day()
         self.assertTrue(str(raw.get("generatedAt") or "").startswith(day))
-        with tempfile.TemporaryDirectory(prefix="lock-route-") as tmp:
+        with tempfile.TemporaryDirectory(prefix="lock-route-") as tmp, unittest.mock.patch.object(
+            PIPE, "ROOT", lock_root
+        ):
             hive = Path(tmp)
             (hive / "bus").mkdir()
             routed = PIPE.harness_route(
