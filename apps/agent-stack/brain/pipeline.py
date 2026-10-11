@@ -502,6 +502,7 @@ SENSES = _load("agent_stack_face_senses", STACK / "face" / "senses.py")
 PRO = _load("agent_stack_pro", STACK / "hands" / "pro.py")
 CRAFT = _load("agent_stack_craft", STACK / "hands" / "craft.py")
 ONLINE = _load("agent_stack_online", HERE / "online.py")
+JEV = _load("agent_stack_jev_preflight", HERE / "jev_preflight.py")
 
 
 def now_iso() -> str:
@@ -5101,6 +5102,8 @@ def _commit_spoken(
             retrieve_roots=retrieve_roots,
         )
     next_turns = append_turn(prior_turns, spoken_in, text)
+    if JEV is not None:
+        JEV.record(hive, spoken_in, tool=tool, hard_step=is_hard_step(spoken_in))
     prior_bus = load_json(hive / "bus" / "state.json")
     digest = roll_digest(str(prior_bus.get("sitting_digest") or ""), spoken_in, text)
     committed = write_bus(

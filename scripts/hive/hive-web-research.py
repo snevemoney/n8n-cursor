@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import importlib.util
 import json
 import re
 import subprocess
@@ -641,6 +642,14 @@ def write_dossier(dossier: dict[str, Any], *, write_vault: bool) -> Path | None:
     return path
 
 
+def _hive_state():
+    spec = importlib.util.spec_from_file_location("hive_state", ROOT / "scripts/hive/hive-state.py")
+    mod = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def register_outcome(dossier: dict[str, Any], agent: str) -> dict[str, Any]:
     tool = ROOT / "scripts/hive/grok-hive-tool.py"
     if not tool.is_file():
@@ -650,12 +659,15 @@ def register_outcome(dossier: dict[str, Any], agent: str) -> dict[str, Any]:
         f"{dossier.get('successCount', 0)}/{dossier.get('artifactCount', 0)} sources"
     )
     params = json.dumps(
-        {
-            "correlationId": dossier.get("correlationId"),
-            "jobType": "research.web_intel",
-            "status": "done",
-            "summary": summary[:500],
-        }
+        _hive_state().guard_outcome_payload(
+            {
+                "correlationId": dossier.get("correlationId"),
+                "jobType": "research.web_intel",
+                "status": "done",
+                "summary": summary[:500],
+                "builder": agent,
+            }
+        )
     )
     proc = subprocess.run(
         [sys.executable, str(tool), "--grok-agent", agent, "--tool", "scorpion_register_outcome", "--params", params],
