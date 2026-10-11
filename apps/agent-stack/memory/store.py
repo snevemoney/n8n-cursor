@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import time
 from pathlib import Path
 
@@ -18,6 +19,9 @@ SESSIONS_CAP = 3
 ASK_CAP = 120
 _SESSION_CACHE: dict = {"at": 0.0, "lines": []}
 CACHE_SEC = 45.0
+# Shared fleet context (cross-platform sessions). Read-only, capped, opt-out.
+FLEET_CONTEXT = HERE / "context" / "JARVIS_CONTEXT.md"
+FLEET_CONTEXT_CAP = 80
 
 
 def _load(name: str, path: Path):
@@ -116,8 +120,28 @@ def sessions_block(*, live: bool) -> str:
     return "Chat sessions (titles only):\n" + "\n".join(rows)
 
 
+def fleet_context_block(path: Path | None = None, cap: int = FLEET_CONTEXT_CAP) -> str:
+    """Shared fleet context for the pack. Missing/disabled file -> empty string."""
+    if os.environ.get("JARVIS_FLEET_CONTEXT", "1").strip() == "0":
+        return ""
+    target = path or FLEET_CONTEXT
+    if not target.is_file():
+        return ""
+    try:
+        text = target.read_text(encoding="utf-8")
+    except OSError:
+        return ""
+    lines = text.strip().splitlines()[:cap]
+    if not lines:
+        return ""
+    return "Fleet context (shared, read-only):\n" + "\n".join(lines)
+
+
 def store_pack(hive: Path, *, live_sessions: bool) -> str:
     parts = [hive_block(hive)]
+    fleet = fleet_context_block()
+    if fleet:
+        parts.append(fleet)
     sessions = sessions_block(live=live_sessions)
     if sessions:
         parts.append(sessions)
