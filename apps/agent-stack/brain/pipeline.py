@@ -127,6 +127,7 @@ PERSONA = _load("agent_stack_persona", STACK / "mouth" / "persona.py")
 SEE = _load("agent_stack_see", STACK / "hands" / "see.py")
 PRO = _load("agent_stack_pro", STACK / "hands" / "pro.py")
 ONLINE = _load("agent_stack_online", HERE / "online.py")
+JEV = _load("agent_stack_jev_preflight", HERE / "jev_preflight.py")
 _EVENT_BUS = None
 
 
@@ -1138,6 +1139,8 @@ def _commit_spoken(
         )
     next_turns = append_turn(prior_turns, spoken_in, text)
     receipt = write_receipt(hive, turn_input=spoken_in, turn_output=text)
+    if JEV is not None:
+        JEV.record(hive, spoken_in, tool=tool, hard_step=is_hard_step(spoken_in))
     write_bus(
         hive,
         phase="speak",
