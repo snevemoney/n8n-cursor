@@ -22,3 +22,6 @@ Trusted vendor download pages get hijacked. Three independent September 2026 rep
 
 ## Proof
 `verify_download.py` was checked against a matching and a tampered file (packet signals-2mo-backlog-20261010/recreations/supply_chain.proof.json).
+
+## Scripted gate (2026-10-11, TOP100 #68)
+`./gate.py owner/repo[@tag|sha] ...` → PASS/REVIEW/HOLD per repo (licence, archived, last push, pinned ref, npm install hooks); exit 1 on any HOLD. Read-only. Verified 2026-10-11: OpenMontage HOLD (AGPL), paperclip/orca REVIEW (install hooks), claude-mem REVIEW (unpinned) — same as the manual REPOS_TESTED verdicts.

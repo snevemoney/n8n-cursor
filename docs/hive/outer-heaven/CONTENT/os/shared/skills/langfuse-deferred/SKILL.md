@@ -15,3 +15,6 @@ When Watchdog reports healthy disk (or operator OK):
 3. Money Desk owns receipts narrative.
 
 Until then: use event-bus / desk outputs for light receipts.
+
+## 2026-10-11 decision
+Still deferred; see /workspace/research/packets/top100-20261011/decisions/LANGFUSE-DEFERRED-20261011.md (use LiteLLM spend logs + route.jsonl).

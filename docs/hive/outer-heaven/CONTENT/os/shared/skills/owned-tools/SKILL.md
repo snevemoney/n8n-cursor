@@ -40,3 +40,6 @@ oh-notify "BLOCKED: Stripe key expired" "Researcher can't pull payouts; rotate t
 
 ## Receipt (append to the work receipt)
 `owned: tool=<search|transcribe|fetch|jev|notify> cmd="<cli + args, no secrets>" rc=<0|n> out=<path or count> fallback=<none|WebSearch|box-whisper|...>`
+
+## Weekly review (2026-10-11, TOP100 #66)
+Run `python3 fallback_rate.py 7` weekly; target fallback <20%. Zero receipts = desks are not logging the line; fix the desk, not the tool.
