@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -191,6 +192,58 @@ class SpeakStoreTest(unittest.TestCase):
         self.assertNotIn("METHODS/", spoken)
         self.assertNotIn("Grok shared workflows", spoken)
 
+
+
+class SharedBrainContextTest(unittest.TestCase):
+    def _write(self, root: Path) -> None:
+        (root / "CURRENT_STATE.md").write_text("# CURRENT_STATE\n<!-- BEGIN brain-export:auto -->\nRotate keys first.\n", encoding="utf-8")
+        (root / "OPERATOR_PROFILE.md").write_text("# OPERATOR_PROFILE\nLead with a plain summary.\n", encoding="utf-8")
+        (root / "TOOLS_AND_REPOS.md").write_text("# TOOLS\n| ntfy | https://ntfy.example | LIVE |\n", encoding="utf-8")
+        (root / "SKILLS_INDEX.md").write_text("| Skill | d | p |\n|---|---|---|\n| `a11y-pass` | x | y |\n| `teach` | x | y |\n", encoding="utf-8")
+
+    def test_loads_all_new_shared_files(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-shared-") as tmp:
+            root = Path(tmp); self._write(root)
+            text = MOD.shared_context_block(root)
+        self.assertTrue(text.startswith("Shared brain (read-only):"))
+        for name in ("CURRENT_STATE.md", "OPERATOR_PROFILE.md", "TOOLS_AND_REPOS.md", "SKILLS_INDEX.md"):
+            self.assertIn(f"[{name}]", text)
+        self.assertIn("2 skills: a11y-pass, teach", text)
+        self.assertIn("Lead with a plain summary.", text)
+        self.assertNotIn("<!--", text)
+
+    def test_caps_lines(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-shared-") as tmp:
+            root = Path(tmp)
+            (root / "OPERATOR_PROFILE.md").write_text("\n".join(f"line {i}" for i in range(500)), encoding="utf-8")
+            text = MOD.shared_context_block(root)
+        self.assertIn("line 44", text)
+        self.assertNotIn("line 45", text)
+
+    def test_missing_dir_and_opt_out(self) -> None:
+        self.assertEqual(MOD.shared_context_block(Path("/tmp/no-such-shared-dir")), "")
+        old = os.environ.get("JARVIS_SHARED_CONTEXT")
+        os.environ["JARVIS_SHARED_CONTEXT"] = "0"
+        try:
+            with tempfile.TemporaryDirectory(prefix="agent-stack-shared-") as tmp:
+                self._write(Path(tmp))
+                self.assertEqual(MOD.shared_context_block(Path(tmp)), "")
+        finally:
+            if old is None:
+                os.environ.pop("JARVIS_SHARED_CONTEXT", None)
+            else:
+                os.environ["JARVIS_SHARED_CONTEXT"] = old
+
+    def test_store_pack_includes_shared_brain_when_present(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-shared-") as tmp:
+            root = Path(tmp); self._write(root)
+            old = MOD.SHARED_DIR
+            MOD.SHARED_DIR = root
+            try:
+                pack = MOD.store_pack(Path(tmp) / "no-hive", live_sessions=False)
+            finally:
+                MOD.SHARED_DIR = old
+        self.assertIn("Shared brain (read-only):", pack)
 
 if __name__ == "__main__":
     unittest.main()
