@@ -247,7 +247,17 @@ class SpeakStoreTest(unittest.TestCase):
         spec.loader.exec_module(ret)
         self.assertIsNone(ret.configured_dir(""))
         self.assertIsNone(ret.configured_dir("."))
-        roots = ret.vault_oh_roots()
+        # The live vault is Mac-only; build a temp one and point the env fallback at it.
+        with tempfile.TemporaryDirectory(prefix="vault-oh-") as tmp:
+            hive = Path(tmp) / "hive"
+            hive.mkdir()
+            (hive / "agent-stack.json").write_text('{"vault": {"oh": "", "path": "."}}', encoding="utf-8")
+            vault = Path(tmp) / "vault"
+            (vault / "00_Outer_Heaven").mkdir(parents=True)
+            with mock.patch.object(ret, "HIVE", hive), mock.patch.dict(
+                os.environ, {"HIVE_OBSIDIAN_VAULT": str(vault)}
+            ):
+                roots = ret.vault_oh_roots()
         cwd = Path.cwd().resolve()
         self.assertTrue(roots)
         self.assertNotIn(cwd, [path.resolve() for path in roots])
@@ -676,6 +686,35 @@ class MemoryAnswerCacheFreshnessTest(unittest.TestCase):
             self.assertIn('CACHE-ALPHA', before['spoken'])
             self.assertIn('CACHE-BRAVO', after['spoken'])
             self.assertNotIn('CACHE-ALPHA', after['spoken'])
+
+    def test_identical_stat_snapshot_still_rereads_changed_bytes(self):
+        # Deterministic form of the restored-mtime case: metadata is pinned, so
+        # only the content digest can tell the two versions apart.
+        with tempfile.TemporaryDirectory() as tmp:
+            ret = self.retrieve()
+            root = Path(tmp)
+            path = root / 'OPERATOR_MEMORY.md'
+            path.write_text('Favorite marker CACHE-ALPHA.\n')
+            pinned = ((str(path), str(path.resolve()), 0, 0, 29, 0, 0, 0, 0),)
+            with mock.patch.object(ret.time, 'time', return_value=1000), mock.patch.object(
+                ret, '_search_source_snapshot', return_value=pinned
+            ):
+                before = ret.search('Favorite marker', [root])
+                path.write_text('Favorite marker CACHE-BRAVO.\n')
+                after = ret.search('Favorite marker', [root])
+            self.assertIn('CACHE-ALPHA', before['spoken'])
+            self.assertIn('CACHE-BRAVO', after['spoken'])
+
+    def test_unchanged_bytes_reuse_cached_answer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ret = self.retrieve()
+            root = Path(tmp)
+            (root / 'OPERATOR_MEMORY.md').write_text('Favorite marker CACHE-ALPHA.\n')
+            with mock.patch.object(ret.time, 'time', return_value=1000):
+                first = ret.search('Favorite marker', [root])
+                with mock.patch.object(ret, '_search_roots', side_effect=AssertionError('cache miss')):
+                    second = ret.search('Favorite marker', [root])
+            self.assertEqual(first, second)
 
     def test_removed_note_does_not_reuse_cached_answer(self):
         with tempfile.TemporaryDirectory() as tmp:

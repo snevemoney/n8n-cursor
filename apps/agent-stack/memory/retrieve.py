@@ -6,6 +6,7 @@ Filter first — cite snippets — UNKNOWN on a miss. Talking does not write not
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -87,7 +88,7 @@ _CANDIDATE_TTL = 2.0
 # UF_DATALESS — macOS iCloud placeholder. Do not open; open hydrates and can stall.
 UF_DATALESS = 0x00004000
 READ_JOIN_S = 0.45
-_SEARCH_CACHE: dict[str, tuple[float, tuple, dict]] = {}
+_SEARCH_CACHE: dict[str, tuple[float, tuple, dict, tuple]] = {}
 _SEARCH_TTL = 12.0
 CLOUD_PLACEHOLDER = "Live vault file is a cloud placeholder."
 # Mouth never reads these aloud. Pack / model brief still may cite them.
@@ -1024,6 +1025,35 @@ def news_signals(query: str, roots: list[Path] | None = None) -> dict:
     }
 
 
+def _search_content_digest(snapshot: tuple) -> tuple:
+    """Content identity for the files in a stat snapshot.
+
+    Metadata can repeat after a same-size edit whose mtime was restored, because
+    ctime only advances on a coarse kernel tick. Only called when the stat
+    snapshot already matches (and once when an answer is cached), so the bytes
+    are read only when metadata alone cannot prove freshness. iCloud dataless
+    placeholders are never opened.
+    """
+    out = []
+    for entry in snapshot:
+        if len(entry) < 3 or entry[1] is None:
+            out.append((entry[0], None))
+            continue
+        path = Path(entry[0])
+        try:
+            if not path.is_file() or is_unavailable_placeholder(path):
+                out.append((entry[0], "skip"))
+                continue
+            digest = hashlib.blake2b(digest_size=16)
+            with path.open("rb") as handle:
+                for chunk in iter(lambda: handle.read(1 << 16), b""):
+                    digest.update(chunk)
+            out.append((entry[0], digest.hexdigest()))
+        except OSError:
+            out.append((entry[0], "error"))
+    return tuple(out)
+
+
 def search(query: str, roots: list[Path] | None = None) -> dict:
     words = tokens(query)
     used = [Path(r) for r in roots if r] if roots is not None else resolve_roots()
@@ -1033,13 +1063,14 @@ def search(query: str, roots: list[Path] | None = None) -> dict:
     now = time.time()
     snapshot = _search_source_snapshot(used)
     hit = _SEARCH_CACHE.get(key)
-    if hit and now - hit[0] < _SEARCH_TTL and hit[1] == snapshot:
+    if hit and now - hit[0] < _SEARCH_TTL and hit[1] == snapshot and hit[3] == _search_content_digest(snapshot):
         return hit[2]
+    digest = _search_content_digest(snapshot)
     found = _search_roots(query, used)
     # Misses and failed reads can recover without a metadata change. Do not
     # retain them as if they were stable source evidence.
     if not found.get("unknown") and not found.get("unavailable"):
-        _SEARCH_CACHE[key] = (now, snapshot, found)
+        _SEARCH_CACHE[key] = (now, snapshot, found, digest)
     else:
         _SEARCH_CACHE.pop(key, None)
     return found
