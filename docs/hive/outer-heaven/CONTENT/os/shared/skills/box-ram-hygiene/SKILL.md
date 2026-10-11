@@ -37,3 +37,9 @@ Shared box: one ~16 GB Linux machine for all desks. Desktops are per-agent; **RA
 
 ## Report shape (operator)
 One short line: freed ≈X GiB; chrome closed N; daemons OK; available now Y GiB. Stay quiet on routine runs when Available ≥ 3 GiB and chrome idle count is zero.
+
+## Fleet rule: repo clones and disk (added 2026-10-11)
+- Never clone a repo into /tmp (or anywhere) when a checkout already exists on the box. Prefer `git -C <existing repo> worktree add <path> <branch>`; worktrees share objects and cost only the working tree.
+- If a throwaway clone is truly needed, use `--depth 1` and delete it the moment the task is done (`rm -rf` the clone, or `git worktree remove` + `git worktree prune` for worktrees). Do not leave clones for the next desk.
+- Large render outputs (`out/`, `*.mp4`) are archived to restic (/workspace/backups) with a hash-verified test restore before local deletion; never delete unarchived renders.
+- Before ending a session, `df -h /`; if free < 15 GB, clean up what you created.
