@@ -49,3 +49,9 @@ Sample estimate (same codes): [path]
 Outputs: estimate rows · inclusions/exclusions/assumptions · allowances
 Golden one job. No invented unit costs. No send. No new ICP.
 ```
+
+
+## Merged from document-processing-micro-demo (2026-10-11 gap audit)
+- Position: P2 proof after speed-to-lead; do not sell as the main SKU before STL.
+- Always label the demo and keep an AI-off path.
+- Provenance wave Z `CWvN7NN-14c` (2026-09-09): doc collection = checklist-diff uploads, remind only on gaps, CRM onboarding writeback; DocuSign/phone BLOCKED. Packet `repass-20260909/CWvN7NN-14c/`.

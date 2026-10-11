@@ -59,3 +59,8 @@ Skill path whose instructions we will optimize:
 
 ## Enrich 2026-09-21 — JUDGE_RUBRIC / jev-as-judge (yt:VE5dsWll06M)
 Online evals: score agent answers on correct / grounded / cited with a cheap gate instead of LLM-as-judge when rubric is closed. Vendor “more consistent” = UNVERIFIED. Local: `harness-route-risk-judge`.
+
+
+## Owned-tools wiring (2026-10-11 gap audit)
+- Jev/router regressions: `/workspace/tools/jev-evals/run.sh` (promptfoo, 25 cases, ~$0.001). Run after ANY change to `~/.local/bin/jev-route` or the Jev policy; must stay PASS 25/25. Promptfoo CLI also at `/workspace/tools/promptfoo-cli`.
+- Append a line: `oh-uselog promptfoo eval`.

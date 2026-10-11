@@ -43,3 +43,7 @@ oh-notify "BLOCKED: Stripe key expired" "Researcher can't pull payouts; rotate t
 
 ## Weekly review (2026-10-11, TOP100 #66)
 Run `python3 fallback_rate.py 7` weekly; target fallback <20%. Zero receipts = desks are not logging the line; fix the desk, not the tool.
+
+## See also (2026-10-11)
+- `owned-tools-method-map` (every owned tool → when to use, proof-of-use log `~/.local/state/owned-tools/use.jsonl`).
+- `request-routing-chains` (which tools/skills/connectors run in which order per request type).

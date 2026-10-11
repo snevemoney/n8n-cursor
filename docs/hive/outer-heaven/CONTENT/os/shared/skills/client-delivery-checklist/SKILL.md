@@ -1,10 +1,12 @@
 ---
 name: Client delivery checklist
 description: >-
-  Use at handoff of an automation or site install — client hosts where needed, QA ladder, Loom, 60/30/10, Grok-first with n8n as fallback.
+  DEPRECATED alias: use client-delivery-checklist-grok-first (merged 2026-10-11). Kept so old links do not break.
 ---
 
-# Client delivery checklist
+# Client delivery checklist (DEPRECATED)
+
+> Merged into `client-delivery-checklist-grok-first/SKILL.md` on 2026-10-11. Use that one.
 
 Sources: Nate 60/30/10 and client-hosted n8n; youtube-ai-implement P1 #6.
 

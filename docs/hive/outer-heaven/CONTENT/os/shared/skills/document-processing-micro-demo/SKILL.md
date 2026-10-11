@@ -1,9 +1,11 @@
 ---
 name: Document-processing micro-demo
 description: >-
-  Use when: P2 proof after speed-to-lead
+  DEPRECATED alias: use document-processing-microdemo (merged 2026-10-11). Kept so old links do not break.
 ---
-# Document-processing micro-demo
+# Document-processing micro-demo (DEPRECATED)
+
+> Merged into `document-processing-microdemo/SKILL.md` on 2026-10-11. Use that one.
 
 **Owner desk:** Forge  
 **Lane:** ai-partner-websites  

@@ -87,3 +87,8 @@ Reusable artifact on disk (brief, packet, checklist, or skill note) — not chat
 | 16 | @AdamKPx | 1 | agents vibe-test apps (habit, no SaaS) | hive-os |
 
 Amazon / ASIN: **none** in this dump. HOLD sellers-as-clients. Quarantine not listed: @SD_Tutorial NSFW · @1337_viking @Av1dlive jailbreak · @everestchris6 cold-mail · @sandy4kad $ UNVERIFIED. USE_STUB until Evens locks.
+
+
+## Owned-tools wiring (2026-10-11 gap audit)
+- Research pass: `oh-search "<competitor> pricing"` (private SearXNG) then `oh-fetch <url>`; video claims: `oh-transcribe <url>`. All log to use.jsonl.
+- App/binary internals: use the `app-teardown-rea` skill (REA MCP / Ghidra), never on anything we lack the right to analyze.

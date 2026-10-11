@@ -153,3 +153,6 @@ Label: LOCALLY_SUPPORTED = backed by a local receipt/test; CANDIDATE = documente
 
 ## Receipt line (append to your work receipt)
 `jev: pack=<pack> mode=<SHADOW|ADVISORY|ASSIST|GATE> tier=<tier> band=<band> lane=<lane> action=<action> hard_step=<human|none> live=<yes|no> authoritative=no`
+
+## Next step after preflight (2026-10-11)
+Pick the chain in `request-routing-chains/SKILL.md`. jev-route v3.1 also logs role/perm/rate (see the script header; JEV_ROLE, JEV_RATE_PER_MIN, ~/.config/jev/permissions.json).
