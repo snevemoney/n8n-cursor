@@ -30,11 +30,11 @@ This chat is listed in Cursor's conversation index but has no `agent-transcripts
 
 ## Related chats
 
+- [[20260816-development-environment-setup-bc-b45ea|Development environment setup]]
 - [[20260324-development-environment-setup-bc-9d9b2|Development environment setup]]
 - [[20260806-development-environment-setup-bc-1df10|Development environment setup]]
 - [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-01846|AI agent with tools, memory, and output parsing]]
 - [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-8dac0|AI agent with tools, memory, and output parsing]]
-- [[20250822-fix-three-code-bugs-bc-ab96d|Fix three code bugs]]
 
 ## Canon
 

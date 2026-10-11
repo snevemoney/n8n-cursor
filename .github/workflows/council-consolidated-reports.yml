@@ -31,6 +31,8 @@ on:
 jobs:
   generate-consolidated-report:
     runs-on: ubuntu-latest
+    env:
+      HAS_SMTP: ${{ secrets.SMTP_USER != '' || secrets.N8N_SMTP_USER != '' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -83,12 +85,12 @@ jobs:
           fi
           
           # Get workflow runs from monitored workflows (simplified - just get recent runs)
-          WORKFLOWS=$(gh run list --workflow=CI.yml --limit $LIMIT --json name,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
-          SECURITY_WORKFLOWS=$(gh run list --workflow="Security Scan" --limit $LIMIT --json name,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
-          BACKUP_WORKFLOWS=$(gh run list --workflow="Automated Backup & Verification" --limit $LIMIT --json name,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
+          WORKFLOWS=$(gh run list --workflow=ci.yml --limit $LIMIT --json workflowName,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
+          SECURITY_WORKFLOWS=$(gh run list --workflow="Security Scan" --limit $LIMIT --json workflowName,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
+          BACKUP_WORKFLOWS=$(gh run list --workflow="Automated Backup & Verification" --limit $LIMIT --json workflowName,conclusion,headBranch,headSha,createdAt,displayTitle 2>/dev/null || echo "[]")
           
-          # Combine workflows and get unique by SHA
-          ALL_WORKFLOWS=$(echo "$WORKFLOWS $SECURITY_WORKFLOWS $BACKUP_WORKFLOWS" | jq -s 'flatten | unique_by(.headSha)' 2>/dev/null || echo "[]")
+          # Keep each observed workflow; a passing sibling must not hide a failure.
+          ALL_WORKFLOWS=$(echo "$WORKFLOWS $SECURITY_WORKFLOWS $BACKUP_WORKFLOWS" | jq -s 'flatten | unique_by([.workflowName, .headSha, .createdAt])' 2>/dev/null || echo "[]")
           
           # Calculate cutoff date (ISO format)
           CUTOFF_DATE=$(date -u -d "$DAYS days ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-${DAYS}d +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo "1970-01-01T00:00:00Z")
@@ -97,7 +99,7 @@ jobs:
           WORKFLOW_DATA=$(echo "$ALL_WORKFLOWS" | jq --arg cutoff "$CUTOFF_DATE" '
             map(select(.createdAt >= $cutoff)) |
             map({
-              workflowName: (.name // "Unknown"),
+              workflowName: (.workflowName // "Unknown"),
               status: (if .conclusion == "success" then "success" elif .conclusion == "failure" then "failure" else "cancelled" end),
               branch: (.headBranch // "unknown"),
               commitSha: (.headSha // ""),
@@ -109,12 +111,9 @@ jobs:
             .[0:20]
           ' 2>/dev/null || echo "[]")
           
-          # If no workflows found, create a sample entry
-          if [ -z "$WORKFLOW_DATA" ] || [ "$WORKFLOW_DATA" = "[]" ]; then
-            NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-            WORKFLOW_DATA="[{\"workflowName\":\"No recent workflows\",\"status\":\"success\",\"branch\":\"main\",\"commitSha\":\"0000000\",\"commitMessage\":\"No workflows found in this period\",\"timestamp\":\"$NOW\",\"changedFiles\":[],\"errorMessages\":[]}]"
-          fi
-          
+          # No observations means an empty report, never synthetic success.
+          if [ -z "$WORKFLOW_DATA" ]; then WORKFLOW_DATA="[]"; fi
+
           echo "workflows<<EOF" >> $GITHUB_OUTPUT
           echo "$WORKFLOW_DATA" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -193,9 +192,9 @@ jobs:
           else
             REPORT_CONTENT="🦂 Consolidated Build Report
 
-Status: Report generation failed. Please check workflow logs.
+          Status: Report generation failed. Please check workflow logs.
 
-View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           fi
           
           echo "content<<EOF" >> $GITHUB_OUTPUT
@@ -206,7 +205,7 @@ View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Send consolidated email
-        if: always() && steps.prepare-email.outcome == 'success' && (secrets.SMTP_USER != '' || secrets.N8N_SMTP_USER != '')
+        if: always() && steps.prepare-email.outcome == 'success' && env.HAS_SMTP == 'true'
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_HOST || secrets.N8N_SMTP_HOST || 'smtp.gmail.com' }}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import subprocess
 import sys
 import tempfile
@@ -250,7 +251,13 @@ class HiveGateTest(unittest.TestCase):
     def test_verifier_live_applies_state(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             tmp = Path(raw)
-            tmp = write_claim(tmp, "WIRED", live_evidence(tmp))
+            # Bind synthetic transition evidence to bytes in this temporary worktree.
+            implementation = tmp / "implementation.py"
+            implementation.write_text("fixture=1\n")
+            evidence = live_evidence(tmp)
+            evidence["source_hashes"] = {"implementation.py": hashlib.sha256(implementation.read_bytes()).hexdigest()}
+            runtime = {**evidence, "source_paths": ["implementation.py"]}
+            tmp = write_claim(tmp, "WIRED", evidence, runtime=runtime)
             proc = request(tmp, "LIVE", "watchdog", "verifier")
             self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
             self.assertIn('"applied": true', proc.stdout)
@@ -356,10 +363,17 @@ class HiveGateTest(unittest.TestCase):
     def test_cursor_separate_run_may_verify(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             tmp = Path(raw)
+            # Bind synthetic transition evidence to bytes in this temporary worktree.
+            implementation = tmp / "implementation.py"
+            implementation.write_text("fixture=1\n")
+            evidence = live_evidence(tmp)
+            evidence["source_hashes"] = {"implementation.py": hashlib.sha256(implementation.read_bytes()).hexdigest()}
+            runtime = {**evidence, "source_paths": ["implementation.py"]}
             tmp = write_claim(
                 tmp,
                 "LIVE",
-                live_evidence(tmp),
+                evidence,
+                runtime=runtime,
                 verifier={
                     "platform": "cursor",
                     "agent": "cursor_background_agent",

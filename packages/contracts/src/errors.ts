@@ -471,7 +471,7 @@ export function createErrorResponse(
   details?: ErrorDetails,
   requestId?: string
 ): ErrorResponse {
-  const errorInfo = errorCatalog[code];
+  const errorInfo = getErrorInfo(code);
   
   return {
     error: code,
@@ -480,25 +480,25 @@ export function createErrorResponse(
     category: errorInfo.category,
     retryable: errorInfo.retryable,
     timestamp: new Date().toISOString(),
-    requestId,
-    details
+    ...(requestId !== undefined ? { requestId } : {}),
+    ...(details !== undefined ? { details } : {})
   };
 }
 
 export function getErrorInfo(code: ErrorCode) {
-  return errorCatalog[code];
+  return errorCatalog[validateErrorCode(code)];
 }
 
 export function getHttpStatus(code: ErrorCode): number {
-  return errorCatalog[code].http;
+  return getErrorInfo(code).http;
 }
 
 export function isRetryable(code: ErrorCode): boolean {
-  return errorCatalog[code].retryable;
+  return getErrorInfo(code).retryable;
 }
 
 export function getErrorCategory(code: ErrorCode): ErrorCategory {
-  return errorCatalog[code].category;
+  return getErrorInfo(code).category;
 }
 
 // Error response helpers for different frameworks
@@ -507,7 +507,7 @@ export function createExpressErrorResponse(
   details?: ErrorDetails,
   requestId?: string
 ) {
-  const errorInfo = errorCatalog[code];
+  const errorInfo = getErrorInfo(code);
   
   return {
     status: errorInfo.http,
@@ -519,8 +519,8 @@ export function createNextResponse(
   code: ErrorCode,
   details?: ErrorDetails,
   requestId?: string
-) {
-  const errorInfo = errorCatalog[code];
+): Response {
+  const errorInfo = getErrorInfo(code);
   
   return new Response(
     JSON.stringify(createErrorResponse(code, details, requestId)),
@@ -535,7 +535,7 @@ export function createNextResponse(
 
 // Error validation
 export function isValidErrorCode(code: string): code is ErrorCode {
-  return code in errorCatalog;
+  return Object.prototype.hasOwnProperty.call(errorCatalog, code);
 }
 
 export function validateErrorCode(code: string): ErrorCode {

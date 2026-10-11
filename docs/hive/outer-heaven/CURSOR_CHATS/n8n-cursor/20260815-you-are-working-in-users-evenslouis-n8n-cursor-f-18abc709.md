@@ -129,10 +129,10 @@ Add this to every tape you walk (caption-honest; do not invent clicks):
 ## Related chats
 
 - [[20260815-you-are-working-in-users-evenslouis-n8n-cursor-f-dea68a50|You are working in /Users/evenslouis/n8n-cursor fo]]
+- [[20260816-you-are-working-in-users-evenslouis-n8n-cursor-f-8b308d82|You are working in /Users/evenslouis/n8n-cursor fo]]
 - [[20260815-evens-asked-do-our-system-and-agents-work-this-w-49b662c5|Evens asked: do our system and agents work this wa]]
 - [[20260814-evens-asked-test-prospects-leads-clients-buyers--7c7a4163|Evens asked: test prospects, leads, clients, buyer]]
 - [[20260814-evens-sent-the-knowledge-synthesis-and-workflow--78ade25c|Evens sent the **Knowledge Synthesis and Workflow ]]
-- [[20260814-evens-pasted-a-deep-video-learning-protocol-.-in-a1f01faf|Evens pasted a **Deep Video Learning Protocol**. I]]
 
 ## Canon
 

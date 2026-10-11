@@ -1,11 +1,18 @@
 ---
 source: Librarian
-date: 2026-08-12
+date: 2026-08-21
 ---
 
 # Agent skills index (from Outer Heaven)
 
 Shared Grok workflows encoded from CONTENT packs (website-building, Nate Herk, related YouTubers, AI Partner playbook, Shared Memory Plane). Invoke with `/` or `@` in Grok.
+
+**Live catalog (2026-08-21):** **325** masters in `scripts/hive/grok-skills/*.md` (SSOT). The **237** canvas is an Aug 17 snapshot. Grok mirrors `~/.grokbot/skills/` = 333 (325 + 8 money-spine orphans, no master — do not count). Older **246** (2026-08-19) is stale. This page stays a **curated subset** — pick by job card; do not dump all skills into a chat. **METHODS/** = 8 playbooks (cache + git). Librarian capture cycle = `run-capture-cycle.sh` (not a skill slug). Outer Heaven first action = `outer-heaven-brief.py` (not a skill slug).
+
+
+## When Remotion (2026-08-21 operator lock)
+
+Trigger words: animate / video / composition / captions / map route / coded walkthrough. Load Remotion plugin `remotion-best-practices` (router). Routes → `remotion-maps`. Hybrid: one repo composition, Studio drag-drop saves back to code. Higgsfield in, Remotion out, Mobbin taste. **Not a new SKU.** Shared workflow: `when-remotion` workflow.
 
 ## Website craft (Forge / Creative Studio)
 
@@ -99,7 +106,7 @@ Packet: `research-packets/ai-partner-scoring-prototype-ladder/AGENT_SKILLS.md`
 |------------------|------|
 | [pricing margin ROI guardrails](sand-workflow:pricing-margin-roi-guardrails) | SKU/margin/ROI score · HOLD/walk |
 | [proof 30-60-90](sand-workflow:proof-30-60-90) | KPI evidence after delivery |
-| CONTENT/business-kits/money-desk.md | Money Desk hive kit |
+| CONTENT/business-kits/Money Desk Playbook.md | Money Desk hive kit |
 | METHODS/business-money-desk-cheat-sheet.md | Short METHODS pointer |
 | [proposal change order](sand-workflow:proposal-change-order) | G12 scope freeze + change orders after yes |
 | ~/.grokbot/cheat-sheets/money-desk.md | Working cheat sheet |
@@ -107,7 +114,7 @@ Packet: `research-packets/ai-partner-scoring-prototype-ladder/AGENT_SKILLS.md`
 
 ## CE flywheel canon (2026-08-12)
 
-**Method:** [[METHODS/business-ce-flywheel-to-agents]] · pack [[CONTENT/ai-partner-scoring-prototype-ladder/CE-FLYWHEEL-TO-AGENTS]]  
+**Method:** [[METHODS/business-ce-flywheel-to-agents]] · pack [[CONTENT/ai-partner-scoring-prototype-ladder/Client Engine Workflow Mapping]]  
 **Cheats SSOT:** `~/.grokbot/cheat-sheets/` (consultant.md, money-desk.md indexed)  
 **Skills SSOT:** `~/.grokbot/skills/` + sand-workflows
 
@@ -122,7 +129,7 @@ Packet: `research-packets/ai-partner-scoring-prototype-ladder/AGENT_SKILLS.md`
 
 ## Business kits (10 active)
 
-See [[CONTENT/business-kits/INDEX]] — working cheats in `~/.grokbot/cheat-sheets/`.
+See [[CONTENT/business-kits/Business Playbooks]] — working cheats in `~/.grokbot/cheat-sheets/`.
 
 ## Product GTM (indexed 2026-08-12)
 
@@ -130,7 +137,7 @@ See [[CONTENT/business-kits/INDEX]] — working cheats in `~/.grokbot/cheat-shee
 |------------------|------|
 | [Four-blank SKU](sand-workflow:four-blank-sku) | After POSITION — four blanks + first-ask rung |
 | [GTM one-pager refresh](sand-workflow:gtm-one-pager-refresh) | Public proof URL live/changed — update CTAs |
-| CONTENT/business-kits/product-gtm.md | Product GTM hive kit (active) |
+| CONTENT/business-kits/Product GTM Playbook.md | Product GTM hive kit (active) |
 | ~/.grokbot/cheat-sheets/product-gtm.md | Working cheat (if present) |
 
 
@@ -178,3 +185,82 @@ Master sheet: `CONTENT/watch-later/STEAL_SHEET.md` · `business-types.json`
 Whole argument: `CONTENT/watch-later/DEEP_SUMMARIES.md`  
 One-person subset: `CONTENT/watch-later/USE_CASES-one-person.md`
 
+
+
+## Live catalog + newest (2026-08-19)
+
+Pick by job card. Do not dump the 246. Repo: `scripts/hive/grok-skills/<slug>.md` · Grok `/`: `~/.grokbot/skills/<slug>/SKILL.md`
+
+| slug | owner/lane | when-to-use | path |
+|------|------------|-------------|------|
+| cursor-chat-sessions | Librarian (index) · Researcher (read) | Read one Cursor sitting by id; live SSOT `~/.cursor/projects/*/agent-transcripts/` | `scripts/hive/grok-skills/cursor-chat-sessions.md` |
+| internal-host-os | Forge · Librarian | Cursor+Grok as hosts; vault as external app; raw → wiki + graph-index | `scripts/hive/grok-skills/internal-host-os.md` |
+| specialist-handoff-group-chat | Comms · Day Planner · HITL | Two named specialists + dump + written handoff in thread; draft ≠ send | `scripts/hive/grok-skills/specialist-handoff-group-chat.md` |
+| org-before-skills | Forge · Librarian | Messy org → named folders + routing before adding skills | `scripts/hive/grok-skills/org-before-skills.md` |
+| six-boring-skills | Forge · Librarian · Big Boss | Winning session → one boring named skill; not a 100-skill dump | `scripts/hive/grok-skills/six-boring-skills.md` |
+| sell-outcome-not-agent-template | Consultant + Product GTM | Agent-template pitch → outcome sentence (I help ICP get X) | `scripts/hive/grok-skills/sell-outcome-not-agent-template.md` |
+| named-team-not-swarm | Forge · Watchdog · Librarian | Two+ specialists → named team + handoff + other-desk GRADE | `scripts/hive/grok-skills/named-team-not-swarm.md` |
+| wiki-ingest | Librarian | Pile of sources → Outer Heaven pages (raw, index, log, provenance) | `scripts/hive/grok-skills/wiki-ingest.md` |
+
+---
+
+## Tape-walk proposed → shipped (2026-08-19, unfolded 87)
+
+Consultant distributed after fleet takes. Bodies: `~/.grokbot/skills/<slug>/SKILL.md` and `scripts/hive/grok-skills/<slug>.md`.
+Host split on every card: public URL → desk browser; Mac localhost → ExternalShell on the user Mac (approval); box browser ≠ Mac :8080. Hard step = HITL.
+
+Already existed (not rewritten): `confirm-then-actuate` · `input-required-gate` · `send-removed` · `token-receipt` · `wiki-lint`.
+
+### Consultant
+`skeptical-customer-pass` · `eval-harness-scope` · `same-day-rubric` · `confirm-then-writeback` (shared) · `factory-not-feature` (shared) · `accomplishment-vault`
+
+### Product GTM
+`known-good-compare` · `time-to-aha-gate` · `waitlist-before-stripe` · `waitlist-before-build` · `talk-track-17` · `packaging-parallel`
+
+### Money Desk
+`unit-econ-card` · `sandbox-before-live` · `sandbox-then-live` · `three-number-loop` · `opportunity-cost-hold` · `opportunity-cost-kill` · `contract-microscope`
+
+### Lead Hunter
+`list-exclusion-lint` · `seed50-score-prompt` · `needs-review-column` · `around-the-call` · `icp-as-argument` · `recon-then-book` · `batch-credit-cap`
+
+### Researcher
+`packet-break-fix` · `session-review-anneal` · `cheap-read-expensive-decide` · `last-30-days-scan` · `computer-use-verify` · `confirm-back` · `grill-me-into-prompt` · `waitlist-before-product`
+
+### Forge
+`adversarial-click-pass` · `isolated-worktree-board` · `known-good-artifact` · `domain-cutover-smoke`
+
+### HITL Operator
+`tier-3-card` · `callback-before-book` · `one-job-one-test`
+
+### Communications Manager
+`inbox-three-buckets` · `thread-handoff-cache` · `loop-alley-status` · `confirm-before-commit` · `grill-me-into-playbook` · `same-day-touch-qa` · `waitlist-is-data`
+
+### Publishing Engine
+`video-drop-pack` · `report-from-transcript` · `brand-as-skill` · `waitlist-proof-page` · `proof-walkthrough`
+
+### Watchdog
+`agent-verify-pass` · `session-not-found-smoke` · `preview-domain-smoke` · `same-day-score` · `confirm-before-hard-step`
+
+### Day Planner
+`conflict-flag-digest` · `one-job-one-session` · `end-of-day-dictation-bank` · `poll-dont-block` · `recon-then-confirm` · `same-day-plan-score` · `waitlist-before-keys`
+
+### Librarian
+`capture-cycle-hot` · `provenance-gate` · `six-p-packet` · `program-md-lint` · `session-review-lint`
+
+### Big Boss
+`fleet-escalation-brief` · `parallel-worktree-pm` · `cards-not-docs` · `known-good-break-pass`
+
+### Career Strategist
+`dump-then-gym` · `hire-ladder` · `mock-score-loop`
+
+### Creative Studio
+`brand-template-as-skill` · `taste-veto` · `lighting-panel` · `playbook-cards` · **When Remotion** (plugin `remotion-best-practices` / `remotion-maps` — not a grok-skills master)
+
+### Personal CFO / Wealth Manager
+`stripe-sandbox-before-live` · `input-required-money` · `kill-on-opportunity-cost` · `unit-econ-smoke` · `waitlist-as-option` · `wiki-lint-holdings`
+
+**Status (Librarian):** 87 tape-walk skills = installed / UNVERIFIED. No METHODS stamp until a desk actually runs that skill. Tape $ stay UNVERIFIED. Sacred files: do not overwrite. Librarian-owned (run first when a desk needs them): `capture-cycle-hot` · `provenance-gate` · `six-p-packet` · `program-md-lint` · `session-review-lint` · `end-of-day-dictation-bank` (also listed under Day Planner).
+
+## SIGNAL_INDEX (2026-08-24)
+
+Desks start research from [SIGNAL_INDEX.md](SIGNAL_INDEX.md). Do not dump L2 bodies. Pick by job card.

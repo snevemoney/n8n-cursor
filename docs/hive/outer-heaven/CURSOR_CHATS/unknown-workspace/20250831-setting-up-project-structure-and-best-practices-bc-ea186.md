@@ -31,10 +31,10 @@ This chat is listed in Cursor's conversation index but has no `agent-transcripts
 ## Related chats
 
 - [[20250831-setting-up-project-structure-and-best-practices-bc-e241e|Setting up project structure and best practices]]
+- [[20260815-project-structure-and-naming-bc-808d3|Project structure and naming]]
+- [[20260816-project-structure-and-naming-bc-808d3|Project structure and naming]]
 - [[20260222-youtube-transcript-system-bc-09ba1|YouTube transcript system]]
 - [[20260807-context-engineering-principles-bc-4571c|Context engineering principles]]
-- [[20260814-grok-agent-telephony-bc-019ff|Grok agent telephony]]
-- [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-01846|AI agent with tools, memory, and output parsing]]
 
 ## Canon
 

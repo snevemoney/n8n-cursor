@@ -9,6 +9,33 @@ Smokes, golden paths, Scorpion cockpit.
 
 ## Linked chats
 
+- [[20261011-can-you-connect-my-artcraft-with-its-mcp-f1143310|can you connect my artcraft with its mcp?]]
+- [[20260928-macbook-space-management-d77daf9a|MacBook space management]]
+- [[20260912-lane-hive-os.-bus303-keep-elevenlabs-kill-gpt-li-4c6e8e23|LANE: hive-os. BUS303: KEEP ElevenLabs, KILL GPT L]]
+- [[20260909-macbook-space-management-d77daf9a|MacBook space management]]
+- [[20260908-you-are-working-in-users-evenslouis-n8n-cursor-f-b51abf01|You are working in /Users/evenslouis/n8n-cursor fo]]
+- [[20260826-grill-q3-a-six-active-01a6b95f|Grill Q3 A six Active]]
+- [[20260826-daily-wealth-remotion-show-cf314c59|Daily wealth Remotion show]]
+- [[20260825-watchdog-grade-x80ljdcpm_u-01a6b95f|Watchdog GRADE X80ljdCPM_U]]
+- [[20260825-skills-five-jobs-grok-reader-01a6b95f|Skills five jobs Grok reader]]
+- [[20260825-project-structure-and-naming-01a6b95f|Project structure and naming]]
+- [[20260825-open-all-five-automations-01a6b95f|Open all five Automations]]
+- [[20260825-hive-daily-automations-pack-01a6b95f|Hive daily Automations pack]]
+- [[20260825-grill-agent-infrastructure-01a6b95f|Grill agent infrastructure]]
+- [[20260825-forge-attempt-x80ljdcpm_u-01a6b95f|Forge attempt X80ljdCPM_U]]
+- [[20260825-fix-hive-cloud-checkout-01a6b95f|Fix hive Cloud checkout]]
+- [[20260825-delete-duplicate-automations-01a6b95f|Delete duplicate Automations]]
+- [[20260824-project-structure-and-naming-01a6b95f|Project structure and naming]]
+- [[20260822-project-structure-and-naming-01a6b95f|Project structure and naming]]
+- [[20260821-workspace-users-evenslouis-n8n-cursor.-you-are-w-ea806d6d|Workspace: /Users/evenslouis/n8n-cursor. You are W]]
+- [[20260821-workspace-users-evenslouis-n8n-cursor.-you-are-f-4528283a|Workspace: /Users/evenslouis/n8n-cursor. You are F]]
+- [[20260821-project-structure-and-naming-01a6b95f|Project structure and naming]]
+- [[20260820-project-structure-and-naming-01a6b95f|Project structure and naming]]
+- [[20260819-project-structure-and-naming-01a6b95f|Project structure and naming]]
+- [[20260817-project-structure-and-naming-01a6b95f|Project structure and naming]]
+- [[20260817-evens-asked-that-s-it-after-a-d-landed.-be-hones-dbbac996|Evens asked \u201cthat\u2019s it?\u201d after A\u2]]
+- [[CURSOR_CHATS/empty-window/20260816-project-structure-and-naming-01a6b95f|Project structure and naming]]
+- [[CURSOR_CHATS/n8n-cursor/20260816-project-structure-and-naming-01a6b95f|Project structure and naming]]
 - [[20260815-you-are-working-in-users-evenslouis-n8n-cursor-f-3f91f777|You are working in /Users/evenslouis/n8n-cursor fo]]
 - [[20260815-evens-said-do-it-full-maestro-style-.-meaning-st-03c9be6c|Evens said: \u201cdo it (full maestro style).\u201]]
 - [[20260814-you-are-watchdog-watchdog-in-users-evenslouis-n8-8932acf2|You are Watchdog (watchdog) in /Users/evenslouis/n]]
@@ -49,20 +76,20 @@ Smokes, golden paths, Scorpion cockpit.
 
 ## Top keywords
 
-- path (37)
-- chat (37)
-- archived false (37)
-- tags (37)
-- archived (37)
-- jsonl (37)
-- updated (37)
-- title (37)
-- themes (37)
-- false (37)
-- chatid (37)
-- false projects (37)
+- source (64)
+- archived (64)
+- chat (64)
+- agent (64)
+- false projects (64)
+- chat id (64)
+- title (64)
+- messagecount (64)
+- tags (64)
+- themes (64)
+- agent transcripts (64)
+- projects (64)
 
 ## See also
 
-- [[THEMES/README]]
+- [[00_Outer_Heaven/THEMES/Theme Hub Guide]]
 - [[OUTER_HEAVEN_LIBRARY]]

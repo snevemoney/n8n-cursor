@@ -30,11 +30,11 @@ This chat is listed in Cursor's conversation index but has no `agent-transcripts
 
 ## Related chats
 
+- [[20260816-skills-five-jobs-grok-reader-bc-808d3|Skills five jobs Grok reader]]
 - [[20250831-setting-up-project-structure-and-best-practices-bc-ea186|Setting up project structure and best practices]]
 - [[20260222-youtube-transcript-system-bc-09ba1|YouTube transcript system]]
 - [[20260807-context-engineering-principles-bc-4571c|Context engineering principles]]
-- [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-01846|AI agent with tools, memory, and output parsing]]
-- [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-8dac0|AI agent with tools, memory, and output parsing]]
+- [[20260816-delete-duplicate-automations-bc-808d3|Delete duplicate Automations]]
 
 ## Canon
 

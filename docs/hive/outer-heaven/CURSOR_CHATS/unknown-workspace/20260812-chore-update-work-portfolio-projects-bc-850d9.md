@@ -31,10 +31,10 @@ This chat is listed in Cursor's conversation index but has no `agent-transcripts
 ## Related chats
 
 - [[20260812-work-portfolio-archive-emmanuelle-add-ai-partner-bc-442a3|Work portfolio: archive Emmanuelle, add AI Partner]]
-- [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-01846|AI agent with tools, memory, and output parsing]]
-- [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-8dac0|AI agent with tools, memory, and output parsing]]
-- [[20250822-fix-three-code-bugs-bc-ab96d|Fix three code bugs]]
-- [[20250822-process-and-analyze-google-document-data-bc-c5556|Process and analyze google document data]]
+- [[20260822-add-secure-portfolio-proof-cards-to-work-bc-32372|Add secure portfolio proof cards to /work]]
+- [[20260822-fix-work-card-videos-mp4-autoplay-bc-4fee6|Fix /work card videos: MP4 + autoplay]]
+- [[20260822-fix-work-case-study-video-gallery-ios-bc-f7d78|Fix /work case study video gallery (iOS)]]
+- [[20260822-work-card-remotion-preview-videos-bc-ed52c|Work card Remotion preview videos]]
 
 ## Canon
 

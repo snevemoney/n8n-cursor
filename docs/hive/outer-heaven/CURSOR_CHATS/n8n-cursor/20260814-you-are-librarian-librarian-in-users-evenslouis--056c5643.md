@@ -58,7 +58,7 @@ Steal is the cycle we already own: raw → page → index, files in the folder s
 - `docs/hive/outer-heaven/CONTENT/job-cards/librarian.md`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/librarian.md`
 - `scripts/hive/grok-skills/wiki-ingest.md`
-- `docs/hive/outer-heaven/CONTENT/job-cards/INDEX.md`
+- `docs/hive/outer-heaven/CONTENT/job-cards/Agent Roles.md`
 - `docs/hive/outer-heaven`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/_prompts/librarian.md`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/README.md`
@@ -94,7 +94,7 @@ Steal is the cycle we already own: raw → page → index, files in the folder s
 - [[20260814-you-are-researcher-researcher-in-users-evensloui-9b1f0b20|You are Researcher (researcher) in /Users/evenslou]]
 - [[20260814-you-are-wealth-manager-wealth-manager-in-users-e-ae1ff0ce|You are Wealth Manager (wealth-manager) in /Users/]]
 - [[20260814-you-are-career-strategist-career-strategist-in-u-02bea94c|You are Career Strategist (career-strategist) in /]]
-- [[20260814-you-are-consultant-consultant-in-users-evensloui-fb0eb30a|You are Consultant (consultant) in /Users/evenslou]]
+- [[20260814-you-are-forge-forge-in-users-evenslouis-n8n-curs-f8a4c71a|You are Forge (forge) in /Users/evenslouis/n8n-cur]]
 
 ## Canon
 

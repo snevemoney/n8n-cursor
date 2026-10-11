@@ -83,7 +83,7 @@ Local `main` was behind origin, so the commit was rebased onto `origin/main` fir
 - [[20260815-evens-asked-to-commit-everything-else-that-has-b-d88cd36d|Evens asked to commit everything else that has bee]]
 - [[20260815-commit-and-push-all-pending-work-in-users-evensl-77f74cee|Commit and push ALL pending work in `/Users/evensl]]
 - [[20260815-implement-evens-s-correction-in-users-evenslouis-53bd9e4e|Implement Evens's correction in `/Users/evenslouis]]
-- [[20260815-read-only.-two-trees-may-exist---users-evensloui-d8948944|Read-only. Two trees may exist: - /Users/evensloui]]
+- [[20260826-evens-said-do-what-you-recommend-about-the-2-487-8cd2f6b4|Evens said \u201cdo what you recommend\u201d about]]
 
 ## Canon
 

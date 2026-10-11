@@ -31,11 +31,11 @@ This chat is listed in Cursor's conversation index but has no `agent-transcripts
 
 ## Related chats
 
+- [[20260824-fix-speed-to-lead-book-slots-never-past-bc-e7940|fix: speed-to-lead Book slots never past]]
 - [[20260812-feat-mcp-connector-demo-github-live-bc-89af2|feat: MCP connector demo (GitHub live)]]
 - [[20260812-feat-cinematic-ai-partner-landing-preview-bc-e4d68|feat: cinematic AI Partner landing preview]]
-- [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-01846|AI agent with tools, memory, and output parsing]]
-- [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-8dac0|AI agent with tools, memory, and output parsing]]
-- [[20250822-fix-three-code-bugs-bc-ab96d|Fix three code bugs]]
+- [[20260824-feat-8-website-assets-landing-proofs-on-work-bc-96825|feat: 8 website-assets landing proofs on /work]]
+- [[20260921-a_build-cloud-agent-dispatch-demo-bc-8afc3|A_BUILD cloud-agent dispatch demo]]
 
 ## Canon
 

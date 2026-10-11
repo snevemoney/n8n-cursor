@@ -5,6 +5,7 @@ import { getTrainingDataCollector } from '@/lib/fine-tuning/collector';
 import { withRateLimit, getClientIdentifier } from '@/lib/rate-limiter';
 import { getMetricsCollector } from '@/lib/metrics';
 import { trace } from '@/lib/tracing';
+import { ApiErrorCode, getRequestId } from '@/lib/api-error-handler';
 
 /**
  * Unified chat endpoint - works with any model source
@@ -101,6 +102,10 @@ export const POST = withRateLimit(
         });
       }, { useRAG: String(useRAG), model: model || 'default' });
     } catch (error: any) {
+      const code = ApiErrorCode.INTERNAL_ERROR;
+      const message = 'An unexpected error occurred';
+      const status = 500;
+      const errorId = getRequestId(request);
       const duration = (Date.now() - startTime) / 1000;
       metrics.incrementCounter('scorpion_api_requests_total', {
         method: 'POST',
@@ -124,7 +129,7 @@ export const POST = withRateLimit(
           error: message,
           code,
           id: errorId,
-          details: process.env.NODE_ENV === 'development' ? error.message : undefined
+          details: process.env.NODE_ENV === 'development' ? error?.message : undefined
         },
         { status }
       );

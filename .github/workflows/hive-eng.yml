@@ -9,6 +9,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Control-plane tests
-        run: python3 -m unittest scripts.hive.eng.test_hive_job scripts.hive.eng.test_hive_matrix scripts.hive.eng.test_hive_gate scripts.hive.eng.test_hive_rules scripts.hive.eng.test_signal -q
+        run: python3 -m unittest scripts.hive.eng.test_hive_job scripts.hive.eng.test_hive_matrix scripts.hive.eng.test_hive_gate scripts.hive.eng.test_hive_rules scripts.hive.eng.test_signal scripts.hive.eng.test_ci_reports scripts.hive.eng.test_global_guards scripts.hive.eng.test_scorpion_ci -q
       - name: Secret scan of the git index
         run: python3 scripts/hive/eng/secret-scan.py
+
+  jarvis-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Offline Jarvis regressions (includes delivery deadlines and Face input routing)
+        working-directory: apps/agent-stack
+        run: |
+          set -o pipefail
+          python3 scripts/test_suite.py 2>&1 | tee jarvis-regressions.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jarvis-regressions
+          path: apps/agent-stack/jarvis-regressions.log

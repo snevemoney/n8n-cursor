@@ -6,6 +6,7 @@
 import { generateGroundedSystemPrompt, GroundingOptions } from '../context/grounding';
 
 export interface LLMRequest {
+  provider?: ModelSource; // Per-request routing; environment remains the default
   prompt: string;
   system?: string;
   model?: string; // Optional model override
@@ -57,6 +58,7 @@ export class LLMAdapter {
     }
 
     const response = await runModel({
+      provider: this.provider,
       prompt,
       system: enhancedSystem,
       model: this.model,
@@ -78,8 +80,9 @@ export class LLMAdapter {
   async request(req: LLMRequest): Promise<LLMResponse> {
     return runModel({
       ...req,
+      provider: req.provider || this.provider,
       model: req.model || this.model,
-      temperature: req.temperature || this.temperature,
+      temperature: req.temperature ?? this.temperature,
       maxTokens: req.maxTokens || this.maxTokens
     });
   }
@@ -99,7 +102,7 @@ export async function runModel(req: LLMRequest): Promise<LLMResponse> {
     });
   }
 
-  const source = (process.env['SCORPION_MODEL_SOURCE'] || 'ollama') as ModelSource;
+  const source = req.provider || (process.env['SCORPION_MODEL_SOURCE'] || 'ollama') as ModelSource;
   
   switch (source) {
     case 'ollama':
@@ -134,7 +137,7 @@ async function runOllama(req: LLMRequest, retries: number = 0): Promise<LLMRespo
         messages,
         stream: false,
         options: {
-          temperature: req.temperature || 0.7,
+          temperature: req.temperature ?? 0.7,
           num_predict: req.maxTokens || 2048
         }
       }),
@@ -197,7 +200,7 @@ async function runOpenAI(req: LLMRequest, retries: number = 0): Promise<LLMRespo
           ...(req.system ? [{ role: 'system', content: req.system }] : []),
           { role: 'user', content: req.prompt }
         ],
-        temperature: req.temperature || 0.7,
+        temperature: req.temperature ?? 0.7,
         max_tokens: req.maxTokens || 2048
       })
     });

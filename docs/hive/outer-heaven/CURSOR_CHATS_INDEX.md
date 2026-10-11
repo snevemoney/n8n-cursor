@@ -1,6 +1,6 @@
 # Cursor chats master index
 
-Total exported: **538** · Local jsonl on disk: **389** · Conversation index: **228**
+Total exported: **1179** · Local jsonl on disk: **936** · Conversation index: **355**
 
 | Workspace | Title | Chat ID | Note |
 |-----------|-------|---------|------|
@@ -388,119 +388,119 @@ Total exported: **538** · Local jsonl on disk: **389** · Conversation index: *
 | n8n-cursor | Evens: https://evenslouis.ca/work is the **real** catalog. h | d49faf0f | 20260815-evens-https-evenslouis.ca-work-is-the-real-catal-d49faf0f.md |
 | n8n-cursor | Evens selected the home hero CTA “View my work” in the brows | 0a3a48ff | 20260815-evens-selected-the-home-hero-cta-view-my-work-in-0a3a48ff.md |
 | n8n-cursor | Implement Evens's correction in `/Users/evenslouis/client-en | 53bd9e4e | 20260815-implement-evens-s-correction-in-users-evenslouis-53bd9e4e.md |
-| n8n-cursor | Commit and push ALL pending work in `/Users/evenslouis/n8n-c | 77f74cee | 20260815-commit-and-push-all-pending-work-in-users-evensl-77f74cee.md |
 | n8n-cursor | Commit and push pending work in `/Users/evenslouis/proof-qc- | 7b2c9c3f | 20260815-commit-and-push-pending-work-in-users-evenslouis-7b2c9c3f.md |
 | n8n-cursor | Commit and push the /pro twin-kill changes in `/Users/evensl | a260c0be | 20260815-commit-and-push-the-pro-twin-kill-changes-in-use-a260c0be.md |
 | n8n-cursor | Evens asked to commit everything else that has been sitting. | d88cd36d | 20260815-evens-asked-to-commit-everything-else-that-has-b-d88cd36d.md |
+| n8n-cursor | Commit and push ALL pending work in `/Users/evenslouis/n8n-c | 77f74cee | 20260815-commit-and-push-all-pending-work-in-users-evensl-77f74cee.md |
 | empty-window | wait for me to open browser tab for you to run with Browser  | c7f2f99c | 20260815-wait-for-me-to-open-browser-tab-for-you-to-run-w-c7f2f99c.md |
-| unknown-workspace | Development environment setup | bc-9d9b2 | 20260324-development-environment-setup-bc-9d9b2.md | index-only |
-| unknown-workspace | Agent response mechanism | bc-b7e9e | 20260324-agent-response-mechanism-bc-b7e9e.md | index-only |
-| unknown-workspace | Site builder frontend quality | bc-85461 | 20260309-site-builder-frontend-quality-bc-85461.md | index-only |
-| unknown-workspace | Agents markdown file | bc-e37b6 | 20260228-agents-markdown-file-bc-e37b6.md | index-only |
-| unknown-workspace | Production app validation | bc-6a072 | 20260223-production-app-validation-bc-6a072.md | index-only |
-| unknown-workspace | Overall app responsiveness | bc-3b6bd | 20260223-overall-app-responsiveness-bc-3b6bd.md | index-only |
-| unknown-workspace | Production testing documentation | bc-d2bd9 | 20260223-production-testing-documentation-bc-d2bd9.md | index-only |
-| unknown-workspace | YouTube ingestion pipeline | bc-9fae2 | 20260222-youtube-ingestion-pipeline-bc-9fae2.md | index-only |
-| unknown-workspace | Codebase bug identification | bc-5c21d | 20260222-codebase-bug-identification-bc-5c21d.md | index-only |
-| unknown-workspace | YouTube transcript system | bc-09ba1 | 20260222-youtube-transcript-system-bc-09ba1.md | index-only |
-| unknown-workspace | Setting up project structure and best practices | bc-e241e | 20250831-setting-up-project-structure-and-best-practices-bc-e241e.md | index-only |
-| unknown-workspace | Setting up project structure and best practices | bc-ea186 | 20250831-setting-up-project-structure-and-best-practices-bc-ea186.md | index-only |
-| unknown-workspace | Find niche and solve pain points | bc-80c44 | 20250825-find-niche-and-solve-pain-points-bc-80c44.md | index-only |
-| unknown-workspace | AI agent with tools, memory, and output parsing | bc-0181f | 20250823-ai-agent-with-tools-memory-and-output-parsing-bc-0181f.md | index-only |
-| unknown-workspace | Fix three code bugs | bc-ab96d | 20250822-fix-three-code-bugs-bc-ab96d.md | index-only |
-| unknown-workspace | AI agent with tools, memory, and output parsing | bc-8dac0 | 20250822-ai-agent-with-tools-memory-and-output-parsing-bc-8dac0.md | index-only |
-| unknown-workspace | Process and analyze google document data | bc-c5556 | 20250822-process-and-analyze-google-document-data-bc-c5556.md | index-only |
-| unknown-workspace | AI agent with tools, memory, and output parsing | bc-01846 | 20250822-ai-agent-with-tools-memory-and-output-parsing-bc-01846.md | index-only |
-| unknown-workspace | a19eff9e-30da-49be-b014-a48cf716bbdc | a19eff9e | 20260629-a19eff9e-30da-49be-b014-a48cf716bbdc-a19eff9e.md | index-only |
-| unknown-workspace | debb599d-cda4-4c6f-bf4b-5bf9666a781f | debb599d | 20260629-debb599d-cda4-4c6f-bf4b-5bf9666a781f-debb599d.md | index-only |
-| unknown-workspace | Adobe After Effects bootcamp resources | 1a650b23 | 20260628-adobe-after-effects-bootcamp-resources-1a650b23.md | index-only |
-| unknown-workspace | 8b00ee17-58c9-4071-b17b-568dcd22de06 | 8b00ee17 | 20260620-8b00ee17-58c9-4071-b17b-568dcd22de06-8b00ee17.md | index-only |
-| unknown-workspace | 1f61ecb5-32e5-437f-a6b7-16cf31025b8c | 1f61ecb5 | 20260620-1f61ecb5-32e5-437f-a6b7-16cf31025b8c-1f61ecb5.md | index-only |
-| unknown-workspace | 5b5ee013-d425-4671-a27d-b780a7dc4167 | 5b5ee013 | 20260617-5b5ee013-d425-4671-a27d-b780a7dc4167-5b5ee013.md | index-only |
-| unknown-workspace | 6c3a94cf-45c2-436a-b6f8-cab47434b295 | 6c3a94cf | 20260617-6c3a94cf-45c2-436a-b6f8-cab47434b295-6c3a94cf.md | index-only |
-| unknown-workspace | bea356be-39ee-495e-a4fa-bca50a978287 | bea356be | 20260616-bea356be-39ee-495e-a4fa-bca50a978287-bea356be.md | index-only |
-| unknown-workspace | 87b198c5-8073-44cb-9c41-45e873736b4e | 87b198c5 | 20260612-87b198c5-8073-44cb-9c41-45e873736b4e-87b198c5.md | index-only |
-| unknown-workspace | 0796688d-da98-4821-ac01-5281fba32c39 | 0796688d | 20260610-0796688d-da98-4821-ac01-5281fba32c39-0796688d.md | index-only |
-| unknown-workspace | a530e09e-84df-4098-b633-c253ee030642 | a530e09e | 20260610-a530e09e-84df-4098-b633-c253ee030642-a530e09e.md | index-only |
-| unknown-workspace | d1f314da-a25e-4803-a868-244c2976de5b | d1f314da | 20260604-d1f314da-a25e-4803-a868-244c2976de5b-d1f314da.md | index-only |
-| unknown-workspace | Cursor compatibility with ComfyUI | 5eef14f3 | 20260603-cursor-compatibility-with-comfyui-5eef14f3.md | index-only |
-| unknown-workspace | 55160231-6a29-47a1-bfaa-4fe5d13e15d2 | 55160231 | 20260531-55160231-6a29-47a1-bfaa-4fe5d13e15d2-55160231.md | index-only |
-| unknown-workspace | 8ea6b77f-e863-4a15-a2b5-bdd3dfe77e0d | 8ea6b77f | 20260529-8ea6b77f-e863-4a15-a2b5-bdd3dfe77e0d-8ea6b77f.md | index-only |
-| unknown-workspace | 1a4b856e-5a40-427c-8047-a140ca20686e | 1a4b856e | 20260529-1a4b856e-5a40-427c-8047-a140ca20686e-1a4b856e.md | index-only |
-| unknown-workspace | 7e037d8e-3a97-41fd-b9cf-54cbfd6fde03 | 7e037d8e | 20260529-7e037d8e-3a97-41fd-b9cf-54cbfd6fde03-7e037d8e.md | index-only |
-| unknown-workspace | 57da2400-babc-4689-b4ef-4ed84b0fa2e0 | 57da2400 | 20260529-57da2400-babc-4689-b4ef-4ed84b0fa2e0-57da2400.md | index-only |
-| unknown-workspace | 649fa636-0092-4158-b553-0572d175f872 | 649fa636 | 20260529-649fa636-0092-4158-b553-0572d175f872-649fa636.md | index-only |
-| unknown-workspace | 3fa403d7-e837-4836-9194-01f247795ea2 | 3fa403d7 | 20260529-3fa403d7-e837-4836-9194-01f247795ea2-3fa403d7.md | index-only |
-| unknown-workspace | d56cf5d1-21e5-4d86-8cb8-ae981cf59ac9 | d56cf5d1 | 20260529-d56cf5d1-21e5-4d86-8cb8-ae981cf59ac9-d56cf5d1.md | index-only |
-| unknown-workspace | Game development roadmap with Godot | f14324d0 | 20260529-game-development-roadmap-with-godot-f14324d0.md | index-only |
-| unknown-workspace | 06aa1192-3cbc-45bb-85c9-2fa6d7ab8759 | 06aa1192 | 20260529-06aa1192-3cbc-45bb-85c9-2fa6d7ab8759-06aa1192.md | index-only |
-| unknown-workspace | cda9d7d6-5343-48b4-927a-46a0257129d4 | cda9d7d6 | 20260525-cda9d7d6-5343-48b4-927a-46a0257129d4-cda9d7d6.md | index-only |
-| unknown-workspace | 31e35833-54d0-4f6e-a355-1ed1194db2d8 | 31e35833 | 20260525-31e35833-54d0-4f6e-a355-1ed1194db2d8-31e35833.md | index-only |
-| unknown-workspace | 53115397-cbfa-4db0-881e-d5e736e3daec | 53115397 | 20260525-53115397-cbfa-4db0-881e-d5e736e3daec-53115397.md | index-only |
-| unknown-workspace | MacOS app handling instructions | 35bbe5c8 | 20260525-macos-app-handling-instructions-35bbe5c8.md | index-only |
-| unknown-workspace | 4dfbb503-a126-421a-8bd1-09d225f174df | 4dfbb503 | 20260525-4dfbb503-a126-421a-8bd1-09d225f174df-4dfbb503.md | index-only |
-| unknown-workspace | f58a6f80-8a73-418f-b36f-ebdf1f03394f | f58a6f80 | 20260502-f58a6f80-8a73-418f-b36f-ebdf1f03394f-f58a6f80.md | index-only |
-| unknown-workspace | bac0b904-fb91-48c2-9010-91fec1ac66f0 | bac0b904 | 20260502-bac0b904-fb91-48c2-9010-91fec1ac66f0-bac0b904.md | index-only |
-| unknown-workspace | 230c5c7e-9938-4164-9911-e1903c1db3d8 | 230c5c7e | 20260404-230c5c7e-9938-4164-9911-e1903c1db3d8-230c5c7e.md | index-only |
-| unknown-workspace | a13e3eee-1d94-46b3-8823-69bb2eacf65f | a13e3eee | 20260404-a13e3eee-1d94-46b3-8823-69bb2eacf65f-a13e3eee.md | index-only |
-| unknown-workspace | 3b9caf2d-9f1c-4b97-86bd-95066509b888 | 3b9caf2d | 20260404-3b9caf2d-9f1c-4b97-86bd-95066509b888-3b9caf2d.md | index-only |
-| unknown-workspace | 45335d88-3b5d-4123-ad0a-21e37da39d5a | 45335d88 | 20260404-45335d88-3b5d-4123-ad0a-21e37da39d5a-45335d88.md | index-only |
-| client-engine-1 | ffac474e-94d2-49aa-949b-28c6aa370edb | ffac474e | 20260404-ffac474e-94d2-49aa-949b-28c6aa370edb-ffac474e.md | index-only |
-| unknown-workspace | 1d9ef764-5833-4bcb-ae05-fe303737997f | 1d9ef764 | 20260404-1d9ef764-5833-4bcb-ae05-fe303737997f-1d9ef764.md | index-only |
-| unknown-workspace | 976c1126-12dd-4be1-bd04-8df34f06b2ae | 976c1126 | 20260404-976c1126-12dd-4be1-bd04-8df34f06b2ae-976c1126.md | index-only |
-| philanthropic-ai-agent | Codebase overview | 2e449875 | 20260326-codebase-overview-2e449875.md | index-only |
-| unknown-workspace | 3a96a9b2-f3a4-42cc-b013-2fad8c04d262 | 3a96a9b2 | 20260323-3a96a9b2-f3a4-42cc-b013-2fad8c04d262-3a96a9b2.md | index-only |
-| unknown-workspace | 3a5a31cf-8058-4a03-8933-c209e8bed2dc | 3a5a31cf | 20260323-3a5a31cf-8058-4a03-8933-c209e8bed2dc-3a5a31cf.md | index-only |
-| unknown-workspace | 49f4e0bc-73ba-4178-9032-bc20fcc1e1f0 | 49f4e0bc | 20260323-49f4e0bc-73ba-4178-9032-bc20fcc1e1f0-49f4e0bc.md | index-only |
-| unknown-workspace | 42446262-eeba-4fe6-b041-44060a283494 | 42446262 | 20260323-42446262-eeba-4fe6-b041-44060a283494-42446262.md | index-only |
-| philanthropic-ai-agent | 4e9417f6-f159-4bb6-b539-f67a0f68af13 | 4e9417f6 | 20260318-4e9417f6-f159-4bb6-b539-f67a0f68af13-4e9417f6.md | index-only |
-| unknown-workspace | 8c62a48d-9cc5-44a4-86bb-460a70689a47 | 8c62a48d | 20260318-8c62a48d-9cc5-44a4-86bb-460a70689a47-8c62a48d.md | index-only |
-| unknown-workspace | b6c3137d-89f8-495a-8cfd-81ce200c1632 | b6c3137d | 20260318-b6c3137d-89f8-495a-8cfd-81ce200c1632-b6c3137d.md | index-only |
-| shield-buddies | b88369fa-feb3-4688-bb4c-5e83cdcd8420 | b88369fa | 20260315-b88369fa-feb3-4688-bb4c-5e83cdcd8420-b88369fa.md | index-only |
-| unknown-workspace | 3ca99415-e176-415f-acce-e52a15e97e4a | 3ca99415 | 20260315-3ca99415-e176-415f-acce-e52a15e97e4a-3ca99415.md | index-only |
-| unknown-workspace | da63c401-c368-4a59-8612-063cf54d5dbc | da63c401 | 20260315-da63c401-c368-4a59-8612-063cf54d5dbc-da63c401.md | index-only |
-| unknown-workspace | a1419c76-0287-4c1b-ab9f-6ffaad9eabe9 | a1419c76 | 20260302-a1419c76-0287-4c1b-ab9f-6ffaad9eabe9-a1419c76.md | index-only |
-| unknown-workspace | e00b6ead-d3fa-4ff8-9fa2-983566fb92e9 | e00b6ead | 20260302-e00b6ead-d3fa-4ff8-9fa2-983566fb92e9-e00b6ead.md | index-only |
-| client-engine-1 | Start dev server in background | task-too | 20260227-start-dev-server-in-background-task-too.md | index-only |
-| 1.1.0 | 8ea6e57b-d22e-4487-a922-ee99e50c96ea | 8ea6e57b | 20260227-8ea6e57b-d22e-4487-a922-ee99e50c96ea-8ea6e57b.md | index-only |
-| 1.1.0 | 3f2885ae-0515-41f6-a40c-6d9b944c965c | 3f2885ae | 20260227-3f2885ae-0515-41f6-a40c-6d9b944c965c-3f2885ae.md | index-only |
-| unknown-workspace | 10b545be-b8a7-4d9e-b83f-fde3e5fdebf3 | 10b545be | 20260222-10b545be-b8a7-4d9e-b83f-fde3e5fdebf3-10b545be.md | index-only |
-| unknown-workspace | 6917d0c9-5386-4fce-abcb-618f45ba99d0 | 6917d0c9 | 20260222-6917d0c9-5386-4fce-abcb-618f45ba99d0-6917d0c9.md | index-only |
-| unknown-workspace | 3992d112-66fd-4afa-a213-2c08925044ad | 3992d112 | 20260222-3992d112-66fd-4afa-a213-2c08925044ad-3992d112.md | index-only |
-| unknown-workspace | 2da2876f-d637-400a-8a84-386de0884317 | 2da2876f | 20260222-2da2876f-d637-400a-8a84-386de0884317-2da2876f.md | index-only |
-| unknown-workspace | 6e31cf6e-c5b3-4ace-92b5-1b1003e878f2 | 6e31cf6e | 20260222-6e31cf6e-c5b3-4ace-92b5-1b1003e878f2-6e31cf6e.md | index-only |
-| client-engine-1 | bf144535-41b4-40e6-9617-df963af4590a | bf144535 | 20260220-bf144535-41b4-40e6-9617-df963af4590a-bf144535.md | index-only |
-| unknown-workspace | 8d457e1b-57b9-4259-b7fe-53719200c2a9 | 8d457e1b | 20260220-8d457e1b-57b9-4259-b7fe-53719200c2a9-8d457e1b.md | index-only |
-| unknown-workspace | a6f4254b-4ed2-4924-978e-02e547009824 | a6f4254b | 20260220-a6f4254b-4ed2-4924-978e-02e547009824-a6f4254b.md | index-only |
-| unknown-workspace | 22803998-61b6-4373-9190-b7e19b38a88b | 22803998 | 20260220-22803998-61b6-4373-9190-b7e19b38a88b-22803998.md | index-only |
-| quick-list-hub-42 | ff5bbcef-57ba-48bb-a757-7cc0edc8851f | ff5bbcef | 20260219-ff5bbcef-57ba-48bb-a757-7cc0edc8851f-ff5bbcef.md | index-only |
-| unknown-workspace | 4cd85542-8d7a-4441-84d4-d2204e6a78ec | 4cd85542 | 20260219-4cd85542-8d7a-4441-84d4-d2204e6a78ec-4cd85542.md | index-only |
-| unknown-workspace | ef1d0d6b-9f66-47b4-b46d-2fde3597ada9 | ef1d0d6b | 20260219-ef1d0d6b-9f66-47b4-b46d-2fde3597ada9-ef1d0d6b.md | index-only |
-| book-reimagined | Viewing the app in the browser | ba0d9e28 | 20260217-viewing-the-app-in-the-browser-ba0d9e28.md | index-only |
-| book-reimagined | 91aa85d2-f2e3-4d38-8b04-25e47384932e | 91aa85d2 | 20260217-91aa85d2-f2e3-4d38-8b04-25e47384932e-91aa85d2.md | index-only |
-| unknown-workspace | 5718b8a9-bb2e-4987-a157-7f5000c56d79 | 5718b8a9 | 20260217-5718b8a9-bb2e-4987-a157-7f5000c56d79-5718b8a9.md | index-only |
-| unknown-workspace | 6e98400d-faf8-4b64-a41a-e257396d0191 | 6e98400d | 20260217-6e98400d-faf8-4b64-a41a-e257396d0191-6e98400d.md | index-only |
-| unknown-workspace | 9588b6f6-83a3-4185-afe5-317a0ff1d8dc | 9588b6f6 | 20260214-9588b6f6-83a3-4185-afe5-317a0ff1d8dc-9588b6f6.md | index-only |
-| unknown-workspace | e79282df-f8ab-4682-9550-db0f92289bb4 | e79282df | 20260214-e79282df-f8ab-4682-9550-db0f92289bb4-e79282df.md | index-only |
-| n8n-cursor | n8n version update check | f280ad28 | 20260214-n8n-version-update-check-f280ad28.md | index-only |
-| unknown-workspace | 51394086-53c1-4a75-aa4e-071ac2715a1e | 51394086 | 20251221-51394086-53c1-4a75-aa4e-071ac2715a1e-51394086.md | index-only |
-| unknown-workspace | 5b7da442-de1f-4570-894c-66c9e1b608aa | 5b7da442 | 20251221-5b7da442-de1f-4570-894c-66c9e1b608aa-5b7da442.md | index-only |
-| n8n-cursor | 59618bc9-b12f-4deb-a254-cc5b7eee40a3 | 59618bc9 | 20251220-59618bc9-b12f-4deb-a254-cc5b7eee40a3-59618bc9.md | index-only |
-| unknown-workspace | 4dd7fae6-7baa-468d-a7c7-cde57b8d348b | 4dd7fae6 | 20251220-4dd7fae6-7baa-468d-a7c7-cde57b8d348b-4dd7fae6.md | index-only |
-| unknown-workspace | c408462b-2a5d-42cc-9c03-95423046c100 | c408462b | 20251220-c408462b-2a5d-42cc-9c03-95423046c100-c408462b.md | index-only |
-| unknown-workspace | Initial greeting | 07c577fd | 20251220-initial-greeting-07c577fd.md | index-only |
-| unknown-workspace | 70d450e9-e174-4987-8f89-475484b26eeb | 70d450e9 | 20251220-70d450e9-e174-4987-8f89-475484b26eeb-70d450e9.md | index-only |
-| unknown-workspace | caddb2d9-f51d-4ec9-a6fd-07f4447406c6 | caddb2d9 | 20251220-caddb2d9-f51d-4ec9-a6fd-07f4447406c6-caddb2d9.md | index-only |
-| n8n-cursor | Identify issues with scorpion image | 5f7f5050 | 20251203-identify-issues-with-scorpion-image-5f7f5050.md | index-only |
-| n8n-cursor | Investigate daily n8n-cursor emails | 7763ad67 | 20251203-investigate-daily-n8n-cursor-emails-7763ad67.md | index-only |
-| n8n-cursor | Fix the voice button issue | 05142797 | 20251202-fix-the-voice-button-issue-05142797.md | index-only |
-| n8n-cursor | Unexpected terminal message after server start | 9b5fc1c2 | 20251202-unexpected-terminal-message-after-server-start-9b5fc1c2.md | index-only |
-| n8n-cursor | Insights on scorpion construction and scoring | 3b41866c | 20251202-insights-on-scorpion-construction-and-scoring-3b41866c.md | index-only |
-| n8n-cursor | Deep scan of scorpion codebase | 87042fd1 | 20251201-deep-scan-of-scorpion-codebase-87042fd1.md | index-only |
-| n8n-cursor | Monitor stream response times | 1639df9f | 20251129-monitor-stream-response-times-1639df9f.md | index-only |
-| n8n-cursor | Start scorpion server | b7207ab3 | 20251129-start-scorpion-server-b7207ab3.md | index-only |
-| n8n-cursor | Improving code readability and structure | 86df14c2 | 20251129-improving-code-readability-and-structure-86df14c2.md | index-only |
-| n8n-cursor | Start scorpion server | b9ba18d6 | 20251129-start-scorpion-server-b9ba18d6.md | index-only |
-| unknown-workspace | 83811e78-03d8-4fcc-b6f0-f367e6ebdff2 | 83811e78 | 20251129-83811e78-03d8-4fcc-b6f0-f367e6ebdff2-83811e78.md | index-only |
-| unknown-workspace | 9c0c089a-6632-4648-aa25-009e2be4002a | 9c0c089a | 20251129-9c0c089a-6632-4648-aa25-009e2be4002a-9c0c089a.md | index-only |
-| unknown-workspace | 88968981-4b29-4005-be16-40aef983b8e9 | 88968981 | 20251129-88968981-4b29-4005-be16-40aef983b8e9-88968981.md | index-only |
+| n8n-cursor | You are working in the n8n-cursor workspace at /Users/evensl | 3870fd2a | 20260816-you-are-working-in-the-n8n-cursor-workspace-at-u-3870fd2a.md |
+| n8n-cursor | You are working in /Users/evenslouis/n8n-cursor for Evens. M | 8b308d82 | 20260816-you-are-working-in-users-evenslouis-n8n-cursor-f-8b308d82.md |
+| empty-window | Real-time file sync setup | 59091494 | 20260816-real-time-file-sync-setup-59091494.md |
+| n8n-cursor | Read the already-open Desk / internal host OS page and repor | a03d05c0 | 20260816-read-the-already-open-desk-internal-host-os-page-a03d05c0.md |
+| n8n-cursor | Enumerate every distinct current job-card task the factory/O | f67e5372 | 20260816-enumerate-every-distinct-current-job-card-task-t-f67e5372.md |
+| n8n-cursor | Enumerate every current task the internal host OS is assigni | fac2540e | 20260816-enumerate-every-current-task-the-internal-host-o-fac2540e.md |
+| n8n-cursor | Enumerate distinct OS/wiki/workflow tasks that are currently | 2d2ff05f | 20260816-enumerate-distinct-os-wiki-workflow-tasks-that-a-2d2ff05f.md |
+| empty-window | OS task overview | d695a750 | 20260816-os-task-overview-d695a750.md |
+| n8n-cursor | You are building "pipeline v2 + glossary" for the hive OS in | ccd94321 | 20260816-you-are-building-pipeline-v2-glossary-for-the-hi-ccd94321.md |
+| n8n-cursor | You are producing the PRESCRIPTIVE-SIGNALS audit for the hiv | 60c1182f | 20260816-you-are-producing-the-prescriptive-signals-audit-60c1182f.md |
+| n8n-cursor | You are the browser-capture worker for the hive OS repass (p | 5187caa2 | 20260816-you-are-the-browser-capture-worker-for-the-hive--5187caa2.md |
+| n8n-cursor | You are persisting browser-capture results and fetching arti | f39c3787 | 20260816-you-are-persisting-browser-capture-results-and-f-f39c3787.md |
+| n8n-cursor | You are running REPASS BATCH 1 for the hive OS in /Users/eve | 36aea7ca | 20260816-you-are-running-repass-batch-1-for-the-hive-os-i-36aea7ca.md |
+| n8n-cursor | You are implementing the top NOW-recommendations from the PR | 2c28ef65 | 20260816-you-are-implementing-the-top-now-recommendations-2c28ef65.md |
+| n8n-cursor | You are REPASS BATCH 2 (final) for the hive OS in /Users/eve | bcb9c72f | 20260816-you-are-repass-batch-2-final-for-the-hive-os-in--bcb9c72f.md |
+| n8n-cursor | You are closing the last agent-runnable items from the Presc | 0b3c38ef | 20260816-you-are-closing-the-last-agent-runnable-items-fr-0b3c38ef.md |
+| n8n-cursor | You are tuning the scene-change frame selector in /Users/eve | 649914a0 | 20260816-you-are-tuning-the-scene-change-frame-selector-i-649914a0.md |
+| n8n-cursor | You are running the v2 tape-intake pipeline on a pasted YouT | 15569131 | 20260816-you-are-running-the-v2-tape-intake-pipeline-on-a-15569131.md |
+| n8n-cursor | <cursor_commands>  --- Cursor Command: status --- # Vercel P | 0a384999 | 20260816-cursor_commands-----cursor-command-status-----ve-0a384999.md |
+| n8n-cursor | <cursor_commands>  --- Cursor Command: status --- # Vercel P | dd213656 | 20260816-cursor_commands-----cursor-command-status-----ve-dd213656.md |
+| n8n-cursor | You are building the operator ask-log for the hive OS in /Us | 4dba5b38 | 20260816-you-are-building-the-operator-ask-log-for-the-hi-4dba5b38.md |
+| n8n-cursor | You are building a provenance log for the hive OS in /Users/ | 93b8969b | 20260816-you-are-building-a-provenance-log-for-the-hive-o-93b8969b.md |
+| n8n-cursor | Continue / finish the skill-provenance log in /Users/evenslo | 4df65b6b | 20260816-continue-finish-the-skill-provenance-log-in-user-4df65b6b.md |
+| n8n-cursor | <cursor_commands>  --- Cursor Command: status --- # Vercel P | ae3e7a02 | 20260816-cursor_commands-----cursor-command-status-----ve-ae3e7a02.md |
+| n8n-cursor | The OS desk at http://127.0.0.1:4017/ is returning error -10 | 65ec81cc | 20260816-the-os-desk-at-http-127.0.0.1-4017-is-returning--65ec81cc.md |
+| n8n-cursor | Wire the OS desk LEARN tab so "MEMORY · VIDEOS WE LEARNED" l | 6180244c | 20260816-wire-the-os-desk-learn-tab-so-memory-videos-we-l-6180244c.md |
+| n8n-cursor | Start a grill-me sitting for Evens. You do CAPTURE + disk ex | efc91217 | 20260817-start-a-grill-me-sitting-for-evens.-you-do-captu-efc91217.md |
+| n8n-cursor | Continue the grill-me sitting. Evens answered Q1. Checkpoint | 0f10664f | 20260817-continue-the-grill-me-sitting.-evens-answered-q1-0f10664f.md |
+| n8n-cursor | Continue grill-me. Evens answered Q2. Checkpoint, draft Q3 o | 936ed8cd | 20260817-continue-grill-me.-evens-answered-q2.-checkpoint-936ed8cd.md |
+| n8n-cursor | Continue grill-me sitting. Evens answered past Q3 with a fac | f449fdea | 20260817-continue-grill-me-sitting.-evens-answered-past-q-f449fdea.md |
+| n8n-cursor | Continue grill-me. Evens answered Q4 with the single letter  | 7297bd56 | 20260817-continue-grill-me.-evens-answered-q4-with-the-si-7297bd56.md |
+| n8n-cursor | CLOSE the grill-me sitting. Evens picked Q5 **(a)**. Checkpo | 054d7d07 | 20260817-close-the-grill-me-sitting.-evens-picked-q5-a-.--054d7d07.md |
+| n8n-cursor | Evens: "we need lots of training for creating any type of to | 8e238675 | 20260817-evens-we-need-lots-of-training-for-creating-any--8e238675.md |
+| n8n-cursor | Answer Evens: "did we ingested the context of each signals y | 1fae835d | 20260817-answer-evens-did-we-ingested-the-context-of-each-1fae835d.md |
+| n8n-cursor | Connect WEBSITE-SELLING training to the Obsidian/OS brain, e | 71f1742c | 20260817-connect-website-selling-training-to-the-obsidian-71f1742c.md |
+| n8n-cursor | Restart the Obsidian OS desk so Evens can open http://127.0. | 8aa5320e | 20260817-restart-the-obsidian-os-desk-so-evens-can-open-h-8aa5320e.md |
+| n8n-cursor | Start the v2 ingest pass on the WEBSITE-SELLING queue first. | ba1399a4 | 20260817-start-the-v2-ingest-pass-on-the-website-selling--ba1399a4.md |
+| n8n-cursor | CONTINUE unfinished work. Salvage first. Do not restart from | eef4762b | 20260817-continue-unfinished-work.-salvage-first.-do-not--eef4762b.md |
+| n8n-cursor | CONTINUE unfinished work. Salvage first. Do not restart from | aea87c22 | 20260817-continue-unfinished-work.-salvage-first.-do-not--aea87c22.md |
+| n8n-cursor | Ingest the YouTube transcript Evens pasted (Claude Code “5 h | 30b89333 | 20260817-ingest-the-youtube-transcript-evens-pasted-claud-30b89333.md |
+| n8n-cursor | Reconcile a dual ingest of the same Nate Herk “5 hacks / don | abdfd0b7 | 20260817-reconcile-a-dual-ingest-of-the-same-nate-herk-5--abdfd0b7.md |
+| n8n-cursor | Ingest Evens’s long architecture dump (imitation-learning /  | 86b9f230 | 20260817-ingest-evens-s-long-architecture-dump-imitation--86b9f230.md |
+| n8n-cursor | Evens said **do it all** on the open grill from 2026-08-17-s | 55a6b77d | 20260817-evens-said-do-it-all-on-the-open-grill-from-2026-55a6b77d.md |
+| n8n-cursor | Evens asked “that’s it?” after A–D landed. Be honest: A–D wa | dbbac996 | 20260817-evens-asked-that-s-it-after-a-d-landed.-be-hones-dbbac996.md |
+| empty-window | Evens: Nate’s site from https://www.youtube.com/watch?v=86HM | 79ae584a | 20260817-evens-nate-s-site-from-https-www.youtube.com-wat-79ae584a.md |
+| n8n-cursor | Evens asked: is https://ais-test-website.vercel.app his or o | 09afe42e | 20260817-evens-asked-is-https-ais-test-website.vercel.app-09afe42e.md |
+| n8n-cursor | Evens: “to make it ours, you have to whitelabel it.”  Do the | 3eea315e | 20260817-evens-to-make-it-ours-you-have-to-whitelabel-it.-3eea315e.md |
+| n8n-cursor | Evens: 4821 and 4822 do not look the same at all. They shoul | 2d03fd90 | 20260817-evens-4821-and-4822-do-not-look-the-same-at-all.-2d03fd90.md |
+| n8n-cursor | Evens asked: is there any trace of Nate Herk and his busines | 9b4a7d44 | 20260817-evens-asked-is-there-any-trace-of-nate-herk-and--9b4a7d44.md |
+| n8n-cursor | 4821 still has three visible ours-copy lines that name AIS.  | 2b8d21c0 | 20260817-4821-still-has-three-visible-ours-copy-lines-tha-2b8d21c0.md |
+| n8n-cursor | Evens: make 5–10 variations of the 4821 whitelabel for diffe | b7250655 | 20260817-evens-make-5-10-variations-of-the-4821-whitelabe-b7250655.md |
+| n8n-cursor | Evens wants dedicated ports for each website-assets vertical | 5bae0ada | 20260817-evens-wants-dedicated-ports-for-each-website-ass-5bae0ada.md |
+| n8n-cursor | Evens gets Chrome/Cursor error -102 (connection refused) on  | df6f0112 | 20260817-evens-gets-chrome-cursor-error--102-connection-r-df6f0112.md |
+| n8n-cursor | Evens asked to be **grilled** on today’s work: ingest `86HM0 | 7c297eba | 20260817-evens-asked-to-be-grilled-on-today-s-work-ingest-7c297eba.md |
+| n8n-cursor | Evens answered grill **Q1** only:  > both a repo and a skill | ff20614a | 20260817-evens-answered-grill-q1-only-both-a-repo-and-a-s-ff20614a.md |
+| n8n-cursor | Evens corrected Q1. We **misread** him.  **WRONG (do not do) | dc7e68ca | 20260817-evens-corrected-q1.-we-misread-him.-wrong-do-not-dc7e68ca.md |
+| n8n-cursor | Evens answered grill Q2–Q9 plus a landing-catalog note. Clos | f377598d | 20260817-evens-answered-grill-q2-q9-plus-a-landing-catalo-f377598d.md |
+| n8n-cursor | Ingest Evens’s pasted Cole Medin workshop transcript as a ** | 2ebc445f | 20260817-ingest-evens-s-pasted-cole-medin-workshop-transc-2ebc445f.md |
+| n8n-cursor | Evens said **yes** to: Watchdog GRADE on one Cursor+Grok RPI | 9f64f86e | 20260817-evens-said-yes-to-watchdog-grade-on-one-cursor-g-9f64f86e.md |
+| n8n-cursor | You are Watchdog only. You did NOT write the emit. You are t | b1435de0 | 20260817-you-are-watchdog-only.-you-did-not-write-the-emi-b1435de0.md |
+| n8n-cursor | Evens: **continue until `ai-layer-in-repo` is PROVEN.**  Hon | d2160eca | 20260817-evens-continue-until-ai-layer-in-repo-is-proven.-d2160eca.md |
+| n8n-cursor | Open a grill-me capture BEFORE any mint. Do not mint SKILL.m | 0a11d0f2 | 20260817-open-a-grill-me-capture-before-any-mint.-do-not--0a11d0f2.md |
+| n8n-cursor | Evens answered grill Q1 by taking the recommended answer ver | 1baa0631 | 20260817-evens-answered-grill-q1-by-taking-the-recommende-1baa0631.md |
+| n8n-cursor | Evens answered Q2: **“both”**  Gloss: fresh execute may be a | fe3aecdc | 20260817-evens-answered-q2-both-gloss-fresh-execute-may-b-fe3aecdc.md |
+| n8n-cursor | Evens answered Q3: **“Watchdog required”**  Checkpoint: ```  | f7f96579 | 20260817-evens-answered-q3-watchdog-required-checkpoint-p-f7f96579.md |
+| n8n-cursor | Evens answered Q4: **“mint now”**  Close the grill and **min | e91b0ce5 | 20260817-evens-answered-q4-mint-now-close-the-grill-and-m-e91b0ce5.md |
+| n8n-cursor | Evens answered grill Q1 on “repeat emissions for all stored  | 69539c9b | 20260817-evens-answered-grill-q1-on-repeat-emissions-for--69539c9b.md |
+| n8n-cursor | Evens answered Q2 (partial): **“1 signal per sitting”**  He  | f9075f70 | 20260817-evens-answered-q2-partial-1-signal-per-sitting-h-f9075f70.md |
+| n8n-cursor | Evens closed Q3: **yes** — sit writes `NEXT.md` (proposed id | 7605039c | 20260817-evens-closed-q3-yes-sit-writes-next.md-proposed--7605039c.md |
+| n8n-cursor | Evens: **“you can auto-mint the all skill-candidate from now | 470e901f | 20260817-evens-you-can-auto-mint-the-all-skill-candidate--470e901f.md |
+| n8n-cursor | Evens said **“next one”**. That unlocks the parked emit sit. | 493319a9 | 20260817-evens-said-next-one-.-that-unlocks-the-parked-em-493319a9.md |
+| n8n-cursor | Evens: **“all things LEARNED should auto-testing and then au | 75bac165 | 20260817-evens-all-things-learned-should-auto-testing-and-75bac165.md |
+| n8n-cursor | Evens: **“do the rest of the learned queued to testing and p | 1cb5972c | 20260817-evens-do-the-rest-of-the-learned-queued-to-testi-1cb5972c.md |
+| n8n-cursor | Evens unlocked the full signal queue and then said **“add mo | 17f2c832 | 20260817-evens-unlocked-the-full-signal-queue-and-then-sa-17f2c832.md |
+| n8n-cursor | Evens unlocked the full signal queue and then said **“add mo | 253a1d2c | 20260817-evens-unlocked-the-full-signal-queue-and-then-sa-253a1d2c.md |
+| n8n-cursor | Evens unlocked the full signal queue and then said **“add mo | 5379a87d | 20260817-evens-unlocked-the-full-signal-queue-and-then-sa-5379a87d.md |
+| n8n-cursor | Evens: **“next until all the signal queued are done. i feel  | 7f2c085a | 20260817-evens-next-until-all-the-signal-queued-are-done.-7f2c085a.md |
+| n8n-cursor | All 4 emit shards finished. Evens asked for the **entire** s | f58fa048 | 20260817-all-4-emit-shards-finished.-evens-asked-for-the--f58fa048.md |
+| n8n-cursor | Evens: **(1) find the urls from Blocked leftovers and fetch  | f7d3cf0e | 20260817-evens-1-find-the-urls-from-blocked-leftovers-and-f7d3cf0e.md |
+| n8n-cursor | Evens: **(2) i told you to auto-mint after being proven. so  | ac1014ac | 20260817-evens-2-i-told-you-to-auto-mint-after-being-prov-ac1014ac.md |
+| n8n-cursor | Evens said **yes** to: mint the 12 aliases as a **second fil | 2f052811 | 20260817-evens-said-yes-to-mint-the-12-aliases-as-a-secon-2f052811.md |
+| n8n-cursor | Evens asked: **/canvas Make me a canvas that enumerate and s | 7eb3d0ca | 20260817-evens-asked-canvas-make-me-a-canvas-that-enumera-7eb3d0ca.md |
+| n8n-cursor | Evens: **“grill me on finding out how to have higher scores” | 7e81517e | 20260817-evens-grill-me-on-finding-out-how-to-have-higher-7e81517e.md |
+| n8n-cursor | Evens closed the higher-skill-scores grill Q4:  **Prove toni | 347b1084 | 20260817-evens-closed-the-higher-skill-scores-grill-q4-pr-347b1084.md |
+| n8n-cursor | Evens (2026-08-19): **“commit and push. give grok bot access | 8551fd79 | 20260819-evens-2026-08-19-commit-and-push.-give-grok-bot--8551fd79.md |
+| n8n-cursor | You are Communications Manager on the factory loop. You draf | 83e9381d | 20260820-you-are-communications-manager-on-the-factory-lo-83e9381d.md |
+| n8n-cursor | You are HITL Operator on the factory loop. You format hard s | d7ac755a | 20260820-you-are-hitl-operator-on-the-factory-loop.-you-f-d7ac755a.md |
+| n8n-cursor | You are Researcher on the factory loop. You walk and file. Y | d3151dca | 20260820-you-are-researcher-on-the-factory-loop.-you-walk-d3151dca.md |
+| n8n-cursor | You are Forge on the factory loop. Evens planned this. You b | 98547c0a | 20260820-you-are-forge-on-the-factory-loop.-evens-planned-98547c0a.md |
+| n8n-cursor | You are Watchdog on the factory loop. Separate verifier. Eve | 84e3f8e4 | 20260820-you-are-watchdog-on-the-factory-loop.-separate-v-84e3f8e4.md |
+| empty-window | Evens: **“what should the agents do now that they are availa | d99177e2 | 20260820-evens-what-should-the-agents-do-now-that-they-ar-d99177e2.md |
+| n8n-cursor | Evens (2026-08-20): **“look if consultant did the right thin | f988ede9 | 20260820-evens-2026-08-20-look-if-consultant-did-the-righ-f988ede9.md |
+| n8n-cursor | Workspace: /Users/evenslouis/n8n-cursor. You are Forge. Load | 4528283a | 20260821-workspace-users-evenslouis-n8n-cursor.-you-are-f-4528283a.md |
+| n8n-cursor | Evens (2026-08-21): **“give grok bot access to the_billion_d | 9107c790 | 20260821-evens-2026-08-21-give-grok-bot-access-to-the_bil-9107c790.md |
+| n8n-cursor | Workspace: /Users/evenslouis/n8n-cursor. You are Watchdog. L | ea806d6d | 20260821-workspace-users-evenslouis-n8n-cursor.-you-are-w-ea806d6d.md |
+| n8n-cursor | Workspace: /Users/evenslouis/n8n-cursor. You are HITL Operat | d27c35e7 | 20260821-workspace-users-evenslouis-n8n-cursor.-you-are-h-d27c35e7.md |
+| n8n-cursor | Workspace: /Users/evenslouis/n8n-cursor. You are Librarian ( | 3f5c0b50 | 20260821-workspace-users-evenslouis-n8n-cursor.-you-are-l-3f5c0b50.md |
+| n8n-cursor | Workspace: /Users/evenslouis/n8n-cursor. You are Communicati | d168cb3a | 20260821-workspace-users-evenslouis-n8n-cursor.-you-are-c-d168cb3a.md |
+| n8n-cursor | Workspace: /Users/evenslouis/n8n-cursor. You are Researcher. | cb959b0b | 20260821-workspace-users-evenslouis-n8n-cursor.-you-are-r-cb959b0b.md |
+| n8n-cursor | SHORT PING ONLY. Workspace /Users/evenslouis/n8n-cursor. You | 9b96236d | 20260821-short-ping-only.-workspace-users-evenslouis-n8n--9b96236d.md |
+| n8n-cursor | SHORT PING ONLY. Workspace /Users/evenslouis/n8n-cursor. You | acaf5c63 | 20260821-short-ping-only.-workspace-users-evenslouis-n8n--acaf5c63.md |
+| n8n-cursor | SHORT PING ONLY. Workspace /Users/evenslouis/n8n-cursor. You | 75fd646f | 20260821-short-ping-only.-workspace-users-evenslouis-n8n--75fd646f.md |
+| n8n-cursor | SHORT PING ONLY. Workspace /Users/evenslouis/n8n-cursor. You | 5a43de18 | 20260821-short-ping-only.-workspace-users-evenslouis-n8n--5a43de18.md |
+| n8n-cursor | SHORT PING ONLY. Workspace /Users/evenslouis/n8n-cursor. You | 30ca8deb | 20260821-short-ping-only.-workspace-users-evenslouis-n8n--30ca8deb.md |
+| n8n-cursor | SHORT PING ONLY. Workspace /Users/evenslouis/n8n-cursor. You | f3b90597 | 20260821-short-ping-only.-workspace-users-evenslouis-n8n--f3b90597.md |
+| n8n-cursor | Evens (2026-08-21) authorized the ASK: **“allow first sync / | 6ad3f492 | 20260821-evens-2026-08-21-authorized-the-ask-allow-first--6ad3f492.md |
+| n8n-cursor | Evens: **“where can they access the new workflows weve made” | d722500a | 20260821-evens-where-can-they-access-the-new-workflows-we-d722500a.md |
+| empty-window | Grill Q3 A six Active | 01a6b95f | 20260826-grill-q3-a-six-active-01a6b95f.md |
+| n8n-cursor | You are **HITL Operator**. Evens handed the website color-va | 2db4059e | 20260824-you-are-hitl-operator-.-evens-handed-the-website-2db4059e.md |
+| n8n-cursor | You are **Researcher**. Evens asked if we still have this we | c0a251a1 | 20260824-you-are-researcher-.-evens-asked-if-we-still-hav-c0a251a1.md |
+| n8n-cursor | You are **Communications Manager**. Evens wants desks to kee | 0e4e432a | 20260824-you-are-communications-manager-.-evens-wants-des-0e4e432a.md |

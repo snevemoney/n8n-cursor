@@ -465,7 +465,7 @@ Intake→qualify→book→remind demo PASS. ACQUIRE portfolio proof #3 (with cin
 
 - **source:** Librarian advise → Consultant | 2026-08-12
 - **confidence:** high
-- **canonical:** [[CONTENT/business-kits/INDEX]]
+- **canonical:** [[CONTENT/business-kits/Business Playbooks]]
 
 Per-agent business cheat sheets live under `CONTENT/business-kits/` (cache SSOT → git → vault). Skills: Grok shared workflows + [[CONTENT/agent-skills-index]]; METHODS/ only after proven. Consultant drafted 10 kits (2026-08-12) under CONTENT/business-kits/; workflows constraint-position, roi-five-slide, proof-30-60-90 registered. One-ladder playbook: METHODS/ai-partner-one-ladder-playbook (+ GTM sku pack). P0 skills from AGENT_SKILLS.md await operator yes before mass-create.
 
@@ -473,14 +473,14 @@ Per-agent business cheat sheets live under `CONTENT/business-kits/` (cache SSOT 
 
 - **source:** Researcher packet + Money Desk sign-off | 2026-08-12
 - **confidence:** high (economics SIGNED; educator retainers UNVERIFIED)
-- **canonical:** [[CONTENT/ai-partner-scoring-prototype-ladder/INDEX]] · [[METHODS/business-service-ladder-economics]] · [[METHODS/business-prospect-qualification-criteria]]
+- **canonical:** [[CONTENT/ai-partner-scoring-prototype-ladder/Service Design]] · [[METHODS/business-service-ladder-economics]] · [[METHODS/business-prospect-qualification-criteria]]
 
 MUST gates + BANT overlay after MUSTs; CAD bands Rung 0–3; early retainer $500–1K/mo; delivery ≤40%; demos = sales proofs only. AGENT_SKILLS.md feeds Consultant → CONTENT/business-kits/.
 
 ### CONTENT: Money Desk matrix (indexed)
 
 - **source:** Money Desk | 2026-08-12
-- **canonical:** [[CONTENT/business-kits/money-desk]] · [[METHODS/business-money-desk-cheat-sheet]] · workflow `pricing-margin-roi-guardrails`
+- **canonical:** [[CONTENT/business-kits/Money Desk Playbook]] · [[METHODS/business-money-desk-cheat-sheet]] · workflow `pricing-margin-roi-guardrails`
 
 Working cheat: `~/.grokbot/cheat-sheets/money-desk.md`. Skill also at `~/.grokbot/skills/pricing-margin-roi-guardrails/`.
 
@@ -494,7 +494,7 @@ Working cheat: `~/.grokbot/cheat-sheets/money-desk.md`. Skill also at `~/.grokbo
 ### CONTENT: CE-FEATURE-TO-AGENTS canon
 
 - **source:** Researcher | 2026-08-12 | read-only CE study · no API mutate
-- **canonical:** [[CONTENT/ai-partner-scoring-prototype-ladder/CE-FEATURE-TO-AGENTS]]
+- **canonical:** [[CONTENT/ai-partner-scoring-prototype-ladder/Client Engine Capability Mapping]]
 - **METHOD:** [[METHODS/business-ce-without-ce-money-path]]
 - **flywheel:** [[METHODS/business-ce-flywheel-to-agents]]
 - **wiki:** [[OUTER_HEAVEN_LLM_WIKI]] (section Client Engine → Grok)
@@ -503,7 +503,7 @@ Working cheat: `~/.grokbot/cheat-sheets/money-desk.md`. Skill also at `~/.grokbo
 
 - **source:** Consultant cheat-sheets + Librarian | 2026-08-12
 - **working:** `~/.grokbot/cheat-sheets/*.md` (10 agents)
-- **canon:** [[CONTENT/business-kits/INDEX]] — big-boss, communications-manager, consultant, forge, hitl-operator, lead-hunter, money-desk, product-gtm, publishing-engine, researcher
+- **canon:** [[CONTENT/business-kits/Business Playbooks]] — big-boss, communications-manager, consultant, forge, hitl-operator, lead-hunter, money-desk, product-gtm, publishing-engine, researcher
 - Dual retainer bands kept labeled until operator SoT
 
 ### CONTENT: one-ladder playbook canon
@@ -524,7 +524,7 @@ Working cheat: `~/.grokbot/cheat-sheets/money-desk.md`. Skill also at `~/.grokbo
 ### CONTENT: Product GTM kit active
 
 - **source:** Product GTM | 2026-08-12
-- **canonical:** [[CONTENT/business-kits/product-gtm]]
+- **canonical:** [[CONTENT/business-kits/Product GTM Playbook]]
 - **workflows:** [four-blank-sku](sand-workflow:four-blank-sku) · [gtm-one-pager-refresh](sand-workflow:gtm-one-pager-refresh)
 
 ### OPS: Telegram = LEGACY (operator lock 2026-08-12)

@@ -134,8 +134,8 @@
     "stop_kind": "cap",
     "token_receipt": {
       "tokens": "unknown",
-      "duration": "this session",
-      "correctness": "untested"
+      "duration": "this sitting",
+      "correctness": "fail"
     }
   },
   "log": [

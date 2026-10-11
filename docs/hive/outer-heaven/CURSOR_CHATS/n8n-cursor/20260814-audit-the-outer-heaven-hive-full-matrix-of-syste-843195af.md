@@ -80,7 +80,7 @@ Cross these planes and find holes (empty files, stub-only files, missing expecte
 - `docs/hive/outer-heaven/CONTENT/job-cards`
 - `docs/hive/outer-heaven/CONTENT/business-kits`
 - `docs/hive/outer-heaven/CONTENT/n8n-learning`
-- `docs/hive/outer-heaven/CONTENT/job-cards/INDEX.md`
+- `docs/hive/outer-heaven/CONTENT/job-cards/Agent Roles.md`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/_prompts`
 - `docs/hive/outer-heaven/CONTENT/n8n-learning/one-pagers`
@@ -107,7 +107,7 @@ Cross these planes and find holes (empty files, stub-only files, missing expecte
 - [[20260814-you-are-lane-c-of-a-fix-them-all-don-t-stop-pass-2234ba51|You are lane C of a \u201cfix them all / don\u2019]]
 - [[20260814-you-are-wealth-manager-slug-wealth-manager-in-us-db31a27e|You are Wealth Manager (slug: wealth-manager) in /]]
 - [[20260814-you-are-communications-manager-slug-communicatio-cc633424|You are Communications Manager (slug: communicatio]]
-- [[20260814-you-are-hitl-operator-slug-hitl-operator-in-user-89e446a4|You are HITL Operator (slug: hitl-operator) in /Us]]
+- [[20260814-you-are-personal-cfo-personal-cfo-in-users-evens-57f48c09|You are Personal CFO (personal-cfo) in /Users/even]]
 
 ## Canon
 

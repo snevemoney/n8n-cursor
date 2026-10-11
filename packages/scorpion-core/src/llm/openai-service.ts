@@ -286,7 +286,9 @@ export class OpenAIService {
       max_tokens: options.max_tokens,
     });
 
-    const content = response.choices[0]?.message?.content;
+    const rawContent = response.choices[0]?.message?.content;
+    const content = typeof rawContent === 'string' ? rawContent
+      : rawContent?.filter(part => part.type === 'text').map(part => part.text).join('');
     if (!content) {
       throw new Error('No content in response');
     }
@@ -536,8 +538,8 @@ export class OpenAIService {
   async createTranscription(request: TranscriptionRequest): Promise<TranscriptionResponse> {
     const formData = new FormData();
     
-    if (request.file instanceof Buffer) {
-      formData.append('file', new Blob([request.file]), 'audio.mp3');
+    if (Buffer.isBuffer(request.file)) {
+      formData.append('file', new Blob([Uint8Array.from(request.file)]), 'audio.mp3');
     } else {
       formData.append('file', request.file);
     }
@@ -571,8 +573,8 @@ export class OpenAIService {
   async createTranslation(request: TranslationRequest): Promise<TranscriptionResponse> {
     const formData = new FormData();
     
-    if (request.file instanceof Buffer) {
-      formData.append('file', new Blob([request.file]), 'audio.mp3');
+    if (Buffer.isBuffer(request.file)) {
+      formData.append('file', new Blob([Uint8Array.from(request.file)]), 'audio.mp3');
     } else {
       formData.append('file', request.file);
     }
@@ -635,8 +637,8 @@ export class OpenAIService {
   async createImageEdit(request: ImageEditRequest): Promise<ImageResponse> {
     const formData = new FormData();
     
-    if (request.image instanceof Buffer) {
-      formData.append('image', new Blob([request.image]), 'image.png');
+    if (Buffer.isBuffer(request.image)) {
+      formData.append('image', new Blob([Uint8Array.from(request.image)]), 'image.png');
     } else {
       formData.append('image', request.image);
     }
@@ -644,8 +646,8 @@ export class OpenAIService {
     formData.append('prompt', request.prompt);
     
     if (request.mask) {
-      if (request.mask instanceof Buffer) {
-        formData.append('mask', new Blob([request.mask]), 'mask.png');
+      if (Buffer.isBuffer(request.mask)) {
+        formData.append('mask', new Blob([Uint8Array.from(request.mask)]), 'mask.png');
       } else {
         formData.append('mask', request.mask);
       }
@@ -677,8 +679,8 @@ export class OpenAIService {
   async createImageVariation(request: ImageVariationRequest): Promise<ImageResponse> {
     const formData = new FormData();
     
-    if (request.image instanceof Buffer) {
-      formData.append('image', new Blob([request.image]), 'image.png');
+    if (Buffer.isBuffer(request.image)) {
+      formData.append('image', new Blob([Uint8Array.from(request.image)]), 'image.png');
     } else {
       formData.append('image', request.image);
     }
@@ -717,8 +719,8 @@ export class OpenAIService {
   ): Promise<FileObject> {
     const formData = new FormData();
     
-    if (file instanceof Buffer) {
-      formData.append('file', new Blob([file]), filename || 'file.jsonl');
+    if (Buffer.isBuffer(file)) {
+      formData.append('file', new Blob([Uint8Array.from(file)]), filename || 'file.jsonl');
     } else {
       formData.append('file', file, filename);
     }

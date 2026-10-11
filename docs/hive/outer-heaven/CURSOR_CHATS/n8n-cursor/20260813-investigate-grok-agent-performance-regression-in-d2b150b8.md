@@ -117,11 +117,11 @@ The main issue is a **broken control plane**, not model regression.
 
 ## Related chats
 
+- [[20260909-macbook-space-management-d77daf9a|MacBook space management]]
 - [[20260812-for-all-the-repos-and-based-off-the-last-chat-bc-973a02a9|for all the repos and based off the last chat bc-6]]
 - [[20260814-you-are-hitl-operator-slug-hitl-operator-in-user-89e446a4|You are HITL Operator (slug: hitl-operator) in /Us]]
-- [[20260812-create-documentation-files-for-evens-ai-operatin-87b5d457|Create documentation files for EVENS AI Operating ]]
-- [[20260813-explore-users-evenslouis-n8n-cursor-for-24-7-aut-af0b2fc8|Explore /Users/evenslouis/n8n-cursor for 24/7 auto]]
-- [[20260814-evens-said-yes-to-run-the-six-dry-runs.-execute--52e48f78|Evens said yes to **run the six** dry-runs. Execut]]
+- [[20260928-macbook-space-management-d77daf9a|MacBook space management]]
+- [[CURSOR_CHATS/n8n-cursor/20260916-https-evenslouis.ca-n8n-mcp-server-http.-i-m-try-f1f0ac64|https://evenslouis.ca/n8n/mcp-server/http. I'm try]]
 
 ## Canon
 

@@ -125,11 +125,11 @@ Claude finished the response
 
 ## Related chats
 
-- [[20260704-higgsfield-activation-in-after-effects-7897fefb|Higgsfield activation in After Effects]]
-- [[20260616-github-repository-access-0f6fff96|GitHub repository access]]
-- [[20260624-macos-game-app-issue-78a2a4e4|macOS game app issue]]
-- [[20260704-adobe-after-effects-skills-development-3b471e0e|Adobe After Effects skills development]]
-- [[20260626-damaged-game-file-227876ef|Damaged game file]]
+- [[CURSOR_CHATS/empty-window/20260816-project-structure-and-naming-01a6b95f|Project structure and naming]]
+- [[CURSOR_CHATS/n8n-cursor/20260816-project-structure-and-naming-01a6b95f|Project structure and naming]]
+- [[20260917-can-you-see-obsidian-using-the-mcp_docker-connec-8a96fc8d|can you see obsidian using the mcp_docker connecto]]
+- [[20260919-can-you-see-obsidian-using-the-mcp_docker-connec-8a96fc8d|can you see obsidian using the mcp_docker connecto]]
+- [[20260821-project-structure-and-naming-01a6b95f|Project structure and naming]]
 
 ## Canon
 

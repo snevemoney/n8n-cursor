@@ -1,154 +1,735 @@
 {
   "playlistUrl": "https://www.youtube.com/playlist?list=WL",
   "playlistId": "WL",
-  "scrapedAt": "2026-08-13T19:51:57+00:00",
+  "scrapedAt": "2026-08-20T02:12:00Z",
   "loggedIn": true,
   "scrolledToEnd": false,
-  "pageTitle": "\u00c0 regarder plus tard",
-  "source": "/Users/evenslouis/n8n-cursor/docs/hive/outer-heaven/CONTENT/watch-later/watch-later.json",
-  "notes": [
-    "Logged-in Snevemoney Watch Later, sort newest-added.",
-    "DOM had 100 ytd-playlist-video-renderer rows already loaded; first 15 taken in list order.",
-    "Do not treat 15 as the full 1803."
-  ],
+  "pageTitle": "Watch later - YouTube",
+  "source": "/Users/evenslouis/.grokbot/outer-heaven/CONTENT/watch-later/watch-later-20260819.json",
+  "notes": [],
   "probe": {},
   "items": [
     {
       "index": 1,
+      "title": "Stop Watching Tutorials - Build These 4 Claude Projects to 10x Output",
+      "channel": "Austin Marchese",
+      "url": "https://www.youtube.com/watch?v=IiZ5HRaeX4s",
+      "videoId": "IiZ5HRaeX4s",
+      "duration": "13:44",
+      "added": "2 months ago"
+    },
+    {
+      "index": 2,
+      "title": "Why DeepSeek Harness Just Became The Fastest Growing Github Repo EVER",
+      "channel": "Chase AI",
+      "url": "https://www.youtube.com/watch?v=f51ICIoHcjY",
+      "videoId": "f51ICIoHcjY",
+      "duration": "11:16",
+      "added": "1 hour ago"
+    },
+    {
+      "index": 3,
+      "title": "You Can Now Build $10,000 Websites Using Qwen 3.8 27B (Ultimate Guide)",
+      "channel": "Bart Slodyczka",
+      "url": "https://www.youtube.com/watch?v=0Yin3Er9DX0",
+      "videoId": "0Yin3Er9DX0",
+      "duration": "15:26",
+      "added": "14 hours ago"
+    },
+    {
+      "index": 4,
+      "title": "The Unsolved Murder in Room 1046",
+      "channel": "fern",
+      "url": "https://www.youtube.com/watch?v=zy6ZN1qM3sY",
+      "videoId": "zy6ZN1qM3sY",
+      "duration": "35:33",
+      "added": "12 hours ago"
+    },
+    {
+      "index": 5,
+      "title": "Is the Secret to Treating Schizophrenia in... Engineering?",
+      "channel": "SciShow",
+      "url": "https://www.youtube.com/watch?v=0DD6u8nK4wE",
+      "videoId": "0DD6u8nK4wE",
+      "duration": "22:09",
+      "added": "9 hours ago"
+    },
+    {
+      "index": 6,
+      "title": "Big Dragon Ball Gaming Creators Destroyed The Haters!",
+      "channel": "Makai",
+      "url": "https://www.youtube.com/watch?v=VCdSJHrDA10",
+      "videoId": "VCdSJHrDA10",
+      "duration": "16:17",
+      "added": "12 hours ago"
+    },
+    {
+      "index": 7,
+      "title": "Claude Code + Instagram = 10,000 Leads/Mo ((100% Automated + Qualified)",
+      "channel": "Fabian Markl",
+      "url": "https://www.youtube.com/watch?v=qhCvVyq3GLQ",
+      "videoId": "qhCvVyq3GLQ",
+      "duration": "14:59",
+      "added": "13 hours ago"
+    },
+    {
+      "index": 8,
+      "title": "A Week of Grok Bot Lessons in 10 Mins",
+      "channel": "Nate Herk | AI Automation",
+      "url": "https://www.youtube.com/watch?v=TMPUUyQC5aM",
+      "videoId": "TMPUUyQC5aM",
+      "duration": "10:25",
+      "added": "23 hours ago"
+    },
+    {
+      "index": 9,
+      "title": "How to INSTANTLY Build An AI Agent Army in n8n with Claude",
+      "channel": "Mark Kashef",
+      "url": "https://www.youtube.com/watch?v=u2NluvotA80",
+      "videoId": "u2NluvotA80",
+      "duration": "24:08",
+      "added": "1 year ago"
+    },
+    {
+      "index": 10,
+      "title": "Every Claude Code Concept Explained In 21 Minutes",
+      "channel": "Chase AI",
+      "url": "https://www.youtube.com/watch?v=eF20iepBQCU",
+      "videoId": "eF20iepBQCU",
+      "duration": "21:18",
+      "added": "1 day ago"
+    },
+    {
+      "index": 11,
+      "title": "A Scammer Scraped ALL Of Cara...",
+      "channel": "kat 'n chat",
+      "url": "https://www.youtube.com/watch?v=vl3fXPSby44",
+      "videoId": "vl3fXPSby44",
+      "duration": "20:29",
+      "added": "1 day ago"
+    },
+    {
+      "index": 12,
+      "title": "The Rushed Potential of Spider-Man 2",
+      "channel": "AlwaysElite",
+      "url": "https://www.youtube.com/watch?v=P-py-MCoyQw",
+      "videoId": "P-py-MCoyQw",
+      "duration": "44:50",
+      "added": "2 years ago"
+    },
+    {
+      "index": 13,
+      "title": "X Men, The Full Story",
+      "channel": "Comicstorian",
+      "url": "https://www.youtube.com/watch?v=7IJdsrqhPxw",
+      "videoId": "7IJdsrqhPxw",
+      "duration": "1:02:05",
+      "added": "2 years ago"
+    },
+    {
+      "index": 14,
+      "title": "How the CEO of Obsidian Takes his Notes (Underrated Genius)",
+      "channel": "Karlos Obsidian Tutorials",
+      "url": "https://www.youtube.com/watch?v=Dq3R3uS0sQ4",
+      "videoId": "Dq3R3uS0sQ4",
+      "duration": "32:19",
+      "added": "8 months ago"
+    },
+    {
+      "index": 15,
+      "title": "15 Skills That Will Be Worth Twice as Much by 2030",
+      "channel": "Alux.com",
+      "url": "https://www.youtube.com/watch?v=oh2Z6aZphLE",
+      "videoId": "oh2Z6aZphLE",
+      "duration": "36:30",
+      "added": "2 months ago"
+    },
+    {
+      "index": 16,
+      "title": "15 Assets That Are Cheap This Year (Underpriced Assets)",
+      "channel": "Alux.com",
+      "url": "https://www.youtube.com/watch?v=FQdmyt0tu7U",
+      "videoId": "FQdmyt0tu7U",
+      "duration": "23:51",
+      "added": "2 months ago"
+    },
+    {
+      "index": 17,
+      "title": "Building the PERFECT Streaming Setup For PS5! (M4 Mac Mini + Astro A50x)",
+      "channel": "MidnightMan",
+      "url": "https://www.youtube.com/watch?v=MgKyPmfBp2w",
+      "videoId": "MgKyPmfBp2w",
+      "duration": "12:10",
+      "added": "1 year ago"
+    },
+    {
+      "index": 18,
+      "title": "The Ultimate Claude Code Tutorial for Mobile Apps - FULL COURSE",
+      "channel": "Codesistency",
+      "url": "https://www.youtube.com/watch?v=p80OV6kjIO8",
+      "videoId": "p80OV6kjIO8",
+      "duration": "3:33:06",
+      "added": "1 month ago"
+    },
+    {
+      "index": 19,
+      "title": "Claude Just MADE HACKING INSANELY Easy...",
+      "channel": "DeadOverflow",
+      "url": "https://www.youtube.com/watch?v=pB4LyTcMaMY",
+      "videoId": "pB4LyTcMaMY",
+      "duration": "9:00",
+      "added": "5 days ago"
+    },
+    {
+      "index": 20,
+      "title": "The Economics Of Owning a Business as a Developer",
+      "channel": "Bgo",
+      "url": "https://www.youtube.com/watch?v=xNjIC5Fxi1I",
+      "videoId": "xNjIC5Fxi1I",
+      "duration": "15:39",
+      "added": "3 weeks ago"
+    },
+    {
+      "index": 21,
+      "title": "Creating Your Own Agentic OS is Easy (Insanely Powerful)",
+      "channel": "Simon Scrapes",
+      "url": "https://www.youtube.com/watch?v=w0S-khYCaB4",
+      "videoId": "w0S-khYCaB4",
+      "duration": "24:34",
+      "added": "3 months ago"
+    },
+    {
+      "index": 22,
+      "title": "The Ultimate Guide to Making Your Entire Development Cycle AI Native",
+      "channel": "Cole Medin",
+      "url": "https://www.youtube.com/watch?v=Tliio-33w4g",
+      "videoId": "Tliio-33w4g",
+      "duration": "1:57:39",
+      "added": "2 days ago"
+    },
+    {
+      "index": 23,
+      "title": "Stop Selling AI Voice Agents. Do This Instead",
+      "channel": "Brendan Jowett",
+      "url": "https://www.youtube.com/watch?v=bnzOiioEuJ4",
+      "videoId": "bnzOiioEuJ4",
+      "duration": "18:10",
+      "added": "4 days ago"
+    },
+    {
+      "index": 24,
+      "title": "Stop Making Ugly Websites with Claude Code",
+      "channel": "Ed Hill | AI Automation",
+      "url": "https://www.youtube.com/watch?v=NNv80mMzFDs",
+      "videoId": "NNv80mMzFDs",
+      "duration": "10:48",
+      "added": "5 months ago"
+    },
+    {
+      "index": 25,
+      "title": "Your AI Second Brain Is Slowly Rotting (Here's How to Fix It)",
+      "channel": "Cole Medin",
+      "url": "https://www.youtube.com/watch?v=xOFkpf9KgKg",
+      "videoId": "xOFkpf9KgKg",
+      "duration": "18:44",
+      "added": "12 days ago"
+    },
+    {
+      "index": 26,
+      "title": "The Agentic OS Setup That Will 10x Claude Code",
+      "channel": "Chase AI",
+      "url": "https://www.youtube.com/watch?v=HRw-vP0j8OM",
+      "videoId": "HRw-vP0j8OM",
+      "duration": "31:20",
+      "added": "1 month ago"
+    },
+    {
+      "index": 27,
+      "title": "Inside a YC Startup Disrupting a $900B Industry That Runs the US",
+      "channel": "Will Phillips",
+      "url": "https://www.youtube.com/watch?v=zY-dqw0_6ug",
+      "videoId": "zY-dqw0_6ug",
+      "duration": "19:13",
+      "added": "1 month ago"
+    },
+    {
+      "index": 28,
+      "title": "Here's how to build & sell AI systems using Claude Code",
+      "channel": "AI Foundations",
+      "url": "https://www.youtube.com/watch?v=t6NxHM5peus",
+      "videoId": "t6NxHM5peus",
+      "duration": "24:15",
+      "added": "5 months ago"
+    },
+    {
+      "index": 29,
+      "title": "Loop Engineering explained in 8min..",
+      "channel": "Caleb Writes Code",
+      "url": "https://www.youtube.com/watch?v=4biXYSNkn9Y",
+      "videoId": "4biXYSNkn9Y",
+      "duration": "8:53",
+      "added": "1 month ago"
+    },
+    {
+      "index": 30,
+      "title": "Why AI Is Making Business Owners Dumber",
+      "channel": "MoreMozi",
+      "url": "https://www.youtube.com/watch?v=sPtx8Rm78Mo",
+      "videoId": "sPtx8Rm78Mo",
+      "duration": "37:56",
+      "added": "2 months ago"
+    },
+    {
+      "index": 31,
+      "title": "Grok 4.6 is Actually Good\u2026 And Claude Keeps Getting Better",
+      "channel": "Riley Brown",
+      "url": "https://www.youtube.com/watch?v=VWDnptnvFrA",
+      "videoId": "VWDnptnvFrA",
+      "duration": "25:22",
+      "added": "4 days ago"
+    },
+    {
+      "index": 32,
+      "title": "If I Had to Become Overemployed in 90 Days, This Is Exactly What I'd Do",
+      "channel": "Wilson Wye",
+      "url": "https://www.youtube.com/watch?v=BJkm9BVS3-M",
+      "videoId": "BJkm9BVS3-M",
+      "duration": "29:26",
+      "added": "5 days ago"
+    },
+    {
+      "index": 33,
+      "title": "Claude + Seedance 2.5 Builds $10,000 Websites in Minutes",
+      "channel": "Zubair Trabzada | AI Workshop",
+      "url": "https://www.youtube.com/watch?v=gt8k4bA01Mo",
+      "videoId": "gt8k4bA01Mo",
+      "duration": "14:50",
+      "added": "5 days ago"
+    },
+    {
+      "index": 34,
+      "title": "Claude Design FINALLY Solved Motion Graphics",
+      "channel": "Jack Roberts",
+      "url": "https://www.youtube.com/watch?v=RDytbVDzMF4",
+      "videoId": "RDytbVDzMF4",
+      "duration": "16:32",
+      "added": "5 days ago"
+    },
+    {
+      "index": 35,
+      "title": "How to Become a Forward Deployed Engineer in 2026",
+      "channel": "Tech With Tim",
+      "url": "https://www.youtube.com/watch?v=vLlIBT0HSSc",
+      "videoId": "vLlIBT0HSSc",
+      "duration": "11:35",
+      "added": "5 days ago"
+    },
+    {
+      "index": 36,
+      "title": "How to Build the Most Powerful System for AI Coding (Full Breakdown)",
+      "channel": "Cole Medin",
+      "url": "https://www.youtube.com/watch?v=eecUhBpTz_g",
+      "videoId": "eecUhBpTz_g",
+      "duration": "24:34",
+      "added": "5 days ago"
+    },
+    {
+      "index": 37,
+      "title": "I Let Claude Edit My Entire Video in DaVinci Resolve (Full Setup)",
+      "channel": "Jason Cooperson",
+      "url": "https://www.youtube.com/watch?v=fSJh8etPngU",
+      "videoId": "fSJh8etPngU",
+      "duration": "19:03",
+      "added": "12 days ago"
+    },
+    {
+      "index": 38,
+      "title": "How To Win Friends & Influence People (in 20 Minutes)",
+      "channel": "Escaping Ordinary (B.C Marx)",
+      "url": "https://www.youtube.com/watch?v=Xo2Q4PQqqWU",
+      "videoId": "Xo2Q4PQqqWU",
+      "duration": "22:00",
+      "added": "2 years ago"
+    },
+    {
+      "index": 39,
+      "title": "System Design Explained: APIs, Databases, Caching, CDNs, Load Balancing & Production Infra",
+      "channel": "Hayk Simonyan",
+      "url": "https://www.youtube.com/watch?v=oYxTTirKY8M",
+      "videoId": "oYxTTirKY8M",
+      "duration": "2:04:07",
+      "added": "2 months ago"
+    },
+    {
+      "index": 40,
+      "title": "The #1 Claude Code Design Skill Just Got a HUGE Upgrade",
+      "channel": "Chase AI",
+      "url": "https://www.youtube.com/watch?v=RVeCbPg0liw",
+      "videoId": "RVeCbPg0liw",
+      "duration": "15:27",
+      "added": "2 weeks ago"
+    },
+    {
+      "index": 41,
+      "title": "Nodes Aren't the Future of AI Creation. Here's What Is.",
+      "channel": "Bilawal Sidhu",
+      "url": "https://www.youtube.com/watch?v=-k87m_sdhRI",
+      "videoId": "-k87m_sdhRI",
+      "duration": "11:43",
+      "added": "6 months ago"
+    },
+    {
+      "index": 42,
+      "title": "AI Video Is Getting Really Good (And Fast!)",
+      "channel": "Bilawal Sidhu",
+      "url": "https://www.youtube.com/watch?v=iRBs8PCBCaA",
+      "videoId": "iRBs8PCBCaA",
+      "duration": "8:14",
+      "added": "6 days ago"
+    },
+    {
+      "index": 43,
+      "title": "Give Me 50 Minutes, I'll Give You 1000+ Hours Of Claude Code Knowledge (2026 Guide)",
+      "channel": "Chase AI",
+      "url": "https://www.youtube.com/watch?v=U6k4MeVks_Y",
+      "videoId": "U6k4MeVks_Y",
+      "duration": "51:29",
+      "added": "8 days ago"
+    },
+    {
+      "index": 44,
+      "title": "10 Github Repos That Will Kill Your Monthly Subscriptions",
+      "channel": "The Next New Thing",
+      "url": "https://www.youtube.com/watch?v=jMAe1h39rHo",
+      "videoId": "jMAe1h39rHo",
+      "duration": "22:45",
+      "added": "8 days ago"
+    },
+    {
+      "index": 45,
+      "title": "Claude's Gauntlet Loop Changed AI Forever",
+      "channel": "Julian Goldie SEO",
+      "url": "https://www.youtube.com/watch?v=IA_zUI1Q6pY",
+      "videoId": "IA_zUI1Q6pY",
+      "duration": "13:03",
+      "added": "8 days ago"
+    },
+    {
+      "index": 46,
+      "title": "How I use Claude Cowork to estimate custom home builds in under 30 minutes",
+      "channel": "Bryan Kaplan",
+      "url": "https://www.youtube.com/watch?v=wmPxY51vpSo",
+      "videoId": "wmPxY51vpSo",
+      "duration": "12:19",
+      "added": "4 months ago"
+    },
+    {
+      "index": 47,
+      "title": "5 INSANE Grok Bot Use Cases I Can't Live Without",
+      "channel": "Brock Mesarich | AI for Non Techies",
+      "url": "https://www.youtube.com/watch?v=lRUpu2-KtGQ",
+      "videoId": "lRUpu2-KtGQ",
+      "duration": "22:19",
+      "added": "6 days ago"
+    },
+    {
+      "index": 48,
+      "title": "AI OFM : How To Automate OFM Chatting With AI",
+      "channel": "Manila AI OFM",
+      "url": "https://www.youtube.com/watch?v=XvMN3nSv2u4",
+      "videoId": "XvMN3nSv2u4",
+      "duration": "10:29",
+      "added": "4 weeks ago"
+    },
+    {
+      "index": 49,
       "title": "AI OFM Unlimited Instagram Accounts With Automation | Devicefarm.io",
       "channel": "Manila AI OFM",
       "url": "https://www.youtube.com/watch?v=13eo8dWa1Gw",
       "videoId": "13eo8dWa1Gw",
       "duration": "9:18",
-      "added": "il y a 1 jour"
+      "added": "7 days ago"
     },
     {
-      "index": 2,
+      "index": 50,
       "title": "4 AI Agents To Automate 99% Of Your Life",
       "channel": "Sandeep Swadia",
       "url": "https://www.youtube.com/watch?v=TL8V41Ea6oM",
       "videoId": "TL8V41Ea6oM",
       "duration": "20:47",
-      "added": "il y a 2 semaines"
+      "added": "2 weeks ago"
     },
     {
-      "index": 3,
-      "title": "Andrej Karpathy Just 10x'd Everyone's Claude Code",
+      "index": 51,
+      "title": "Andrej Karpathy Just 10x\u2019d Everyone\u2019s Claude Code",
       "channel": "Nate Herk | AI Automation",
       "url": "https://www.youtube.com/watch?v=sboNwYmH3AY",
       "videoId": "sboNwYmH3AY",
       "duration": "17:47",
-      "added": "il y a 4 mois"
+      "added": "4 months ago"
     },
     {
-      "index": 4,
+      "index": 52,
       "title": "Andrej Karpathy just changed how he prompts claude... (INSANE RESULTS!)",
       "channel": "Dream Labs AI",
       "url": "https://www.youtube.com/watch?v=eMPWBunaOic",
       "videoId": "eMPWBunaOic",
       "duration": "14:12",
-      "added": "il y a 5 jours"
+      "added": "11 days ago"
     },
     {
-      "index": 5,
+      "index": 53,
       "title": "Skill Issue: Andrej Karpathy on Code Agents, AutoResearch, and the Loopy Era of AI",
       "channel": "No Priors: AI, Machine Learning, Tech, & Startups",
       "url": "https://www.youtube.com/watch?v=kwSVtQ7dziU",
       "videoId": "kwSVtQ7dziU",
       "duration": "1:06:32",
-      "added": "il y a 4 mois"
+      "added": "4 months ago"
     },
     {
-      "index": 6,
+      "index": 54,
       "title": "Build & Sell AI SaaS Products (2 HOUR COURSE)",
       "channel": "Nate Herk | AI Automation",
       "url": "https://www.youtube.com/watch?v=IVx8OSMbTss",
       "videoId": "IVx8OSMbTss",
       "duration": "2:22:52",
-      "added": "il y a 3 jours"
+      "added": "9 days ago"
     },
     {
-      "index": 7,
+      "index": 55,
       "title": "My top secrets to running an AI Agent Workforce",
-      "channel": "Greg Isenberg et Allie K Miller",
+      "channel": "Greg Isenberg and Allie K Miller",
       "url": "https://www.youtube.com/watch?v=EzQAgnjTq2k",
       "videoId": "EzQAgnjTq2k",
       "duration": "48:28",
-      "added": "il y a 22 heures"
+      "added": "7 days ago"
     },
     {
-      "index": 8,
+      "index": 56,
       "title": "Why One-Person Companies Are the Future of Work",
       "channel": "There's An AI For That",
       "url": "https://www.youtube.com/watch?v=hGdG-04TkDs",
       "videoId": "hGdG-04TkDs",
       "duration": "16:00",
-      "added": "il y a 6 mois"
+      "added": "6 months ago"
     },
     {
-      "index": 9,
-      "title": "How I'd Build a 1-Person AI Business (0 to $1M+)",
+      "index": 57,
+      "title": "How I\u2019d Build a 1-Person AI Business (0 to $1M+)",
       "channel": "Sandeep Swadia",
       "url": "https://www.youtube.com/watch?v=IWdvG9Up8Mc",
       "videoId": "IWdvG9Up8Mc",
       "duration": "14:08",
-      "added": "il y a 8 mois"
+      "added": "8 months ago"
     },
     {
-      "index": 10,
+      "index": 58,
       "title": "My AI Called a Restaurant (Real Recording)",
       "channel": "Zubair Trabzada | AI Workshop",
       "url": "https://www.youtube.com/watch?v=whIp1SOahOM",
       "videoId": "whIp1SOahOM",
       "duration": "23:54",
-      "added": "il y a 13 jours"
+      "added": "2 weeks ago"
     },
     {
-      "index": 11,
+      "index": 59,
       "title": "Claude Just Changed Cold Calling Forever! (Tutorial)",
       "channel": "Glencoco",
       "url": "https://www.youtube.com/watch?v=nS2FrgXN-EY",
       "videoId": "nS2FrgXN-EY",
       "duration": "28:28",
-      "added": "il y a 2 jours"
+      "added": "9 days ago"
     },
     {
-      "index": 12,
+      "index": 60,
       "title": "Stop Asking AI To Build The Whole Game At Once",
       "channel": "Can It Code?",
       "url": "https://www.youtube.com/watch?v=mjg_JUMar04",
       "videoId": "mjg_JUMar04",
       "duration": "6:50",
-      "added": "il y a 3 jours"
+      "added": "9 days ago"
     },
     {
-      "index": 13,
+      "index": 61,
       "title": "Building Perfect Lead Lists With Claude Code (Step by Step)",
       "channel": "Mitchell Keller",
       "url": "https://www.youtube.com/watch?v=ESIxitOLYoQ",
       "videoId": "ESIxitOLYoQ",
       "duration": "23:24",
-      "added": "il y a 3 mois"
+      "added": "3 months ago"
     },
     {
-      "index": 14,
+      "index": 62,
       "title": "Watch Me Build & Sell an AI SaaS in 10 hours",
       "channel": "Ty Chen",
       "url": "https://www.youtube.com/watch?v=I7mpF7_pnPM",
       "videoId": "I7mpF7_pnPM",
       "duration": "43:49",
-      "added": "il y a 1 jour"
+      "added": "7 days ago"
     },
     {
-      "index": 15,
+      "index": 63,
       "title": "MCP Was Wrong From The Start (They Just Fixed It)",
       "channel": "Better Stack",
       "url": "https://www.youtube.com/watch?v=f4mI3d-nTrI",
       "videoId": "f4mI3d-nTrI",
       "duration": "6:52",
-      "added": "il y a 5 jours"
+      "added": "11 days ago"
+    },
+    {
+      "index": 64,
+      "title": "The Insane Lore of the Anti-Goku Squad",
+      "channel": "Lonk's Takes",
+      "url": "https://www.youtube.com/watch?v=Jez5pzD6K34",
+      "videoId": "Jez5pzD6K34",
+      "duration": "9:52",
+      "added": "11 days ago"
+    },
+    {
+      "index": 65,
+      "title": "The Xenoverse 3 Drama Just Got Juicy!",
+      "channel": "Makai",
+      "url": "https://www.youtube.com/watch?v=_PSl1SaIFKo",
+      "videoId": "_PSl1SaIFKo",
+      "duration": "15:00",
+      "added": "13 days ago"
+    },
+    {
+      "index": 66,
+      "title": "The Perfect Ultron",
+      "channel": "Veny",
+      "url": "https://www.youtube.com/watch?v=gxQcSI4AigI",
+      "videoId": "gxQcSI4AigI",
+      "duration": "16:42",
+      "added": "1 year ago"
+    },
+    {
+      "index": 67,
+      "title": "How A True Workaholic Works",
+      "channel": "Nic Munoz",
+      "url": "https://www.youtube.com/watch?v=qtdoO31xJKc",
+      "videoId": "qtdoO31xJKc",
+      "duration": "23:53",
+      "added": "4 weeks ago"
+    },
+    {
+      "index": 68,
+      "title": "Nothing prepares you for the Silksong endgame",
+      "channel": "zanny",
+      "url": "https://www.youtube.com/watch?v=7f3GWqu1r8w",
+      "videoId": "7f3GWqu1r8w",
+      "duration": "38:01",
+      "added": "6 months ago"
+    },
+    {
+      "index": 69,
+      "title": "Do These BEFORE the Monster Hunter Wilds Expansion - Guide",
+      "channel": "Rurikhan",
+      "url": "https://www.youtube.com/watch?v=50LKbkkr6ms",
+      "videoId": "50LKbkkr6ms",
+      "duration": "12:21",
+      "added": "3 months ago"
+    },
+    {
+      "index": 70,
+      "title": "So Monster Hunter Wilds is Dead Now...",
+      "channel": "RageGamingVideos",
+      "url": "https://www.youtube.com/watch?v=17sBwsCPz4s",
+      "videoId": "17sBwsCPz4s",
+      "duration": "22:15",
+      "added": "2 months ago"
+    },
+    {
+      "index": 71,
+      "title": "How A Single Gas Station Breaks Its Local Economy",
+      "channel": "The Invisible Game",
+      "url": "https://www.youtube.com/watch?v=P7G80jGOr9w",
+      "videoId": "P7G80jGOr9w",
+      "duration": "13:17",
+      "added": "3 weeks ago"
+    },
+    {
+      "index": 72,
+      "title": "TMZ Just Got DESTROYED By Nolan Wells Supporter",
+      "channel": "BIGGKISH",
+      "url": "https://www.youtube.com/watch?v=ORRVh4hYWdE",
+      "videoId": "ORRVh4hYWdE",
+      "duration": "13:43",
+      "added": "2 weeks ago"
+    },
+    {
+      "index": 73,
+      "title": "Ryan Coogler and Kevin Feige Just Ruined the Black Panther Franchise",
+      "channel": "IV ROSS",
+      "url": "https://www.youtube.com/watch?v=krtdahaQ8PQ",
+      "videoId": "krtdahaQ8PQ",
+      "duration": "15:03",
+      "added": "2 weeks ago"
+    },
+    {
+      "index": 74,
+      "title": "Why Did Philosophers Hate Women?",
+      "channel": "Ramboh",
+      "url": "https://www.youtube.com/watch?v=6CEi7R5lGno",
+      "videoId": "6CEi7R5lGno",
+      "duration": "17:09",
+      "added": "7 months ago"
+    },
+    {
+      "index": 75,
+      "title": "The Morph Problem In X-Men 97",
+      "channel": "Portal To Me",
+      "url": "https://www.youtube.com/watch?v=3TXHhMgpGfs",
+      "videoId": "3TXHhMgpGfs",
+      "duration": "6:30",
+      "added": "3 weeks ago"
+    },
+    {
+      "index": 76,
+      "title": "Otherworldly Switch Ups",
+      "channel": "just.lateef",
+      "url": "https://www.youtube.com/watch?v=6tq2Xgmv9W0",
+      "videoId": "6tq2Xgmv9W0",
+      "duration": "16:09",
+      "added": "1 year ago"
+    },
+    {
+      "index": 77,
+      "title": "I've always played Monster Hunter \u201cAlone\u201d...",
+      "channel": "pigletic",
+      "url": "https://www.youtube.com/watch?v=Lw8rOoLosdo",
+      "videoId": "Lw8rOoLosdo",
+      "duration": "10:15",
+      "added": "2 months ago"
+    },
+    {
+      "index": 78,
+      "title": "MHW Ascendance is MUCH bigger than we thought...",
+      "channel": "Cobra Llama",
+      "url": "https://www.youtube.com/watch?v=EwGhtOdjxlU",
+      "videoId": "EwGhtOdjxlU",
+      "duration": "9:42",
+      "added": "1 month ago"
+    },
+    {
+      "index": 79,
+      "title": "I Built a Control Center in My Backyard",
+      "channel": "Basically Homeless",
+      "url": "https://www.youtube.com/watch?v=lL0goqtIKL4",
+      "videoId": "lL0goqtIKL4",
+      "duration": "11:19",
+      "added": "2 weeks ago"
+    },
+    {
+      "index": 80,
+      "title": "Crazy Computer Science Concepts (#1)",
+      "channel": "Lattice",
+      "url": "https://www.youtube.com/watch?v=Nu8wLR4QqSE",
+      "videoId": "Nu8wLR4QqSE",
+      "duration": "7:49",
+      "added": "2 weeks ago"
     }
   ],
-  "totalItems": 15,
-  "uniqueVideoIds": 15
+  "totalItems": 80,
+  "uniqueVideoIds": 80
 }

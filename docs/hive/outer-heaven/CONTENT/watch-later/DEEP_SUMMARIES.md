@@ -459,6 +459,110 @@ These are not stealable machines. Watermark/jailbreak/NSFW are outside the hive.
 
 ---
 
+## WL-P1. Rotting second brain — Cole Medin `yt:xOFkpf9KgKg`
+
+Append-only wikis rot. The machine is **state vs event**: a rate or roadmap replaces; a delivery appends with a date. Three copies of "what we charge" is how the agent answers last month. Outer Heaven + Librarian lint already are this. His Claude Code audit skill is a remap, not an install. Demo retainers and the 8% "please date things" test are UNVERIFIED. Granola is a sponsor.
+
+**Hold:** `wiki-ingest`. No second brain app.
+
+## WL-P1. Grok week — Riley Brown `yt:VWDnptnvFrA`
+
+The useful sentence is UX, not a model bake-off: a named session with its own routines beats a global pile of cron. The hive already is that. Grok 4.6 in Cursor is the model lane. Cloud-browser "teach a task," GenSpark, and phone-harness are operate-never. $55 rewrite and token math are UNVERIFIED. ASR on this tape is noisy.
+
+**Hold:** 17 desks + existing routines. No second Grok desktop.
+
+## WL-P1. Stop selling voice agents — Brendan Jowett `yt:bnzOiioEuJ4`
+
+Generic voice is a weekend clone. Money (on his tape) is deep integration + hard industry + paid reliability. That is Consultant/GTM language for machines we already sell (`private-book-install`, `review-to-book`). It is **not** a voice-SDR SKU and not a reason to open HIPAA or Yardi. n8n/Zapier calendar webhooks are the shallow integration he says dies. $12k / 20 industries / 433 use cases = UNVERIFIED. No new `icp_id`.
+
+**Hold:** talk track only. Voice-agent sell stays HOLD.
+
+## WL-P1. Agentic OS as folders — Simon Scrapes `yt:w0S-khYCaB4`
+
+Nine "limitations" collapse to identity file, session hook, short skills, per-client folders, one output path. Outer Heaven already. Academy / soul.md / Claude-desktop scheduler are on-tape only. He has not hosted the OS 24/7 himself. Send stays HITL.
+
+**Hold:** `session-bootstrap` + job cards. No second OS.
+
+## WL-P1. Ugly sites — Ed Hill `yt:NNv80mMzFDs`
+
+Three levels: raw prompt (indigo slop) → generic design skill → assemble real components, normalize one system, fill from facts. That is `cinematic-recipe` + `slice-build`. Invented testimonials on the demo page are the failure mode Watchdog already exists to catch. 21st.dev and Discord are not SKUs. Remap Claude Code → Cursor.
+
+**Hold:** assemble-normalize-fill. No fake proof.
+
+## WL-P1. Loop engineering — Caleb `yt:4biXYSNkn9Y`
+
+Prompt / context / harness / loop. Loop without a check is the illusion of progress. Hive routines already self-prompt **with** `golden-test-loop`. Do not rename the OS. Sponsor compute dollars UNVERIFIED.
+
+**Hold:** existing routines + verify. No token-burn product.
+
+---
+
+## WL-P0. Nate Grok week — `yt:TMPUUyQC5aM`
+
+This is a vendor tape about the product we already sit in. The machine is grill-me until shared understanding, one pinned chief that delegates first, one-job specialists, and a split between shared hive facts and private desk notes. Routines should name the skill and the delegate. Logging is owner + status + link, not ClickUp. School auto-like and saved browser logins are the failure mode: if it can click Like, it will. Composio / GoHighLevel stay on tape.
+
+**Hold:** `session-bootstrap` + existing 17 desks. No second chief.
+
+## WL-P0. DeepSeek harness — `yt:f51ICIoHcjY`
+
+A coding harness where even the loop is a plugin. Chase's own punchline: do not leave your current harness today. Preview plugins get full shell + full filesystem. Steal PTC (batch many tool calls into one script/packet) and trajectory visibility. Star counts and "fastest repo ever" are UNVERIFIED. Do not install DeepSeek Harness, Claude Code, or Codex.
+
+**Hold:** Cursor + Grok. Pattern only.
+
+## WL-P0. Every Claude Code concept — `yt:eF20iepBQCU`
+
+Ten product nouns that remap 1:1: thin global rules, one skill per job, three attach paths, automate only a proven skill, loop = trigger/task/success/log, fan-out + verify as a research shape. Ultra / hundred-agent JS swarms are operate-never. Compact around a third of the window. Artifacts die unless written to the repo.
+
+**Hold:** existing grok-skills + `golden-test-loop`. No Claude Code.
+
+## WL-P0. Qwen $10k sites — `yt:0Yin3Er9DX0`
+
+Title price is UNVERIFIED. The machine is cinematic-recipe with media hygiene: close one image loop into `assets/`, pick from a 4-pack, 10s still→motion, splice to frames for scroll-scrub, then a design pass that kills emoji slop. Roof-restoration / before-after is a **module** for ICPs we already take, not a new `icp_id`. Pi, OpenClaw, local 27B, Higgsfield-from-agent, and deploy are operate-never.
+
+**Hold:** `cinematic-recipe` + `motion-pipeline`.
+
+## WL-P0. Four Claude projects — `yt:IiZ5HRaeX4s`
+
+Interview-me + a public-YouTube advisor loop; build the dashboard you already live in; feeling-first page; then an internal OS that is Outer Heaven already (`knowledge/` `skills/` `projects/` + thin root file). Improve-system writes the lesson back. Hostinger MCP deploy and buildpartner.ai are sponsor. 10x / raise / seven-figure = UNVERIFIED. Do not start a second wiki.
+
+**Hold:** `wiki-ingest` + `session-bootstrap`. No deploy-from-chat.
+
+---
+
+## YT-20260821. Eleven Grok Bot use cases — Berman `yt:5CSXUsljJ_E`
+
+Named bots (email, calendar, browser, coding, food order, meeting summary, chief of staff, personal, school, weekly cleanup, Telegram front). The steal is UX: propose, owner decides, execute. His public prompt pack says never send unless asked and start classifiers paused. Cleanup is a verify loop, not unattended delete. Disk-size figures UNVERIFIED.
+
+**Hold:** named desks + HITL. No second Grok desktop. No Telegram productize. No DoorDash.
+
+## YT-20260821. Eden expert hour — `yt:1VhMmgL_Gx8`
+
+Spoken captions missing (CAPTION_GAP). Official chapters are a creator OS: swipe boards, weekly content system, voice/mentor AI, social MCP, publish/schedule. Public help maps boards to swipe file or weekly writing desk. Remap to Librarian + Publishing. DM automations sit next to the IG-lead quarantine.
+
+**Hold:** wiki-ingest pattern. No Eden install. No DM farm.
+
+## YT-20260821. Comfy official MCP — Silent Snow `yt:cNaOJg47Z2A`
+
+Local Comfy MCP plus the June cloud MCP. He frames Higgsfield as a wrapper + overhead (price talk UNVERIFIED). Caption-index is an install walkthrough we do not run. Official blog: agent reads GPU/models/nodes and recommends before download. Steal is cinematic-recipe MCP, not a GPU desktop.
+
+**Hold:** MCP connector pattern. No ComfyUI/Higgsfield install.
+
+## YT-20260821. Grok Bot business tutorial — Eric `yt:01jxZN2ZNsc`
+
+Title confirmed: Grok Bot Just Changed Businesses Forever! (Tutorial). Setup, then his ops, then OpenClaw/Hermes comparison. Pathos example: phone message to swap low-reply inboxes with existing skills. Reply/lead/volume counts UNVERIFIED. Description is outbound + Clay. Do not operate.
+
+**Hold:** phone-to-routine talk-track. No client send. No outbound farm.
+
+---
+
+## YT-20260822. Claude Code top 12 features — Nate Herk `yt:vfWTyEreOEc`
+
+Tier list D→S for knowledge-work automation, not SWE. Spoken top 12 (countdown): `/goal`, ultra plan, `/insights`, auto-memory, agent teams, `/rewind`, sub-agents, `/loop`, remote control, routines, status line, skills (#1). Skills = markdown recipes + session handoff. Status line = model/effort/context. Routines schedule agents; `/loop` is session-bound cron. `/goal` wants objective done + verification; he prefers short runs over 24–48h demos. Sub-agents report to main; teams debate. Timedtext 429 from box; spoken recovered from YouTube page. Mac offline.
+
+**Hold:** session-bootstrap recipes + golden-test-loop bounds + named routines with HITL. No second Claude desktop. No unattended send. No Instagram farms. No client send without HITL.
+
+---
+
 ## YT-20260902. Fable 5.1 kills AI website slop — Nate Herk `yt:FFWtxjvW2ts`
 
 Caption-only. Shows AIS community, Nate personal, Glido (Lemon clone-feel). Thesis: you cannot say “make it premium.” Need a living object (Fora layers, 21st.dev copy-prompt, godly.design, awards-by-niche, Motion Sites). One-shot after refs produced Ferna + Lowkey as a **base**; Lowkey hard cut proves verify. Seven principles: brand, Three Ps, scroll lock, inspiration, grab components, mobile, screenshot-verify scroll. Model version < the seven. Token $ UNVERIFIED. Fable = Claude family on-tape (Anthropic blog cited). Operate-never Claude/Skool.

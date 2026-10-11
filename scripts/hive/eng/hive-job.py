@@ -264,11 +264,27 @@ def evidence_reasons(claim: dict, directory: Path, ev: dict) -> list[str]:
     for key in EVIDENCE_KEYS:
         if ev.get(key) in (None, "", {}, []):
             reasons.append(f"missing evidence.{key}")
+    timestamp = ev.get("timestamp")
+    try:
+        if not isinstance(timestamp, str):
+            raise ValueError("not a string")
+        instant = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+        if instant.tzinfo is None or instant.utcoffset() is None:
+            raise ValueError("timezone missing")
+    except (ValueError, TypeError):
+        reasons.append("evidence timestamp must be a valid timezone-aware ISO instant")
     runtime = claim.get("runtime") if isinstance(claim.get("runtime"), dict) else {}
     surface = str(ev.get("surface") or "")
     expected = str(runtime.get("surface") or runtime.get("expected_face") or runtime.get("address") or "")
     if expected and surface and surface != expected:
         reasons.append(f"wrong surface {surface!r} != {expected!r}")
+    # The same host and commit can expose multiple routes/environments.
+    # Evidence for one cannot certify a different declared runtime identity.
+    for key in ("entrypoint", "environment", "address", "expected_listen"):
+        wanted = str(runtime.get(key) or "")
+        actual = str(ev.get(key) or "")
+        if wanted and actual and wanted != actual:
+            reasons.append(f"evidence {key} does not match the claim")
     if ev.get("authority") in {"UNTRUSTED_DATA", "EXTERNAL_RESEARCH"} or ev.get("may_change_goal") is True:
         reasons.append("external research cannot mutate state")
     observed = ev.get("observed")
@@ -291,6 +307,34 @@ def evidence_reasons(claim: dict, directory: Path, ev: dict) -> list[str]:
             reasons.append("stale git_sha: evidence is not this checkout")
     if claim_tree and claim_tree != repo_root and not claim_sha:
         reasons.append("a named worktree requires runtime.git_sha")
+    source_paths = runtime.get("source_paths")
+    if source_paths is None:
+        reasons.append("runtime.source_paths must identify implementation files for LIVE+ evidence")
+    if source_paths is not None:
+        if not isinstance(source_paths, list) or not source_paths:
+            reasons.append("runtime.source_paths must name implementation files")
+        else:
+            hashes = ev.get("source_hashes")
+            tree = Path(claim_tree or repo_root).resolve()
+            for raw_path in source_paths:
+                if not isinstance(raw_path, str) or not raw_path:
+                    reasons.append("invalid runtime source path")
+                    continue
+                source = (tree / raw_path).resolve()
+                if Path(raw_path).is_absolute() or not source.is_relative_to(tree):
+                    reasons.append("source path must stay inside the declared worktree")
+                    continue
+                digest = hashes.get(raw_path) if isinstance(hashes, dict) else None
+                if not isinstance(digest, str) or len(digest) != 64:
+                    reasons.append(f"missing source fingerprint: {raw_path}")
+                    continue
+                try:
+                    current_digest = hashlib.sha256(source.read_bytes()).hexdigest()
+                except OSError:
+                    reasons.append(f"source unavailable: {raw_path}")
+                    continue
+                if digest != current_digest:
+                    reasons.append(f"stale source fingerprint: {raw_path}")
     return reasons
 
 
@@ -538,7 +582,9 @@ def cmd_registry() -> int:
             claim = json.loads(path.read_text(encoding="utf-8"))
             if not isinstance(claim, dict):
                 continue
-            reasons = ownership_reasons(claim, load_receipts(path.parent))
+            # The registry must project the same evidence gate as verify.
+            # A matching transition receipt alone cannot certify runtime truth.
+            reasons = reasons_for(claim, path.parent, ping_runtime=False)
             rows.append(
                 {
                     "id": claim.get("id"),
@@ -546,6 +592,7 @@ def cmd_registry() -> int:
                     "proof_status": claim.get("proof_status"),
                     "release_status": claim.get("release_status"),
                     "stale": bool(reasons),
+                    "stale_reasons": reasons,
                 }
             )
     handwritten = CAPEX / "REGISTRY.json"

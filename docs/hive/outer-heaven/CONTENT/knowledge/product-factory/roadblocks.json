@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-08-15",
+  "updated": "2026-09-12",
   "roadblocks": [
     {
       "id": "rb-catalog-webhook-paths-2026-08-12",
@@ -81,6 +81,16 @@
       "related_primitive": "promotion",
       "source": "docs/hive/outer-heaven/CONTENT/job-cards/WORK-AS-BUSINESSES-2026-08-14.md",
       "status": "open"
+    },
+    {
+      "id": "rb-face-looking-nex-bus-wipe-2026-09-12",
+      "date": "2026-09-12",
+      "symptom": "Orb spoke Looking while thinking, then answered as Nex. Sitting turns collapsed to one Hello.",
+      "cause": "Think stamp Looking. was yielded as spoken_delta and TTS'd. Free nex-n2.5-mini named itself. Non-atomic state.json writes plus Face self_test hitting the live hive bus.",
+      "never_again": "Think events stay silent. Strip vendor names at the mouth. write_json is atomic. Face self_test uses a temp hive.",
+      "related_primitive": null,
+      "source": "docs/hive/outer-heaven/CONTENT/brainstorms/2026-09-12-orb-senses.md",
+      "status": "recorded"
     }
   ]
 }

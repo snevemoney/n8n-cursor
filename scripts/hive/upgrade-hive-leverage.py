@@ -73,7 +73,18 @@ def deploy_n8n_catalog() -> None:
     print(f"deployed catalog → {PHILANTHROPY_CATALOG}")
 
 
+def _refuse_openclaw(action: str) -> None:
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from openclaw_refuse import refuse_mutate
+
+    refuse_mutate(action)
+
+
 def patch_bigboss_tools() -> None:
+    _refuse_openclaw("patch Big Boss TOOLS.md under /root/.openclaw")
     if not BB_TOOLS.is_file():
         print(f"skip Big Boss TOOLS — missing {BB_TOOLS}")
         return
@@ -118,6 +129,7 @@ def deploy_philanthropy_tools() -> None:
 
 
 def deploy_shortcuts() -> None:
+    _refuse_openclaw("deploy OpenClaw shortcuts into /root/.openclaw/plugins")
     src = HUB / "outer-heaven-shortcuts" / "index.js"
     SHORTCUTS_DST.mkdir(parents=True, exist_ok=True)
     shutil.copy2(src, SHORTCUTS_DST / "index.js")
@@ -238,6 +250,7 @@ def sync_philanthropy_env() -> None:
 
 
 def deploy_build_philosophy() -> None:
+    _refuse_openclaw("sync canon into /root/.openclaw/workspace-bigboss")
     tpl = HUB / "templates" / "BUILD_PHILOSOPHY.md"
     mandate = HUB / "templates" / "OPERATIONAL_MANDATE.md"
     empire = HUB / "templates" / "EMPIRE_SECRETS.md"

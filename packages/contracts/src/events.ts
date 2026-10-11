@@ -1,7 +1,7 @@
 // LightningFlow AI Event Schema
 // Generated from contracts/events.yaml
 
-import { ajv, validateOrThrow } from './validator';
+import { ajv } from './validator';
 
 // Event types
 export type EventType = 
@@ -479,6 +479,9 @@ export class EventValidator {
   }
 
   validate(event: any): { valid: boolean; errors?: any[] } {
+    if (!event || typeof event !== 'object' || Array.isArray(event)) {
+      return { valid: false, errors: [{ message: 'Event must be an object' }] };
+    }
     const eventType = event.event_type as EventType;
     const validator = this.validators.get(eventType);
 
@@ -521,10 +524,10 @@ export function createUserCreatedEvent(
     source: 'lightningflow-api',
     user_id,
     email,
-    full_name,
+    ...(full_name !== undefined ? { full_name } : {}),
     subscription_tier,
     created_at: new Date().toISOString(),
-    metadata
+    ...(metadata !== undefined ? { metadata } : {})
   };
 }
 
@@ -546,10 +549,10 @@ export function createPaymentCreatedEvent(
     user_id,
     amount_sats,
     description,
-    recipient,
+    ...(recipient !== undefined ? { recipient } : {}),
     status: 'pending',
     created_at: new Date().toISOString(),
-    metadata
+    ...(metadata !== undefined ? { metadata } : {})
   };
 }
 
@@ -573,9 +576,9 @@ export function createPaymentCompletedEvent(
     amount_sats,
     payment_hash,
     completed_at: new Date().toISOString(),
-    description,
-    recipient,
-    fees_sats
+    ...(description !== undefined ? { description } : {}),
+    ...(recipient !== undefined ? { recipient } : {}),
+    ...(fees_sats !== undefined ? { fees_sats } : {})
   };
 }
 
@@ -599,7 +602,7 @@ export function createAgentTaskStartedEvent(
     task_type,
     parameters,
     started_at: new Date().toISOString(),
-    estimated_duration_seconds
+    ...(estimated_duration_seconds !== undefined ? { estimated_duration_seconds } : {})
   };
 }
 
@@ -625,9 +628,9 @@ export function createAgentTaskCompletedEvent(
     status,
     completed_at: new Date().toISOString(),
     duration_seconds,
-    result_summary,
-    error_message,
-    output_size_bytes
+    ...(result_summary !== undefined ? { result_summary } : {}),
+    ...(error_message !== undefined ? { error_message } : {}),
+    ...(output_size_bytes !== undefined ? { output_size_bytes } : {})
   };
 }
 

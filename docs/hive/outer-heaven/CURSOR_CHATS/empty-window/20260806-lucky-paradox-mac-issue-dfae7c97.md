@@ -71,11 +71,11 @@ When you’re sure it works, you can delete the 13 GB zip to free more space:
 
 ## Related chats
 
+- [[20260824-game-launch-issue-c9ec0d30|Game launch issue]]
 - [[20260616-running-games-on-macos-5d09d044|Running games on macOS]]
 - [[20260725-game-launch-issue-on-mac-4aabdbed|Game launch issue on Mac]]
-- [[20260704-higgsfield-activation-in-after-effects-7897fefb|Higgsfield activation in After Effects]]
-- [[20260221-current-inventory-and-future-pipeline-plans-fb5d2bb0|Current inventory and future pipeline plans]]
-- [[20260626-game-ram-usage-issue-e08d079a|Game RAM usage issue]]
+- [[CURSOR_CHATS/empty-window/20260816-project-structure-and-naming-01a6b95f|Project structure and naming]]
+- [[20260914-game-launch-and-update-summary-0ab99cef|Game launch and update summary]]
 
 ## Canon
 

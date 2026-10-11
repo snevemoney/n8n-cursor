@@ -73,7 +73,7 @@ All three **fail**:
 - `scripts/hive/tape-self-teach-mission.py`
 - `scripts/hive/cursor-spawn-desks.py`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/_prompts/librarian.md`
-- `docs/hive/outer-heaven/CONTENT/job-cards/INDEX.md`
+- `docs/hive/outer-heaven/CONTENT/job-cards/Agent Roles.md`
 - `scripts/hive/agent-doctrine-lanes.py`
 - `docs/hive/outer-heaven`
 - `docs/hive/outer-heaven/CONTENT/n8n-learning`

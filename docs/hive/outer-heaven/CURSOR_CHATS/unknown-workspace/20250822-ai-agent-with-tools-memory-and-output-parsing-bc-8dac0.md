@@ -32,9 +32,9 @@ This chat is listed in Cursor's conversation index but has no `agent-transcripts
 
 - [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-01846|AI agent with tools, memory, and output parsing]]
 - [[20250823-ai-agent-with-tools-memory-and-output-parsing-bc-0181f|AI agent with tools, memory, and output parsing]]
-- [[20250822-fix-three-code-bugs-bc-ab96d|Fix three code bugs]]
-- [[20250822-process-and-analyze-google-document-data-bc-c5556|Process and analyze google document data]]
-- [[20250825-find-niche-and-solve-pain-points-bc-80c44|Find niche and solve pain points]]
+- [[20260827-hardening-20-dry-run-philanthropic-ai-agent-bc-e434e|Hardening 20 dry-run \u2014 philanthropic-ai-agent]]
+- [[20260827-pre-gate-post-log-for-tools-skills-workflows-bc-b324c|pre-gate + post-log for tools/skills/workflows]]
+- [[20260917-15-capex-tools-craft-bc-961fa|15 CapEx tools+craft]]
 
 ## Canon
 

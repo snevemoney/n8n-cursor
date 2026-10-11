@@ -12,3 +12,7 @@ export * from './code';
 export * from './orchestration';
 export * from './devtools';
 
+
+// Resolve the two template contracts explicitly at the package boundary.
+export type { PromptTemplate } from './context';
+export type { PromptTemplate as EngineeringPromptTemplate } from './agents/prompt-engineering-agent';

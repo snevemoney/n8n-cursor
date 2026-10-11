@@ -77,8 +77,8 @@ Your job: commit and push that leftover Client Engine WIP. Do not redo the twin-
 - [[20260815-commit-and-push-pending-work-in-users-evenslouis-7b2c9c3f|Commit and push pending work in `/Users/evenslouis]]
 - [[20260815-commit-and-push-the-pro-twin-kill-changes-in-use-a260c0be|Commit and push the /pro twin-kill changes in `/Us]]
 - [[20260815-commit-and-push-all-pending-work-in-users-evensl-77f74cee|Commit and push ALL pending work in `/Users/evensl]]
-- [[20260815-implement-evens-s-correction-in-users-evenslouis-53bd9e4e|Implement Evens's correction in `/Users/evenslouis]]
-- [[20260815-evens-asked-do-our-system-and-agents-work-this-w-49b662c5|Evens asked: do our system and agents work this wa]]
+- [[20260826-evens-fix-it-all.-also-the-repos-branches-cursor-4cd50389|Evens: \u201cfix it all. also the repos, branches,]]
+- [[20260826-evens-said-do-what-you-recommend-about-the-2-487-8cd2f6b4|Evens said \u201cdo what you recommend\u201d about]]
 
 ## Canon
 

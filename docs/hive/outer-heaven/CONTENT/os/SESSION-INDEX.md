@@ -8,6 +8,6 @@ Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok,
 
 Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store.
 
-SSOT: [[sessions/INDEX]] — `CONTENT/os/sessions/INDEX.md`. Slack: `#hive` · [[SLACK]].
+SSOT: [[00_Outer_Heaven/CONTENT/os/sessions/Recent Conversations]] — `CONTENT/os/sessions/Recent Conversations.md`. Slack: `#hive`.
 
-[[hot]] · [[GRAPH]] · [[HOST]]
+[[hot]] · [[OS-GRAPH]] · [[HOST]]

@@ -1,0 +1,21 @@
+{
+  "job_id": "jarvis-eval-fixture",
+  "parent_job": null,
+  "platform": "cursor",
+  "native_session_id": null,
+  "status": "done",
+  "summary": "Fixture only. Not a live harness run.",
+  "authority_chain": {
+    "requested_by": "evens",
+    "routed_by": "jarvis",
+    "executed_by": "eval-contracts",
+    "evidence_from": "live_vault",
+    "verified_by": "jarvis"
+  },
+  "evidence": [{"kind": "fixture", "path": "eval/federation/conflict_case.yaml"}],
+  "files_changed": [],
+  "artifacts": [],
+  "remaining_risks": ["Wave A has no live Face prove"],
+  "continuation_ref": null,
+  "handoff_chars": 120
+}

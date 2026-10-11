@@ -477,3 +477,23 @@ class JarvisChatsTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ConversationScopeRoutingTest(unittest.TestCase):
+    def test_scope_and_preferences_are_not_archive_requests(self):
+        for ask in (
+            "For this conversation only: I am planning a vegetarian dinner at home, have 25 minutes, and dislike mushrooms. Briefly suggest two Japanese dishes.",
+            "In this chat, keep your answers concise.",
+            "For this thread, explain the full architecture.",
+            "Keep this chat focused on the authentication bug.",
+        ):
+            with self.subTest(ask=ask):
+                self.assertFalse(MOD.wants_all_sessions(ask))
+                self.assertFalse(MOD.wants_session_recall(ask))
+                self.assertFalse(MOD.wants_session_look(ask))
+
+    def test_explicit_archive_requests_still_route(self):
+        self.assertTrue(MOD.wants_all_sessions("this chat"))
+        self.assertTrue(MOD.wants_all_sessions("Show all chat sessions across all platforms."))
+        self.assertTrue(MOD.wants_session_recall("What did we decide in this chat?"))
+        self.assertTrue(MOD.wants_all_sessions("Show this conversation."))

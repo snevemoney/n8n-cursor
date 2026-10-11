@@ -30,11 +30,11 @@ This chat is listed in Cursor's conversation index but has no `agent-transcripts
 
 ## Related chats
 
+- [[20260824-feat-8-website-assets-landing-proofs-on-work-bc-96825|feat: 8 website-assets landing proofs on /work]]
+- [[20260827-hardening-20-dry-run-cinematic-ai-partner-green-bc-97884|Hardening 20 dry-run \u2014 cinematic-ai-partner-g]]
 - [[20260812-feat-mcp-connector-demo-github-live-bc-89af2|feat: MCP connector demo (GitHub live)]]
 - [[20260812-feat-speed-to-lead-intake-book-demo-bc-b6b1c|feat: Speed-to-Lead Intake\u2192Book demo]]
 - [[20260812-work-portfolio-archive-emmanuelle-add-ai-partner-bc-442a3|Work portfolio: archive Emmanuelle, add AI Partner]]
-- [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-01846|AI agent with tools, memory, and output parsing]]
-- [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-8dac0|AI agent with tools, memory, and output parsing]]
 
 ## Canon
 

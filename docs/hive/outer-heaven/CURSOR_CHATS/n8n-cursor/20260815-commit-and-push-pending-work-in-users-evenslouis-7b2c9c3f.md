@@ -85,7 +85,7 @@ First push was rejected because origin already had two docs commits (`a5612b5`, 
 - [[20260815-commit-and-push-the-pro-twin-kill-changes-in-use-a260c0be|Commit and push the /pro twin-kill changes in `/Us]]
 - [[20260815-commit-and-push-all-pending-work-in-users-evensl-77f74cee|Commit and push ALL pending work in `/Users/evensl]]
 - [[20260815-fix-proofcheck-qc-frontend-bugs-found-by-headed--ad243fac|Fix ProofCheck QC frontend bugs found by headed Ma]]
-- [[20260815-evens-https-evenslouis.ca-work-is-the-real-catal-d49faf0f|Evens: https://evenslouis.ca/work is the **real** ]]
+- [[20260826-evens-said-do-what-you-recommend-about-the-2-487-8cd2f6b4|Evens said \u201cdo what you recommend\u201d about]]
 
 ## Canon
 

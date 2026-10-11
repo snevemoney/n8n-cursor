@@ -60,8 +60,8 @@ Tag chronicle: `business-hours`, `money-path`
 ## Related canon (Librarian 2026-08-12)
 
 - Full CE study SoT (read-only, **do not duplicate**): `~/.grokbot/research-packets/ai-partner-scoring-prototype-ladder/CE-FEATURE-TO-AGENTS.md`
-- Outer Heaven pointer: [[CONTENT/ai-partner-scoring-prototype-ladder/CE-FEATURE-TO-AGENTS]]
+- Outer Heaven pointer: [[CONTENT/ai-partner-scoring-prototype-ladder/Client Engine Capability Mapping]]
 - Flywheel addendum SoT: `~/.grokbot/research-packets/ai-partner-scoring-prototype-ladder/CE-FLYWHEEL-TO-AGENTS.md`
-- METHOD distillate: [[METHODS/business-ce-flywheel-to-agents]] · pointer [[CONTENT/ai-partner-scoring-prototype-ladder/CE-FLYWHEEL-TO-AGENTS]]
-- Scoring pack: [[CONTENT/ai-partner-scoring-prototype-ladder/INDEX]]
-- Wiki: [[OUTER_HEAVEN_LLM_WIKI]] / [[CONTENT/OUTER_HEAVEN_LLM_WIKI]]
+- METHOD distillate: [[METHODS/business-ce-flywheel-to-agents]] · pointer [[CONTENT/ai-partner-scoring-prototype-ladder/Client Engine Workflow Mapping]]
+- Scoring pack: [[CONTENT/ai-partner-scoring-prototype-ladder/Service Design]]
+- Wiki: [[00_Outer_Heaven/OUTER_HEAVEN_LLM_WIKI]] / [[00_Outer_Heaven/CONTENT/OUTER_HEAVEN_LLM_WIKI]]

@@ -76,18 +76,7 @@ jobs:
         run: pnpm --filter contracts run validate:flags
 
       - name: Check for unknown flags
-        run: |
-          # Extract known flags from schema
-          KNOWN_FLAGS=$(jq -r '.properties | keys[]' contracts/flags.schema.json | tr '\n' '|' | sed 's/|$//')
-          
-          # Check for unknown flags in code
-          if rg -n "FF_[A-Z_]+" apps packages --type ts --type js | grep -v "(${KNOWN_FLAGS})"; then
-            echo "❌ Found unknown feature flags in code"
-            echo "Known flags: ${KNOWN_FLAGS}"
-            exit 1
-          fi
-          
-          echo "✅ All feature flags are known and documented"
+        run: python3 packages/contracts/scripts/check-flags.py
 
   error-catalog:
     name: Validate Error Catalog
@@ -114,18 +103,7 @@ jobs:
         run: pnpm --filter contracts run validate:errors
 
       - name: Check for unknown error codes
-        run: |
-          # Extract known error codes from catalog
-          KNOWN_CODES=$(grep -o "LFAI-[0-9]\{4\}" contracts/errors.yaml | sort -u | tr '\n' '|' | sed 's/|$//')
-          
-          # Check for unknown error codes in code
-          if rg -n "LFAI-[0-9]\{4\}" apps packages --type ts --type js | grep -v "(${KNOWN_CODES})"; then
-            echo "❌ Found unknown error codes in code"
-            echo "Known codes: ${KNOWN_CODES}"
-            exit 1
-          fi
-          
-          echo "✅ All error codes are documented in catalog"
+        run: node packages/contracts/scripts/check-errors.cjs
 
   openapi-lint:
     name: Validate OpenAPI Specification
@@ -226,17 +204,7 @@ jobs:
         run: pnpm --filter contracts run validate:telemetry
 
       - name: Check telemetry consistency
-        run: |
-          # Check that all telemetry names are documented
-          TELEMETRY_USAGE=$(find apps packages -name "*.ts" | xargs grep -l "span\|metric\|trace" | wc -l)
-          TELEMETRY_DEFINITIONS=$(grep -c "spans:\|metrics:" contracts/telemetry.yaml)
-          
-          if [ "$TELEMETRY_USAGE" -gt 0 ] && [ "$TELEMETRY_DEFINITIONS" -eq 0 ]; then
-            echo "❌ Telemetry usage found but no telemetry definitions documented"
-            exit 1
-          fi
-          
-          echo "✅ Telemetry specification is consistent with code"
+        run: node packages/contracts/scripts/check-telemetry.cjs
 
   consistency-check:
     name: Global Consistency Check

@@ -64,7 +64,7 @@ The desk line: audit current Cursor + Grok seats before Chase Plus or any extra 
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/_prompts/personal-cfo.md`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/personal-cfo.md`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/tests/career-strategist.md`
-- `docs/hive/outer-heaven/CONTENT/job-cards/INDEX.md`
+- `docs/hive/outer-heaven/CONTENT/job-cards/Agent Roles.md`
 - `docs/hive/outer-heaven/CONTENT/watch-later/packets/U6k4MeVks_Y/PACKET.md`
 - `docs/hive/outer-heaven/CONTENT/job-cards`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/README.md`

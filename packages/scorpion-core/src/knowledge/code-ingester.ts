@@ -615,7 +615,7 @@ Return only the questions, one per line, no numbering:`;
    * Check if a file is a test file (should be excluded from indexing)
    */
   private isTestFile(filePath: string): boolean {
-    const normalized = filePath.toLowerCase();
+    const normalized = '/' + filePath.toLowerCase().replace(/\\/g, '/');
     const fileName = path.basename(filePath).toLowerCase();
     
     // Skip test files and test directories
@@ -633,8 +633,8 @@ Return only the questions, one per line, no numbering:`;
       fileName.endsWith('.spec.tsx') ||
       fileName.endsWith('.spec.js') ||
       fileName.endsWith('.spec.jsx') ||
-      fileName.match(/test-\d+/) || // Matches test-1748574172423-test_fix-1748574172424.ts
-      fileName.match(/test_\d+/)    // Matches test_1748574172423 patterns
+      /test-\d+/.test(fileName) || // Matches test-1748574172423-test_fix-1748574172424.ts
+      /test_\d+/.test(fileName)    // Matches test_1748574172423 patterns
     );
   }
 

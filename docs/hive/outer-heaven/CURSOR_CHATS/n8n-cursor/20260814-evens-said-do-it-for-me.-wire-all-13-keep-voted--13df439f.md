@@ -91,7 +91,7 @@ If you already wrote those 10 (or hive-funnels rows / routine lines for them), R
 - `scripts/hive/grok-skills/four-blank-sku.md`
 - `scripts/hive/grok-skills/private-book-install.md`
 - `scripts/hive/grok-skills/no-reply-follow-up.md`
-- `docs/hive/outer-heaven/CONTENT/job-cards/INDEX.md`
+- `docs/hive/outer-heaven/CONTENT/job-cards/Agent Roles.md`
 - `docs/hive/outer-heaven/CONTENT`
 - `scripts/hive/agent-tool-inventory.py`
 - `docs/hive/outer-heaven/CONTENT/job-cards/hitl-operator.md`

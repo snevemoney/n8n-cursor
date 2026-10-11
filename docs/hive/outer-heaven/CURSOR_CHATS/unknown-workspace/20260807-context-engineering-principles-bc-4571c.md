@@ -33,8 +33,8 @@ This chat is listed in Cursor's conversation index but has no `agent-transcripts
 - [[20250831-setting-up-project-structure-and-best-practices-bc-ea186|Setting up project structure and best practices]]
 - [[20260222-youtube-transcript-system-bc-09ba1|YouTube transcript system]]
 - [[20260814-grok-agent-telephony-bc-019ff|Grok agent telephony]]
-- [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-01846|AI agent with tools, memory, and output parsing]]
-- [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-8dac0|AI agent with tools, memory, and output parsing]]
+- [[20260816-delete-duplicate-automations-bc-808d3|Delete duplicate Automations]]
+- [[20260816-fix-hive-cloud-checkout-bc-808d3|Fix hive Cloud checkout]]
 
 ## Canon
 

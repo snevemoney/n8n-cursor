@@ -67,10 +67,10 @@ This is an RPG Maker MV game packaged as `Game.app` (NW.js). It failed for two r
 ## Related chats
 
 - [[20260616-running-games-on-macos-5d09d044|Running games on macOS]]
+- [[20260824-game-launch-issue-c9ec0d30|Game launch issue]]
 - [[20260628-adobe-after-effects-installation-c6ce8a03|Adobe After Effects installation]]
 - [[20260806-lucky-paradox-mac-issue-dfae7c97|Lucky Paradox Mac issue]]
 - [[20260626-game-ram-usage-issue-e08d079a|Game RAM usage issue]]
-- [[20260625-harem-heaven-mod-outfits-91847fff|Harem Heaven mod outfits]]
 
 ## Canon
 

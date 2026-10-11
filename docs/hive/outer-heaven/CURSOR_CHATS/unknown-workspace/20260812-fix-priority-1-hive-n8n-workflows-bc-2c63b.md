@@ -36,9 +36,9 @@ This chat is listed in Cursor's conversation index but has no `agent-transcripts
 
 - [[20260812-fix-n8n-hive-list-pagination-bc-dc92a|Fix n8n hive list pagination]]
 - [[20260807-n8n-domain-migration-bc-67d2a|N8n domain migration]]
-- [[20251202-fix-the-voice-button-issue-05142797|Fix the voice button issue]]
-- [[20260214-n8n-version-update-check-f280ad28|n8n version update check]]
-- [[20251122-07bf9361-6f81-4904-8ac5-f85d15a74782-07bf9361|07bf9361-6f81-4904-8ac5-f85d15a74782]]
+- [[20260827-n8n-grok-first-matrix-stale-facts-gaps-bc-784f2|n8n Grok-first matrix \u2014 stale facts + gaps]]
+- [[20260827-n8n-notify-sink-is-grok-watchdog-webhook-bc-14f2f|n8n notify sink is Grok Watchdog webhook]]
+- [[20260827-hardening-20-dry-run-n8n-cursor-bc-7816f|Hardening 20 dry-run \u2014 n8n-cursor]]
 
 ## Canon
 

@@ -69,8 +69,8 @@ Return specific tool names, MCP server IDs, and workflow if they exist
 - [[20260809-search-the-n8n-cursor-monorepo-for-how-client-en-178af42e|Search the n8n-cursor monorepo for how Client Engi]]
 - [[20260809-search-the-n8n-cursor-monorepo-for-twilio-eleven-5aa9f9d0|Search the n8n-cursor monorepo for Twilio, ElevenL]]
 - [[CURSOR_CHATS/n8n-cursor/20260814-browser-tab-automation-setup-c7f2f99c|Browser tab automation setup]]
+- [[20260816-you-are-the-browser-capture-worker-for-the-hive--5187caa2|You are the browser-capture worker for the hive OS]]
 - [[20260812-explore-the-n8n-cursor-monorepo-at-users-evenslo-8c1d3e22|Explore the n8n-cursor monorepo at /Users/evenslou]]
-- [[20260812-explore-the-n8n-cursor-monorepo-for-grok-bot-age-9b17084b|Explore the n8n-cursor monorepo for Grok Bot agent]]
 
 ## Canon
 

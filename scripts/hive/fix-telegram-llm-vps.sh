@@ -5,6 +5,10 @@ set -euo pipefail
 
 MAX_TOKENS="${HIVE_MAX_TOKENS:-1024}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=openclaw-refuse.sh
+source "${SCRIPT_DIR}/openclaw-refuse.sh"
+openclaw_refuse_mutate "fix-telegram-llm against /root/.openclaw" || exit $?
+openclaw_refuse_start "restart OpenClaw from fix-telegram-llm" || exit $?
 
 echo "== Restore OpenRouter models in all agent models.json =="
 python3 - <<PY

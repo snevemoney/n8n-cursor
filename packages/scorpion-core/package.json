@@ -22,7 +22,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsup src/index.ts --format esm,cjs --dts --outDir dist",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "test": "node tests/model-routing.cjs && node tests/grounding.cjs && node tests/ingestion.cjs && node tests/media.cjs"
   },
   "dependencies": {
     "@lightningflow/shared-config": "workspace:*",

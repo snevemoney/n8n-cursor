@@ -45,86 +45,42 @@ test.describe('Component Interactions', () => {
 
   test('Form validation', async ({ page }) => {
     await page.goto(`${BASE_URL}/agents/create`);
+    const template = page.getByRole('button', { name: /Content Creator/ });
+    await expect(template).toBeVisible();
+    await template.click();
 
-    // Select template first
-    const template = page.locator('button:has-text("Content Creator")').first();
-    if (await template.isVisible({ timeout: 2000 })) {
-      await template.click();
-    }
-
-    // Try to submit without filling required fields
-    const createButton = page.locator('button:has-text("Create Agent")');
-    if (await createButton.isVisible({ timeout: 2000 })) {
-      // Button should be disabled if name is empty
-      const nameInput = page.locator('input[placeholder*="Agent"]');
-      if (await nameInput.isVisible({ timeout: 1000 })) {
-        const isDisabled = await createButton.isDisabled();
-        // Button should be disabled when name is empty
-        expect(isDisabled).toBeTruthy();
-
-        // Fill name
-        await nameInput.fill('Test Agent');
-        await page.waitForTimeout(300);
-
-        // Button should now be enabled
-        const isEnabled = await createButton.isEnabled();
-        expect(isEnabled).toBeTruthy();
-      }
-    }
+    const createButton = page.getByRole('button', { name: 'Create Agent', exact: true });
+    const nameInput = page.getByPlaceholder('My Awesome Agent', { exact: true });
+    await expect(nameInput).toBeVisible();
+    await expect(createButton).toBeDisabled();
+    await nameInput.fill('   ');
+    await expect(createButton).toBeDisabled();
+    await nameInput.fill('Test Agent');
+    await expect(createButton).toBeEnabled();
+    await nameInput.fill('');
+    await expect(createButton).toBeDisabled();
   });
 
   test('Modal open and close', async ({ page }) => {
-    await page.goto(`${BASE_URL}/observability`);
-    await page.waitForLoadState('networkidle');
-
-    // Look for CommandBar button
-    const commandsButton = page.locator('button:has-text("Commands")');
-    if (await commandsButton.isVisible({ timeout: 2000 })) {
-      // Open modal
-      await commandsButton.click();
-
-      // Verify modal is open
-      await expect(page.locator('text=Command Center')).toBeVisible({ timeout: 2000 });
-
-      // Close modal
-      const closeButton = page.locator('button:has-text("✕"), button[aria-label*="close"]').first();
-      if (await closeButton.isVisible({ timeout: 1000 })) {
-        await closeButton.click();
-
-        // Verify modal is closed
-        await expect(page.locator('text=Command Center')).not.toBeVisible({ timeout: 2000 });
-      }
-    }
+    await page.goto(`${BASE_URL}/observability`, { waitUntil: 'domcontentloaded' });
+    const commandsButton = page.getByRole('button', { name: 'Commands', exact: true });
+    await expect(commandsButton).toBeVisible();
+    await commandsButton.click();
+    await expect(page.getByRole('heading', { name: 'Command Center', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: '✕', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Command Center', exact: true })).not.toBeVisible();
   });
 
   test('Modal confirmation flow', async ({ page }) => {
-    await page.goto(`${BASE_URL}/observability`);
-    await page.waitForLoadState('networkidle');
-
-    const commandsButton = page.locator('button:has-text("Commands")');
-    if (await commandsButton.isVisible({ timeout: 2000 })) {
-      await commandsButton.click();
-
-      // Look for dangerous command (restart, drain)
-      const restartButton = page.locator('button:has-text("Restart"), button:has-text("Run")').first();
-      if (await restartButton.isVisible({ timeout: 2000 })) {
-        // Click dangerous command
-        await restartButton.click();
-
-        // Should show confirmation
-        const confirmButton = page.locator('button:has-text("Confirm")');
-        if (await confirmButton.isVisible({ timeout: 2000 })) {
-          // Cancel confirmation
-          const cancelButton = page.locator('button:has-text("Cancel")');
-          if (await cancelButton.isVisible({ timeout: 1000 })) {
-            await cancelButton.click();
-
-            // Should go back to normal state
-            await expect(confirmButton).not.toBeVisible({ timeout: 2000 });
-          }
-        }
-      }
-    }
+    await page.goto(`${BASE_URL}/observability`, { waitUntil: 'domcontentloaded' });
+    const commandsButton = page.getByRole('button', { name: 'Commands', exact: true });
+    await expect(commandsButton).toBeVisible();
+    await commandsButton.click();
+    const command = page.getByText('Restart Worker', { exact: true }).locator('xpath=ancestor::div[.//button][1]');
+    await command.getByRole('button', { name: 'Run', exact: true }).click();
+    await expect(command.getByRole('button', { name: 'Confirm', exact: true })).toBeVisible();
+    await command.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await expect(command.getByRole('button', { name: 'Confirm', exact: true })).not.toBeVisible();
   });
 
   test('Settings form interaction', async ({ page }) => {

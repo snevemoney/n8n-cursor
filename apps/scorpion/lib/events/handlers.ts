@@ -10,11 +10,14 @@ import { getCostTracker } from '../cost/tracker';
 import { getNotificationManager } from '../notification-manager';
 import { runModelUnified } from '../chat/modelRunner';
 
+const initializedBuses = new WeakSet<ReturnType<typeof getEventBus>>();
+
 /**
  * Initialize default event handlers
  */
 export function initializeEventHandlers() {
   const bus = getEventBus();
+  if (initializedBuses.has(bus)) return;
 
   // Handle workflow failures - auto-summarize and create mission
   bus.subscribe('workflow.failed', async (event: EnrichedEvent) => {
@@ -245,5 +248,6 @@ Provide a clear, actionable summary:`;
       });
     });
   }
+  initializedBuses.add(bus);
 }
 

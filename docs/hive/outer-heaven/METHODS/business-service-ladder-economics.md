@@ -10,7 +10,7 @@ apps_used: [grok]
 
 # Service ladder economics (Money Desk SoT)
 
-**Packet:** [[CONTENT/ai-partner-scoring-prototype-ladder/PACKET]]  
+**Packet:** [[CONTENT/ai-partner-scoring-prototype-ladder/Service Design Research]]  
 **Criteria:** [[METHODS/business-prospect-qualification-criteria]]  
 **Rules:** fixed bands preferred; pain-% only with verified volume; delivery ≤40% of fee; no invented client proofs
 

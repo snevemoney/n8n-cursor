@@ -1,0 +1,6 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),ts=require('typescript'),path=require('node:path'),crypto=require('node:crypto');
+function load(name,dependencies={}){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.resolve(__dirname,'../src/'+name+'.ts'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText,{exports,require:n=>n in dependencies?dependencies[n]:require(n),crypto:crypto.webcrypto,Error});return exports;}
+const validator=load('validator'),events=load('events',{'./validator':validator});
+for(const value of [null,undefined,42,'bad',[]])assert.equal(events.eventValidator.validate(value).valid,false);
+const event=events.createUserCreatedEvent(crypto.randomUUID(),'fixture@example.invalid');assert.equal(events.eventValidator.validate(event).valid,true);
+assert.equal(events.eventValidator.validate({...event,email:'bad'}).valid,false);assert.equal(events.eventValidator.validate({...event,event_type:'unknown'}).valid,false);assert.equal(events.eventValidator.validate({...event,timestamp:'bad'}).valid,false);console.log('Actual factories and Ajv event schemas integrate: valid event accepted; malformed payload/email/timestamp/type rejected.');

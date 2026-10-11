@@ -240,7 +240,6 @@ export const MetricAttributes = {
   SystemMountPoint: 'system.mount_point',
   
   // Business attributes
-  UserSubscriptionTier: 'user.subscription_tier',
   UserSource: 'user.source',
   RevenueSource: 'revenue.source',
   UserTenantId: 'user.tenant_id'

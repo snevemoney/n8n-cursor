@@ -1,5 +1,5 @@
 // AJV validator setup for LightningFlow AI contracts
-import Ajv from 'ajv';
+import Ajv, { type ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
 import { DateTime } from 'luxon';
 import Decimal from 'decimal.js';
@@ -17,7 +17,7 @@ ajv.addFormat('date-time-utc', {
   type: 'string',
   validate: (data: string) => {
     try {
-      const dt = DateTime.fromISO(data);
+      const dt = DateTime.fromISO(data, { setZone: true });
       return dt.isValid && dt.zoneName === 'UTC';
     } catch {
       return false;
@@ -72,7 +72,7 @@ ajv.addKeyword({
 ajv.addKeyword({
   keyword: 'timezone',
   type: 'string',
-  validate: (schema: any, data: string) => {
+  validate: (_schema: any, data: string) => {
     try {
       return DateTime.now().setZone(data).isValid;
     } catch {
@@ -84,14 +84,7 @@ ajv.addKeyword({
 // Validation result type
 export interface ValidationResult {
   valid: boolean;
-  errors?: Array<{
-    instancePath: string;
-    schemaPath: string;
-    keyword: string;
-    params: any;
-    message: string;
-    data?: any;
-  }>;
+  errors?: ErrorObject[];
 }
 
 // Generic validation function
@@ -101,7 +94,7 @@ export function validate<T>(schema: any, data: T): ValidationResult {
   
   return {
     valid,
-    errors: valid ? undefined : validate.errors || []
+    ...(!valid ? { errors: validate.errors || [] } : {})
   };
 }
 
@@ -117,7 +110,7 @@ export class ValidationError extends Error {
     this.data = data;
   }
 
-  toString(): string {
+  override toString(): string {
     return `${this.message}\n${this.errors?.map(e => `  ${e.instancePath}: ${e.message}`).join('\n') || ''}`;
   }
 }

@@ -413,7 +413,7 @@ export interface Action {
   name: string;
   category: 'query' | 'create' | 'update' | 'delete' | 'analyze' | 'notify' | 'schedule';
   description: string;
-  parameters: Record<string, string>;
+  parameters: Record<string, unknown>;
   returns: string;
   examples: string[];
 }
@@ -1399,17 +1399,7 @@ export function generateGroundingContext(options?: {
         : ''
     },
     agents: {
-      available: includeAgents ? getAllActiveAgents(registryToUse).map(config => ({
-        id: config.id,
-        name: config.name,
-        role: config.role || 'Unknown',
-        description: config.description || '',
-        capabilities: config.capabilities || [],
-        tools: config.tools || [],
-        memoryType: config.memory?.type || 'unknown',
-        memoryRetention: config.memory?.retention || 0,
-        useCases: []
-      })) : [],
+      available: includeAgents ? getAllActiveAgents(registryToUse).map(toAgentInfo) : [],
       recommendations: includeAgents
         ? `Available agents: ${getAllActiveAgents(registryToUse).map(a => `${a.name} (${a.role || 'Unknown'})`).join(', ')}. ` +
           `Each agent has specific capabilities, tools, and memory configurations. ` +
@@ -1575,7 +1565,23 @@ export function getAgentInfo(agentId: string): AgentInfo | undefined {
   const config = getAgentConfig(agentId);
   if (!config) return undefined;
   
-  // Convert AgentConfig to AgentInfo format
+  return toAgentInfo(config);
+}
+
+/**
+ * Get agents by role
+ * Uses external registry if available, otherwise falls back to built-in agents
+ */
+export function getAgentsByRole(role: string): AgentInfo[] {
+  const agents = getAllActiveAgents();
+  return agents
+    .filter(a => a.role === role)
+    .map(toAgentInfo);
+}
+
+
+/** Canonical projection from registry configuration into grounding facts. */
+function toAgentInfo(config: AgentConfig): AgentInfo {
   return {
     id: config.id,
     name: config.name,
@@ -1592,29 +1598,3 @@ export function getAgentInfo(agentId: string): AgentInfo | undefined {
     useCases: []
   };
 }
-
-/**
- * Get agents by role
- * Uses external registry if available, otherwise falls back to built-in agents
- */
-export function getAgentsByRole(role: string): AgentInfo[] {
-  const agents = getAllActiveAgents();
-  return agents
-    .filter(a => a.role === role)
-    .map(config => ({
-      id: config.id,
-      name: config.name,
-      role: config.role || 'Unknown',
-      description: config.description || '',
-      capabilities: config.capabilities || [],
-      tools: config.tools?.map(t => ({
-        name: t.name,
-        description: t.description || '',
-        parameters: t.parameters || {}
-      })) || [],
-      memoryType: config.memory?.type || 'unknown',
-      memoryRetention: config.memory?.retention || 0,
-      useCases: []
-    }));
-}
-

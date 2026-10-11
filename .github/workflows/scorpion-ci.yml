@@ -38,18 +38,24 @@ jobs:
       - name: Lint
         run: pnpm --filter scorpion lint
       
+      - name: Install browser runtime
+        run: pnpm --filter scorpion exec playwright install --with-deps chromium
+
       - name: Run E2E tests
+        working-directory: apps/scorpion
         run: |
-          cd apps/scorpion
-          pnpm audit:install
-          pnpm test:e2e || true  # Don't fail CI if tests fail (for now)
+          set -o pipefail
+          pnpm test:e2e 2>&1 | tee e2e.log
       
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: apps/scorpion/test-results/
+          path: |
+            apps/scorpion/test-results/
+            apps/scorpion/tests/e2e/playwright-report/
+            apps/scorpion/e2e.log
           retention-days: 7
 
   security-scan:

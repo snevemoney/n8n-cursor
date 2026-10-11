@@ -64,7 +64,7 @@ Workspace: /Users/evenslouis/n8n-cursor
 - `docs/hive/outer-heaven/CONTENT/icp-runbooks/MATRIX-MOVEMENT-TEST.md`
 - `scripts/hive/product-state/operator.json`
 - `scripts/hive/product-state/clipengine.json`
-- `docs/hive/outer-heaven/CONTENT/job-cards/INDEX.md`
+- `docs/hive/outer-heaven/CONTENT/job-cards/Agent Roles.md`
 - `docs/hive/outer-heaven/CONTENT/job-cards`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/README.md`
 - `docs/hive/outer-heaven/CONTENT/job-cards/LESSONS-FROM-TAPE.md`
@@ -95,8 +95,8 @@ Workspace: /Users/evenslouis/n8n-cursor
 ## Related chats
 
 - [[20260814-evens-asked-test-prospects-leads-clients-buyers--7c7a4163|Evens asked: test prospects, leads, clients, buyer]]
-- [[20260814-you-are-lane-c-of-a-fix-them-all-don-t-stop-pass-2234ba51|You are lane C of a \u201cfix them all / don\u2019]]
 - [[20260814-evens-said-do-it-for-me.-wire-all-13-keep-voted--13df439f|Evens said \u201cdo it for me.\u201d Wire all 13 K]]
+- [[20260814-you-are-lane-c-of-a-fix-them-all-don-t-stop-pass-2234ba51|You are lane C of a \u201cfix them all / don\u2019]]
 - [[20260814-you-are-big-boss-slug-big-boss-in-users-evenslou-65f79df9|You are Big Boss (slug: big-boss) in /Users/evensl]]
 - [[20260814-you-are-lane-a-of-a-fix-them-all-don-t-stop-pass-538023d3|You are lane A of a \u201cfix them all / don\u2019]]
 

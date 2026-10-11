@@ -149,7 +149,7 @@ Requirements:
 - [[20260221-quiet-proof-engine-implementation-4e9afda5|Quiet proof engine implementation]]
 - [[20260222-production-environment-testing-76809846|Production environment testing]]
 - [[20260228-css-style-changes-for-codebase-3c2e9c5b|CSS style changes for codebase]]
-- [[20260308-self-improvement-skill-framework-0e0eaab3|Self-improvement skill framework]]
+- [[CURSOR_CHATS/empty-window/20260816-project-structure-and-naming-01a6b95f|Project structure and naming]]
 
 ## Canon
 

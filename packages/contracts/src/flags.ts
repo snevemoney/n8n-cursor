@@ -132,11 +132,16 @@ export class FlagLoader {
   private getArrayFlag(envVar: string, defaultValue: string[]): string[] {
     const value = process.env[envVar];
     if (value === undefined) return defaultValue;
+    let parsed: unknown;
     try {
-      return JSON.parse(value);
+      parsed = JSON.parse(value);
     } catch {
       return value.split(',').map(s => s.trim());
     }
+    if (!Array.isArray(parsed) || !parsed.every(item => typeof item === 'string')) {
+      throw new Error(`Flag ${envVar} must be an array of strings`);
+    }
+    return parsed;
   }
 
   // Get all flags

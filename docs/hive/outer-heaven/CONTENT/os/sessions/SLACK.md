@@ -17,8 +17,8 @@ Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok,
 | Permalink | https://evenslouis.slack.com/archives/C0BTH1TMFC5 |
 | SSOT post | https://evenslouis.slack.com/archives/C0BTH1TMFC5/p1788033480720409 |
 | Cursor factory brief | https://evenslouis.slack.com/archives/C0BTH1TMFC5/p1788034980352089 |
-| INDEX | `docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md` |
-| GitHub INDEX | https://github.com/snevemoney/n8n-cursor/blob/main/docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md |
+| INDEX | `docs/hive/outer-heaven/CONTENT/os/sessions/Recent Conversations.md` |
+| GitHub INDEX | https://github.com/snevemoney/n8n-cursor/blob/main/docs/hive/outer-heaven/CONTENT/os/sessions/Recent Conversations.md |
 
 Leftover empty channel `#all-n8n` (`C08KM78R3U6`) is **not** the brain. Do not post outreach there.
 
@@ -29,8 +29,8 @@ Cursor Slack MCP is already on this workspace (Evens `U08KM788F54`). Composio Sl
 ```
 Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting.
 
-INDEX: docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md
-https://github.com/snevemoney/n8n-cursor/blob/main/docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md
+INDEX: docs/hive/outer-heaven/CONTENT/os/sessions/Recent Conversations.md
+https://github.com/snevemoney/n8n-cursor/blob/main/docs/hive/outer-heaven/CONTENT/os/sessions/Recent Conversations.md
 
 hot / said: 2026-08-29T19:28:34Z · store sessions/ cursor=20 grok=17 claude=20 chatgpt=20 · inbox/2026-08-29-said-2.md
 

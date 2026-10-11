@@ -140,11 +140,11 @@ Every packet with a real `full.txt` under:
 
 ## Related chats
 
-- [[CURSOR_CHATS/n8n-cursor/20260814-you-are-big-boss-slug-big-boss-.-cursor-task-onl-7044d925|You are **Big Boss** (slug `big-boss`). Cursor Tas]]
-- [[20260814-you-are-big-boss-slug-big-boss-.-cursor-task-onl-662b371f|You are Big Boss (slug `big-boss`). Cursor Task on]]
-- [[20260814-you-are-big-boss-slug-big-boss-.-cursor-task-onl-ac38e0f5|You are Big Boss (slug `big-boss`). Cursor Task on]]
-- [[20260814-you-are-big-boss-slug-big-boss-.-cursor-task-onl-ff5c2ec0|You are Big Boss (slug `big-boss`). Cursor Task on]]
-- [[20260814-you-are-big-boss-slug-big-boss-.-cursor-task-onl-1d802faa|You are Big Boss (slug `big-boss`). Cursor Task on]]
+- [[20260820-evens-what-should-the-agents-do-now-that-they-ar-d99177e2|Evens: **\u201cwhat should the agents do now that ]]
+- [[20260816-os-task-overview-d695a750|OS task overview]]
+- [[20260816-real-time-file-sync-setup-59091494|Real-time file sync setup]]
+- [[20260830-daily-wealth-remotion-show-cf314c59|Daily wealth Remotion show]]
+- [[20260827-daily-wealth-remotion-show-cf314c59|Daily wealth Remotion show]]
 
 ## Canon
 

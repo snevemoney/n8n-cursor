@@ -127,11 +127,11 @@ Your Obsid
 
 ## Related chats
 
-- [[20260813-investigate-grok-agent-performance-regression-in-d2b150b8|Investigate Grok agent performance/regression in /]]
-- [[20260811-explore-users-evenslouis-n8n-cursor-for-existing-51ed4b66|Explore /Users/evenslouis/n8n-cursor for existing ]]
-- [[20260525-clipengine-app-automation-capabilities-8faad87e|Clipengine app automation capabilities]]
-- [[20260809-search-the-n8n-cursor-monorepo-for-how-client-en-178af42e|Search the n8n-cursor monorepo for how Client Engi]]
-- [[20260814-evens-said-yes-to-run-the-six-dry-runs.-execute--52e48f78|Evens said yes to **run the six** dry-runs. Execut]]
+- [[20260909-macbook-space-management-d77daf9a|MacBook space management]]
+- [[20260928-macbook-space-management-d77daf9a|MacBook space management]]
+- [[20260825-delete-duplicate-automations-01a6b95f|Delete duplicate Automations]]
+- [[20260825-hive-daily-automations-pack-01a6b95f|Hive daily Automations pack]]
+- [[20260822-project-structure-and-naming-01a6b95f|Project structure and naming]]
 
 ## Canon
 

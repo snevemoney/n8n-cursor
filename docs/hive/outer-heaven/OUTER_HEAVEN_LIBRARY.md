@@ -202,6 +202,6 @@ Grok: also read `docs/hive/GROKBOT_ACCESS.md` for URLs and VPS paths.
 | `docs/hive/META_COGNITIVE_MANDATE.md` | Pattern promotion + founder signals |
 
 ### CE → Grok (read-only study)
-- [[CONTENT/ai-partner-scoring-prototype-ladder/CE-FEATURE-TO-AGENTS]]
+- [[CONTENT/ai-partner-scoring-prototype-ladder/Client Engine Capability Mapping]]
 - [[METHODS/business-ce-without-ce-money-path]]
 - [[METHODS/business-ce-flywheel-to-agents]]

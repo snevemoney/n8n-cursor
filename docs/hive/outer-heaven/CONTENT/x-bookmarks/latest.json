@@ -1,897 +1,1772 @@
 {
-  "source": "x-api",
-  "handle": "snevemoney",
+  "source": "user-X MCP get_users_bookmarks",
+  "handle": "@snevemoney",
   "user_id": "514498939",
-  "synced_at_utc": "2026-08-15T21:49:48Z",
-  "synced_at_local": "2026-08-15 17:49 EDT",
+  "synced_at_utc": "2026-09-11T14:36:38Z",
+  "synced_at_local": "2026-09-11 10:36:38 EDT",
   "max_requested": 100,
-  "count": 98,
-  "format": "structured",
+  "count": 97,
+  "format": "structured-v1",
+  "delta_vs_prev": {
+    "prev_synced_at_utc": "2026-09-11T14:23:31Z",
+    "prev_count": 97,
+    "added_ids": [],
+    "removed_ids": [],
+    "added": 0,
+    "removed": 0,
+    "overlap": 97,
+    "note": "signals-close 20260911-1023 already skill-closed +6; this fire +0"
+  },
   "items": [
     {
-      "id": "2088302050706686198",
-      "text": "New: A map of the most important skills in AI Engineering. https://t.co/VVkn1Dqp1N",
-      "author_id": "216939636",
-      "created_at": "2026-08-14T16:29:42.000Z",
-      "url": "https://x.com/i/web/status/2088302050706686198",
-      "author_username": "AndrewYNg",
-      "author_name": "Andrew Ng"
+      "id": "2098252621039497696",
+      "text": "These are what the law enforcer see when they access your phones. https://t.co/Ws3yUF7l6U",
+      "created_at": "2026-09-11T03:29:43.000Z",
+      "author_id": "1352566939349114883",
+      "author_username": "TheOdin_II",
+      "author_name": "The Odin",
+      "url": "https://x.com/TheOdin_II/status/2098252621039497696",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 11528,
+        "impression_count": 641248,
+        "like_count": 11570,
+        "quote_count": 123,
+        "reply_count": 204,
+        "repost_count": 2488
+      }
     },
     {
-      "id": "2088359756096532965",
-      "text": "One of the biggest arbitrage opportunities in AI is to build a \"software factory.\"\n\nHere is the example: \n- I run an AI First Index with my Fortune 500 clients. \n- We interview their executives and score them on 16 dimensions. \n- Then we made a public version of it.\n\nOption one: https://t.co/aXKiEpNxwn https://t.co/FyUMvoN3Gx",
-      "author_id": "1943357969602895873",
-      "created_at": "2026-08-14T20:19:00.000Z",
-      "url": "https://x.com/i/web/status/2088359756096532965",
-      "author_username": "startupideaspod",
-      "author_name": "The Startup Ideas Podcast (SIP) 🧃"
+      "id": "2098118191029624911",
+      "text": "Now available: ChatGPT for Financial Services.\n\nThis is a tailored ChatGPT Work experience that combines built-in financial data with GPT-6 Astra’s reasoning.\n\nTeams can develop research, build financial models, and create customized client materials.\n\nhttps://t.co/6WP5OJdnE8 https://t.co/AundGG3jtc",
+      "created_at": "2026-09-10T18:35:32.000Z",
+      "author_id": "4398626122",
+      "author_username": "OpenAI",
+      "author_name": "OpenAI",
+      "url": "https://x.com/OpenAI/status/2098118191029624911",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 17676,
+        "impression_count": 10221670,
+        "like_count": 24206,
+        "quote_count": 1265,
+        "reply_count": 613,
+        "repost_count": 2097
+      }
     },
     {
-      "id": "2085360583499485654",
-      "text": "https://t.co/5wOWSHzZc3",
-      "author_id": "1569989545575284738",
-      "created_at": "2026-08-06T13:41:21.000Z",
-      "url": "https://x.com/i/web/status/2085360583499485654",
-      "author_username": "noisyb0y1",
-      "author_name": "Noisy"
+      "id": "2098233797745725882",
+      "text": "SpaceXAI will livestream a three-person team attempting to build an entire company from scratch with Grok Bot, September 15–17.\n\nmattyp, poteto and roshan_s will start with an idea and work through the business plan, product decisions and engineering, with viewers following the https://t.co/jRuhLes8m7",
+      "created_at": "2026-09-11T02:14:55.000Z",
+      "author_id": "1587601034339561472",
+      "author_username": "tetsuoai",
+      "author_name": "tetsuo",
+      "url": "https://x.com/tetsuoai/status/2098233797745725882",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1167,
+        "impression_count": 1573375,
+        "like_count": 1946,
+        "quote_count": 105,
+        "reply_count": 138,
+        "repost_count": 249
+      }
     },
     {
-      "id": "2087128585144357274",
-      "text": "He is 17 and already an AI engineer at OpenAI making $1.4M a year - and came to Stanford to share how:\n\n\"I finished school and immediately made $100k a month thanks to AI\"\n\n00:33 - how to get an OpenAI offer at 17 with no degree\n28:34 - how an agent without code brings $100k https://t.co/vrd7XBjj1B https://t.co/iQkAkUwsce",
-      "author_id": "1569989545575284738",
-      "created_at": "2026-08-11T10:46:46.000Z",
-      "url": "https://x.com/i/web/status/2087128585144357274",
-      "author_username": "noisyb0y1",
-      "author_name": "Noisy"
+      "id": "2098162488013455784",
+      "text": "Introducing Projects, a new way of working in Cursor.\n\nRather than creating a chat for every task, you work with a coordinator agent in a single, persistent thread.\n\nLike @bot, your agent is always on, proactively manages work with subagents, and improves over time. https://t.co/9RREyjtnTz",
+      "created_at": "2026-09-10T21:31:33.000Z",
+      "author_id": "1695890961094909952",
+      "author_username": "cursor_ai",
+      "author_name": "Cursor",
+      "url": "https://x.com/cursor_ai/status/2098162488013455784",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 3791,
+        "impression_count": 1349544,
+        "like_count": 8873,
+        "quote_count": 384,
+        "reply_count": 429,
+        "repost_count": 509
+      }
     },
     {
-      "id": "2087423235558392079",
-      "text": "一个来自深圳的 13 岁孩子，整个寒假都宅在卧室里——当所有同学都在外面玩耍时，他连续 21 天坐在一台 MacBook Air 前，看 Claude 教程，对着屏幕一遍遍模仿练习。\n \n假期结束时，他做出了自己的 AI 代理，能每 45 秒解出一道 Codeforces 编程题。放假最后一天，他把整套代码上传到了一个公开的 GitHub https://t.co/xBAdqAiPFK",
-      "author_id": "1862793139523637249",
-      "created_at": "2026-08-12T06:17:36.000Z",
-      "url": "https://x.com/i/web/status/2087423235558392079",
-      "author_username": "linda6248130564",
-      "author_name": "财经老王"
+      "id": "2092243372929151135",
+      "text": "https://t.co/rbVzTKPezE",
+      "created_at": "2026-08-25T13:31:06.000Z",
+      "author_id": "362697164",
+      "author_username": "VibeMarketer_",
+      "author_name": "J.B.",
+      "url": "https://x.com/VibeMarketer_/status/2092243372929151135",
+      "lang": "zxx",
+      "public_metrics": {
+        "bookmark_count": 6983,
+        "impression_count": 1178277,
+        "like_count": 1742,
+        "quote_count": 24,
+        "reply_count": 41,
+        "repost_count": 228
+      }
     },
     {
-      "id": "2088350699285541216",
-      "text": "N8N FULL COURSE 1 HOUR (Build &amp; Automate Anything) https://t.co/aPn6FwhSpk",
-      "author_id": "1405031034",
-      "created_at": "2026-08-14T19:43:01.000Z",
-      "url": "https://x.com/i/web/status/2088350699285541216",
-      "author_username": "JulianGoldieSEO",
-      "author_name": "Julian Goldie SEO"
+      "id": "2098099269551149398",
+      "text": "GPT-Live-1 is now available in the API.\n\nBring ChatGPT’s natural back-and-forth to your app, with voice agents that listen while they speak and work with the models and harness you choose. https://t.co/gIl1gwsBDV",
+      "created_at": "2026-09-10T17:20:21.000Z",
+      "author_id": "1633874951508721686",
+      "author_username": "OpenAIDevs",
+      "author_name": "OpenAI Developers",
+      "url": "https://x.com/OpenAIDevs/status/2098099269551149398",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 9390,
+        "impression_count": 5127315,
+        "like_count": 15613,
+        "quote_count": 797,
+        "reply_count": 453,
+        "repost_count": 1245
+      }
     },
     {
-      "id": "2087910909947642285",
-      "text": "somebody just torched their entire career for us\n\nsomeone inside Anthropic wrote down exactly how they wire their AIs to work as a team instead of one at a time, every number, and let the whole thing walk out the door\n\nit's called Graph Engineering: you stop asking one AI to do https://t.co/oKkZ1WrsSA https://t.co/cFlWbGNDuc",
-      "author_id": "1966599631900438528",
-      "created_at": "2026-08-13T14:35:27.000Z",
-      "url": "https://x.com/i/web/status/2087910909947642285",
-      "author_username": "Argona0x",
-      "author_name": "Argona"
+      "id": "2097411953249685869",
+      "text": "That time @PeterMcCormack explained to me why rich people (like him) love inflation ..and we all know I'm no good at maths https://t.co/bDrWNNQY3R",
+      "created_at": "2026-09-08T19:49:12.000Z",
+      "author_id": "340305102",
+      "author_username": "narindertweets",
+      "author_name": "Narinder Kaur",
+      "url": "https://x.com/narindertweets/status/2097411953249685869",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1689,
+        "impression_count": 86508,
+        "like_count": 1661,
+        "quote_count": 12,
+        "reply_count": 154,
+        "repost_count": 212
+      }
     },
     {
-      "id": "2088258814554390943",
-      "text": "THIS IS F**KING GOLD\n\nClaude can now produce fully animated YouTube videos directly inside your chat.\n\nNo video editors. No external rendering tools. No timeline slicing.\n\nNobody is talking about this workflow yet, but connecting Claude to a custom Model Context Protocol (MCP) https://t.co/fGt1B0OQnU https://t.co/whrq1PXEKB",
-      "author_id": "1591728702513102850",
-      "created_at": "2026-08-14T13:37:54.000Z",
-      "url": "https://x.com/i/web/status/2088258814554390943",
-      "author_username": "BIGMayrr",
-      "author_name": "Mayor."
+      "id": "2097581354837770703",
+      "text": "8 Motion resources that make your interfaces feel alive Animated components, ready to copy \n\n1. https://t.co/p8EJeYMEsI\n2. https://t.co/9PiOn7LNNt\n3. https://t.co/ThNWIbGTCl\n4. https://t.co/pRbLUfy8ZP\n5. https://t.co/wfiVn2al2K\n6. https://t.co/39EevjULJP\n7. https://t.co/O2KZPzoJWZ",
+      "created_at": "2026-09-09T07:02:20.000Z",
+      "author_id": "1675456073375920129",
+      "author_username": "noahelhadedy",
+      "author_name": "𝐍𝐨𝐚𝐡",
+      "url": "https://x.com/noahelhadedy/status/2097581354837770703",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 744,
+        "impression_count": 22428,
+        "like_count": 534,
+        "quote_count": 1,
+        "reply_count": 9,
+        "repost_count": 73
+      }
     },
     {
-      "id": "2087999020878700781",
-      "text": "You're not a YOUTUBER if you don't know what this is 💯 https://t.co/aqjdOkIrbi",
-      "author_id": "2065244953312108544",
-      "created_at": "2026-08-13T20:25:34.000Z",
-      "url": "https://x.com/i/web/status/2087999020878700781",
-      "author_username": "KKlystin",
-      "author_name": "Kostya"
+      "id": "2097483323991822572",
+      "text": "Oh I even forgot to mention the RCE 0days in the LG TVs these researchers found. https://t.co/0VntgjD4EH",
+      "created_at": "2026-09-09T00:32:48.000Z",
+      "author_id": "15040971",
+      "author_username": "mattjay",
+      "author_name": "Matt Johansen",
+      "url": "https://x.com/mattjay/status/2097483323991822572",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1205,
+        "impression_count": 44384,
+        "like_count": 2429,
+        "quote_count": 32,
+        "reply_count": 73,
+        "repost_count": 531
+      }
     },
     {
-      "id": "2087589633152459123",
-      "text": "We found a way to write AI scripts for YouTube that don't sound like AI, and they still perform.\n\nNo robotic pacing, no generic phrasing, no obvious AI language. The script pulls straight from your voice.\n\nReply \"SCRIPT\" and I'll send it to you. https://t.co/Dcs3mCTcZi",
-      "author_id": "1388210327649669124",
-      "created_at": "2026-08-12T17:18:48.000Z",
-      "url": "https://x.com/i/web/status/2087589633152459123",
-      "author_username": "natecurtiss_yt",
-      "author_name": "Nate Curtiss"
+      "id": "2097628313728479496",
+      "text": "OPENAI JUST DROPPED THE OFFICIAL GUIDE TO PROMPTING GPT-6 ASTRA.\n\nthe counterintuitive part: your old prompts will fight this model, not help it.\n\nBookmark this guide before you forget.\n\n&gt; it stops to ask more, so prompt it to act on its own\n&gt; it's sensitive to skill files, spell https://t.co/neUkgwUxrU https://t.co/LxsD7yeUZg",
+      "created_at": "2026-09-09T10:08:56.000Z",
+      "author_id": "2230289537",
+      "author_username": "kirillk_web3",
+      "author_name": "Kirill",
+      "url": "https://x.com/kirillk_web3/status/2097628313728479496",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 37,
+        "impression_count": 13861,
+        "like_count": 25,
+        "quote_count": 1,
+        "reply_count": 3,
+        "repost_count": 2
+      }
     },
     {
-      "id": "2087997144569356289",
-      "text": "Do you know this? https://t.co/v6xb253fdV",
-      "author_id": "1507689785560907779",
-      "created_at": "2026-08-13T20:18:07.000Z",
-      "url": "https://x.com/i/web/status/2087997144569356289",
-      "author_username": "OpajobiAdedamo2",
-      "author_name": "VitalMode lifestyle"
+      "id": "2097100854729834636",
+      "text": "I used GPT-6 Astra to get AAA PC games running on my iPad mini!\n\nSkyrim, Batman: Arkham City, Hades, and Age of Empires II.\n\nThe actual Windows versions, running locally with touch controls. No streaming.\n\nDemo below and I'll share a repo and setup guides soon! https://t.co/zz8ze2R6Qn",
+      "created_at": "2026-09-07T23:13:00.000Z",
+      "author_id": "25667970",
+      "author_username": "ammaar",
+      "author_name": "Ammaar Reshi",
+      "url": "https://x.com/ammaar/status/2097100854729834636",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 2098,
+        "impression_count": 537019,
+        "like_count": 3651,
+        "quote_count": 70,
+        "reply_count": 208,
+        "repost_count": 190
+      }
     },
     {
-      "id": "2087003313955119480",
-      "text": "the best YouTube RPM breakdown ive ever seen https://t.co/L192iIktF5",
-      "author_id": "1519436684009648129",
-      "created_at": "2026-08-11T02:28:59.000Z",
-      "url": "https://x.com/i/web/status/2087003313955119480",
-      "author_username": "adaviadavis",
-      "author_name": "adavia"
+      "id": "2097337678844821678",
+      "text": "This might be a big deal. I’m already editing with AI so I’m really curious what this opens up. \n\nWe’re an Adobe shop but this might be enough to make us switch. https://t.co/s7bIJxaN9W",
+      "created_at": "2026-09-08T14:54:03.000Z",
+      "author_id": "706295244304744448",
+      "author_username": "NetworkChuck",
+      "author_name": "NetworkChuck",
+      "url": "https://x.com/NetworkChuck/status/2097337678844821678",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 216,
+        "impression_count": 48689,
+        "like_count": 503,
+        "quote_count": 2,
+        "reply_count": 34,
+        "repost_count": 27
+      }
     },
     {
-      "id": "2087231307965239365",
-      "text": "How to stay an0nym0us 0nline \n\n[For educational purposes] https://t.co/v9b8qbt9gI",
-      "author_id": "2050080583825448960",
-      "created_at": "2026-08-11T17:34:57.000Z",
-      "url": "https://x.com/i/web/status/2087231307965239365",
-      "author_username": "cyber__razz",
-      "author_name": "The Cybersecurity guy"
+      "id": "2097087133534036374",
+      "text": "GPT-6 Astra is a complete beast at reverse engineering games. Gave it 2 hours while I was at the gym, and now I can play The Legend of Zelda: The Wind Waker on my phone 😎 https://t.co/9a7rdJwQC2",
+      "created_at": "2026-09-07T22:18:29.000Z",
+      "author_id": "346866575",
+      "author_username": "h4nkdog",
+      "author_name": "Hank",
+      "url": "https://x.com/h4nkdog/status/2097087133534036374",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 2252,
+        "impression_count": 1530490,
+        "like_count": 5116,
+        "quote_count": 60,
+        "reply_count": 141,
+        "repost_count": 201
+      }
     },
     {
-      "id": "2087230404323586170",
-      "text": "🚨DON'T travel with your crypto!\n\nHardware wallets are not always TSA or Customs friendly...\n\nYour wallet can be confiscated.\n\nYou can be forced to open your accounts.\n\nThe goal is to avoid that entire scenario.\n\nHere's what I've learned after traveling with crypto... https://t.co/Cm7lijDoDm",
-      "author_id": "1502840013867782145",
-      "created_at": "2026-08-11T17:31:21.000Z",
-      "url": "https://x.com/i/web/status/2087230404323586170",
-      "author_username": "CyberScrilla",
-      "author_name": "Cyber Scrilla"
+      "id": "2096972908828426747",
+      "text": "Introducing SuperAstra: Edit Super Nintendo games live with GPT-6\n\nOne of my favorite ways to test new models has been reverse engineering classic games. This is hard because it's raw machine code. Astra is way better than anything I've seen.\n\nDownload and examples below 👇 https://t.co/O39Vx0DqDT",
+      "created_at": "2026-09-07T14:44:35.000Z",
+      "author_id": "89538466",
+      "author_username": "scottastevenson",
+      "author_name": "Scott Stevenson",
+      "url": "https://x.com/scottastevenson/status/2096972908828426747",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 4056,
+        "impression_count": 1217494,
+        "like_count": 6315,
+        "quote_count": 196,
+        "reply_count": 260,
+        "repost_count": 525
+      }
     },
     {
-      "id": "2086976486771155361",
-      "text": "@Polymarket Translate → back-translate\n\nTranslate the text into another language, then translate it back to English.\n\nThis almost always scrambles the original token pattern enough to break the watermark.\n\n🤷‍♂️\n\nNot sure why Claude is being low IQ here.",
-      "author_id": "1919158684807995392",
-      "created_at": "2026-08-11T00:42:23.000Z",
-      "url": "https://x.com/i/web/status/2086976486771155361",
-      "author_username": "1337_viking",
-      "author_name": "1337 Viking 🇺🇸"
-    },
-    {
-      "id": "2085370355951001796",
-      "text": "Even many men are scared of other men. Physical strength, aggression, status, and group power can make men cautious about speaking honestly or setting boundaries. Fear does not always look obvious. It can appear as silence, conformity, nervous respect, or avoiding conflict with https://t.co/B2bO2auwex",
-      "author_id": "1964505482988519424",
-      "created_at": "2026-08-06T14:20:11.000Z",
-      "url": "https://x.com/i/web/status/2085370355951001796",
-      "author_username": "themutualman",
-      "author_name": "The Mutual Man"
-    },
-    {
-      "id": "2085030099988996546",
-      "text": "I'm sure he used to clean up after crime scenes. https://t.co/zAbtiUK1tp",
-      "author_id": "884176793007267840",
-      "created_at": "2026-08-05T15:48:08.000Z",
-      "url": "https://x.com/i/web/status/2085030099988996546",
-      "author_username": "currentiyke",
-      "author_name": "Iyke"
-    },
-    {
-      "id": "2085380194081100244",
-      "text": "How to create poster mockup on paper in Photoshop (Step by Step) https://t.co/pr9UKqjLu4",
-      "author_id": "1546129035624849409",
-      "created_at": "2026-08-06T14:59:17.000Z",
-      "url": "https://x.com/i/web/status/2085380194081100244",
-      "author_username": "UiSavior",
-      "author_name": "UI/UX Savior"
-    },
-    {
-      "id": "2085576468952711210",
-      "text": "This is the kind of history that Trump doesn't want you to know. He would probably label this as inaccurate.\n#history #facts #trump #blackhistory https://t.co/ZFIGRx8LKw",
-      "author_id": "1241859777304702976",
-      "created_at": "2026-08-07T03:59:12.000Z",
-      "url": "https://x.com/i/web/status/2085576468952711210",
-      "author_username": "Bmbempower",
-      "author_name": "BMB Empower Network"
-    },
-    {
-      "id": "2085482414751580314",
-      "text": "Jonathan Majors stars in DailyWire’s “Run Hide Fight: Infidels” as a former Delta Force veteran who teams with students and a campus security guard after Islamist terrorists seize a pro-Palestine encampment at a liberal college campus. Out Sept. 16, 2026. https://t.co/8bOYQPne7p",
-      "author_id": "1594871021978652673",
-      "created_at": "2026-08-06T21:45:28.000Z",
-      "url": "https://x.com/i/web/status/2085482414751580314",
-      "author_username": "FearedBuck",
-      "author_name": "FearBuck"
-    },
-    {
-      "id": "2084437647368298915",
-      "text": "WOW https://t.co/IK0w2iEYl0",
-      "author_id": "1517523408002633739",
-      "created_at": "2026-08-04T00:33:56.000Z",
-      "url": "https://x.com/i/web/status/2084437647368298915",
-      "author_username": "jshaliraqi",
-      "author_name": "J.S.H"
-    },
-    {
-      "id": "2085107005304320403",
-      "text": "https://t.co/AlqYl8HZBR https://t.co/b1c0VRY9YF",
-      "author_id": "1552208679423938561",
-      "created_at": "2026-08-05T20:53:44.000Z",
-      "url": "https://x.com/i/web/status/2085107005304320403",
-      "author_username": "J_Onaka",
-      "author_name": "Jay 🌑🇨🇩"
-    },
-    {
-      "id": "2085082694573002969",
-      "text": "Finally. Competitive Blender. https://t.co/6xA50hH6T3",
-      "author_id": "1112124069468688386",
-      "created_at": "2026-08-05T19:17:08.000Z",
-      "url": "https://x.com/i/web/status/2085082694573002969",
-      "author_username": "Jackson_Boof",
-      "author_name": "Jackson | Husdog🦊💍"
-    },
-    {
-      "id": "2083447129037504555",
-      "text": "Still unfinished 🥲 \nRip to my but pens 💀 \n\n#Indie_anime #animation2d https://t.co/ip7LTuigm0",
-      "author_id": "2514532928",
-      "created_at": "2026-08-01T06:57:58.000Z",
-      "url": "https://x.com/i/web/status/2083447129037504555",
-      "author_username": "Be_myvu",
-      "author_name": "BemyVu"
-    },
-    {
-      "id": "2084110089670283540",
-      "text": "I needed to move a sofa.\n\nI mentioned this to an American. He said, \"You know anybody with a truck?\"\n\nI did not know anybody with a truck.\n\nHe looked at me with real concern. Not pity. Concern. The way you look at a man who has told you he does not have a name.\n\n\"You gotta know",
-      "author_id": "1695275254850228224",
-      "created_at": "2026-08-03T02:52:20.000Z",
-      "url": "https://x.com/i/web/status/2084110089670283540",
-      "author_username": "japan_nobunaga",
-      "author_name": "NOBUNAGA🇯🇵🏯_夏樹蒼依"
-    },
-    {
-      "id": "2084278632571126141",
-      "text": "How the avoidant, anxious &amp; secure person responds. https://t.co/9U40XOXf52",
-      "author_id": "1537490838665711616",
-      "created_at": "2026-08-03T14:02:04.000Z",
-      "url": "https://x.com/i/web/status/2084278632571126141",
-      "author_username": "Maxtheairbnbguy",
-      "author_name": "Max The Airbnb Guy🏡"
-    },
-    {
-      "id": "2084396376511709399",
-      "text": "2 men couldn’t see eye to eye on how a daughter “should be raised.” Thoughts? 👀🤔 https://t.co/Ob3WpfF8oU",
-      "author_id": "1802584284470915072",
-      "created_at": "2026-08-03T21:49:57.000Z",
-      "url": "https://x.com/i/web/status/2084396376511709399",
-      "author_username": "Raindropsmedia1",
-      "author_name": "Rain Drops Media"
-    },
-    {
-      "id": "2083538235561738338",
-      "text": "Visa, Mastercard and Ripple backed an open standard buried since 1991.\n\nIf you want to learn how I make money off this, it's all one dollar.\nLink in bio, or go to https://t.co/pjC805QCLJ.\n\nWhen they wrote the original rules of the web, the engineers reserved\na slot called error https://t.co/Ct1LjkgpSC",
-      "author_id": "901706048",
-      "created_at": "2026-08-01T13:00:00.000Z",
-      "url": "https://x.com/i/web/status/2083538235561738338",
-      "author_username": "alexelorenzo",
-      "author_name": "Alexander Lorenzo"
-    },
-    {
-      "id": "2083897271964541300",
-      "text": "did a defense contractor just sell me a Nintendo 64?\n\npalmer luckey sold oculus to facebook for $2 billion at 21. now runs anduril, a $61 billion autonomous weapons company.\n\nand this weekend I find him on youtube, 30 minutes deep, explaining an N64 clone he engineered to last https://t.co/bTZtcf8JXw",
-      "author_id": "1336829759884550155",
-      "created_at": "2026-08-02T12:46:41.000Z",
-      "url": "https://x.com/i/web/status/2083897271964541300",
-      "author_username": "GoshawkTrades",
-      "author_name": "Goshawk Trades"
-    },
-    {
-      "id": "2083717655366635540",
-      "text": "A man who went to prison for talking people out of their money filmed himself doing it live, then sold the method as a course. 7 million people have watched him work.\n\nThe man is Jordan Belfort. The film about him made him famous. What almost nobody has done is watch the real https://t.co/NTddT8GQfU https://t.co/QFgzZJeNT8",
-      "author_id": "2077860355141763072",
-      "created_at": "2026-08-02T00:52:57.000Z",
-      "url": "https://x.com/i/web/status/2083717655366635540",
-      "author_username": "21xSilverhand",
-      "author_name": "Silverhand"
-    },
-    {
-      "id": "2083585581322248283",
-      "text": "The funny thing is, this is exactly how Emma acts lmao https://t.co/VfHcUobujc",
-      "author_id": "1145682126668537856",
-      "created_at": "2026-08-01T16:08:08.000Z",
-      "url": "https://x.com/i/web/status/2083585581322248283",
-      "author_username": "seangarrette",
-      "author_name": "Sean Garrette"
-    },
-    {
-      "id": "2083539190038299045",
-      "text": "Your Mac decides which app the media keys control. It's usually wrong.\n\nBeamhook lets you just… pick one.\n\nOpen source, macOS. https://t.co/smlsxMZ0aH",
-      "author_id": "67656077",
-      "created_at": "2026-08-01T13:03:47.000Z",
-      "url": "https://x.com/i/web/status/2083539190038299045",
-      "author_username": "olli_asia",
-      "author_name": "OP"
-    },
-    {
-      "id": "1758171178055725176",
-      "text": "Fodase, tomem aqui Gogeta vs Janemba https://t.co/6zjiRqEDoW https://t.co/kgX6PjVEIy",
-      "author_id": "1104543343495794688",
-      "created_at": "2024-02-15T16:47:28.000Z",
-      "url": "https://x.com/i/web/status/1758171178055725176",
-      "author_username": "zenkicuck",
-      "author_name": "zenkicuck"
-    },
-    {
-      "id": "2082070276112564256",
-      "text": "El CEO de Anthropic dándose cuenta de que Claude Fable 5 volvió hace 48 horas y un tipo lo uso para construir un sistema para crear sitios web cinematográficos de $50,000 y acaba de filtrar toda la estrategia gratis https://t.co/68FqDHmPo5 https://t.co/CTGLeL34km",
-      "author_id": "1444693617986129932",
-      "created_at": "2026-07-28T11:46:51.000Z",
-      "url": "https://x.com/i/web/status/2082070276112564256",
-      "author_username": "chesny",
-      "author_name": "Chesny"
-    },
-    {
-      "id": "2081692785216999566",
-      "text": "after they pulled the plug head cha-la came on the playlist and it lined up perfectly! \n\ni enjoyed my time with marvelfighterz https://t.co/Lz1xIwARMd",
-      "author_id": "26643082",
-      "created_at": "2026-07-27T10:46:50.000Z",
-      "url": "https://x.com/i/web/status/2081692785216999566",
-      "author_username": "TheNameIsMYK",
-      "author_name": "Michael Y. Kwon"
-    },
-    {
-      "id": "2080977918914969636",
-      "text": "a=(y,d=mag(k=(4+cos(i/9-t*2))*cos(i/35),e=y/7-13)+sin(e/9+t/2)-4)=&gt;point((q=2*sin(k*3)-y/35*k*(9+k*sin(cos(e)*9-d*2+t)))+40*cos(c=d-t)+200,q*sin(c)+d*35)\nt=0,draw=$=&gt;{t||createCanvas(w=400,w);background(9).stroke(w,96);for(t+=PI/80,i=1e4;i--;)a(i/235)}//#つぶやきProcessing https://t.co/xN7rW0ufTe",
-      "author_id": "534780961",
-      "created_at": "2026-07-25T11:26:13.000Z",
-      "url": "https://x.com/i/web/status/2080977918914969636",
-      "author_username": "yuruyurau",
-      "author_name": "ア"
-    },
-    {
-      "id": "2079674432038248611",
-      "text": "Claude Code on desktop now works with the iOS simulator.\n\nBuild and run your iOS app, and the simulator opens in a panel right next to your conversation. Available today in public beta. https://t.co/su4IguzPVb",
-      "author_id": "2024518793679294464",
-      "created_at": "2026-07-21T21:06:37.000Z",
-      "url": "https://x.com/i/web/status/2079674432038248611",
-      "author_username": "ClaudeDevs",
-      "author_name": "ClaudeDevs"
-    },
-    {
-      "id": "2079410752251679041",
-      "text": "Gaming is about to get crazy… games will soon be multi-engine. 🤯 https://t.co/2IKmLBhbts",
+      "id": "2097322151804121536",
+      "text": "New AI models are translating the code of old view games so people can play the on the go. 🔥🔥🔥 https://t.co/NmO39rhmBi",
+      "created_at": "2026-09-08T13:52:22.000Z",
       "author_id": "807355480188141568",
-      "created_at": "2026-07-21T03:38:51.000Z",
-      "url": "https://x.com/i/web/status/2079410752251679041",
       "author_username": "DramaAlert",
-      "author_name": "DramaAlert"
+      "author_name": "DramaAlert",
+      "url": "https://x.com/DramaAlert/status/2097322151804121536",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 142,
+        "impression_count": 46002,
+        "like_count": 455,
+        "quote_count": 2,
+        "reply_count": 7,
+        "repost_count": 19
+      }
     },
     {
-      "id": "2079062726039531972",
-      "text": "workstations from yesterday’s future https://t.co/hYueZKdU74",
-      "author_id": "1846361722267095040",
-      "created_at": "2026-07-20T04:35:55.000Z",
-      "url": "https://x.com/i/web/status/2079062726039531972",
-      "author_username": "Synthetic_Copy",
-      "author_name": "Synthetic_soul"
+      "id": "2096784468220535295",
+      "text": "GPT-6 Astra + \nBusiness wiki + \nMeetings + \nYouTube videos + \nClaude memory + \nCodex memory + \nProjects + \nSkills + \nAgents = \nFun https://t.co/k7zjeNLvl4 https://t.co/y9yLGU7m7a",
+      "created_at": "2026-09-07T02:15:48.000Z",
+      "author_id": "1921674544999489536",
+      "author_username": "nateherk",
+      "author_name": "Nate Herk",
+      "url": "https://x.com/nateherk/status/2096784468220535295",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1030,
+        "impression_count": 50560,
+        "like_count": 677,
+        "quote_count": 1,
+        "reply_count": 17,
+        "repost_count": 44
+      }
     },
     {
-      "id": "2079159381728624688",
-      "text": "this should not be free https://t.co/CkzVz3Lh6d https://t.co/TDcIpygZVQ",
-      "author_id": "512156315",
-      "created_at": "2026-07-20T11:00:00.000Z",
-      "url": "https://x.com/i/web/status/2079159381728624688",
-      "author_username": "MichLieben",
-      "author_name": "Michel Lieben"
+      "id": "2097021624616943764",
+      "text": "https://t.co/bHbYp6GGuc",
+      "created_at": "2026-09-07T17:58:10.000Z",
+      "author_id": "1648699406760255488",
+      "author_username": "DavidOndrej1",
+      "author_name": "David Ondrej",
+      "url": "https://x.com/DavidOndrej1/status/2097021624616943764",
+      "lang": "zxx",
+      "public_metrics": {
+        "bookmark_count": 116,
+        "impression_count": 21012,
+        "like_count": 64,
+        "quote_count": 2,
+        "reply_count": 4,
+        "repost_count": 1
+      }
     },
     {
-      "id": "2079315551206379890",
-      "text": "Docs: https://t.co/c2WKykWv12",
-      "author_id": "2024518793679294464",
-      "created_at": "2026-07-20T21:20:33.000Z",
-      "url": "https://x.com/i/web/status/2079315551206379890",
-      "author_username": "ClaudeDevs",
-      "author_name": "ClaudeDevs"
+      "id": "2096623782534287738",
+      "text": "ACABAN DE CREAR UN VIDEOJUEGO EN 3D CON GPT-6 ASTRA TOTALMENTE JUGABLE\n\nEn solo 45 minutos, Astra le creó un prototipo 3D jugable prácticamente desde cero, consumiendo apenas una pequeña parte de su cuota.\n\nEl proceso fue brutal:\n\n→ Conectó Codex a Blender mediante MCP\n→ Le https://t.co/Xa3C1ZhpzX",
+      "created_at": "2026-09-06T15:37:17.000Z",
+      "author_id": "91392262",
+      "author_username": "romanftp",
+      "author_name": "ryu.",
+      "url": "https://x.com/romanftp/status/2096623782534287738",
+      "lang": "es",
+      "public_metrics": {
+        "bookmark_count": 671,
+        "impression_count": 612973,
+        "like_count": 1058,
+        "quote_count": 12,
+        "reply_count": 58,
+        "repost_count": 81
+      }
     },
     {
-      "id": "2078706001054941206",
-      "text": "Downloaded this TikTok as if I'll ever need to do this 😭 https://t.co/kfQpQxfbDt",
-      "author_id": "745675797843709952",
-      "created_at": "2026-07-19T04:58:25.000Z",
-      "url": "https://x.com/i/web/status/2078706001054941206",
-      "author_username": "BradenIsBased",
-      "author_name": "Braden 🏺"
+      "id": "2096695894309568563",
+      "text": "I HAVE BECOME F*CKING USELESS, TEN GPT6-ASTRA AGENTS TOOK $52 TO $11,345.95 WITHOUT ME\n\nafter trading memecoins on Robinhood for 13 hours, they closed with a balance of $11,345.95\n\nwhen I handed them the terminal, there was one instruction:\n\npay for your own Ultra subscription https://t.co/BFwp1iqH1Q https://t.co/AjM5pcmmhu",
+      "created_at": "2026-09-06T20:23:50.000Z",
+      "author_id": "1821527215177367552",
+      "author_username": "immortalhowwl",
+      "author_name": "Logics",
+      "url": "https://x.com/immortalhowwl/status/2096695894309568563",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 7634,
+        "impression_count": 1186268,
+        "like_count": 3082,
+        "quote_count": 38,
+        "reply_count": 245,
+        "repost_count": 227
+      }
     },
     {
-      "id": "2077827886149439547",
-      "text": "I asked a Kimi K3 Max agent swarm to recreate macOS 27 with real Liquid Glass and native apps in web browser and it’s been going for 3 hours https://t.co/lC8dAPHkB5",
-      "author_id": "3239896262",
-      "created_at": "2026-07-16T18:49:06.000Z",
-      "url": "https://x.com/i/web/status/2077827886149439547",
-      "author_username": "mweinbach",
-      "author_name": "Max Weinbach"
+      "id": "2076711728117886998",
+      "text": "If you haven't seen my posts before, I share my experiments on solving engineering related problems with AI, designing fun and interactive science apps, and occasionally making games with AI tools.\n\nHere's a preview https://t.co/oCABbkqcnq",
+      "created_at": "2026-07-13T16:53:54.000Z",
+      "author_id": "428882772",
+      "author_username": "DilumSanjaya",
+      "author_name": "Dilum Sanjaya",
+      "url": "https://x.com/DilumSanjaya/status/2076711728117886998",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 367,
+        "impression_count": 226316,
+        "like_count": 373,
+        "quote_count": 4,
+        "reply_count": 18,
+        "repost_count": 34
+      }
     },
     {
-      "id": "2077489907350856038",
-      "text": "Claude Code artifacts can now call MCP connectors, letting you build dashboards and apps that can fetch information and take actions for each viewer on demand.\n\nAvailable on Pro, Max, Team, and Enterprise plans. Not available on publicly-shared artifacts. https://t.co/FcvtiOqv0J",
-      "author_id": "2024518793679294464",
-      "created_at": "2026-07-15T20:26:06.000Z",
-      "url": "https://x.com/i/web/status/2077489907350856038",
-      "author_username": "ClaudeDevs",
-      "author_name": "ClaudeDevs"
+      "id": "2094750310447341666",
+      "text": "❤️‍🔥 Just Recorded a 7 min Tutorial on How to use Claude Opus 5 to Build Animated $50k Websites (step-by-step)\n\nYou can now build amazing marketing sites 100% with AI https://t.co/2EXN46lQOk",
+      "created_at": "2026-09-01T11:32:47.000Z",
+      "author_id": "2732582439",
+      "author_username": "chhddavid",
+      "author_name": "David Ch",
+      "url": "https://x.com/chhddavid/status/2094750310447341666",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 580,
+        "impression_count": 58396,
+        "like_count": 209,
+        "quote_count": 3,
+        "reply_count": 2,
+        "repost_count": 17
+      }
     },
     {
-      "id": "2077199463278395732",
-      "text": "Claude \"Puzzling\" while GPT 5.6 on GOD-MODE just bade a banger that's mindblowing.\n\nHere's the exact way to get a site like this, step by step:\n\n&gt; open the desktop app, pick Sol, reasoning on High. taste work never goes to small models\n\n&gt; drop it 3 sites with motion you love and https://t.co/BvJujhrb2t https://t.co/tGgpiLNpn6",
-      "author_id": "1519974714038534146",
-      "created_at": "2026-07-15T01:11:59.000Z",
-      "url": "https://x.com/i/web/status/2077199463278395732",
-      "author_username": "0xMiraqle",
-      "author_name": "Miraqle"
+      "id": "2095060006127149480",
+      "text": "call me insane...but this is the closest thing to AGI i've ever seen\n\n19 skills turn an agent into a worker\neyes, ears, hands, a memory\n\ngive this article to your agent\n\nit'll be the most productive thing you do this week https://t.co/6mRsWhLKv6",
+      "created_at": "2026-09-02T08:03:24.000Z",
+      "author_id": "1074810577065832448",
+      "author_username": "painn_x",
+      "author_name": "painn",
+      "url": "https://x.com/painn_x/status/2095060006127149480",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 4541,
+        "impression_count": 678916,
+        "like_count": 1394,
+        "quote_count": 12,
+        "reply_count": 52,
+        "repost_count": 131
+      }
     },
     {
-      "id": "2076849161027407963",
-      "text": "Gameplay Revealed. \nPre-Register Now！ https://t.co/3d7KryP2Ms",
-      "author_id": "2058795745982242816",
-      "created_at": "2026-07-14T02:00:00.000Z",
-      "url": "https://x.com/i/web/status/2076849161027407963",
-      "author_username": "maia_meltdownEN",
-      "author_name": "Maia:Meltdown"
+      "id": "2096053889141489669",
+      "text": "GPT-6 Astra is the new SOTA in agentic CAD.\n\nA true step change in what AI can do in mechanical design https://t.co/IKGZ3UKihW",
+      "created_at": "2026-09-05T01:52:44.000Z",
+      "author_id": "1830679664211501056",
+      "author_username": "adamdotnew",
+      "author_name": "adam",
+      "url": "https://x.com/adamdotnew/status/2096053889141489669",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 3274,
+        "impression_count": 3544588,
+        "like_count": 7205,
+        "quote_count": 328,
+        "reply_count": 201,
+        "repost_count": 463
+      }
     },
     {
-      "id": "2077369580507590774",
-      "text": "NotebookLM FULL COURSE 4 HOURS (Build &amp; Automate Anything) 2 https://t.co/b4Lcago8IY",
+      "id": "2096060090398732741",
+      "text": "Lucy Liu https://t.co/GZhVRVFnNj",
+      "created_at": "2026-09-05T02:17:23.000Z",
+      "author_id": "751849098098143232",
+      "author_username": "all_eddy",
+      "author_name": "Edward A., MD, PhD",
+      "url": "https://x.com/all_eddy/status/2096060090398732741",
+      "lang": "pt",
+      "public_metrics": {
+        "bookmark_count": 2072,
+        "impression_count": 1059892,
+        "like_count": 17028,
+        "quote_count": 84,
+        "reply_count": 178,
+        "repost_count": 637
+      }
+    },
+    {
+      "id": "2096283130844029227",
+      "text": "We are cooking the new https://t.co/usFkAkVXuk gradient collections.\nstay tuned 😇 https://t.co/atu1N5NbBn https://t.co/p5tMJONTNZ",
+      "created_at": "2026-09-05T17:03:40.000Z",
+      "author_id": "3050564824",
+      "author_username": "basit_designs",
+      "author_name": "Basit A. Khan",
+      "url": "https://x.com/basit_designs/status/2096283130844029227",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1505,
+        "impression_count": 108975,
+        "like_count": 1559,
+        "quote_count": 6,
+        "reply_count": 22,
+        "repost_count": 87
+      }
+    },
+    {
+      "id": "2095977838134563067",
+      "text": "n8n just changed the hardest part of automation.\n\nYou can now describe the workflow in plain English and let AI build the structure for you.\n\nHere’s the basic setup:\n\n→ Enable the instance-level MCP server.\n\n→ Connect an AI tool like Claude or ChatGPT.\n\n→ Describe the outcome https://t.co/FW2ttVAFNa",
+      "created_at": "2026-09-04T20:50:32.000Z",
       "author_id": "1405031034",
-      "created_at": "2026-07-15T12:27:58.000Z",
-      "url": "https://x.com/i/web/status/2077369580507590774",
       "author_username": "JulianGoldieSEO",
-      "author_name": "Julian Goldie SEO"
+      "author_name": "Julian Goldie SEO",
+      "url": "https://x.com/JulianGoldieSEO/status/2095977838134563067",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 19,
+        "impression_count": 3964,
+        "like_count": 19,
+        "quote_count": 0,
+        "reply_count": 6,
+        "repost_count": 0
+      }
     },
     {
-      "id": "2077030540704714899",
-      "text": "I had to weigh in 😂\n\n@edwardeachday https://t.co/HuY8bcliA7",
-      "author_id": "1560644180673708032",
-      "created_at": "2026-07-14T14:00:44.000Z",
-      "url": "https://x.com/i/web/status/2077030540704714899",
-      "author_username": "heytonyagency",
-      "author_name": "HeyTony"
+      "id": "2095954888937345336",
+      "text": "We've packaged some of the best use cases from the SpaceXAI team into templates anyone can use. We'll continue adding more from Grok Bot users.\n\nSee them all: https://t.co/BGE1SyR1O6",
+      "created_at": "2026-09-04T19:19:21.000Z",
+      "author_id": "2085838061347217408",
+      "author_username": "bot",
+      "author_name": "Grok Bot",
+      "url": "https://x.com/bot/status/2095954888937345336",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 778,
+        "impression_count": 133439,
+        "like_count": 855,
+        "quote_count": 16,
+        "reply_count": 40,
+        "repost_count": 73
+      }
     },
     {
-      "id": "2076738496778445003",
-      "text": "I gave an AI blocks. It built me a castle.\n\n(full video below) https://t.co/2NLEGTmxSN",
-      "author_id": "9701462",
-      "created_at": "2026-07-13T18:40:16.000Z",
-      "url": "https://x.com/i/web/status/2076738496778445003",
-      "author_username": "techleadhd",
-      "author_name": "TechLead"
+      "id": "2095760911181234617",
+      "text": "AI writes great code. It designs terrible landing pages. So I fixed it.\n\nFree skill + full video so you can run it yourself 👇 https://t.co/idy9ygSJlO",
+      "created_at": "2026-09-04T06:28:33.000Z",
+      "author_id": "197785542",
+      "author_username": "dannypostma",
+      "author_name": "Danny Postma",
+      "url": "https://x.com/dannypostma/status/2095760911181234617",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1591,
+        "impression_count": 106673,
+        "like_count": 704,
+        "quote_count": 9,
+        "reply_count": 57,
+        "repost_count": 30
+      }
     },
     {
-      "id": "2077016770939122149",
-      "text": "Higgsfield MCP/Plugin for After Effects just got upgraded.\nPowered by Fable 5.\n\n1. Build your own AE plugins\n2. Drop in your reference and it decomposes into editable vector layers you can animate\n3. AI assistant that answers or does it for you\n4. Localize a project seamlessly https://t.co/WL4pqMgLEM",
-      "author_id": "1895453094361890816",
-      "created_at": "2026-07-14T13:06:01.000Z",
-      "url": "https://x.com/i/web/status/2077016770939122149",
-      "author_username": "higgsfield",
-      "author_name": "Higgsfield AI 🧩"
+      "id": "2095751225283350624",
+      "text": "People keep asking for the prompt, harness, and other things I used to make this come out so good. You're all overthinking it.\n\n1. Install Blender\n2. Open Codex app\n3. Paste prompt\n4. Game appears in 30 minutes to 2 hours https://t.co/1KRI7OJziA https://t.co/TxKJ6t3hzL",
+      "created_at": "2026-09-04T05:50:03.000Z",
+      "author_id": "786375418685165568",
+      "author_username": "theo",
+      "author_name": "Theo - t3.gg",
+      "url": "https://x.com/theo/status/2095751225283350624",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 6154,
+        "impression_count": 553346,
+        "like_count": 5118,
+        "quote_count": 32,
+        "reply_count": 129,
+        "repost_count": 255
+      }
     },
     {
-      "id": "2076898262523466082",
-      "text": "Have to get the boys to play this oh my gosh https://t.co/oFQmYAdIk9",
-      "author_id": "968105115956731906",
-      "created_at": "2026-07-14T05:15:07.000Z",
-      "url": "https://x.com/i/web/status/2076898262523466082",
-      "author_username": "Onepeg",
-      "author_name": "Onepeg"
+      "id": "2095727513897181292",
+      "text": "img2threejs rebuilds objects from a single reference image as code-only, procedural Three.js models. https://t.co/zPbyCyJwX9",
+      "created_at": "2026-09-04T04:15:50.000Z",
+      "author_id": "1315639147248246785",
+      "author_username": "GithubProjects",
+      "author_name": "GitHub Projects Community",
+      "url": "https://x.com/GithubProjects/status/2095727513897181292",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 91,
+        "impression_count": 13683,
+        "like_count": 151,
+        "quote_count": 0,
+        "reply_count": 3,
+        "repost_count": 9
+      }
     },
     {
-      "id": "2076625671917273294",
-      "text": "i cant believe what i've just watched  \n\nhttps://t.co/irRYc24HJf",
-      "author_id": "16219154",
-      "created_at": "2026-07-13T11:11:56.000Z",
-      "url": "https://x.com/i/web/status/2076625671917273294",
-      "author_username": "peduarte",
-      "author_name": "Pedro Duarte"
+      "id": "2095575585569247629",
+      "text": "Jane Street pays its quants more than $750,000 a year. I built the whole thing on Grok Bot, and it trades on its own.\n\nOne agent is already up $7,800 from a $10 start.\n\nthere was one rule: earn or die\n\n&gt; every agent is born with $10.00\n&gt; that's the entire budget for its entire https://t.co/RtRy77eL0f https://t.co/uViUiar4aA",
+      "created_at": "2026-09-03T18:12:08.000Z",
+      "author_id": "1665059027305242625",
+      "author_username": "Dmytroo_eth",
+      "author_name": "Dmytro",
+      "url": "https://x.com/Dmytroo_eth/status/2095575585569247629",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 62,
+        "impression_count": 8453,
+        "like_count": 42,
+        "quote_count": 0,
+        "reply_count": 3,
+        "repost_count": 1
+      }
     },
     {
-      "id": "2076268684633391373",
-      "text": "Steelie and Clevie remains immortal 🇯🇲 https://t.co/ObiOyGdmdr",
-      "author_id": "136510509",
-      "created_at": "2026-07-12T11:33:24.000Z",
-      "url": "https://x.com/i/web/status/2076268684633391373",
-      "author_username": "ibkontehja",
-      "author_name": "highb highb"
+      "id": "2095675291293061501",
+      "text": "THIS WEBSITE IS INSANE\n\nIt contains a huge collection of open-source tools in the browser that don't require registration to use.\n\nIt includes tools in multiple categories:\n→ Design and Graphics\n→ Development\n→ Productivity\n→ Privacy and Security\n→ AI\n→ Education \n\nNo https://t.co/1xWJodSwNN",
+      "created_at": "2026-09-04T00:48:19.000Z",
+      "author_id": "1788243647885987840",
+      "author_username": "mikenevermiss",
+      "author_name": "MIKE",
+      "url": "https://x.com/mikenevermiss/status/2095675291293061501",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 449,
+        "impression_count": 211032,
+        "like_count": 267,
+        "quote_count": 1,
+        "reply_count": 21,
+        "repost_count": 31
+      }
     },
     {
-      "id": "2075754077074620467",
-      "text": "This is a very interesting video. If you’re a young man, and especially if you’re struggling with dating, it’s actually in your interest to be shaming age gaps, these older men have you completely bamboozled. No one would benefit more from making age gaps taboo than young men. https://t.co/tBjadoFUxD",
-      "author_id": "1603561263015026689",
-      "created_at": "2026-07-11T01:28:32.000Z",
-      "url": "https://x.com/i/web/status/2075754077074620467",
-      "author_username": "hollowearthterf",
-      "author_name": "Alicia🦎👁‍🗨🪐🌘 ⬛️ (Doctor)"
+      "id": "2095692573549514846",
+      "text": "DOWNLOADING ANYTHING FROM THE INTERNET JUST GOT ABSURDLY EASY.\n\nsomeone built an open-source tool called Cobalt that lets you download videos, audio, photos, and GIFs from practically any website.\n\nall you have to do is paste the link and it handles the rest, no ads, trackers, https://t.co/4F69Sxvh3e https://t.co/bQOLPnuCdg",
+      "created_at": "2026-09-04T01:57:00.000Z",
+      "author_id": "1788243647885987840",
+      "author_username": "mikenevermiss",
+      "author_name": "MIKE",
+      "url": "https://x.com/mikenevermiss/status/2095692573549514846",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 3772,
+        "impression_count": 154957,
+        "like_count": 2779,
+        "quote_count": 3,
+        "reply_count": 36,
+        "repost_count": 334
+      }
     },
     {
-      "id": "2075545587093807111",
-      "text": "The New GPT 5.6 Sol is insane.\n\n❤️‍🔥Just recorded a 21-min Full Tutorial on How To Build Premium, Cinematic Websites with GPT 5.6 Sol! https://t.co/rTMd8x40ZE",
-      "author_id": "893369654768529408",
-      "created_at": "2026-07-10T11:40:04.000Z",
-      "url": "https://x.com/i/web/status/2075545587093807111",
-      "author_username": "viktoroddy",
-      "author_name": "Viktor Oddy"
+      "id": "2095463061142512089",
+      "text": "THIS GUIDE BREAKS DOWN 6 AI AGENT HARNESSES AND EXPLAINS THE DIFFERENCES, BENEFITS AND BEST USE CASES FOR EACH.\n\nOMP → PI → CLAUDE CODE → ZCODE → CODEX → WARP\n\n https://t.co/8mbbuMUEvd",
+      "created_at": "2026-09-03T10:45:00.000Z",
+      "author_id": "1536693901230321666",
+      "author_username": "RoundtableSpace",
+      "author_name": "0xMarioNawfal",
+      "url": "https://x.com/RoundtableSpace/status/2095463061142512089",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 34,
+        "impression_count": 46832,
+        "like_count": 56,
+        "quote_count": 0,
+        "reply_count": 15,
+        "repost_count": 0
+      }
     },
     {
-      "id": "2076031727181471810",
-      "text": "So yall know what the message is... https://t.co/LMskhTmgZA",
-      "author_id": "1886432647653793793",
-      "created_at": "2026-07-11T19:51:49.000Z",
-      "url": "https://x.com/i/web/status/2076031727181471810",
-      "author_username": "rizzolosophy",
-      "author_name": "The Rizz Bible"
+      "id": "2095708438290403800",
+      "text": "Treat it like an agency that isn't allowed to ship, not a life OS that books Costco.\n\nGet it to draft. You don't get to send. That's the rule for all nine loops here.\n\nOne bot\n   |\n   v\nOne clear job\n   |\n   v\nGenerate candidates\n   |\n   v\nHuman approval\n   |\n   v\nLimited https://t.co/aawHg4asXj https://t.co/Cnduf9inHm",
+      "created_at": "2026-09-04T03:00:02.000Z",
+      "author_id": "136364721",
+      "author_username": "ericosiu",
+      "author_name": "ericosiu",
+      "url": "https://x.com/ericosiu/status/2095708438290403800",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 25,
+        "impression_count": 3187,
+        "like_count": 17,
+        "quote_count": 0,
+        "reply_count": 3,
+        "repost_count": 1
+      }
     },
     {
-      "id": "2075815572995264899",
-      "text": "Better view … https://t.co/5k9ejL3UBa https://t.co/Tt0U8oQkRh",
-      "author_id": "19809927",
-      "created_at": "2026-07-11T05:32:54.000Z",
-      "url": "https://x.com/i/web/status/2075815572995264899",
-      "author_username": "erfmufn",
-      "author_name": "Dylan O'Donnell 🦋"
+      "id": "2095715982140383615",
+      "text": "Backend Interview Question: \n\nOne of these API designs scales much better. \n\nWhich one are you choosing? https://t.co/FKtpr9DLSS",
+      "created_at": "2026-09-04T03:30:01.000Z",
+      "author_id": "2033567396435558400",
+      "author_username": "heyyyyyieeee",
+      "author_name": "Shivii",
+      "url": "https://x.com/heyyyyyieeee/status/2095715982140383615",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 95,
+        "impression_count": 20930,
+        "like_count": 208,
+        "quote_count": 5,
+        "reply_count": 87,
+        "repost_count": 7
+      }
     },
     {
-      "id": "2075611333668540502",
-      "text": "Claude widget prototype for BUSY Bar 👀 \n\nIt shows your live usage limits and lets you approve or deny Claude requests straight from BUSY Bar.\n\nNot planned as an official app yet, but we wanted to try it out and see if people would actually use something like this. https://t.co/wsL7FcY1xa",
-      "author_id": "1597266884197552128",
-      "created_at": "2026-07-10T16:01:19.000Z",
-      "url": "https://x.com/i/web/status/2075611333668540502",
-      "author_username": "BusyFocusApp",
-      "author_name": "BUSY – Advanced Focus Timer"
+      "id": "2095574250145091980",
+      "text": "@AwaisQarni001 Fuck this guy. Here's the full prompt \n\nTurn this image into a: Ultra-realistic close-up portrait of a confident man, with {same} expressions on his face &amp; he must watching straightly towards the camera,his body, face &amp; eyes also must be exactly straightly towards the camera.",
+      "created_at": "2026-09-03T18:06:49.000Z",
+      "author_id": "951054785301528576",
+      "author_username": "EVANonX",
+      "author_name": "Evan",
+      "url": "https://x.com/EVANonX/status/2095574250145091980",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 295,
+        "impression_count": 7685,
+        "like_count": 163,
+        "quote_count": 0,
+        "reply_count": 2,
+        "repost_count": 14
+      }
     },
     {
-      "id": "2075635283211772279",
-      "text": "Claude Code on desktop now has an in-app browser.\n\nClaude can pull up docs, designs, or any other site. It can read, click through, and interact the same way it does with your local dev servers.\n\nIt's sandboxed and configurable: you choose whether sessions persist. https://t.co/Jbc21OP0vJ",
-      "author_id": "2024518793679294464",
-      "created_at": "2026-07-10T17:36:29.000Z",
-      "url": "https://x.com/i/web/status/2075635283211772279",
-      "author_username": "ClaudeDevs",
-      "author_name": "ClaudeDevs"
+      "id": "2095453314406113664",
+      "text": "This is goldmine for anyone making Logos with AI\n\nThis gives you thousands of real app icons to reference or just need a little inspiration.\n\nLink: https://t.co/YAwr5LrqwO https://t.co/VEtZuyjV9P",
+      "created_at": "2026-09-03T10:06:16.000Z",
+      "author_id": "1679837089876131841",
+      "author_username": "VullnetAdemaj",
+      "author_name": "Vullnet Ademaj",
+      "url": "https://x.com/VullnetAdemaj/status/2095453314406113664",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 746,
+        "impression_count": 27318,
+        "like_count": 505,
+        "quote_count": 1,
+        "reply_count": 9,
+        "repost_count": 37
+      }
     },
     {
-      "id": "2075389858504220970",
-      "text": "Oh my Lord he's right... https://t.co/u2nbyRWNqM",
-      "author_id": "1403000940202844176",
-      "created_at": "2026-07-10T01:21:15.000Z",
-      "url": "https://x.com/i/web/status/2075389858504220970",
-      "author_username": "Aelthemplaer",
-      "author_name": "Ælþemplær"
+      "id": "2095680544529076278",
+      "text": "turns out my habits were only half of it\n\n9 steps to cut your Grok Bot usage by over 50% (if you're on a Cursor plan):\n\n1. open cursor desktop app settings\n\n2. go to the models option in the side menu\n\n3. flip off any models you don't want to be using\n\n4. next, set task models in https://t.co/019P6OGlXs https://t.co/PzYih3TnwS",
+      "created_at": "2026-09-04T01:09:12.000Z",
+      "author_id": "1470503969789251589",
+      "author_username": "kloss_xyz",
+      "author_name": "klöss",
+      "url": "https://x.com/kloss_xyz/status/2095680544529076278",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 637,
+        "impression_count": 35317,
+        "like_count": 249,
+        "quote_count": 7,
+        "reply_count": 26,
+        "repost_count": 15
+      }
     },
     {
-      "id": "2075336840605839860",
-      "text": "not an expert here\n\ncan someone explain how he does it literally every single time? https://t.co/zl5ZmG3JUU",
-      "author_id": "1861049534983356416",
-      "created_at": "2026-07-09T21:50:35.000Z",
-      "url": "https://x.com/i/web/status/2075336840605839860",
-      "author_username": "0x45o",
-      "author_name": "0x45"
+      "id": "2093680229462269953",
+      "text": "took this advice and audited my Grok @bot setup as I was mega burning usage\n\nmost of mine was testing, setup, and experiments… here were my problems \n\nand how I hopefully fixed them:\n\n→ accidentally had a routine running every 15 minutes… that is 96 times a day (audit your https://t.co/oexXoBuJ6d https://t.co/2KcQeRo0vz",
+      "created_at": "2026-08-29T12:40:40.000Z",
+      "author_id": "1470503969789251589",
+      "author_username": "kloss_xyz",
+      "author_name": "klöss",
+      "url": "https://x.com/kloss_xyz/status/2093680229462269953",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 452,
+        "impression_count": 98644,
+        "like_count": 287,
+        "quote_count": 6,
+        "reply_count": 29,
+        "repost_count": 11
+      }
     },
     {
-      "id": "2075192866553413944",
-      "text": "When you've got so much control over the AI tools, \nyou start messing with them for fun🖱️\n\nImage: @midjourney v8.2\nAnimation: Seedance 2.0 on @runwayml\nUpscale: @topazlabs SPL 2.5\nEdit &amp; Color Grading: DaVinci Resolve\nTiming help: Fable 5 https://t.co/d9JE2tgVEU",
-      "author_id": "1709573202467229696",
-      "created_at": "2026-07-09T12:18:29.000Z",
-      "url": "https://x.com/i/web/status/2075192866553413944",
-      "author_username": "ibexdream",
-      "author_name": "ibexdream"
+      "id": "2095582997894541406",
+      "text": "Grok Bot is INSANE for Meta ads.\n\nHere are the 12 I'm already running.\n\nIt launched three weeks ago. I've had bots monitoring our ad account and our clients' accounts since day one.\n\nHere's the full roster:\n\nResearch\n\n1. Ad Library Scout — sweeps every competitor's active ads https://t.co/ONXcNPQNd3",
+      "created_at": "2026-09-03T18:41:35.000Z",
+      "author_id": "1633788954141925378",
+      "author_username": "spect3ral",
+      "author_name": "Ahad Shams",
+      "url": "https://x.com/spect3ral/status/2095582997894541406",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1812,
+        "impression_count": 79268,
+        "like_count": 756,
+        "quote_count": 7,
+        "reply_count": 863,
+        "repost_count": 58
+      }
     },
     {
-      "id": "2074720080638914655",
-      "text": "youtube sleep channels are a f*cking cheatcode lol.\n\nplease start one. https://t.co/6KbCutWQgc",
-      "author_id": "1830420700697624576",
-      "created_at": "2026-07-08T04:59:48.000Z",
-      "url": "https://x.com/i/web/status/2074720080638914655",
-      "author_username": "blakefakhoury",
-      "author_name": "Blake Ryan"
+      "id": "2095553673845932110",
+      "text": "Jakub bought a domain for his stunning library https://t.co/k93pWOUjRE",
+      "created_at": "2026-09-03T16:45:04.000Z",
+      "author_id": "588083665",
+      "author_username": "tranmautritam",
+      "author_name": "Tran Mau Tri Tam ✪",
+      "url": "https://x.com/tranmautritam/status/2095553673845932110",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 71,
+        "impression_count": 11498,
+        "like_count": 48,
+        "quote_count": 0,
+        "reply_count": 1,
+        "repost_count": 0
+      }
     },
     {
-      "id": "2074438871526379532",
-      "text": "this is f**king dangerous\n\nsomeone just figured out how to get fable 5 reasoning in opus 4.8 with one prompt \n\nyou have less than 24 hours to set this up as this takes away 20% of your usage limit \n\nhere is how:\n\n1) Paste the prompt and ask it to \"make an operating manual\"\n2) https://t.co/b5lzkGnbBd https://t.co/7yNWNzteFn",
-      "author_id": "1713062826175299584",
-      "created_at": "2026-07-07T10:22:22.000Z",
-      "url": "https://x.com/i/web/status/2074438871526379532",
-      "author_username": "Av1dlive",
-      "author_name": "Avid"
+      "id": "2095479553846108163",
+      "text": "I HAD 340 NOTES IN MY SECOND BRAIN BY MONTH TWO. BY MONTH THREE I DELETED THE WHOLE THING\n\nnot because I got lazy. because I did the math on what it was actually costing me and the number scared me\n\nhere’s what nobody tells you when you start one of these systems\n\nevery note https://t.co/MkAs2ybCoM https://t.co/fYof3cZq7T",
+      "created_at": "2026-09-03T11:50:32.000Z",
+      "author_id": "1840797220162940928",
+      "author_username": "rvaniaaaa",
+      "author_name": "rvaniaaa",
+      "url": "https://x.com/rvaniaaaa/status/2095479553846108163",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 113,
+        "impression_count": 8117,
+        "like_count": 78,
+        "quote_count": 1,
+        "reply_count": 8,
+        "repost_count": 8
+      }
     },
     {
-      "id": "2074304050880012736",
-      "text": "Holy Shxt... Humans have officially become the bottleneck.\n\nI built a system around Andrej Karpathy's LLM Wiki.\n\nEvery employee's responsibilities, workflows, and operational context are captured in the LLM Wiki, allowing the system to understand how work is organized before https://t.co/p3OTflaPTf",
-      "author_id": "1707588370795515904",
-      "created_at": "2026-07-07T01:26:39.000Z",
-      "url": "https://x.com/i/web/status/2074304050880012736",
-      "author_username": "arrakis_ai",
-      "author_name": "CHOI"
+      "id": "2095537943738024131",
+      "text": "10 GITHUB REPOS THAT ARE QUIETLY CHANGING HOW WE BUILD SOFTWARE\n\n1. Codebase Memory MCP\nGive AI agents persistent context across your codebase.\n\n→ https://t.co/4dJbj9iklv\n\n2. GraphRAG\nCombine knowledge graphs with retrieval for better AI reasoning.\n\n→ https://t.co/M2TTXmUQiv https://t.co/l0XA3FaasS",
+      "created_at": "2026-09-03T15:42:33.000Z",
+      "author_id": "1676317602941894657",
+      "author_username": "RodmanAi",
+      "author_name": "Leonard Rodman",
+      "url": "https://x.com/RodmanAi/status/2095537943738024131",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 168,
+        "impression_count": 6928,
+        "like_count": 119,
+        "quote_count": 1,
+        "reply_count": 18,
+        "repost_count": 23
+      }
     },
     {
-      "id": "2074589352273867128",
-      "text": "Any subject you can think of can now be fully automated. \n\nFrom research to publishing without leaving your Claude or Chatgpt. \n\nMaxfusion AI MCP handles it all... https://t.co/S22kiPE2vK https://t.co/MLDflFAQhN",
-      "author_id": "834775279629373440",
-      "created_at": "2026-07-07T20:20:20.000Z",
-      "url": "https://x.com/i/web/status/2074589352273867128",
-      "author_username": "OriSilver",
-      "author_name": "Ori Silver"
+      "id": "2095591406806909378",
+      "text": "Describe the dataset you need. Get a training-ready dataset back. No existing data required.\n\nDataset creation used to start with collection. That bottleneck is gone.\n\n https://t.co/UPFCcQkcbh",
+      "created_at": "2026-09-03T19:15:00.000Z",
+      "author_id": "1536693901230321666",
+      "author_username": "RoundtableSpace",
+      "author_name": "0xMarioNawfal",
+      "url": "https://x.com/RoundtableSpace/status/2095591406806909378",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 24,
+        "impression_count": 47633,
+        "like_count": 41,
+        "quote_count": 0,
+        "reply_count": 6,
+        "repost_count": 0
+      }
     },
     {
-      "id": "2074271032589074881",
-      "text": "nobody at your company knows what your app actually looks like. \n\ndesigners ship figma. engineers ship code. PM ships a roadmap. none of them match. we built atlas to fix this. \n\npoint it at any iOS app, get back a complete map of every screen and every path through it.",
-      "author_id": "1809037542957985792",
-      "created_at": "2026-07-06T23:15:26.000Z",
-      "url": "https://x.com/i/web/status/2074271032589074881",
-      "author_username": "tryrevyl",
-      "author_name": "Revyl"
+      "id": "2095697151313801463",
+      "text": "20 video tools worth bookmarking.\n\nX, TikTok, Douyin, Instagram, Facebook, YouTube and more -&gt; this list has you covered:\n\n1. X videos → https://t.co/PtvS5cMFKg\n2. TikTok / Douyin → https://t.co/XkcJwjkYyi\n3. Instagram / Facebook → https://t.co/Ta7N63Bb7X\n4. Multiple platforms https://t.co/uJ14Koh0I4",
+      "created_at": "2026-09-04T02:15:11.000Z",
+      "author_id": "1959303681351794688",
+      "author_username": "monicaa_AI",
+      "author_name": "Monica",
+      "url": "https://x.com/monicaa_AI/status/2095697151313801463",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 384,
+        "impression_count": 12963,
+        "like_count": 318,
+        "quote_count": 1,
+        "reply_count": 28,
+        "repost_count": 79
+      }
     },
     {
-      "id": "2074290108782534890",
-      "text": "Anthropic just revealed the secret sauce to their AI… turns out they have something similar to consciousness called the J-space.  https://t.co/7uP6g2bkJB",
-      "author_id": "807355480188141568",
-      "created_at": "2026-07-07T00:31:15.000Z",
-      "url": "https://x.com/i/web/status/2074290108782534890",
-      "author_username": "DramaAlert",
-      "author_name": "DramaAlert"
+      "id": "2095511108815577293",
+      "text": "HE GAVE GROK A BODY AND NOW IT WON'T STOP WATCHING HIM SCROLL\n\nHooked Grok up to Chrome access, wasn't even trying to build something specific.\n\nWhat came out is a tiny character that lives on the screen:\n\n&gt; walks across posts\n&gt; jumps between UI elements\n&gt; wonders around the https://t.co/Y5cWzsYUNF https://t.co/LImj3nXJSx",
+      "created_at": "2026-09-03T13:55:55.000Z",
+      "author_id": "2079988861992615936",
+      "author_username": "0xTenzo",
+      "author_name": "tenzo",
+      "url": "https://x.com/0xTenzo/status/2095511108815577293",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 262,
+        "impression_count": 29846,
+        "like_count": 248,
+        "quote_count": 3,
+        "reply_count": 24,
+        "repost_count": 25
+      }
     },
     {
-      "id": "2074230939962794478",
-      "text": "The most difficult in the world. https://t.co/EOy3AfmFev",
-      "author_id": "1721164899345199104",
-      "created_at": "2026-07-06T20:36:08.000Z",
-      "url": "https://x.com/i/web/status/2074230939962794478",
-      "author_username": "LivingTricks_",
-      "author_name": "Living Tricks"
+      "id": "2095367378045432015",
+      "text": "If you're building an app, you need this!\n\nA collection of minimal, animated chart components for React.  \n\nAdd beautiful, interactive charts to your app in seconds with a single CLI command.\n\nCheck it out → https://t.co/C06ApFRwPe https://t.co/cHREFcf4ab",
+      "created_at": "2026-09-03T04:24:47.000Z",
+      "author_id": "1915448406413332480",
+      "author_username": "HoudayfaDesign",
+      "author_name": "Houdayfa",
+      "url": "https://x.com/HoudayfaDesign/status/2095367378045432015",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 663,
+        "impression_count": 27022,
+        "like_count": 524,
+        "quote_count": 1,
+        "reply_count": 11,
+        "repost_count": 42
+      }
     },
     {
-      "id": "2074046218741678570",
-      "text": "btw AI agents can now vibe test your apps too 👀 https://t.co/kSRE2n3o06",
-      "author_id": "1076497351634812928",
-      "created_at": "2026-07-06T08:22:07.000Z",
-      "url": "https://x.com/i/web/status/2074046218741678570",
-      "author_username": "AdamKPx",
-      "author_name": "Adam KP"
+      "id": "2095670739852525966",
+      "text": "HOW TO FIX YOUR AI AGENTS (it's called \"self-healing agents\")\n\nIf you've run AI agents, you know they BREAK constantly. \n\nThe FIX is something called a \"self healing\" agent!\n\nA normal agent hits a dead end and just stops, leaving you a half finished mess and that's why output https://t.co/PIW138H3ht",
+      "created_at": "2026-09-04T00:30:14.000Z",
+      "author_id": "14642331",
+      "author_username": "gregisenberg",
+      "author_name": "GREG ISENBERG",
+      "url": "https://x.com/gregisenberg/status/2095670739852525966",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1606,
+        "impression_count": 73007,
+        "like_count": 901,
+        "quote_count": 14,
+        "reply_count": 95,
+        "repost_count": 88
+      }
     },
     {
-      "id": "2074198124898181121",
-      "text": "https://t.co/oGOXZChYZw",
-      "author_id": "1643695629665722379",
-      "created_at": "2026-07-06T18:25:44.000Z",
-      "url": "https://x.com/i/web/status/2074198124898181121",
-      "author_username": "alex_prompter",
-      "author_name": "Alex Prompter"
+      "id": "2095396577204654446",
+      "text": "Has anyone here developed iOS apps? Could you tell me how to get AI to design a UI in this style, other than just giving it a reference image and asking it to copy it? https://t.co/BOePvdbgcr",
+      "created_at": "2026-09-03T06:20:49.000Z",
+      "author_id": "26444691",
+      "author_username": "kyleleung_io",
+      "author_name": "Kyle Leung",
+      "url": "https://x.com/kyleleung_io/status/2095396577204654446",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 2319,
+        "impression_count": 96887,
+        "like_count": 1304,
+        "quote_count": 10,
+        "reply_count": 135,
+        "repost_count": 38
+      }
     },
     {
-      "id": "2074208949205881033",
-      "text": "https://t.co/v694m8Eaj6",
-      "author_id": "2024518793679294464",
-      "created_at": "2026-07-06T19:08:45.000Z",
-      "url": "https://x.com/i/web/status/2074208949205881033",
-      "author_username": "ClaudeDevs",
-      "author_name": "ClaudeDevs"
+      "id": "2095447563583516676",
+      "text": "ElevenLabs just got a full open-source replacement that runs entirely on your own hardware.\n\nIt's called VoiceStudio, and it does the entire voice pipeline locally: cloning, voice design, video dubbing, dictation, transcription, and audiobook creation.\n\nMost hosted voice tools https://t.co/VtWiUKQEw0",
+      "created_at": "2026-09-03T09:43:25.000Z",
+      "author_id": "1390345932001189890",
+      "author_username": "thisguyknowsai",
+      "author_name": "Brady Long",
+      "url": "https://x.com/thisguyknowsai/status/2095447563583516676",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1080,
+        "impression_count": 33946,
+        "like_count": 654,
+        "quote_count": 3,
+        "reply_count": 15,
+        "repost_count": 77
+      }
     },
     {
-      "id": "2074158868142194898",
-      "text": "This site looks like it was built by a team of 3D developers\n\nIt wasn't. It's just video. And that's the part nobody expects\n\n&gt; he generated two frames with AI\n&gt; turned them into a clip with Seedance 2.0\n&gt; then gave it to Claude 4.8 to wrap into a full immersive scrollable https://t.co/thTUi1YAya https://t.co/yVeHkUSqkP",
-      "author_id": "3049366699",
-      "created_at": "2026-07-06T15:49:44.000Z",
-      "url": "https://x.com/i/web/status/2074158868142194898",
-      "author_username": "monokern",
-      "author_name": "monokern"
+      "id": "2095464614498619493",
+      "text": "How to run your whole Grok Bot workday on loops instead of prompts.\n\n📁 grok-bot-system \n┃\n┣ 📂 coordinator\n┃  ┣ /triage\n┃  ┣ /delegate\n┃  ┣ /watch-handoffs\n┃  ┣ /collect-deliverable\n┃  ┗ /escalate-only-if-needed\n┃\n┣ 📂 bot-contract\n┃  ┣ /job\n┃  ┣ /sources\n┃ https://t.co/8M8Qwtz1tl https://t.co/5cjNonwjpD",
+      "created_at": "2026-09-03T10:51:10.000Z",
+      "author_id": "1840788730249961476",
+      "author_username": "adiix_official",
+      "author_name": "AdiiX",
+      "url": "https://x.com/adiix_official/status/2095464614498619493",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 804,
+        "impression_count": 54965,
+        "like_count": 324,
+        "quote_count": 1,
+        "reply_count": 17,
+        "repost_count": 39
+      }
     },
     {
-      "id": "2074197574458995121",
-      "text": "Looks like SCAIL 2 is quite capable when it comes to this type of manipulation. nice ~ https://t.co/h3K5ssqVOM",
-      "author_id": "1643992507532083202",
-      "created_at": "2026-07-06T18:23:33.000Z",
-      "url": "https://x.com/i/web/status/2074197574458995121",
-      "author_username": "SlipperyGem",
-      "author_name": "Brie Wensleydale🧀🐭"
+      "id": "2095368979309310090",
+      "text": "POV: normal coder vs vibe coder 💀 https://t.co/euPrTaxdXz",
+      "created_at": "2026-09-03T04:31:09.000Z",
+      "author_id": "1128566801036599296",
+      "author_username": "adnaannasir_",
+      "author_name": "Adnaan",
+      "url": "https://x.com/adnaannasir_/status/2095368979309310090",
+      "lang": "de",
+      "public_metrics": {
+        "bookmark_count": 1118,
+        "impression_count": 636488,
+        "like_count": 2177,
+        "quote_count": 37,
+        "reply_count": 154,
+        "repost_count": 133
+      }
     },
     {
-      "id": "2074119000137601528",
-      "text": "I built a Claude skill that makes motion-style animation.\n\n&gt; Paste a reference image\n&gt; It generates frames with Nano Banana 2 \n&gt; and animates the video with Seedance 2.0\n\nEverything runs in Claude through the Arcads MCP\n\nComment \"Motion\", and I'll send you the skill https://t.co/4YQq5d3E7g",
-      "author_id": "1053259404928258048",
-      "created_at": "2026-07-06T13:11:19.000Z",
-      "url": "https://x.com/i/web/status/2074119000137601528",
-      "author_username": "rom1trs",
-      "author_name": "Romain Torres"
+      "id": "2095628583326589298",
+      "text": "it's time to clone. @boardui is on github now under the MIT license! \n\ncopy, modify, distribute, build. https://t.co/FrweMjOa7Q",
+      "created_at": "2026-09-03T21:42:43.000Z",
+      "author_id": "981223380",
+      "author_username": "sitenley",
+      "author_name": "Mertcan",
+      "url": "https://x.com/sitenley/status/2095628583326589298",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1018,
+        "impression_count": 58047,
+        "like_count": 745,
+        "quote_count": 5,
+        "reply_count": 16,
+        "repost_count": 38
+      }
     },
     {
-      "id": "2074108067361280173",
-      "text": "Crazy impressive results using Claude Fable to build out a pose/depth previs for Seedance. \n\nThis was inspired by Josh Daws' build-- but of course I made a few tweaks I'll showcase on the channel later this week. \nAnother example below that shows why I think this is awesome: https://t.co/6FQ0UcdZkc",
-      "author_id": "1631716740190150676",
-      "created_at": "2026-07-06T12:27:52.000Z",
-      "url": "https://x.com/i/web/status/2074108067361280173",
-      "author_username": "TheoMediaAI",
-      "author_name": "Theoretically Media"
+      "id": "2095508337563463791",
+      "text": "this might be the clearest example of why most companies calling themselves AI-native are still bullsh*t\n\nthey bolt AI onto existing workflows, keep humans doing the actual work, and pretend they’ve built something revolutionary\n\nthis guide flips the entire model: agents get https://t.co/B8Pe1Ua13Y https://t.co/8XB1LqUpu5",
+      "created_at": "2026-09-03T13:44:54.000Z",
+      "author_id": "1298572884001148928",
+      "author_username": "leopardracer",
+      "author_name": "leopardracer",
+      "url": "https://x.com/leopardracer/status/2095508337563463791",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1819,
+        "impression_count": 99684,
+        "like_count": 682,
+        "quote_count": 0,
+        "reply_count": 23,
+        "repost_count": 84
+      }
     },
     {
-      "id": "2074005214219432097",
-      "text": "Hey @grok remove the weakest one https://t.co/kPqfIzgEan",
-      "author_id": "1628213482037587968",
-      "created_at": "2026-07-06T05:39:10.000Z",
-      "url": "https://x.com/i/web/status/2074005214219432097",
-      "author_username": "KlassicKohli",
-      "author_name": "`"
+      "id": "2095182776249049456",
+      "text": "https://t.co/XWyWTMaVvP",
+      "created_at": "2026-09-02T16:11:15.000Z",
+      "author_id": "249795230",
+      "author_username": "AmirMushich",
+      "author_name": "AmirMušić",
+      "url": "https://x.com/AmirMushich/status/2095182776249049456",
+      "lang": "zxx",
+      "public_metrics": {
+        "bookmark_count": 2074,
+        "impression_count": 330420,
+        "like_count": 794,
+        "quote_count": 14,
+        "reply_count": 35,
+        "repost_count": 71
+      }
     },
     {
-      "id": "2073841163652722890",
-      "text": "STOP LETTING APPLE SCAM YOU: THE M4 MAC MINI MODULAR SSD WAS JUST SUCCESSFULLY CRACKED\n\nWe’ve been gaslit into believing base-model storage is unchangeable. It’s a total lie. \n\nThe \"soldered\" narrative is just a predatory tax to milk your wallet, and you can actually rip out the https://t.co/DQkkvrBchZ https://t.co/sqID4cr8md",
-      "author_id": "1677820368751403008",
-      "created_at": "2026-07-05T18:47:18.000Z",
-      "url": "https://x.com/i/web/status/2073841163652722890",
-      "author_username": "doublenickk",
-      "author_name": "Shadow Nick"
+      "id": "2095510707299287175",
+      "text": "Open Bot by @CopilotKit is the best open source version of Grok Bot out there.\n\nIt works with ANY agent harness and already has 4k GitHub stars with thousands of daily runtime requests from users.\n\nCheck out the repo: https://t.co/kC3N1QGAH6 https://t.co/6yFa1A8BV8 https://t.co/E2aASqsQAF",
+      "created_at": "2026-09-03T13:54:19.000Z",
+      "author_id": "1087061356770021376",
+      "author_username": "ataiiam",
+      "author_name": "Atai Barkai",
+      "url": "https://x.com/ataiiam/status/2095510707299287175",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 391,
+        "impression_count": 35512,
+        "like_count": 245,
+        "quote_count": 2,
+        "reply_count": 16,
+        "repost_count": 27
+      }
     },
     {
-      "id": "2073892716878946569",
-      "text": "The Burner Phones. https://t.co/aWXTgwcnjF",
-      "author_id": "1746694144829927424",
-      "created_at": "2026-07-05T22:12:09.000Z",
-      "url": "https://x.com/i/web/status/2073892716878946569",
-      "author_username": "JOKAQARMY1",
-      "author_name": "JOKAMRREDPILLZ"
+      "id": "2095557355777745393",
+      "text": "cleanest CRM design you'll ever see https://t.co/A1rwCSxf1E",
+      "created_at": "2026-09-03T16:59:41.000Z",
+      "author_id": "1566851334283870210",
+      "author_username": "marcelkargul",
+      "author_name": "Marcel",
+      "url": "https://x.com/marcelkargul/status/2095557355777745393",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1260,
+        "impression_count": 77743,
+        "like_count": 798,
+        "quote_count": 3,
+        "reply_count": 32,
+        "repost_count": 23
+      }
     },
     {
-      "id": "2073722809063543275",
-      "text": "【これ、リアルタイムで動いてます】\nOverwatch 2に関わったPedro Borges氏がUE5で作ったトゥーンシェーダー。\nセルシェーディングに手描き風のハッチングやモーションブラーを重ねて、\nアニメがそのまま動いているような画になっています🎨\n#UE5 #realtimeVFX\nhttps://t.co/ee5aV29mQ3",
-      "author_id": "851062387725578240",
-      "created_at": "2026-07-05T10:57:00.000Z",
-      "url": "https://x.com/i/web/status/2073722809063543275",
-      "author_username": "RecGame_RA",
-      "author_name": "亀井りく｜「RecGame」広報担当"
+      "id": "2095584609685868891",
+      "text": "n8n just changed how you build AI automation.\n\nInstead of putting an AI agent inside every workflow, you can build one agent and let it use your workflows as tools.\n\nHere’s the new setup:\n\n→ Create one agent inside your n8n project.\n\n→ Give it a model, instructions, knowledge, https://t.co/K5kl9aKSsr",
+      "created_at": "2026-09-03T18:47:59.000Z",
+      "author_id": "1405031034",
+      "author_username": "JulianGoldieSEO",
+      "author_name": "Julian Goldie SEO",
+      "url": "https://x.com/JulianGoldieSEO/status/2095584609685868891",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 14,
+        "impression_count": 3667,
+        "like_count": 11,
+        "quote_count": 0,
+        "reply_count": 4,
+        "repost_count": 4
+      }
     },
     {
-      "id": "2073528269979136050",
-      "text": "5 Guns That Cure My Depression https://t.co/Rqte4GRHV3",
-      "author_id": "1680382754033381377",
-      "created_at": "2026-07-04T22:03:58.000Z",
-      "url": "https://x.com/i/web/status/2073528269979136050",
-      "author_username": "Civ_Tac",
-      "author_name": "Civilian Tactical"
+      "id": "2095551141367173608",
+      "text": "A new home for all my libraries.\n\nhttps://t.co/wHtSRzl80E\n5 UI effect libraries, 20+ variants, ready to use for free.\nBorder beam, Orbs, Metal, Gooey, Image https://t.co/WgJMfb0nTb",
+      "created_at": "2026-09-03T16:35:00.000Z",
+      "author_id": "594034161",
+      "author_username": "Jakubantalik",
+      "author_name": "Jakub Antalik",
+      "url": "https://x.com/Jakubantalik/status/2095551141367173608",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 3754,
+        "impression_count": 181495,
+        "like_count": 2523,
+        "quote_count": 10,
+        "reply_count": 54,
+        "repost_count": 172
+      }
     },
     {
-      "id": "2073529116981109148",
-      "text": "https://t.co/gfBSDbqLTQ",
-      "author_id": "46187709",
-      "created_at": "2026-07-04T22:07:20.000Z",
-      "url": "https://x.com/i/web/status/2073529116981109148",
-      "author_username": "CartuneNetwerk",
-      "author_name": "Tune, MBA, CISSP"
+      "id": "2095432862090604675",
+      "text": "ANDREJ KARPATHY JUST COMPRESSED YEARS OF AI EXPERIENCE INTO ONE FREE 2-HOUR LECTURE.\n\nAGENTS → LOOPS → HARNESSES → SELF-IMPROVING SYSTEMS.\n\n https://t.co/2lgKadNayD",
+      "created_at": "2026-09-03T08:45:00.000Z",
+      "author_id": "1536693901230321666",
+      "author_username": "RoundtableSpace",
+      "author_name": "0xMarioNawfal",
+      "url": "https://x.com/RoundtableSpace/status/2095432862090604675",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 143,
+        "impression_count": 41329,
+        "like_count": 107,
+        "quote_count": 0,
+        "reply_count": 8,
+        "repost_count": 17
+      }
     },
     {
-      "id": "2073451776401895625",
-      "text": "They really outsmarted the locked AirBNB thermostat with frozen peas 💀😂 https://t.co/F2ZmURhZgO",
-      "author_id": "1525971668132306951",
-      "created_at": "2026-07-04T17:00:01.000Z",
-      "url": "https://x.com/i/web/status/2073451776401895625",
-      "author_username": "TheNetDaily",
-      "author_name": "The Net Daily"
+      "id": "2095500811639881831",
+      "text": "OpenDesign just dropped a new generation strategy that blind tests showed produced more polished results across 30 design experts and 100 real workflows.\n\nOne toggle in settings. Better output immediately.\n\n https://t.co/aecICK1PEs",
+      "created_at": "2026-09-03T13:15:00.000Z",
+      "author_id": "1536693901230321666",
+      "author_username": "RoundtableSpace",
+      "author_name": "0xMarioNawfal",
+      "url": "https://x.com/RoundtableSpace/status/2095500811639881831",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 40,
+        "impression_count": 53445,
+        "like_count": 51,
+        "quote_count": 0,
+        "reply_count": 3,
+        "repost_count": 0
+      }
     },
     {
-      "id": "2073272122508513702",
-      "text": "8 hours of work with Fable:\n\n- Implemented this game prototype from scratch. Fable built the demo with fluid movements, robust rollback netcode, and US/BR servers it deployed itself. Try it (links below).\n\n- Investigated and solved a paradox in Bend2. This led us to a new, https://t.co/0E1BhDb5KF",
-      "author_id": "272239060",
-      "created_at": "2026-07-04T05:06:08.000Z",
-      "url": "https://x.com/i/web/status/2073272122508513702",
-      "author_username": "VictorTaelin",
-      "author_name": "Taelin"
+      "id": "2090300976670425489",
+      "text": "https://t.co/zcu5fecgt6",
+      "created_at": "2026-08-20T04:52:43.000Z",
+      "author_id": "1788243647885987840",
+      "author_username": "mikenevermiss",
+      "author_name": "MIKE",
+      "url": "https://x.com/mikenevermiss/status/2090300976670425489",
+      "lang": "zxx",
+      "public_metrics": {
+        "bookmark_count": 1017,
+        "impression_count": 798336,
+        "like_count": 418,
+        "quote_count": 15,
+        "reply_count": 32,
+        "repost_count": 65
+      }
     },
     {
-      "id": "2073378450459570257",
-      "text": "ANTHROPIC'S LEAD ENGINEER MAKING $2.2M/YEAR LEAKED THE COMPANY'S INTERNAL OBSIDIAN BRAIN - AND GOT FIRED THE SAME DAY\n\n00:07 a live neural network with 21 inputs, 10+ hidden layers, ReLU activation - thousands of connections firing in real time as the system processes every https://t.co/TA6FSWYjSd https://t.co/52IRTZqrPn",
-      "author_id": "1623421089777844227",
-      "created_at": "2026-07-04T12:08:38.000Z",
-      "url": "https://x.com/i/web/status/2073378450459570257",
-      "author_username": "0xDeliriumm",
-      "author_name": "Deliriumm"
+      "id": "2094873690924286189",
+      "text": "My most liked designs https://t.co/thKnGvWXNr",
+      "created_at": "2026-09-01T19:43:03.000Z",
+      "author_id": "1631680040823066626",
+      "author_username": "TheKartikBansal",
+      "author_name": "Kartik Bansal",
+      "url": "https://x.com/TheKartikBansal/status/2094873690924286189",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 2991,
+        "impression_count": 140416,
+        "like_count": 2394,
+        "quote_count": 2,
+        "reply_count": 41,
+        "repost_count": 65
+      }
     },
     {
-      "id": "2073306997064421677",
-      "text": "Codex+Godot游戏引擎不仅可以制作2D游戏，也可以制作3D游戏\n\n这是我做的一个3D游戏demo，其中建模、绑定模型骨架全部由AI完成，最后由Codex帮助我整合所有项目资源到Godot引擎运行\n\n下面是我完整的工作流： https://t.co/WNcjkTHWYo https://t.co/7G5aTGbk9F",
-      "author_id": "2010272176830840832",
-      "created_at": "2026-07-04T07:24:42.000Z",
-      "url": "https://x.com/i/web/status/2073306997064421677",
-      "author_username": "xingbugengming",
-      "author_name": "小奇说"
+      "id": "2095334715188298164",
+      "text": "Fable 5.1 is significantly better at Three.js sites, faster and more precise with complex design instructions, but taste still matters and tokens burn faster because of the speed improvement.\n\nhttps://t.co/VGnstA5Rk8",
+      "created_at": "2026-09-03T02:15:00.000Z",
+      "author_id": "1536693901230321666",
+      "author_username": "RoundtableSpace",
+      "author_name": "0xMarioNawfal",
+      "url": "https://x.com/RoundtableSpace/status/2095334715188298164",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 16,
+        "impression_count": 44552,
+        "like_count": 72,
+        "quote_count": 0,
+        "reply_count": 9,
+        "repost_count": 2
+      }
     },
     {
-      "id": "2073432396301836557",
-      "text": "Day 5: Vibe coding a license server and a base macOS app  $0 revenue https://t.co/Xi674Nlpmc",
-      "author_id": "1773165105062219776",
-      "created_at": "2026-07-04T15:43:00.000Z",
-      "url": "https://x.com/i/web/status/2073432396301836557",
-      "author_username": "XadenRyan",
-      "author_name": "Xaden Ryan"
+      "id": "2095262696983691520",
+      "text": "How to design the perfect iOS mobile app:\n\n- Flawless shadows\n- Consistent spacing\n- 430px width, 932px height\n- Simplifying everything down\n- Great typography (SF pro rounded)\n\nTake notes! https://t.co/kkgEepZK5j",
+      "created_at": "2026-09-02T21:28:49.000Z",
+      "author_id": "1566851334283870210",
+      "author_username": "marcelkargul",
+      "author_name": "Marcel",
+      "url": "https://x.com/marcelkargul/status/2095262696983691520",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 2909,
+        "impression_count": 138268,
+        "like_count": 2123,
+        "quote_count": 7,
+        "reply_count": 51,
+        "repost_count": 121
+      }
     },
     {
-      "id": "2073469967308030384",
-      "text": "Told Claude Fable 5 to make a Vampire Survivors clone in pure C++, no engine, no asset files\n\nEverything from sprites, sounds, graphics to music tracks is generated by code at runtime\n\nSource code is in the thread below https://t.co/SnRFR9vcWP",
-      "author_id": "1950465537818951681",
-      "created_at": "2026-07-04T18:12:18.000Z",
-      "url": "https://x.com/i/web/status/2073469967308030384",
-      "author_username": "Lentils80",
-      "author_name": "Lentils"
+      "id": "2095271382783328463",
+      "text": "16 minute tutorial on how to build $50,000 cinematic websites (step by step) with Claude Fable 5\n\nSave this before you lose it 🔖\nhttps://t.co/KyVUhyQSXn",
+      "created_at": "2026-09-02T22:03:20.000Z",
+      "author_id": "1678636871310516224",
+      "author_username": "deanwperkins",
+      "author_name": "Dean W. Perkins",
+      "url": "https://x.com/deanwperkins/status/2095271382783328463",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 52657,
+        "impression_count": 5072998,
+        "like_count": 17364,
+        "quote_count": 56,
+        "reply_count": 131,
+        "repost_count": 1706
+      }
     },
     {
-      "id": "2073432082458517827",
-      "text": "This is the best way to make money on YouTube in 2026.\n\nUpload all of your YouTube videos to Spotify. https://t.co/nNTZErhVt8 https://t.co/7idNedlHc2",
-      "author_id": "1388210327649669124",
-      "created_at": "2026-07-04T15:41:45.000Z",
-      "url": "https://x.com/i/web/status/2073432082458517827",
-      "author_username": "natecurtiss_yt",
-      "author_name": "Nate Curtiss"
+      "id": "2095077116593295673",
+      "text": "Detects faces, maps landmarks, and compares identities within a private, on-premise Python SDK.\n\nhttps://t.co/V7HnOlWLsP https://t.co/kdBV6nFaRG",
+      "created_at": "2026-09-02T09:11:23.000Z",
+      "author_id": "1326180756310331399",
+      "author_username": "tom_doerr",
+      "author_name": "Tom Dörr",
+      "url": "https://x.com/tom_doerr/status/2095077116593295673",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 640,
+        "impression_count": 24896,
+        "like_count": 550,
+        "quote_count": 2,
+        "reply_count": 1,
+        "repost_count": 70
+      }
     },
     {
-      "id": "2073423288882090405",
-      "text": "Had Fable build a tool that lets me turn shots from movies into previs I can provide to Seedance, the same way I'd show a cinematographer the shots I want to emulate. https://t.co/UNWfEZ7ylV https://t.co/JlxgheIHIH",
-      "author_id": "12645352",
-      "created_at": "2026-07-04T15:06:49.000Z",
-      "url": "https://x.com/i/web/status/2073423288882090405",
-      "author_username": "JoshDaws",
-      "author_name": "Josh Daws"
+      "id": "2095180126359105955",
+      "text": "https://t.co/b4fTEzmv6K",
+      "created_at": "2026-09-02T16:00:43.000Z",
+      "author_id": "1414948050817196037",
+      "author_username": "DeRonin_",
+      "author_name": "Ronin",
+      "url": "https://x.com/DeRonin_/status/2095180126359105955",
+      "lang": "zxx",
+      "public_metrics": {
+        "bookmark_count": 22358,
+        "impression_count": 2678179,
+        "like_count": 7982,
+        "quote_count": 134,
+        "reply_count": 135,
+        "repost_count": 1070
+      }
     },
     {
-      "id": "2073320835658772937",
-      "text": "A developer just killed the real estate walkthrough industry by scanned an entire house with his phone. Uploaded it.\n\nNow anyone on Earth can walk through it in a browser tab. No app. No VR. No agent. No appointment.\n\nClick → you’re inside. Every room. Every angle. Every shadow. https://t.co/QKuwzEwsiE",
-      "author_id": "1433898842865520644",
-      "created_at": "2026-07-04T08:19:42.000Z",
-      "url": "https://x.com/i/web/status/2073320835658772937",
-      "author_username": "bigaiguy",
-      "author_name": "Spencer Baggins"
+      "id": "2095296966527697175",
+      "text": "Claude Artifacts can now call your MCP connectors so shared dashboards pull fresh data through each viewer's own connections with no refresh job, no shared credentials and nothing to maintain.\n\nhttps://t.co/g7GsjdIafA",
+      "created_at": "2026-09-02T23:45:00.000Z",
+      "author_id": "1536693901230321666",
+      "author_username": "RoundtableSpace",
+      "author_name": "0xMarioNawfal",
+      "url": "https://x.com/RoundtableSpace/status/2095296966527697175",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 25,
+        "impression_count": 38844,
+        "like_count": 80,
+        "quote_count": 0,
+        "reply_count": 9,
+        "repost_count": 4
+      }
     },
     {
-      "id": "2073402691527860500",
-      "text": "「個人開発なのに、大手が出せないDLCより自由に動く」\nオーストラリアのgibb0氏がUE5で制作したクリーチャーアクション。車を掴んで投げ、背中の腕を翼に変えて滑空します🕷️ この発想力が一人から出てくるの、すごい時代ですね。\n#UE5 #gamedev\nhttps://t.co/Y1nKwD21v3",
-      "author_id": "851062387725578240",
-      "created_at": "2026-07-04T13:44:58.000Z",
-      "url": "https://x.com/i/web/status/2073402691527860500",
-      "author_username": "RecGame_RA",
-      "author_name": "亀井りく｜「RecGame」広報担当"
+      "id": "2089580046340010038",
+      "text": "Rebuilt this using @framer  Agent in ~55 min. 👀\nSame design. Half the time. https://t.co/2SXutIgkMM https://t.co/fdFHy8Rp5t",
+      "created_at": "2026-08-18T05:08:00.000Z",
+      "author_id": "1823557308774821888",
+      "author_username": "ShruPosts",
+      "author_name": "Shruti",
+      "url": "https://x.com/ShruPosts/status/2089580046340010038",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 575,
+        "impression_count": 618466,
+        "like_count": 804,
+        "quote_count": 3,
+        "reply_count": 22,
+        "repost_count": 43
+      }
     },
     {
-      "id": "2073250825858892241",
-      "text": "Claude Fable 5 just one shot this procedural creatures! 🤯\n\nBuilt a whole procedural 3D character generator in Three.js with:\n\n&gt; Ragdoll-like characters made from primitive shapes that merge into one seamless body  \n&gt; Custom vertex shader + SDF tech that removes all seams and https://t.co/xHjJvHFOan",
-      "author_id": "1956954573614313472",
-      "created_at": "2026-07-04T03:41:30.000Z",
-      "url": "https://x.com/i/web/status/2073250825858892241",
-      "author_username": "TimJayas",
-      "author_name": "Tim Jayas"
+      "id": "2095112026855219654",
+      "text": "Appwrite is a free, open-source all-in-one developer tool that lets you handle user logins, data storage, file uploads, and web hosting in one place instead of patching together multiple separate services. https://t.co/7NdTzy8HFq",
+      "created_at": "2026-09-02T11:30:07.000Z",
+      "author_id": "1315639147248246785",
+      "author_username": "GithubProjects",
+      "author_name": "GitHub Projects Community",
+      "url": "https://x.com/GithubProjects/status/2095112026855219654",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 92,
+        "impression_count": 15319,
+        "like_count": 95,
+        "quote_count": 2,
+        "reply_count": 4,
+        "repost_count": 16
+      }
     },
     {
-      "id": "2072259144023671244",
-      "text": "https://t.co/uYLvK9Wxqz",
-      "author_id": "1978452003182546944",
-      "created_at": "2026-07-01T10:00:55.000Z",
-      "url": "https://x.com/i/web/status/2072259144023671244",
-      "author_username": "0xWast3",
-      "author_name": "wast3"
+      "id": "2095098559011967288",
+      "text": "10 USEFUL GITHUB REPOS YOU SHOULD KNOW\n\n1. iFixAi — AI misalignment testing\nhttps://t.co/IZcXFjzqHn\n\n2. public-apis — Free APIs for almost everything\nhttps://t.co/U41Zdnsr1V\n\n3. build-your-own-x — Learn by building\nhttps://t.co/TBFTZvSCPU\n\n4. developer-roadmap — Learn any tech https://t.co/K1QCQdt11N",
+      "created_at": "2026-09-02T10:36:36.000Z",
+      "author_id": "1676317602941894657",
+      "author_username": "RodmanAi",
+      "author_name": "Leonard Rodman",
+      "url": "https://x.com/RodmanAi/status/2095098559011967288",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 455,
+        "impression_count": 17064,
+        "like_count": 314,
+        "quote_count": 1,
+        "reply_count": 11,
+        "repost_count": 46
+      }
     },
     {
-      "id": "2073036873065476217",
-      "text": "AKIRA風SOL攻撃をAEで再現するチュートリアル\n#AfterEffects https://t.co/a9TFHNe8DL",
-      "author_id": "1865293675162669058",
-      "created_at": "2026-07-03T13:31:20.000Z",
-      "url": "https://x.com/i/web/status/2073036873065476217",
-      "author_username": "aaatouketsu",
-      "author_name": "あああ"
+      "id": "2095179318641201619",
+      "text": "Silo's finale is on Friday, here is an interactive visualisation Silo 18.\n\nTry it here: https://t.co/mwh4kkcoLw https://t.co/Iz6RHqgAwf",
+      "created_at": "2026-09-02T15:57:30.000Z",
+      "author_id": "1527398936616607744",
+      "author_username": "Nal_uh",
+      "author_name": "Charly Delaroche",
+      "url": "https://x.com/Nal_uh/status/2095179318641201619",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 4826,
+        "impression_count": 1027394,
+        "like_count": 7023,
+        "quote_count": 211,
+        "reply_count": 185,
+        "repost_count": 743
+      }
     },
     {
-      "id": "2073065244482503064",
-      "text": "Confesso que eu já tinha desistido de algumas roupas pretas. 😭✨\n\nMas aí descobri isso e fiquei impressionada com a diferença. A peça ganhou outra cara! 🖤👀 https://t.co/woWGorz6qs",
-      "author_id": "1937226232678219778",
-      "created_at": "2026-07-03T15:24:04.000Z",
-      "url": "https://x.com/i/web/status/2073065244482503064",
-      "author_username": "Kittshp",
-      "author_name": "KitSz🦋"
+      "id": "2095142221662257198",
+      "text": "OpenWhispr is a free, open-source app that turns your voice into text on your computer, and it can work entirely offline so your audio never leaves your device.\n\nExplore it here:\nhttps://t.co/mOGSUeXu16 https://t.co/lVPsQfvKdE",
+      "created_at": "2026-09-02T13:30:06.000Z",
+      "author_id": "1315639147248246785",
+      "author_username": "GithubProjects",
+      "author_name": "GitHub Projects Community",
+      "url": "https://x.com/GithubProjects/status/2095142221662257198",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1202,
+        "impression_count": 53328,
+        "like_count": 1101,
+        "quote_count": 0,
+        "reply_count": 8,
+        "repost_count": 120
+      }
     },
     {
-      "id": "2073006970047541268",
-      "text": "Pour alcohol on charcoal and watch closely what happens next https://t.co/5NfDRqeVos",
-      "author_id": "1909002398250541057",
-      "created_at": "2026-07-03T11:32:30.000Z",
-      "url": "https://x.com/i/web/status/2073006970047541268",
-      "author_username": "WisdomLifeHack",
-      "author_name": "Eco tonic | wellness 🌿"
+      "id": "2095213960719208618",
+      "text": "still using Pinterest in 2026? these are better 👇\n\nhttps://t.co/GCicL37BAq - the best navbar designs\nhttps://t.co/i2TuZ3P5EG - 𝙳𝙴𝚂𝙸𝙶𝙽.𝙼𝙳 files for AI agents\nhttps://t.co/0NxiIBCdVY - UI animation &amp; interaction details\nhttps://t.co/w3fOeE9zy8 - best of social post design https://t.co/V9nu1gUblh",
+      "created_at": "2026-09-02T18:15:10.000Z",
+      "author_id": "1560666650986237953",
+      "author_username": "HeyDetya",
+      "author_name": "Hey Detya",
+      "url": "https://x.com/HeyDetya/status/2095213960719208618",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1402,
+        "impression_count": 36582,
+        "like_count": 750,
+        "quote_count": 3,
+        "reply_count": 17,
+        "repost_count": 91
+      }
     },
     {
-      "id": "2072932020003496380",
-      "text": "ANTHROPIC DROPPED THEIR OWN OBSIDIAN BRAIN THAT MANAGES ALL COMPANY INNOVATIONS AND KNOWLEDGE FLOWS\n\n00:22 8,893 nodes, 4,729 links, 8,893 views - a knowledge graph so dense it looks like a galaxy when you zoom out\n\nMarginalia Collection, Glossary Backbone, Comparative Grammar https://t.co/6szF6FHZqt https://t.co/52IRTZqrPn",
-      "author_id": "1623421089777844227",
-      "created_at": "2026-07-03T06:34:41.000Z",
-      "url": "https://x.com/i/web/status/2072932020003496380",
-      "author_username": "0xDeliriumm",
-      "author_name": "Deliriumm"
+      "id": "2095231184531828762",
+      "text": "Hey Grok, make $1M, make no mistakes\n\n9 Grok bots to run your marketing 👇\n\n1/ Ads Grok\n-&gt;  Connect Google and Meta in 1 click and say \"do it for me\"\n-&gt;  Builds creatives, changes targeting, tweaks performance weekly\n\n2/ SEO Grok\n-&gt;  1-click connect your site or store\n-&gt;  Audits https://t.co/oAMqQuYEQM https://t.co/dKCO3z6jFI",
+      "created_at": "2026-09-02T19:23:36.000Z",
+      "author_id": "1844257725460709376",
+      "author_username": "irabukht",
+      "author_name": "Ira Bodnar",
+      "url": "https://x.com/irabukht/status/2095231184531828762",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 751,
+        "impression_count": 117094,
+        "like_count": 341,
+        "quote_count": 4,
+        "reply_count": 27,
+        "repost_count": 31
+      }
+    },
+    {
+      "id": "2094978889525428256",
+      "text": "Cursor and SpaceXAI are not gonna like this..\n\nA SpaceXAI engineer went viral calling Grok Bot \"a highly capable engineering intern\" with its own computer, $200/month on Cursor Ultra.\n\nThat's where OpenBot steps in. It is a free, open source project that ships the same core idea: https://t.co/BJtgK9pScH https://t.co/pXM5RXAqsi",
+      "created_at": "2026-09-02T02:41:04.000Z",
+      "author_id": "1963821944668876800",
+      "author_username": "simplifyinAI",
+      "author_name": "Simplifying AI",
+      "url": "https://x.com/simplifyinAI/status/2094978889525428256",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 335,
+        "impression_count": 28357,
+        "like_count": 193,
+        "quote_count": 2,
+        "reply_count": 10,
+        "repost_count": 28
+      }
+    },
+    {
+      "id": "2095091161937703114",
+      "text": "🚨 BREAKING: Today, we killed Grok Bot.\n\nI just watched my Mac alone one-shot a $27bn company in 128 seconds.\n\nThis is, without exaggeration, completely terrifying. https://t.co/RcsaBLAlKo",
+      "created_at": "2026-09-02T10:07:12.000Z",
+      "author_id": "1937523873379217408",
+      "author_username": "shipper_now",
+      "author_name": "Shipper",
+      "url": "https://x.com/shipper_now/status/2095091161937703114",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 699,
+        "impression_count": 188139,
+        "like_count": 464,
+        "quote_count": 8,
+        "reply_count": 19,
+        "repost_count": 22
+      }
+    },
+    {
+      "id": "2095132400787263761",
+      "text": "https://t.co/o5bNd5V30i",
+      "created_at": "2026-09-02T12:51:04.000Z",
+      "author_id": "1355965591702614018",
+      "author_username": "liam_fallen",
+      "author_name": "Liam",
+      "url": "https://x.com/liam_fallen/status/2095132400787263761",
+      "lang": "zxx",
+      "public_metrics": {
+        "bookmark_count": 271,
+        "impression_count": 11318,
+        "like_count": 114,
+        "quote_count": 1,
+        "reply_count": 4,
+        "repost_count": 11
+      }
+    },
+    {
+      "id": "2094839756329041984",
+      "text": "Introducing Atlas:\n\nThe world's first multimodal world model that generates image and video frames with pixel-perfect camera control and reconstructs them in 3D.\n\nModel the world, move the camera, and simulate space &amp; time. https://t.co/o0qeGubi19",
+      "created_at": "2026-09-01T17:28:12.000Z",
+      "author_id": "1741642915871600640",
+      "author_username": "theworldlabs",
+      "author_name": "World Labs",
+      "url": "https://x.com/theworldlabs/status/2094839756329041984",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 19532,
+        "impression_count": 10662463,
+        "like_count": 32408,
+        "quote_count": 1530,
+        "reply_count": 773,
+        "repost_count": 3484
+      }
+    },
+    {
+      "id": "2095085573706748156",
+      "text": "OBSIDIAN JUST TURNED YOUR VAULT INTO AN AI AGENT PLAYGROUND.\n\nOBSIDIAN-SKILLS GIVES CLAUDE CODE, CODEX AND OPENCODE 5 SKILLS TO READ, WRITE, ORGANIZE AND CONTROL YOUR VAULT DIRECTLY. https://t.co/6H9bmXJT1n",
+      "created_at": "2026-09-02T09:45:00.000Z",
+      "author_id": "1536693901230321666",
+      "author_username": "RoundtableSpace",
+      "author_name": "0xMarioNawfal",
+      "url": "https://x.com/RoundtableSpace/status/2095085573706748156",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 56,
+        "impression_count": 42594,
+        "like_count": 80,
+        "quote_count": 1,
+        "reply_count": 20,
+        "repost_count": 8
+      }
+    },
+    {
+      "id": "2095078647652917329",
+      "text": "Top best websites to get 𝙳𝙴𝚂𝙸𝙶𝙽.𝚖𝚍. Save for later 👇\n\n- https://t.co/5MqOioND1l\n- https://t.co/LWAT55ywyQ\n- https://t.co/VOCVLEiLnd\n- https://t.co/VafbiQJBnB\n- getdesign.md\n- https://t.co/3p2FFDHfNx\n- https://t.co/OqsM4rmmzG\n- https://t.co/KCMIiWA96A\n- https://t.co/AVdBSr2zpO",
+      "created_at": "2026-09-02T09:17:28.000Z",
+      "author_id": "588083665",
+      "author_username": "tranmautritam",
+      "author_name": "Tran Mau Tri Tam ✪",
+      "url": "https://x.com/tranmautritam/status/2095078647652917329",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 6704,
+        "impression_count": 173426,
+        "like_count": 3219,
+        "quote_count": 9,
+        "reply_count": 44,
+        "repost_count": 391
+      }
+    },
+    {
+      "id": "2095047825063023067",
+      "text": "THIS MIGHT BE THE CLEANEST KNOWLEDGE GRAPH SYSTEM EVER \n\nhttps://t.co/xbM0W6DX2I\n\nhttps://t.co/303ZtkViku",
+      "created_at": "2026-09-02T07:15:00.000Z",
+      "author_id": "1536693901230321666",
+      "author_username": "RoundtableSpace",
+      "author_name": "0xMarioNawfal",
+      "url": "https://x.com/RoundtableSpace/status/2095047825063023067",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 150,
+        "impression_count": 50776,
+        "like_count": 179,
+        "quote_count": 0,
+        "reply_count": 1,
+        "repost_count": 24
+      }
+    },
+    {
+      "id": "2094874098501664818",
+      "text": "You can experience how grok bot would be like with Fable 5.1\n\nOpenMausBot now supports it\n\nIt honestly looks very promising \n\nDownload it from here: https://t.co/UjTre6F8Mz https://t.co/FX6MAbG7lJ https://t.co/pJM6Mh4vQd",
+      "created_at": "2026-09-01T19:44:40.000Z",
+      "author_id": "1955005796527509507",
+      "author_username": "milindlabs",
+      "author_name": "Milind S",
+      "url": "https://x.com/milindlabs/status/2094874098501664818",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 100,
+        "impression_count": 15797,
+        "like_count": 78,
+        "quote_count": 1,
+        "reply_count": 7,
+        "repost_count": 5
+      }
+    },
+    {
+      "id": "2094754900899221523",
+      "text": "Introducing OpenDesign Harness Beta.\n\nA new generation strategy for more complete and polished design results. Evaluated in blind tests by 30 design experts and 100 users across real workflows.\n\nTurn it on in Settings under Open Design Labs and tell us what you think below. https://t.co/rxy2F0oduj",
+      "created_at": "2026-09-01T11:51:01.000Z",
+      "author_id": "2029813579025637376",
+      "author_username": "OpenDesignHQ",
+      "author_name": "OpenDesign",
+      "url": "https://x.com/OpenDesignHQ/status/2094754900899221523",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1522,
+        "impression_count": 141714,
+        "like_count": 1300,
+        "quote_count": 11,
+        "reply_count": 29,
+        "repost_count": 81
+      }
+    },
+    {
+      "id": "2094730735877812492",
+      "text": "THIS ANTHROPIC HACKATHON WINNER OPEN-SOURCED A FULL CLAUDE CODE ENGINEERING TEAM WITH 68 SUBAGENTS, 286 SKILLS AND 94 COMMANDS. https://t.co/iSEg7Nczd1",
+      "created_at": "2026-09-01T10:15:00.000Z",
+      "author_id": "1536693901230321666",
+      "author_username": "RoundtableSpace",
+      "author_name": "0xMarioNawfal",
+      "url": "https://x.com/RoundtableSpace/status/2094730735877812492",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 62,
+        "impression_count": 49030,
+        "like_count": 84,
+        "quote_count": 0,
+        "reply_count": 14,
+        "repost_count": 8
+      }
+    },
+    {
+      "id": "2094692986760180130",
+      "text": "CLAUDE + OBSIDIAN + LOOP ENGINEERING = A VAULT THAT RUNS ITSELF.\n\nCAPTURE → CONTEXT → DRAFT → REVIEW → COMMIT\n\nTHE KEY: CLAUDE NEVER WRITES STRAIGHT TO YOUR LIVE VAULT. A REVIEW AGENT CHECKS EVERY CHANGE FIRST.\n\n https://t.co/zhEulKfA2G",
+      "created_at": "2026-09-01T07:45:00.000Z",
+      "author_id": "1536693901230321666",
+      "author_username": "RoundtableSpace",
+      "author_name": "0xMarioNawfal",
+      "url": "https://x.com/RoundtableSpace/status/2094692986760180130",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 177,
+        "impression_count": 47815,
+        "like_count": 188,
+        "quote_count": 3,
+        "reply_count": 17,
+        "repost_count": 23
+      }
+    },
+    {
+      "id": "2094671763020132565",
+      "text": "done, it's open source now ✅\n\niOS phone farm - register real iPhones, watch + control them live in the browser, schedule tiktok on a postgres-backed scheduler. \n\nfree, self-hosted, apache-2.0.\n\n- git: https://t.co/COLryoAtwK\n- DIY steps: https://t.co/N8XGsrTiqn https://t.co/3SgYDL3oVv",
+      "created_at": "2026-09-01T06:20:40.000Z",
+      "author_id": "1836285205088546816",
+      "author_username": "consumerxai",
+      "author_name": "An Nayal",
+      "url": "https://x.com/consumerxai/status/2094671763020132565",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 6634,
+        "impression_count": 516227,
+        "like_count": 2988,
+        "quote_count": 19,
+        "reply_count": 86,
+        "repost_count": 262
+      }
+    },
+    {
+      "id": "2094777520855920791",
+      "text": "Grok Bot vs Hermes Agent\n\nI use both. Here's where each one wins: https://t.co/44voe5pRZ1",
+      "created_at": "2026-09-01T13:20:54.000Z",
+      "author_id": "1767869376496107520",
+      "author_username": "bridgemindai",
+      "author_name": "BridgeMind",
+      "url": "https://x.com/bridgemindai/status/2094777520855920791",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 262,
+        "impression_count": 24247,
+        "like_count": 304,
+        "quote_count": 2,
+        "reply_count": 19,
+        "repost_count": 15
+      }
+    },
+    {
+      "id": "2094737661835571309",
+      "text": "Your UI is too perfect.\n\nnpm i drawably\n\nhttps://t.co/x3svmHJShi https://t.co/nkhcMQzHJh",
+      "created_at": "2026-09-01T10:42:31.000Z",
+      "author_id": "1917637884967792640",
+      "author_username": "dwhitedesign",
+      "author_name": "Daniel White",
+      "url": "https://x.com/dwhitedesign/status/2094737661835571309",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 3704,
+        "impression_count": 353361,
+        "like_count": 3823,
+        "quote_count": 27,
+        "reply_count": 109,
+        "repost_count": 150
+      }
+    },
+    {
+      "id": "2094704183345922356",
+      "text": "summary of my AI stack:\n\n1. @orca_build - main ADE for working with multiple agents\n2. @bot - marketing agents autonomous workers\n3. @paper - design, FE, visual mood board\n4. @herdrdev - ADE in terminal\n5. @cursor_ai - FE and access to Grok Bot\n6. @WisprFlow - transcribing my https://t.co/3jUFJ06Nsj https://t.co/aj1PAzjnuf",
+      "created_at": "2026-09-01T08:29:29.000Z",
+      "author_id": "1455999313453195265",
+      "author_username": "shannholmberg",
+      "author_name": "Shann³",
+      "url": "https://x.com/shannholmberg/status/2094704183345922356",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 2623,
+        "impression_count": 199665,
+        "like_count": 1746,
+        "quote_count": 17,
+        "reply_count": 81,
+        "repost_count": 87
+      }
+    },
+    {
+      "id": "2094519342440620441",
+      "text": "GROK BOT TURNED 100 COLD DMS INTO 41 SIGNUPS\n\nFound relevant X profiles, sent personalized outreach, and handled replies directly through the browser\n\nhttps://t.co/AqO1HV2ZTC",
+      "created_at": "2026-08-31T20:15:00.000Z",
+      "author_id": "1536693901230321666",
+      "author_username": "RoundtableSpace",
+      "author_name": "0xMarioNawfal",
+      "url": "https://x.com/RoundtableSpace/status/2094519342440620441",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 38,
+        "impression_count": 54655,
+        "like_count": 96,
+        "quote_count": 0,
+        "reply_count": 17,
+        "repost_count": 3
+      }
+    },
+    {
+      "id": "2037146278979629361",
+      "text": "https://t.co/bO7EvYUlrK",
+      "created_at": "2026-03-26T12:34:55.000Z",
+      "author_id": "505835394",
+      "author_username": "ericzakariasson",
+      "author_name": "eric zakariasson",
+      "url": "https://x.com/ericzakariasson/status/2037146278979629361",
+      "lang": "zxx",
+      "public_metrics": {
+        "bookmark_count": 740,
+        "impression_count": 70265,
+        "like_count": 650,
+        "quote_count": 14,
+        "reply_count": 32,
+        "repost_count": 48
+      }
+    },
+    {
+      "id": "2093693183976759387",
+      "text": "God’s Eye View is on GitHub Trending. MIT license.\n\nUse voice commands to “jump into the cockpit of the nearest helicopter or jet” or ask “how many military flights are in this region”\n\nTurning the 3d globe into a canvas you can annotate w/ voice is really quite fun. https://t.co/IpH6wzXfAQ",
+      "created_at": "2026-08-29T13:32:08.000Z",
+      "author_id": "227528138",
+      "author_username": "bilawalsidhu",
+      "author_name": "Bilawal Sidhu",
+      "url": "https://x.com/bilawalsidhu/status/2093693183976759387",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 329,
+        "impression_count": 15127,
+        "like_count": 362,
+        "quote_count": 1,
+        "reply_count": 10,
+        "repost_count": 39
+      }
+    },
+    {
+      "id": "2092359244830089287",
+      "text": "gtm gold.",
+      "created_at": "2026-08-25T21:11:32.000Z",
+      "author_id": "9493002",
+      "author_username": "tomblue",
+      "author_name": "Tom Blue",
+      "url": "https://x.com/tomblue/status/2092359244830089287",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1547,
+        "impression_count": 1241488,
+        "like_count": 1402,
+        "quote_count": 1,
+        "reply_count": 42,
+        "repost_count": 42
+      }
+    },
+    {
+      "id": "2094320864292696376",
+      "text": "You don’t need After Effects for Motion Graphics anymore. 👀\n\nJust describe what you want → get the animation. ✨. https://t.co/a1H23Cjalh",
+      "created_at": "2026-08-31T07:06:19.000Z",
+      "author_id": "881945748681748480",
+      "author_username": "rege_dev",
+      "author_name": "rege",
+      "url": "https://x.com/rege_dev/status/2094320864292696376",
+      "lang": "en",
+      "public_metrics": {
+        "bookmark_count": 1070,
+        "impression_count": 67470,
+        "like_count": 919,
+        "quote_count": 4,
+        "reply_count": 47,
+        "repost_count": 61
+      }
     }
   ],
   "meta": {
-    "result_count": 98
+    "result_count": 97,
+    "next_token": null
   }
 }

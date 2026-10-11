@@ -6,7 +6,7 @@
  * Future: Redis Streams or Kafka for higher throughput
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter, captureRejectionSymbol } from 'events';
 import { ScorpionEvent, EnrichedEvent, EventMetadata } from './types';
 import { query } from '../db/client';
 
@@ -22,7 +22,7 @@ export class ScorpionEventBus extends EventEmitter {
   private dbInitialized: boolean = false;
 
   constructor(config: EventBusConfig = {}) {
-    super();
+    super({ captureRejections: true });
     this.config = {
       persistence: config.persistence ?? true,
       maxListeners: config.maxListeners ?? 100,
@@ -31,8 +31,14 @@ export class ScorpionEventBus extends EventEmitter {
     this.setMaxListeners(this.config.maxListeners);
   }
 
+  [captureRejectionSymbol](error: unknown, event: string | symbol): void {
+    // Delivery is asynchronous: record failure without emitting another event
+    // that could recursively reject or be mistaken for successful execution.
+    console.error('[EventBus] Subscriber failed:', event, error);
+  }
+
   /**
-   * Publish an event to the bus
+   * Publish an event to the bus. Does not await asynchronous subscribers.
    */
   async publish(event: ScorpionEvent, metadata?: EventMetadata): Promise<void> {
     const enrichedEvent: EnrichedEvent = {

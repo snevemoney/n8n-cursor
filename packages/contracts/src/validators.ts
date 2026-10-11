@@ -1,18 +1,26 @@
 // LightningFlow AI Contracts - Validator Utilities
 // Common validation utilities and helpers
 
-import Ajv from 'ajv';
+import Ajv, { type ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
 
-// Create configured Ajv instance
-export const ajv = addErrors(addFormats(new Ajv({
+type ValidationOptions = {
+  coerceTypes?: boolean;
+  removeAdditional?: boolean;
+  useDefaults?: boolean;
+};
+
+// One configuration owner for default and explicitly configured validation.
+function createAjv(options: ValidationOptions = {}): Ajv {
+const ajv = addErrors(addFormats(new Ajv({
   allErrors: true,
   strict: false,
   verbose: true,
   removeAdditional: true,
   useDefaults: true,
-  coerceTypes: true
+  coerceTypes: true,
+  ...options
 })));
 
 // Custom formats
@@ -25,7 +33,7 @@ ajv.addFormat('uuid', {
 });
 
 ajv.addFormat('satoshi', {
-  type: 'integer',
+  type: 'number',
   validate: (value: number) => {
     return Number.isInteger(value) && value >= 1;
   }
@@ -47,11 +55,16 @@ ajv.addFormat('preimage', {
   }
 });
 
+return ajv;
+}
+
+export const ajv = createAjv();
+
 // Validation result type
 export interface ValidationResult<T = any> {
   valid: boolean;
   data?: T;
-  errors?: Ajv.ErrorObject[];
+  errors?: ErrorObject[];
   errorMessage?: string;
 }
 
@@ -59,14 +72,11 @@ export interface ValidationResult<T = any> {
 export function validate<T = any>(
   schema: any,
   data: any,
-  options: {
-    coerceTypes?: boolean;
-    removeAdditional?: boolean;
-    useDefaults?: boolean;
-  } = {}
+  options: ValidationOptions = {}
 ): ValidationResult<T> {
   try {
-    const validate = ajv.compile(schema);
+    const engine = Object.keys(options).length ? createAjv(options) : ajv;
+    const validate = engine.compile(schema);
     const valid = validate(data);
     
     if (valid) {
@@ -78,7 +88,7 @@ export function validate<T = any>(
       return {
         valid: false,
         errors: validate.errors || [],
-        errorMessage: ajv.errorsText(validate.errors)
+        errorMessage: engine.errorsText(validate.errors)
       };
     }
   } catch (error) {
@@ -241,7 +251,7 @@ export const validators = {
 };
 
 // Validation error formatter
-export function formatValidationErrors(errors: Ajv.ErrorObject[]): string {
+export function formatValidationErrors(errors: ErrorObject[]): string {
   return errors.map(error => {
     const path = error.instancePath || error.schemaPath;
     const message = error.message;

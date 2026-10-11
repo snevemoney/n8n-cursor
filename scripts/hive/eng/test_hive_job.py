@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import json
+import hashlib
+import importlib.util
+import io
+from contextlib import redirect_stdout
 import subprocess
 import sys
 import tempfile
@@ -221,6 +225,89 @@ class HiveJobGateTest(unittest.TestCase):
             proc = run_verify(tmp, "--offline")
             self.assertNotEqual(proc.returncode, 0, proc.stdout)
             self.assertIn("forge performs develop on grok_bot and is not a verifier", proc.stdout)
+
+    def test_runtime_evidence_identity_matches_claim(self) -> None:
+        spec=importlib.util.spec_from_file_location("identity_gate",CLI)
+        module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+        claim=base_claim("LIVE")
+        evidence={**claim["runtime"],"kind":"runtime","git_sha":module.head_sha(),"worktree":str(ROOT),
+                  "process":"synthetic fixture","timestamp":module.utc_now(),"trace_id":"fixture",
+                  "input":"harmless fixture","observed":{"result":"fixture only"}}
+        source_rel = str(CLI.relative_to(ROOT))
+        claim["runtime"]["source_paths"] = [source_rel]
+        evidence["source_hashes"] = {source_rel: hashlib.sha256(CLI.read_bytes()).hexdigest()}
+        with tempfile.TemporaryDirectory() as raw:
+            directory=Path(raw)
+            self.assertEqual(module.evidence_reasons(claim,directory,evidence),[])
+            for key in ("environment","entrypoint","address","expected_listen"):
+                with self.subTest(key=key):
+                    reasons=module.evidence_reasons(claim,directory,{**evidence,key:"different"})
+                    self.assertTrue(any(key in reason for reason in reasons),reasons)
+
+    def test_runtime_evidence_timestamp_is_a_real_zoned_instant(self) -> None:
+        spec = importlib.util.spec_from_file_location("timestamp_gate", CLI)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        claim = base_claim("LIVE")
+        evidence = {**claim["runtime"], "kind": "runtime", "git_sha": module.head_sha(),
+                    "worktree": str(ROOT), "process": "fixture", "timestamp": module.utc_now(),
+                    "trace_id": "fixture", "input": "fixture", "observed": {"result": "fixture"}}
+        source_rel = str(CLI.relative_to(ROOT))
+        claim["runtime"]["source_paths"] = [source_rel]
+        evidence["source_hashes"] = {source_rel: hashlib.sha256(CLI.read_bytes()).hexdigest()}
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            self.assertEqual(module.evidence_reasons(claim, directory, evidence), [])
+            for timestamp in ("PASS", "2026-02-30T12:00:00Z", "2026-10-06T12:00:00", 42):
+                with self.subTest(timestamp=timestamp):
+                    reasons = module.evidence_reasons(claim, directory, {**evidence, "timestamp": timestamp})
+                    self.assertTrue(any("timestamp" in reason for reason in reasons), reasons)
+            self.assertEqual(module.evidence_reasons(claim, directory,
+                {**evidence, "timestamp": "2026-10-06T12:00:00+02:00"}), [])
+
+    def test_runtime_evidence_follows_declared_source_content(self) -> None:
+        import hashlib
+        spec = importlib.util.spec_from_file_location("source_gate", CLI)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            source = root / "implementation.py"
+            source.write_text("version = 1\n")
+            claim = base_claim("LIVE")
+            claim["runtime"].update(worktree=str(root), git_sha=module.head_sha(), source_paths=["implementation.py"])
+            evidence = {**claim["runtime"], "kind": "runtime", "process": "fixture", "timestamp": module.utc_now(),
+                        "trace_id": "fixture", "input": "fixture", "observed": {"result": "fixture"},
+                        "source_hashes": {"implementation.py": hashlib.sha256(source.read_bytes()).hexdigest()}}
+            self.assertEqual(module.evidence_reasons(claim, root, evidence), [])
+            omitted = dict(claim)
+            omitted["runtime"] = dict(claim["runtime"])
+            omitted["runtime"].pop("source_paths")
+            self.assertTrue(any("source_paths" in r for r in module.evidence_reasons(omitted, root, evidence)))
+            missing = dict(evidence)
+            missing.pop("source_hashes")
+            self.assertTrue(any("source" in r for r in module.evidence_reasons(claim, root, missing)))
+            source.write_text("version = 2\n")
+            self.assertTrue(any("source" in r for r in module.evidence_reasons(claim, root, evidence)))
+            source.unlink()
+            self.assertTrue(any("source" in r for r in module.evidence_reasons(claim, root, evidence)))
+            for unsafe in ("../outside.py", str(root / "absolute.py")):
+                with self.subTest(source_path=unsafe):
+                    claim["runtime"]["source_paths"] = [unsafe]
+                    self.assertTrue(any("inside" in r for r in module.evidence_reasons(claim, root, evidence)))
+
+    def test_registry_does_not_promote_live_without_runtime_evidence(self) -> None:
+        spec=importlib.util.spec_from_file_location("registry_gate",CLI)
+        module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+        with tempfile.TemporaryDirectory() as raw:
+            module.CAPEX=Path(raw)
+            write_claim(module.CAPEX/'FAKE-LIVE',base_claim("LIVE"))
+            captured=io.StringIO()
+            with redirect_stdout(captured): module.cmd_registry()
+            row=json.loads(captured.getvalue())["capabilities"][0]
+            self.assertEqual(row["state"],"STALE",row)
+            self.assertTrue(row["stale"])
+            self.assertTrue(any("evidence" in reason for reason in row["stale_reasons"]),row)
 
     def test_registry_is_derived(self) -> None:
         proc = subprocess.run(

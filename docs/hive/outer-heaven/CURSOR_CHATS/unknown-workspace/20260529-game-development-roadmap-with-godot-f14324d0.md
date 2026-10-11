@@ -31,11 +31,11 @@ This chat is listed in Cursor's conversation index but has no `agent-transcripts
 
 ## Related chats
 
+- [[CURSOR_CHATS/unknown-workspace/20261007-game-infinite-loop-error-8f32b8eb|Game infinite loop error]]
 - [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-01846|AI agent with tools, memory, and output parsing]]
 - [[20250822-ai-agent-with-tools-memory-and-output-parsing-bc-8dac0|AI agent with tools, memory, and output parsing]]
 - [[20250823-ai-agent-with-tools-memory-and-output-parsing-bc-0181f|AI agent with tools, memory, and output parsing]]
 - [[20260324-development-environment-setup-bc-9d9b2|Development environment setup]]
-- [[20260404-1d9ef764-5833-4bcb-ae05-fe303737997f-1d9ef764|1d9ef764-5833-4bcb-ae05-fe303737997f]]
 
 ## Canon
 

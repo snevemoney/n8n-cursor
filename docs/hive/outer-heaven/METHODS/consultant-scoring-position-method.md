@@ -4,8 +4,8 @@
 **CAD numbers SoT:** Money Desk SIGNED ladder — do not invent parallel bands here.
 
 ## Partner files
-- GTM half: `~/.grokbot/research/gtm-playbook-ladder-sku-packaging-20260812.md` · vault `METHODS/gtm-playbook-ladder-sku-packaging.md`
-- Money Desk bands: `~/.grokbot/research/money-desk-service-ladder-economics-draft-20260812.md` · `METHODS/business-service-ladder-economics.md`
+- GTM half: `~/.grokbot/research/gtm-playbook-ladder-sku-packaging-20260812.md` · vault [[00_Outer_Heaven/METHODS/gtm-playbook-ladder-sku-packaging]]
+- Money Desk bands: `~/.grokbot/research/money-desk-service-ladder-economics-draft-20260812.md` · [[00_Outer_Heaven/METHODS/business-service-ladder-economics]]
 - Criteria: `~/.grokbot/research/prospect-qualification-criteria-20260812.md`
 - Deep research: `~/.grokbot/research-packets/ai-partner-scoring-prototype-ladder/PACKET.md` §1
 - Skills: `~/.grokbot/skills/constraint-position/SKILL.md` · `roi-five-slide` · `proof-30-60-90`

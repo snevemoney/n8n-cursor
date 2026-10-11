@@ -7,7 +7,7 @@ From take: takes/librarian.md
 
 ### 1. takes/ SSOT wiring
 - Tape change: Canonical = `takes/{slug}.md`. Agents load their own take. Cursor-draft is not the scoreboard. Librarian persists what Evens keeps. Do not flatten 17 desks into one memo.
-- Command: `python3` schema check of `tape-self-teach-mission.py` AGENTS vs `takes/*.md` vs `takes/README.md` vs `job-cards/INDEX.md`; `python3 scripts/hive/cursor-spawn-desks.py --job tape-self-teach --print --agent Librarian`; `python3 scripts/hive/os/outer-heaven-brief.py --agent Librarian`
+- Command: `python3` schema check of `tape-self-teach-mission.py` AGENTS vs `takes/*.md` vs `takes/README.md` vs `job-cards/Agent Roles.md`; `python3 scripts/hive/cursor-spawn-desks.py --job tape-self-teach --print --agent Librarian`; `python3 scripts/hive/os/outer-heaven-brief.py --agent Librarian`
 - Result: fail
 - Evidence:
   - Repo write-path is intact: 17/17 slugs match AGENTS, README, and INDEX. Each take is `Status: filled`, has a Roll-up, and names all 18 corpus ids. Librarian take is 31582 bytes. Spawn `--print` writes only `takes/librarian.md` and Hard-never includes “Do not edit LESSONS-FROM-TAPE.md.”

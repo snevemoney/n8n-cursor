@@ -10,7 +10,7 @@ Cursor + Grok read this. One vault. Do not rebuild the 8k graph.
 
 **Vault (Mac awake):** `/Users/evenslouis/Documents/My_Billion_Dollar_Vault`  
 **Hive folder:** [[OS]] in `00_Outer_Heaven`  
-**Mac closed / local unreachable:** SSH `n8ncloud` `root@69.62.66.78:/root/My_Billion_Dollar_Vault` (first-sync full-enough copy; `00_Outer_Heaven` inside). Leftover OH cache `/root/outer-heaven-mirror` is not the write target. Resolve: `python3 scripts/hive/os/vault-config.py --resolve --treat-local-missing`. One write target — do not write two vaults. Do not dump the rest. `cursor-chat-sessions` is **not** the vault.  
+**Mac closed / local unreachable:** SSH `n8ncloud` `root@69.62.66.78:/root/My_Billion_Dollar_Vault` (first-sync replica; `00_Outer_Heaven` inside). **Stale-aware.** Live Mac vault wins. Leftover OH cache `/root/outer-heaven-mirror` is not the write target and is not Jarvis memory. Resolve: `python3 scripts/hive/os/vault-config.py --resolve --treat-local-missing`. One write target — do not write two vaults. Do not dump the rest. `cursor-chat-sessions` is **not** the vault.  
 **Front door:** [[index]] · [[GRAPH]]  
 **Sync:** `syncthing-vault-sync` — live identical Obsidian folder across Mac / Grok desktop / phone / existing `n8ncloud`. Device IDs off git.
 
@@ -18,7 +18,11 @@ Cursor + Grok read this. One vault. Do not rebuild the 8k graph.
 
 Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store.
 
-INDEX: `CONTENT/os/sessions/INDEX.md`
+INDEX: `CONTENT/os/sessions/Recent Conversations.md`
+
+## OpenClaw on n8ncloud (2026-09-12)
+
+Installed **2026.4.2**. Gateway **DOWN**. Ghost home `/root/.openclaw` **gone**. Live JSON `/opt/philanthropy/openclaw/openclaw.json`. Bind in that file is `lan` — do not start as written. OpenClaw is a **delegate runtime**, not a second Jarvis. Face stays `127.0.0.1:4018`. Notes: [[HARVEST-2026-09-12]] · [[OPENCLAW-RESURRECTION-AUDIT]]. Hostinger panel on the Cursor login listed no VPS — SSH is the live path.
 
 ## Rooms (do not rename)
 

@@ -3,7 +3,7 @@
 Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting.
 
 **Slack:** workspace Hive · `#hive` (`C0BTH1TMFC5`) · https://evenslouis.slack.com/archives/C0BTH1TMFC5  
-**INDEX:** `CONTENT/os/sessions/INDEX.md`  
+**INDEX:** `CONTENT/os/sessions/Recent Conversations.md`  
 **SSOT message:** `CONTENT/os/sessions/SLACK.md`  
 **Folders:** `sessions/cursor/` · `sessions/grok/` · `sessions/claude/` · `sessions/chatgpt/`  
 **Refresh:** `python3 scripts/hive/os/sync-sessions.py`  

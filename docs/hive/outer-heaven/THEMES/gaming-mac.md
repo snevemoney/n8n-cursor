@@ -9,6 +9,13 @@ Games, Unity, Mac modding.
 
 ## Linked chats
 
+- [[20261009-dual-monitor-display-issue-1268421a|Dual monitor display issue]]
+- [[20260909-evens-obsidian-should-understand-his-full-pc-tim-8a90ecd4|Evens: Obsidian should understand his **full PC ti]]
+- [[20260829-you-are-researching-how-to-trigger-slack-connect-d18bf6ac|You are researching how to TRIGGER Slack-connected]]
+- [[20260826-you-are-forge-in-users-evenslouis-n8n-cursor.-ev-3bb1b06a|You are Forge in /Users/evenslouis/n8n-cursor. Eve]]
+- [[20260826-evens-said-go-.-context-we-deleted-a-53-day-old--a9385d55|Evens said **go**. Context: we deleted a 53-day-ol]]
+- [[20260826-evens-inspected-apps-portfolio-brief-remotion-ou-ca0788fd|Evens inspected `apps/portfolio-brief-remotion/out]]
+- [[20260820-you-are-researcher-on-the-factory-loop.-you-walk-d3151dca|You are Researcher on the factory loop. You walk a]]
 - [[20260814-evens-voted-the-last-unvoted-parked-skills-on-th-7e3775ec|Evens voted the last unvoted parked skills on the ]]
 - [[20260814-evens-said-keep-the-ones-we-actually-need-and-th-77961cd1|Evens said: \u201ckeep the ones we actually need a]]
 - [[20260814-evens-said-do-it-for-me.-wire-all-13-keep-voted--13df439f|Evens said \u201cdo it for me.\u201d Wire all 13 K]]
@@ -25,20 +32,20 @@ Games, Unity, Mac modding.
 
 ## Top keywords
 
-- themes (13)
-- path (13)
-- agent transcripts (13)
-- false (13)
-- chat (13)
-- projects (13)
-- agent (13)
-- projects themes (13)
-- archived false (13)
-- chat id (13)
-- themes tags (13)
-- chatid (13)
+- path (20)
+- chatid (20)
+- themes (20)
+- agent transcripts (20)
+- projects (20)
+- source (20)
+- archived (20)
+- transcripts (20)
+- archived false (20)
+- updated (20)
+- false projects (20)
+- chat id (20)
 
 ## See also
 
-- [[THEMES/README]]
+- [[00_Outer_Heaven/THEMES/Theme Hub Guide]]
 - [[OUTER_HEAVEN_LIBRARY]]

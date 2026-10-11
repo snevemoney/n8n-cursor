@@ -33,7 +33,7 @@ export interface ParsedWorkflow {
   nodes: ParsedWorkflowNode[];
   connections: ParsedWorkflowConnection[];
   nodeTypes: Set<string>;
-  triggerType?: string;
+  triggerType: string;
   purpose?: string; // Inferred from nodes and connections
 }
 

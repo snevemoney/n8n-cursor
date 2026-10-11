@@ -230,7 +230,7 @@ So the main **missing feature** for “runs while I’m at my 9–5” is: **ale
 - [[20260222-missing-components-in-build-5ad508ad|Missing components in build]]
 - [[20260320-vps-health-check-and-pm2-status-8f6ce894|VPS health check and pm2 status]]
 - [[20260226-website-performance-issues-2db66e24|Website performance issues]]
-- [[20260222-cursor-cloud-agent-integration-plan-623a99f6|Cursor Cloud Agent integration plan]]
+- [[CURSOR_CHATS/empty-window/20260816-project-structure-and-naming-01a6b95f|Project structure and naming]]
 
 ## Canon
 

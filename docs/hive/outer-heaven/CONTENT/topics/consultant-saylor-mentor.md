@@ -1,8 +1,145 @@
 # consultant-saylor-mentor
 
-**State (REPLACE)** 2026-09-01 23:10 ET
-Consultant is Evens's mentor for harvested Saylor university skills (professional / undergrad / grad BUS+ECON+PRDV+COMM). Not a new desk. Catalog: 42 skills, `CONTENT/saylor-skill-triggers.md`. Speak-sheet: `saylor-trigger-map.md`. Data pack: `live-facts-card.md`. Router: `saylor-course-skill`. Masters: `scripts/hive/grok-skills/{slug}.md`.
-How: operator talks plain hive/site/money. Name LANE (`hive-os` | `agency`). Consultant picks 1–3 skills, writes PUT-IN-SYSTEM + LEVERAGE (`saylor-mentor-pass`), then hands execution to the lane owner. Building mode. No exam dump. No invented KPIs.
+**State (REPLACE)** 2026-09-02 22:07 ET
+Consultant is Evens's mentor for harvested Saylor university skills (professional / undergrad / grad BUS+ECON+PRDV+COMM+ESL). Not a new desk. Catalog: **164** unique courses (COMM311 + ESLHub in), `CONTENT/saylor-skill-triggers.md`. Speak-sheet: `saylor-trigger-map.md`. Desk matrix: `saylor-desk-matrix.md`. Data pack: `live-facts-card.md`.
+How: operator talks plain hive/site/money. Consultant **scans the full catalog** for the next best thing, **suggests, critics, and helps**, speaks 1–3 schools, then hands execution to the lane owner. Building mode. No exam dump. No invented KPIs.
 
 **Events**
 - 2026-09-01 23:10 ET Operator: "i want the consultant to be my mentor using all those skills cause they are professional and university level."
+- 2026-09-01 23:35 ET Catalog 41 after BUS612 fold.
+- 2026-09-01 23:43 ET Catalog 42 after BUS614 fold.
+- 2026-09-01 23:44 ET Catalog 43 after BUS613 fold.
+- 2026-09-01 23:45 ET Catalog 44 after BUS630 fold.
+- 2026-09-01 23:49 ET Catalog 46 after ARTH101 + ECON101 guest folds. No Chrome until BUS301 submits.
+- 2026-09-01 23:51 ET Catalog 47 after CS105 guest fold.
+- 2026-09-01 23:52 ET Catalog 48 after ENGL101 guest fold.
+- 2026-09-01 23:53 ET Catalog 49 after CS101 guest fold.
+- 2026-09-01 23:53 ET Catalog 50 after BUS640 guest fold.
+- 2026-09-01 23:57 ET Catalog 51 after COMM101 guest fold.
+- 2026-09-01 23:59 ET Catalog 52 after BUS651 guest fold.
+- 2026-09-02 00:00 ET Catalog 53 after BUS652 guest fold.
+- 2026-09-02 00:00 ET Catalog 54 after BUS641 guest fold.
+- 2026-09-02 00:01 ET Catalog 55 after BUS653 guest fold.
+- 2026-09-02 00:01 ET Catalog 56 after BUS654 guest fold. MEI cluster 651–654 in.
+- 2026-09-02 00:02 ET Catalog 57 after BUS642 guest fold.
+- 2026-09-02 00:03 ET Catalog 58 after HIST103 guest fold.
+- 2026-09-02 00:03 ET Catalog 59 after BUS632 guest fold.
+- 2026-09-02 00:06 ET Catalog 60 after BUS631 guest fold.
+- 2026-09-02 00:07 ET Catalog 61 after BUS633 guest fold.
+- 2026-09-02 00:08 ET Catalog 62 after BUS643 guest fold. ALS MMGT 640–643 cluster in.
+- 2026-09-02 17:48 ET Catalog 63 after HIST362 guest fold.
+- 2026-09-02 17:55 ET Catalog 64 after HIST363 guest fold.
+- 2026-09-02 18:00 ET Catalog 65 after PHIL102 guest fold. ACE SAYA-0045 exists — do not sit.
+- 2026-09-02 18:02 ET BUS303 cert final passed 47/50 (94%) attempt 4151321. Do not encode items. Live exam BUS305.
+- 2026-09-02 18:05 ET Catalog 66 after PHIL103 guest fold. ACE SAYA-0011 exists — do not sit.
+- 2026-09-02 18:11 ET Catalog 67 after PHIL203 guest fold. ACE N. No PHIL104.
+- 2026-09-02 18:13 ET BUS305 cert final passed 31/39 (79.49%) attempt 4151329. Do not encode items. Live exam BUS402.
+- 2026-09-02 18:14 ET Catalog 68 after PHIL304 guest fold. ACE N. No PHIL104. Creative arts/hist/phil cluster in.
+- 2026-09-02 18:17 ET Catalog 69 after GEOG101 guest fold. ACE SAYA-0044 exists — do not sit.
+- 2026-09-02 18:20 ET Catalog 70 after POLSC101 guest fold. ACE N. Do not invent a SAYA id.
+- 2026-09-02 18:21 ET Catalog 71 after POLSC201 guest fold. ACE N. Next POLSC221.
+- 2026-09-02 18:23 ET Catalog 72 after POLSC221 guest fold. ACE N. Next POLSC232.
+- 2026-09-02 18:23 ET BUS402 cert final passed 37/45 (82.22%) attempt 4151339. Do not encode items. Live exam BUS403.
+- 2026-09-02 18:24 ET Catalog 73 after POLSC232 guest fold. ACE N. Next POLSC401.
+- 2026-09-02 18:24 ET Catalog 74 after POLSC401 guest fold. ACE N. Next POLSC402.
+- 2026-09-02 18:25 ET Catalog 75 after POLSC402 guest fold. POLSC cluster closed. Creative next SOC101.
+- 2026-09-02 18:27 ET Catalog 76 after PSYCH101 guest fold. ACE SAYA-0007 exists — do not sit. Creative next SOC101.
+- 2026-09-02 18:28 ET Catalog 77 after SOC101 guest fold. ACE N. Do not invent SAYA. Creative next ESL001.
+- 2026-09-02 18:30 ET Catalog 78 after CS201 guest fold. ACE N. Creative owns remaining CS (CS201+). Next CS202. ESL waits.
+- 2026-09-02 18:31 ET Catalog 81 after PRDV002 + leftover PRDV003/004 guest folds. ACE N. Career next PRDV005.
+- 2026-09-02 18:32 ET Uncataloged PRDV003/004 CFO stubs. Folded closed PRDV005 + PRDV007. Catalog still 81. Career next PRDV008. Do not catalog PRDV006.
+- 2026-09-02 18:34 ET Catalog 82 after CS202 guest fold. ACE N. Creative next CS205.
+- 2026-09-02 18:35 ET Catalog 83 after CS205 guest fold. ACE N. Creative next CS207.
+- 2026-09-02 18:35 ET Catalog 84 after PRDV008 guest fold. ACE N. Career next PRDV009.
+- 2026-09-02 18:36 ET Catalog 85 after CS207 guest fold. ACE N. Creative next CS250.
+- 2026-09-02 18:37 ET Catalog 86 after CS250 guest fold. ACE N. Creative next CS260.
+- 2026-09-02 18:37 ET Catalog 87 after PRDV009 guest fold. ACE N. Career next PRDV010.
+- 2026-09-02 18:38 ET BUS403 cert final passed 44/50 (88%) attempt 4151349 cmid 103778. Do not encode items. Live exam BUS501 (LMS 1273; never id=54).
+- 2026-09-02 18:39 ET Catalog 88 after CS260 guest fold. ACE N. Creative next CS301. Chrome off until BUS501.
+- 2026-09-02 18:40 ET Catalog 89 after PRDV010 guest fold. ACE N. Career next PRDV011. Chrome off until BUS501.
+- 2026-09-02 18:40 ET Catalog 90 after CS301 guest fold. ACE N. Creative next CS302 (SAYA-0018 harvest only, do not sit). Chrome off until BUS501.
+- 2026-09-02 18:41 ET Catalog 91 after CS302 guest fold. ACE SAYA-0018 exists — do not sit. Creative next CS401. Chrome off until BUS501.
+- 2026-09-02 18:42 ET Catalog 92 after CS401 guest fold. ACE N. Creative next CS402 (SAYA-0016 harvest only — do not sit). Chrome off until BUS501.
+- 2026-09-02 18:43 ET Catalog 93 after PRDV011 guest fold. ACE N. Advise-only — never move money / never operator FACT. Career next PRDV102. Chrome off until BUS501.
+- 2026-09-02 18:44 ET Catalog 94 after CS402 guest fold. ACE SAYA-0016 exists — do not sit. Creative next CS403 then CS406. Chrome off until BUS501.
+- 2026-09-02 18:44 ET Catalog 95 after PRDV102 guest fold. ACE N. Never send/apply. Live cert wait 7-day unlimited. Career next PRDV103. Chrome off until BUS501.
+- 2026-09-02 18:45 ET Catalog 96 after CS403 guest fold. ACE N. Creative next CS406 (last remaining CS on their list). Chrome off until BUS501.
+- 2026-09-02 18:46 ET Catalog 97 after PRDV103 guest fold. ACE N. Never send/apply. Career next PRDV104. Chrome off until BUS501.
+- 2026-09-02 18:47 ET Catalog 98 after CS406 guest fold. ACE N. Concepts only — no exploits. Creative CS remaining 0. Next PRDV200 (Career keeps 104/107). ESL waits. Chrome off until BUS501.
+- 2026-09-02 18:48 ET Catalog 99 after PRDV104 guest fold. ACE N. Never send. Career owns PD (next 107 then 200s). Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 18:50 ET Catalog 100 after PRDV107 guest fold. ACE N. Never send/post. Career next PRDV200. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 18:50 ET Catalog 101 after PRDV200 guest fold. ACE N. Never invent metrics. Career next PRDV201. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 18:51 ET Catalog 102 after PRDV201 guest fold. ACE N. Not PRDV010. Career next PRDV211. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 18:52 ET Catalog 103 after PRDV211 guest fold. ACE N. Survey not 212–215. Career next PRDV212. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 18:53 ET Catalog 104 after PRDV212 guest fold. ACE N. Not 211/213/230/641. Career next PRDV213. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 18:55 ET BUS501 passed 41/43 (95.35%) attempt 4151362. Items not encoded. Live exam BUS502 LMS 669. Chrome off until BUS502.
+- 2026-09-02 18:56 ET Catalog 105 after PRDV213 guest fold. ACE N. Stages unnamed (no Tuckman). Career next PRDV214. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 18:57 ET Catalog 106 after PRDV214 guest fold. ACE N. Never send/post. Career next PRDV215. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 18:58 ET Catalog 107 after PRDV215 guest fold. ACE N. Social = ethics not post. Career next PRDV217 literacy-only (building mode, no sell). Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 18:59 ET Catalog 108 after PRDV217 guest fold. ACE N. Literacy only (building mode, no sell). Career next PRDV221. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 19:00 ET Catalog 109 after PRDV221 guest fold. ACE N. Reused 221–229 blurb is not live intro. Career next PRDV222. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 19:01 ET Catalog 110 after PRDV222 guest fold. ACE N. Taylor named live. Late-1800s is 222 description not 221 intro. Career next PRDV223. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 19:02 ET Catalog 111 after PRDV223 guest fold. ACE N. Reused late-1800s description is not the job. Career next PRDV224. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 19:06 ET Catalog 112 after PRDV224 guest fold. ACE N. Stages unnamed (no Tuckman). Reused late-1800s is not the job. Career next PRDV225. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 19:08 ET Catalog 113 after PRDV225 guest fold. ACE N. Theory names not live. Reused late-1800s is not the job. Career next PRDV226. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 19:10 ET Catalog 114 after PRDV226 guest fold. ACE N. Never send. Not operator HR. Reused late-1800s is not the job. Career next PRDV227. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 19:11 ET Catalog 115 after PRDV227 guest fold. ACE N. Framework names not live. Reused late-1800s is not the job. Career next PRDV228. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 19:13 ET Catalog 116 after PRDV228 guest fold. ACE N. Step/model names not live. Reused late-1800s is not the job. Career next PRDV229. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 19:14 ET Catalog 117 after PRDV229 guest fold. ACE N. Last of 221–229 family. Structure/change-model names not live. Reused late-1800s is not the job. Career next PRDV230. Creative HOLDS ESL until PD done. Live exam BUS502. Chrome off until BUS502.
+- 2026-09-02 19:15 ET BUS502 certificate final passed 31/40 (77.5%) attempt 4151373 cmid 56060. Items not encoded. Live exam now BUS601 LMS 686. Chrome off until BUS601. Remaining not 0.
+- 2026-09-02 19:16 ET Catalog 118 after PRDV230 guest fold. ACE N. LMS 452 live. Not late-1800s family. Never send. Not operator HR. Career next PRDV231. Creative HOLDS ESL until PD done. Live exam BUS601. Chrome off until BUS601.
+- 2026-09-02 19:17 ET Catalog 119 after PRDV231 guest fold. ACE N. Plato phrase live; four names not. Career next PRDV304. Creative HOLDS ESL until PD done. Live exam BUS601. Chrome off until BUS601.
+- 2026-09-02 19:19 ET Catalog 120 after PRDV304 guest fold. ACE N. Last B&C PD. Bullwhip live. Career next PRDV251 then 401/402/420/430/433. Creative HOLDS ESL until PD done. Live exam BUS601. Chrome off until BUS601.
+- 2026-09-02 19:20 ET Catalog 121 after PRDV251 guest fold. ACE N. CIT PD. Not Forge. Career next PRDV401 then 402/420/430/433. Creative HOLDS ESL until PD done. Live exam BUS601. Chrome off until BUS601.
+- 2026-09-02 19:22 ET Catalog 122 after PRDV401 guest fold. ACE N. First of three JS courses (catalog lists 401/402 only). Career next PRDV402 then 420/430/433. Creative HOLDS ESL until CIT remainder done. Live exam BUS601. Chrome off until BUS601.
+- 2026-09-02 19:24 ET Catalog 123 after PRDV402 guest fold. ACE N. Second of three JS mini-courses (catalog lists 401/402 only). Career next PRDV420 then 430/433. Creative HOLDS ESL until CIT remainder done. Live exam BUS601. Chrome off until BUS601.
+- 2026-09-02 19:25 ET Catalog 124 after PRDV420 guest fold. ACE N. R+RStudio live. Not a Mac install. Career next PRDV430 then 433. Creative HOLDS ESL until CIT remainder done. Live exam BUS601. Chrome off until BUS601.
+- 2026-09-02 19:27 ET Catalog 125 after PRDV430 guest fold. ACE N. GenAI/prompt/ethics live. Vendor names not. Career next PRDV433 last CIT remainder. Creative HOLDS ESL until 433 closes. Live exam BUS601. Chrome off until BUS601.
+- 2026-09-02 19:28 ET Catalog 126 after PRDV433 guest fold. ACE N. Last CIT remainder. ChatGPT/Claude live. Hours collision encoded. CIT remainder done. Creative ESL HOLD lifted — ESL001. Career next BIO101. Live exam BUS601. Chrome off until BUS601.
+- 2026-09-02 19:30 ET Catalog 127 after ESL001 guest fold. ACE N. A2. Creative next ESL002–006. ESLHub hub-only. Stay off ENGL*. Career idle until ESL family done. Live exam BUS601. Chrome off until BUS601.
+- 2026-09-02 19:32 ET Catalog 128 after ESL002 guest fold. ACE N. Creative next ESL003–006. ESLHub hub-only. Stay off ENGL*. Career idle until ESL family done. Live exam BUS601. Chrome off until BUS601.
+- 2026-09-02 19:36 ET BUS601 PASSED 47/51 (92.16%) attempt 4151403. Live exam BUS602 LMS 687. Chrome off until BUS602. Creative ESL003–006. Career idle. Remaining not 0.
+- 2026-09-02 19:37 ET Catalog 129 after ESL003 guest fold. ACE N. B2. Creative next ESL004–006. ESLHub hub-only. Stay off ENGL*. Career idle until ESL family done. Live exam BUS602. Chrome off until BUS602.
+- 2026-09-02 19:38 ET Catalog 130 after ESL004 guest fold. ACE N. C1. Creative next ESL005–006. ESLHub hub-only. Stay off ENGL*. Career idle until ESL family done. Live exam BUS602. Chrome off until BUS602.
+- 2026-09-02 19:39 ET Catalog 131 after ESL005 guest fold. ACE N. C2. Creative next ESL006. ESLHub hub-only. Stay off ENGL* BUS*. Career idle until ESL family done. Live exam BUS602. Chrome off until BUS602.
+- 2026-09-02 19:40 ET Catalog 132 after ESL006 guest fold. ACE N. Live Proficient (C1). Numbered ESL 001–006 done. Creative next ESLHub packet-only (0 CEU, no exam). Stay off ENGL*. Career idle until ESLHub lands; Sci/Math later. Live exam BUS602. Chrome off until BUS602.
+- 2026-09-02 19:42 ET Creative closed ESLHub packet-only (LMS 1368, 0h/0 CEU, ACE N, no exam, no COURSE-SKILL). Catalog stays 132. Hub indexes ESL001–006 + two 5-course specs. Hub labels ESL006 Healthcare English (C2) vs course-card Proficient (C1) — keep both. ESL family including hub done. Career next BIO101 (Sci/Math). Creative parked. Stay off ENGL* CS120. Live exam BUS602. Chrome off until BUS602. Pack ARMED. Remaining not 0.
+- 2026-09-02 19:43 ET Catalog 133 after BIO101 guest fold. ACE catalog SAYA-0019 not in guest HTML. Skip ACE exams. Literacy not lab. Career next CHEM101 then MA006–008, MA120–122, PHYS101–102. Creative parked. Stay off ENGL*. Live exam BUS602. Chrome off until BUS602.
+- 2026-09-02 19:44 ET Catalog 134 after CHEM101 guest fold. ACE catalog SAYA-0028 not in guest HTML. Skip ACE exams. Weapons = origin-story only. Career next MA006–008 then MA120–122, PHYS101–102. Creative parked. Stay off ENGL*. Live exam BUS602. Chrome off until BUS602.
+- 2026-09-02 19:46 ET Catalog 135 after MA006 guest fold. ACE N. First of three Real World Math. Career next MA007–008 then MA120–122, PHYS101–102. Creative parked. Stay off ENGL*. Live exam BUS602. Chrome off until BUS602.
+- 2026-09-02 19:49 ET BUS602 FAILED 26/40 (65%) attempt 4151434. 14-day wait until 2026-09-16 7:48 PM ET — do not reopen. Live exam BUS603 LMS 696. Chrome off until BUS603. Career Sci/Math. Creative parked. Remaining not 0.
+- 2026-09-02 19:50 ET Catalog 136 after MA007 guest fold. ACE N. Second of three Real World Math. Career next MA008 then MA120–122, PHYS101–102. Creative parked. Stay off ENGL*. Live exam BUS603. Chrome off until BUS603. BUS602 14-day wait do not reopen.
+- 2026-09-02 19:51 ET Catalog 137 after MA008 guest fold. ACE N. Last of three Real World Math. Career next MA120–122 then PHYS101–102. Encode MA120 ACE catalog SAYA-0026 live vs catalog, do not invent. Creative parked. Stay off ENGL*. Live exam BUS603. Chrome off until BUS603. BUS602 14-day wait do not reopen.
+- 2026-09-02 19:52 ET Catalog 138 after MA120 guest fold. ACE catalog SAYA-0026 not in guest HTML. Skip ACE exams. Career next MA121–122 then PHYS101–102. Creative parked. Stay off ENGL*. Live exam BUS603. Chrome off until BUS603. BUS602 14-day wait do not reopen.
+- 2026-09-02 19:53 ET Catalog 139 after MA121 guest fold. ACE N. Hours collision pretty 15h vs catalog 35h. Career next MA122 then PHYS101–102. Creative parked. Stay off ENGL*. Live exam BUS603. Chrome off until BUS603. BUS602 14-day wait do not reopen.
+- 2026-09-02 19:54 ET Catalog 140 after MA122 guest fold. ACE N. Last of MA120–122. Career next PHYS101–102. Creative parked. Stay off ENGL*. Live exam BUS603. Chrome off until BUS603. BUS602 14-day wait do not reopen.
+- 2026-09-02 19:56 ET Catalog 141 after PHYS101 guest fold. ACE N. Projectiles/collisions = literacy not targeting. Career next PHYS102 last PHYS*. Creative parked. Stay off ENGL*. Live exam BUS603. Chrome off until BUS603. BUS602 14-day wait do not reopen.
+- 2026-09-02 19:57 ET Catalog 142 after PHYS102 guest fold. ACE N. Last PHYS*. Sci/Math sequence BIO/CHEM/MA006–008/MA120–122/PHYS* done. Career idle. Creative parked. Stay off ENGL*. Live exam BUS603. Chrome off until BUS603. BUS602 14-day wait do not reopen. Remaining not 0 — next family is yours.
+- 2026-09-02 19:59 ET Catalog 143 after ENGL095 guest fold. ACE N. Creative next cluster ENGL101+ENGL102 (over bar, not skipped), then 210/405/COMM411. Skip redo ARTH101 and PHIL102–304 only. Career idle. Stay ON ENGL*. Live exam BUS603. Chrome off until BUS603.
+- 2026-09-02 20:00 ET Catalog 144 after ENGL101 cluster-replace + ENGL102 guest fold. Both in bar. Creative next ENGL210 then 405, COMM411. Skip redo ARTH101 and PHIL102–304. Career idle. Stay ON ENGL*. Live exam BUS603. Chrome off until BUS603.
+- 2026-09-02 20:02 ET Catalog 145 after ENGL210 guest fold. ACE N. Native CLOs (the ENGL101 paste lives here). Creative next ENGL405 then COMM411. Skip redo ARTH101 and PHIL102–304. Career idle. Stay ON ENGL*. Live exam BUS603. Chrome off until BUS603.
+- 2026-09-02 20:03 ET BUS603 FAILED 27/40 (67.5%) attempt 4151448. 14-day wait until 2026-09-16 8:02 PM ET — do not reopen. Live exam BUS604 LMS 688. Chrome off until BUS604. Creative ENGL405 then COMM411. Career idle. Remaining not 0.
+- 2026-09-02 20:04 ET Catalog 146 after ENGL405 guest fold. ACE N. Do not dump literature. Creative next COMM411. Skip redo ARTH101 and PHIL102–304. Career idle. Live exam BUS604 LMS 688. Chrome off until BUS604. Do not reopen BUS603 or BUS602.
+- 2026-09-02 20:05 ET Catalog 147 after COMM411 guest fold. ACE N. Clustered 4.8KB; fat 48KB PACKET kept. Rest-family ENGL* + COMM411 in. Skip redo ARTH101 and PHIL102–304. Creative waiting next assign. Career idle. Live exam BUS604 LMS 688. Chrome off until BUS604. Do not reopen BUS603 or BUS602. Remaining not 0.
+- 2026-09-02 20:08 ET Big Boss: Creative next cluster HIST362 then HIST363 (SKILL_DRAFT ~20.3KB / ~20.1KB, just over bar, not skip). Same slugs. COMM411 already catalog 147. Career idle. Live exam BUS604 LMS 688. Chrome off until BUS604. Remaining not 0.
+- 2026-09-02 20:09 ET Catalog stays 147 after HIST362+HIST363 cluster-replace (4.5KB each; drafts were just over bar). Fat packets kept. Skip GEOG101/HIST103/POLSC101. Skip redo ARTH101 PHIL102–304. Creative waiting next assign. Career idle. Live exam BUS604 LMS 688. Chrome off until BUS604. Remaining not 0.
+- 2026-09-02 20:10 ET Big Boss: rest-family over-bar cluster done (HIST362+HIST363 in bar). Creative PARKED. Career idle. Remaining not 0 is exams. Live exam BUS604 LMS 688. Chrome off until BUS604. Pack ARMED.
+- 2026-09-02 20:10 ET Big Boss confirm: Creative PARKED (not waiting assign). Career idle. Remaining not 0 is exams. Live BUS604 LMS 688. Chrome off until BUS604. Do not reopen BUS603, BUS602, or BUS301. Pack ARMED.
+- 2026-09-02 20:20 ET BUS604 exam-close: PASSED 32/40 (80%) attempt 4151463 cmid 59444 LMS 688. Items not encoded. Live exam now BUS605 Strategic Project Management LMS 736. Chrome off until BUS605. Do not reopen BUS604, BUS603, BUS602, or BUS301. Creative PARKED. Career idle. Pack ARMED. Remaining not 0 (exams).
+- 2026-09-02 20:41 ET BUS605 exam-close: PASSED 33/40 (82.5%) attempt 4151482 cmid 66089 LMS 736. Items not encoded. Live exam now BUS606 Operations and Supply Chain Management LMS 703. Chrome off until BUS606. Do not reopen BUS605, BUS604, BUS603, BUS602, or BUS301. Creative PARKED. Career idle. Pack ARMED. Remaining not 0 (exams).
+- 2026-09-02 20:46 ET Catalog 151 after missed COURSE-SKILLs: BUS634, CS102, CS107, ECON102. Already in: BUS612/630/631/632/633/643/CS105. CS120 empty CLAIM skipped. ESLHub packet-only. PRDV003/004/006 skip-held. Live exam BUS606 LMS 703. Chrome off until BUS606. Creative PARKED. Career idle. Remaining not 0.
+- 2026-09-02 20:56 ET BUS606 exam-close: PASSED 29/40 (72.5%) attempt 4151501 cmid 61487 LMS 703. Items not encoded. Live exam now BUS607 Data-Driven Decision-Making LMS 737. Chrome off until BUS607. Do not reopen BUS606, BUS605, BUS604, BUS603, BUS602, or BUS301. Creative PARKED. Career idle. Pack ARMED. Remaining not 0 (exams).
+- 2026-09-02 21:04 ET Operator PAUSED exam closes. Do not sit BUS607 or any other certificate final until resume. Chrome FREE (no live exam). Holds: BUS301 after 2026-09-09 1:02 AM ET; BUS602 after 2026-09-16 7:48 PM ET; BUS603 after 2026-09-16 8:02 PM ET. BUS208 webcam skip. Next harvest: Creative deepens thin BUS632 (3.0KB), BUS633 (3.5KB), BUS652 (3.7KB), BUS653 (3.3KB), BUS654 (3.1KB) to 4–20KB bar, guest/curl. CS120 still Watchdog CLAIM empty. PRDV003/004/006 skip-held. Career idle unless assigned. Pack ARMED. Remaining exams not 0 (paused, not done). Never send.
+- 2026-09-02 21:05 ET Operator lifted harvest skip list. Exam closes still PAUSED (no BUS607, no finals). Chrome FREE. Creative: deepen thin BUS632/633/652–654 then PRDV003/004/006 then ESLHub COURSE-SKILL. Career: CS120 (LMS 500, not PRDV151) then SDV100 then GKT101–104. Do not harvest CS103 404, CUST105 alias of BUS107, COMM001/MA001 404 retired. CS120 harvest in progress on Career. Pack ARMED. Never send. Remaining exams not 0 (paused).
+- 2026-09-02 21:06 ET Catalog 152 after CS120 guest fold. ACE N. Distinct from PRDV151. Career next SDV100 then GKT101–104. Exam closes PAUSED. Chrome FREE. Remaining exams not 0 (paused).
+- 2026-09-02 21:06 ET Deepen-replaced BUS632 `grad-digital-marketing-mix-sem-campaign` (5.8KB, was 3.0KB thin). Same slug. Catalog stays 152 after CS120. Creative next BUS633 then BUS652–654 then PRDV003/004/006 then ESLHub skill. Exam closes PAUSED. Chrome FREE. Never send.
+- 2026-09-02 21:07 ET Catalog 153 after SDV100 guest fold. ACE catalog SAYA-0040 skip exam. Career next GKT101–104. BUS633 deepen already in bar (5.5KB). Creative next BUS652. Exam closes PAUSED. Chrome FREE. Remaining exams not 0 (paused).
+- 2026-09-02 21:08 ET Catalog 154 after GKT101 guest fold. ACE N. Not MA* as the course. Career next GKT102–104. Creative on BUS652+. Exam closes PAUSED. Chrome FREE. Remaining exams not 0 (paused).
+- 2026-09-02 21:09 ET Catalog 155 after GKT102 guest fold. ACE N. Off ENGL*. Career next GKT103–104. BUS652 deepen already in bar (5.7KB). Creative next BUS653. Exam closes PAUSED. Chrome FREE. Remaining exams not 0 (paused).
+- 2026-09-02 21:10 ET Catalog 156 after GKT103 guest fold. ACE N. Off ENGL*. Career next GKT104 last GKT*. Creative on PRDV003 (not BUS652) — thin BUS already in bar. Exam closes PAUSED. Chrome FREE. Remaining exams not 0 (paused).
+- 2026-09-02 21:11 ET Catalog 157 after GKT104 guest fold. Last GKT*. Career PARKED. Creative on PRDV003 (not BUS652). Exam closes PAUSED. Chrome FREE. Remaining exams not 0 (paused).
+- 2026-09-02 21:13 ET Catalog 161 after ESLHub + PRDV003/004/006. Creative PARKED. Career PARKED. Exam closes PAUSED. Remaining exams not 0 (paused). BB claimed 164/164 — this disk is 161 after those four (BUS615 leftover and BUS650 drafts not folded).
+- 2026-09-02 21:15 ET Catalog 163 after leftover BUS615 + BUS650. Creative PARKED. Career PARKED. Exam closes PAUSED. Remaining exams not 0 (paused). BB claimed 164/164 — this disk is 163.
+- 2026-09-02 22:09 ET Catalog 165 after COMM100 + COMM311. IMPLEMENT not SHIPPED. Exam closes PAUSED. KPI BLANK. Desk matrix + 17 one-liner job cards filed. Full catalog is yours to mentor; still 1–3 skills per ask.
+- 2026-09-02 22:13 ET First bind BUS210/501/204 on evenslouis.ca. Still 1–3. KPI BLANK. Not SHIPPED.
+- 2026-09-02 22:07 ET Desk bind: catalog **164** unique courses. COMM311 `undergrad-intercultural-hofstede-adapt-competence` + ESLHub `eslhub-student-resource-route` in speak-sheet. Job-card when-says filled. Skills remaining=0. Exam closes PAUSED. Not SHIPPED. Never send.

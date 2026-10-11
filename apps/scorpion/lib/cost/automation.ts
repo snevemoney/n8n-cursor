@@ -74,7 +74,19 @@ const DEFAULT_BUDGETS: BudgetDefinition[] = [
  * Initialize cost automation
  * Registers default resources and budgets on startup
  */
-export async function initializeCostAutomation(): Promise<void> {
+let initialization: Promise<void> | undefined;
+let budgetChecker: ReturnType<typeof setInterval> | undefined;
+
+export function initializeCostAutomation(): Promise<void> {
+  if (!initialization) {
+    initialization = initializeCostAutomationOnce().finally(() => {
+      initialization = undefined;
+    });
+  }
+  return initialization;
+}
+
+async function initializeCostAutomationOnce(): Promise<void> {
   try {
     const tracker = getCostTracker();
     
@@ -115,11 +127,13 @@ export async function initializeCostAutomation(): Promise<void> {
  * Checks budgets every hour and emits warnings if thresholds are exceeded
  */
 function startBudgetChecker(): void {
+  if (budgetChecker !== undefined) return;
+
   // Check budgets immediately
   checkBudgets();
   
   // Then check every hour
-  setInterval(() => {
+  budgetChecker = setInterval(() => {
     checkBudgets();
   }, 3600000); // 1 hour
 }
@@ -127,7 +141,11 @@ function startBudgetChecker(): void {
 /**
  * Check all budgets and emit warnings if needed
  */
+let checkingBudgets = false;
+
 async function checkBudgets(): Promise<void> {
+  if (checkingBudgets) return;
+  checkingBudgets = true;
   try {
     const tracker = getCostTracker();
     const budgets = await tracker.getBudgetStatus();
@@ -141,6 +159,8 @@ async function checkBudgets(): Promise<void> {
     }
   } catch (error) {
     console.error('[Cost Automation] Failed to check budgets:', error);
+  } finally {
+    checkingBudgets = false;
   }
 }
 

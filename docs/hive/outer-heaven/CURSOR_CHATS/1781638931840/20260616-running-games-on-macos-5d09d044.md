@@ -91,11 +91,11 @@ open "/Users/evenslouis/Downloads/DD_V07_25_MAC/DD_V07_25_MAC/Game.app"
 
 ## Related chats
 
+- [[20261008-game-opening-issue-3ebb8f71|Game opening issue]]
 - [[20260704-higgsfield-activation-in-after-effects-7897fefb|Higgsfield activation in After Effects]]
+- [[20260824-game-launch-issue-c9ec0d30|Game launch issue]]
+- [[20260830-daily-wealth-remotion-show-cf314c59|Daily wealth Remotion show]]
 - [[20260616-github-repository-access-0f6fff96|GitHub repository access]]
-- [[20260704-adobe-after-effects-skills-development-3b471e0e|Adobe After Effects skills development]]
-- [[20260525-clipengine-app-automation-capabilities-8faad87e|Clipengine app automation capabilities]]
-- [[20260812-for-all-the-repos-and-based-off-the-last-chat-bc-973a02a9|for all the repos and based off the last chat bc-6]]
 
 ## Canon
 

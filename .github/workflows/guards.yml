@@ -6,17 +6,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - run: |
-          git diff --name-only origin/${{ github.base_ref }}... | grep -E '\.env(\.|$)' \
-          && { echo "❌ Env files must not change in PRs"; exit 1; } || true
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...)
+          if printf '%s\n' "$CHANGED" | grep -Eq '\.env(\.|$)'; then
+            echo "❌ Env files must not change in PRs"
+            exit 1
+          fi
 
   api-contract-sync:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - run: |
-          A=$(git diff --name-only origin/${{ github.base_ref }}... apps/api | wc -l)
-          C=$(git diff --name-only origin/${{ github.base_ref }}... contracts/openapi.yaml | wc -l)
+          API_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}... -- apps/api)
+          CONTRACT_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}... -- contracts/openapi.yaml)
+          A=$(printf '%s\n' "$API_CHANGED" | grep -c . || true)
+          C=$(printf '%s\n' "$CONTRACT_CHANGED" | grep -c . || true)
           if [ $A -gt 0 ] && [ $C -eq 0 ]; then
             echo "❌ API changed without openapi.yaml update"
             exit 1
@@ -37,7 +46,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - run: |
-          L=$(git diff --name-only origin/${{ github.base_ref }}... | grep -E '^apps/lfai/|^workflows/lfai/' || true)
-          S=$(git diff --name-only origin/${{ github.base_ref }}... | grep -E '^apps/side/|^workflows/side/' || true)
-          [ -n "$L" ] && [ -n "$S" ] && { echo "❌ PR touches LFAI & SIDE. Split PRs."; exit 1; } || true
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...)
+          L=$(printf '%s\n' "$CHANGED" | grep -E '^apps/lfai/|^workflows/lfai/' || true)
+          S=$(printf '%s\n' "$CHANGED" | grep -E '^apps/side/|^workflows/side/' || true)
+          if [ -n "$L" ] && [ -n "$S" ]; then
+            echo "❌ PR touches LFAI & SIDE. Split PRs."
+            exit 1
+          fi

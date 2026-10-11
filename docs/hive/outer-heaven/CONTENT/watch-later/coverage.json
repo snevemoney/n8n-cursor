@@ -1,18 +1,25 @@
 {
-  "total_items": 15,
-  "items_in_ledger": 15,
+  "total_items": 80,
+  "items_in_ledger": 80,
   "coverage_pct": 100,
   "loggedIn": true,
   "blocker": null,
   "batch_size": 25,
-  "batch_count": 1,
+  "batch_count": 4,
   "batch_files": [
-    "batches/batch-001.md"
+    "batches/batch-001.md",
+    "batches/batch-002.md",
+    "batches/batch-003.md",
+    "batches/batch-004.md"
   ],
   "themes": {
-    "other": 10,
-    "claude-code-desktop": 2,
-    "knowledge-graph": 2,
+    "other": 59,
+    "claude-code-desktop": 10,
+    "models-research": 3,
+    "automation-workflows": 1,
+    "entertainment": 1,
+    "knowledge-graph": 4,
+    "creative-pipeline": 1,
     "mcp-connectors": 1
   },
   "read_protocol": "Researcher reads batches/batch-NNN.md in order; every item appears exactly once; report items_read == total_items before done. Never invent videos if signed_out."

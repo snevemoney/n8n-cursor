@@ -1,3 +1,7 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
+
+const spanContext = new AsyncLocalStorage<string[]>();
+
 /**
  * Distributed Tracing System
  * Simple tracing implementation for request tracking
@@ -17,7 +21,11 @@ export interface Span {
 
 class Tracer {
   private spans: Map<string, Span> = new Map();
-  private activeSpans: string[] = [];
+  private manualActiveSpans: string[] = [];
+
+  private get activeSpans(): string[] {
+    return spanContext.getStore() ?? this.manualActiveSpans;
+  }
 
   /**
    * Start a new span
@@ -159,7 +167,7 @@ class Tracer {
    */
   clear(): void {
     this.spans.clear();
-    this.activeSpans = [];
+    this.activeSpans.splice(0);
   }
 }
 
@@ -181,18 +189,23 @@ export async function trace<T>(
   fn: (spanId: string) => Promise<T>,
   tags: Record<string, string> = {}
 ): Promise<T> {
-  const t = getTracer();
-  const spanId = t.startSpan(name, tags);
-  
-  try {
-    const result = await fn(spanId);
-    t.endSpan(spanId);
-    return result;
-  } catch (error: any) {
-    t.setTag(spanId, 'error', 'true');
-    t.log(spanId, error.message, { error: error.message, stack: error.stack });
-    t.endSpan(spanId);
-    throw error;
-  }
+  // Each asynchronous branch owns its stack; sibling requests must not
+  // inherit spans merely because another request is still awaiting work.
+  return spanContext.run([...(spanContext.getStore() ?? [])], async () => {
+    const t = getTracer();
+    const spanId = t.startSpan(name, tags);
+    try {
+      return await fn(spanId);
+    } catch (error: unknown) {
+      t.setTag(spanId, 'error', 'true');
+      const message = error instanceof Error ? error.message : String(error);
+      t.log(spanId, message, {
+        error: message,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      throw error;
+    } finally {
+      t.endSpan(spanId);
+    }
+  });
 }
-

@@ -74,12 +74,20 @@ export class TimeUtils {
 
   // Add duration to timestamp
   static add(timestamp: string, duration: string): string {
-    return this.parse(timestamp).plus({ [duration]: 1 }).toISO();
+    return this.requireISO(this.parse(timestamp).plus({ [duration]: 1 }));
   }
 
   // Subtract duration from timestamp
   static subtract(timestamp: string, duration: string): string {
-    return this.parse(timestamp).minus({ [duration]: 1 }).toISO();
+    return this.requireISO(this.parse(timestamp).minus({ [duration]: 1 }));
+  }
+
+  private static requireISO(value: DateTime): string {
+    const result = value.toISO();
+    if (result === null) {
+      throw new Error(`Invalid timestamp: ${value.invalidExplanation || value.invalidReason || 'unknown'}`);
+    }
+    return result;
   }
 
   // Get time difference in seconds
@@ -309,11 +317,13 @@ export class ObjectUtils {
 
     if (this.isObject(target) && this.isObject(source)) {
       for (const key in source) {
-        if (this.isObject(source[key])) {
-          if (!target[key]) Object.assign(target, { [key]: {} });
-          this.deepMerge(target[key], source[key]);
+        const sourceValue = source[key];
+        if (this.isObject(sourceValue)) {
+          const existing = target[key];
+          const nested = this.isObject(existing) ? existing : {};
+          Object.assign(target, { [key]: this.deepMerge(nested, sourceValue) });
         } else {
-          Object.assign(target, { [key]: source[key] });
+          Object.assign(target, { [key]: sourceValue });
         }
       }
     }
@@ -322,8 +332,8 @@ export class ObjectUtils {
   }
 
   // Check if value is an object
-  static isObject(item: any): boolean {
-    return item && typeof item === 'object' && !Array.isArray(item);
+  static isObject(item: unknown): item is Record<string, unknown> {
+    return item !== null && typeof item === 'object' && !Array.isArray(item);
   }
 
   // Get nested property value
@@ -444,27 +454,10 @@ export class ArrayUtils {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      // Both indexes are within the dense copy: 0 <= j <= i < length.
+      [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
     }
     return shuffled;
   }
 }
-
-// Export all utility classes
-export {
-  CurrencyUtils,
-  TimeUtils,
-  UuidUtils,
-  ValidationUtils,
-  StringUtils,
-  ObjectUtils,
-  ArrayUtils
-};
-
-
-
-
-
-
-
 

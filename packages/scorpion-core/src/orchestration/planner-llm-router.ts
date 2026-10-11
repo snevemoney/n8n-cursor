@@ -7,7 +7,7 @@
 import { runModel, type LLMRequest, type LLMResponse } from '../llm/modelAdapter';
 
 export interface PlannerLLMConfig {
-  provider: 'ollama' | 'openai' | 'auto';
+  provider?: 'ollama' | 'openai' | 'auto';
   model?: string;
   fallbackProvider?: 'openai' | 'ollama';
   fallbackModel?: string;
@@ -77,20 +77,11 @@ export async function routePlannerLLM(
 
   // Helper to run with specific source
   const runWithSource = async (source: 'ollama' | 'openai', modelName: string): Promise<LLMResponse> => {
-    const originalSource = process.env['SCORPION_MODEL_SOURCE'];
-    process.env['SCORPION_MODEL_SOURCE'] = source;
-    try {
-      return await runModel({
-        ...request,
-        model: modelName
-      });
-    } finally {
-      if (originalSource) {
-        process.env['SCORPION_MODEL_SOURCE'] = originalSource;
-      } else {
-        delete process.env['SCORPION_MODEL_SOURCE'];
-      }
-    }
+    return runModel({
+      ...request,
+      provider: source,
+      model: modelName
+    });
   };
 
   // Auto mode: prefer cloud for reliability

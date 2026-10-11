@@ -64,7 +64,7 @@ Walk these two ingested tapes independently. Write one take file per video. Do n
 - `docs/hive/outer-heaven/CONTENT/job-cards/`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/big-boss.md`
 - `docs/hive/outer-heaven/CONTENT`
-- `docs/hive/outer-heaven/CONTENT/job-cards/INDEX.md`
+- `docs/hive/outer-heaven/CONTENT/job-cards/Agent Roles.md`
 - `docs/hive/outer-heaven/CONTENT/job-cards/big-boss.md`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/0YXjEzFfft8/big-boss.md`
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes/B4p9O2P2a3c/big-boss.md`

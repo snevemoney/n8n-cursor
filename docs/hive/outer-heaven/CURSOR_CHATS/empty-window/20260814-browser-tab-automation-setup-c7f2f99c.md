@@ -143,7 +143,7 @@ Your move: keep, kill, or pick desks to read. I will not merge until you say so.
 - [[20260815-wait-for-me-to-open-browser-tab-for-you-to-run-w-c7f2f99c|wait for me to open browser tab for you to run wit]]
 - [[CURSOR_CHATS/n8n-cursor/20260814-browser-tab-automation-setup-c7f2f99c|Browser tab automation setup]]
 - [[20260813-browser-tab-automation-setup-c7f2f99c|Browser tab automation setup]]
-- [[20260814-you-are-wealth-manager-slug-wealth-manager-in-us-db31a27e|You are Wealth Manager (slug: wealth-manager) in /]]
+- [[20260821-project-structure-and-naming-01a6b95f|Project structure and naming]]
 
 ## Canon
 

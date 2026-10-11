@@ -106,10 +106,10 @@ Write-up: `docs/hive/outer-heaven/CONTENT/knowledge/upgrades/nate-82/DRY-RUN-SIX
 ## Related chats
 
 - [[20260814-evens-continue-until-everything-is-completed.-sc-f1454b33|Evens: \u201ccontinue until everything is complete]]
+- [[CURSOR_CHATS/empty-window/20260817-evens-nate-s-site-from-https-www.youtube.com-wat-79ae584a|Evens: Nate\u2019s site from https://www.youtube.c]]
+- [[20260820-evens-what-should-the-agents-do-now-that-they-ar-d99177e2|Evens: **\u201cwhat should the agents do now that ]]
 - [[20260814-evens-said-continue-after-the-nate-82-upgrade-bo-1e2fc604|Evens said \u201ccontinue\u201d after the Nate-82 ]]
 - [[20260814-evens-said-continue.-last-wired-slice-was-checka-36e4b549|Evens said \u201ccontinue.\u201d Last wired slice ]]
-- [[20260814-evens-wants-the-x-clip-listen-finished-then-a-cl-cb3a29a6|Evens wants the X-clip listen finished, then a cle]]
-- [[20260814-evens-asked-test-prospects-leads-clients-buyers--7c7a4163|Evens asked: test prospects, leads, clients, buyer]]
 
 ## Canon
 

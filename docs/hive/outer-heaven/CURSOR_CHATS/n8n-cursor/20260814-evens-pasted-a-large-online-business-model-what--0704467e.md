@@ -63,7 +63,7 @@ Greppable index: `docs/hive/outer-heaven/CONTENT/job-cards/BUSINESS-MODEL-FIT.md
 - `docs/hive/outer-heaven/CONTENT/OPERATOR_FOCUS.json`
 - `docs/hive/outer-heaven/CONTENT/watch-later/STEAL_SHEET.md`
 - `docs/hive/outer-heaven/CONTENT/job-cards/PARKED-SKILLS-FROM-TAPE.md`
-- `docs/hive/outer-heaven/CONTENT/job-cards/INDEX.md`
+- `docs/hive/outer-heaven/CONTENT/job-cards/Agent Roles.md`
 - `docs/hive/outer-heaven/CONTENT/AGENT_TOOL_INVENTORY.json`
 - `scripts/hive/product-state.py`
 - `apps/scorpion`

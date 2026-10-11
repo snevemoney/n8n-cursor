@@ -70,7 +70,7 @@ Steal is plan mode, one folder, skills as instruction packs, and one landing per
 - `docs/hive/outer-heaven/CONTENT/job-cards/takes`
 - `docs/hive/outer-heaven/CONTENT/job-cards/LESSONS-FROM-TAPE.md`
 - `scripts/hive/cursor-spawn-desks.py`
-- `docs/hive/outer-heaven/CONTENT/job-cards/INDEX.md`
+- `docs/hive/outer-heaven/CONTENT/job-cards/Agent Roles.md`
 - `scripts/hive/grok-skills/click-live-site.md`
 - `scripts/hive/grok-skills/session-bootstrap.md`
 - `scripts/hive/grok-skills`

@@ -167,7 +167,7 @@ Keep CE **axioms/gates**; do **not** run daily money path in CE UI.
 | CE-without-CE money path | [[METHODS/business-ce-without-ce-money-path]] |
 | CE feature inventory → agents | SoT ``~/.grokbot/research-packets/ai-partner-scoring-prototype-ladder/CE-FEATURE-TO-AGENTS.md`` (CONTENT = pointer) |
 | Flywheel (condensed) | SoT ``~/.grokbot/research-packets/ai-partner-scoring-prototype-ladder/CE-FLYWHEEL-TO-AGENTS.md`` · METHOD [[METHODS/business-ce-flywheel-to-agents]] |
-| Scoring / ladder pack | [[CONTENT/ai-partner-scoring-prototype-ladder/INDEX]] |
+| Scoring / ladder pack | [[CONTENT/ai-partner-scoring-prototype-ladder/Service Design]] |
 
 **Rule:** read-only CE study · no CE API mutate · `/pro` only for formal Tier-3 ledger buttons.
 
@@ -177,7 +177,7 @@ Keep CE **axioms/gates**; do **not** run daily money path in CE UI.
 
 ## Business kits
 
-[[CONTENT/business-kits/INDEX]] — 10 AI Partner kits; working cheats `~/.grokbot/cheat-sheets/`.
+[[CONTENT/business-kits/Business Playbooks]] — 10 AI Partner kits; working cheats `~/.grokbot/cheat-sheets/`.
 
 ## Surface posture
 

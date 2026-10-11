@@ -87,7 +87,7 @@ NEXT: escalate
 - [[20260815-evens-asked-do-our-system-and-agents-work-this-w-49b662c5|Evens asked: do our system and agents work this wa]]
 - [[20260814-evens-said-yes-to-run-the-six-dry-runs.-execute--52e48f78|Evens said yes to **run the six** dry-runs. Execut]]
 - [[20260815-you-are-working-in-users-evenslouis-n8n-cursor-f-3f91f777|You are working in /Users/evenslouis/n8n-cursor fo]]
-- [[20260814-evens-said-continue.-last-wired-slice-was-checka-36e4b549|Evens said \u201ccontinue.\u201d Last wired slice ]]
+- [[20260816-read-the-already-open-desk-internal-host-os-page-a03d05c0|Read the already-open Desk / internal host OS page]]
 
 ## Canon
 

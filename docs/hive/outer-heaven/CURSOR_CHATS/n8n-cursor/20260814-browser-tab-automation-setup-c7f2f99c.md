@@ -166,7 +166,7 @@ Consultant + Creative + GTM. Input: their profile, leak, four-blank, “what I w
 - [[20260814-wait-for-me-to-open-browser-tab-for-you-to-run-w-c7f2f99c|wait for me to open browser tab for you to run wit]]
 - [[CURSOR_CHATS/empty-window/20260814-browser-tab-automation-setup-c7f2f99c|Browser tab automation setup]]
 - [[20260813-browser-tab-automation-setup-c7f2f99c|Browser tab automation setup]]
-- [[20260815-you-are-working-in-users-evenslouis-n8n-cursor-f-18abc709|You are working in /Users/evenslouis/n8n-cursor fo]]
+- [[20260821-project-structure-and-naming-01a6b95f|Project structure and naming]]
 
 ## Canon
 

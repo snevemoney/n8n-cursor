@@ -16,9 +16,9 @@ last_verified: 2026-08-12
 
 | Half | Path | Owns |
 |------|------|------|
-| Scoring + POSITION | `~/.grokbot/research/consultant-scoring-position-method-20260812.md` · `METHODS/consultant-scoring-position-method.md` | MUST→scorecard advance, POSITION pack, #14 brand, diagnosis-vs-install |
-| Ladder + SKU packaging | `~/.grokbot/research/gtm-playbook-ladder-sku-packaging-20260812.md` · `METHODS/gtm-playbook-ladder-sku-packaging.md` | Four blanks, rung packaging, demos, gate sequence |
-| CAD economics | `~/.grokbot/research/money-desk-service-ladder-economics-draft-20260812.md` · `METHODS/business-service-ladder-economics.md` | Bands + ≤40% + early retainer |
+| Scoring + POSITION | `~/.grokbot/research/consultant-scoring-position-method-20260812.md` · [[00_Outer_Heaven/METHODS/consultant-scoring-position-method]] | MUST→scorecard advance, POSITION pack, #14 brand, diagnosis-vs-install |
+| Ladder + SKU packaging | `~/.grokbot/research/gtm-playbook-ladder-sku-packaging-20260812.md` · [[00_Outer_Heaven/METHODS/gtm-playbook-ladder-sku-packaging]] | Four blanks, rung packaging, demos, gate sequence |
+| CAD economics | `~/.grokbot/research/money-desk-service-ladder-economics-draft-20260812.md` · [[00_Outer_Heaven/METHODS/business-service-ladder-economics]] | Bands + ≤40% + early retainer |
 | Criteria | `~/.grokbot/research/prospect-qualification-criteria-20260812.md` | MUST gates |
 | Deep pack | `~/.grokbot/research-packets/ai-partner-scoring-prototype-ladder/` | PACKET · WORKFLOWS · AGENT_SKILLS · CE maps |
 
@@ -126,7 +126,7 @@ Vault target: `METHODS/ai-partner-one-ladder-playbook.md`
 - Consultant scoring/position: [[METHODS/consultant-scoring-position-method]]
 - Money Desk economics (SIGNED): [[METHODS/business-service-ladder-economics]]
 - Criteria: [[METHODS/business-prospect-qualification-criteria]]
-- Pack: [[CONTENT/ai-partner-scoring-prototype-ladder/INDEX]]
+- Pack: [[CONTENT/ai-partner-scoring-prototype-ladder/Service Design]]
 - Money use cases → rung: [[CONTENT/ai-partner-money-usecases-20260812/INDEX]] · SoT `~/.grokbot/research-packets/ai-partner-money-usecases-20260812/` · [use-case-to-sku](sand-workflow:use-case-to-sku)
 - CE method: [[METHODS/business-ce-without-ce-money-path]] · [[METHODS/business-ce-flywheel-to-agents]]
 

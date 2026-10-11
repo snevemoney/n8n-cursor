@@ -1,246 +1,202 @@
-# Master steal sheet
+# STEAL_SHEET (Outer Heaven watch-later)
 
-**One catalog.** Watch Later videos **and** X bookmarks append here. Do **not** create `x-bookmarks/STEAL_SHEET.md`.
+SSOT mirror for steal clusters. Additive appends only.
 
-**Stack:** Cursor + Grok Bot. Workflow = funnel.  
-**Router:** `website-offer-funnel` Path A (named client) / B (volume list) / C (our surface).  
-**Skill:** `steal-usecases` · JSON: `business-types.json`  
-**$ on tape / tweet:** UNVERIFIED. Steal the machine, not the dashboard.
+# 2026-09-03 live X bookmarks
 
-**Source tags:** `yt:{videoId}` · `x:{tweetId}`
 
-Researcher must **append** this file after every L2 video, Watch Later batch, or X-bookmark true-read. Thesis-only = not done.  
-**Whole argument (not just machines):** [DEEP_SUMMARIES.md](DEEP_SUMMARIES.md) — videos = per-video; bookmarks = **clusters**, not one essay per tweet.
+### X bookmarks live 2026-09-03 (box user-X) — clusters
+Source: FACT live pull `user-X` @snevemoney count=99; delta vs 2026-08-27 = +85/−86 IDs. Packet: `/workspace/research/packets/x-bookmarks/20260903-live/`
 
----
+#### n8n: agent outside workflow (uses workflows as tools)
+- FACT posts: @JulianGoldieSEO (agent uses workflows as tools; describe-outcome → AI builds workflow).
+- Steal: keep research/ops script-first; n8n = tool surface for one agent, not an agent-in-every-node. Aligns Grok-first doctrine.
+- ICP: `hive-os` automation layer.
+- Do not: webhook-spam research · rebuild estate as n8n-first · treat “AI builds workflow” as auto-prod without HITL.
 
-## Business types we will take (ICP catalog)
+#### Grok Bot multi-agent lab peers
+- FACT: peer labs (Milo clinic, Hermes compare, SpaceXAI “intern” framing, agents-on-Grok-VM rate-limit tip).
+- Steal: validate max-3-streams + desk roles; rate-limit → install coding agents on Grok VM (already our pattern).
+- $ / signup % / “killed Grok Bot” claims = UNVERIFIED marketing.
+- Do not: mint 68-subagent packs · auto cold-DM outreach (building-mode) · install OpenMausBot/Fable as hive face.
 
-These are the kinds of businesses the hive is allowed to hunt, brief, and install for. Tag every prospect with an `icp_id`.  
-**Default hunt city:** Greater Montreal (unless Evens names another).  
-**Run today:** open [../icp-runbooks/{icp_id}.md](../icp-runbooks/INDEX.md) — skill `icp-runbook`. **Log:** [HUNT_LOG.md](../icp-runbooks/HUNT_LOG.md).
+#### Open Bot / CopilotKit (open Grok-like harness)
+- FACT named open-source harness. Watch only.
+- Steal: none until operator yes via awesome-skill-import-gate.
+- Do not: install as second desktop / replace Grok Bot.
 
-| icp_id | Who | Pain we steal | Default machine | Path | Runbook |
-|--------|-----|---------------|-----------------|------|---------|
-| `local-clinic` | Dentists, med-spa, physio, vet | Reviews sit unused; book path weak | `review-to-book` | A | [local-clinic](../icp-runbooks/local-clinic.md) |
-| `local-pro` | Plumber, HVAC, salon, home services (trade) | Missed calls, no-shows, email-only | `private-book-install` + speed-to-lead | A | [local-pro](../icp-runbooks/local-pro.md) |
-| `restaurant` | Independent restaurant | Phone booking chaos; we do **not** auto-dial | missed-call / book CTA; voice = `ask-principal` only | A | [restaurant](../icp-runbooks/restaurant.md) |
-| `exec-coach` | Exec coaches: VP→consulting, numbered promise | Vague “coaching site” | `orchestrated-site-brief` | A/C | [exec-coach](../icp-runbooks/exec-coach.md) |
-| `creator-longform` | Podcasters, YouTubers, course people | Long ep dies after publish | `clip-factory` | A or C | [creator-longform](../icp-runbooks/creator-longform.md) |
-| `agency-delivery` | Agency owners drowning in client delivery | No kit, no aha | `client-delivery-kit` (Client Pack analog) | A/C | [agency-delivery](../icp-runbooks/agency-delivery.md) |
-| `industrial-smb` | Manufacturing, castings, robotics, B2B ops | Need lists + site, not a dial factory | `list-anneal` → Path A | B→A | [industrial-smb](../icp-runbooks/industrial-smb.md) |
-| `mktg-software` | Marketing **software** (not agencies) | Exclusion nuance; install on leak not list-as-SKU | `list-anneal` | B | [mktg-software](../icp-runbooks/mktg-software.md) |
-| `owner-coach-fitness` | Fitness / wellness coach with leaky book | Newsletter ≠ intake | `private-book-install` | A | [owner-coach-fitness](../icp-runbooks/owner-coach-fitness.md) |
-| `law-adj` | Solo lawyer, boutique consult rails | Apply 404 / no book | `private-book-install` | A | [law-adj](../icp-runbooks/law-adj.md) |
-| `us` | Evens / hive OS | Our desk, wiki, paid slice | internal machines | C | [us](../icp-runbooks/us.md) |
+#### Claude Code mega-pack + Obsidian vault loop
+- FACT: posts cite 68 subagents / 286 skills; vault capture→context→draft→review→commit; review agent before live vault write; Boris Cherny “delete 80% of system prompt.”
+- Steal: review-before-write already = Outer Heaven layers; lean prompts; start one plan + one rules pack.
+- WORKAROUND: Cursor + Grok desks. Claude desktop / Ollama-into-Claude = BLOCKED.
+- Do not: dump all COURSE-SKILLs · dual Claude desktop.
 
-**Not an ICP (kill):** OnlyFans / IG farms · betting / prediction markets · “I do AI” shops · generic landing mills · outsourced auto-dial factories.
+#### Cursor `/goal` long-lived objective
+- FACT @cursor_ai changelog. Steal: long CloudAgent / session prompts name done-when + keep-going until complete. Enrich session-bootstrap.
 
----
+#### Design / cinematic / Fable / Framer Agent
+- Steal UI: DESIGN.md for agents, shadcn terminal UIs, cinematic site tutorials → Remotion + video-to-website known-good.
+- Fable 5.1 / OpenMausBot / Claude Fable tutorials = NO install (existing Fable don’t).
 
-## Machines we run (SKU catalog)
+#### Operator correction 2026-09-03 — keep-outs loosened
+- Open Bot / CopilotKit / tool-watch = research-ok (import-gate propose, not auto-block).
+- Hard locks only: second desktop as hive face + Tier-3 client send.
+- Tweet $/% = UNVERIFIED labels, not reading bans.
 
-| steal_as | What it is | Path | Hive skills | Source |
-|----------|------------|------|-------------|--------|
-| `review-to-book` | New Google review → HITL thank-you + book link → 5★ referral ask | A | lead-web-find → MUST → private-book + warm-draft-hitl | `yt:hGdG-04TkDs` |
-| `clip-factory` | Long ep → pick hooks → cut → captions/thumbs/copy → human ships | C or A | Creative + Publishing; slice-build | `yt:hGdG-04TkDs` |
-| `orchestrated-site-brief` | ICP + numbered promise + tone + fear + CTA; 3–5 passes | C | session-bootstrap + slice-build | `yt:hGdG-04TkDs` |
-| `cinematic-recipe` | Taste = big model; drop 3 loved motion sites; hero = video not fake 3D; premium without a named ref is a fail (D1–D7) | C | session-bootstrap + slice-build + Creative | `x:2077199463278395732` `x:2074158868142194898` `x:2082070276112564256` `yt:FFWtxjvW2ts` |
-| `seven-principle-anti-slop` | Brand + 3Ps + scroll lock + named inspiration + grab components + mobile + screenshot-verify. Merge, not a new skill. | C | cinematic-recipe + seedance-site + ingest-is-steps | `yt:FFWtxjvW2ts` |
-| `speed-positioning` | Competitors → 3 options + 2-week calendar + Loom, same/next day | A | Researcher + Consultant + GTM | `yt:hGdG-04TkDs` |
-| `demand-validate` | Public gigs >$500 with completed jobs; can we do ~80%? | B | Researcher → money-now-pick3 | `yt:hGdG-04TkDs` |
-| `morning-ceo-desk` | Mail + calendar digest; visible→efficient→automatic→then delegate | C | morning-day-plan | `yt:TL8V41Ea6oM` |
-| `folder-to-deck` | Notes folder → deck/page | C | Cursor Agent on folder | `yt:TL8V41Ea6oM` |
-| `interview-gym` | Stay in character, then coach, then harder persona | C | Career Strategist | `yt:TL8V41Ea6oM` |
-| `wiki-ingest` | Raw → wiki → index → log → lint | C | wiki-ingest | `yt:sboNwYmH3AY` `x:2074304050880012736` |
-| `agent-job-card` | One page per agent: you own X, you never do Y — before the agent works | C | wiki-ingest + Librarian | `x:2074304050880012736` |
-| `session-bootstrap` | One long dump, then short loops | C | session-bootstrap | `yt:eMPWBunaOic` |
-| `competitive-teardown` | Scrape two channels, same job, score the artifact | C | Researcher packet | `yt:eMPWBunaOic` |
-| `golden-test-loop` | Untrusted workers; keep only what a cheap check passes | C | Watchdog + Forge | `yt:kwSVtQ7dziU` |
-| `click-live-site` | After every site ship: agent opens the URL and clicks. No “looks good.” | C | Watchdog + Forge (golden-test on the live page) | `x:2075635283211772279` `x:2074046218741678570` |
-| `client-delivery-kit` | Transcript/notes → interactive deck for *their* clients | A/C | paid-slice or slice-build; analog of Client Pack | `yt:IVx8OSMbTss` |
-| `paid-slice` | Pain → name → thin V1 → Stripe HITL → preview≠domain → aha | C | paid-slice-funnel | `yt:IVx8OSMbTss` |
-| `interview-to-desk` | Interview + triangle → one TEAM task | C | interview-to-desk | `yt:EzQAgnjTq2k` `yt:IWdvG9Up8Mc` |
-| `context-docs` | Write judgment Gmail never captured | C | wiki-ingest + OPERATOR_MEMORY | `yt:EzQAgnjTq2k` |
-| `ask-principal` | Act → ask Evens → resume; no cards | C | ask-principal | `yt:whIp1SOahOM` |
-| `playbook-before-send` | Certify playbook before anyone is approved to send | A | outbound-playbook-funnel | `yt:nS2FrgXN-EY` |
-| `same-day-qa` | Score every send/call that day | A | outbound-playbook-funnel | `yt:nS2FrgXN-EY` |
-| `list-anneal` | 50 → 60–70% great → exclusions → people → 3–5 to Path A | B | list-anneal-funnel | `yt:ESIxitOLYoQ` `yt:nS2FrgXN-EY` |
-| `slice-build` | Bible → plan → one system | C | slice-build | `yt:mjg_JUMar04` |
-| `checkout-proof` | Real pay in one sitting; warm network first | C | paid-slice-funnel | `yt:I7mpF7_pnPM` |
-| `one-channel-deep` | One surface, spaced posts, warm net | C | outcome-offer-funnel | `yt:I7mpF7_pnPM` `yt:hGdG-04TkDs` |
-| `missed-call-book` | Missed call → book CTA + HITL; no auto-voice book | A | private-book-install + ask-principal | `yt:whIp1SOahOM` |
-| `motion-pipeline` | Still → frames → clip → grade; previs before a long render | C | Creative Studio (Higgsfield/AE we have) | `x:2075192866553413944` `x:2077016770939122149` `x:2074108067361280173` |
 
----
+## Keep-outs policy overlay (2026-09-03 — retroactive)
+See `topics/signal-keepouts-loosen.md`. **Kill / quarantine** rows for fraud, farms, betting, jailbreak, NSFW product stay. Rows that only said “other AI vendors / rebuild Claude / do not install X tool” are **not** a research ban — hive face stays Grok+Cursor; tools = research-ok + import-gate. Soften “Do not: install Open Bot / Fable tutorials” in 2026-09-03 clusters to: no second OS; research OK.
 
-## Kill / quarantine (never become a SKU)
 
-| On tape | Why |
-|---------|-----|
-| IG Device Farm / OTP / fake followers / OFM mass-DM | ToS + fraud · `13eo8dWa1Gw` |
-| Betting / Polymarket helper | Not a hive lane · `I7mpF7_pnPM` |
-| Auto-dial factory as the product | HITL · `nS2FrgXN-EY` |
-| Auto-book without callback | `ask-principal` · `whIp1SOahOM` |
-| Generic landing / basic content / “I do AI” | Commodity · `hGdG-04TkDs` |
-| Other AI vendors as our stack | Cursor + Grok only |
-| YouTube $ / tweet $ as proof | UNVERIFIED · `yt:*` · `x:2072255044544512004` `x:2071996301311381827` `x:2082070276112564256` |
-| Jailbreak / watermark bypass / NSFW LoRA | Not our work · `x:2086976486771155361` `x:2074438871526379532` `x:2072980099050410259` |
-| Cold postcard / sold-home scrape mail | No-send · `x:2072687270709309589` |
-| Game studio / sprite-engine SKU this cycle | Themes only · leisure cluster |
-| Rebuild Claude / Codex / menu-bar HITL inside Grok | Habit steal only |
-| 8k-node Obsidian theater | Vault + packets · `x:2072932020003496380` |
+### X bookmarks deep repass 2026-09-03 — tools/repos/harness (cluster)
+Packet: `/workspace/research/packets/x-bookmarks/20260903-live/repass/` · TOOLS_REPOS.md
+- OpenBot/OpenMausBot: RESEARCH-OK import-gate propose; steal gateway+HITL+roster; BLOCKED as hive face.
+- iFixAI + Pixeltable: RESEARCH-OK propose; builder≠judge; media catalog WORKAROUND Higgsfield/Remotion.
+- Cursor /goal harness: enrich session-bootstrap / jump-surface / agent-harness-loops.
+- Design packs: DESIGN.md one-page tokens; Remotion WORKAROUND; Fable face keep-out.
+- n8n agent-as-tools concrete steps in n8n-kit-researcher.
+- Awesome learn list: catalog/reference only; no new desks.
 
-**Legal shape only (OFM):** many surfaces → one URL. Publishing Engine, no farms.
+### VIDEO REPASS 2026-09-03 (Operator Evens — deep watch)
+Packet: `/workspace/research/packets/x-bookmarks/20260903-live/repass/` · `VIDEO_FINDINGS.md` · shots under `shots/` · YT `EWvNQjAaOHw` (+ `kwSVtQ7dziU`, `96jN2OCOfLs`).
 
----
+- **Karpathy How I use LLMs** (X remix of YT): harness = tool inject into context; verify agent code; Cursor Composer goal→shell→Accept. Slogan Agents→Loops→Harness = packaging.
+- **Open Bot:** `/outreach` from recency card; draft-not-send. Research-ok / import-gate — not hive face.
+- **n8n Agents:** one agent + workflows-as-tools + channels + MCP + approval. Scripts-first research.
+- **Gipp clinic UI:** signature gate + narrow missions + crew ticker (inspiration). Health fiction.
+- **Fable cinematic:** Remotion/video-to-website WORKAROUND; video hero; $50k UNVERIFIED; no Fable install.
+- **Artifacts MCP:** viewer-scoped connectors; waiting-on-data empty state.
+- **Cursor `/goal`:** long-lived done-when; HITL for unattended.
+- **brainless shadcn:** Claude/Codex/Grok terminal components + agent install prompts.
+- **Loops→graphs:** loop corrects one unit; graph promotes accepted units to rules.
+- **Boris / Claude Code:** delete 80% prompt via ablation; product overhang; verification > tips; lean prompts on Cursor+Grok (Claude desktop blocked).
 
-## Per-video extract (all 15)
+Hard locks unchanged: no second desktop as hive face · Tier-3 no send · $ UNVERIFIED.
 
-### 1. Manila AI OFM — `13eo8dWa1Gw` · QUARANTINE
-- **Named business:** OnlyFans traffic via farmed IGs.
-- **Steal:** stage names only (identity / warmup / message / conversion) for *legal* multi-surface.
-- **Do not:** OTP, proxies-as-identity, fake followers, mass-DM.
+#### Deep repass COMPLETE 2026-09-03
+- Packet `20260903-live/repass/`. Karpathy remix = yt:EWvNQjAaOHw (not a separate harness lecture).
+- RESEARCH-OK propose: OpenBot · OpenMausBot · iFixAI · Pixeltable — import-gate only, not hive face.
 
-### 2. Swadia 4 agents — `TL8V41Ea6oM`
-- **Steal:** `morning-ceo-desk` · `folder-to-deck` · telescope+microscope research · `interview-gym`.
-- **ICP:** none to hunt — this is *our* desk (icp `us`).
+## Cluster — skill-fleet / always-on workers (2026-09-06 PLATFORM deepen)
+**Source:** CapEx `fleet-skill-router-capex-20260906` + packet `fleet-skill-workers-20260906/PLATFORM_ADDENDUM.md` (Claude/Cursor/Codex/Grok public docs). **skill fire:** steal-usecases (research-signals). Labels: FACT where docs named; Install paths FACT; hive map INFERENCE.
 
-### 3. Nate wiki — `sboNwYmH3AY`
-- **Steal:** `wiki-ingest` (36 sources → pages + index + log).
-- **ICP:** `us`. YouTuber knowledge businesses can be *clients* for wiki-as-a-service later — not this week.
+| machine | who sighs | steal as | kill-do-not | lane tag |
+|---|---|---|---|---|
+| Skill = method; routine/automation = schedule | Operator drowning in 400 skills with no fire | `skill-recall-by-use` | Dump full catalog into chat; wake all 17 | hive-os |
+| Quiet-if-empty (Codex Triage auto-archive) | Desk spam when 0 delta | hive smarter-loop / signals-close quiet rule | Ack spam / filler "(no change.)" | hive-os |
+| One skill per fire deep pass | CapEx Phase 1 proof / usage log empty | `skill-recall-by-use` + this sheet | Fan-out cluster workers before Mon Sep 8 | hive-os |
+| Cursor `/goal` + subscriptions for repo loops | Long PR / CI babysit without laptop open | `agent-harness-loops` · `session-bootstrap` | Dual-cron same job on Cursor+Grok | hive-os |
+| Claude `/goal` `/loop` `/schedule` vocab | Need loop types without Claude desktop OS | `agent-harness-loops` (WORKAROUND) | Claude desktop as second hive face | hive-os |
+| Codex Skills + Automations → Triage inbox | Recurring report with human review queue | `skill-recall-by-use` (pattern only) | Codex as default hive OS | hive-os |
+| Grok named bots + routines + chief-of-staff | Always-on OS without 24/7 17-desk burn | Big Boss CapEx router · Researcher Phase 1 | Re-arm 7am clone armies; invent 80% KPI | hive-os |
 
-### 4. Dream Labs prompting 2.0 — `eMPWBunaOic`
-- **Steal:** `session-bootstrap` · `competitive-teardown` (two creators, same job, score the dashboard).
-- **ICP:** creators / agencies who need a teardown (Path A if named).
+Hand: catalog appended — Consultant/GTM may run use-case-to-sku. Researcher stops here.
 
-### 5. Karpathy / No Priors — `kwSVtQ7dziU`
-- **Steal:** `golden-test-loop` · fleet of sessions · ask-when-unsure.
-- **ICP:** `us` (Forge/Watchdog). Labs/sensors = not our lane.
+# 2026-09-07 WIH Social (HN)
 
-### 6. Nate 2h SaaS — `IVx8OSMbTss`
-- **Named business:** **Client Pack** — agency owners overwhelmed on delivering to *their* clients. Transcript → interactive deck. Auth, Stripe, domain, aha.
-- **Steal:** `client-delivery-kit` (sell to `agency-delivery`) · `paid-slice` (our product) · preview≠prod.
-- **Do not:** fork a second Client Pack SaaS this week. Kit = website/AI Partner delivery analog.
+### Ask HN skills management → import gate
+- FACT: HN item 49589914 (~178 pts). Public/celebrity skills often called useless; useful = repo/team macros + reactive house rules; AGENTS.md camp strong; git+symlink+evals camp also present.
+- machine: gate public skill malls; keep owned eval’d skills small
+- who sighs: Researcher / Big Boss when skill catalog bloats
+- steal as: `awesome-skill-import-gate` + `skill-recall-by-use`
+- kill-do-not: 1:1 skills.sh dump · catalog dump · desk 18
+- lane tag: `hive-os`
 
-### 7. Isenberg + Miller — `EzQAgnjTq2k`
-- **Steal:** `interview-to-desk` · `context-docs` · watcher = Watchdog/Librarian · factory behind one task.
-- **ICP:** `us` + any client who needs a queryable desk (Rung 0 enablement).
+### Multi-agent markdown coordination (anti-bureaucracy)
+- FACT: HN item 47245373 — CEO agent org-chart failure; 3 constrained roles + markdown tasks + manual /go worked better than auto-orchestration.
+- machine: constrain roles; markdown task inbox; human review before next step
+- who sighs: Big Boss when agents spam status memos
+- steal as: `aios-five-layers` (anti org-chart block)
+- kill-do-not: auto CEO agent · second hive face · uncapped fan-out
+- lane tag: `hive-os`
 
-### 8. One-person companies — `hGdG-04TkDs`
-- Full sheet: [USE_CASES-one-person.md](USE_CASES-one-person.md)
-- **ICP:** `local-clinic` · `creator-longform` · `exec-coach`
-- **Steal:** `review-to-book` · `clip-factory` · `orchestrated-site-brief` · `speed-positioning` · `demand-validate`
 
-### 9. Swadia triangle — `IWdvG9Up8Mc`
-- **Steal:** founders triangle before `business-lanes.json` · one TEAM letter · one recurring task.
-- **ICP:** gate for any new type, not a client SKU.
 
-### 10. Zubair restaurant — `whIp1SOahOM`
-- **Named business:** restaurant reservation.
-- **Steal:** `ask-principal` state machine · PIN · no cards.
-- **ICP:** `restaurant` gets **missed-call / book CTA** (Path A), not a second voice vendor that books alone.
+## X bookmarks 2026-09-07 10:51 EDT (user-X live, +39/−39)
 
-### 11. Glencoco — `nS2FrgXN-EY`
-- **Named ICP on tape:** manufacturing / castings.
-- **Steal:** `playbook-before-send` · `same-day-qa` · fast admin / slow prospect · lists (they used Claude; we use Grok + Cursor).
-- **ICP:** `industrial-smb` → website Path A. No auto-dialer, no Glencoco clone.
+| machine | who sighs | steal as | kill-do-not | lane tag |
+|---|---|---|---|---|
+| Homepage vs landing-page brief for AI sites | builder shipping a confused LP | `landing-page-design` / `cinematic-site-recipe` / `video-to-website` | Fable/Claude-desktop as hive face; quote $50k as FACT | ai-partner-websites |
+| Draft-not-send agency loops (9 loops) | operator burning tokens on life-OS bots | `hive-smarter-loop` | auto-send email/Slack/ads; Costco life-OS | hive-os |
+| Loops-not-prompts coordinator folder | desk drowning in one-off prompts | `hive-smarter-loop` / `session-bootstrap` | mint desk 18; uncapped fan-out | hive-os |
+| Usage cut: flip unused models + audit routines | SuperGrok/Cursor burn from idle routines | `hive-smarter-loop` + token-meter lock | disable core weekday digests without review | hive-os |
+| n8n NL→workflow via instance MCP | automation builder stuck wiring nodes | `n8n-legacy-ops` / `n8n-kit-researcher` | n8n-first as hive face; n8ncloud.tech | hive-os |
+| Self-healing agent retry loop | agent run that dies on first tool fail | enrich `research-signal-to-skills` / verify-then-done patterns | unconstrained CEO org-chart agent | hive-os |
+| img2threejs / motion from one still | motion desk needing code-only 3D | `when-remotion` / `remotion-brief-to-render` / own-motion-lib | require Blender install as default | ai-partner-websites |
+| Meta ads monitor roster (read) | ads ops wanting overnight watch | catalog only → Consultant later | live spend/send without Tier-3 HITL | ai-partner-websites |
+| SpaceXAI / Grok Bot user templates watch | operator wanting known-good bot packs | `grokbot-signal-training` | 1:1 import without import-gate | hive-os |
 
-### 12. Can It Code? — `mjg_JUMar04`
-- **Named product:** Godot snow/walker prototype.
-- **Steal:** `slice-build` · color bible · placeholders + light.
-- **ICP:** cinematic / game-adjacent sites (`us` + client Path C).
 
-### 13. Mitchell lists — `ESIxitOLYoQ`
-- **Named ICP on tape:** robotics; “software” leaking agencies; marketing **software** vs agencies.
-- **Steal:** `list-anneal` (60–70%, anneal 50, then people).
-- **ICP:** `industrial-smb` · `mktg-software`. After 3–5 leaks → Path A.
+# 2026-09-07 live X bookmarks
 
-### 14. Ty Chen 10h — `I7mpF7_pnPM`
-- **Named product:** prediction-market / betting helper. **QUARANTINE SKU.**
-- **Steal:** `checkout-proof` · `one-channel-deep` · warm network converted, IG flopped.
-- **Do not:** copy Koshi/Polymarket.
+### X bookmarks live 2026-09-07 (box user-X) — clusters
+Source: FACT live pull `user-X` @snevemoney count=99; delta vs 2026-09-04 = +39/−39 IDs. Packet: `/workspace/research/packets/x-bookmarks/20260907-1051/`
 
-### 15. Better Stack MCP — `f4mI3d-nTrI`
-- **Steal:** FACT only — stateless HTTP when we touch MCP.
-- **ICP:** none.
+| machine | who sighs | steal as | kill-do-not | lane |
+|---|---|---|---|---|
+| Homepage ≠ Landing Page; AI LP skill taste | Forge shipping multi-intent hero as “LP” | `landing-page-design` + `cinematic-site-recipe` | Treat @dannypostma pack as auto-install; quote $50k as FACT | ai-partner |
+| Animated marketing sites from AI video/tutorial | Creative wants Fable/Claude desktop cinema | `video-to-website` known-good + Remotion | Install Fable/Claude face; invent $ as ours | ai-partner |
+| Draft-not-send agency (9 loops) | Desk that ships email/ads without HITL | `hive-smarter-loop` + approval-based-autopilot | Life-OS that books Costco; live send in building mode | hive-os |
+| Loops-not-prompts folder tree (coordinator/bot-contract) | Prompt soup with no job card | `hive-smarter-loop` · `agent-job-card` | 17-DM fan-out; nameless swarm | hive-os |
+| Usage cut / model flip / routine audit | Token burn from 15-min test routines | `hive-smarter-loop` (kloss hygiene) | Leave every model on; silent 96×/day routines | hive-os |
+| SpaceXAI → Grok Bot templates watch | Want ready-made bot packs | watch only; import-gate if adopt | Auto-adopt whole template mall | hive-os |
+| n8n describe-workflow via instance MCP | Plain-English → graph draft | `n8n-kit-researcher` · `n8n-legacy-ops` | Webhook-spam research; AI-build = prod without HITL; n8n-first OS | hive-os |
+| 6 harnesses compare (OMP…Warp) | “Which agent OS?” shopping | `session-bootstrap` RESEARCH-OK card | Install second hive face / dual desktop | hive-os |
+| Self-healing agent (retry + verifier) | Half-finished agent mess | `agent-harness-loops` enrich | Mint duplicate self-healing-agent-loop skill | hive-os |
+| Meta ads 12-bot roster (mechanism) | Want always-on ad monitors | RESEARCH-OK note only | Auto-send / spend bots = Tier-3 NO-SKILL | ai-partner |
+| Second-brain anti-hoard (delete notes) | Vault bloat / token cost | Outer Heaven raw/distilled/active | Rebuild second-brain desk; hoard 340 notes | hive-os |
+| Public skill/repo malls (19 skills, 10 repos) | Catalog FOMO | `awesome-skill-import-gate` + owned house rules | 1:1 skills.sh dump; desk 18 | hive-os |
 
----
+Hard locks: building mode · Tier-3 HITL · max-3 · no catalog dump · Grok-first · leisure=NO-SKILL · $ UNVERIFIED · trading/memecoin auto-agents=NO-SKILL · Meta ads send=Tier-3 NO-SKILL.
 
-## X bookmarks — AI working set (2026-08-13)
 
-True-read: `CONTENT/x-bookmarks/learnings-implement.md` · **34** AI-only (library 98).  
-Theme breakdown stays there. **Steal + doctrine merge here.** No second catalog.
+### X bookmarks live 2026-09-09 10:51 ET (box user-X) — clusters
+Source: FACT live pull `user-X` @snevemoney count=99; delta vs 2026-09-08T20:56:04Z = +5/−5. Packet: `/workspace/research/packets/x-bookmarks/20260909-1051/`
 
-**No new hunt ICP.** Bookmarks reinforce `us` (Path C) and cinematic delivery for existing ICPs (`exec-coach`, `agency-delivery`). Do not add a `business-lanes.json` row.
+#### AI NLE / Adobe-shop switch watch (NetworkChuck)
+- FACT: @NetworkChuck already AI-editing; Adobe shop; open to switch if linked tool is strong (`2097337678844821678`). Linked product not verified this fire.
+- Steal as: `reference-driven-video-production` — treat AI edit copilots as RESEARCH-OK references; keep Remotion+Juno WORKAROUND while NLE BLOCKED.
+- Who sighs: operator finishing wealth/AI Partner video without a wired NLE.
+- Kill-do-not: auto-switch hive to Adobe/CapCut/unnamed AI NLE; claim NLE PROVE; Tier-3 install without HITL.
+- Lane: `hive-os`.
 
-### Cluster extract
+#### GPT-6 Astra classic-game RE / ports (leisure NO-SKILL)
+- FACT: SuperAstra SNES live edit (@scottastevenson); Wind Waker phone (@h4nkdog); AAA Windows on iPad mini (@ammaar); DramaAlert aggregator.
+- Steal as: none — leisure.
+- Kill-do-not: mint game-RE/port skill; install RE stacks; client game-port offers; treat demo claims as stack FACT.
+- Lane: none (leisure quarantine).
 
-### Cinematic sites — `x:2082070276112564256` `x:2077199463278395732` `x:2074158868142194898` `x:2075545587093807111`
-- **Named claim:** $50k cinematic-site system (tweet). **UNVERIFIED.**
-- **Steal:** `cinematic-recipe` · `orchestrated-site-brief` · `slice-build` Path C. Taste never goes to a small model. Drop 3 sites with motion you love. Hero = two frames → clip → wrap a scroll. Do not hire 3D.
-- **ICP:** `us` + any Path A client who needs a cinematic page (`exec-coach`).
-- **Do not:** quote $50k · treat a pretty landing as the product (that is the new generic mill).
 
-### See-and-click — `x:2075635283211772279` `x:2074046218741678570` `x:2077489907350856038` `x:2072001793492763022`
-- **On tape:** Claude in-app browser / MCP artifacts / live-device drive. **On tape only.**
-- **Steal:** `click-live-site` (golden-test on the shipped URL) · one live demo that actually reads a connector we already have.
-- **ICP:** `us`.
-- **Do not:** rebuild Claude desktop · buy a vibe-test SaaS · build a menu-bar approve widget · iOS simulator shop.
+### X bookmarks live 2026-09-09 13:59 ET (box user-X) — clusters
+Source: FACT live pull `user-X` @snevemoney count=99; delta vs 2026-09-09T14:51:25Z = +2/−2. Packet: `/workspace/research/packets/x-bookmarks/20260909-1359/`
 
-### Motion / AE — `x:2077016770939122149` `x:2075192866553413944` `x:2074119000137601528` `x:2074108067361280173`
-- **Steal:** `motion-pipeline` — still → frames → clip → grade; previs (pose/depth) before a long Seedance render. One Higgsfield/AE proof clip.
-- **ICP:** `us` + cinematic Path C.
-- **Do not:** new plugin business · buy Arcads MCP · open a game studio.
+#### Prompt / autonomy / delegation hygiene (@kirillk_web3)
+- FACT: note_tweet steers — act when clear; skill files subordinate to operator instructions; dial down subagent over-delegation; plain prose; mid-turn steer without cache dump (`2097628313728479496`).
+- UNVERIFIED: “OpenAI official GPT-6 Astra guide” branding / product naming.
+- Steal as: `session-bootstrap` + `hive-smarter-loop` + `agent-harness-loops`.
+- Who sighs: desks that re-ask or spawn too many subagents on small work.
+- Kill-do-not: mint twin Astra-prompting skill; cite influencer post as OpenAI FACT docs; ignore max-3.
+- Lane: `hive-os`.
 
-### Wiki / job card — `x:2074304050880012736` `x:2073378450459570257` `x:2072932020003496380`
-- **Steal:** `agent-job-card` + `wiki-ingest`. Every agent’s owns/never **before** it works. Outer Heaven already is the wiki.
-- **ICP:** `us`.
-- **Do not:** 8,893-node theater · $2.2M leak drama as fact · second Obsidian brain.
+#### LG TV RCE 0-day mention (@mattjay) — NO-SKILL quarantine
+- FACT: mentions researchers found RCE 0-days in LG TVs; video only; no steps in text (`2097483323991822572`).
+- Steal as: none — offensive-cyber quarantine.
+- Kill-do-not: RCE/PoC skill; TV-hack how-to; pentest steps from news bookmarks.
+- Lane: none (quarantine).
 
-### Swarm flex — `x:2072255044544512004` `x:2071996301311381827` `x:2077827886149439547`
-- **Steal:** talk track only — “one person + **named** AI employees” (we have 17). Same doctrine as video 8: capacity ≠ company.
-- **Do not:** quote $20k / $400 / $1B / $500/mo / 40 nameless marketers.
 
-### Leisure / games — themes only
-- **Steal:** portfolio motion proof if needed (`slice-build` taste).
-- **Do not:** game-studio SKU this cycle. Amazon lane gets nothing.
+### X bookmarks live 2026-09-10 13:24 ET (box user-X) — clusters
+Source: FACT live pull `user-X` @snevemoney count=99; delta vs 2026-09-09T21:06:01Z = +2/−2. Packet: `/workspace/research/packets/x-bookmarks/20260910-1324/`
 
-### Almost useful, wrong SKU
-- House walkthrough in a tab (`x:2073320835658772937`): demo-in-the-tab, no appointment — same cheap path as cinematic. **Not** a real-estate SKU.
-- RPM bookmark (`x:2087003313955119480`): Publishing diet only. Not a hive SKU.
+#### UI motion resource malls (@noahelhadedy)
+- FACT: bookmark lists animated component resources; resolved hosts: 21st.dev, motion-primitives.com, reactbits.dev, hover.dev, ui.aceternity.com, microinteractionsui.com (`2097581354837770703`).
+- Steal as: `ae-akira-motion-craft-refs` (+ `own-motion-kit` / `cinematic-site-recipe`) — taste/refs shelf; implement on owned Remotion/own-motion-lib.
+- Who sighs: operator polishing AI Partner landings that feel static.
+- Kill-do-not: require mall kits as hive deps; claim paid UI kits as ours; second motion SaaS desktop.
+- Lane: `ai-partner-websites`.
 
-### Quarantine
-Watermark break · jailbreak / burn usage · J-space · NSFW LoRA · scrape + mail postcards. See Kill table.
-
----
-
-## YT daily L2 2026-09-02 — Nate Fable anti-slop (`yt:FFWtxjvW2ts`)
-
-Source: `yt:FFWtxjvW2ts` · Nate Herk | AI Automation · 16:13 · upload 20260902
-Caption-only (544 segments). Visual/click UNKNOWN. No new `icp_id`. Token $ UNVERIFIED. Fable/Claude on-tape = operate-never.
-
-### Seven-principle site, not a Scrollcraft install — `yt:FFWtxjvW2ts`
-- **Named business / ICP:** `us`
-- **Steal as:** `cinematic-recipe` + `seedance-site` + `ingest-is-steps` · Path C
-- **Hive run:** Brand → Three Ps (facts card only) → scroll lock → named living ref → grab components (21st.dev / godly.design / awards-by-niche / Motion Sites, read-only) → mobile → `click-live-site` on scroll frames. Two distinct variants then pick. One-shot is a base. House winner still orb-scroll / plate+scrub.
-- **Kill / do not:** Claude/Fable stack · Skool Scrollcraft · “make it premium” with no object · one-shot HTML this sitting · quote token $ · unpark Path A / clone Lemon · fill Last verified proof without a visitor URL
-
-### Clone-competitor-feel HOLD — `yt:FFWtxjvW2ts`
-- **Named business / ICP:** Path A parked (no named client)
-- **Steal as:** `website-emit-from-ref` clone method · HOLD
-- **Hive run:** Brand-onto-their-feel is allowed **after** Evens names the client + living URL. Not this sitting.
-- **Kill / do not:** unpark Path A · send the clone · invent Three Ps / offer $
-
----
-
-## How Researcher fills the next batch
-
-For each new **video**, add a Machines/ICP row plus a per-video bullet.  
-For each new **bookmark batch**, add cluster bullets (not 98 rows) tagged `x:{id}`. Then:
-
-1. Update `business-types.json`
-2. If sellable → `usecase-to-sku`
-3. Promote new `icp_id` to OPERATOR_MEMORY FACTS (none from this bookmark pass)
-4. Append cluster doctrine to `DEEP_SUMMARIES.md`
-5. Do not quote $ as ours. Do not fork a second steal sheet.
+#### Inflation / Peter McCormack clip (@narindertweets) — NO-SKILL leisure
+- FACT: meme/clip about rich people loving inflation (`2097411953249685869`).
+- Steal as: none — leisure.
+- Kill-do-not: mint econ/inflation skill from meme bookmarks.
+- Lane: none (leisure quarantine).

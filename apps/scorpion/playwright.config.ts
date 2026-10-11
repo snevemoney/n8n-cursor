@@ -34,11 +34,13 @@ export default defineConfig({
     },
   ],
 
-  // Don't start the dev server (assume it's already running)
-  // webServer: {
-  //   command: 'pnpm dev',
-  //   url: 'http://localhost:3003',
-  //   reuseExistingServer: true,
-  // },
+  // CI owns a fresh local server; local audits can use their existing target.
+  webServer: process.env.CI && !process.env.BASE_URL && !process.env.AUDIT_BASE_URL ? {
+    command: 'pnpm dev',
+    url: 'http://localhost:3003',
+    reuseExistingServer: false,
+    timeout: 120_000,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  } : undefined,
 });
-

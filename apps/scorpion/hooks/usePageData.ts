@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface UsePageDataOptions<T> {
-  fetchFn: () => Promise<T>;
+  fetchFn: (signal?: AbortSignal) => Promise<T>;
   cacheKey?: string;
   cacheMaxAge?: number; // milliseconds
   timeout?: number; // milliseconds, default 10000
@@ -48,14 +48,22 @@ export function usePageData<T>(options: UsePageDataOptions<T>): UsePageDataResul
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
+  // Callback identity changes on normal renders must not restart initial loading.
+  const callbacksRef = useRef({ fetchFn, onSuccess, onError });
+  callbacksRef.current = { fetchFn, onSuccess, onError };
+  const mountedRef = useRef(true);
+  const requestGenRef = useRef(0);
   const loadingRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const retryCountRef = useRef(0);
   const hasLoadedOnceRef = useRef(false);
 
-  const fetchData = useCallback(async (force = false, retryAttempt = 0) => {
+  const fetchData = useCallback(async (force = false, retryAttempt = 0, skipCache = false) => {
+    if (!mountedRef.current) return;
     // Prevent duplicate requests
     if (loadingRef.current && !force) return;
+    const requestGen = ++requestGenRef.current;
+    abortControllerRef.current?.abort();
     loadingRef.current = true;
 
     // Skip if tab not visible and already loaded (unless forced)
@@ -66,7 +74,7 @@ export function usePageData<T>(options: UsePageDataOptions<T>): UsePageDataResul
     }
 
     // Try cache first (unless forced)
-    if (!force && cacheKey && typeof window !== 'undefined') {
+    if (!force && !skipCache && cacheKey && typeof window !== 'undefined') {
       try {
         const cached = sessionStorage.getItem(cacheKey);
         const cacheTime = sessionStorage.getItem(`${cacheKey}_time`);
@@ -78,7 +86,9 @@ export function usePageData<T>(options: UsePageDataOptions<T>): UsePageDataResul
             hasLoadedOnceRef.current = true;
             loadingRef.current = false;
             // Still fetch in background for fresh data
-            setTimeout(() => fetchData(false, 0), 0);
+            setTimeout(() => {
+              if (requestGen === requestGenRef.current) fetchData(false, 0, true);
+            }, 0);
             return;
           }
         }
@@ -98,11 +108,26 @@ export function usePageData<T>(options: UsePageDataOptions<T>): UsePageDataResul
       // Create abort controller for timeout
       const controller = new AbortController();
       abortControllerRef.current = controller;
-      const timeoutId = setTimeout(() => controller.abort(), timeout + (retryAttempt * 1000));
+      let timeoutId: ReturnType<typeof setTimeout> | undefined;
+      const deadline = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          const error = new Error('Request timed out. Please try again.');
+          error.name = 'TimeoutError';
+          reject(error);
+          controller.abort();
+        }, timeout + (retryAttempt * 1000));
+      });
 
       try {
-        const result = await fetchFn();
+        let result: T;
+        try {
+          result = await Promise.race([callbacksRef.current.fetchFn(controller.signal), deadline]);
+        } finally {
+          clearTimeout(timeoutId!);
+        }
 
+        // Only the newest request may publish data, cache or loading state.
+        if (requestGen !== requestGenRef.current) return;
         // Check if aborted
         if (controller.signal.aborted) {
           loadingRef.current = false;
@@ -124,11 +149,12 @@ export function usePageData<T>(options: UsePageDataOptions<T>): UsePageDataResul
           }
         }
 
-        if (onSuccess) onSuccess(result);
+        callbacksRef.current.onSuccess?.(result);
       } catch (fetchError: any) {
         clearTimeout(timeoutId);
+        if (requestGen !== requestGenRef.current) return;
 
-        if (controller.signal.aborted) {
+        if (controller.signal.aborted && fetchError.name !== 'TimeoutError') {
           loadingRef.current = false;
           return;
         }
@@ -138,14 +164,14 @@ export function usePageData<T>(options: UsePageDataOptions<T>): UsePageDataResul
           const delay = Math.min(retryDelay * Math.pow(2, retryAttempt), 5000);
           retryCountRef.current = retryAttempt + 1;
           setTimeout(() => {
-            fetchData(force, retryAttempt + 1);
+            if (requestGen === requestGenRef.current) fetchData(force, retryAttempt + 1);
           }, delay);
           return;
         }
 
         // Set error
         let errorMessage = 'Failed to load data';
-        if (fetchError.name === 'AbortError') {
+        if (fetchError.name === 'AbortError' || fetchError.name === 'TimeoutError') {
           errorMessage = 'Request timed out. Please try again.';
         } else if (fetchError.message?.includes('Failed to fetch') || fetchError.message?.includes('NetworkError')) {
           errorMessage = 'Unable to connect to server. Please check your connection.';
@@ -154,28 +180,32 @@ export function usePageData<T>(options: UsePageDataOptions<T>): UsePageDataResul
         }
 
         setError(errorMessage);
-        if (onError) onError(new Error(errorMessage));
+        callbacksRef.current.onError?.(new Error(errorMessage));
       } finally {
-        setLoading(false);
-        setIsRefreshing(false);
-        loadingRef.current = false;
+        if (requestGen === requestGenRef.current) {
+          setLoading(false);
+          setIsRefreshing(false);
+          loadingRef.current = false;
+        }
       }
     } catch (err) {
+      if (requestGen !== requestGenRef.current) return;
       const errorMessage = err instanceof Error ? err.message : 'Failed to load data';
       setError(errorMessage);
       setLoading(false);
       setIsRefreshing(false);
       loadingRef.current = false;
-      if (onError) onError(new Error(errorMessage));
+      callbacksRef.current.onError?.(new Error(errorMessage));
     }
-  }, [fetchFn, cacheKey, cacheMaxAge, timeout, retry, retryDelay, onSuccess, onError]);
+  }, [cacheKey, cacheMaxAge, timeout, retry, retryDelay]);
 
   // Initial load - deferred for instant render
   useEffect(() => {
     if (!enabled) return;
 
+    let cancelled = false;
     const loadData = () => {
-      fetchData(false, 0);
+      if (!cancelled) fetchData(false, 0);
     };
 
     // Defer initial load to allow page to render first
@@ -184,6 +214,7 @@ export function usePageData<T>(options: UsePageDataOptions<T>): UsePageDataResul
     } else {
       setTimeout(loadData, 50);
     }
+    return () => { cancelled = true; };
   }, [enabled, fetchData]);
 
   // Polling (if enabled)
@@ -218,9 +249,13 @@ export function usePageData<T>(options: UsePageDataOptions<T>): UsePageDataResul
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [enabled, fetchData]);
 
-  // Cleanup on unmount
+  // Invalidate queued work and publication on unmount (including StrictMode cleanup).
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
+      mountedRef.current = false;
+      ++requestGenRef.current;
+      loadingRef.current = false;
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }

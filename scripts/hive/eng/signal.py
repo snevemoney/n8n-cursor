@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import re
 import sys
@@ -183,6 +184,23 @@ def promote(root: Path, candidate_id: str, write_rule: bool) -> int:
         )
     if doc.get("may_change_goal") is True or doc.get("authority") == "UNTRUSTED_DATA":
         return emit({"reason": "untrusted signal cannot promote itself"}, False)
+    # PROVEN is a report, not proof. Reuse the canonical engineering gate:
+    # experiment names an independently verified CapEx claim, not free text.
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,119}", experiment):
+        return emit({"reason": "experiment must name a verified engineering claim"}, False)
+    gate_path = Path(__file__).with_name("hive-job.py")
+    spec = importlib.util.spec_from_file_location("signal_proof_gate", gate_path)
+    if spec is None or spec.loader is None:
+        return emit({"reason": "experiment proof gate unavailable"}, False)
+    gate = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gate)
+    claim_dir = gate.CAPEX / experiment
+    claim = read_json(claim_dir / "claim.json")
+    if claim.get("state") not in gate.VERIFIED_PLUS:
+        return emit({"reason": "experiment has no independently verified engineering claim", "experiment": experiment}, False)
+    reasons = gate.reasons_for(claim, claim_dir, ping_runtime=False)
+    if reasons:
+        return emit({"reason": "experiment proof is invalid or stale", "experiment": experiment, "proof_reasons": reasons}, False)
     doc["status"] = "ADOPTED"
     doc["doctrine_write"] = False
     write_json(path, doc)
