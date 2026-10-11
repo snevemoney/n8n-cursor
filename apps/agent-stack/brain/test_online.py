@@ -341,5 +341,51 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertIn("Hello Evens.", evs[-1]["spoken"])
 
 
+    def test_call_openrouter_uses_the_named_model(self) -> None:
+        text = SCRIPT.read_text(encoding="utf-8")
+        named = "google/gemma-4-31b-it:free"
+        self.assertEqual(MOD.OPENROUTER_URL, "https://openrouter.ai/api/v1/chat/completions")
+        self.assertEqual(MOD.openrouter_model(), named)
+        self.assertIn(named, text)
+        self.assertNotIn("claude-haiku", text)
+        self.assertNotIn("x-ai/grok-4", text)
+        self.assertNotIn("nex-agi/nex-n2.5-mini:free", text)
+        self.assertNotIn("qwen/qwen3.8-27b:free", text)
+        self.assertNotIn("openrouter/free", text)
+        seen: dict = {}
+
+        def fake_http(url, data=None, headers=None, timeout=20.0):
+            seen["url"] = url
+            seen["model"] = (data or {}).get("model")
+            auth = str((headers or {}).get("Authorization") or "")
+            seen["auth_is_bearer"] = auth.startswith("Bearer ") and len(auth) > len("Bearer ")
+            return {"choices": [{"message": {"content": "Tokyo."}}]}
+
+        with mock.patch.dict(os.environ, {"OPENROUTER_API_KEY": "test-key"}, clear=False):
+            with mock.patch.object(MOD, "_http_json", side_effect=fake_http):
+                out = MOD.call_openrouter("What is the capital of Japan?", "Earlier: none.")
+        self.assertFalse(out["unknown"])
+        self.assertEqual(out["wire"], "openrouter")
+        self.assertEqual(out["engine"], "openrouter")
+        self.assertEqual(out["model"], named)
+        self.assertEqual(seen.get("model"), named)
+        self.assertEqual(seen.get("url"), MOD.OPENROUTER_URL)
+        self.assertTrue(seen.get("auth_is_bearer"))
+        self.assertEqual(out["spoken"], "Tokyo.")
+        self.assertNotIn("test-key", json.dumps(out))
+        self.assertNotIn("OPENROUTER_API_KEY", out["spoken"])
+
+    def test_call_openrouter_absent_key_does_not_post(self) -> None:
+        env = {k: v for k, v in os.environ.items() if k != "OPENROUTER_API_KEY"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            with mock.patch.object(MOD, "_http_json", side_effect=AssertionError("must not post")):
+                out = MOD.call_openrouter("How are you?")
+        self.assertTrue(out["unknown"])
+        self.assertEqual(out["wire"], "openrouter")
+        self.assertEqual(out["model"], "google/gemma-4-31b-it:free")
+        self.assertNotIn("OPENROUTER_API_KEY", out["spoken"])
+        self.assertNotIn("test-key", json.dumps(out))
+
+
 if __name__ == "__main__":
     unittest.main()
