@@ -17,7 +17,8 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 REPO_OH = ROOT / "docs/hive/outer-heaven"
-DEFAULT_VAULT = Path.home() / "Documents/My_Billion_Dollar_Vault"
+# Public repo: no absolute user paths. JARVIS_VAULT_DIR overrides; HOME-relative default.
+DEFAULT_VAULT = Path(os.environ.get("JARVIS_VAULT_DIR") or (Path.home() / "Documents/My_Billion_Dollar_Vault")).expanduser()
 LANES = ROOT / "scripts/hive/business-lanes.json"
 
 ALLOW_REL = (

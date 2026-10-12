@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
 import re
 import time
 import urllib.error
@@ -60,8 +61,22 @@ def resolve_roots() -> list[Path]:
     return list(_load_retrieve().resolve_roots())
 
 
+GOLD_LOCAL = Path(os.environ.get("JARVIS_GOLD_VAULT_LOCAL") or (HERE / "gold_vault.local.json")).expanduser()
+
+
 def load_gold() -> dict:
-    return json.loads(GOLD.read_text(encoding="utf-8"))
+    """Public gold rows, plus private needles from the gitignored local file."""
+    spec = json.loads(GOLD.read_text(encoding="utf-8"))
+    try:
+        local = json.loads(GOLD_LOCAL.read_text(encoding="utf-8")) if GOLD_LOCAL.is_file() else {}
+    except (OSError, ValueError):
+        local = {}
+    if isinstance(local, dict):
+        for row in spec.get("items") or []:
+            needle = local.get(str(row.get("id") or ""))
+            if isinstance(needle, str) and needle:
+                row["must_contain"] = needle
+    return spec
 
 
 def find_locator(locator: str, roots: list[Path]) -> Path | None:
