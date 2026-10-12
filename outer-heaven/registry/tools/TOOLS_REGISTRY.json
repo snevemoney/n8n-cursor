@@ -1,0 +1,1398 @@
+{
+ "generated": "2026-10-11",
+ "sources": [
+  "/workspace/tools/BRENZHILLS-10-INSTALL.md",
+  "/workspace/tools/TOP20-INSTALL.md",
+  "/workspace/research/packets/vps-repos-20261011/RESULTS*.md",
+  "Mac ~/tools/_*.txt install logs",
+  "/workspace/research/packets/jev-tools-test-20261011/REPORT.md"
+ ],
+ "status_legend": {
+  "verified": "smoke-tested on >=1 machine, works without extra keys",
+  "partial": "installed but part missing (disk/browser/apply)",
+  "needs-key": "installed; real use needs a key",
+  "skipped": "deliberately not installed"
+ },
+ "count": 51,
+ "tools": [
+  {
+   "name": "VoiceStudio",
+   "repo_url": "https://github.com/debpalash/VoiceStudio",
+   "purpose": "Local voice cloning, dubbing, transcription (Electron+Python)",
+   "license": "AGPL-3.0",
+   "owner_desk": "creative_studio",
+   "status": "skipped",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/VoiceStudio",
+     "verify": "test -f /workspace/tools/VoiceStudio/package.json",
+     "reported": "DEFERRED_RAM clone only"
+    }
+   },
+   "skill_pack": null,
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": "Deferred for RAM; VPS SKIPPED as instructed"
+  },
+  {
+   "name": "ppt-master",
+   "repo_url": "https://github.com/hugohe3/ppt-master",
+   "purpose": "PDF/Word/MD to editable PPTX (skill + scripts)",
+   "license": "MIT",
+   "owner_desk": "creative_studio",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/ppt-master",
+     "verify": "test -x /workspace/tools/ppt-master/.venv/bin/python && test -f /workspace/tools/ppt-master/skills/ppt-master/scripts/svg_to_pptx.py",
+     "reported": "INSTALLED_VERIFIED"
+    },
+    "mac": {
+     "path": "~/tools/ppt-master",
+     "verify": "test -d ~/tools/ppt-master/skills/ppt-master",
+     "reported": "present (_install-results)"
+    },
+    "vps": {
+     "path": "/opt/tools/hugohe3_ppt-master",
+     "verify": "test -f /opt/tools/hugohe3_ppt-master/skills/ppt-master/scripts/svg_to_pptx.py",
+     "reported": "INSTALLED_OBSERVED"
+    }
+   },
+   "skill_pack": "/workspace/tools/ppt-master/skills",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": ""
+  },
+  {
+   "name": "gods-eye-view",
+   "repo_url": "https://github.com/bilawalsidhu/gods-eye-view",
+   "purpose": "3D globe viewer with live flights/ships/cams",
+   "license": "MIT (code; data/assets not MIT)",
+   "owner_desk": "creative_studio",
+   "status": "needs-key",
+   "keys_needed": [
+    "GOOGLE_MAPS_API_KEY (opt)",
+    "CESIUM_ION_TOKEN (opt)",
+    "OPENAI_API_KEY (opt)",
+    "AISSTREAM_API_KEY (opt)",
+    "FIRMS_MAP_KEY (opt)",
+    "TOMTOM_API_KEY (opt)",
+    "OPENSKY creds (opt)"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/gods-eye-view",
+     "verify": "test -d /workspace/tools/gods-eye-view/dist",
+     "reported": "INSTALLED_VERIFIED build+preview"
+    },
+    "mac": {
+     "path": "~/tools/gods-eye-view",
+     "verify": "test -d ~/tools/gods-eye-view",
+     "reported": "build exit 0"
+    }
+   },
+   "skill_pack": null,
+   "source": "BRENZHILLS-10-INSTALL.md",
+   "notes": "Live layers need optional keys; VPS SKIPPED"
+  },
+  {
+   "name": "rea",
+   "repo_url": "https://github.com/morluto/rea",
+   "purpose": "Reverse-engineering CLI + MCP server",
+   "license": "MIT",
+   "owner_desk": "forge",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/rea",
+     "verify": "node /workspace/tools/rea/scripts/rea.mjs --version",
+     "reported": "6.4.0"
+    },
+    "mac": {
+     "path": "~/tools/rea",
+     "verify": "node ~/tools/rea/scripts/rea.mjs --version",
+     "reported": "6.4.0 | SYNC 2026-10-11: FAIL \u2014 compiled runtime missing (needs `npm ci && npm run build:cached` in ~/tools/rea)"
+    },
+    "vps": {
+     "path": "/opt/tools/morluto_rea",
+     "verify": "node /opt/tools/morluto_rea/scripts/rea.mjs --version",
+     "reported": "6.4.0"
+    }
+   },
+   "skill_pack": null,
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": "Also MCP namespace user-rea in this agent"
+  },
+  {
+   "name": "diagram-design",
+   "repo_url": "https://github.com/cathrynlavery/diagram-design",
+   "purpose": "Diagram skill (44 types HTML/SVG)",
+   "license": "MIT",
+   "owner_desk": "creative_studio",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/diagram-design",
+     "verify": "test -f /workspace/tools/diagram-design/scripts/verify-doctor.py",
+     "reported": "doctor PASS"
+    },
+    "mac": {
+     "path": "~/tools/diagram-design",
+     "verify": "test -d ~/tools/diagram-design",
+     "reported": "doctor: needs Playwright renderer"
+    },
+    "vps": {
+     "path": "/opt/tools/cathrynlavery_diagram-design",
+     "verify": "python3 /opt/tools/cathrynlavery_diagram-design/scripts/verify-doctor.py",
+     "reported": "PASS"
+    }
+   },
+   "skill_pack": "/workspace/tools/diagram-design/skills",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": "PNG export needs Playwright browser"
+  },
+  {
+   "name": "paperclip",
+   "repo_url": "https://github.com/paperclipai/paperclip",
+   "purpose": "Run a company of autonomous agents",
+   "license": "MIT",
+   "owner_desk": "big_boss",
+   "status": "partial",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/paperclip",
+     "verify": "test -f /workspace/tools/paperclip/package.json",
+     "reported": "BLOCKED_DISK source only"
+    },
+    "mac": {
+     "path": "~/tools/paperclip",
+     "verify": "test -d ~/tools/paperclip/node_modules",
+     "reported": "deps exit 0"
+    },
+    "vps": {
+     "path": "/opt/tools/paperclipai_paperclip",
+     "verify": "bash -c 'ls /opt/tools/paperclipai_paperclip/node_modules >/dev/null'",
+     "reported": "API /api/health 200; UI not served"
+    }
+   },
+   "skill_pack": null,
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": ""
+  },
+  {
+   "name": "mattpocock-skills",
+   "repo_url": "https://github.com/mattpocock/skills",
+   "purpose": "38 small engineering skills",
+   "license": "MIT",
+   "owner_desk": "forge",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/skills",
+     "verify": "test $(find /workspace/tools/skills/skills -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "cloned"
+    },
+    "mac": {
+     "path": "~/tools/mattpocock-skills",
+     "verify": "test $(find ~/tools/mattpocock-skills -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "present"
+    },
+    "vps": {
+     "path": "/opt/tools/mattpocock_skills",
+     "verify": "test $(find /opt/tools/mattpocock_skills -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "38/38 valid"
+    }
+   },
+   "skill_pack": "/workspace/tools/skills/skills",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": ""
+  },
+  {
+   "name": "ECC",
+   "repo_url": "https://github.com/affaan-m/ECC",
+   "purpose": "Skills/memory/security pack for Claude Code, Codex, Cursor",
+   "license": "MIT",
+   "owner_desk": "forge",
+   "status": "partial",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/ECC",
+     "verify": "node /workspace/tools/ECC/scripts/ecc.js --help >/dev/null",
+     "reported": "--help OK; not applied"
+    },
+    "mac": {
+     "path": "~/tools/ECC",
+     "verify": "node ~/tools/ECC/scripts/ecc.js --help >/dev/null",
+     "reported": "dry-run + apply log present (_ecc-apply.txt)"
+    },
+    "vps": {
+     "path": "/opt/tools/affaan-m_ECC",
+     "verify": "node /opt/tools/affaan-m_ECC/scripts/ecc.js --help >/dev/null",
+     "reported": "CLI OK; apply not done (would overwrite settings.json)"
+    }
+   },
+   "skill_pack": null,
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": ""
+  },
+  {
+   "name": "andrej-karpathy-skills",
+   "repo_url": "https://github.com/multica-ai/andrej-karpathy-skills",
+   "purpose": "CLAUDE.md with 4 Karpathy coding rules",
+   "license": "none (no license)",
+   "owner_desk": "forge",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/andrej-karpathy-skills",
+     "verify": "test -f /workspace/tools/andrej-karpathy-skills/CLAUDE.md",
+     "reported": "present"
+    },
+    "mac": {
+     "path": "~/tools/andrej-karpathy-skills",
+     "verify": "test -f ~/tools/andrej-karpathy-skills/CLAUDE.md",
+     "reported": "present"
+    },
+    "vps": {
+     "path": "/opt/tools/multica-ai_andrej-karpathy-skills",
+     "verify": "test -f /opt/tools/multica-ai_andrej-karpathy-skills/CLAUDE.md",
+     "reported": "present"
+    }
+   },
+   "skill_pack": null,
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": ""
+  },
+  {
+   "name": "claude-mem",
+   "repo_url": "https://github.com/thedotmack/claude-mem",
+   "purpose": "Session memory/summaries for agents",
+   "license": "Apache-2.0",
+   "owner_desk": "librarian",
+   "status": "needs-key",
+   "keys_needed": [
+    "Claude login or OPENROUTER_API_KEY"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/claude-mem",
+     "verify": "node /workspace/tools/claude-mem/dist/npx-cli/index.js version",
+     "reported": "13.35.0"
+    },
+    "mac": {
+     "path": "~/tools/claude-mem",
+     "verify": "test -d ~/tools/claude-mem",
+     "reported": "13.35.0; sign-in link pending"
+    },
+    "vps": {
+     "path": "/opt/tools/thedotmack_claude-mem",
+     "verify": "node /opt/tools/thedotmack_claude-mem/dist/npx-cli/index.js version",
+     "reported": "13.35.0"
+    }
+   },
+   "skill_pack": null,
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": "Hooks not installed; reads Claude keychain token by design; PostHog telemetry consent-gated"
+  },
+  {
+   "name": "agency-agents",
+   "repo_url": "https://github.com/msitarzewski/agency-agents",
+   "purpose": "~170 role agents for 15+ tools",
+   "license": "MIT",
+   "owner_desk": "big_boss",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/undefinedki/msitarzewski__agency-agents",
+     "verify": "test -d /workspace/tools/undefinedki/msitarzewski__agency-agents",
+     "reported": "lint 0 errors"
+    },
+    "mac": {
+     "path": "~/tools/agency-agents",
+     "verify": "test -d ~/tools/agency-agents",
+     "reported": "present"
+    },
+    "vps": {
+     "path": "/opt/tools/msitarzewski_agency-agents",
+     "verify": "test -d /opt/tools/msitarzewski_agency-agents",
+     "reported": "lint PASSED"
+    }
+   },
+   "skill_pack": null,
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": ""
+  },
+  {
+   "name": "wshobson-agents",
+   "repo_url": "https://github.com/wshobson/agents",
+   "purpose": "92 Claude Code plugins",
+   "license": "MIT",
+   "owner_desk": "forge",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/undefinedki/wshobson__agents",
+     "verify": "test $(find /workspace/tools/undefinedki/wshobson__agents -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "plugin.json valid"
+    },
+    "mac": {
+     "path": "~/tools/wshobson-agents",
+     "verify": "test -d ~/tools/wshobson-agents",
+     "reported": "present"
+    },
+    "vps": {
+     "path": "/opt/tools/wshobson_agents",
+     "verify": "test -d /opt/tools/wshobson_agents",
+     "reported": "92/92 valid"
+    }
+   },
+   "skill_pack": "/workspace/tools/undefinedki/wshobson__agents",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": ""
+  },
+  {
+   "name": "knowledge-work-plugins",
+   "repo_url": "https://github.com/anthropics/knowledge-work-plugins",
+   "purpose": "Anthropic job plugins (sales, legal, finance)",
+   "license": "Apache-2.0",
+   "owner_desk": "big_boss",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/undefinedki/anthropics__knowledge-work-plugins",
+     "verify": "test $(find /workspace/tools/undefinedki/anthropics__knowledge-work-plugins -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "22 plugins valid"
+    },
+    "mac": {
+     "path": "~/tools/knowledge-work-plugins",
+     "verify": "test -d ~/tools/knowledge-work-plugins",
+     "reported": "present"
+    },
+    "vps": {
+     "path": "/opt/tools/anthropics_knowledge-work-plugins",
+     "verify": "test -d /opt/tools/anthropics_knowledge-work-plugins",
+     "reported": "22/22, 252/252"
+    }
+   },
+   "skill_pack": "/workspace/tools/undefinedki/anthropics__knowledge-work-plugins",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": ""
+  },
+  {
+   "name": "claude-quickstarts",
+   "repo_url": "https://github.com/anthropics/claude-quickstarts",
+   "purpose": "Official runnable agent examples",
+   "license": "MIT",
+   "owner_desk": "forge",
+   "status": "needs-key",
+   "keys_needed": [
+    "ANTHROPIC_API_KEY"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/undefinedki/anthropics__claude-quickstarts",
+     "verify": "test -d /workspace/tools/undefinedki/anthropics__claude-quickstarts/.venv",
+     "reported": "venv; Agent imports"
+    },
+    "mac": {
+     "path": "~/tools/claude-quickstarts",
+     "verify": "test -d ~/tools/claude-quickstarts",
+     "reported": "anthropic 1.13.0"
+    },
+    "vps": {
+     "path": "/opt/tools/anthropics_claude-quickstarts",
+     "verify": "test -d /opt/tools/anthropics_claude-quickstarts",
+     "reported": "clone only"
+    }
+   },
+   "skill_pack": null,
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": ""
+  },
+  {
+   "name": "addyosmani-agent-skills",
+   "repo_url": "https://github.com/addyosmani/agent-skills",
+   "purpose": "25 dev-cycle skills",
+   "license": "MIT",
+   "owner_desk": "forge",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/undefinedki/addyosmani__agent-skills",
+     "verify": "test $(find /workspace/tools/undefinedki/addyosmani__agent-skills -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "25 valid"
+    },
+    "mac": {
+     "path": "~/tools/agent-skills",
+     "verify": "test -d ~/tools/agent-skills",
+     "reported": "present"
+    },
+    "vps": {
+     "path": "/opt/tools/addyosmani_agent-skills",
+     "verify": "test -d /opt/tools/addyosmani_agent-skills",
+     "reported": "25/25"
+    }
+   },
+   "skill_pack": "/workspace/tools/undefinedki/addyosmani__agent-skills",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS.md",
+   "notes": ""
+  },
+  {
+   "name": "hyperframes",
+   "repo_url": "https://github.com/heygen-com/hyperframes",
+   "purpose": "HTML+GSAP to MP4 rendering CLI + skills",
+   "license": "Apache-2.0",
+   "owner_desk": "creative_studio",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/nateherk/heygen-com__hyperframes",
+     "verify": "test $(find /workspace/tools/nateherk/heygen-com__hyperframes -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "SKILLS_ONLY; CLI not installed"
+    },
+    "mac": {
+     "path": "~/tools/hyperframes",
+     "verify": "test -d ~/tools/hyperframes",
+     "reported": "0.8.147; 21 skills"
+    },
+    "vps": {
+     "path": "/opt/tools/b2/heygen-com_hyperframes",
+     "verify": "test -d /opt/tools/b2",
+     "reported": "0.8.147; 21/21"
+    }
+   },
+   "skill_pack": "/workspace/tools/nateherk/heygen-com__hyperframes",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS-BATCH2.md",
+   "notes": ""
+  },
+  {
+   "name": "googleworkspace-cli (gws)",
+   "repo_url": "https://github.com/googleworkspace/cli",
+   "purpose": "Gmail/Drive/Calendar/Sheets CLI + 95 skills",
+   "license": "Apache-2.0",
+   "owner_desk": "big_boss",
+   "status": "needs-key",
+   "keys_needed": [
+    "GCP OAuth client (gws auth setup)"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/nateherk/googleworkspace__cli",
+     "verify": "test $(find /workspace/tools/nateherk/googleworkspace__cli -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "SKILLS_ONLY"
+    },
+    "mac": {
+     "path": "~/tools/gws-cli",
+     "verify": "test -d ~/tools/gws-cli",
+     "reported": "gws present; 95 skills"
+    },
+    "vps": {
+     "path": "/opt/tools/b2/googleworkspace_cli",
+     "verify": "test -d /opt/tools/b2",
+     "reported": "gws 0.22.5; no auth"
+    }
+   },
+   "skill_pack": "/workspace/tools/nateherk/googleworkspace__cli",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS-BATCH2.md",
+   "notes": ""
+  },
+  {
+   "name": "apify-mcp-server",
+   "repo_url": "https://github.com/apify/apify-mcp-server",
+   "purpose": "MCP server for Apify actors (scraping)",
+   "license": "MIT",
+   "owner_desk": "researcher",
+   "status": "needs-key",
+   "keys_needed": [
+    "APIFY_TOKEN"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/nateherk/apify__apify-mcp-server",
+     "verify": "test -d /workspace/tools/nateherk/apify__apify-mcp-server",
+     "reported": "CLONE_ONLY"
+    },
+    "mac": {
+     "path": "~/tools/apify-mcp-server",
+     "verify": "test -d ~/tools/apify-mcp-server",
+     "reported": "present"
+    },
+    "vps": {
+     "path": "/opt/tools/b2/apify_apify-mcp-server",
+     "verify": "node /opt/tools/b2/apify_apify-mcp-server/dist/stdio.js --help",
+     "reported": "build OK; not registered"
+    }
+   },
+   "skill_pack": null,
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS-BATCH2.md",
+   "notes": ""
+  },
+  {
+   "name": "scroll-craft",
+   "repo_url": "https://github.com/nateherkai/scroll-craft",
+   "purpose": "Skill for scroll-driven premium websites",
+   "license": "MIT",
+   "owner_desk": "creative_studio",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/nateherk/nateherkai__scroll-craft",
+     "verify": "test $(find /workspace/tools/nateherk/nateherkai__scroll-craft -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "valid"
+    },
+    "mac": {
+     "path": "~/tools/scroll-craft",
+     "verify": "test -d ~/tools/scroll-craft",
+     "reported": "1 skill"
+    },
+    "vps": {
+     "path": "/opt/tools/b2/nateherkai_scroll-craft",
+     "verify": "test -d /opt/tools/b2",
+     "reported": "valid"
+    }
+   },
+   "skill_pack": "/workspace/tools/nateherk/nateherkai__scroll-craft",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS-BATCH2.md",
+   "notes": ""
+  },
+  {
+   "name": "humanizer",
+   "repo_url": "https://github.com/blader/humanizer",
+   "purpose": "Removes AI-writing tells",
+   "license": "MIT",
+   "owner_desk": "lead_gtm_comms",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/nateherk/blader__humanizer",
+     "verify": "test $(find /workspace/tools/nateherk/blader__humanizer -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "valid"
+    },
+    "mac": {
+     "path": "~/tools/humanizer",
+     "verify": "test -d ~/tools/humanizer",
+     "reported": "1 skill"
+    },
+    "vps": {
+     "path": "/opt/tools/b2/blader_humanizer",
+     "verify": "test -d /opt/tools/b2",
+     "reported": "valid"
+    }
+   },
+   "skill_pack": "/workspace/tools/nateherk/blader__humanizer",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS-BATCH2.md",
+   "notes": ""
+  },
+  {
+   "name": "expo-skills",
+   "repo_url": "https://github.com/expo/skills",
+   "purpose": "25 Expo/React Native skills",
+   "license": "MIT",
+   "owner_desk": "forge",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/nateherk/expo__skills",
+     "verify": "test $(find /workspace/tools/nateherk/expo__skills -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "25 valid"
+    },
+    "mac": {
+     "path": "~/tools/expo-skills",
+     "verify": "test -d ~/tools/expo-skills",
+     "reported": "26 skills"
+    },
+    "vps": {
+     "path": "/opt/tools/b2/expo_skills",
+     "verify": "test -d /opt/tools/b2",
+     "reported": "25/25"
+    }
+   },
+   "skill_pack": "/workspace/tools/nateherk/expo__skills",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS-BATCH2.md",
+   "notes": ""
+  },
+  {
+   "name": "supabase-agent-skills",
+   "repo_url": "https://github.com/supabase/agent-skills",
+   "purpose": "Supabase/Postgres best-practice skills",
+   "license": "MIT",
+   "owner_desk": "forge",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/nateherk/supabase__agent-skills",
+     "verify": "test $(find /workspace/tools/nateherk/supabase__agent-skills -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "2 valid"
+    },
+    "mac": {
+     "path": "~/tools/supabase-agent-skills",
+     "verify": "test -d ~/tools/supabase-agent-skills",
+     "reported": "2 skills"
+    },
+    "vps": {
+     "path": "/opt/tools/b2/supabase_agent-skills",
+     "verify": "test -d /opt/tools/b2",
+     "reported": "2/2"
+    }
+   },
+   "skill_pack": "/workspace/tools/nateherk/supabase__agent-skills",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS-BATCH2.md",
+   "notes": ""
+  },
+  {
+   "name": "stripe-best-practices",
+   "repo_url": "https://github.com/stripe/ai",
+   "purpose": "Stripe integration skill (sparse)",
+   "license": "MIT",
+   "owner_desk": "money_desk",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/nateherk/stripe__ai",
+     "verify": "test $(find /workspace/tools/nateherk/stripe__ai -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "valid"
+    },
+    "mac": {
+     "path": "~/tools/stripe-ai",
+     "verify": "test -d ~/tools/stripe-ai",
+     "reported": "1 skill"
+    },
+    "vps": {
+     "path": "/opt/tools/b2/stripe_ai",
+     "verify": "test -d /opt/tools/b2",
+     "reported": "valid"
+    }
+   },
+   "skill_pack": "/workspace/tools/nateherk/stripe__ai",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS-BATCH2.md",
+   "notes": ""
+  },
+  {
+   "name": "playwright-cli",
+   "repo_url": "https://github.com/microsoft/playwright-cli",
+   "purpose": "Token-light browser automation CLI",
+   "license": "Apache-2.0",
+   "owner_desk": "forge",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/nateherk/microsoft__playwright-cli",
+     "verify": "test $(find /workspace/tools/nateherk/microsoft__playwright-cli -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "SKILL_ONLY"
+    },
+    "mac": {
+     "path": "~/tools/playwright-cli",
+     "verify": "test -d ~/tools/playwright-cli",
+     "reported": "0.1.22"
+    },
+    "vps": {
+     "path": "/opt/tools/b2/microsoft_playwright-cli",
+     "verify": "test -d /opt/tools/_ms-playwright",
+     "reported": "0.1.22 + headless chromium real run"
+    }
+   },
+   "skill_pack": "/workspace/tools/nateherk/microsoft__playwright-cli",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS-BATCH2.md",
+   "notes": ""
+  },
+  {
+   "name": "claude-security",
+   "repo_url": "https://github.com/anthropics/claude-plugins-official",
+   "purpose": "In-session vuln scan plugin (hooks when enabled)",
+   "license": "Apache-2.0",
+   "owner_desk": "watchdog",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/nateherk/anthropics__claude-plugins-official",
+     "verify": "test $(find /workspace/tools/nateherk/anthropics__claude-plugins-official -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "plugin valid"
+    },
+    "mac": {
+     "path": "~/tools/claude-plugins-official",
+     "verify": "test -d ~/tools/claude-plugins-official",
+     "reported": "present"
+    },
+    "vps": {
+     "path": "/opt/tools/b2/anthropics_claude-plugins-official",
+     "verify": "test -d /opt/tools/b2",
+     "reported": "files only"
+    }
+   },
+   "skill_pack": "/workspace/tools/nateherk/anthropics__claude-plugins-official",
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS-BATCH2.md",
+   "notes": "Hooks not enabled anywhere"
+  },
+  {
+   "name": "open-seo",
+   "repo_url": "https://github.com/every-app/open-seo",
+   "purpose": "Self-hosted SEO tool on DataForSEO",
+   "license": "MIT",
+   "owner_desk": "lead_gtm_comms",
+   "status": "needs-key",
+   "keys_needed": [
+    "DATAFORSEO_API_KEY"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/nateherk/every-app__open-seo",
+     "verify": "test -d /workspace/tools/nateherk/every-app__open-seo",
+     "reported": "CLONE_ONLY"
+    },
+    "vps": {
+     "path": "/opt/tools/b2/every-app_open-seo",
+     "verify": "test -d /opt/tools/b2",
+     "reported": "clone only; Docker skipped (disk)"
+    }
+   },
+   "skill_pack": null,
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS-BATCH2.md",
+   "notes": ""
+  },
+  {
+   "name": "token-dashboard",
+   "repo_url": "https://github.com/nateherkai/token-dashboard",
+   "purpose": "Claude Code token/cost dashboard",
+   "license": "MIT",
+   "owner_desk": "watchdog",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/nateherk/nateherkai__token-dashboard",
+     "verify": "python3 /workspace/tools/nateherk/nateherkai__token-dashboard/cli.py --help >/dev/null",
+     "reported": "scan+stats ran"
+    },
+    "mac": {
+     "path": "~/tools/token-dashboard",
+     "verify": "python3 ~/tools/token-dashboard/cli.py --help >/dev/null",
+     "reported": "help captured"
+    },
+    "vps": {
+     "path": "/opt/tools/b2/nateherkai_token-dashboard",
+     "verify": "test -d /opt/tools/b2",
+     "reported": "scan ran"
+    }
+   },
+   "skill_pack": null,
+   "source": "BRENZHILLS-10-INSTALL.md; vps RESULTS-BATCH2.md",
+   "notes": "Probable video item (not confirmed)"
+  },
+  {
+   "name": "superpowers",
+   "repo_url": "https://github.com/obra/superpowers",
+   "purpose": "Engineering workflow skills",
+   "license": "MIT",
+   "owner_desk": "forge",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/superpowers",
+     "verify": "test $(find /workspace/tools/superpowers -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "cloned 15 SKILL.md"
+    },
+    "mac": {
+     "path": "~/tools/superpowers",
+     "verify": "test -d ~/.claude/skills/brainstorming || test -d ~/tools/superpowers",
+     "reported": "14 skills x3 dirs"
+    },
+    "vps": {
+     "path": "/opt/tools/b3/obra_superpowers",
+     "verify": "test -d /opt/tools/b3/obra_superpowers",
+     "reported": "15/15"
+    }
+   },
+   "skill_pack": "/workspace/tools/superpowers/skills",
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": ""
+  },
+  {
+   "name": "codebase-memory-mcp",
+   "repo_url": "https://github.com/DeusData/codebase-memory-mcp",
+   "purpose": "Code knowledge-graph MCP server",
+   "license": "MIT",
+   "owner_desk": "librarian",
+   "status": "partial",
+   "keys_needed": [],
+   "machines": {
+    "mac": {
+     "path": "~/tools/codebase-memory-mcp",
+     "verify": "~/tools/codebase-memory-mcp/build/c/codebase-memory-mcp --version",
+     "reported": "built from source; not in MCP config"
+    },
+    "vps": {
+     "path": "(not installed)",
+     "verify": "true",
+     "reported": "SKIPPED disk floor"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": ""
+  },
+  {
+   "name": "last30days-skill",
+   "repo_url": "https://github.com/mvanhorn/last30days-skill",
+   "purpose": "30-day multi-source research skill",
+   "license": "MIT",
+   "owner_desk": "researcher",
+   "status": "needs-key",
+   "keys_needed": [
+    "X/Reddit/YouTube source keys (optional, see CONFIGURATION.md)"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/last30days-skill",
+     "verify": "test -d /workspace/tools/last30days-skill/.venv",
+     "reported": "--help OK"
+    },
+    "vps": {
+     "path": "/opt/tools/b3/mvanhorn_last30days-skill",
+     "verify": "test -d /opt/tools/b3/mvanhorn_last30days-skill",
+     "reported": "--help OK"
+    }
+   },
+   "skill_pack": "/workspace/tools/last30days-skill/skills",
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": "Optional macOS keychain cookie extractor \u2014 do not enable without Evens OK"
+  },
+  {
+   "name": "Agent-Reach",
+   "repo_url": "https://github.com/Panniantong/Agent-Reach",
+   "purpose": "Multi-platform reach/scrape CLI",
+   "license": "MIT",
+   "owner_desk": "researcher",
+   "status": "needs-key",
+   "keys_needed": [
+    "per-platform keys/cookies"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/Agent-Reach",
+     "verify": "/workspace/tools/Agent-Reach/.venv/bin/agent-reach --version",
+     "reported": "v1.5.0"
+    },
+    "vps": {
+     "path": "/opt/tools/b3/Panniantong_Agent-Reach",
+     "verify": "/opt/tools/b3/Panniantong_Agent-Reach/.venv/bin/agent-reach --version",
+     "reported": "v1.5.0"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": ""
+  },
+  {
+   "name": "jev-ultrafast",
+   "repo_url": "https://github.com/browser-use/jev-ultrafast",
+   "purpose": "Jev-driven fast browser agent",
+   "license": "MIT",
+   "owner_desk": "forge",
+   "status": "needs-key",
+   "keys_needed": [
+    "TYPESAFE_API_KEY",
+    "TEXT_MODEL_API_KEY"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/jev-ultrafast",
+     "verify": "/workspace/tools/jev-ultrafast/.venv/bin/python -c 'import importlib.util,sys;sys.exit(0 if importlib.util.find_spec(\"jev_ultrafast\") or importlib.util.find_spec(\"jev\") else 1)'",
+     "reported": "imports; `jev --help` hangs"
+    },
+    "vps": {
+     "path": "/opt/tools/b3/browser-use_jev-ultrafast",
+     "verify": "test -d /opt/tools/b3/browser-use_jev-ultrafast/.venv",
+     "reported": "entry point; starts server on --version"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": "Never run `jev --help/--version` as a check: it starts a server"
+  },
+  {
+   "name": "gstack",
+   "repo_url": "https://github.com/garrytan/gstack",
+   "purpose": "Review/QA/ship skills (subset)",
+   "license": "MIT",
+   "owner_desk": "watchdog",
+   "status": "partial",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/gstack",
+     "verify": "test -d /workspace/tools/gstack",
+     "reported": "cloned, no setup"
+    },
+    "mac": {
+     "path": "~/.claude/skills/gstack",
+     "verify": "test -f ~/.claude/skills/gstack/VERSION",
+     "reported": "v1.91.90.0; 4 skills x3; bun/browse missing"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md",
+   "notes": "Browser/cookie/keychain parts NOT installed"
+  },
+  {
+   "name": "anthropic-skills",
+   "repo_url": "https://github.com/anthropics/skills",
+   "purpose": "Official Anthropic skills",
+   "license": "Apache-2.0 (docx/pdf/pptx/xlsx source-available)",
+   "owner_desk": "creative_studio",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/anthropic-skills",
+     "verify": "test $(find /workspace/tools/anthropic-skills -name SKILL.md 2>/dev/null | wc -l) -gt 0",
+     "reported": "cloned"
+    },
+    "mac": {
+     "path": "~/tools/anthropic-skills",
+     "verify": "test -d ~/tools/anthropic-skills",
+     "reported": "18 skills x3"
+    },
+    "vps": {
+     "path": "/opt/tools/b3/anthropics_skills",
+     "verify": "test -d /opt/tools/b3/anthropics_skills",
+     "reported": "20/20"
+    }
+   },
+   "skill_pack": "/workspace/tools/anthropic-skills/skills",
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": ""
+  },
+  {
+   "name": "promptfoo",
+   "repo_url": "https://github.com/promptfoo/promptfoo",
+   "purpose": "LLM eval harness",
+   "license": "MIT",
+   "owner_desk": "watchdog",
+   "status": "needs-key",
+   "keys_needed": [
+    "OPENROUTER_API_KEY (model)"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/promptfoo-cli",
+     "verify": "cd /workspace/tools/promptfoo-cli && PROMPTFOO_DISABLE_TELEMETRY=1 timeout 60 npx --no-install promptfoo --version",
+     "reported": "0.124.1"
+    },
+    "vps": {
+     "path": "(not installed)",
+     "verify": "true",
+     "reported": "SKIPPED disk floor"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": "Set PROMPTFOO_DISABLE_TELEMETRY=1"
+  },
+  {
+   "name": "impeccable",
+   "repo_url": "https://github.com/pbakaus/impeccable",
+   "purpose": "Design-quality skills",
+   "license": "Apache-2.0",
+   "owner_desk": "creative_studio",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/impeccable",
+     "verify": "test -d /workspace/tools/impeccable",
+     "reported": "cloned"
+    },
+    "mac": {
+     "path": "~/tools/impeccable",
+     "verify": "test -d ~/tools/impeccable",
+     "reported": "per-tool variants"
+    }
+   },
+   "skill_pack": "/workspace/tools/impeccable",
+   "source": "TOP20-INSTALL.md",
+   "notes": ""
+  },
+  {
+   "name": "taste-skill",
+   "repo_url": "https://github.com/Leonxlnx/taste-skill",
+   "purpose": "Design taste skills",
+   "license": "MIT",
+   "owner_desk": "creative_studio",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/taste-skill",
+     "verify": "test -d /workspace/tools/taste-skill",
+     "reported": "cloned"
+    },
+    "mac": {
+     "path": "~/tools/taste-skill",
+     "verify": "test -d ~/tools/taste-skill",
+     "reported": "13 skills x3"
+    }
+   },
+   "skill_pack": "/workspace/tools/taste-skill",
+   "source": "TOP20-INSTALL.md",
+   "notes": ""
+  },
+  {
+   "name": "mem0",
+   "repo_url": "https://github.com/mem0ai/mem0",
+   "purpose": "Agent memory library",
+   "license": "Apache-2.0",
+   "owner_desk": "librarian",
+   "status": "needs-key",
+   "keys_needed": [
+    "OPENAI_API_KEY (LLM+embeddings; configurable)"
+   ],
+   "machines": {
+    "vps": {
+     "path": "/opt/tools/b3/mem0ai_mem0",
+     "verify": "test -d /opt/tools/b3/mem0ai_mem0/.venv",
+     "reported": "library imports, 2.2.1"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": ""
+  },
+  {
+   "name": "crawl4ai",
+   "repo_url": "https://github.com/unclecode/crawl4ai",
+   "purpose": "LLM-friendly crawler",
+   "license": "Apache-2.0",
+   "owner_desk": "researcher",
+   "status": "partial",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/crawl4ai",
+     "verify": "test -x /workspace/tools/crawl4ai/.venv/bin/crwl",
+     "reported": "0.9.4; browsers not installed"
+    },
+    "vps": {
+     "path": "/opt/tools/b3/unclecode_crawl4ai",
+     "verify": "test -d /opt/tools/b3/unclecode_crawl4ai",
+     "reported": "clone only; SKIPPED disk"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": ""
+  },
+  {
+   "name": "markitdown",
+   "repo_url": "https://github.com/microsoft/markitdown",
+   "purpose": "Files to Markdown",
+   "license": "MIT",
+   "owner_desk": "librarian",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/markitdown",
+     "verify": "bash -c 'ls /workspace/tools/markitdown/.venv/bin/markitdown'",
+     "reported": "0.1.8"
+    },
+    "mac": {
+     "path": "~/tools/markitdown",
+     "verify": "bash -c 'ls ~/tools/markitdown/.venv/bin/markitdown'",
+     "reported": "0.1.8"
+    },
+    "vps": {
+     "path": "/opt/tools/b3/microsoft_markitdown",
+     "verify": "test -d /opt/tools/b3/microsoft_markitdown/.venv",
+     "reported": "0.1.8 real run"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": ""
+  },
+  {
+   "name": "Scrapling",
+   "repo_url": "https://github.com/D4Vinci/Scrapling",
+   "purpose": "Adaptive scraping library",
+   "license": "BSD-3-Clause",
+   "owner_desk": "researcher",
+   "status": "partial",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/Scrapling",
+     "verify": "test -d /workspace/tools/Scrapling/.venv",
+     "reported": "core 0.4.15; fetchers not installed"
+    },
+    "vps": {
+     "path": "/opt/tools/b3/D4Vinci_Scrapling",
+     "verify": "test -d /opt/tools/b3/D4Vinci_Scrapling/.venv",
+     "reported": "core parser ok"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": ""
+  },
+  {
+   "name": "fastmcp",
+   "repo_url": "https://github.com/PrefectHQ/fastmcp",
+   "purpose": "Python MCP server framework",
+   "license": "Apache-2.0",
+   "owner_desk": "forge",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "mac": {
+     "path": "~/tools/fastmcp",
+     "verify": "bash -c 'ls ~/tools/fastmcp/.venv/bin/fastmcp'",
+     "reported": "fastmcp version OK"
+    },
+    "vps": {
+     "path": "/opt/tools/b3/PrefectHQ_fastmcp",
+     "verify": "test -d /opt/tools/b3/PrefectHQ_fastmcp/.venv",
+     "reported": "4.1.0 PyPI"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": ""
+  },
+  {
+   "name": "context7-mcp",
+   "repo_url": "https://github.com/upstash/context7",
+   "purpose": "Docs-lookup MCP server",
+   "license": "MIT",
+   "owner_desk": "forge",
+   "status": "verified",
+   "keys_needed": [
+    "CONTEXT7_API_KEY (optional)"
+   ],
+   "machines": {
+    "mac": {
+     "path": "~/tools/context7-mcp",
+     "verify": "test -d ~/tools/context7-mcp/node_modules",
+     "reported": "--help OK; not in MCP configs"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md",
+   "notes": "Adding to MCP configs needs Evens approval"
+  },
+  {
+   "name": "iFixAi",
+   "repo_url": "https://github.com/ifixai-ai/iFixAi",
+   "purpose": "AI diagnostics CLI",
+   "license": "Apache-2.0",
+   "owner_desk": "watchdog",
+   "status": "needs-key",
+   "keys_needed": [
+    "model provider key"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/iFixAi",
+     "verify": "test -d /workspace/tools/iFixAi/.venv",
+     "reported": "4.1.0"
+    },
+    "vps": {
+     "path": "/opt/tools/b3/ifixai-ai_iFixAi",
+     "verify": "test -d /opt/tools/b3/ifixai-ai_iFixAi/.venv",
+     "reported": "4.1.0"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": ""
+  },
+  {
+   "name": "warren",
+   "repo_url": "https://github.com/jayminwest/warren",
+   "purpose": "Multi-agent CLI orchestrator",
+   "license": "MIT",
+   "owner_desk": "big_boss",
+   "status": "needs-key",
+   "keys_needed": [
+    "agent CLIs' own keys"
+   ],
+   "machines": {
+    "vps": {
+     "path": "/opt/tools/b3/jayminwest_warren",
+     "verify": "test -x /opt/tools/b3/_cli/bun",
+     "reported": "0.19.3 CLI"
+    }
+   },
+   "skill_pack": null,
+   "source": "TOP20-INSTALL.md; vps RESULTS-TOP20.md",
+   "notes": ""
+  },
+  {
+   "name": "gsap-skills",
+   "repo_url": "https://github.com/greensock/gsap-skills",
+   "purpose": "GSAP animation skills",
+   "license": "MIT",
+   "owner_desk": "creative_studio",
+   "status": "verified",
+   "keys_needed": [],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/gsap-skills",
+     "verify": "test -d /workspace/tools/gsap-skills",
+     "reported": "cloned"
+    },
+    "mac": {
+     "path": "~/tools/gsap-skills",
+     "verify": "test -d ~/tools/gsap-skills",
+     "reported": "8 skills x3"
+    }
+   },
+   "skill_pack": "/workspace/tools/gsap-skills",
+   "source": "TOP20-INSTALL.md",
+   "notes": ""
+  },
+  {
+   "name": "claude-seo",
+   "repo_url": "https://github.com/AgriciDaniel/claude-seo",
+   "purpose": "SEO audit/content/schema skill pack",
+   "license": "MIT",
+   "owner_desk": "lead_gtm_comms",
+   "status": "verified",
+   "keys_needed": [
+    "DataForSEO/Ahrefs/SE Ranking/Google/Firecrawl (optional extensions)"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/claude-seo",
+     "verify": "test -d /workspace/tools/claude-seo",
+     "reported": "cloned"
+    },
+    "mac": {
+     "path": "~/tools/claude-seo",
+     "verify": "test -d ~/tools/claude-seo",
+     "reported": "25 skills x3"
+    }
+   },
+   "skill_pack": "/workspace/tools/claude-seo/skills",
+   "source": "TOP20-INSTALL.md",
+   "notes": ""
+  },
+  {
+   "name": "JevRouter",
+   "repo_url": "(local clone; upstream per jev-tools-test REPORT)",
+   "purpose": "Policy-gated Jev capability router",
+   "license": "MIT",
+   "owner_desk": "big_boss",
+   "status": "verified",
+   "keys_needed": [
+    "LITELLM_KEY_* via jev-shim (or OPENROUTER_API_KEY)"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/JevRouter",
+     "verify": "test -f /workspace/tools/JevRouter/dist/index.js || test -d /workspace/tools/JevRouter/dist",
+     "reported": "0.1.0 built"
+    },
+    "mac": {
+     "path": "~/tools/JevRouter",
+     "verify": "test -d ~/tools/JevRouter",
+     "reported": "bundle copied"
+    }
+   },
+   "skill_pack": null,
+   "source": "jev-tools-test-20261011/REPORT.md",
+   "notes": ""
+  },
+  {
+   "name": "jev-shim",
+   "repo_url": null,
+   "purpose": "Loopback shim: native Jev API to LiteLLM jev",
+   "license": "internal",
+   "owner_desk": "big_boss",
+   "status": "verified",
+   "keys_needed": [
+    "LITELLM_KEY_*"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/jev-shim",
+     "verify": "test -f /workspace/tools/jev-shim/shim.py",
+     "reported": "in use"
+    },
+    "mac": {
+     "path": "~/tools/jev-shim",
+     "verify": "test -d ~/tools/jev-shim",
+     "reported": "present"
+    }
+   },
+   "skill_pack": null,
+   "source": "jev-tools-test-20261011/REPORT.md",
+   "notes": ""
+  },
+  {
+   "name": "jev-evals (promptfoo slim)",
+   "repo_url": null,
+   "purpose": "Jev eval suite on promptfoo",
+   "license": "internal",
+   "owner_desk": "watchdog",
+   "status": "verified",
+   "keys_needed": [
+    "LITELLM_KEY_*"
+   ],
+   "machines": {
+    "box": {
+     "path": "/workspace/tools/jev-evals",
+     "verify": "test -f /workspace/tools/jev-evals/promptfooconfig.yaml",
+     "reported": "18/18"
+    },
+    "mac": {
+     "path": "~/tools/jev-evals",
+     "verify": "test -d ~/tools/jev-evals",
+     "reported": "present"
+    }
+   },
+   "skill_pack": null,
+   "source": "jev-tools-test-20261011/REPORT.md",
+   "notes": ""
+  },
+  {
+   "name": "jev-route",
+   "repo_url": null,
+   "purpose": "Cheap Jev preflight router CLI (v3.2 signal-pack fix)",
+   "license": "internal",
+   "owner_desk": "big_boss",
+   "status": "verified",
+   "keys_needed": [
+    "LITELLM_KEY_GROK_DESKS (+ per-platform LITELLM_KEY_*)"
+   ],
+   "machines": {
+    "box": {
+     "path": "/home/box/.local/bin/jev-route",
+     "verify": "test -x /home/box/.local/bin/jev-route && test -f /home/box/.local/share/jev/packs.json",
+     "reported": "v3.2 live 2026-10-11"
+    }
+   },
+   "skill_pack": null,
+   "source": "jev-preflight SKILL.md",
+   "notes": ""
+  }
+ ]
+}
