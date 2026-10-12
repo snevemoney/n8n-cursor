@@ -6,8 +6,8 @@ Input → full context file → conversation by default. Cursor CLI picks a hand
 
 - **Face (local):** PCB HUD + mic + TTS. POST `/api/turn` (JSON or SSE).
 - **Voice:** Kokoro `bm_lewis` (British butler). ElevenLabs Tarquin if a key is already on the machine.
-- **Brain:** `brain/pipeline.py`. The pack is a file. No `prompt[:4000]`. Logged-in Cursor is `agent -p` with the same `~/.local/bin/agent`, HOME, and repo cwd as Terminal. Face loads existing `.env` / `.env.dev` keys (`XAI_API_KEY` / `GROK_API_KEY`) at start — it does not invent keys. A live `agent status` that is logged in wins over a stale `cursor_login_said` flag. If Cursor is dark, `call_grok` uses that key or an already-running Grok Bot gateway (`~/.grokbot/local-exec-daemon-connection.json`). UNKNOWN/queued is not a reply. No key lecture. No new desk. No Ollama.
-- **Hands:** Safari via `hands/see.py`. Cursor ask is repo only. Grok Bot is a desk; its live local gateway may speak when Cursor is dark.
+- **Brain:** `brain/pipeline.py`. Talk owner is OpenRouter (`call_openrouter` via `call_grok`). Retrieve-then-talk: vault `00_Outer_Heaven` for about-me, then the mouth. Scratchpad / thinking-process is never spoken. Cursor CLI is the `cursor_ask` hand only — not the first mouth, not `pick_prompt` converse. Face loads existing `.env` / `.env.local` keys at start. UNKNOWN/queued is not a reply. No key lecture. No new desk. No Ollama.
+- **Hands:** `vault_read` / `safari_see` / `cursor_ask` / `status` / `refuse_hard_step`. Watch-armed only: `mac_act`. OpenRouter may emit `tool_calls`; otherwise retrieve-then-talk. Still images attach when `OPENROUTER_VISION_MODEL` can see them. Safari via `hands/see.py`. Grok Bot is a desk.
 - **Hard steps:** send / pay / deploy / book / publish = spoken proposal, then STOP.
 
 ```

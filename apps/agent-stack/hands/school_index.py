@@ -535,8 +535,9 @@ def build_snapshot(
         "named_courses": len(courses),
         "unnamed_enrolled_delta": max(0, claim - len(courses)),
         "note": (
-            "164 is the enrolled Saylor catalog claim in saylor-catalog-complete.md. "
-            "saylor-skill-triggers.md harvest table is not 164 rows — quote that Count. "
+            f"{claim} is the enrolled Saylor catalog claim in saylor-catalog-complete.md. "
+            f"saylor-skill-triggers.md declares Count: **{harvest}**; "
+            f"{len(on_disk)} indexed skill files exist on disk. "
             "saylor-desk-matrix.md is referenced but missing on disk. "
             "Named remaining rows are missing: true. Do not invent slugs for the unnamed delta."
         ),

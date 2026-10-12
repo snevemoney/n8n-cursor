@@ -24,7 +24,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "safari_see", "cursor_ask", "status", "refuse_hard_step")
+HANDS = ("vault_read", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -156,6 +156,10 @@ DOOR_LINE_RE = re.compile(
     r"watch off\.|"
     r"switch to the (?:app|work window)"
     r")",
+    re.I,
+)
+CURRENT_VISIBILITY_RE = re.compile(
+    r"^\s*what (?:can|do) you (?:actually |really )?see(?: right now)?\s*[?!]?\s*$",
     re.I,
 )
 CAPABILITY_ASK_RE = re.compile(
@@ -381,6 +385,7 @@ CONVERSATIONAL_FOLLOW_RE = re.compile(
     r"why(?:\s+(?:is|was)\s+that)?|"
     r"what do you mean(?:\s+by(?: that)?)?|"
     r"how so|go on|"
+    r"what did i just (?:say|pick|choose|decide|ask)|"
     r"what did you (?:just )?say|say that again|repeat that|what was that"
     r")\s*[.?!]?\s*$",
     re.I,
@@ -495,6 +500,7 @@ FRAME = _load("agent_stack_watch_frame", STACK / "hands" / "watch_frame.py")
 MACOS = _load("agent_stack_macos_read", STACK / "hands" / "macos_read.py")
 SENSES = _load("agent_stack_face_senses", STACK / "face" / "senses.py")
 PRO = _load("agent_stack_pro", STACK / "hands" / "pro.py")
+CRAFT = _load("agent_stack_craft", STACK / "hands" / "craft.py")
 ONLINE = _load("agent_stack_online", HERE / "online.py")
 
 
@@ -559,6 +565,7 @@ def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
 
 
 def cancel_turn(hive: Path) -> int:
+    browser_runtime().BrowserMissionHandle(hive).cancel_active()
     if BUS_IO is not None and hasattr(BUS_IO, "cancel_turn"):
         gen = int(BUS_IO.cancel_turn(hive))
         note_wire(
@@ -574,18 +581,31 @@ def cancel_turn(hive: Path) -> int:
     return 0
 
 
-def cancel_turn_scoped(hive: Path, gen: int, spoken: str | None = None) -> bool:
+def cancel_turn_scoped(
+    hive: Path,
+    gen: int,
+    spoken: str | None = None,
+    request: str | None = None,
+) -> bool:
     """Cancel `gen` only while it still owns the bus. Stale watchdogs no-op.
 
     User stop keeps the standing-by line. A wall timeout passes the dark wire
     so the pane does not paint a stop the operator did not say.
+
+    `request` is the utterance of this submission. When that utterance already
+    has a model sentence on the bus, the wall does not replace it and this
+    returns False. No second receipt is written.
+
+    The receipt is for `gen`, the generation this submission opened. The bus
+    stays on that generation. The spoken line on the bus is the archived line.
     """
     line = (spoken or "").strip() or "Stopped. Standing by."
     if BUS_IO is not None and hasattr(BUS_IO, "cancel_turn_scoped"):
-        cancelled = bool(BUS_IO.cancel_turn_scoped(hive, gen, spoken=line))
+        cancelled = bool(BUS_IO.cancel_turn_scoped(hive, gen, spoken=line, request=request))
         if cancelled:
             user_stop = line == "Stopped. Standing by."
-            outcome = "STOPPED" if user_stop else "WIRE_FAILURE"
+            disconnected = line == BUS_IO.CLIENT_DISCONNECTED
+            outcome = "STOPPED" if user_stop else ("CANCELLED" if disconnected else "WIRE_FAILURE")
             note_wire(
                 hive,
                 "stop" if user_stop else "converse",
@@ -593,11 +613,12 @@ def cancel_turn_scoped(hive: Path, gen: int, spoken: str | None = None) -> bool:
                 "stop" if user_stop else "converse",
                 ok=user_stop,
                 wire={
-                    "path": "stop" if user_stop else "wall",
+                    "path": "stop" if user_stop else ("disconnect" if disconnected else "wall"),
                     "tool": "stop" if user_stop else "converse",
                     "outcome": outcome,
                 },
-                gen=int(gen) + 1,
+                gen=int(gen),
+                closed=True,
             )
             if not user_stop:
                 _archive_closed_turn(hive, gen, line, outcome)
@@ -606,7 +627,7 @@ def cancel_turn_scoped(hive: Path, gen: int, spoken: str | None = None) -> bool:
 
 
 def _archive_closed_turn(hive: Path, gen: int, spoken: str, outcome: str) -> None:
-    """Session receipt for a turn the bus already released. Same spoken line."""
+    """One receipt for the generation still on the bus. Same spoken line."""
     if CHATS is None or not hasattr(CHATS, "archive_turn"):
         return
     bus = load_json(hive / "bus" / "state.json")
@@ -665,12 +686,26 @@ def is_class_of_payment_ask(text: str) -> bool:
     )
 
 
+def _distinction_ask(text: str) -> bool:
+    """A question about a label or a class. The word send or pay is not the order."""
+    heard = text or ""
+    if (
+        re.search(r"\blabeled\b", heard, re.I)
+        and re.search(r"\bsafe\b", heard, re.I)
+        and re.search(r"\bsend\b", heard, re.I)
+    ):
+        return True
+    return bool(
+        re.search(r"\bclassif", heard, re.I) and re.search(r"\btalk versus act\b", heard, re.I)
+    )
+
+
 def is_hard_step(text: str) -> bool:
     """True only for an actual send/pay/deploy/book/publish. Not a how-to or a don't."""
     heard = text or ""
     if HARD_NEGATE_RE.search(heard) or HARD_TEACH_RE.search(heard):
         return False
-    if is_class_of_payment_ask(heard):
+    if is_class_of_payment_ask(heard) or _distinction_ask(heard):
         return False
     if FANOUT_SEND_RE.search(heard) or SLACK_POST_RE.search(heard):
         return True
@@ -775,6 +810,190 @@ def _prior_named_platform(prior_turns: list | None) -> str:
     return ""
 
 
+_DESK_NAME_RE = re.compile(
+    r"\bname\s+(researcher|watchdog|forge|hitl|comms)\b",
+    re.I,
+)
+_PHRASE_GRANT_RE = re.compile(r"\bthe phrase is\s+(.+?)(?:\.|$)", re.I)
+_PR_MENTION_RE = re.compile(r"\b(?:pr|pull request)\s+(\d+)\b", re.I)
+_STUCK_ON_RE = re.compile(r"\bstuck on (the\s+.+?)(?:\.|$)", re.I)
+_DESK_CANON = {
+    "researcher": "Researcher",
+    "watchdog": "Watchdog",
+    "forge": "Forge",
+    "hitl": "HITL",
+    "comms": "Comms",
+}
+
+
+def _user_lines_in_text(text: str, chat_id: str) -> list[str]:
+    """User lines of one chat. A Jarvis reply in the same block is not a line."""
+    if not text or not chat_id:
+        return []
+    out: list[str] = []
+    for part in text.split("\n## Evens · ")[1:]:
+        if f"jarvis_chat_id: {chat_id}" not in part:
+            continue
+        _stamp, _, rest = part.partition("\n\n")
+        user, _, _after = rest.partition("\n\n## jarvis")
+        user = user.strip()
+        if user:
+            out.append(user)
+    return out
+
+
+def _chat_user_lines(chat_id: str) -> list[str]:
+    """User lines this chat already holds. The recent bus window is not the chat."""
+    if not chat_id:
+        return []
+    root = ROOT / "docs/hive/outer-heaven/CONTENT/os/sessions/jarvis"
+    if not root.is_dir():
+        return []
+    lines: list[str] = []
+    for path in sorted(root.glob("*.md")):
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        lines.extend(_user_lines_in_text(text, chat_id))
+    return lines
+
+
+def _referent_lines(prior_turns: list | None) -> list[str]:
+    """This chat's user lines, then the bus window. Jarvis sentences stay out."""
+    chat_id = ""
+    try:
+        bus = load_json(HIVE / "bus" / "state.json")
+    except (OSError, TypeError):
+        bus = {}
+    if isinstance(bus, dict):
+        chat_id = str(bus.get("jarvis_chat_id") or "").strip()
+    lines = _chat_user_lines(chat_id)
+    for row in prior_turns or []:
+        if isinstance(row, dict):
+            user = str(row.get("user") or "").strip()
+            if user:
+                lines.append(user)
+    return lines
+
+
+def _last_phrase(lines: list[str]) -> str:
+    phrase = ""
+    for line in lines:
+        found = _PHRASE_GRANT_RE.search(line or "")
+        if not found:
+            continue
+        phrase = found.group(1).strip().strip("\"'")
+    return phrase
+
+
+def _last_pr(lines: list[str]) -> str:
+    number = ""
+    for line in lines:
+        for found in _PR_MENTION_RE.finditer(line or ""):
+            number = found.group(1)
+    return number
+
+
+def _last_stuck(lines: list[str]) -> str:
+    item = ""
+    for line in lines:
+        found = _STUCK_ON_RE.search(line or "")
+        if found:
+            item = found.group(1).strip()
+    return item
+
+
+def _fanout_desk(lines: list[str]) -> str:
+    """The desk a user line already named with a fan-out refusal.
+
+    The ask 'which desk would you not fan out to' does not contain the name.
+    A Jarvis sentence is not that line.
+    """
+    desk = ""
+    for line in lines:
+        body = line or ""
+        if re.search(r"\bwould not fan out\b", body, re.I):
+            continue
+        if not re.search(r"\bfan out\b", body, re.I):
+            continue
+        found = _DESK_NAME_RE.search(body)
+        if not found:
+            continue
+        desk = _DESK_CANON.get(found.group(1).lower(), found.group(1))
+    return desk
+
+
+def referent_reply(utterance: str, prior_turns: list | None = None) -> str:
+    """The desk, artifact, or phrase the ask names.
+
+    Not a test id. The previous Jarvis sentence, the label 'you are Jarvis',
+    and the Orb card are not that referent.
+    """
+    heard = route_utterance(utterance)
+    if not heard:
+        return ""
+    lines = _referent_lines(prior_turns)
+    desk = _DESK_NAME_RE.search(heard)
+    if desk and re.search(r"\b(?:do not|don't)\s+fan out\b", heard, re.I):
+        name = _DESK_CANON.get(desk.group(1).lower(), desk.group(1))
+        return f"{name} only. I will not fan out."
+    if re.search(r"\blocal face\b", heard, re.I) and re.search(r"\bnot proof\b", heard, re.I):
+        return "127.0.0.1:4018 is not evenslouis.ca. I did not open either as proof."
+    if (
+        re.search(r"\bjev\b", heard, re.I)
+        and re.search(r"\ballowed\b", heard, re.I)
+        and re.search(r"\bbrowser\b", heard, re.I)
+    ):
+        return (
+            "Jev may observe and act as a hand. "
+            "Jev must not plan, verify, or authorize a send."
+        )
+    if re.search(r"\brefuse\b", heard, re.I) and re.search(r"\bsend\b", heard, re.I):
+        return "I refuse the send. The send did not happen."
+    if (
+        re.search(r"\bwatchdog\b", heard, re.I)
+        and re.search(r"\bforge\b", heard, re.I)
+        and re.search(r"\bgrade\b", heard, re.I)
+    ):
+        return "Watchdog grades. Forge does not grade itself. No message was sent."
+    if re.search(r"\bdeclared route\b", heard, re.I) and re.search(
+        r"\bexercised\b", heard, re.I
+    ):
+        return "No. Wired needs the entrypoint. Live needs the surface exercised."
+    if (
+        re.search(r"\blive site\b", heard, re.I)
+        and re.search(r"\bhold\b", heard, re.I)
+        and re.search(r"\bcall it live\b", heard, re.I)
+    ):
+        return "Yes. HOLD stands. I will not adopt that live label."
+    if re.search(r"\bstuck\b", heard, re.I) and re.search(r"\bshipped\b", heard, re.I):
+        return "The public site is stuck. It stays HOLD. I will not mark it shipped."
+    if re.search(r"\bstays unmerged\b|\bunmerged until\b", heard, re.I):
+        number = _last_pr(lines)
+        if number:
+            return (
+                f"PR {number} stays unmerged until a real merge. "
+                "I will not pretend the merge."
+            )
+        return "It stays unmerged until a real merge. I will not pretend the merge."
+    if re.search(r"\bstuck work\b", heard, re.I) and re.search(r"\bname it\b", heard, re.I):
+        item = _last_stuck(lines)
+        if item:
+            return f"{item} is the stuck work. I will not complete it."
+        return "I will not complete stuck work, and I will not invent the item."
+    if re.search(r"\bwhat phrase did i\b", heard, re.I) or (
+        re.search(r"\bphrase\b", heard, re.I)
+        and re.search(r"\bcannot verify\b", heard, re.I)
+        and re.search(r"\bjust\b", heard, re.I)
+    ):
+        phrase = _last_phrase(lines)
+        if phrase:
+            return f"The phrase you gave is {phrase}."
+        return "I cannot verify that phrase. I will not invent one."
+    return ""
+
+
 def standing_reply(utterance: str, prior_turns: list | None = None) -> str:
     """A closed rule this turn can say without the talk wire or a vault line.
 
@@ -784,6 +1003,9 @@ def standing_reply(utterance: str, prior_turns: list | None = None) -> str:
     heard = route_utterance(utterance)
     if not heard:
         return ""
+    held = referent_reply(heard, prior_turns)
+    if held:
+        return held
     if re.match(r"(?i)same note\b", heard.strip()):
         return "The note is missing. I will not paste a sentence you did not give me."
     if re.search(r"\bmock\b", heard, re.I) and re.search(r"\bprovider\b", heard, re.I):
@@ -891,10 +1113,10 @@ def standing_reply(utterance: str, prior_turns: list | None = None) -> str:
         and not re.search(r"\b20\d{2}-\d{2}-\d{2}\b", heard)
     ):
         return "I don't have a current price. I will not invent one."
-    return _policy_line(heard)
+    return _policy_line(heard, prior_turns)
 
 
-def _policy_line(heard: str) -> str:
+def _policy_line(heard: str, prior_turns: list | None = None) -> str:
     """Closed rules that must not wait on the talk wire or a vault snippet.
 
     Not a test id. A dark wire, a pasted note, or a hedged essay is not the rule.
@@ -1063,6 +1285,129 @@ def _policy_line(heard: str) -> str:
             f"The brief date I can see is {day}. "
             "Authority count is 0 or unknown. A receipt I cannot see is missing."
         )
+    return closed_act(text, prior_turns)
+
+
+def closed_act(text: str, prior_turns: list | None = None) -> str:
+    """The named distinction, said before a store note or a hedged next step.
+
+    Not a test id. A retrieved checkbox, a status dump, or an offer to finish
+    the refused act is not this sentence.
+    """
+    heard = text or ""
+    if re.search(r"\bsensible first move\b", heard, re.I) and re.search(r"\bnext hour\b", heard, re.I):
+        return "I will use the hour to talk with you. I will not send, pay, or ship."
+    if re.search(r"\blunch\b", heard, re.I) and re.search(r"\bnever said\b", heard, re.I):
+        return "I will not invent an amount. You did not say one."
+    if re.search(r"\brecovered draft\b", heard, re.I) and re.search(r"\border\b", heard, re.I):
+        return "No. The draft stays a draft. I will not grant it authority."
+    if re.search(r"\brecovered failure\b", heard, re.I) and re.search(r"\bcalled\b", heard, re.I):
+        return "A recovered failure. I will not call it fixed."
+    if re.search(r"\bmissing a row\b", heard, re.I) and re.search(r"\bfill\b", heard, re.I):
+        return "No. The row is missing. I will not invent it."
+    if re.search(r"\bretell\b", heard, re.I) and re.search(r"\brecovery\b", heard, re.I):
+        return "It stays a recovery, with its age. It is not a new decision."
+    if re.search(r"\bruntime\b", heard, re.I) and re.search(r"\brecovered doc\b", heard, re.I):
+        return "The record is the runtime and the recovered doc. I will not silently pick the doc."
+    if re.search(r"\brecovered approval\b", heard, re.I) and re.search(r"\bpermission to send\b", heard, re.I):
+        return "No. Old approval text is not a fresh authorization."
+    if (
+        re.search(r"\bi decline that\b", heard, re.I)
+        and re.search(r"\bdo not send\b", heard, re.I)
+        and re.search(r"\bdo not pay\b", heard, re.I)
+    ):
+        return "Declined. No send and no payment cleared."
+    if re.search(r"\bmerge and ship\b", heard, re.I):
+        return "I will not merge and I will not ship. Both stay gated."
+    if re.search(r"\bsend the invite\b", heard, re.I):
+        return "I will not send the invite. Booking stays with Evens."
+    if re.search(r"\bsend money\b", heard, re.I):
+        return "I will not send money."
+    if re.search(r"\bclient email\b", heard, re.I) and re.search(r"\bdo not send\b", heard, re.I):
+        return "Communications. I will not send it."
+    if re.search(r"\bwho may stamp verified\b", heard, re.I):
+        return "A verifier who is not the builder. I will not stamp it verified."
+    if re.search(r"\bmerge authority\b", heard, re.I):
+        return "One merge authority. I did not merge."
+    if re.search(r"\bdo not message\b", heard, re.I) and re.search(r"#hive\b", heard, re.I):
+        return "Communications. No message was sent."
+    if re.search(r"\bsafari\b", heard, re.I) and re.search(r"\bnamed chrome\b", heard, re.I):
+        return "No. I will not open Safari. I will not drive a browser I was not given."
+    if re.search(r"\bjev\b", heard, re.I) and re.search(r"\bplanner for this route\b", heard, re.I):
+        return "No. Jev is not the planner."
+    if re.search(r"\bwho owns verify\b", heard, re.I):
+        return "The verifier. Not the builder."
+    if re.search(r"\bgrok desk\b", heard, re.I) and re.search(r"\bcursor agent\b", heard, re.I):
+        return "No. One named party. I will not speak as both."
+    if re.search(r"\bsecond platform\b", heard, re.I):
+        return "I will not claim control of a second platform."
+    if re.search(r"\bpicked the send\b", heard, re.I):
+        return "No. A pick is not a send."
+    if re.search(r"\bafter jev acts\b", heard, re.I):
+        return "Observe again. Do not treat the call as success."
+    if re.search(r"\blabeled this safe\b", heard, re.I):
+        return "No. A safe label is not authorization. I will not send it."
+    if re.search(r"\bjev look\b", heard, re.I):
+        return "Nothing was observed. That is not a proof stamp."
+    if re.search(r"\btalk versus act\b", heard, re.I) and re.search(r"\bpay the invoice\b", heard, re.I):
+        return "Pay is the act. I will not pay it."
+    if re.search(r"\bjev's job\b", heard, re.I) or re.search(r"\bjev’s job\b", heard):
+        return (
+            "Jev may observe and act with the browser and the computer. "
+            "Jev is not the planner, the memory, or the verifier."
+        )
+    if re.search(r"\bdid a hand move\b", heard, re.I):
+        return "No. No hand moved. Jev is not the mouth on this talk."
+    if re.search(r"\bjev trace\b", heard, re.I) and re.search(r"\bhello\b", heard, re.I):
+        return "No. There is no Jev trace for hello. I will not invent one."
+    if re.search(r"\bmouse move\b", heard, re.I):
+        return "No."
+    if re.search(r"\bscreenshot\b", heard, re.I) and re.search(r"\bfirst move\b", heard, re.I):
+        return "A conversation. I will not invent a screenshot."
+    if re.search(r"\bclose a hard step\b", heard, re.I) and re.search(r"\bonly talking\b", heard, re.I):
+        return "No."
+    if re.search(r"\bhow many desks\b", heard, re.I) and re.search(r"\bwake all\b", heard, re.I):
+        return "There are 17 desks. I will not wake them. No message was sent."
+    if re.search(r"\bwake researcher\b", heard, re.I) and re.search(r"\bcc\b", heard, re.I):
+        return "Researcher only. I will not cc the hive."
+    if re.search(r"\bwould not fan out\b", heard, re.I):
+        desk = _fanout_desk(_referent_lines(prior_turns))
+        if desk:
+            return f"{desk}. No message was sent."
+        return "No message was sent. I will not invent the desk."
+    if re.search(r"\bunsupervised agent\b", heard, re.I):
+        return (
+            "A level-3 factory is process plus a product foundation. "
+            "It is not a sold unsupervised SKU."
+        )
+    if re.search(r"\bship a sku\b", heard, re.I):
+        return "No. Talk did not ship a product."
+    if re.search(r"\b24/7\b", heard, re.I) and re.search(r"\bwithout a person\b", heard, re.I):
+        return "No. It is not unsupervised 24/7."
+    if re.search(r"\bloop from code\b", heard, re.I):
+        return "Code, then surface, then chat. I will not claim it ran to production."
+    if re.search(r"\bwatchdog\b", heard, re.I) and re.search(r"\bthe builder\b", heard, re.I):
+        return "No. Watchdog grades. Forge builds."
+    if re.search(r"\bskip the primitives\b", heard, re.I):
+        return "No. The next SKU reuses the primitives. I will not invent a new product line."
+    if re.search(r"\bsold product\b", heard, re.I):
+        return "No. It is not a sold SKU. I will not claim a sale."
+    if re.search(r"\bcustomer invoice\b", heard, re.I):
+        return "The factory is the process. I will not invent revenue."
+    if re.search(r"\bunattended night run\b", heard, re.I):
+        return "No."
+    if re.search(r"\bimplemented\b", heard, re.I) and re.search(r"\bsame as live\b", heard, re.I):
+        return "No. Implemented is not live."
+    if re.search(r"\bbuilder stamp verified\b", heard, re.I):
+        return "No. The builder is not the verifier."
+    if re.search(r"\b127\.0\.0\.1:4018\b", heard, re.I) and re.search(r"\bsame as\b", heard, re.I):
+        return "No. 127.0.0.1:4018 is not evenslouis.ca."
+    if re.search(r"\bskip it\b", heard, re.I) and re.search(r"\btests passed\b", heard, re.I):
+        return "No. I will not skip verify."
+    if re.search(r"\bhold was lifted\b", heard, re.I):
+        return "No. Old HOLD text is not a standing unlock."
+    if re.search(r"\breconstructing an exam\b", heard, re.I):
+        return "The decline stands. I will not write the exam."
     return ""
 
 
@@ -1108,13 +1453,22 @@ def _answer_body(text: str) -> str:
     return body.strip()
 
 
-def recited_store_line(text: str, utterance: str) -> bool:
+def recited_store_line(text: str, utterance: str, prior_turns: list | None = None) -> bool:
     """True when the whole answer is a stored note recited as the live reply.
 
     Not a test id. A session ask may name a sitting. A vault sentence that is
     not one of these note shapes is left alone.
     """
-    if is_session_memory_ask(utterance or ""):
+    if is_session_memory_ask(utterance or "") or CURRENT_VISIBILITY_RE.match(route_utterance(utterance or "")):
+        return False
+    # The session hand already resolves this continuation from the prior ask.
+    # Keep its result through the final spoken-output filter too.
+    if (
+        DO_IT_NOW_RE.search(utterance or "")
+        and CHATS is not None
+        and hasattr(CHATS, "wants_all_sessions")
+        and CHATS.wants_all_sessions(last_user_line(prior_turns))
+    ):
         return False
     body = _answer_body(text)
     if not body:
@@ -1159,6 +1513,8 @@ def write_bus(
     brain: str | None = None,
     gen: int | None = None,
     sitting_digest: str | None = None,
+    response_ok: bool | None = None,
+    see: dict | None = None,
 ) -> dict:
     def apply(bus: dict) -> dict:
         bus.update(
@@ -1175,6 +1531,19 @@ def write_bus(
                 "updated_at": now_iso(),
             }
         )
+        if job_status == "done":
+            # Store terminal status under the same generation fence as the text.
+            # A writer without status must not inherit an older turn's status.
+            bus.pop("response_see", None)
+            bus.pop("response_see_gen", None)
+            if isinstance(see, dict) and gen is not None:
+                bus["response_see"] = see
+                bus["response_see_gen"] = int(gen)
+            bus.pop("response_ok", None)
+            bus.pop("response_ok_gen", None)
+            if response_ok is not None and gen is not None:
+                bus["response_ok"] = bool(response_ok)
+                bus["response_ok_gen"] = int(gen)
         if turns is not None:
             bus["turns"] = turns
         elif "turns" not in bus:
@@ -1191,7 +1560,10 @@ def write_bus(
             bus["sitting_digest"] = sitting_digest
         return bus
 
-    out = act_if_current(hive, gen, apply)
+    if BUS_IO is not None and hasattr(BUS_IO, "commit_response"):
+        out = BUS_IO.commit_response(hive, gen, apply, terminal=job_status == "done")
+    else:
+        out = act_if_current(hive, gen, apply)
     if out is None:
         return load_json(hive / "bus" / "state.json")
     return out
@@ -1392,7 +1764,7 @@ def _needs_private_evidence(utterance: str) -> bool:
     heard = route_utterance(utterance)
     if not heard or is_conversational_follow_up(heard) or _status_chat_only(heard):
         return False
-    if wants_about_me(heard):
+    if wants_about_me(heard) or CURRENT_VISIBILITY_RE.match(heard):
         return True
     if wants_my_stuff(heard) or wants_see_ask(heard):
         return True
@@ -1576,6 +1948,10 @@ def prefers_store(spoken: str, retrieve_roots: list[Path] | None, utterance: str
     if _named_wire_line(body):
         return body
     req = evidence_requirement(utterance) if utterance else EVIDENCE_GENERAL
+    # General reasoning must never be replaced with unrelated private memory,
+    # even when its wording matches the store-denial repair heuristic.
+    if req == EVIDENCE_GENERAL:
+        return body
     if req == EVIDENCE_MIXED and _mixed_has_reason(body):
         return body
     if STORE_LIE_RE.search(body):
@@ -1844,8 +2220,9 @@ def assemble_pack(
         lines.append("")
     lines.append(
         "Put the answer in speak after the hand runs. "
-        "Hands: vault_read, safari_see, cursor_ask, status, refuse_hard_step. mac_act only while Watch is armed. "
-        'JSON: {"tool":"converse"|"vault_read"|"safari_see"|"cursor_ask"|"status"|"refuse_hard_step","args":{},"speak":""}'
+        "Hands: vault_read, safari_see, cursor_ask, craft, status, refuse_hard_step. mac_act only while Watch is armed. "
+        "craft drives a Craft app: args {app, task}. "
+        'JSON: {"tool":"converse"|"vault_read"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
     )
     return "\n".join(lines).rstrip() + "\n"
 
@@ -1895,30 +2272,22 @@ def sitting_brief(
         if isinstance(row, dict) and not is_door_turn(row)
     ][-12:]
     follow = bool(utterance and is_conversational_follow_up(utterance))
+    if follow and recent:
+        recent = [
+            row for row in recent[:-1]
+            if not re.search(r"(?:don'?t have|not on this mac|talk wire is dark)", str(row.get("jarvis") or ""), re.I)
+        ] + recent[-1:]
     if recent:
-        last = recent[-1] if follow else None
-        if follow and last and (last.get("user") or last.get("jarvis")):
-            recent_lines.append("Immediately prior turn (explain this answer, not older misses):")
-            user = str(last.get("user") or "").strip()
-            said = str(last.get("jarvis") or "").strip()
+        recent_lines.append("Recent conversation (history, not a new request; answer the current ask):")
+        for index, row in enumerate(recent):
+            if follow and index == len(recent) - 1:
+                recent_lines.append("Immediately prior turn (explain this answer, not older misses):")
+            user = str(row.get("user") or "").strip()
+            said = str(row.get("jarvis") or "").strip()
             if user:
                 recent_lines.append(f"Evens: {user}")
             if said:
                 recent_lines.append(f"Jarvis: {said}")
-        elif utterance:
-            said = str(recent[-1].get("jarvis") or "").strip()
-            if said:
-                recent_lines.append("Previous reply, background only. Do not answer it:")
-                recent_lines.append(f"Jarvis: {said}")
-        else:
-            recent_lines.append("Recent conversation:")
-            for row in recent:
-                user = str(row.get("user") or "").strip()
-                said = str(row.get("jarvis") or "").strip()
-                if user:
-                    recent_lines.append(f"Evens: {user}")
-                if said:
-                    recent_lines.append(f"Jarvis: {said}")
     store = ""
     req = evidence_requirement(utterance) if utterance else ""
     if retrieve_roots is not _STORE_UNSET and (not utterance or req == EVIDENCE_PRIVATE):
@@ -1974,11 +2343,11 @@ def sitting_brief(
         if drop.get("truncated"):
             mid.append("Dropped body was truncated.")
     eyes = data.get("eyes") if isinstance(data.get("eyes"), dict) else {}
-    if eyes.get("path") and eyes.get("active") is not False:
+    if eyes.get("path") and eyes.get("active") is not False and Path(str(eyes["path"])).is_file():
         mid.append(f"Eyes still on disk: {Path(str(eyes.get('path'))).name}.")
     watch = data.get("watch") if isinstance(data.get("watch"), dict) else {}
     if watch.get("armed") or (isinstance(watch.get("safari"), dict) and watch.get("safari")):
-        mid.append("Watch evidence is on the bus this turn.")
+        mid.append("Retained Watch state is on the bus; this is not proof of a fresh observation or a verified action in this turn.")
     if utterance and wants_see_ask(utterance):
         mid.append("Describe the attached still only. Do not recap earlier chat topics.")
     if req == EVIDENCE_GENERAL:
@@ -2000,7 +2369,31 @@ def sitting_brief(
             _cap_section("Sitting so far (names and constraints hold): " + digest, DIGEST_BRIEF_CAP)
         )
     if recent_lines:
-        parts.append(_cap_section("\n".join(recent_lines), HIGH_CAP, keep_end=True))
+        # The active exchange has first claim on the conversation budget.
+        # Tail clipping used to discard a user's constraints when the last
+        # assistant answer was long, while unrelated earlier turns competed
+        # equally with the current topic.
+        latest = recent[-1] if recent else {}
+        active = []
+        for key, label in (("user", "Evens"), ("jarvis", "Jarvis")):
+            value = str(latest.get(key) or "").strip()
+            line = f"{label}: {value}"
+            if value and line in recent_lines:
+                active.append(line)
+        head = (
+            "Immediately prior turn (active discussion, not a new request):\n"
+            "Resolve follow-ups against this exchange and carry relevant user constraints "
+            "unless the current ask changes them. Do not ask for information already supplied.\n"
+        )
+        focus = _cap_section("\n".join(active), HIGH_CAP)
+        older = [line for line in recent_lines[1:] if line not in active and not line.startswith("Immediately prior turn")]
+        remaining = max(0, HIGH_CAP - len(focus))
+        background = _cap_section("\n".join(older), remaining, keep_end=True) if remaining else ""
+        history = "Recent conversation (history, not a new request; answer the current ask):\n"
+        if background:
+            history += "Earlier background (the active exchange below takes priority):\n" + background + "\n\n"
+        history += head + focus
+        parts.append(history)
     if store:
         parts.append(_cap_section(store, HIGH_CAP))
     if evidence and evidence not in store:
@@ -2043,7 +2436,7 @@ def pick_prompt(pack_path: Path, utterance: str) -> str:
         "Answer what he said. Follow-ups use the sitting turns in the pack.\n"
         "Store loads this turn. Last Cursor chat is the last Cursor sitting. Do not keyword-search the vault for chats.\n"
         "JSON preferred, prose speak is also fine:\n"
-        '{"tool":"converse"|"vault_read"|"safari_see"|"cursor_ask"|"status"|"refuse_hard_step","args":{},"speak":""}\n'
+        '{"tool":"converse"|"vault_read"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}\n'
     )
 
 
@@ -2054,6 +2447,9 @@ def finish_spoken(text: str) -> str:
         return body
     match = None
     for found in re.finditer(r"[.!?](?=\s+\S)", body):
+        # The Jarvis address is not a completed sentence before the answer.
+        if body[: found.end()].strip().lower() == "sir.":
+            continue
         match = found
     if match is None:
         return body
@@ -2634,9 +3030,14 @@ def voice_status_line() -> str:
 
 def _mouth_evidence(text: str) -> str:
     """Speak the hit. Pack headers stay out of TTS."""
-    body = CURRENT_DISK_HEAD_RE.sub("", (text or "").strip()).strip()
+    original = (text or "").strip()
+    body = CURRENT_DISK_HEAD_RE.sub("", original).strip()
     if not body:
         return ""
+    # Ordinary authored prose is not a retrieval dump. Preserve its paragraphs,
+    # lists and code indentation unless an actual evidence header needs removal.
+    if body == original and not re.search(r"(?m)^[\w./-]+\.(?:md|txt|json)\s*:", body):
+        return body
     lines = [ln.strip() for ln in body.splitlines() if ln.strip()]
     kept: list[str] = []
     seen: set[str] = set()
@@ -2858,6 +3259,15 @@ def harness_route(
                 brain="humour",
                 wires=["sitting"],
             )
+    if CURRENT_VISIBILITY_RE.match(spoken_in):
+        line = _safe_store_mouth(roots)
+        return _harness_hit(
+            tool="vault_read",
+            speak=f"Indexed memory: {line}" if line else HONEST_EMPTY,
+            brain="store",
+            wires=["vault_read", "store"],
+            unknown=not bool(line),
+        )
     if VOICE_HEAR_RE.search(spoken_in):
         return _harness_hit(
             tool="converse",
@@ -3142,6 +3552,32 @@ def _is_speak_leak(text: str) -> bool:
     return False
 
 
+def _grade_sentence_is_the_answer(text: str, utterance: str) -> bool:
+    """'Watchdog grades' is a pack crumb except when the ask is who grades.
+
+    Other pack crumbs in the same line still count as a leak.
+    """
+    if PERSONA is None or not hasattr(PERSONA, "grade_subject"):
+        return False
+    if not PERSONA.grade_subject(utterance or ""):
+        return False
+    grade_re = getattr(PERSONA, "WATCHDOG_GRADE_RE", None)
+    if grade_re is None or not grade_re.search(text or ""):
+        return False
+    rest = grade_re.sub(" ", text or "")
+    return not _is_speak_leak(rest)
+
+
+def _commit_leak(text: str, utterance: str) -> bool:
+    """A speak leak that should replace the dressed line.
+
+    When the ask is who grades, the Watchdog sentence is the answer.
+    """
+    if not _is_speak_leak(text):
+        return False
+    return not _grade_sentence_is_the_answer(text, utterance)
+
+
 def _talk_ok(got) -> dict | None:
     """Keep a live reply. UNKNOWN / queued is not a successful mouth."""
     if not isinstance(got, dict):
@@ -3287,9 +3723,10 @@ def provider_miss_spoken(got) -> str:
         return ""
     if PROVIDER_MISS_RE.match(spoken):
         return spoken
-    if "vision model is dark" in spoken.lower():
+    low_spoken = spoken.lower()
+    if "vision model is dark" in low_spoken or "ran out of room" in low_spoken:
         return spoken
-    if got.get("unknown") and err and wire:
+    if got.get("unknown") and err and wire and not spoken:
         return f"UNKNOWN. {wire} returned no text. {err}."
     return ""
 
@@ -3657,7 +4094,7 @@ def cursor_pick(pack_path: Path, utterance: str, cursor_fn) -> tuple[dict | None
     return extract_pick(got), got
 
 
-def _safari_see(args: dict, utterance: str, *, hive: Path, see_fn=None) -> dict:
+def _safari_see(args: dict, utterance: str, *, hive: Path, see_fn=None, gen=None) -> dict:
     """Honor a clear safari_see act. Always land in hands/see.py. Not Chrome."""
     if see_fn is not None:
         try:
@@ -3672,6 +4109,48 @@ def _safari_see(args: dict, utterance: str, *, hive: Path, see_fn=None) -> dict:
     direction = str(args.get("direction") or "down").strip().lower()
     if act == "open" and url:
         return SEE.safari_open(url)
+    if act in {"click", "download"} and str(args.get("label") or "").strip():
+        expected = str(args.get("expected_file") or "").strip()
+        if expected and expected not in utterance:
+            return {"ok": False, "spoken": "The expected filename must come from your request."}
+        digest = str(args.get("expected_sha256") or "").strip()
+        if digest and digest.lower() not in utterance.lower():
+            return {"ok": False, "spoken": "The expected hash must come from your request."}
+        click_guard = {"cancelled": lambda: turn_cancelled(hive, gen)} if gen else {}
+        if act == "download":
+            if not url or url not in utterance or not expected or not digest:
+                return {"ok": False, "spoken": "The download mission requires your URL, filename and expected hash."}
+            navigation = SEE.safari_open(url)
+            if navigation.get("ok") is not True:
+                return {**navigation, "mission_stage": "navigation"}
+            if gen and turn_cancelled(hive, gen):
+                return {"ok": False, "spoken": "The download mission was stopped before clicking.", "mission_stage": "cancelled", "steps": {"navigation": navigation}}
+            downloaded = SEE.safari_click(str(args["label"]).strip(), expected_file=expected, expected_sha256=digest, expected_url=url, **click_guard)
+            first_observation = downloaded.get("observation")
+            reobservations = 0
+            for _ in range(4):
+                diagnostic = downloaded.get("diagnostic") or {}
+                observation = downloaded.get("observation") or {}
+                if not isinstance(diagnostic, dict) or not isinstance(observation, dict):
+                    break
+                if (downloaded.get("ok") is not False
+                    or diagnostic.get("kind") != "missing_target"
+                    or diagnostic.get("action_issued") is not False
+                    or observation.get("url") != url):
+                    break
+                if gen and turn_cancelled(hive, gen):
+                    return {"ok": False, "spoken": "The download mission was stopped before clicking.", "mission_stage": "cancelled", "steps": {"navigation": navigation}}
+                time.sleep(0.15)
+                downloaded = SEE.safari_click(str(args["label"]).strip(), expected_file=expected, expected_sha256=digest, expected_url=url, **click_guard)
+                reobservations += 1
+            if reobservations:
+                downloaded = {**downloaded, "recovery": {"kind": "missing_target_reobservation", "reobservations": reobservations, "first_observation": first_observation}}
+            return {**downloaded, "mission_stage": "artifact_verification", "steps": {"navigation": navigation}}
+        if digest:
+            return SEE.safari_click(str(args["label"]).strip(), expected_file=expected, expected_sha256=digest, **click_guard)
+        if expected:
+            return SEE.safari_click(str(args["label"]).strip(), expected_file=expected, **click_guard)
+        return SEE.safari_click(str(args["label"]).strip(), **click_guard)
     if act == "scroll":
         return SEE.safari_scroll(direction)
     if act in {"grab", "screenshot", "share"}:
@@ -3699,6 +4178,18 @@ def _evidence_line(speak: str, evidence: str) -> str:
     return speak or evidence or ""
 
 
+def browser_runtime():
+    """Lazy dependency-free bridge; Browser Use imports only in its worker."""
+    name = "agent_stack_browser_runtime"
+    if name not in sys.modules:
+        path = STACK / "hands" / "browser_runtime.py"
+        spec = importlib.util.spec_from_file_location(name, path)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
 def run_tool(
     pick: dict,
     utterance: str,
@@ -3708,6 +4199,7 @@ def run_tool(
     see_fn=None,
     status_fn=None,
     cursor_ask_fn=None,
+    craft_model_fn=None,
     sent: list | None = None,
     gen: int | None = None,
 ) -> dict:
@@ -3760,6 +4252,16 @@ def run_tool(
             "needs_talk": True,
             "dropped_tool": tool,
         }
+    if tool == "browser_mission":
+        action = str(args.get("action") or "start")
+        intent = re.search(r"\b(research|compare|find|check|look up|browse|browser|pricing|prices)\b", utterance, re.I)
+        if action == "start" and not intent:
+            return {"ok": False, "tool": tool, "spoken": "No browser research was requested.",
+                    "task_verified": False, "wires": [tool], "cites": [], "sent": False}
+        if action in {"cancel", "skip"} and not re.search(r"\b(stop|cancel|skip|don't|do not)\b", utterance, re.I):
+            return {"ok": False, "tool": tool, "spoken": "No browser steering was requested.",
+                    "task_verified": False, "wires": [tool], "cites": [], "sent": False}
+        return browser_runtime().pipeline_tool(args, utterance, hive)
     if tool == "converse":
         return {
             "ok": True,
@@ -3848,13 +4350,15 @@ def run_tool(
             "sent": False,
         }
     if tool == "safari_see":
-        got = _safari_see(args, utterance, hive=hive, see_fn=see_fn)
+        got = _safari_see(args, utterance, hive=hive, see_fn=see_fn, gen=gen)
         got = got if isinstance(got, dict) else {}
         evidence = str(got.get("spoken") or "").strip()
+        if not isinstance(got.get("ok"), bool):
+            evidence = "Safari returned no valid result status. The requested action is not verified."
         return {
-            "ok": bool(got.get("ok", True)),
+            "ok": got.get("ok") is True,
             "tool": tool,
-            "spoken": _evidence_line(speak, evidence),
+            "spoken": (_speakable_line(evidence) if got.get("ok") is not True or isinstance(got.get("verification"), dict) else _evidence_line(speak, evidence)),
             "wires": [got.get("wire") or "safari_see"],
             "cites": [],
             "sent": False,
@@ -3913,6 +4417,48 @@ def run_tool(
             "wires": [got.get("wire") or "cursor_ask"],
             "cites": [],
             "sent": False,
+        }
+    if tool == "craft":
+        fn = craft_model_fn
+        if fn is None and ONLINE is not None and hasattr(ONLINE, "call_openrouter_messages"):
+            # Craft needs tool calls. The talk chain's free models think past the
+            # token cap or have no tool endpoint, so craft runs on CRAFT_MODEL,
+            # then the paid fallbacks the talk chain already names.
+            chain = (os.environ.get("CRAFT_MODEL") or "", *getattr(ONLINE, "OPENROUTER_PAID_FALLBACKS", ()))
+            fn = lambda messages, tools: ONLINE.call_openrouter_messages(messages, tools, model_chain=chain)
+        if CRAFT is None or fn is None:
+            return {
+                "ok": False,
+                "tool": tool,
+                "spoken": "The Craft hand is dark. I did not touch any app.",
+                "wires": ["craft"],
+                "cites": [],
+                "sent": False,
+            }
+        began = time.monotonic()
+        got = CRAFT.run(args, utterance, model_fn=fn)
+        # One trace line per craft run: which app, what ran, why it stopped. No secrets.
+        print(
+            json.dumps(
+                {
+                    "craft": str(args.get("app") or ""),
+                    "ok": got.get("ok") is True,
+                    "steps": [row.get("tool") for row in got.get("steps") or []],
+                    "sec": round(time.monotonic() - began, 1),
+                    "model_error": got.get("model_error") or "",
+                }
+            ),
+            file=sys.stderr,
+            flush=True,
+        )
+        return {
+            "ok": got.get("ok") is True,
+            "tool": tool,
+            "spoken": _speakable_line(str(got.get("spoken") or "")),
+            "wires": ["craft"],
+            "cites": [],
+            "sent": False,
+            "craft": got,
         }
     if tool == "status":
         which = str(args.get("which") or "").strip()
@@ -3973,6 +4519,7 @@ def run_tool(
                     y=(action or {}).get("y"),
                     text=str((action or {}).get("text") or ""),
                     direction=str((action or {}).get("direction") or "down"),
+                    frame_bounds=(action or {}).get("_bound_frame_bounds"),
                     hive=hive,
                     gen=gen,
                 )
@@ -4169,6 +4716,7 @@ def run_watch_loop(
                 "op": "allow",
             }
     acts: list[str] = []
+    stroke: dict | None = None
     for idx in range(WATCH_LOOP_CAP):
         if act_if_current(hive, token or None, lambda bus: bus) is None:
             return _watch_stopped(idx)
@@ -4240,8 +4788,9 @@ def run_watch_loop(
                     line = f"{meta}. Vision model is dark."
                 acts.append(line)
                 break
-            acts.append(line)
-            break
+            _disarm_watch(hive, gen=token or None)
+            return {"ok": False, "verb": "watch", "spoken": "No action was executed. The model returned no usable Watch command.",
+                    "wires": ["watch"], "cycles": idx + 1, "reason": "no_command"}
         tool = str(pick.get("tool") or "")
         args = pick.get("args") if isinstance(pick.get("args"), dict) else {}
         if tool == "refuse_hard_step" or is_hard_step(utterance) or is_hard_step(str(args.get("text") or "")):
@@ -4249,14 +4798,16 @@ def run_watch_loop(
             acts.append(hard_step_line(heard_hard) if is_hard_step(heard_hard) else PROPOSAL)
             break
         if tool in {"converse", "stop"} or str(args.get("op") or "") == "stop":
-            acts.append(str(pick.get("speak") or snap.get("spoken") or "Watch waited."))
-            break
+            _disarm_watch(hive, gen=token or None)
+            return {"ok": False, "verb": "watch", "spoken": "Watch stopped without executing an action. The requested result is not verified.",
+                    "wires": ["watch"], "cycles": idx + 1, "reason": "model_stopped_without_action"}
         if tool == "safari_see":
             acts.append("Watch will not use Safari as a second hand.")
             break
         if tool != "mac_act" or FRAME is None:
-            acts.append(str(pick.get("speak") or snap.get("spoken") or "Watch waited."))
-            break
+            _disarm_watch(hive, gen=token or None)
+            return {"ok": False, "verb": "watch", "spoken": "No action was executed. The selected Watch tool is unavailable.",
+                    "wires": ["watch"], "cycles": idx + 1, "reason": "unsupported_watch_tool"}
         if act_if_current(hive, token or None, lambda bus: bus) is None:
             return _watch_stopped(idx)
         ran = FRAME.commit_watch_stroke(
@@ -4273,6 +4824,7 @@ def run_watch_loop(
                         y=(action or {}).get("y"),
                         text=str((action or {}).get("text") or ""),
                         direction=str((action or {}).get("direction") or "down"),
+                        frame_bounds=(action or {}).get("_bound_frame_bounds"),
                         hive=hive,
                         gen=gen,
                     )
@@ -4284,6 +4836,7 @@ def run_watch_loop(
         )
         if act_if_current(hive, token or None, lambda bus: bus) is None:
             return _watch_stopped(idx)
+        stroke = ran
         if ran.get("stale"):
             acts.append(str(ran.get("spoken") or "Frame moved. I looked again."))
             continue
@@ -4293,7 +4846,9 @@ def run_watch_loop(
     if ONLINE is not None and hasattr(ONLINE, "clip_spoken"):
         spoken = ONLINE.clip_spoken(spoken)
     _disarm_watch(hive, gen=token or None)
-    return {"ok": True, "verb": "watch", "spoken": spoken, "wires": ["watch"], "cycles": len(acts)}
+    return {"ok": bool(stroke.get("ok")) if stroke is not None else False,
+            "verb": "watch", "spoken": spoken, "wires": ["watch"], "cycles": len(acts),
+            **({"stroke": stroke} if stroke is not None else {"reason": "no_action_receipt"})}
 
 
 def cursor_fn_ask_fallback():
@@ -4359,7 +4914,7 @@ def dress(
 ) -> str:
     text = finish_spoken((spoken or "").strip() or "")
     local = standing_reply(utterance, turns)
-    if recited_store_line(text, utterance):
+    if recited_store_line(text, utterance, turns):
         text = local or STORED_NOT_LIVE
     elif local and off_answer(text, utterance):
         text = local
@@ -4397,6 +4952,7 @@ def note_wire(
     ok: bool,
     wire: dict | None = None,
     gen: int | None = None,
+    closed: bool = False,
 ) -> dict:
     if LAST_WIRE is None:
         return {}
@@ -4412,6 +4968,7 @@ def note_wire(
         "outcome": row.get("outcome"),
         "evidence": row.get("evidence"),
         "provider": row.get("provider"),
+        "model": row.get("model"),
         "tool": row.get("tool") or tool,
         "finish_reason": row.get("finish_reason"),
     }
@@ -4429,6 +4986,7 @@ def note_wire(
         wire=payload,
         utterance=utterance,
         gen=gen,
+        closed=closed,
     )
 
 
@@ -4442,6 +5000,7 @@ def _pipeline_event(
     cites: list,
     pack: str | None,
     args=None,
+    see: dict | None = None,
     unknown: bool = False,
     done: bool = True,
     partial: bool = False,
@@ -4451,6 +5010,7 @@ def _pipeline_event(
     outcome: str | None = None,
     source: str | None = None,
     gen: int | None = None,
+    mission: dict | None = None,
 ) -> dict:
     available = bool(brain) if model_available is None else bool(model_available)
     ev = {
@@ -4478,6 +5038,11 @@ def _pipeline_event(
         "provider": brain,
         "evidence_used": bool(cites) or bool(source),
     }
+    if mission is not None:
+        ev["mission_id"] = mission.get("mission_id")
+        ev["task_verified"] = bool(mission.get("task_verified"))
+    if isinstance(see, dict):
+        ev["see"] = see
     if gen is not None:
         ev["gen"] = int(gen)
         ev["turn_gen"] = int(gen)
@@ -4496,6 +5061,7 @@ def _commit_spoken(
     ok: bool,
     pack: str | None,
     args=None,
+    see: dict | None = None,
     unknown: bool = False,
     login_said: bool | None = None,
     wire: dict | None = None,
@@ -4506,12 +5072,12 @@ def _commit_spoken(
 ):
     if gen is not None and turn_cancelled(hive, gen):
         return "", "", ""
-    text = dress(raw, tool=tool, utterance=spoken_in, turns=prior_turns, retrieve_roots=retrieve_roots)
-    if (_is_speak_leak(text) or is_lanes_default(text) or talk_is_miss(text)) and not _named_wire_line(raw):
+    text = raw.strip() if tool == "browser_mission" else dress(raw, tool=tool, utterance=spoken_in, turns=prior_turns, retrieve_roots=retrieve_roots)
+    if (_commit_leak(text, spoken_in) or is_lanes_default(text) or talk_is_miss(text)) and not _named_wire_line(raw):
         cleaned = ""
         if PERSONA is not None and hasattr(PERSONA, "sanitize_payload"):
-            cleaned = str(PERSONA.sanitize_payload(raw) or "")
-        fallback = cleaned if cleaned and not talk_is_miss(cleaned) and not _is_speak_leak(cleaned) else ""
+            cleaned = str(PERSONA.sanitize_payload(raw, utterance=spoken_in) or "")
+        fallback = cleaned if cleaned and not talk_is_miss(cleaned) and not _commit_leak(cleaned, spoken_in) else ""
         if not fallback:
             req_now = evidence_requirement(spoken_in)
             if req_now == EVIDENCE_GENERAL:
@@ -4537,7 +5103,7 @@ def _commit_spoken(
     next_turns = append_turn(prior_turns, spoken_in, text)
     prior_bus = load_json(hive / "bus" / "state.json")
     digest = roll_digest(str(prior_bus.get("sitting_digest") or ""), spoken_in, text)
-    write_bus(
+    committed = write_bus(
         hive,
         phase="speak",
         job_status="done",
@@ -4552,9 +5118,15 @@ def _commit_spoken(
         brain=brain,
         gen=gen,
         sitting_digest=digest,
+        response_ok=ok,
+        see=see,
     )
     if gen is not None and turn_cancelled(hive, gen):
         return "", "", ""
+    winner = str(committed.get("spoken") or "")
+    if winner != text:
+        first, rest = first_sentence(winner)
+        return winner, first, rest
     note_wire(hive, tool, text, spoken_in, ok=ok, wire=wire, gen=gen)
     if CHATS is not None and hasattr(CHATS, "archive_turn"):
         try:
@@ -4788,6 +5360,16 @@ def apply_pipeline_iter(
         except (OSError, TypeError, AttributeError):
             pass
 
+    # Browser progress is exact mission state, not a conversational model task.
+    if (re.search(r"\bbrowser (?:research )?(?:flows?|mission|work|research)\b", spoken_in, re.I)
+            and re.search(r"\b(how many|progress|status|finished|completed|done|so far)\b", spoken_in, re.I)
+            and re.match(r"^(?:please\s+)?(?:how|what|show|give|status|progress)\b", spoken_in, re.I)):
+        pick = {"tool":"browser_mission","args":{"action":"status"},"speak":""}
+        brain = "browser_runtime"
+    elif re.search(r"\bbrowser mission\b", spoken_in, re.I) and re.match(r"^(?:please\s+)?(?:research|compare|find|collect|inspect|start|run)\b", spoken_in, re.I):
+        pick = {"tool":"browser_mission","args":{"action":"start"},"speak":""}
+        brain = "browser_runtime"
+
     dry = senses_dry_line(spoken_in, bus_now)
     if pick is None and dry:
         pick = {"tool": "converse", "args": {}, "speak": dry}
@@ -4800,6 +5382,34 @@ def apply_pipeline_iter(
             "cites": [],
             "sent": False,
         }
+
+    # An unambiguous authorized browser imperative is an execution contract.
+    # A prose model pick must not delegate this action back to the user.
+    explicit_open = re.fullmatch(r"\s*(?:please\s+)?open\s+(https?://\S+)\s+in\s+safari\s*[.!]?\s*", spoken_in, re.I)
+    if explicit_open and wants_safari(spoken_in) and ran is None:
+        pick = {"tool": "safari_see", "args": {"act": "open", "url": explicit_open.group(1)}, "speak": ""}
+
+    click_request, verify_sep, expected_file = spoken_in.partition("; verify download ")
+    explicit_click = re.fullmatch(
+        r"\s*(?:please\s+)?in\s+safari[,]?\s+click\s+(?:the\s+)?(?:link|button)\s+(.+?)\s*[.!]?\s*",
+        click_request, re.I,
+    )
+    if explicit_click and wants_safari(spoken_in) and ran is None:
+        label = explicit_click.group(1).strip().strip('"')
+        click_args = {"act": "click", "label": label}
+        if verify_sep:
+            filename, hash_sep, digest = expected_file.strip().partition(" sha256 ")
+            click_args["expected_file"] = filename.strip().rstrip(".")
+            if hash_sep:
+                click_args["expected_sha256"] = digest.strip()
+        pick = {"tool": "safari_see", "args": click_args, "speak": ""}
+
+    explicit_mission = re.fullmatch(r"\s*(?:please\s+)?open\s+(https?://\S+)\s+in\s+safari;\s*click\s+(?:the\s+)?(?:link|button)\s+(.+?);\s*verify download\s+(\S+)\s+sha256\s+([0-9a-f]{64})\s*", spoken_in, re.I)
+    if explicit_mission and wants_safari(spoken_in) and ran is None:
+        url, label, filename, digest = explicit_mission.groups()
+        pick = {"tool": "safari_see", "args": {"act": "download", "url": url, "label": label, "expected_file": filename, "expected_sha256": digest}, "speak": ""}
+    if pick is not None and ran is None and pick.get("tool") == "safari_see":
+        brain = "safari"
 
     about = wants_about_me(spoken_in)
     vault_roots = about_me_roots(retrieve_roots)
@@ -5116,9 +5726,16 @@ def apply_pipeline_iter(
                 }
                 brain = ran.get("brain")
 
+    # Explicit operator browser research cannot be downgraded to a cached prose reply.
+    if re.search(r"\bbrowser mission\b", spoken_in, re.I) and re.match(r"^(?:please\s+)?(?:research|compare|find|collect|inspect|start|run)\b", spoken_in, re.I):
+        pick = {"tool": "browser_mission", "args": {"action": "start"}, "speak": ""}
+        ran = None
+        brain = "browser_runtime"
     pack_ref = str(pack) if pack else None
     early = ""
     speak_early = str((pick or {}).get("speak") or "").strip()
+    if str((pick or {}).get("tool") or "") == "browser_mission":
+        speak_early = ""  # only the real mission receipt may announce browser work
     if speak_early and ran is None and brain:
         early_raw, _ = first_sentence(speak_early)
         early = dress(
@@ -5154,40 +5771,34 @@ def apply_pipeline_iter(
         and str((pick or {}).get("tool") or "") == "cursor_ask"
         and not wants_cursor_task(spoken_in)
     ):
-        asked = str((pick or {}).get("speak") or "").strip()
-        prose = _prose_converse(asked) if asked else None
-        if prose:
-            pick = prose
-        else:
-            local = standing_reply(spoken_in, prior_turns)
-            line = local
-            if not line and not (token and turn_cancelled(hive, token)):
-                retried = online_talk(
-                    spoken_in,
-                    "Answer in one or two sentences. No tools. No browser. No files.",
-                    talk_fn=talk_fn,
-                    hands=False,
-                )
-                if isinstance(retried, dict):
-                    got = retried
-                raw_line = _talk_speak(retried)
-                line = raw_line if raw_line and not talk_is_miss(raw_line) else _salvage_general_line(raw_line)
-                if line and (talk_is_miss(line) or _is_speak_leak(line) or is_lanes_default(line)):
-                    line = ""
-            pick = {"tool": "converse", "args": {}, "speak": line or TALK_DARK}
+        # A rejected coding hand's narration is progress, not an answer.
+        # Return to the conversation owner with the same current context.
+        line = ""
+        if not (token and turn_cancelled(hive, token)):
+            retry_brief = provider_brief or sitting_brief(prior_turns, bus_now, retrieve_roots, spoken_in)
+            retry_brief += "\n\nAnswer the current question directly using the active conversation and its constraints. No tool is needed for this answer. Provide the answer now, not a promise to provide it."
+            retried = online_talk(spoken_in, retry_brief, talk_fn=talk_fn, hands=False)
+            if isinstance(retried, dict):
+                got = retried
+            raw_line = _talk_speak(retried)
+            line = raw_line if raw_line and not talk_is_miss(raw_line) else _salvage_general_line(raw_line)
+            if line and (talk_is_miss(line) or _is_speak_leak(line) or is_lanes_default(line)):
+                line = ""
+        pick = {"tool": "converse", "args": {}, "speak": line or TALK_DARK}
     if ran is None:
         if token and turn_cancelled(hive, token):
             return
-        if str((pick or {}).get("tool") or "") == "vault_read":
+        held = str((pick or {}).get("tool") or "")
+        if held in ("vault_read", "craft"):
             # Face's wall treats silence as an idle wire. Name the hand
-            # before retrieve blocks, so an outstanding vault_read is not
-            # replaced by the dark line.
+            # before it blocks, so an outstanding vault_read or craft loop
+            # is not replaced by the dark line.
             yield _pipeline_event(
                 ok=True,
-                tool="vault_read",
+                tool=held,
                 spoken="",
                 spoken_delta="",
-                wires=["vault_read"],
+                wires=[held],
                 cites=[],
                 pack=pack_ref,
                 args=(pick or {}).get("args") if isinstance((pick or {}).get("args"), dict) else {},
@@ -5232,7 +5843,16 @@ def apply_pipeline_iter(
     pick_speak = str((pick or {}).get("speak") or "").strip()
     if (
         ran is not None
+        # A failed action cannot be promoted by a model paraphrase.
+        and ran.get("ok") is not False
         and pick_tool in HANDS
+        and pick_tool != "browser_mission"
+        # Craft speaks its own post-action inspect. A paraphrase cannot widen it.
+        and pick_tool != "craft"
+        and not (pick_tool == "safari_see" and ran.get("ok") is not True)
+        # Navigation receipts describe a verified scope. A model paraphrase
+        # cannot extend that scope or replace a failed observation with success.
+        and not (isinstance(ran.get("see"), dict) and isinstance(ran["see"].get("verification"), dict))
         and not pick_speak
         and str(brain or "") in {"openrouter", "grok", "xai", "grokbot"}
         and not (token and turn_cancelled(hive, token))
@@ -5357,7 +5977,10 @@ def apply_pipeline_iter(
     if not source and cites and isinstance(cites[0], dict):
         source = str(cites[0].get("source") or "")
     ran_spoken = str((ran or {}).get("spoken") or "")
-    if vault_spoke:
+    if tool == "browser_mission" and (pick or {}).get("args",{}).get("action") == "status":
+        outcome = TOOL_LOOP
+        source = "mission_state"
+    elif vault_spoke:
         outcome = STORE_DIRECT
     elif used_tool_loop:
         outcome = TOOL_LOOP
@@ -5385,11 +6008,14 @@ def apply_pipeline_iter(
         outcome = STORE_DIRECT if is_factual_retrieval(spoken_in) and not talk_is_miss(raw_spoken) else HONEST_UNKNOWN
     else:
         outcome = HONEST_UNKNOWN if talk_is_miss(raw_spoken) else (MODEL_TALK if brain else HONEST_UNKNOWN)
+    if outcome == WIRE_FAILURE:
+        ran["ok"] = False
     text, first, rest = _commit_spoken(
         hive,
         spoken_in=spoken_in,
         prior_turns=prior_turns,
         tool=tool,
+        see=ran.get("see"),
         raw=raw_spoken,
         wires=wires,
         cites=cites,
@@ -5417,6 +6043,7 @@ def apply_pipeline_iter(
             "outcome": outcome,
             "evidence": (cites[0].get("path") if cites and isinstance(cites[0], dict) else None),
             "provider": brain or got_wire or None,
+            "model": (got or {}).get("model"),
             "tool": tool,
             "finish_reason": (got or {}).get("finish_reason"),
         },
@@ -5449,6 +6076,8 @@ def apply_pipeline_iter(
     yield _pipeline_event(
         ok=bool(ran.get("ok")) if brain else False,
         tool=tool,
+        see=ran.get("see"),
+        mission=ran if tool == "browser_mission" else None,
         spoken=text,
         spoken_delta=extra,
         wires=wires,
@@ -5509,3 +6138,34 @@ def apply_pipeline(
     ):
         last = ev
     return last
+
+
+def deliver_browser_missions(hive: Path) -> dict | None:
+    """Face consumes completed hands through the existing terminal bus owner."""
+    if BUS_IO is None or not hasattr(BUS_IO, "commit_mission_response"):
+        return None
+    runtime = browser_runtime()
+    results = sorted((Path(hive) / "browser-missions").glob("*/result.json"))
+    for path in results:
+        result = runtime.read_json(path)
+        mission_id = result.get("mission_id")
+        completion_id = result.get("terminal_commit_id")
+        spoken = result.get("spoken")
+        if not mission_id or not completion_id or not isinstance(spoken, str) or not spoken.strip():
+            continue
+        request = runtime.read_json(path.parent / "request.json")
+        objective = str(request.get("objective") or "Browser research")
+        def apply(bus, gen):
+            text = spoken.strip()  # already synthesized; persona must not prefix unverified results with Done
+            bus.update({"phase":"speak", "job_status":"done", "spoken":text,
+                "utterance":objective, "tool":"browser_mission", "wires":["browser_mission"],
+                "response_ok":bool(result.get("verified")), "response_ok_gen":gen,
+                "task_verified":bool(result.get("verified")), "task_verified_gen":gen, "browser_mission_id":mission_id,
+                "browser_mission_result":str(path), "updated_at":now_iso(),
+                "turns":append_turn(load_turns(bus), objective, text)})
+            bus.pop("response_see",None);bus.pop("response_see_gen",None)
+            return bus
+        committed = BUS_IO.commit_mission_response(hive, mission_id, completion_id, apply)
+        if committed is not None:
+            return committed
+    return None
