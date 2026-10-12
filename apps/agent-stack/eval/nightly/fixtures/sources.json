@@ -1,0 +1,4 @@
+{"question": "What is the boiling point of water at sea level in Celsius?",
+ "sources": {"s1": "At sea level, pure water boils at 100 degrees Celsius.", "s2": "Water freezes at 0 degrees Celsius."},
+ "good_answer": {"claim": "Water boils at 100 degrees Celsius at sea level", "cites": ["s1"], "key": "100 degrees Celsius"},
+ "bad_answer": {"claim": "Water boils at 90 degrees Celsius at sea level", "cites": ["s2"], "key": "90 degrees Celsius"}}
