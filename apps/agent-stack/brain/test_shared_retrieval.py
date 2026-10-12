@@ -106,6 +106,20 @@ class RetrievalTest(unittest.TestCase):
         self.assertIn("[shared:JARVIS_CONTEXT.md | as of 2023-11-", got["text"])
         self.assertIn("STALE", got["text"])
 
+    def test_r15_drift_report_names_missing_and_stale(self):
+        os.utime(self.root / "MAC_SHARED_MEMORY.md", (1_700_000_000, 1_700_000_000))
+        rep = SC.drift_report(self.root)
+        self.assertIn("AGENT_RULES.md", rep["missing"])
+        self.assertIn("MAC_SHARED_MEMORY.md", rep["stale"])
+        self.assertNotIn("CURRENT_STATE.md", [r["file"] for r in rep["present"]])
+        self.assertFalse(rep["ok"])
+
+    def test_f07_header_date_beats_fresh_sync_mtime(self):
+        (self.root / "SHARED_MEMORY.md").write_text("# SHARED_MEMORY (2023-11-01 22:30 ET)\n- studio save export open\n")
+        line = SC.stamp(self.root / "SHARED_MEMORY.md")
+        self.assertIn("as of 2023-11-01 22:30", line)
+        self.assertIn("STALE", line)
+
     def test_opt_out(self):
         with mock.patch.dict(os.environ, {"JARVIS_SHARED_CONTEXT": "0"}):
             self.assertEqual(SC.retrieve_entries("studio save export open"), [])

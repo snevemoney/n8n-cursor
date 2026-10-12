@@ -83,6 +83,19 @@ def stamp(path: Path, now: float | None = None) -> str:
     except OSError:
         return "date unknown"
     now = time.time() if now is None else now
+    # A synced copy gets a fresh mtime; a date in the file header is the content date. Use the older.
+    try:
+        with path.open("r", encoding="utf-8", errors="ignore") as fh:
+            head = fh.read(300)
+    except OSError:
+        head = ""
+    found = re.search(r"\b(20\d\d-\d\d-\d\d)(?:[ T](\d\d:\d\d))?", head)
+    if found:
+        try:
+            dated = time.mktime(time.strptime(found.group(1) + " " + (found.group(2) or "00:00"), "%Y-%m-%d %H:%M"))
+            mtime = min(mtime, dated)
+        except ValueError:
+            pass
     age_h = max(0.0, (now - mtime) / 3600.0)
     when = time.strftime("%Y-%m-%d %H:%M", time.localtime(mtime))
     age = f"{age_h:.0f} h old" if age_h < 48 else f"{age_h / 24:.1f} days old"
@@ -326,3 +339,39 @@ def pack_block(base: Path, files=PACK_FILES) -> str:
 def system_owns_fleet_context() -> bool:
     """True when the system prompt already carries the private JARVIS_CONTEXT.md (no double load)."""
     return enabled() and (shared_dir() / PRIMARY).is_file()
+
+
+# --- R15 drift check: which expected shared files are missing or stale (names + dates only) ---
+EXPECTED_FILES = (
+    "JARVIS_CONTEXT.md", "AGENT_RULES.md", "ACTIVE_TASKS.md", "MAC_SHARED_MEMORY.md",
+    "SHARED_MEMORY.md", "OPERATOR_PROFILE.md", "TOOLS_AND_REPOS.md", "SKILLS_INDEX.md",
+)
+
+
+def drift_report(root: Path | None = None, now: float | None = None) -> dict:
+    base = Path(root) if root else shared_dir()
+    now = time.time() if now is None else now
+    rows, missing, stale = [], [], []
+    for name in EXPECTED_FILES:
+        path = base / name
+        if not path.is_file():
+            missing.append(name)
+            continue
+        try:
+            age_h = (now - path.stat().st_mtime) / 3600.0
+        except OSError:
+            missing.append(name)
+            continue
+        rows.append({"file": name, "age_hours": round(age_h, 1)})
+        if age_h > stale_hours():
+            stale.append(name)
+    return {"dir": str(base), "present": rows, "missing": missing, "stale": stale,
+            "ok": not missing and not stale}
+
+
+if __name__ == "__main__":
+    import json
+    import sys
+
+    if "--drift" in sys.argv:
+        print(json.dumps(drift_report(), indent=2))
