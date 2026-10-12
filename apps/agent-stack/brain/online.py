@@ -46,8 +46,18 @@ OPENROUTER_PAID_FALLBACKS = (
 OPENROUTER_VISION_FALLBACKS = (
     "deepseek/deepseek-v4-flash-vision-exp",
 )
-OPENROUTER_ATTEMPT_SEC = 10.0
-OPENROUTER_WALL_SEC = 20.0
+# Measured 2026-10-11: deepseek-chat-v3.1 takes 11-25 s for a ~4k-token system prompt and a
+# multi-sentence answer, so a 10 s per-try limit timed out every long reply. Stay under the
+# Face TURN_WALL_SEC (25 s). Override with JARVIS_TALK_ATTEMPT_SEC / JARVIS_TALK_WALL_SEC.
+def _sec_env(name: str, default: float) -> float:
+    try:
+        return max(1.0, float(os.environ.get(name) or default))
+    except ValueError:
+        return default
+
+
+OPENROUTER_ATTEMPT_SEC = _sec_env("JARVIS_TALK_ATTEMPT_SEC", 20.0)
+OPENROUTER_WALL_SEC = _sec_env("JARVIS_TALK_WALL_SEC", 22.0)
 TALK_DARK = "The talk wire is dark this turn."
 OPENROUTER_MAX_TOKENS = 512
 OPENROUTER_RETRIEVE_TOKENS = 512
