@@ -174,7 +174,8 @@ FACTORY_PHRASE = (
     (FACE_ADDR_MOUTH_RE, ""),
     (
         re.compile(
-            r"(?:(?:/Users|/home|/tmp|/var|/opt|~/|[A-Za-z]:\\)[\w./\\-]+|"
+            # HOME-relative user folders (~/Documents, ~/Movies, ...) are where Evens looks; keep them.
+            r"(?:(?:/Users|/home|/tmp|/var|/opt|~/(?!(?:Documents|Movies|Desktop|Downloads|Pictures|Music)\b)|[A-Za-z]:\\)[\w./\\-]+|"
             r"(?:apps|scripts|docs|CONTENT|packages)/[\w./-]+)"
         ),
         "",
