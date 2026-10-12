@@ -16,6 +16,27 @@ class MissionController:
     def __init__(self, adapter):
         self.adapter = adapter
 
+    @staticmethod
+    def _terminal_commit_id(request, state):
+        # JARVIS_ONE_MIND=1: deterministic sha256(mission id + verified outcome). Off: uuid4, unchanged.
+        import os
+        if os.environ.get('JARVIS_ONE_MIND', '') != '1':
+            return uuid.uuid4().hex
+        import importlib.util
+        import sys
+        name = 'agent_stack_one_mind_trace_for_browser'
+        if name not in sys.modules:
+            path = Path(__file__).resolve().parent / 'one_mind' / 'trace.py'
+            pkg_spec = importlib.util.spec_from_file_location('agent_stack_one_mind', path.parent / '__init__.py', submodule_search_locations=[str(path.parent)])
+            pkg = importlib.util.module_from_spec(pkg_spec); sys.modules['agent_stack_one_mind'] = pkg; pkg_spec.loader.exec_module(pkg)
+            spec = importlib.util.spec_from_file_location('agent_stack_one_mind.trace', path)
+            mod = importlib.util.module_from_spec(spec); sys.modules['agent_stack_one_mind.trace'] = mod; spec.loader.exec_module(mod)
+            sys.modules[name] = mod
+        verified = bool(state.get('verified'))
+        outcome = {'status': state.get('status'), 'verified': verified,
+                   'accepted': sorted(r.get('flow_id') for r in state.get('results', []) if verified and r.get('verified'))}
+        return sys.modules[name].terminal_commit_id(request['mission_id'], outcome)
+
     def _assert_source_current(self, request):
         expected = request.get('source_manifest')
         if expected is not None and expected != self.adapter.mission_source_manifest():
@@ -117,7 +138,7 @@ class MissionController:
                             break
                         continue
                     self._assert_source_current(request)
-                    state.update(status='VERIFIED' if verified else 'PARTIAL', spoken=summary['spoken'] if verified else self.adapter.mission_contract().unverified_response(acceptance), duration=time.monotonic() - started, calls=gateway.calls, terminal_commit_id=uuid.uuid4().hex, finished=time.time())
+                    state.update(status='VERIFIED' if verified else 'PARTIAL', spoken=summary['spoken'] if verified else self.adapter.mission_contract().unverified_response(acceptance), duration=time.monotonic() - started, calls=gateway.calls, terminal_commit_id=self._terminal_commit_id(request, state), finished=time.time())
                     self.adapter.write_json(root / 'result.json', state)
                     self.adapter.write_json(root / 'state.json', state)
                     return state
@@ -125,7 +146,7 @@ class MissionController:
                 raise RuntimeError('steering_revision_budget')
         except Exception as exc:
             state.update(status='FAILED', verified=False, terminal_reason=type(exc).__name__ + ': ' + str(exc)[:500], spoken='The browser mission did not complete. Its requested result is not verified.')
-        state.update(duration=time.monotonic() - started, calls=gateway.calls if gateway else [], terminal_commit_id=uuid.uuid4().hex, finished=time.time())
+        state.update(duration=time.monotonic() - started, calls=gateway.calls if gateway else [], terminal_commit_id=self._terminal_commit_id(request, state), finished=time.time())
         import fcntl
         with (root / 'steering.lock').open('a') as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
