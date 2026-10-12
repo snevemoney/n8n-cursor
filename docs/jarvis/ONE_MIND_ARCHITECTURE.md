@@ -27,8 +27,9 @@ Identity/Persona: `response_runtime.JARVIS_PROFILE` + `mouth/persona.py` · Memo
 
 ## Not in this PR (by design)
 - **Point 22 profile improvement.** Design: trace → candidate profile version → offline eval on Golden + replay → shadow/A-B through `EvidenceRouter.evidence` → promote or reject on the six metrics plus task pass rate. PR #591's learning-engine is a candidate harness. Not implemented.
-- **Live wiring.** There is no `pipeline.py` branch yet. Real box-agent coding backend and research/browser graph templates under the generic controller are follow-ups.
-- **Browser controller commit id.** `brain/mission_controller.py:128` still uses `uuid4`. Changing it would break the flag-off byte-identity guarantee, so it needs an explicit operator decision. The proposed change is a flag-gated swap to `trace.terminal_commit_id`.
+- **Pipeline hook (done, Evens OK 2026-10-11 23:00 ET).** `pipeline.run_tool` → `one_mind_route` runs only with `JARVIS_ONE_MIND=1`, after the hard-step and unauthorized refusals. It routes coding turns (`cursor_ask`) to the generic controller when box-agent workers are registered (`one_mind/pipeline_hook.register_workers`). Otherwise it returns None and the legacy path runs. browser_mission keeps its own controller. Not deployed.
+- **Still to do:** Real box-agent coding backend and research/browser graph templates under the generic controller are follow-ups.
+- **Browser controller commit id (done, Evens OK 2026-10-11 22:54 ET).** `brain/mission_controller.py` `_terminal_commit_id`: with `JARVIS_ONE_MIND=1` it is `trace.terminal_commit_id` (sha256 of mission id + verified outcome). With the flag off it is still `uuid4`, so behavior is unchanged (`test_mission_controller_commit_id`).
 
 ## Overlaps
 #599/#606 loaders are reused, not duplicated. Consultant's `jarvis/fixes-20261011` adds `brain/shared_context.py` under the same `JARVIS_SHARED_CONTEXT` flag; One-Mind doesn't import it. Draft #613 REA becomes the `rea.analyze` tool on `software.reviewer`.
