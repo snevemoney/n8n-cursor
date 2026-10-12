@@ -63,7 +63,7 @@ class SharedContextTest(unittest.TestCase):
             got = SC.load_shared_context(use_cache=False)
             self.assertEqual(got["files"], [])
             ONLINE._SHARED_MOD = None
-            self.assertEqual(ONLINE.system_for("m"), ONLINE.SYS)
+            self.assertEqual(ONLINE.system_for(""), ONLINE.SYS)
             self.assertEqual(ONLINE.LAST_INJECT["files"], [])
 
     def test_missing_dir_is_empty_not_error(self):

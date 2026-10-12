@@ -993,7 +993,16 @@ def system_for(model: str = "", primary: str = "", provider: str = "OpenRouter")
         block, files = "", []
     if block:
         parts.append(block)
+    try:
+        honest = _shared_mod().model_self_report(model, primary, provider)
+    except Exception:  # noqa: BLE001
+        honest = ""
+    if honest:
+        parts.append(honest)
+    LAST_INJECT["model"] = model
+    LAST_INJECT["primary"] = primary
     LAST_INJECT["files"] = list(files)
+    LAST_INJECT["chars"] = len(block)
     LAST_INJECT["t"] = time.time()
     return "\n\n".join(parts)
 
@@ -1141,7 +1150,46 @@ def usable_openrouter(got) -> bool:
     return bool(tool) and tool in openrouter_hand_names() and isinstance(args, dict)
 
 
+# Last talk call, for the per-turn log. Model ids and counts only.
+LAST_TALK: dict = {}
+
+
 def call_openrouter(
+    prompt: str,
+    context: str = "",
+    *,
+    images: list | None = None,
+    extra_tools: list | None = None,
+    hands: bool = True,
+) -> dict:
+    """OpenRouter chat. Free first. Paid fallback on the same host when :free is 429.
+
+    Not ChatGPT, Claude, or Gemini as the product mouth. Records LAST_TALK.
+    """
+    began = time.monotonic()
+    got = _call_openrouter_inner(prompt, context, images=images, extra_tools=extra_tools, hands=hands)
+    primary = str(LAST_INJECT.get("primary") or "") or (openrouter_vision_model() if images else "") or openrouter_model()
+    model = str(got.get("model") or "") if isinstance(got, dict) else ""
+    reply = str(got.get("spoken") or "") if isinstance(got, dict) else ""
+    LAST_TALK.clear()
+    LAST_TALK.update({
+        "t": time.time(),
+        "ok": bool(isinstance(got, dict) and got.get("ok")),
+        "model": model,
+        "primary": primary,
+        "fallback": bool(model and primary and model != primary),
+        "latency_ms": int((time.monotonic() - began) * 1000),
+        # Rough estimate: ~4 chars per token. The stream path carries no usage block.
+        "est_tokens_in": (len(SYS) + int(LAST_INJECT.get("chars") or 0) + len(prompt or "") + len(context or "")) // 4,
+        "est_tokens_out": len(reply) // 4,
+        "injected": list(LAST_INJECT.get("files") or []),
+    })
+    if isinstance(got, dict) and got.get("ok"):
+        got.setdefault("primary_model", primary)
+    return got
+
+
+def _call_openrouter_inner(
     prompt: str,
     context: str = "",
     *,
@@ -1179,6 +1227,12 @@ def call_openrouter(
     for mid in (vision, primary, *OPENROUTER_FALLBACKS, *vision_paid, *OPENROUTER_PAID_FALLBACKS):
         if mid and mid not in models:
             models.append(mid)
+    primary_mid = models[0] if models else ""
+
+    def _openrouter_payload(*args, **kw):  # noqa: F811 — same payload, primary named for the self-report
+        kw.setdefault("primary", primary_mid)
+        return globals()["_openrouter_payload"](*args, **kw)
+
     free_quota_dead = False
     if stills and not models:
         return {
@@ -1398,7 +1452,7 @@ def call_xai(prompt: str, context: str = "") -> dict:
                 "model": grok_model(),
                 "temperature": 0.3,
                 "messages": [
-                    {"role": "system", "content": SYS},
+                    {"role": "system", "content": system_for(grok_model(), "", "xAI")},
                     {"role": "user", "content": user},
                 ],
             },
