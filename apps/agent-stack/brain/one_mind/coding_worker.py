@@ -107,7 +107,13 @@ def make_box_workers(workspaces, agent, *, test_cmd, review_files):
     def builder(ctx, node, attempt):
         mid = ctx['mission_id']
         sb = workspaces.get(mid)
-        out = agent.run(sb, ctx['context'].get('objective', ''), ctx['context'].get('test_feedback'), ctx.get('emit'))
+        emit = ctx.get('emit') or (lambda *a, **k: None)
+        previous = getattr(agent.llm, 'on_call', None)
+        agent.llm.on_call = lambda row: emit('model.call', **row)
+        try:
+            out = agent.run(sb, ctx['context'].get('objective', ''), ctx['context'].get('test_feedback'), emit)
+        finally:
+            agent.llm.on_call = previous
         patch = sb.diff(agent.files)
         status = 'COMPLETED' if out['status'] == 'COMPLETED' and patch else 'FAILED'
         return W.BuilderResult('art-build-%s-%d' % (mid[-8:], attempt), 'builder',

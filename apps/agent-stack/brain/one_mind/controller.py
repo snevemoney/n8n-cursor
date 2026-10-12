@@ -44,6 +44,7 @@ class MissionController:
         self.deliver = deliver  # called exactly once with the committed MissionResult dict
         self.context = context_builder or ContextBuilder()
         self.advisor = advisor  # JevAdvisor (SHADOW); output never read back
+        self._actions = {}
 
     # ---------- terminal commit ----------
     def _terminal_path(self, mission_id):
@@ -132,6 +133,9 @@ class MissionController:
                                         mission.get('integration', ()))
         tracer.emit('mission.verification', verified=mission_check['verified'], failures=mission_check['failures'],
                     accepted=accepted)
+        for wid, (aid, act, cap) in sorted(self._actions.get(mid, {}).items()):
+            tracer.emit('action.outcome', action_id=aid, worker_id=wid, action=act, capability=cap,
+                        possible=True, authorized='AUTO_EXECUTE', executed=True, outcome_occurred=wid in accepted)
         if status != 'CANCELLED':
             if paused:
                 status = 'NEEDS_APPROVAL'
@@ -146,6 +150,8 @@ class MissionController:
                 status = 'FAILED'
         outcome = MissionResult(mid, status, status == 'VERIFIED', '', accepted=sorted(accepted), failures=mission_check['failures'], paused=sorted(paused),
                                 artifacts={w: r.to_dict() for w, r in results.items()})
+        cost = round(sum(float(r.get('cost_usd') or 0) for r in tracer.rows() if r['event'] == 'model.call'), 6)
+        tracer.emit('mission.cost', cost_usd=cost)
         tracer.emit('mission.phase', phase='COMPLETE', status=status)
         return self.commit(tracer, outcome)
 
@@ -195,11 +201,15 @@ class MissionController:
             result = W.WorkerResult(tracer.next_id('artifact', node['worker_id']), 'error', prov, status='FAILED',
                                     notes=';'.join(errors)[:300])
         executed = True
+        self._actions.setdefault(mission['mission_id'], {})[node['worker_id']] = (action_id, action, capability)
         tracer.action(ActionRecord(action_id, node['worker_id'], action, capability, True, 'AUTO_EXECUTE', executed,
                                    None, 'profile:%s@%d attempt:%d' % (profile.profile_id, profile.version, attempt)))
         tracer.emit('mission.phase', phase='OBSERVE', worker_id=node['worker_id'], result_kind=result.kind,
                     result_status=result.status, artifact_id=result.artifact_id,
                     verdict=getattr(result, 'verdict', None))
+        if isinstance(result, W.TesterResult):
+            tracer.emit('verifier.result', worker_id=node['worker_id'], verdict=result.verdict, condition=result.condition, expected=result.expected,
+                        observed=result.observed, receipts=list(result.evidence), artifact_id=result.artifact_id)
         results[node['worker_id']] = result
 
     def _recover(self, tracer, mission, authority, batch, by_id, results, paused, used, attempts, feedback, nodes, approvals):
