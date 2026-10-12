@@ -1364,7 +1364,8 @@ def _call_openrouter_inner(
     if stills and not openrouter_vision_model() and not extra_tools:
         # Try the talk model first; if every host rejects images, VISION_DARK.
         pass
-    max_tokens = OPENROUTER_RETRIEVE_TOKENS if brief else OPENROUTER_MAX_TOKENS
+    # No-hands answers (memory/rules questions) get the short cap too: live PASS answer ran 18-20 s at 512.
+    max_tokens = OPENROUTER_RETRIEVE_TOKENS if (brief or not (hands or extra_tools)) else OPENROUTER_MAX_TOKENS
     with_tools = bool(hands or extra_tools)
     models: list[str] = []
     vision = openrouter_vision_model() if stills else ""
