@@ -102,6 +102,8 @@ def run_once(root, mid, *, inject_failure=False, steer=False):
 
 def golden(root):
     runs = [run_once(root, 'golden-%d' % i) for i in range(1, 4)]
+    runs.append(run_once(root, 'golden-fail', inject_failure=True))
+    runs.append(run_once(root, 'golden-steer', steer=True))
     runs.append(run_once(root, 'golden-steer-fail', inject_failure=True, steer=True))
     ok = all(r['verified'] and r['deliveries'] == 1 and len(r['answers']) == 1 and r['replay_duplicate']
              and r['replay_same_id'] and not any(r['metrics'].values()) for r in runs)

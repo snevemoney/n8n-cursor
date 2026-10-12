@@ -30,7 +30,14 @@ class CommitIdTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(row['status'], 'FAILED')
             self.assertRegex(row['terminal_commit_id'], r'^ter_[0-9a-f]{24}$')
         self.assertEqual(first['terminal_commit_id'], second['terminal_commit_id'])
-        self.assertFalse([m for m in sys.modules if m.startswith('agent_stack_one_mind')])
+        code = ('import importlib.util,sys;s=importlib.util.spec_from_file_location("mc",%r);m=importlib.util.module_from_spec(s);'
+                's.loader.exec_module(m);print(m.MissionController._terminal_commit_id({"mission_id":"x"},{"status":"FAILED"}));'
+                'print([k for k in sys.modules if "one_mind" in k])') % str(HERE / 'mission_controller.py')
+        import subprocess
+        out = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, env={k: v for k, v in os.environ.items() if k != 'JARVIS_ONE_MIND'})
+        lines = out.stdout.split()
+        self.assertTrue(lines[0].startswith('ter_'), out.stderr)
+        self.assertEqual(lines[-1], '[]')
 
     def test_matches_one_mind_trace_formula(self):
         spec3 = importlib.util.spec_from_file_location('commit_id_mc2', HERE / 'mission_controller.py')

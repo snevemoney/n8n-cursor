@@ -25,7 +25,8 @@ class GoldenMission(unittest.TestCase):
             steer = [r for r in report['runs'] if r['mission_id'] == 'golden-steer-fail'][0]
             rows = [json.loads(l) for l in (Path(tmp) / 'missions' / 'golden-steer-fail' / 'trace.jsonl').read_text().splitlines()]
         self.assertTrue(report['passed'], json.dumps(report, indent=1)[:3000])
-        self.assertEqual(len(report['runs']), 4)
+        self.assertEqual(len(report['runs']), 6)
+        self.assertEqual([r['mission_id'] for r in report['runs']][3:5], ['golden-fail', 'golden-steer'])
         phases = {r.get('phase') for r in rows if r['event'] == 'mission.phase'}
         for ph in ('GOAL', 'GROUND', 'PLAN', 'GRAPH', 'OBSERVE', 'VERIFY', 'RECOVER', 'REPLAN', 'COMPLETE'):
             self.assertIn(ph, phases)
