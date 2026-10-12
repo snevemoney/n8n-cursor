@@ -6,56 +6,56 @@
       "expect": "gold",
       "prompt": "What do my operator memory four north stars say about leverage and attention?",
       "locator": "OPERATOR_MEMORY.md",
-      "must_contain": "protecting attention"
+      "must_contain": ""
     },
     {
       "id": "north-star",
       "expect": "gold",
       "prompt": "What is my north star thesis about a one-person business?",
       "locator": "NORTH_STAR.md",
-      "must_contain": "one-person business that behaves like a company"
+      "must_contain": ""
     },
     {
       "id": "vault-map",
       "expect": "gold",
       "prompt": "What does my vault map say this organism is?",
       "locator": "CONTENT/VAULT_MAP.md",
-      "must_contain": "one-person multi-business automation company"
+      "must_contain": ""
     },
     {
       "id": "research-lane",
       "expect": "gold",
       "prompt": "What constraint pattern is in my research lane note — Acquire, Grow, or Cut?",
       "locator": "CONTENT/LANE.md",
-      "must_contain": "Acquire / Grow / Cut"
+      "must_contain": ""
     },
     {
       "id": "glossary-philanthropy",
       "expect": "gold",
       "prompt": "In my Outer Heaven glossary, what is Philanthropy?",
       "locator": "OUTER_HEAVEN_GLOSSARY.md",
-      "must_contain": "philanthropic-ai-agent"
+      "must_contain": ""
     },
     {
       "id": "weekly-scoreboard",
       "expect": "gold",
       "prompt": "What does my weekly scoreboard say about the 20hr target?",
       "locator": "WEEKLY_SCOREBOARD.md",
-      "must_contain": "20hr target met"
+      "must_contain": ""
     },
     {
       "id": "live-facts",
       "expect": "gold",
       "prompt": "What do the hive-os live facts say about building mode?",
       "locator": "CONTENT/topics/live-facts-hive-os.md",
-      "must_contain": "Building mode"
+      "must_contain": ""
     },
     {
       "id": "mentor-orb",
       "expect": "gold",
       "prompt": "What sitting is written in tonight's mentor pass report?",
       "locator": "CONTENT/os/reports/mentor.md",
-      "must_contain": "SITTING:"
+      "must_contain": ""
     },
     {
       "id": "neg-quantum-turtle",
@@ -85,5 +85,6 @@
       "locator": "",
       "must_contain": ""
     }
-  ]
+  ],
+  "_note": "Public copy: verbatim note excerpts removed. Put real needles in gold_vault.local.json ({id: must_contain}) or point JARVIS_GOLD_VAULT_LOCAL at one; that file is gitignored."
 }

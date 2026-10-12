@@ -8,3 +8,12 @@ see.png
 face/e2e/test-artifacts/**
 !face/e2e/test-artifacts/.gitkeep
 tests/.matrix-last.json
+
+# Saved run outputs: machine-local, not source.
+eval/computer/last.json
+eval/computer/watch-live.json
+eval/scoreboard.draft.json
+# Private gold needles (verbatim vault excerpts).
+face/gold_vault.local.json
+# Per-turn JSONL log.
+data/
