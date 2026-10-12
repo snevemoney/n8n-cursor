@@ -21,7 +21,9 @@ def load_page(path):
             'sha256': hashlib.sha256(raw.encode()).hexdigest()[:16]}
 
 
-def verify(page, expect_text):
+def verify(page, expect_text, *, mission_id='', worker_id=''):
+    from . import receipts
     ok = expect_text.lower() in page['text'].lower()
-    return {'verified': ok, 'evidence': ('page:%s:%s' % (page['sha256'], page['url']),) if ok else (),
+    rid = receipts.record('page', mission_id, worker_id, {'sha256': page['sha256'], 'url': page['url'], 'expect': expect_text}) if ok else None
+    return {'verified': ok, 'evidence': (rid,) if ok else (),
             'observed': page['text'][:160]}

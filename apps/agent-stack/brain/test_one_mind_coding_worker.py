@@ -94,7 +94,10 @@ class MissionTests(Repo):
         finally:
             ws.cleanup()
         self.assertEqual(out['status'], 'VERIFIED')
-        self.assertTrue(out['artifacts']['test']['evidence'][0].startswith('run:test:exit=0'))
+        from one_mind import receipts
+        rid = out['artifacts']['test']['evidence'][0]
+        self.assertTrue(receipts.valid(rid, 'cw1', 'test', ('run',)))
+        self.assertEqual(receipts.lookup(rid)['detail']['exit_code'], 0)
         self.assertTrue(any(r['event'] == 'builder.iteration' for r in rows))
 
     def test_pipeline_hook_routes_with_box_workers(self):

@@ -135,8 +135,11 @@ class MissionController:
         if status != 'CANCELLED':
             if paused:
                 status = 'NEEDS_APPROVAL'
-            elif mission_check['verified']:
+            elif mission_check['verified'] and self._independently_executed(nodes, results):
                 status = 'VERIFIED'
+            elif mission_check['verified']:
+                status = 'PARTIAL'
+                mission_check['failures'].append({'worker_id': '*', 'reason': 'no_independent_execution'})
             elif accepted:
                 status = 'PARTIAL'
             else:
@@ -225,6 +228,18 @@ class MissionController:
                                      feedback, nodes, approvals)
         return True
 
+    def _independently_executed(self, nodes, results):
+        """Done gate (F3): some verifier-profile worker, separate from every builder, holds a run/page receipt."""
+        builders = {n['worker_id'] for n in nodes if n.get('action', 'READ') in MUTATING}
+        for n in nodes:
+            r = results.get(n['worker_id'])
+            if n['worker_id'] in builders or not V.is_verifier(self.registry.resolve(n['profile_id'])):
+                continue
+            if isinstance(r, W.TesterResult) and r.verdict == 'PASS' and \
+                    V.receipts.any_valid(r.evidence, r.provenance.mission_id, n['worker_id']):
+                return True
+        return any(isinstance(r, W.BrowserFlowResult) and V.browser_flow_ok(r, r.provenance.mission_id) for r in results.values())
+
     def _flow_verify(self, nodes, by_id, results):
         failures, accepted = [], []
         for node in nodes:
@@ -233,9 +248,17 @@ class MissionController:
             if r is None or r.status != 'COMPLETED':
                 continue
             profile = self.registry.resolve(node['profile_id'])
-            if V.is_verifier(profile) or node.get('action', 'READ') not in MUTATING:
-                if getattr(r, 'verdict', 'PASS') == 'PASS':
+            if isinstance(r, W.BrowserFlowResult) and not V.browser_flow_ok(r, r.provenance.mission_id):
+                failures.append({'worker_id': wid, 'reason': 'browser_not_verified_by_page_load'})
+                continue
+            if V.is_verifier(profile):
+                if isinstance(r, W.TesterResult) and r.verdict == 'PASS' and V.receipts.any_valid(r.evidence, r.provenance.mission_id, wid):
                     accepted.append(wid)
+                elif isinstance(r, W.TesterResult) and r.verdict == 'PASS':
+                    failures.append({'worker_id': wid, 'reason': 'no_execution_receipt'})
+                continue
+            if node.get('action', 'READ') not in MUTATING:
+                accepted.append(wid)
                 continue
             verifiers = [n for n in nodes if wid in n.get('dependencies', ())
                          and V.is_verifier(self.registry.resolve(n['profile_id']))]

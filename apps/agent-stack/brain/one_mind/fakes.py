@@ -1,5 +1,5 @@
 """Fake coding worker graph for offline tests and the Golden Mission. No network, no spend."""
-from . import worker_results as W
+from . import receipts, worker_results as W
 from .authority import MissionAuthority
 
 
@@ -48,7 +48,7 @@ def tester(mission_id, verdicts):
         return W.TesterResult('art-%s-%d' % (node['worker_id'], attempt), 'tester',
                               prov(mission_id, node, 'software.verifier'), verdict=v, condition='unit tests',
                               expected='0 failures', observed='0 failures' if v == 'PASS' else '1 failure: test_add',
-                              evidence=('log:%s:%d' % (node['worker_id'], attempt),) if v == 'PASS' else ())
+                              evidence=(receipts.record('run', mission_id, node['worker_id'], {'attempt': attempt, 'fake': True}),) if v == 'PASS' else ())
     return run
 
 

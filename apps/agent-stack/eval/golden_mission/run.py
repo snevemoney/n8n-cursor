@@ -16,7 +16,7 @@ from pathlib import Path
 
 BRAIN = Path(__file__).resolve().parents[2] / 'brain'
 sys.path.insert(0, str(BRAIN))
-from one_mind import controller as MC, fakes as F, registry as R, worker_results as W  # noqa: E402
+from one_mind import controller as MC, fakes as F, receipts, registry as R, worker_results as W  # noqa: E402
 from one_mind.jev_hooks import JevAdvisor  # noqa: E402
 from one_mind.response_runtime import ResponseRuntime  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -68,7 +68,7 @@ def workers(mid, repo, *, inject_failure):
                               F.prov(mid, node, 'software.verifier'), verdict='PASS' if ok else 'FAIL',
                               condition='unit tests' + (' + edge' if extra else ''), expected='0 failures',
                               observed='0 failures' if ok else ' '.join(tail)[:200],
-                              evidence=('unittest:%s:%d:%s' % (node['worker_id'], attempt, 'ok'),) if ok else ())
+                              evidence=(receipts.record('run', mid, node['worker_id'], {'cmd': 'unittest', 'attempt': attempt, 'ok': ok}),) if ok else ())
 
     def reviewer(ctx, node, attempt):
         src = (repo / 'calc.py').read_text()

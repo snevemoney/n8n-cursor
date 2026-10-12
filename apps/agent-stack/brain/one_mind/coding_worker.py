@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 
-from . import worker_results as W
+from . import receipts, worker_results as W
 from .sandbox import Sandbox
 
 FORBIDDEN_CODE = re.compile(r"(os\.system|subprocess|shutil\.rmtree|socket|urllib|requests|eval\(|exec\()")
@@ -122,7 +122,7 @@ def make_box_workers(workspaces, agent, *, test_cmd, review_files):
                               W.Provenance(mid, node['task_id'], node['worker_id'], 'software.verifier', 1),
                               verdict='PASS' if res['passed'] else 'FAIL', condition=' '.join(test_cmd),
                               expected='exit 0', observed='exit %d: %s' % (res['exit_code'], res['tail'][-160:]),
-                              evidence=('run:%s:exit=%d:%.2fs' % (node['worker_id'], res['exit_code'], res['seconds']),) if res['passed'] else ())
+                              evidence=(receipts.record('run', mid, node['worker_id'], {'cmd': test_cmd, 'exit_code': res['exit_code'], 'seconds': res['seconds']}),) if res['passed'] else ())
 
     def reviewer(ctx, node, attempt):
         mid = ctx['mission_id']

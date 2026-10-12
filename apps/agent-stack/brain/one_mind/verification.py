@@ -5,7 +5,7 @@ a different worker running a verifier profile that depends on it. Mission succes
 needs every required node verified, an integration PASS when one is declared,
 and no reviewer 'block'.
 """
-from . import worker_results as W
+from . import receipts, worker_results as W
 
 VERIFIER_CAPS = ('software.verify', 'browser.verify', 'research.verify')
 
@@ -32,7 +32,19 @@ def flow_level(node, result, verifier_node, verifier_result, verifier_profile):
         return 'invalid_verifier_result'
     if verifier_result.verdict != 'PASS':
         return 'verifier_failed:' + verifier_result.observed[:120]
+    prov = verifier_result.provenance
+    if not receipts.any_valid(verifier_result.evidence, prov.mission_id, verifier_node['worker_id']):
+        return 'no_execution_receipt'
     return None
+
+
+def browser_flow_ok(result, mission_id):
+    """'browser verified' only with a page-load receipt minted by a different worker."""
+    if not isinstance(result, W.BrowserFlowResult):
+        return True
+    row = receipts.lookup(result.verified_by) if result.verified_by else None
+    return bool(row and row['kind'] == 'page' and row['mission_id'] == mission_id
+                and row['worker_id'] != result.provenance.worker_id)
 
 
 def mission_level(nodes, results, flow_failures, integration_ids=()):
@@ -46,8 +58,12 @@ def mission_level(nodes, results, flow_failures, integration_ids=()):
             failures.append({'worker_id': wid, 'reason': 'worker_status_' + r.status.lower()})
     for wid in integration_ids:
         r = results.get(wid)
-        if not (isinstance(r, W.TesterResult) and r.verdict == 'PASS' and r.evidence):
+        if not (isinstance(r, W.TesterResult) and r.verdict == 'PASS'
+                and receipts.any_valid(r.evidence, r.provenance.mission_id, wid)):
             failures.append({'worker_id': wid, 'reason': 'integration_not_passed'})
+    for wid, r in results.items():
+        if isinstance(r, W.BrowserFlowResult) and not browser_flow_ok(r, r.provenance.mission_id):
+            failures.append({'worker_id': wid, 'reason': 'browser_not_verified_by_page_load'})
     for wid, r in results.items():
         if isinstance(r, W.ReviewerResult) and r.recommendation == 'block':
             failures.append({'worker_id': wid, 'reason': 'reviewer_block'})
