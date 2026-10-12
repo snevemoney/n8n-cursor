@@ -983,7 +983,7 @@ def _shared_mod():
     return _SHARED_MOD
 
 
-def system_for(model: str = "", primary: str = "", provider: str = "OpenRouter") -> str:
+def system_for(model: str = "", primary: str = "", provider: str = "OpenRouter", query: str = "") -> str:
     """SYS plus the shared fleet context. Records which files were injected."""
     parts = [SYS]
     files: list[str] = []
@@ -993,6 +993,16 @@ def system_for(model: str = "", primary: str = "", provider: str = "OpenRouter")
         block, files = "", []
     if block:
         parts.append(block)
+    snippets: list[dict] = []
+    if query:
+        try:
+            found, snippets = _shared_mod().retrieved_block(query)
+        except Exception:  # noqa: BLE001
+            found, snippets = "", []
+        if found:
+            parts.append(found)
+            block += "\n" + found
+    LAST_INJECT["snippets"] = snippets
     try:
         honest = _shared_mod().model_self_report(model, primary, provider)
     except Exception:  # noqa: BLE001
@@ -1005,6 +1015,12 @@ def system_for(model: str = "", primary: str = "", provider: str = "OpenRouter")
     LAST_INJECT["chars"] = len(block)
     LAST_INJECT["t"] = time.time()
     return "\n\n".join(parts)
+
+
+def _ask_only(user: str) -> str:
+    """The current ask, not the live-context brief, drives shared-memory retrieval."""
+    text = user or ""
+    return text.rsplit("Current ask:\n", 1)[-1] if "Current ask:\n" in text else text
 
 
 def _openrouter_payload(
@@ -1034,7 +1050,7 @@ def _openrouter_payload(
         "max_tokens": int(max_tokens or OPENROUTER_MAX_TOKENS),
         "stream": stream,
         "messages": [
-            {"role": "system", "content": system_for(model, primary)},
+            {"role": "system", "content": system_for(model, primary, query=_ask_only(user))},
             {"role": "user", "content": content},
         ],
     }
@@ -1183,6 +1199,7 @@ def call_openrouter(
         "est_tokens_in": (len(SYS) + int(LAST_INJECT.get("chars") or 0) + len(prompt or "") + len(context or "")) // 4,
         "est_tokens_out": len(reply) // 4,
         "injected": list(LAST_INJECT.get("files") or []),
+        "retrieved": [dict(r) for r in (LAST_INJECT.get("snippets") or [])],
     })
     if isinstance(got, dict) and got.get("ok"):
         got.setdefault("primary_model", primary)

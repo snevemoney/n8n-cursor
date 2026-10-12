@@ -42,6 +42,10 @@ def build_row(*, started: float, ended: float, events: list[dict], talk: dict | 
         "est_tokens_in": talk.get("est_tokens_in"),
         "est_tokens_out": talk.get("est_tokens_out"),
         "injected_context": list(talk.get("injected") or inject.get("files") or []),
+        "retrieved": [
+            {"file": str(r.get("file") or ""), "heading": str(r.get("heading") or "")[:120]}
+            for r in (talk.get("retrieved") or []) if isinstance(r, dict)
+        ],
         "tools": tools,
         "verb": final.get("verb"),
         "ok": bool(final.get("ok", True)),

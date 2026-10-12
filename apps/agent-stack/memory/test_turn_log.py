@@ -38,7 +38,7 @@ class TurnLogTest(unittest.TestCase):
         self.assertNotIn("4417", line)
         self.assertNotIn("zebra", line)
         allowed = {"ts", "model", "primary_model", "fallback", "latency_ms", "talk_latency_ms", "est_tokens_in",
-                   "est_tokens_out", "injected_context", "tools", "verb", "ok", "outcome", "gen"}
+                   "est_tokens_out", "injected_context", "retrieved", "tools", "verb", "ok", "outcome", "gen"}
         self.assertEqual(set(json.loads(line)), allowed)
 
     def test_stale_talk_record_is_not_this_turn(self):
