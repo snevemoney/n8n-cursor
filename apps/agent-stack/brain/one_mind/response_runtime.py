@@ -34,9 +34,11 @@ def honest_line(result):
 
 
 class ResponseRuntime:
-    def __init__(self, chat=None, polish=None):
+    def __init__(self, chat=None, polish=None, memory_guard=None, chat_stream=None):
         self.chat = chat  # callable(prompt: str) -> str ; fake in tests
+        self.chat_stream = chat_stream  # callable(prompt) -> iterable[str] (F8)
         self.polish = polish or (lambda text: text)
+        self.memory_guard = memory_guard  # e.g. memory.redact_unspeakable (F6)
 
     def final(self, result, objective=''):
         if not (result.get('verified') and result.get('status') == 'VERIFIED') or self.chat is None:
@@ -47,8 +49,9 @@ class ResponseRuntime:
                                                                                'verified_facts': _verified_facts(result)}))
         return self._guard(result, self.polish(self.chat(prompt)))
 
-    @staticmethod
-    def _guard(result, text):
+    def _guard(self, result, text):
+        if self.memory_guard is not None:
+            text = self.memory_guard(text) or ('Verified.' if result.get('verified') else honest_line(result))
         if not result.get('verified') and SUCCESS_RE.search(text) and 'not' not in text.lower():
             return honest_line(result)
         return text
