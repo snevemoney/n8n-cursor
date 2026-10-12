@@ -36,13 +36,14 @@ class MissionResult:
 
 
 class MissionController:
-    def __init__(self, root, registry, workers, *, deliver=None, context_builder=None):
+    def __init__(self, root, registry, workers, *, deliver=None, context_builder=None, advisor=None):
         require_enabled()
         self.root = Path(root)
         self.registry = registry
         self.workers = workers  # profile_id -> callable(context: dict, node: dict, attempt: int) -> WorkerResult
         self.deliver = deliver  # called exactly once with the committed MissionResult dict
         self.context = context_builder or ContextBuilder()
+        self.advisor = advisor  # JevAdvisor (SHADOW); output never read back
 
     # ---------- terminal commit ----------
     def _terminal_path(self, mission_id):
@@ -173,6 +174,8 @@ class MissionController:
         state = {'objective': mission.get('objective', ''), 'acceptance': node.get('acceptance', ''),
                  'constraints': mission.get('constraints', ()), **node.get('inputs', {})}
         built = self.context.build(profile, state, task=task)
+        if self.advisor is not None and built['missing']:
+            self.advisor.ask(tracer, 'context_sufficiency', {'worker_id': node['worker_id'], 'missing': built['missing']})
         attempt = attempts.get(node['worker_id'], 0)
         attempts[node['worker_id']] = attempt + 1
         used['actions'] += 1
@@ -208,6 +211,8 @@ class MissionController:
                     tracer.emit('mission.phase', phase='RECOVER', worker_id=target, outcome='retry_budget_exhausted')
                     continue
                 tracer.emit('mission.phase', phase='RECOVER', worker_id=target, reason=r.observed[:200])
+                if self.advisor is not None:
+                    self.advisor.ask(tracer, 'failure_classify', {'observed': r.observed, 'condition': r.condition})
                 feedback[target] = {'condition': r.condition, 'expected': r.expected, 'observed': r.observed}
                 results.pop(target, None); results.pop(wid, None)
                 self._execute_node(tracer, mission, authority, by_id[target], results, paused, used, attempts,
