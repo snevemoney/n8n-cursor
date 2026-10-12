@@ -2,6 +2,7 @@
 """Resolve Obsidian vault + Mac cache paths for Outer Heaven (stdlib-only)."""
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -16,6 +17,13 @@ def _cache_path() -> Path:
     return Path.home() / ".grokbot/outer-heaven"
 OS_CONFIG = Path.home() / ".grokbot/os-config.json"
 REPO_MIRROR = Path(__file__).resolve().parents[3] / "docs/hive/outer-heaven"
+
+_fc_spec = importlib.util.spec_from_file_location(
+    "fleet_closures", Path(__file__).with_name("fleet-closures.py")
+)
+_fc = importlib.util.module_from_spec(_fc_spec)
+assert _fc_spec is not None and _fc_spec.loader is not None
+_fc_spec.loader.exec_module(_fc)
 
 
 def _load_os_config() -> dict:
@@ -79,8 +87,19 @@ def read_root(prefer: str = "auto") -> Path:
 
 
 def write_root() -> Path:
-    """Canonical capture write path (always fast local cache)."""
+    """Fast local cache. Not the Obsidian vault and not the git mirror."""
     return cache_root()
+
+
+def knowledge_status() -> dict:
+    vault = vault_outer_heaven()
+    return {
+        "cache": str(cache_root()),
+        "vault": str(vault) if vault else "",
+        "mirror": str(REPO_MIRROR),
+        "write_root": str(write_root()),
+        "one_store": False,
+    }
 
 
 def vault_path_for_agents() -> str:
@@ -93,6 +112,26 @@ def outer_heaven_root() -> Path:
     return read_root("auto")
 
 
+def vault_access_card() -> str:
+    """Where a desk may read. Not permission to change vault-config."""
+    status = knowledge_status()
+    vault = status["vault"] or "(unset)"
+    return (
+        f"cache={status['cache']} vault={vault} mirror={status['mirror']} "
+        f"write_root={status['write_root']}. "
+        "A desk cannot grant a vault-config mutation."
+    )
+
+
+def resolve_vault() -> dict:
+    return knowledge_status()
+
+
+def mutation_authorized(actor: str, authority: dict | None = None) -> bool:
+    """Big Boss and Publishing Engine cannot grant a vault-config write."""
+    return bool(_fc.mutation_authorized(actor, authority))
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -101,11 +140,15 @@ if __name__ == "__main__":
     ap.add_argument("--outer-heaven", action="store_true", help="Read root for agents")
     ap.add_argument("--cache", action="store_true", help="Cache root path")
     ap.add_argument("--write-root", action="store_true", help="Capture write root")
+    ap.add_argument("--status", action="store_true", help="Show that cache, vault, and mirror are separate")
     args = ap.parse_args()
     if args.cache:
         print(cache_root())
     elif args.write_root:
         print(write_root())
+    elif args.status:
+        print(json.dumps(knowledge_status(), indent=2))
+        raise SystemExit(0)
     elif args.outer_heaven:
         print(read_root("auto"))
     elif args.show:

@@ -1,0 +1,36 @@
+lifecycle: [probe, observe, execute, verify, cancel, recover, evidence]
+prefer:
+  - structured_api_or_file
+  - cli
+  - native_automation
+  - computer_use
+computer_use: universal fallback; same perceive-bind-act-verify as Watch
+job:
+  fields: [target, cwd, command_class, pid, started_at, status, bounded_output, artifacts]
+  targets: [local, ssh]
+  follow_up: inspect existing job; do not relaunch
+  vps_start: Evens HITL
+journeys:
+  - id: design-vs-repo
+    ask: Why does the live architecture note disagree with the repo?
+    surfaces: [obsidian, repo]
+    manual_context_transfers: 0
+  - id: openclaw-health
+    ask: Why is OpenClaw unhealthy?
+    surfaces: [obsidian, ssh]
+    start: Evens
+    manual_context_transfers: 0
+  - id: local-job
+    ask: Run the tests and tell me when they finish
+    surfaces: [local_job]
+    follow_up: Is it finished?
+  - id: drop-then-vault
+    ask: Summarize this drop and compare it to the project note
+    surfaces: [drop, vault]
+  - id: watch-then-talk
+    ask: Stop Watch then keep talking
+    surfaces: [watch, conversation]
+    watch_arm: Evens
+kpi:
+  manual_context_transfers: 0
+  handoff_context_efficiency: bounded selected context

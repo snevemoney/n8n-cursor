@@ -47,19 +47,32 @@ else
   bad "Docker n8n volume not found (pattern n8n)"
 fi
 
-# Philanthropy / OpenClaw process
-if remote "pgrep -af 'philanthropy|openclaw' >/dev/null 2>&1 || pm2 list 2>/dev/null | grep -qi philanthropy" 2>/dev/null; then
-  ok "Philanthropy/OpenClaw process running"
+# OpenClaw gateway — loopback health only. pgrep matches leftover "pm2 restart"
+# and the embedder; that is not the gateway (2026-09-12 audit).
+if remote "curl -fsS --max-time 3 http://127.0.0.1:18789/health >/dev/null" 2>/dev/null; then
+  ok "OpenClaw gateway :18789 health"
 else
-  bad "Philanthropy/OpenClaw process not detected"
+  bad "OpenClaw gateway :18789 down (HOLD until Evens starts it)"
 fi
 
-# Sacred files count under workspace (best-effort)
-sacred_count=$(remote "find ${PHIL_ROOT} -maxdepth 4 \\( -name 'SOUL.md' -o -name 'AGENTS.md' -o -name 'TOOLS.md' \\) 2>/dev/null | wc -l" 2>/dev/null || echo "0")
-if [[ "$sacred_count" =~ ^[0-9]+$ ]] && (( sacred_count >= 1 )); then
-  ok "Sacred workspace files found (count=$sacred_count)"
+if remote "test -f /opt/philanthropy/openclaw/openclaw.json" 2>/dev/null; then
+  ok "Live OpenClaw config /opt/philanthropy/openclaw/openclaw.json"
 else
-  bad "Sacred workspace files not found under $PHIL_ROOT"
+  bad "Live OpenClaw config missing"
+fi
+
+if remote "test -d /root/.openclaw" 2>/dev/null; then
+  ok "Ghost home /root/.openclaw present"
+else
+  skp "Ghost home /root/.openclaw missing — scripts must refuse mutate"
+fi
+
+# Sacred files at philanthropy root (per-agent workspace souls are empty husks)
+sacred_count=$(remote "find ${PHIL_ROOT} -maxdepth 1 \\( -name 'SOUL.md' -o -name 'AGENTS.md' -o -name 'TOOLS.md' \\) 2>/dev/null | wc -l" 2>/dev/null || echo "0")
+if [[ "$sacred_count" =~ ^[0-9]+$ ]] && (( sacred_count >= 1 )); then
+  ok "Sacred philanthropy files found (count=$sacred_count)"
+else
+  bad "Sacred philanthropy files not found under $PHIL_ROOT"
 fi
 
 # Backup freshness (if dir exists)

@@ -1,0 +1,22 @@
+id: general_talk_empty_vault
+claim: Ordinary conversation is MODEL_TALK on an empty vault
+ask:
+  - What do you think makes a good AI assistant?
+  - Explain recursion simply.
+  - Help me brainstorm a business idea.
+  - What would you do in my situation?
+  - Tell me something interesting.
+  - Why?
+  - What do you mean by that?
+forbidden:
+  - UNKNOWN
+  - not on disk
+  - I don't have that
+private_miss:
+  - What did I decide about OpenClaw?
+expected:
+  general: MODEL_TALK
+  private_miss: HONEST_UNKNOWN
+verdict: PROVED
+observed: "independent Face verifier 2026-09-13T03:25:08Z 127.0.0.1:4018; general 7/7 MODEL_TALK; OpenClaw miss HONEST_UNKNOWN 9ms; recovery MODEL_TALK; /tmp/jarvis-conversation-p0-verify/GRADE-reprove.json"
+validity: store-status is not the product

@@ -5,7 +5,7 @@ Reusable workflows promoted from chronicle, INBOX, or manual capture.
 ```dataview
 TABLE domain, status, last_verified, survival_score
 FROM "00_Outer_Heaven/METHODS"
-WHERE file.name != "README"
+WHERE file.name != "Method Promotion"
 SORT last_verified DESC
 ```
 

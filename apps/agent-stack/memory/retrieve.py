@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Smallest vault Q&A: keyword over an allow-list. Never dump the vault.
+"""Query-driven vault Q&A. Live Obsidian is the durable read-memory.
 
-Adopt existing path (live vault or repo hive). No second vault. No hive/desk.
-No ChatGPT .data. Filter first — cite snippets — UNKNOWN on a miss.
+Adopt the existing vault. No second vault. No vector DB. No hive/desk dump.
+Filter first — cite snippets — UNKNOWN on a miss. Talking does not write notes.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
+import threading
+import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -21,7 +24,7 @@ LANES = ROOT / "scripts/hive/business-lanes.json"
 ALLOW_REL = (
     "OPERATOR_MEMORY.md",
     "CONTENT/os/hot.md",
-    "CONTENT/os/index.md",
+    "CONTENT/os/Operations Hub.md",
     "CONTENT/os/ASKS.md",
     "CONTENT/os/HOST.md",
     "CONTENT/os/DESK-MISSIONS-NOW.md",
@@ -29,6 +32,19 @@ ALLOW_REL = (
     "CONTENT/watch-later/OPERATOR_MEMORY.md",
     "CONTENT/knowledge/PRESCRIPTIVE-SIGNALS.md",
 )
+APPROVED_PREFIXES = ("CONTENT/",)
+ROOT_NOTES = (
+    "OPERATOR_MEMORY.md",
+    "VAULT_MAP.md",
+    "CONTENT/VAULT_MAP.md",
+    "NORTH_STAR.md",
+    "OUTER_HEAVEN_GLOSSARY.md",
+    "WEEKLY_SCOREBOARD.md",
+    "CONTENT/LANE.md",
+    "CONTENT/topics/live-facts-hive-os.md",
+    "CONTENT/os/reports/mentor.md",
+)
+NAMED_NOTE_RELS = frozenset(ROOT_NOTES)
 INBOX_REL = "CONTENT/os/inbox"
 BLOCK_MARKS = (
     "/hive/desk/",
@@ -37,14 +53,50 @@ BLOCK_MARKS = (
     "chatgpt",
     "/node_modules/",
     "/.git/",
+    "/.obsidian/",
+    "/secrets/",
+    "/vendor/",
+    "/cache/",
+    "/__pycache__/",
+    "/.trash/",
+    "/.smart-env/",
+    "/os/sessions/",
+    "\\os\\sessions\\",
 )
+DENY_DIR = {
+    ".obsidian",
+    ".git",
+    ".trash",
+    ".smart-env",
+    "node_modules",
+    "__pycache__",
+    "vendor",
+    "cache",
+    "secrets",
+    "hive",
+    "sessions",
+}
+RECENCY_RE = re.compile(
+    r"\b(two weeks ago|2 weeks ago|latest|recent|yesterday|today|this week)\b",
+    re.I,
+)
+SCAN_CAP = 800
+BODY_SCAN_CAP = 160
+BODY_READ_CAP = 80_000
+_CANDIDATE_CACHE: dict[str, tuple[float, list[Path]]] = {}
+_CANDIDATE_TTL = 2.0
+# UF_DATALESS — macOS iCloud placeholder. Do not open; open hydrates and can stall.
+UF_DATALESS = 0x00004000
+READ_JOIN_S = 0.45
+_SEARCH_CACHE: dict[str, tuple[float, tuple, dict, tuple]] = {}
+_SEARCH_TTL = 12.0
+CLOUD_PLACEHOLDER = "Live vault file is a cloud placeholder."
 # Mouth never reads these aloud. Pack / model brief still may cite them.
 SPEAK_SKIP = ("watch-later", "asks.md", "/inbox/", "\\inbox\\")
 LEAK_RE = re.compile(
     r"("
     r"adopted path missing|"
     r"\b\d{1,2}:\d{2}\s+[—\-–]|"
-    r"agentic os|"
     r"youtuber said|"
     r"\[paste|"
     r"i heard you:|"
@@ -72,7 +124,10 @@ LEAK_RE = re.compile(
     r"catalog bump|"
     r"one-person-marketing|"
     r"`[a-z0-9-]{8,}`|"
-    r"\[\[+"
+    r"\[\[+|"
+    r"\bno-skill\b|"
+    r"\*\*source:\*\*|"
+    r"\bdecisions:"
     r")",
     re.I,
 )
@@ -132,7 +187,44 @@ STOP = {
     "ask",
     "asked",
 }
-TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9'-]{2,}", re.I)
+TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9'-]{2,}|\d{1,4}", re.I)
+VAULT_SUMMARY_RE = re.compile(
+    r"("
+    r"\b(?:summar(?:y|ise|ize)|overview|what(?:'s| is) in|walk me through|map of)\b"
+    r".{0,48}\b(?:vault|obsidian)\b"
+    r"|"
+    r"\b(?:vault|obsidian)\b.{0,48}\b(?:summar(?:y|ise|ize)|overview|as a whole|the whole)\b"
+    r"|"
+    r"\bevery (?:single )?(?:thing|node|nodes|memory|context).{0,60}\b(?:vault|obsidian)\b|"
+    r"\b(?:vault|obsidian).{0,60}\bevery (?:single )?(?:thing|node|nodes|memory|context)\b|"
+    r"\bthe whole vault\b"
+    r")",
+    re.I,
+)
+MAP_REL = (
+    "CONTENT/VAULT_MAP.md",
+    "VAULT_MAP.md",
+)
+MAP_SKIP_ROOMS = {
+    "room",
+    "what",
+    "open first",
+    "wiki",
+    "01_strategic_intent",
+    "patterns",
+    "job-cards",
+    "watch-later",
+    "icp-runbooks",
+}
+ROOM_SAY = {
+    "content": "knowledge",
+    "methods": "methods",
+    "projects": "projects",
+    "themes": "themes",
+    "chronicle": "the chronicle",
+    "inbox": "inbox",
+    "root notes": "root notes",
+}
 MAX_FILE = 400_000
 MAX_CITES = 3
 SNIP = 240
@@ -146,8 +238,8 @@ def _blocked(path: Path) -> bool:
 def tokens(query: str) -> list[str]:
     out: list[str] = []
     for raw in TOKEN_RE.findall(query or ""):
-        word = raw.lower().strip("'")
-        if word in STOP or len(word) < 3:
+        word = re.sub(r"'s$", "", raw.lower().strip("'"))
+        if word in STOP or (len(word) < 3 and not word.isdigit()):
             continue
         if word not in out:
             out.append(word)
@@ -162,6 +254,17 @@ def load_json(path: Path) -> dict:
     except json.JSONDecodeError:
         return {}
     return data if isinstance(data, dict) else {}
+
+
+def configured_dir(raw) -> Path | None:
+    """A written vault path only. Empty string must not become cwd."""
+    text = str(raw or "").strip()
+    if not text or text in {".", "./"}:
+        return None
+    path = Path(text).expanduser()
+    if not path.is_dir():
+        return None
+    return path
 
 
 def resolve_roots(extra: list[Path] | None = None) -> list[Path]:
@@ -186,19 +289,54 @@ def resolve_roots(extra: list[Path] | None = None) -> list[Path]:
         return roots
     stack = load_json(HIVE / "agent-stack.json")
     vault = stack.get("vault") if isinstance(stack.get("vault"), dict) else {}
-    oh = Path(str(vault.get("oh") or "")).expanduser()
-    root = Path(str(vault.get("path") or "")).expanduser()
-    if oh.is_dir():
+    oh = configured_dir(vault.get("oh"))
+    root = configured_dir(vault.get("path"))
+    if oh is not None:
         add(oh)
-    elif root.is_dir():
+    elif root is not None:
         add(root / "00_Outer_Heaven")
         add(root)
     else:
         env = (os.environ.get("HIVE_OBSIDIAN_VAULT") or "").strip()
         live = Path(env).expanduser() if env else DEFAULT_VAULT
-        add(live / "00_Outer_Heaven")
-        add(live)
+        oh_live = live / "00_Outer_Heaven"
+        add(oh_live)
+        if not oh_live.is_dir():
+            add(live)
     add(REPO_OH)
+    return roots
+
+
+def vault_oh_roots() -> list[Path]:
+    """About-me corpus: live 00_Outer_Heaven only. No repo hive, no sessions."""
+    roots: list[Path] = []
+    seen: set[str] = set()
+
+    def add(path: Path | None) -> None:
+        if path is None:
+            return
+        raw = path.expanduser()
+        if not raw.is_dir():
+            return
+        key = str(raw.resolve()) if raw.exists() else str(raw)
+        if key in seen:
+            return
+        seen.add(key)
+        roots.append(raw)
+
+    stack = load_json(HIVE / "agent-stack.json")
+    vault = stack.get("vault") if isinstance(stack.get("vault"), dict) else {}
+    oh = configured_dir(vault.get("oh"))
+    root = configured_dir(vault.get("path"))
+    if oh is not None:
+        add(oh)
+        return roots
+    if root is not None and (root / "00_Outer_Heaven").is_dir():
+        add(root / "00_Outer_Heaven")
+        return roots
+    env = (os.environ.get("HIVE_OBSIDIAN_VAULT") or "").strip()
+    live = Path(env).expanduser() if env else DEFAULT_VAULT
+    add(live / "00_Outer_Heaven")
     return roots
 
 
@@ -206,47 +344,437 @@ def _inbox_files(root: Path) -> list[Path]:
     inbox = root / INBOX_REL
     if not inbox.is_dir():
         return []
-    # Repo os inbox only — do not walk a dirty vault hive/desk tree.
-    if "docs/hive/outer-heaven" not in str(root).replace("\\", "/"):
-        return []
-    files = [p for p in inbox.glob("*.md") if p.is_file() and not _blocked(p)]
+    files = [p for p in inbox.glob("*.md") if p.is_file() and not _blocked(p) and not _denied_walk(p, root)]
     files.sort(key=lambda p: p.stat().st_mtime if p.exists() else 0, reverse=True)
     return files[:5]
 
 
+def _denied_walk(path: Path, root: Path) -> bool:
+    try:
+        rel = path.relative_to(root)
+    except ValueError:
+        rel = path
+    for part in rel.parts[:-1]:
+        if part in DENY_DIR:
+            return True
+        if part.startswith(".") and part not in {".", ".."}:
+            return True
+    return False
+
+
+def _walk_approved_md(content: Path, root: Path) -> list[Path]:
+    found: list[Path] = []
+    try:
+        walker = os.walk(content, followlinks=False)
+    except OSError:
+        return found
+    for dirpath, dirnames, filenames in walker:
+        dirnames[:] = [
+            name
+            for name in dirnames
+            if name not in DENY_DIR and not (name.startswith(".") and name not in {".", ".."})
+        ]
+        here = Path(dirpath)
+        if _denied_walk(here / "x.md", root) or _blocked(here):
+            dirnames[:] = []
+            continue
+        for name in filenames:
+            if not name.endswith(".md"):
+                continue
+            path = here / name
+            if not path.is_file() or _denied_walk(path, root) or _blocked(path):
+                continue
+            found.append(path)
+            if len(found) >= SCAN_CAP * 2:
+                found.sort(key=lambda p: p.stat().st_mtime if p.exists() else 0, reverse=True)
+                return found[:SCAN_CAP]
+    found.sort(key=lambda p: p.stat().st_mtime if p.exists() else 0, reverse=True)
+    return found[:SCAN_CAP]
+
+
+def logical_rel(path: Path, roots: list[Path] | None = None) -> str:
+    used = [Path(r) for r in (roots or []) if r]
+    for root in used:
+        try:
+            return str(path.relative_to(root)).replace("\\", "/")
+        except ValueError:
+            continue
+    text = str(path).replace("\\", "/")
+    marker = "/CONTENT/"
+    if marker in text:
+        return "CONTENT/" + text.split(marker, 1)[1]
+    return path.name
+
+
+def classify_source(path: Path, repo_root: Path | None = None) -> str:
+    repo = Path(repo_root or REPO_OH)
+    try:
+        resolved = str(path.resolve())
+        repo_key = str(repo.resolve()) if repo.exists() else str(repo)
+    except OSError:
+        resolved = str(path)
+        repo_key = str(repo)
+    repo_key = repo_key.rstrip("/")
+    if resolved == repo_key or resolved.startswith(repo_key + "/"):
+        return "repo_mirror"
+    return "live_vault"
+
+
+def is_unavailable_placeholder(path: Path) -> bool:
+    """True for an iCloud dataless file. Metadata only — do not open it."""
+    try:
+        st = path.stat()
+    except OSError:
+        return False
+    flags = int(getattr(st, "st_flags", 0) or 0)
+    if flags & UF_DATALESS:
+        return True
+    blocks = int(getattr(st, "st_blocks", 1) or 0)
+    if st.st_size > 4096 and blocks == 0:
+        return True
+    return False
+
+
+def _open_text(path: Path):
+    return path.open("r", encoding="utf-8", errors="ignore")
+
+
+def read_local_text(path: Path, cap: int) -> tuple[str | None, str | None]:
+    """Bounded local read. Skip cloud placeholders instead of hydrating them."""
+    if is_unavailable_placeholder(path):
+        return None, "dataless"
+    box: list = []
+
+    def work() -> None:
+        try:
+            with _open_text(path) as fh:
+                box.append(fh.read(max(0, int(cap))))
+        except OSError as exc:
+            box.append(exc)
+
+    worker = threading.Thread(target=work, daemon=True, name="vault-read")
+    worker.start()
+    worker.join(READ_JOIN_S)
+    if worker.is_alive():
+        return None, "timeout"
+    if not box:
+        return None, "empty"
+    got = box[0]
+    if isinstance(got, BaseException):
+        return None, "oserror"
+    return str(got), None
+
+
+def clear_search_cache() -> None:
+    _SEARCH_CACHE.clear()
+
+
+def _search_cache_key(query: str, roots: list[Path]) -> str:
+    return query + "\0" + "|".join(str(Path(r)) for r in roots)
+
+
+def _search_source_snapshot(roots: list[Path]) -> tuple:
+    """Metadata-only identity for scanned files and possible live counterparts.
+
+    Never open placeholders to validate a cache. Include absent counterparts so
+    a newly materialized live note invalidates a previously cached mirror.
+    """
+    files = candidate_files(roots)
+    paths = set(files)
+    live_roots = [Path(root) for root in roots if classify_source(Path(root)) == "live_vault"]
+    for path in files:
+        if classify_source(path) == "live_vault":
+            continue
+        rel = logical_rel(path, roots)
+        if rel not in ROOT_NOTES and rel not in ALLOW_REL and not rel.startswith("CONTENT/"):
+            continue
+        for root in live_roots:
+            twin = root / rel
+            try:
+                resolved = twin.resolve()
+                if resolved.is_relative_to(root.resolve()) and not _blocked(twin) and not _blocked(resolved) and not _denied_walk(twin, root):
+                    paths.add(twin)
+            except OSError:
+                pass
+    snapshot = []
+    for path in sorted(paths, key=str):
+        try:
+            stat = path.stat()
+            snapshot.append((str(path), str(path.resolve()), stat.st_dev, stat.st_ino,
+                             stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns,
+                             stat.st_mode, getattr(stat, "st_flags", 0)))
+        except OSError:
+            snapshot.append((str(path), None))
+    return tuple(snapshot)
+
+
+def _file_score(path: Path, text: str, words: list[str], query: str) -> int:
+    score = 0
+    path_blob = f"{path.name} {logical_rel(path)}".lower()
+    headings = re.findall(r"^#{1,6}\s+(.+)$", text, re.M)
+    title_fm = re.search(r"(?im)^(?:title|name):\s*(.+)$", text)
+    head_blob = " ".join(headings).lower()
+    if title_fm:
+        head_blob += " " + title_fm.group(1).lower()
+    body = text.lower()
+    for word in words:
+        if _token_hit(word, path_blob):
+            score += 8
+        if _token_hit(word, head_blob):
+            score += 5
+        score += min(_token_count(word, body), 6)
+    blob = f"{path_blob} {head_blob} {body}"
+    nonces = re.findall(r"\b[a-z0-9]+(?:-[a-z0-9]+){2,}\b", (query or "").lower())
+    if nonces and not any(nonce in blob for nonce in nonces):
+        return 0
+    distinctive = [w for w in words if len(w) >= 8 or any(ch.isdigit() for ch in w)]
+    if distinctive:
+        if not any(_token_hit(w, blob) for w in distinctive):
+            return 0
+    else:
+        weak = {
+            "hive",
+            "code",
+            "now",
+            "note",
+            "token",
+            "live",
+            "disk",
+            "file",
+            "just",
+            "where",
+            "does",
+            "work",
+            "hey",
+            "they",
+            "them",
+        }
+        rare = [w for w in words if w not in weak and len(w) >= 4]
+        if rare and not any(w in blob for w in rare):
+            return 0
+        score += sum(2 for w in rare if w in blob)
+    rel = logical_rel(path).replace("\\", "/")
+    qlow = (query or "").lower()
+    lane_ask = bool(
+        re.search(
+            r"research lane|acquire\s*/\s*grow\s*/\s*cut|\bacquire\b.+\bgrow\b.+\bcut\b",
+            qlow,
+        )
+    )
+    if lane_ask:
+        if rel.replace("\\", "/").endswith("CONTENT/LANE.md") or path.name == "LANE.md":
+            score += 80
+        if path.name == "OPERATOR_MEMORY.md" or rel.replace("\\", "/").endswith("OPERATOR_MEMORY.md"):
+            score -= 20
+    if rel in NAMED_NOTE_RELS or path.name in {
+        "OPERATOR_MEMORY.md",
+        "NORTH_STAR.md",
+        "OUTER_HEAVEN_GLOSSARY.md",
+        "WEEKLY_SCOREBOARD.md",
+        "VAULT_MAP.md",
+    }:
+        score += 28
+    stem = re.sub(r"[-_]", " ", path.stem.lower())
+    score += sum(16 for part in stem.split() if len(part) >= 4 and part in words)
+    if path.stem.lower() in words:
+        score += 40
+    if RECENCY_RE.search(query or ""):
+        try:
+            age = time.time() - path.stat().st_mtime
+        except OSError:
+            age = 10**9
+        if age < 14 * 86400:
+            score += 12
+        elif age < 30 * 86400:
+            score += 6
+    return score
+
+
+def _dedupe_live_wins(hits: list[dict], roots: list[Path]) -> list[dict]:
+    by_rel: dict[str, dict] = {}
+    for hit in hits:
+        path = Path(str(hit.get("abs") or hit.get("path") or ""))
+        rel = str(hit.get("rel") or logical_rel(path, roots))
+        source = str(hit.get("source") or classify_source(path))
+        row = {**hit, "rel": rel, "source": source, "path": rel}
+        prior = by_rel.get(rel)
+        if prior is None:
+            by_rel[rel] = row
+            continue
+        if source == "live_vault" and prior.get("source") != "live_vault":
+            by_rel[rel] = row
+            continue
+        if prior.get("source") == "live_vault" and source != "live_vault":
+            continue
+        if int(row.get("score") or 0) > int(prior.get("score") or 0):
+            by_rel[rel] = row
+    return list(by_rel.values())
+
+
 def candidate_files(roots: list[Path]) -> list[Path]:
+    key = "|".join(str(Path(r)) for r in roots)
+    now = time.time()
+    hit = _CANDIDATE_CACHE.get(key)
+    if hit and now - hit[0] < _CANDIDATE_TTL:
+        return hit[1]
     files: list[Path] = []
     seen: set[str] = set()
-    for root in roots:
-        for rel in ALLOW_REL:
-            path = root / rel
-            if path.is_file() and not _blocked(path):
-                key = str(path)
-                if key not in seen:
-                    seen.add(key)
-                    files.append(path)
-        for path in _inbox_files(root):
+
+    def add(path: Path, root: Path) -> None:
+        if not path.is_file() or path.suffix != ".md":
+            return
+        if _blocked(path) or _denied_walk(path, root):
+            return
+        try:
+            key = str(path.resolve())
+        except OSError:
             key = str(path)
-            if key not in seen:
-                seen.add(key)
-                files.append(path)
+        if key in seen:
+            return
+        seen.add(key)
+        files.append(path)
+
+    for root in roots:
+        root = Path(root)
+        if not root.is_dir():
+            continue
+        for name in ROOT_NOTES:
+            add(root / name, root)
+        for rel in ALLOW_REL:
+            add(root / rel, root)
+        content = root / "CONTENT"
+        if content.is_dir():
+            for path in _walk_approved_md(content, root):
+                add(path, root)
+                if len(files) >= SCAN_CAP + len(ALLOW_REL):
+                    break
+        for path in _inbox_files(root):
+            add(path, root)
+    _CANDIDATE_CACHE[key] = (now, files)
     return files
 
 
-def _snippet(text: str, words: list[str]) -> str:
-    low = text.lower()
-    idx = -1
-    for word in words:
-        idx = low.find(word)
-        if idx >= 0:
-            break
-    if idx < 0:
-        idx = 0
+def _window(text: str, idx: int) -> str:
     start = text.rfind("\n", 0, idx)
     start = 0 if start < 0 else start + 1
-    chunk = re.sub(r"\s+", " ", text[start : start + SNIP + 80]).strip()
+    end = text.find("\n", idx)
+    if end < 0:
+        end = min(len(text), start + SNIP + 80)
+    line = text[start:end]
+    if re.match(r"^#{1,6}\s+", line):
+        cursor = end
+        extra = ""
+        while cursor < len(text) and not extra.strip():
+            nxt = text.find("\n", cursor + 1)
+            extra = text[cursor + 1 : nxt if nxt >= 0 else len(text)]
+            cursor = nxt if nxt >= 0 else len(text)
+            if nxt < 0:
+                break
+        line = line + " " + extra
+    chunk = re.sub(r"\s+", " ", line).strip()
     chunk = re.sub(r"^#+\s*", "", chunk)
     return chunk[:SNIP]
+
+
+def _token_hit(word: str, low: str) -> bool:
+    """A short number is its own token. It must not match inside a year."""
+    if not word:
+        return False
+    if word.isdigit():
+        return re.search(rf"(?<!\d){re.escape(word)}(?!\d)", low or "") is not None
+    return word in (low or "")
+
+
+def _token_count(word: str, low: str) -> int:
+    if not word:
+        return 0
+    if word.isdigit():
+        return len(re.findall(rf"(?<!\d){re.escape(word)}(?!\d)", low or ""))
+    return (low or "").count(word)
+
+
+def _window_score(chunk: str, words: list[str]) -> int:
+    low = (chunk or "").lower()
+    if not chunk:
+        return -1
+    if re.match(r"^(title|skill|kind|lane|date|id|state)\s*:", chunk.strip(), re.I):
+        return -1
+    leaked = bool(LEAK_RE.search(chunk))
+    distinctive_hit = any(
+        (len(word) >= 8 or any(ch.isdigit() for ch in word)) and _token_hit(word, low) for word in words
+    )
+    if leaked and not distinctive_hit:
+        return -1
+    score = sum(1 for word in words if _token_hit(word, low))
+    for word in words:
+        if (len(word) >= 8 or any(ch.isdigit() for ch in word)) and _token_hit(word, low):
+            score += 8
+    if any(any(ch.isdigit() for ch in word) and _token_hit(word, low) for word in words):
+        score += 16
+    if "sitting" in words and re.search(r"\bsitting\s*:", low):
+        score += 10
+    if "evens louis" in low:
+        score += 3
+    if "hive-os" in low or "hive os" in low:
+        score += 2
+    if "operator" in low:
+        score += 1
+    if "evenslouis.ca" in low and "evens louis" not in low:
+        score -= 2
+    return score
+
+
+def _snippet(text: str, words: list[str]) -> str:
+    """Prefer a speakable name/role/lane window. Skip OPERATOR_MEMORY preamble."""
+    distinctive = sorted(
+        (w for w in words if len(w) >= 8 or any(ch.isdigit() for ch in w)),
+        key=len,
+        reverse=True,
+    )
+    low = text.lower()
+    longest = distinctive[0] if distinctive else ""
+    best = ""
+    best_score = -1
+    for word in distinctive or words:
+        start_at = 0
+        while start_at < len(low):
+            idx = low.find(word, start_at)
+            if idx < 0:
+                break
+            chunk = _window(text, idx)
+            score = _window_score(chunk, words)
+            if longest and _token_hit(longest, (chunk or "").lower()):
+                score += 12
+            if score > best_score:
+                best = chunk
+                best_score = score
+            start_at = idx + 1
+    if best_score >= 0:
+        return best
+    low = text.lower()
+    start_from = 0
+    first = ""
+    best = ""
+    best_score = -1
+    while start_from < len(low):
+        idx = -1
+        for word in words:
+            pos = low.find(word, start_from)
+            if pos >= 0 and (idx < 0 or pos < idx):
+                idx = pos
+        if idx < 0:
+            break
+        chunk = _window(text, idx)
+        if not first:
+            first = chunk
+        score = _window_score(chunk, words)
+        if score > best_score:
+            best = chunk
+            best_score = score
+        start_from = idx + 1
+    if best_score >= 0:
+        return best
+    return first or (_window(text, 0) if text else "")
 
 
 def is_speak_leak(text: str) -> bool:
@@ -272,30 +800,44 @@ def model_brief(hits: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def _answer(hits: list[dict]) -> dict:
+def _answer(hits: list[dict], unavailable: list[dict] | None = None) -> dict:
+    skipped = [row for row in (unavailable or []) if isinstance(row, dict)]
     brief = model_brief(hits)
+    if skipped:
+        names = ", ".join(str(row.get("path") or "?") for row in skipped[:4])
+        note = f"Unavailable (cloud placeholder): {names}."
+        if any(row.get("used_mirror") for row in skipped):
+            note += " Using the repo mirror."
+        brief = f"{brief}\n{note}".strip() if brief else note
+    source = str((hits[0] or {}).get("source") or "") if hits else ""
     if not hits:
+        spoken = CLOUD_PLACEHOLDER if skipped else "I don't have that on disk."
         return {
             "ok": True,
             "hits": [],
             "unknown": True,
-            "spoken": "I don't have that in the vault. UNKNOWN.",
+            "spoken": spoken,
             "brief": brief,
+            "source": None,
+            "unavailable": skipped,
         }
     spoken_hit = None
     for hit in hits:
         path = str(hit.get("path") or "")
-        snippet = str(hit.get("snippet") or "")
+        snippet = re.sub(r"`+", "", str(hit.get("snippet") or ""))
         if _speakable_path(path) and snippet and not is_speak_leak(snippet):
-            spoken_hit = hit
+            spoken_hit = {**hit, "snippet": snippet}
             break
     if spoken_hit is None:
+        spoken = CLOUD_PLACEHOLDER if skipped else "I don't have a speakable vault line for that."
         return {
             "ok": True,
             "hits": hits,
             "unknown": True,
-            "spoken": "I don't have a speakable vault line for that.",
+            "spoken": spoken,
             "brief": brief,
+            "source": source or None,
+            "unavailable": skipped,
         }
     first = str(spoken_hit.get("snippet") or "")
     first = re.sub(r"#{1,6}\s*", "", first)
@@ -307,6 +849,8 @@ def _answer(hits: list[dict]) -> dict:
         "unknown": False,
         "spoken": spoken,
         "brief": brief,
+        "source": spoken_hit.get("source") or source or None,
+        "unavailable": skipped,
     }
 
 
@@ -315,37 +859,95 @@ def _search_roots(query: str, used_roots: list[Path]) -> dict:
     if not words:
         return _answer([])
     files = candidate_files(used_roots)
-    scored: list[tuple[int, Path, str]] = []
+    path_hits: list[Path] = []
+    rest: list[Path] = []
     for path in files:
-        try:
-            if path.stat().st_size > MAX_FILE:
+        blob = f"{path.name} {logical_rel(path, used_roots)}".lower()
+        if any(word in blob for word in words):
+            path_hits.append(path)
+        else:
+            rest.append(path)
+    scan = path_hits + rest[: max(0, BODY_SCAN_CAP - len(path_hits))]
+    live_by_rel = {logical_rel(path, used_roots): path for path in files if classify_source(path) == "live_vault"}
+    for mirror in scan:
+        if classify_source(mirror) == "live_vault":
+            continue
+        rel = logical_rel(mirror, used_roots)
+        if rel not in ROOT_NOTES and rel not in ALLOW_REL and not rel.startswith("CONTENT/"):
+            continue
+        for live_root in used_roots:
+            live_root = Path(live_root)
+            if classify_source(live_root) != "live_vault":
                 continue
-            text = path.read_text(encoding="utf-8", errors="ignore")
+            twin = live_root / rel
+            try:
+                resolved = twin.resolve()
+                if not resolved.is_relative_to(live_root.resolve()):
+                    continue
+                if _blocked(twin) or _blocked(resolved) or _denied_walk(twin, live_root):
+                    continue
+                if twin.suffix == ".md" and twin.is_file():
+                    live_by_rel.setdefault(rel, twin)
+            except OSError:
+                continue
+    selected = set(scan)
+    twins = [live_by_rel[logical_rel(path, used_roots)] for path in scan if classify_source(path) != "live_vault" and logical_rel(path, used_roots) in live_by_rel]
+    scan = list(dict.fromkeys(scan + [path for path in twins if path not in selected]))
+    scored: list[dict] = []
+    unavailable: list[dict] = []
+    readable_live_rels: set[str] = set()
+    for path in scan:
+        try:
+            stat = path.stat()
+            if stat.st_size > MAX_FILE:
+                continue
         except OSError:
             continue
-        low = text.lower()
-        score = sum(low.count(word) for word in words)
+        rel = logical_rel(path, used_roots)
+        name_hit = any(word in f"{path.name} {rel}".lower() for word in words)
+        cap = MAX_FILE if name_hit or stat.st_size <= BODY_READ_CAP else BODY_READ_CAP
+        text, skip = read_local_text(path, cap)
+        if skip:
+            unavailable.append(
+                {
+                    "path": rel,
+                    "abs": str(path),
+                    "reason": skip,
+                    "source": classify_source(path),
+                    "mtime": int(stat.st_mtime),
+                }
+            )
+            continue
+        if classify_source(path) == "live_vault":
+            readable_live_rels.add(rel)
+        if not text:
+            continue
+        score = _file_score(path, text, words, query)
         if score <= 0:
             continue
-        scored.append((score, path, _snippet(text, words)))
-    scored.sort(key=lambda row: (-row[0], str(row[1])))
-    hits = []
-    seen_rel: set[str] = set()
-    for score, path, snippet in scored:
-        rel = path.name
-        for root in used_roots:
-            try:
-                rel = str(path.relative_to(root))
-                break
-            except ValueError:
-                continue
-        if rel in seen_rel:
-            continue
-        seen_rel.add(rel)
-        hits.append({"path": rel, "snippet": snippet, "score": score})
-        if len(hits) >= MAX_CITES:
-            break
-    return _answer(hits)
+        scored.append(
+            {
+                "path": rel,
+                "rel": rel,
+                "abs": str(path),
+                "snippet": _snippet(text, words),
+                "score": score,
+                "source": classify_source(path),
+                "mtime": int(stat.st_mtime),
+            }
+        )
+    scored = [row for row in scored if row["source"] == "live_vault" or row["rel"] not in readable_live_rels]
+    hits = _dedupe_live_wins(scored, used_roots)
+    hits.sort(
+        key=lambda h: (int(h.get("score") or 0), 1 if h.get("source") == "live_vault" else 0),
+        reverse=True,
+    )
+    hits = hits[:MAX_CITES]
+    hit_rels = {str(h.get("rel") or h.get("path") or "") for h in hits}
+    for row in unavailable:
+        if row.get("source") == "live_vault" and str(row.get("path") or "") in hit_rels:
+            row["used_mirror"] = True
+    return _answer(hits, unavailable)
 
 
 def life_card(roots: list[Path] | None = None) -> dict:
@@ -423,20 +1025,55 @@ def news_signals(query: str, roots: list[Path] | None = None) -> dict:
     }
 
 
+def _search_content_digest(snapshot: tuple) -> tuple:
+    """Content identity for the files in a stat snapshot.
+
+    Metadata can repeat after a same-size edit whose mtime was restored, because
+    ctime only advances on a coarse kernel tick. Only called when the stat
+    snapshot already matches (and once when an answer is cached), so the bytes
+    are read only when metadata alone cannot prove freshness. iCloud dataless
+    placeholders are never opened.
+    """
+    out = []
+    for entry in snapshot:
+        if len(entry) < 3 or entry[1] is None:
+            out.append((entry[0], None))
+            continue
+        path = Path(entry[0])
+        try:
+            if not path.is_file() or is_unavailable_placeholder(path):
+                out.append((entry[0], "skip"))
+                continue
+            digest = hashlib.blake2b(digest_size=16)
+            with path.open("rb") as handle:
+                for chunk in iter(lambda: handle.read(1 << 16), b""):
+                    digest.update(chunk)
+            out.append((entry[0], digest.hexdigest()))
+        except OSError:
+            out.append((entry[0], "error"))
+    return tuple(out)
+
+
 def search(query: str, roots: list[Path] | None = None) -> dict:
     words = tokens(query)
+    used = [Path(r) for r in roots if r] if roots is not None else resolve_roots()
     if not words:
         return _answer([])
-    if roots is not None:
-        return _search_roots(query, roots)
-    # Repo hot path first. Live vault only on a miss — Documents can stall.
-    repo = _search_roots(query, [REPO_OH] if REPO_OH.is_dir() else [])
-    if not repo.get("unknown"):
-        return repo
-    live = [r for r in resolve_roots() if r != REPO_OH]
-    if not live:
-        return repo
-    return _search_roots(query, live)
+    key = _search_cache_key(query, used)
+    now = time.time()
+    snapshot = _search_source_snapshot(used)
+    hit = _SEARCH_CACHE.get(key)
+    if hit and now - hit[0] < _SEARCH_TTL and hit[1] == snapshot and hit[3] == _search_content_digest(snapshot):
+        return hit[2]
+    digest = _search_content_digest(snapshot)
+    found = _search_roots(query, used)
+    # Misses and failed reads can recover without a metadata change. Do not
+    # retain them as if they were stable source evidence.
+    if not found.get("unknown") and not found.get("unavailable"):
+        _SEARCH_CACHE[key] = (now, snapshot, found, digest)
+    else:
+        _SEARCH_CACHE.pop(key, None)
+    return found
 
 
 def is_lanes_default(text: str) -> bool:
@@ -460,14 +1097,13 @@ def speak_life(roots: list[Path] | None = None) -> str:
 
 def speak_hot(roots: list[Path] | None = None) -> str:
     """First clean dash line from hot.md. Skip factory / ASKS / leak crumbs."""
-    used = roots if roots is not None else ([REPO_OH] if REPO_OH.is_dir() else [])
+    used = roots if roots is not None else (vault_oh_roots() or ([REPO_OH] if REPO_OH.is_dir() else []))
     for root in used:
         path = Path(root) / "CONTENT/os/hot.md"
         if not path.is_file():
             continue
-        try:
-            text = path.read_text(encoding="utf-8", errors="ignore")
-        except OSError:
+        text, skip = read_local_text(path, BODY_READ_CAP)
+        if skip or not text:
             continue
         for line in text.splitlines():
             raw = line.strip()
@@ -483,6 +1119,86 @@ def speak_hot(roots: list[Path] | None = None) -> str:
                 continue
             return body
     return ""
+
+
+def wants_vault_summary(utterance: str) -> bool:
+    """True when he asked for the map, not a dump and not the school shelf."""
+    return bool(VAULT_SUMMARY_RE.search(utterance or ""))
+
+
+def _map_rooms(text: str) -> list[str]:
+    rooms: list[str] = []
+    seen: set[str] = set()
+    in_table = False
+    for raw in (text or "").splitlines():
+        line = raw.strip()
+        if line.lower().startswith("## rooms"):
+            in_table = True
+            continue
+        if in_table and line.startswith("## "):
+            break
+        if not in_table or not line.startswith("|"):
+            continue
+        cells = [c.strip().strip("`") for c in line.split("|") if c.strip()]
+        if not cells:
+            continue
+        name = cells[0]
+        if set(name) <= set("-: "):
+            continue
+        raw = name.lower().strip()
+        if raw in {"content", "content/"}:
+            key = "content"
+        elif raw.startswith("content/"):
+            key = raw[len("content/") :].strip("/")
+        else:
+            key = raw.strip("/")
+        if not key or key in MAP_SKIP_ROOMS:
+            continue
+        spoken = ROOM_SAY.get(key, key.replace("-", " "))
+        if not spoken or "/" in spoken or spoken in seen:
+            continue
+        seen.add(spoken)
+        rooms.append(spoken)
+        if len(rooms) >= 6:
+            break
+    return rooms
+
+
+def speak_vault_summary(roots: list[Path] | None = None) -> str:
+    """Two sentences from VAULT_MAP. Never the pile. Never a second wiki."""
+    used = resolve_roots() if roots is None else [Path(p) for p in roots]
+    body = ""
+    present = False
+    for root in used:
+        root = Path(root)
+        if root.is_dir():
+            present = True
+        for rel in MAP_REL:
+            path = root / rel
+            if not path.is_file():
+                continue
+            body, skip = read_local_text(path, BODY_READ_CAP)
+            if skip or not body:
+                continue
+            if body.strip():
+                break
+        if body and body.strip():
+            break
+    if not body:
+        return "" if roots is not None else "I don't have that on disk."
+    rooms = _map_rooms(body)
+    if rooms:
+        listed = ", ".join(rooms[:-1]) + f", and {rooms[-1]}" if len(rooms) > 1 else rooms[0]
+        return (
+            f"The vault is Outer Heaven, the living room. On the map: {listed}. "
+            "I will not read the pile. Name a room."
+        )
+    if body:
+        return (
+            "The vault is Outer Heaven on this Mac. I will not read it aloud. "
+            "Name a room or a file."
+        )
+    return "I don't have that on disk."
 
 
 def speak_store(
