@@ -1,0 +1,21 @@
+{
+  "_note": "Sanitized offline fixtures for archive regressions. Shapes only; no private text.",
+  "cases": [
+    {"id": "turn-4052", "kind": "browser_skip",
+     "state": {"status": "VERIFIED", "flows": [{"flow_id": "a"}, {"flow_id": "b"}, {"flow_id": "c"}],
+               "results": [{"flow_id": "a", "verified": true, "status": "VERIFIED", "revision": 1},
+                           {"flow_id": "b", "verified": true, "status": "VERIFIED", "revision": 1}]},
+     "control": {"cancel_flows": ["c"]},
+     "must_not": ["The mission is verified."], "must": ["not verified", "skipped"]},
+    {"id": "turn-4055", "kind": "dark_tool_done",
+     "verb": "craft", "payload": "The model behind the sheet hand is dark. I stopped after 2 steps.",
+     "must_not": ["Done."], "must": ["dark"]},
+    {"id": "turn-4068", "kind": "capability_denial",
+     "utterance": "In SheetCraft, open example.xlsx and email it to a contact.",
+     "payload": "I cannot access files or send emails directly. You'll need to open the app and manually email example.xlsx.",
+     "must_not": ["cannot access files", "manually"], "must": ["I can open and edit files", "stays with you"]},
+    {"id": "turn-4070", "kind": "model_identity",
+     "primary": "primary/model:free", "fallback": "backup/model", "claimed_wrong": "Claude 3.5 Sonnet",
+     "must": ["`backup/model` via OpenRouter", "fallback that fired", "Do not claim to be Claude"]}
+  ]
+}

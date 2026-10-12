@@ -703,6 +703,7 @@ def sanitize_payload(text: str, *, utterance: str = "") -> str:
     if not body:
         return ""
     body = strip_factory(body, utterance=utterance)
+    body = fix_capability_denial(body, utterance=utterance)
     return scrub_unspeakable(body.strip(), utterance=utterance)
 
 
@@ -745,6 +746,41 @@ def proven_repeat(
         if ask and mark and ask == mark:
             hits += 1
     return hits >= 1
+
+
+# A reply that reports a dark tool/model, a stop or a failure must not open with "Done." (turn 4055).
+UNAVAILABLE_RE = re.compile(
+    r"\b(?:is|was|went|are) dark\b|\bI stopped\b|\bran out of time\b|\bfailed\b|\bcould not\b|"
+    r"\bcouldn['\u2019]t\b|\bunavailable\b|\bdid not (?:finish|complete|save|touch)\b|\bnot (?:saved|done|finished)\b",
+    re.I,
+)
+# Blanket "I cannot access files" while file hands exist (turn 4068). Capability != authority.
+CAPABILITY_DENIAL_RE = re.compile(
+    r"[^.!?]*\bI (?:cannot|can['\u2019]t|can not|do not|don['\u2019]t|am unable to|'m unable to)"
+    r"(?: have the ability to| have access to)? (?:directly )?(?:access|open|read|edit|touch|work with) "
+    r"(?:your |any |local )?files?\b[^.!?]*[.!?]?",
+    re.I,
+)
+FILE_ASK_RE = re.compile(r"\b(?:file|files|\.xlsx|\.docx|\.csv|workbook|document|gridcraft|wordcraft|\w+craft)\b", re.I)
+SEND_ASK_RE = re.compile(r"\b(?:email|e-mail|send|mail)\b", re.I)
+CAPABILITY_LINE = "I can open and edit files on this Mac through the craft hands."
+SEND_HELD_LINE = "Sending email is a hard step that stays with you; I can prepare it, and you send."
+
+
+def fix_capability_denial(text: str, *, utterance: str = "") -> str:
+    body = (text or "").strip()
+    if not body or not FILE_ASK_RE.search(utterance or "") or not CAPABILITY_DENIAL_RE.search(body):
+        return body
+    parts = re.split(r"(?<=[.!?])\s+", body)
+    rest = " ".join(
+        s for s in parts if not CAPABILITY_DENIAL_RE.search(s) and not re.search(r"\bmanually\b", s, re.I)
+    ).strip()
+    lines = [CAPABILITY_LINE]
+    if SEND_ASK_RE.search(utterance or ""):
+        lines.append(SEND_HELD_LINE)
+    if rest:
+        lines.append(rest)
+    return " ".join(lines)
 
 
 def witty_beat(verb: str, *, repeat: bool = False) -> str:
@@ -802,7 +838,7 @@ def wrap(
             return payload
         return f"Sir. {payload}"
     repeat = proven_repeat(utterance, turns, store_lines, scars, verb)
-    beat = witty_beat(verb, repeat=repeat)
+    beat = "" if UNAVAILABLE_RE.search(payload) else witty_beat(verb, repeat=repeat)
     if not beat:
         return f"Sir. {payload}"
     if payload.lower().startswith(beat.lower()):
