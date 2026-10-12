@@ -46,11 +46,21 @@ OPENROUTER_PAID_FALLBACKS = (
 OPENROUTER_VISION_FALLBACKS = (
     "deepseek/deepseek-v4-flash-vision-exp",
 )
-OPENROUTER_ATTEMPT_SEC = 10.0
-OPENROUTER_WALL_SEC = 20.0
+# Measured 2026-10-11: deepseek-chat-v3.1 takes 11-25 s for a ~4k-token system prompt and a
+# multi-sentence answer, so a 10 s per-try limit timed out every long reply. Stay under the
+# Face TURN_WALL_SEC (25 s). Override with JARVIS_TALK_ATTEMPT_SEC / JARVIS_TALK_WALL_SEC.
+def _sec_env(name: str, default: float) -> float:
+    try:
+        return max(1.0, float(os.environ.get(name) or default))
+    except ValueError:
+        return default
+
+
+OPENROUTER_ATTEMPT_SEC = _sec_env("JARVIS_TALK_ATTEMPT_SEC", 20.0)
+OPENROUTER_WALL_SEC = _sec_env("JARVIS_TALK_WALL_SEC", 22.0)
 TALK_DARK = "The talk wire is dark this turn."
 OPENROUTER_MAX_TOKENS = 512
-OPENROUTER_RETRIEVE_TOKENS = 512
+OPENROUTER_RETRIEVE_TOKENS = int(os.environ.get("JARVIS_TALK_MAX_TOKENS") or 320)  # short spoken answers; cut ArtCraft latency
 LENGTH_RETRY_TOKENS = 640
 LENGTH_MISS = "UNKNOWN. That answer ran out of room."
 OPENROUTER_HANDS = (
@@ -395,6 +405,63 @@ def _read_http_body(res, timeout: float) -> bytes:
     _abort_response(res)
     worker.join(1.0)
     raise TimeoutError("response body stalled")
+
+
+def talk_hedge_sec() -> float:
+    """Seconds before a second identical talk request races the first. 0 turns it off."""
+    raw = (os.environ.get("JARVIS_TALK_HEDGE_SEC") or "").strip()
+    if not raw:
+        return 9.0
+    try:
+        return max(0.0, float(raw))
+    except ValueError:
+        return 9.0
+
+
+def _hedged_http_json(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0) -> dict:
+    """_http_json, plus one identical backup request if the first is still out after hedge seconds.
+
+    Profiled live: the same prompt took 5-17 s, with 20 s timeouts about 1 turn in 6. The tail
+    is provider queueing, not prompt size. The first reply to land wins; the loser is ignored.
+    Cost: a second request only on slow turns.
+    """
+    hedge = talk_hedge_sec()
+    if hedge <= 0 or hedge >= timeout - 2:
+        return _http_json(url, data=data, headers=headers, timeout=timeout)
+    done = threading.Event()
+    box: list = []
+    state = {"out": 0}
+    lock = threading.Lock()
+    began = time.monotonic()
+
+    def go(budget: float) -> None:
+        try:
+            got = ("ok", _http_json(url, data=data, headers=headers, timeout=budget))
+        except Exception as exc:  # noqa: BLE001
+            got = ("err", exc)
+        with lock:
+            state["out"] -= 1
+            box.append(got)
+            # Done on the first success, or on an error with nothing else still out.
+            if got[0] == "ok" or state["out"] <= 0:
+                done.set()
+
+    def launch(budget: float, name: str) -> None:
+        with lock:
+            state["out"] += 1
+        threading.Thread(target=go, args=(budget,), daemon=True, name=name).start()
+
+    launch(timeout, "talk-a")
+    if not done.wait(hedge):
+        launch(max(1.0, timeout - (time.monotonic() - began)), "talk-b")
+    done.wait(max(0.0, timeout - (time.monotonic() - began)) + 0.5)
+    with lock:
+        for kind, val in box:
+            if kind == "ok":
+                return val
+        if box:
+            raise box[-1][1]
+    raise TimeoutError("talk request timed out")
 
 
 def _http_json(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0) -> dict:
@@ -967,6 +1034,62 @@ def _openrouter_length_retry(
     return str(msg.get("content") or "").strip(), reason
 
 
+_SHARED_MOD = None
+# Last injection, for the per-turn log. Names only, never file bodies.
+LAST_INJECT: dict = {"files": [], "t": 0.0}
+
+
+def _shared_mod():
+    global _SHARED_MOD
+    if _SHARED_MOD is None:
+        path = Path(__file__).resolve().parent / "shared_context.py"
+        spec = importlib.util.spec_from_file_location("agent_stack_shared_context", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)  # type: ignore[union-attr]
+        _SHARED_MOD = mod
+    return _SHARED_MOD
+
+
+def system_for(model: str = "", primary: str = "", provider: str = "OpenRouter", query: str = "") -> str:
+    """SYS plus the shared fleet context. Records which files were injected."""
+    parts = [SYS]
+    files: list[str] = []
+    try:
+        block, files = _shared_mod().shared_system_block()
+    except Exception:  # noqa: BLE001 — a missing shared dir never breaks talk
+        block, files = "", []
+    if block:
+        parts.append(block)
+    snippets: list[dict] = []
+    if query:
+        try:
+            found, snippets = _shared_mod().retrieved_block(query)
+        except Exception:  # noqa: BLE001
+            found, snippets = "", []
+        if found:
+            parts.append(found)
+            block += "\n" + found
+    LAST_INJECT["snippets"] = snippets
+    try:
+        honest = _shared_mod().model_self_report(model, primary, provider)
+    except Exception:  # noqa: BLE001
+        honest = ""
+    if honest:
+        parts.append(honest)
+    LAST_INJECT["model"] = model
+    LAST_INJECT["primary"] = primary
+    LAST_INJECT["files"] = list(files)
+    LAST_INJECT["chars"] = len(block)
+    LAST_INJECT["t"] = time.time()
+    return "\n\n".join(parts)
+
+
+def _ask_only(user: str) -> str:
+    """The current ask, not the live-context brief, drives shared-memory retrieval."""
+    text = user or ""
+    return text.rsplit("Current ask:\n", 1)[-1] if "Current ask:\n" in text else text
+
+
 def _openrouter_payload(
     model: str,
     user: str,
@@ -977,6 +1100,7 @@ def _openrouter_payload(
     images: list | None = None,
     extra_tools: list | None = None,
     hands: bool = True,
+    primary: str = "",
 ) -> dict:
     content: str | list
     stills = [str(u) for u in (images or []) if str(u or "").startswith("data:image")]
@@ -993,7 +1117,7 @@ def _openrouter_payload(
         "max_tokens": int(max_tokens or OPENROUTER_MAX_TOKENS),
         "stream": stream,
         "messages": [
-            {"role": "system", "content": SYS},
+            {"role": "system", "content": system_for(model, primary, query=_ask_only(user))},
             {"role": "user", "content": content},
         ],
     }
@@ -1033,6 +1157,9 @@ def _tool_pick_from_message(msg: dict) -> dict | None:
     return {"tool": name, "args": args, "speak": str(msg.get("content") or "").strip()}
 
 
+WORKER_MAX_TOKENS = int(os.environ.get("JARVIS_WORKER_MAX_TOKENS") or 600)
+
+
 def call_openrouter_messages(
     messages: list[dict],
     tools: list[dict],
@@ -1056,7 +1183,8 @@ def call_openrouter_messages(
             "messages": messages,
             "tools": tools,
             "tool_choice": "auto",
-            "max_tokens": OPENROUTER_MAX_TOKENS,
+            "parallel_tool_calls": True,
+            "max_tokens": WORKER_MAX_TOKENS,
             "reasoning": {"enabled": False},
         }
         try:
@@ -1072,8 +1200,14 @@ def call_openrouter_messages(
         pick = _tool_pick_from_message(msg)
         if pick:
             first = (msg.get("tool_calls") or [{}])[0]
+            calls = []
+            for i, tc in enumerate(msg.get("tool_calls") or []):
+                one = _tool_pick_from_message({"tool_calls": [tc]}) if isinstance(tc, dict) else None
+                if one:
+                    calls.append({"tool": one["tool"], "args": one.get("args") or {}, "call_id": str(tc.get("id") or f"call_{i}")})
             return {
                 "ok": True,
+                "calls": calls,
                 "tool": pick["tool"],
                 "args": pick.get("args") or {},
                 "call_id": str(first.get("id") or "call_0"),
@@ -1109,7 +1243,99 @@ def usable_openrouter(got) -> bool:
     return bool(tool) and tool in openrouter_hand_names() and isinstance(args, dict)
 
 
+# Last talk call, for the per-turn log. Model ids and counts only.
+LAST_TALK: dict = {}
+
+
 def call_openrouter(
+    prompt: str,
+    context: str = "",
+    *,
+    images: list | None = None,
+    extra_tools: list | None = None,
+    hands: bool = True,
+) -> dict:
+    """OpenRouter chat. Free first. Paid fallback on the same host when :free is 429.
+
+    Not ChatGPT, Claude, or Gemini as the product mouth. Records LAST_TALK.
+    """
+    began = time.monotonic()
+    got = _call_openrouter_inner(prompt, context, images=images, extra_tools=extra_tools, hands=hands)
+    primary = str(LAST_INJECT.get("primary") or "") or (openrouter_vision_model() if images else "") or openrouter_model()
+    model = str(got.get("model") or "") if isinstance(got, dict) else ""
+    reply = str(got.get("spoken") or "") if isinstance(got, dict) else ""
+    LAST_TALK.clear()
+    LAST_TALK.update({
+        "t": time.time(),
+        "ok": bool(isinstance(got, dict) and got.get("ok")),
+        "model": model,
+        "primary": primary,
+        "fallback": bool(model and primary and model != primary),
+        "latency_ms": int((time.monotonic() - began) * 1000),
+        # Rough estimate: ~4 chars per token. The stream path carries no usage block.
+        "est_tokens_in": (len(SYS) + int(LAST_INJECT.get("chars") or 0) + len(prompt or "") + len(context or "")) // 4,
+        "est_tokens_out": len(reply) // 4,
+        "injected": list(LAST_INJECT.get("files") or []),
+        "retrieved": [dict(r) for r in (LAST_INJECT.get("snippets") or [])],
+    })
+    if isinstance(got, dict) and got.get("ok"):
+        got.setdefault("primary_model", primary)
+        try:
+            aged = _shared_mod().correct_ages(str(got.get("spoken") or ""))
+        except Exception:  # noqa: BLE001
+            aged = str(got.get("spoken") or "")
+        if aged != got.get("spoken"):
+            got["spoken"] = aged
+        backed = bool(LAST_INJECT.get("snippets"))
+        cleaned = unbacked_memory_claim(str(got.get("spoken") or ""), backed=backed)
+        if cleaned != got.get("spoken"):
+            got["spoken"] = cleaned
+            got["claim_fixed"] = True
+        if not any(got.get(k) for k in ("tool", "tool_calls", "hand", "action", "verb", "args")):
+            fixed = unverified_claim(str(got.get("spoken") or ""))
+            if fixed != got.get("spoken"):
+                got["spoken"] = fixed
+                got["claim_fixed"] = True
+    return got
+
+
+# A talk reply runs no hand, so it cannot have opened, sent or launched anything.
+TALK_CLAIM_RE = re.compile(
+    r"\b(?:I(?:'ve|\s+have)?\s+(?:just\s+|now\s+)?(?:opened|sent|launched|emailed|posted|published|uploaded|saved)"
+    r"|(?:is|it's|it\s+is)\s+now\s+open"
+    r"|now\s+open\s+in)\b",
+    re.I,
+)
+
+
+# "As you confirmed earlier", "like you told me before": claims about past turns.
+MEMORY_CLAIM_RE = re.compile(
+    r"[,;]?\s*\b(?:as|like)\s+(?:you|we)\s+(?:already\s+|just\s+)?"
+    r"(?:confirmed|said|mentioned|told\s+me|noted|agreed|discussed|established)"
+    r"(?:\s+(?:earlier|before|previously|last\s+time))?\b[,;]?"
+    r"|[,;]?\s*\b(?:you|we)\s+(?:already\s+)?(?:confirmed|agreed|told\s+me)\s+(?:that\s+)?(?:earlier|before|previously)\b[,;]?",
+    re.I,
+)
+
+
+def unbacked_memory_claim(text: str, *, backed: bool) -> str:
+    """Drop 'as you confirmed earlier'-style phrases unless retrieved context backs them."""
+    if backed or not text or not MEMORY_CLAIM_RE.search(text):
+        return text
+    out = MEMORY_CLAIM_RE.sub("", text)
+    out = re.sub(r"\s+([.,;!?])", r"\1", out)
+    return re.sub(r"[ \t]{2,}", " ", out).strip()
+
+
+def unverified_claim(text: str) -> str:
+    """Drop first-person done-claims from a tool-less talk reply and say so plainly."""
+    if not text or not TALK_CLAIM_RE.search(text):
+        return text
+    keep = [s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s and not TALK_CLAIM_RE.search(s)]
+    return " ".join(keep + ["I have not opened or sent anything from this answer; no tool ran."]).strip()
+
+
+def _call_openrouter_inner(
     prompt: str,
     context: str = "",
     *,
@@ -1138,7 +1364,8 @@ def call_openrouter(
     if stills and not openrouter_vision_model() and not extra_tools:
         # Try the talk model first; if every host rejects images, VISION_DARK.
         pass
-    max_tokens = OPENROUTER_RETRIEVE_TOKENS if brief else OPENROUTER_MAX_TOKENS
+    # No-hands answers (memory/rules questions) get the short cap too: live PASS answer ran 18-20 s at 512.
+    max_tokens = OPENROUTER_RETRIEVE_TOKENS if (brief or not (hands or extra_tools)) else OPENROUTER_MAX_TOKENS
     with_tools = bool(hands or extra_tools)
     models: list[str] = []
     vision = openrouter_vision_model() if stills else ""
@@ -1147,6 +1374,12 @@ def call_openrouter(
     for mid in (vision, primary, *OPENROUTER_FALLBACKS, *vision_paid, *OPENROUTER_PAID_FALLBACKS):
         if mid and mid not in models:
             models.append(mid)
+    primary_mid = models[0] if models else ""
+
+    def _openrouter_payload(*args, **kw):  # noqa: F811 — same payload, primary named for the self-report
+        kw.setdefault("primary", primary_mid)
+        return globals()["_openrouter_payload"](*args, **kw)
+
     free_quota_dead = False
     if stills and not models:
         return {
@@ -1178,7 +1411,7 @@ def call_openrouter(
         finish = ""
         try:
             if with_tools:
-                data = _http_json(
+                data = _hedged_http_json(
                     OPENROUTER_URL,
                     data=_openrouter_payload(
                         mid,
@@ -1228,6 +1461,22 @@ def call_openrouter(
                         msg = raw_msg if isinstance(raw_msg, dict) else {}
                         finish = _choice_finish_reason(choices[0])
                     text = str(msg.get("content") or "").strip()
+                elif talk_hedge_sec() > 0:
+                    # Hedged plain request: the stream path had no backup, and live 20 s
+                    # stream stalls hit 2 of 7 no-hands turns. The reply is used whole either way.
+                    data = _hedged_http_json(
+                        OPENROUTER_URL,
+                        data=_openrouter_payload(mid, user, stream=False, max_tokens=max_tokens, images=stills),
+                        headers=headers,
+                        timeout=attempt,
+                    )
+                    choices = data.get("choices") if isinstance(data, dict) else None
+                    msg = {}
+                    if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+                        raw_msg = choices[0].get("message")
+                        msg = raw_msg if isinstance(raw_msg, dict) else {}
+                        finish = _choice_finish_reason(choices[0])
+                    text = _strip_scratchpad(str(msg.get("content") or "").strip())
                 else:
                     request_started = time.monotonic()
                     with _http_open(
@@ -1366,7 +1615,7 @@ def call_xai(prompt: str, context: str = "") -> dict:
                 "model": grok_model(),
                 "temperature": 0.3,
                 "messages": [
-                    {"role": "system", "content": SYS},
+                    {"role": "system", "content": system_for(grok_model(), "", "xAI")},
                     {"role": "user", "content": user},
                 ],
             },

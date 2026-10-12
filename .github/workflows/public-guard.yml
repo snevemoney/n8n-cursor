@@ -1,0 +1,21 @@
+name: public-guard
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Block private shared files, absolute home paths and secrets in added lines
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+          git cat-file -e "$BASE" 2>/dev/null || BASE=$(git rev-list --max-parents=0 HEAD | tail -1)
+          python3 scripts/guard/public_guard.py --range "$BASE...HEAD"

@@ -1069,6 +1069,7 @@ class OnlineBrainTest(unittest.TestCase):
             MOD._read_openrouter_stream(Stream(), timeout=0.05)
         self.assertTrue(released.is_set())
 
+    @mock.patch.dict(os.environ, {"JARVIS_TALK_HEDGE_SEC": "0"})  # the stream path runs only with the hedge off
     def test_stream_headers_and_body_share_attempt_budget(self) -> None:
         released = threading.Event()
 

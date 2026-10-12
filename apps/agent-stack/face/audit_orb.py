@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import time
 import urllib.error
@@ -29,7 +30,7 @@ JARVIS_LOGS = (
     ROOT / "docs/hive/outer-heaven/CONTENT/os/sessions/jarvis/2026-09-13.md",
     ROOT / "docs/hive/outer-heaven/CONTENT/os/sessions/jarvis/2026-09-12.md",
 )
-VAULT_OH = Path.home() / "Documents/My_Billion_Dollar_Vault/00_Outer_Heaven"
+VAULT_OH = Path(os.environ.get("JARVIS_VAULT_DIR") or (Path.home() / "Documents/My_Billion_Dollar_Vault")).expanduser() / "00_Outer_Heaven"
 HOST = "127.0.0.1"
 PORT = 4018
 CAP = 1000

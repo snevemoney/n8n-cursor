@@ -46,6 +46,24 @@ class StorePackTest(unittest.TestCase):
 
 
 class FleetContextTest(unittest.TestCase):
+    def setUp(self) -> None:
+        # The repo fleet file is the fallback when no private shared dir carries JARVIS_CONTEXT.md.
+        self._old_dir = os.environ.get("JARVIS_SHARED_DIR")
+        os.environ["JARVIS_SHARED_DIR"] = "/tmp/no-such-private-shared-dir"
+
+    def tearDown(self) -> None:
+        if self._old_dir is None:
+            os.environ.pop("JARVIS_SHARED_DIR", None)
+        else:
+            os.environ["JARVIS_SHARED_DIR"] = self._old_dir
+
+    def test_private_context_suppresses_duplicate_fleet_file(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-priv-") as tmp:
+            (Path(tmp) / "JARVIS_CONTEXT.md").write_text("# private\n", encoding="utf-8")
+            os.environ["JARVIS_SHARED_DIR"] = tmp
+            self.assertEqual(MOD.fleet_context_block(), "")
+            self.assertTrue(MOD.fleet_context_block(MOD.FLEET_CONTEXT).startswith("Fleet context"))
+
     def test_repo_fleet_context_file_loads(self) -> None:
         self.assertTrue(MOD.FLEET_CONTEXT.is_file(), MOD.FLEET_CONTEXT)
         text = MOD.fleet_context_block()

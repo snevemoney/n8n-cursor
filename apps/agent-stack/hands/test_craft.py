@@ -66,6 +66,31 @@ def scripted(*picks):
 
 
 class CraftHandTests(unittest.TestCase):
+    def test_parallel_calls_run_in_one_round_and_inspect_once(self):
+        fake = FakeSession()
+        fake.tools.append({"name": "save_workbook", "inputSchema": {"type": "object", "properties": {"path": {"type": "string"}}}})
+        model = scripted(
+            {"tool": "new_workbook", "calls": [
+                {"tool": "new_workbook", "args": {}, "call_id": "a"},
+                {"tool": "set_cell", "args": {"cell": "A1"}, "call_id": "b"},
+                {"tool": "save_workbook", "args": {"path": "p.xlsx"}, "call_id": "c"},
+            ]},
+        )
+        got = MOD.run({"app": "gridcraft", "task": "x"}, "", model_fn=model, session_fn=lambda a: fake)
+        self.assertTrue(got["ok"])
+        self.assertEqual(fake.calls, ["inspect_workbook", "new_workbook", "set_cell", "save_workbook", "inspect_workbook"])
+        self.assertEqual(len(model.prompts), 1)  # final save ends the job: no narration round
+        self.assertIn("saved p.xlsx", got["spoken"])
+        self.assertNotIn("open", got["spoken"].lower())
+
+    def test_batch_with_hard_step_runs_nothing(self):
+        fake = FakeSession()
+        model = scripted({"tool": "new_workbook", "calls": [
+            {"tool": "new_workbook", "args": {}}, {"tool": "ui_screenshot", "args": {}}]})
+        got = MOD.run({"app": "gridcraft", "task": "x"}, "", model_fn=model, session_fn=lambda a: fake)
+        self.assertFalse(got["ok"])
+        self.assertEqual(fake.calls, ["inspect_workbook"])
+
     def test_unknown_app_touches_nothing(self):
         got = MOD.run({"app": "excel", "task": "x"}, "", model_fn=scripted(), session_fn=lambda a: FakeSession())
         self.assertFalse(got["ok"])
