@@ -967,6 +967,37 @@ def _openrouter_length_retry(
     return str(msg.get("content") or "").strip(), reason
 
 
+_SHARED_MOD = None
+# Last injection, for the per-turn log. Names only, never file bodies.
+LAST_INJECT: dict = {"files": [], "t": 0.0}
+
+
+def _shared_mod():
+    global _SHARED_MOD
+    if _SHARED_MOD is None:
+        path = Path(__file__).resolve().parent / "shared_context.py"
+        spec = importlib.util.spec_from_file_location("agent_stack_shared_context", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)  # type: ignore[union-attr]
+        _SHARED_MOD = mod
+    return _SHARED_MOD
+
+
+def system_for(model: str = "", primary: str = "", provider: str = "OpenRouter") -> str:
+    """SYS plus the shared fleet context. Records which files were injected."""
+    parts = [SYS]
+    files: list[str] = []
+    try:
+        block, files = _shared_mod().shared_system_block()
+    except Exception:  # noqa: BLE001 — a missing shared dir never breaks talk
+        block, files = "", []
+    if block:
+        parts.append(block)
+    LAST_INJECT["files"] = list(files)
+    LAST_INJECT["t"] = time.time()
+    return "\n\n".join(parts)
+
+
 def _openrouter_payload(
     model: str,
     user: str,
@@ -977,6 +1008,7 @@ def _openrouter_payload(
     images: list | None = None,
     extra_tools: list | None = None,
     hands: bool = True,
+    primary: str = "",
 ) -> dict:
     content: str | list
     stills = [str(u) for u in (images or []) if str(u or "").startswith("data:image")]
@@ -993,7 +1025,7 @@ def _openrouter_payload(
         "max_tokens": int(max_tokens or OPENROUTER_MAX_TOKENS),
         "stream": stream,
         "messages": [
-            {"role": "system", "content": SYS},
+            {"role": "system", "content": system_for(model, primary)},
             {"role": "user", "content": content},
         ],
     }
