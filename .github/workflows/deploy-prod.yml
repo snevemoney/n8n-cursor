@@ -1,7 +1,6 @@
 name: Deploy - Prod (Blue/Green)
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build-push:

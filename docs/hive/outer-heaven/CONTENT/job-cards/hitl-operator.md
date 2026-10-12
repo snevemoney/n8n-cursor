@@ -22,7 +22,7 @@
 - `scripts/hive/grok-skills/ask-principal.md`
 
 ## Current truth (2026-08-27 · parent Cursor has the factory)
-Wealth DailyShow exists (`wealth-daily-show`, Grok desktop Remotion · PR 68 / `e68f6f3f`). V2 on main. Cursor Cloud `/workspace` abort. Evens Mac optional. This desk stood down — parent Cursor owns the factory. Publish / YouTube / trades stay you. Catch-up: `CONTENT/os/inbox/2026-08-27-said-3.md`.
+Wealth DailyShow exists (`wealth-daily-show`, Grok desktop Remotion · PR 68 / `e68f6f3f`). V2 on main. Cursor Cloud `/workspace` abort. Evens Mac optional. This desk stood down — parent Cursor owns the factory. Publish / YouTube / trades stay you. **Law:** Grok, Claude, ChatGPT, and Cursor each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. INDEX: `CONTENT/os/sessions/INDEX.md`. DailyShow product overlay: `said-4`.
 
 ## Cloud host
 HOST = git. Inbox + board: `desk-missions-now/hitl/{INBOX,GOAL-GAP-BOARD}.md`. Locks: `hitl/briefs/INDEX.md` + memories — not live chats. Doctrine: `desk-missions-now/CLOUD-HOST.md`.

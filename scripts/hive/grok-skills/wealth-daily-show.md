@@ -66,6 +66,8 @@ Missing path on that SHA → STOP and report the SHA. Paths exist + this host is
 
 Do not scoop the dirty `hive/desk` checkout.
 
+**Law:** Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting. Open `#hive`. INDEX: `CONTENT/os/sessions/INDEX.md`.
+
 ## Since cap / current truth (2026-08-27)
 
 - **Default product:** silent Remotion DailyShow on this Grok desktop. `desk-checkout.sh` + `render-day.sh` → `out/daily-YYYY-MM-DD.mp4`. Not ~7min Higgsfield Juno.

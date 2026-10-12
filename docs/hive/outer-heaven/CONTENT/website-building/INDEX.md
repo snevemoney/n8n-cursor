@@ -43,6 +43,7 @@ Official docs > primary GitHub READMEs > reputable engineering blogs > affiliate
 | File | What | Who |
 |------|------|-----|
 | [cinematic/PLAYBOOK.md](./cinematic/PLAYBOOK.md) | Cinematic playbook **v2 locked 2026-08-13** (3 refs→bible, fail-the-build, video hero not WebGL; no GOD-MODE) | Forge, Creative Studio |
+| [cinematic/TASTE-WINNER-ORB-SCROLL.md](./cinematic/TASTE-WINNER-ORB-SCROLL.md) | House taste 2026-09-02: orb-scroll-demo (plate+scrub) feels more premium than cinematic-website | Forge, Creative Studio, Consultant |
 | [cinematic/DEMO_BRIEF.md](./cinematic/DEMO_BRIEF.md) | AI Partner cinematic landing demo kickoff | Forge, Creative Studio |
 | [cinematic/motion-ref-pack.md](./cinematic/motion-ref-pack.md) | Taste refs: Inkwell, Streets of Punk, fromanother | Creative Studio, Forge |
 | [cinematic/brand-call.md](./cinematic/brand-call.md) | Dark premium tokens; light leak + film grain | Creative Studio, Forge |

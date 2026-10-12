@@ -1,7 +1,14 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "operator": "Evens Louis",
   "hive_identity": "Automation business — AI agent employees manage workflows across a portfolio of operator-owned businesses",
+  "this_sitting_businesses": ["hive-os", "ai-partner-websites"],
+  "do_not_merge_economics": ["hive-os", "ai-partner-websites", "amazon-own-store"],
+  "mentor": {
+    "skill": "saylor-mentor-pass",
+    "live": "python3 scripts/hive/os/saylor-mentor-pass.py --live --lane hive-os|agency --sitting \"…\"",
+    "note": "Two businesses this cycle = hive-os + agency. Amazon is a third lane, not these two dollars."
+  },
   "rules": [
     "Agents serve the PORTFOLIO, never tunnel-vision on one product unless operator names a lane this session",
     "Big Boss rotates attention across active lanes in morning brief — at least one bullet per ACTIVE lane",
@@ -20,7 +27,9 @@
       "operator_role": "Builder/strategist — NOT primary outbound salesperson this cycle (introvert/home/high-leverage)",
       "primary_agents": ["Consultant", "Product GTM", "Forge", "Creative Studio", "Lead Hunter", "Communications Manager"],
       "product_state": "clipengine",
-      "notes": "MONEY MIX: prefer leveraged seats; sell OS/workflow to operators with existing demand"
+      "facts_card": "docs/hive/outer-heaven/CONTENT/topics/live-facts-agency.md",
+      "sitting_lane": "agency",
+      "notes": "MONEY MIX: prefer leveraged seats; sell OS/workflow to operators with existing demand. Facts + $ stay on the agency card. Building mode: no outbound."
     },
     {
       "id": "amazon-own-store",
@@ -54,7 +63,9 @@
       "operator_role": "Operator + Forge/Cursor — this repo and Grok fleet",
       "primary_agents": ["Big Boss", "Watchdog", "Forge", "Librarian", "Researcher"],
       "product_state": "operator",
-      "notes": "n8n/Scorpion = legacy fallback; Grok-first"
+      "facts_card": "docs/hive/outer-heaven/CONTENT/topics/live-facts-hive-os.md",
+      "sitting_lane": "hive-os",
+      "notes": "n8n/Scorpion = legacy fallback; Grok-first. Live mentor on this lane. Last verified proof BLANK until a visitor can see one build."
     },
     {
       "id": "future",

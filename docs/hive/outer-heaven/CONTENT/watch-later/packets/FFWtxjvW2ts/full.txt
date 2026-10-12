@@ -1,0 +1,544 @@
+[00:00] This is probably my favorite website
+[00:01] I've ever built with Claude. This is the
+[00:03] AI Automation Society site. What I think
+[00:05] is so cool about this one is look at the
+[00:07] layers as I start to scroll. We can see
+[00:08] the mountains in the background and this
+[00:10] like treeine and they are clearly
+[00:12] different layers and that adds a really
+[00:13] premium feel as well as this whole
+[00:15] laptop kind of being dynamic. Right now
+[00:18] we keep scrolling down and we see a
+[00:19] little bit about AI automation society.
+[00:21] We see the words come in. We see the
+[00:22] words come in down here and we can flip
+[00:24] between the classroom live calls events
+[00:26] and leaderboard. And as we keep
+[00:28] scrolling, more text keeps coming in
+[00:30] dynamically and these cards start to
+[00:31] stack on top of each other, which I
+[00:33] think just feels super super dynamic and
+[00:36] engaging. We can see the pricing section
+[00:37] here, free community plus community, as
+[00:39] well as our certification cohort. We see
+[00:41] some Q&A down here or FAQ, sorry. And
+[00:44] look at this animation where the text
+[00:45] sort of like locks as we switch between
+[00:47] these different things. I think that's
+[00:48] awesome. We see some YouTube videos and
+[00:50] then finally the call to action down
+[00:51] here with once again the layering comes
+[00:54] back in. And I just think that that is
+[00:55] so so cool. And I know you guys are
+[00:57] probably wondering on mobile. So here it
+[00:59] is right here. This is me on my phone.
+[01:01] We get the same dynamic laptop screen.
+[01:02] We get the same layered effect, which I
+[01:04] think is just beautiful. We can scroll
+[01:06] through this text. We see we get these
+[01:08] same animations, but we click through
+[01:10] these sections a little bit differently.
+[01:12] We continue to scroll down. All of this
+[01:13] stuff comes in. The cards don't stack
+[01:15] the same way it does on desktop, but I'm
+[01:17] sure we could engineer that if we wanted
+[01:18] to with just one prompt. We keep coming
+[01:20] through. The point I'm trying to make
+[01:22] here is Fable 5.1 is able to take care
+[01:24] of this on mobile as well and you get
+[01:27] the exact same premium feel. I think
+[01:28] that this website is beautiful. Let's
+[01:30] take a look at another example here.
+[01:32] This is my website. You can see we've
+[01:34] got the text. We've got the hero
+[01:35] section. Those numbers were sort of like
+[01:36] ticking up. I've got myself over here
+[01:38] and this is like a really neat
+[01:39] background that I think adds depth and
+[01:41] adds another layer, but it's not
+[01:43] distracting. These are all clickable
+[01:44] links. These numbers are ticking up and
+[01:46] we can still see consistency with the
+[01:47] background animation. We continue to go
+[01:49] through these things color up as I
+[01:51] highlight. We get into this interesting
+[01:53] like dynamic element. You can see when I
+[01:55] move my mouse, these move, but once
+[01:56] again, it's not too overwhelming or
+[01:58] distracting. I think it just feels very
+[02:00] premium and adds some nice depth here.
+[02:02] We have a little bit and background
+[02:03] information. And this links to the about
+[02:05] page, which is um just a little bit of a
+[02:08] bio. It's nothing too fancy at all. But
+[02:09] anyways, we keep coming down and we have
+[02:11] like a little bit of a photo montage.
+[02:13] These kind of come up as they go into
+[02:15] screen. And then we keep coming down.
+[02:17] see my book, Becoming AI Native. We have
+[02:19] new YouTube videos every week. And then
+[02:21] it pulls up um join AIS and a little
+[02:23] signature, which it just actually found
+[02:26] in my um pictures on my local desktop.
+[02:29] Now, what I also really like is that the
+[02:30] navbar stays with you all the way
+[02:32] through. And it also did that within the
+[02:34] AIS um site, which I really, really
+[02:36] like. I don't know why. It just feels a
+[02:38] bit more like having it locked there
+[02:40] just feels good. Now, let me show you
+[02:41] guys this next one, which is Glido. I
+[02:42] think this one is so cool because look
+[02:44] at this little dictation bar. There's so
+[02:46] many animations within this. You can see
+[02:47] that it's dictating words and putting
+[02:49] them into Slack. And this looks very
+[02:50] similar to the way that you can actually
+[02:52] see me talking into my mic right now.
+[02:54] And right here, you can see that I'm
+[02:55] dictating with Glyo. So, super super
+[02:57] cool. We can have the apps right here
+[02:58] that we already use and it pauses when
+[03:00] I'm on it. We get these animations
+[03:02] coming in with the holding down a key
+[03:04] saying it messy and then it gets
+[03:06] dictated and pasted over here. Much
+[03:08] cleaner. We can keep going down and
+[03:09] seeing that we have different apps like
+[03:11] we're seeing Glido putting this into
+[03:13] Slack. We're seeing Glido put this into
+[03:15] cursor. We're seeing it actually sort of
+[03:16] like have these animations where we can
+[03:18] see what it would look like to use GLO
+[03:20] in these different apps. Gmail and of
+[03:21] course cloud code in the terminal. We
+[03:24] have more stuff down here transcribing
+[03:26] over here or speaking over here as well
+[03:28] as just like typing the difference right
+[03:29] there. And now this is my favorite part.
+[03:32] As we go down, which is this animation,
+[03:34] we have the dictation and then we have
+[03:36] these two things that are going
+[03:37] different ways with all of these apps.
+[03:38] Some of these logos are obviously off,
+[03:40] but hey, for a oneshot prompt, this is
+[03:42] pretty solid. I like that animation,
+[03:44] too. And we have some stuff from us, the
+[03:46] founders down here. Anyways, the
+[03:48] pricing. Now, what I want to talk about
+[03:50] is how do you actually get Fable 5.1 to
+[03:53] do stuff like this without giving you AI
+[03:56] slop. Now, obviously, what I found is
+[03:57] having things like scroll animations and
+[04:00] having text feel more dynamic. And
+[04:01] specifically in this video, I really
+[04:03] found out about layering. That helps a
+[04:05] ton. But ultimately what I realized is
+[04:06] that you can't just say to Fable 5.1 or
+[04:09] any AI model, make this look
+[04:10] professional. Make this feel premium.
+[04:12] You really have to give it something to
+[04:14] work off of. So what we did in this
+[04:15] video is I got a lot of inspiration from
+[04:17] other websites. So for example, with
+[04:19] this website which I just absolutely
+[04:20] love, I found an example of a website
+[04:22] that I really loved and I took the
+[04:24] elements from it that I liked. So this
+[04:26] one is called Fora. You can see it's
+[04:28] very similar. You can see it has hero
+[04:29] text. It has the layers in the
+[04:31] background. Then when I started to
+[04:32] scroll, I was like, "Wow, I love the
+[04:34] layering here." So I told Fable 5.1 how
+[04:36] to figure out how we could make a hero
+[04:38] section that as I scroll down, there's
+[04:40] like four layers. There's a back
+[04:42] mountain, there's a middle mountain,
+[04:43] there's a laptop screen, and then
+[04:45] there's a front layer of trees. And I
+[04:47] basically just love that feel and I
+[04:49] wanted to replicate it. So I just had it
+[04:50] make all of these separate layers that
+[04:52] move when you scroll. Then we of course
+[04:54] have like this text thing. I really
+[04:56] liked how the cards here stacked. I
+[04:58] thought that that felt super premium.
+[04:59] So, I looked at this website for
+[05:01] inspiration and I told Fable 5.1 that I
+[05:03] wanted to have mine have the same feel
+[05:05] and I explained all the elements of this
+[05:06] and why I liked it and how I wanted it
+[05:08] to use that as inspiration. Now, for my
+[05:11] website here, there wasn't exactly a
+[05:12] website that I took inspiration from,
+[05:14] but instead what I did is I took
+[05:15] components that I really liked. So, I
+[05:17] went to um where is it? I went to
+[05:18] something called 21st.dev, which you
+[05:20] guys have probably heard of before
+[05:21] already if you've been watching me for a
+[05:23] while making sites. This site basically
+[05:25] has a bunch of components that you can
+[05:26] find and you can literally give your AI
+[05:28] agents the prompts for these animations.
+[05:30] So for example, this container scroll,
+[05:32] you can just copy prompt and then your
+[05:34] agent can basically copy that element.
+[05:36] So I was looking at backgrounds that I
+[05:38] really liked here. I was looking at
+[05:39] different gradients. I was looking at
+[05:41] different interactive elements and I
+[05:42] just decided that I liked one. I'm not
+[05:44] going to be able to find it right now,
+[05:45] but I really liked that one that you see
+[05:46] in the background here and I just took
+[05:48] it and then I started designing with it.
+[05:50] And then I just explained to Fable that
+[05:51] I wanted all of this text to sort of
+[05:52] appear as it enters the screen. And then
+[05:55] I said, "Hey, I want this to be 3D. I
+[05:56] want this to feel dynamic. I want, you
+[05:58] know, all this text to come in. I want
+[05:59] this to scroll sideways." And of course,
+[06:01] I used my scroll craft skill, which you
+[06:03] guys can access for completely free. It
+[06:05] is linked in my free school community,
+[06:06] which is in the description. This skill
+[06:08] has all of the design elements that you
+[06:09] need to understand for layering, for
+[06:11] scrolling, for, you know, text appearing
+[06:13] like this, for text appearing like this.
+[06:15] It has basically all these principles
+[06:17] inside of that skill. It's completely
+[06:18] free. And then for GLO, what I actually
+[06:20] did is we looked at a competitor site.
+[06:21] So we looked at Lemon, which is another
+[06:23] dictation app, and I loved how it had
+[06:24] these animations that almost give you
+[06:26] the feel as if you're already using the
+[06:28] product. So I basically just once again
+[06:29] came through here and said, "Hey,
+[06:31] actually, for this one, what I want you
+[06:32] to do is go to Glido. I want you to take
+[06:34] our brand guidelines and just insert it
+[06:36] onto a page like this." And you can see
+[06:38] this one was, you know, very directly
+[06:40] just like cloning it, I would say. But
+[06:42] that's what's so cool about Fable 5.1 is
+[06:44] it can inspect what's going on here and
+[06:46] it can generate you one that feels the
+[06:48] exact same. It even made the same sort
+[06:49] of like it almost feels like watercolor
+[06:51] painting in the background as you can
+[06:52] see, but it made the same vibe. And now
+[06:54] we just have Oh, sorry that was the
+[06:56] wrong app. And now we just have this
+[06:57] that we could go ahead and, you know,
+[06:59] push live if we wanted to. And then look
+[07:00] at what else I did. I was like, "Okay,
+[07:01] this is pretty cool." So I gave it an
+[07:04] example of a good site. And then I gave
+[07:05] it this goal, so one shot prompt. And
+[07:07] then I told it to build me two
+[07:08] distinctly different but most impressive
+[07:10] scrollcraft, which is my skill layered
+[07:12] sites that you could possibly build me
+[07:14] using our skills. I told it to look at
+[07:16] the AIS site cuz I really liked that
+[07:17] one. I told it to grab components from
+[07:19] 21st.dev. I told it to go to
+[07:21] godly.websites. This is all about giving
+[07:23] your agent more specific prompts and
+[07:25] inspiration. If I go to actually godly
+[07:28] websites, you can see godly.design. We
+[07:30] can find trending sites. We can find um
+[07:33] logos. We can find hero sections. We can
+[07:35] give all of this kind of stuff to our AI
+[07:37] agents for inspiration of how we want
+[07:39] our site to look. CTAs, footers, OG
+[07:42] images. There's so much stuff in here.
+[07:43] There's also another site called awards
+[07:45] where you can literally look at websites
+[07:46] that are winning awards for design and
+[07:48] you can just understand what kind of
+[07:50] feel do you want. You know, there's
+[07:51] different categories in here um you know
+[07:53] technology, e-commerce, restaurant,
+[07:55] fashion because obviously your site
+[07:58] probably is going to convert better if
+[07:59] it feels like it's in your niche talking
+[08:01] to your avatar. So, this kind of stuff
+[08:03] helps you get inspiration much better.
+[08:05] There's literally another site called
+[08:06] Motion Sites that has like these
+[08:07] jaw-dropping animated backgrounds that
+[08:09] you can actually go ahead and grab and
+[08:11] just bring right into your websites. I
+[08:14] think the one that I actually used was
+[08:15] very similar to this one. If you, as you
+[08:17] can see, if I put this into a new page,
+[08:19] this one is just kind of like a really
+[08:21] nice animated background. It's obviously
+[08:23] not the same because ours is sort of
+[08:25] interactive, but this is also a really
+[08:26] cool feel to have in the background of
+[08:28] your hero section. Okay. Okay. So then
+[08:30] what I did is I gave it this /goal
+[08:31] prompt and I said, "Hey, I need you to
+[08:32] build me two distinctly different but
+[08:34] most impressive scrollcraft, which is my
+[08:36] skill type of sites that you could using
+[08:39] these skills, using layering, looking at
+[08:41] these components for inspiration, right?
+[08:42] Like godly websites, 21st.dev, looking
+[08:45] at all this type of stuff." I told her
+[08:48] it could generate the assets that it
+[08:50] needed. It could use key, it could use
+[08:51] Higsfield, it can use whatever it wants,
+[08:53] but I need it to be subtle but premium.
+[08:55] And I just said, "Go make me these
+[08:56] sites." So let's take a look at what it
+[08:58] actually built. So, this first one's
+[08:59] called Ferna, fresh herbs without the
+[09:01] window sill. You can already see right
+[09:03] away from the beginning, we have
+[09:04] layering. We can literally tell that
+[09:06] this plant PNG as well as I think even
+[09:09] this leaf in the background and these
+[09:10] leaves, they're all on different planes.
+[09:12] And the background image is on a
+[09:14] different layer as well. So, that gives
+[09:15] it a really nice immersive feel. We can
+[09:18] see the text comes through right here.
+[09:20] This text pops through. This text fades
+[09:21] in. These cards stack, which I think
+[09:23] looks amazing. We can see right here we
+[09:26] have a little scroll video now where
+[09:27] this literally grows over time and we
+[09:29] can go backwards. I like how this feels.
+[09:32] Once again, we get more layering. You
+[09:33] can see the plants in the background are
+[09:35] moving to the left as well, but not at
+[09:36] the same rate. And then finally, we end
+[09:38] off with this video where the light
+[09:40] basically turns on and that is the site.
+[09:42] That was a oneshot prompt with
+[09:44] Scrollcraft. Okay. And then the second
+[09:46] one it made, this one is called Lowkey.
+[09:48] It's a keyboard. Let me just refresh
+[09:50] this. So we see the text comes in like
+[09:51] that. We can see there's a little
+[09:52] animation here. It looks like there was
+[09:54] like some of the keys were being
+[09:55] pressed. If you watch right here, yep,
+[09:57] they look like they're being pressed. We
+[09:58] can keep scrolling and now we get more
+[10:00] elements of layering because the
+[10:02] background is moving as well as the
+[10:03] actual keyboard. Now, this is something
+[10:05] I don't like. You can see there's like a
+[10:06] hard cut right here. So, on more of a
+[10:09] verification loop and on more of like a
+[10:11] iteration, it would probably we'd be
+[10:13] able to fix that, but this was a oneshot
+[10:14] prompt. Anyways, text comes down here.
+[10:16] Text comes through here. I like how it
+[10:18] comes in like that. Same thing. Now,
+[10:19] open it. The keyboard keeps coming down.
+[10:21] And now the keyboard like comes out,
+[10:23] right? So it literally like takes it
+[10:25] apart itself and we can see inside of
+[10:27] it. And then we have different colors to
+[10:29] pick from. The desk is still scrolling
+[10:31] down this whole time. The keyboard comes
+[10:32] back and now we could also have our call
+[10:34] to action down here. So all things
+[10:36] considered, one shot prompts these two
+[10:38] sites. I think that it gives you a
+[10:40] really good base to work from. So after
+[10:41] showing you guys those examples and
+[10:42] talking about all that, here's what I
+[10:44] think is the most important that you
+[10:45] need to actually be doing when you're
+[10:47] building websites. And all of these
+[10:48] things that I'm going to talk about are
+[10:49] baked into my scroll craft skill, which
+[10:51] you can grab, like I said, in my free
+[10:52] school community. So, the first thing
+[10:54] that I think is really important is to
+[10:55] actually have some sort of brand
+[10:57] guidelines, right? You want this to feel
+[10:58] consistent as far as, you know, your
+[11:01] logo, your colors, things like that.
+[11:03] From there, I think that you need to
+[11:04] give it your three Ps, which is what I
+[11:07] call sort of like the AI monetization
+[11:08] readiness assessment. Meaning, does your
+[11:10] business have a pain that you're
+[11:12] solving? Do you have a person that
+[11:14] you're solving that pain for? And do you
+[11:16] have a promise of how your product or
+[11:18] service is solving that pain? Promising
+[11:21] how it solves that pain for that
+[11:22] specific person. Now, from there, what I
+[11:23] think you need is you need some sort of
+[11:25] scroll um lock. And maybe lock wasn't
+[11:29] the right word, but you need
+[11:30] responsiveness. You need the user to
+[11:32] feel that they're controlling the site
+[11:34] because as they scroll, they're getting
+[11:36] some sort of feedback. And it doesn't
+[11:39] have to be anything super super flashy.
+[11:41] But like even just having the text go
+[11:43] like this, even just having, you know,
+[11:45] words appear. And I have to refresh this
+[11:47] because they already did. Even having
+[11:48] the words appear like this, just
+[11:50] something that subtle, I think makes the
+[11:52] website feel so much more premium
+[11:54] because some feedback I got on my last
+[11:55] video was like, "Oh, I hate these 3D
+[11:58] world where I scroll and it makes me fly
+[12:00] through." And I get that. I get that. It
+[12:01] depends on the business. It depends on
+[12:03] the three Ps like I just said. But I do
+[12:06] think that having a scroll element in
+[12:08] something is just really, really
+[12:10] important. Anyways, from there, I think
+[12:12] that you need inspiration. I think it's
+[12:14] very hard to go into a website design
+[12:16] project and just tell it what you want
+[12:19] and expect that it's going to come back
+[12:20] and not feel like AI slot because unless
+[12:22] you're using some sort of skill or
+[12:23] unless you're building off of some sort
+[12:24] of template, it's probably going to feel
+[12:26] that way because AI is AI. So,
+[12:28] inspiration can come in the form of
+[12:30] looking at other websites and finding
+[12:31] out what you like about it, like the
+[12:33] layering. I think the layering is super
+[12:34] important like that. Maybe it's the way
+[12:36] that the pricing section feels. Maybe
+[12:38] it's the way that the background is like
+[12:40] interactive and responsive to the mouse.
+[12:42] Whatever it is, you need at least a
+[12:43] little bit of inspiration. And what's
+[12:44] cool about something like 21st.dev is
+[12:47] you can get inspiration on your borders.
+[12:49] You can get inspiration on your actual
+[12:51] buttons. This one literally has like a
+[12:53] section for features. It has a section
+[12:54] for FAQs. You can get inspiration on how
+[12:56] you want every single like little
+[12:58] element of your site to look, even like
+[13:01] the text, all of the stuff. And then
+[13:03] that's basically part five, which is
+[13:04] understanding what components can you
+[13:07] grab that already exist somewhere that
+[13:08] you can use in order to make your site
+[13:10] feel more dynamic and feel more branded.
+[13:12] And then really the most important thing
+[13:13] at the end of the day besides actually
+[13:15] no number six, you need to make sure it
+[13:16] works on mobile too. It has to look good
+[13:18] on mobile. So many people are looking
+[13:19] you up on mobile, clicking links on
+[13:20] mobile. Make sure it's verified on
+[13:22] mobile. Claude can do that well.
+[13:24] Anyways, the last thing ties into that,
+[13:26] which is verification. Now, by this I
+[13:28] mean have it screenshot everything,
+[13:30] especially when you're doing scroll
+[13:31] animations. have it screenshot frame by
+[13:34] frame or pixel by pixel as it's, you
+[13:35] know, scrolling down. That way, it's
+[13:37] essentially watching a video of how you
+[13:39] will experience it. So, if you don't
+[13:40] have a verification loop, if it's not
+[13:41] taking screenshots and saying, "Oh, wow.
+[13:43] This looks bad. This looks out of
+[13:44] bounds. This color's off. Let me fix
+[13:46] that." Then what are you doing? Now, the
+[13:48] last part of this video was I was going
+[13:49] to run through a bunch of these other
+[13:50] experiments I did between Fable 5 and
+[13:52] Fable 5.1. I had it build a bunch of
+[13:54] different sites for me. As you can see,
+[13:56] I did like, you know, these perk form
+[13:58] sites right here. This one was Fable
+[14:00] 5.1. This one was Fable 5. This one was
+[14:02] Fable 5. This one was Fable 5.1. They
+[14:04] just felt very similar. Like none of
+[14:06] them clearly blew the other one out of
+[14:08] the water. They were very similar
+[14:09] because they had the same prompts, the
+[14:10] same assets, the same brand brand
+[14:12] guidelines, excuse me. And they use the
+[14:14] same skill. They all use Scrollcraft.
+[14:16] There was a few minor minor differences,
+[14:18] but not enough for me to be like, "Wow,
+[14:19] Fable 5.1 crushes Fable 5. Those seven
+[14:22] things that I just talked about are more
+[14:23] important than explicitly using which
+[14:25] model." But here's what's interesting.
+[14:27] Around the board, Fable 5.1 was actually
+[14:30] cheaper. Here's an example. Fable 5.1
+[14:32] was 1824. Fable 5 was 2022. Here's
+[14:35] another one where Fable 5.1 was 1452.
+[14:37] Fable 5 was 1467. So, that one's
+[14:40] actually pretty similar. Here's another
+[14:41] one where Fable 5.1 was 1283 and Fable 5
+[14:44] was 2164. Here's another one where Fable
+[14:47] 5.1 was 1118 and Fable 5 was 1737. So if
+[14:51] you guys remember in the release blog
+[14:53] they basically said enthropic said hey
+[14:54] you know Fable 5 is going to be 25% more
+[14:57] efficient which is cheaper on some like
+[14:59] you know knowledge work and and regular
+[15:00] type of work and then on heavy agentic
+[15:02] coding and multistep fable 5 might be as
+[15:05] much as 45% cheaper or sorry fable 5.1
+[15:08] might be as much as 45% cheaper than
+[15:10] fable 5 because of how much more
+[15:11] efficient it is with its tokens and so
+[15:13] far that actually is what I've seen out
+[15:15] of all these experiments and all the
+[15:16] knowledge work that I've done you know
+[15:18] all of the experiments and websites that
+[15:20] you guys saw me build but then also a
+[15:21] bunch of testing that I've done on my
+[15:22] own that I haven't showed you guys, I've
+[15:24] only used about 45% of my weekly Fable
+[15:26] limit, which yes, I know a lot of you
+[15:27] guys might think like, oh, that's a lot
+[15:28] for like, you know, 5 to 6 hours of
+[15:30] work, but I've blown through Fable
+[15:33] weekly limit in like 1 to two hours
+[15:35] before just using Fable 5, driving work,
+[15:38] building some things, building some
+[15:39] websites. I was actually really
+[15:40] surprised that I didn't crush through my
+[15:42] weekly Fable limit already, just based
+[15:44] on how much I've been sitting here using
+[15:45] it for the past multiple hours. So
+[15:47] anyways guys, I was going to break that
+[15:48] down more, but honestly I thought that
+[15:49] it would just get a little bit boring
+[15:50] and feel repetitive. So I just wanted to
+[15:52] bring you guys those results. Overall,
+[15:53] Fable 5.1 feels a little bit faster and
+[15:55] a little bit cheaper. But that is going
+[15:56] to do it for today. Don't forget to go
+[15:58] into my free school community linked in
+[15:59] the description if you want that scroll
+[16:00] craft skill because it's what I'm
+[16:02] constantly updating as I'm learning more
+[16:03] about AI design. So if you enjoyed the
+[16:06] video or you learn something new, please
+[16:07] give it a like. It helps me out a ton.
+[16:08] And as always, I appreciate you guys
+[16:09] making it to the end of the video and I
+[16:10] will see you all in the next one. Thanks
+[16:12] everyone.

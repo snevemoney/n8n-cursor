@@ -456,3 +456,11 @@ Games, sprites, procedural creatures, Vampire Survivors-in-C++: you like motion.
 These are not stealable machines. Watermark/jailbreak/NSFW are outside the hive. Postcard-to-sold-homes is cold spam — against no-send. Consciousness-as-entertainment is not a lane. OPSEC reads stay read-only.
 
 **Hold:** Kill table. Do not implement. Do not “for educational purposes” the steps into a skill.
+
+---
+
+## YT-20260902. Fable 5.1 kills AI website slop — Nate Herk `yt:FFWtxjvW2ts`
+
+Caption-only. Shows AIS community, Nate personal, Glido (Lemon clone-feel). Thesis: you cannot say “make it premium.” Need a living object (Fora layers, 21st.dev copy-prompt, godly.design, awards-by-niche, Motion Sites). One-shot after refs produced Ferna + Lowkey as a **base**; Lowkey hard cut proves verify. Seven principles: brand, Three Ps, scroll lock, inspiration, grab components, mobile, screenshot-verify scroll. Model version < the seven. Token $ UNVERIFIED. Fable = Claude family on-tape (Anthropic blog cited). Operate-never Claude/Skool.
+
+**Hold:** merge into cinematic-recipe + seedance-site + ingest-is-steps. Two-distinct-then-pick. Clone-feel Path A parked. No one-shot HTML this sitting. No Scrollcraft install.

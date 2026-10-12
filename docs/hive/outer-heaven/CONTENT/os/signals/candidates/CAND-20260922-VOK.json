@@ -1,0 +1,12 @@
+{
+  "id": "CAND-20260922-VOK",
+  "kind": "CANDIDATE_RULE",
+  "signal_id": "SIG-20260922-VOK",
+  "text": "Runtime verification should execute the actual application before a capability is called live.",
+  "authority": "UNTRUSTED_DATA",
+  "may_change_goal": false,
+  "experiment": "",
+  "result": "",
+  "status": "CANDIDATE",
+  "doctrine_write": false
+}

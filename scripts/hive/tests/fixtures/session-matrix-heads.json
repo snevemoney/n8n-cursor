@@ -1,0 +1,18 @@
+{
+  "cursor": [
+    {
+      "id": "11111111-aaaa-bbbb-cccc-222222222222",
+      "project": "n8n-cursor",
+      "mtime": "2026-08-29T18:00:00+00:00",
+      "ask": "can the memory of all chat session continue"
+    }
+  ],
+  "grok": [
+    {
+      "id": "33333333-dddd-eeee-ffff-444444444444",
+      "desk": "Forge",
+      "mtime": "2026-08-29T17:00:00+00:00",
+      "ask": "stand down — parent Cursor has the factory"
+    }
+  ]
+}
