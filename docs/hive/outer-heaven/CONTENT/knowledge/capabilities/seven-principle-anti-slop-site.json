@@ -1,0 +1,110 @@
+{
+  "capability_id": "CAP-FFWtxjvW2ts-seven-principle-anti-slop",
+  "name": "seven-principle-anti-slop-site",
+  "goal": "named living refs + brand + Three Ps → layered / scroll-locked wrap → two distinct variants → pick → screenshot-verify scroll + mobile",
+  "demonstrated_outcome": "Caption-only. Spoken: AIS / Nate personal / Glido demos, then Ferna + Lowkey one-shots as a base. Visual UNKNOWN. Hive implement not this sitting.",
+  "observed_workflow": [
+    "Load brand guidelines (logo, colors, consistency)",
+    "Fill Three Ps (pain, person, promise) from lane facts — do not invent",
+    "Lock scroll so the user feels control (feedback on scroll; 3D fly-through not required)",
+    "Name living inspiration (site / layers / competitor feel / component) — never “make it premium”",
+    "Grab existing components (21st.dev copy-prompt; godly.design / awards-by-niche / Motion Sites as libraries)",
+    "Ask for two distinctly different layered sites, then pick",
+    "Verify mobile",
+    "Screenshot the scroll frame-by-frame; fix hard cuts (hive: click-live-site + verify-after-browser)"
+  ],
+  "tools": [
+    "Fable / Claude + Scrollcraft (on-tape operate-never)",
+    "21st.dev / godly.design / awards / Motion Sites (read-only refs)",
+    "Higgsfield (already on Creative)",
+    "Cursor + Grok (hive remap)"
+  ],
+  "agent_abilities": [
+    "refuse premium-without-ref",
+    "write DESIGN block with N≥2 then pick",
+    "fail-the-build on hard cuts / buried CTA"
+  ],
+  "triggers": [
+    "avoid AI slop",
+    "premium website examples",
+    "clone competitor feel",
+    "one-shot website prompt"
+  ],
+  "state": "refs named or fail; two variants exist or fail; D7 ran or not shipped",
+  "guardrails": [
+    "send / pay / deploy / book / publish stay HITL",
+    "Claude / Fable / Skool Scrollcraft operate-never as stack",
+    "do not quote token $ or 45% cheaper as FACT",
+    "do not unpark Path A or invent Three Ps",
+    "one-shot is a base, not a ship"
+  ],
+  "reproduce": "Dry-run: name 1–3 living refs + WHY + layers. Do not one-shot HTML this sitting. Do not join Skool.",
+  "generalize": "Same pick-one family as ingest-is-steps DESIGN. Same fail-pass family as cinematic-recipe. Premium feel still routes to seedance-site / orb-scroll-demo.",
+  "improve": "Do not improve by installing Fable or Scrollcraft. Do not fill Last verified proof without a visitor URL.",
+  "atom_ids": [
+    "K-FFWtxjvW2ts-01",
+    "K-FFWtxjvW2ts-02",
+    "K-FFWtxjvW2ts-04",
+    "K-FFWtxjvW2ts-06"
+  ],
+  "source_video_id": "FFWtxjvW2ts",
+  "timestamp": "10:43-13:47",
+  "knowledge_type": "declared",
+  "evidence_status": "transcript-implied",
+  "status": "LEARNED",
+  "source_tape_id": "FFWtxjvW2ts",
+  "prerequisites": [
+    "named living ref or component or competitor URL",
+    "brand tokens (or Path C house tokens)",
+    "UNKNOWN — headed scroll screenshots",
+    "UNKNOWN — cursor-video-watch pixels"
+  ],
+  "decision_rules": [
+    "IF the brief only says professional/premium → refuse and ask for a ref",
+    "IF two distinct variants were not produced → fail DESIGN",
+    "IF a hard cut / out-of-bounds / color break is visible on scroll → do not ship; run D7",
+    "IF the ask is clone-competitor-feel and no named client → HOLD Path A"
+  ],
+  "failure_modes": [
+    "blank one-shot sold as done",
+    "3D fly-through as the only scroll lock",
+    "joining Skool to “get the skill”",
+    "implementing Ferna/Lowkey HTML from captions"
+  ],
+  "observed_tricks": [
+    "copy-prompt from 21st.dev",
+    "brand-onto-competitor feel",
+    "two distinct outputs then pick",
+    "screenshot the scroll"
+  ],
+  "system_primitive": "named-ref-then-seven-then-verify",
+  "skill_candidates": [
+    "cinematic-recipe",
+    "seedance-site",
+    "ingest-is-steps",
+    "click-live-site"
+  ],
+  "system_upgrade_candidates": [],
+  "last_verify": "2026-09-02 caption-only LEARNED. No implement. Watchdog GRADE not this sitting.",
+  "unknowns": {
+    "known": [
+      "packet + LEARNED + D1–D7 on disk"
+    ],
+    "observed": [
+      "spoken inspiration list: Fora layers, 21st.dev, godly.design, awards-by-niche, Motion Sites, Lemon/Glido"
+    ],
+    "unknown": [
+      "pixel quality of AIS / Ferna / Lowkey",
+      "exact Fora / Lemon / Motion Sites URLs",
+      "orb-scroll-demo live URL"
+    ],
+    "hypotheses": [
+      "orb-scroll-demo already satisfies D3 layering; cannot confirm without URL"
+    ],
+    "blocking": false
+  },
+  "blockers": [
+    "UNKNOWN — headed scroll verify",
+    "UNKNOWN — visitor-visible proof URL"
+  ]
+}

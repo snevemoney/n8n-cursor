@@ -44,8 +44,30 @@ AGENT_STATES = frozenset(
         "NEEDS_HUMAN",
         "COMPLETED",
         "FAILED",
+        "IMPLEMENTED",
+        "BEHAVIOR_PASS",
+        "RECEIPT_UNPROVEN",
+        "VERIFYING",
+        "PARTIAL",
     }
 )
+
+
+def agent_state_for_close(requested: str, decision: dict) -> str:
+    """Existing project derivation. This is not a copy of the job word.
+
+    A permitted COMPLETED is stored as COMPLETED. Any other hive decision is
+    stored only when that word is already in AGENT_STATES. DONE is not an
+    agent state, so a permitted job DONE leaves the project BLOCKED. No
+    child-job rollup exists in this file; one closed job does not clear BLOCKED.
+    """
+    if decision.get("permitted") and str(requested).upper() == "COMPLETED":
+        return "COMPLETED"
+    hold = str(decision.get("state") or "")
+    return hold if hold in AGENT_STATES else "BLOCKED"
+
+
+_CLOSE_AGENT_STATES = frozenset({"COMPLETED", "DONE", "PASS", "VERIFIED", "LIVE", "SHIPPED", "CLOSED"})
 
 
 def _load_should_run():
@@ -97,7 +119,31 @@ def validate_state(state: dict[str, Any]) -> list[str]:
     return errors
 
 
-def transition(project_id: str, lifecycle: str | None, agent_state: str | None, actor: str) -> dict[str, Any]:
+def _load_hive_state():
+    spec = importlib.util.spec_from_file_location(
+        "hive_state", Path(__file__).resolve().parent / "hive-state.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def transition(
+    project_id: str,
+    lifecycle: str | None,
+    agent_state: str | None,
+    actor: str,
+    *,
+    builder: str | None = None,
+    verifier: dict | None = None,
+    evidence: list | None = None,
+    environment: dict | None = None,
+    required: list | None = None,
+    session: dict | None = None,
+    receipt: dict | None = None,
+    state_path: Path | None = None,
+) -> dict[str, Any]:
     state = load_state(project_id)
     old = {"lifecycle": state.get("lifecycle"), "agent_state": state.get("agent_state")}
     if lifecycle:
@@ -105,9 +151,33 @@ def transition(project_id: str, lifecycle: str | None, agent_state: str | None, 
             raise SystemExit(f"Invalid lifecycle: {lifecycle}")
         state["lifecycle"] = lifecycle
     if agent_state:
-        if agent_state not in AGENT_STATES:
+        if agent_state not in AGENT_STATES and str(agent_state).upper() not in _CLOSE_AGENT_STATES:
             raise SystemExit(f"Invalid agent_state: {agent_state}")
-        state["agent_state"] = agent_state
+        if str(agent_state).upper() in _CLOSE_AGENT_STATES:
+            hive = _load_hive_state()
+            target = "CLOSED" if str(agent_state).upper() == "COMPLETED" else str(agent_state).upper()
+            decision = hive.transition_job(
+                project_id,
+                target,
+                actor=actor,
+                builder=builder or actor,
+                verifier=verifier,
+                evidence=evidence,
+                environment=environment,
+                required=required,
+                session=session,
+                receipt=receipt,
+                desk=actor,
+                state_path=state_path,
+            )
+            state["agent_state"] = agent_state_for_close(str(agent_state), decision)
+            state["terminal_guard"] = {
+                "permitted": decision["permitted"],
+                "state": decision["state"],
+                "reason": decision["reason"],
+            }
+        else:
+            state["agent_state"] = agent_state
     state["last_action"] = f"transition by {actor} at {datetime.now(timezone.utc).isoformat()}"
     save_state(project_id, state)
     emit = _load_event_bus()

@@ -1,0 +1,42 @@
+# click-live-site — Keyline anti-slop emit (:4841)
+# Localhost is the ship. Money parked. No deploy. No charge.
+id: keyline-4841
+name: Keyline :4841 — launch → amber CTA → type listen → proof no hard cut → reserve hash
+hard_step: publish
+host: cursor-ide-browser
+status: fail
+run: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/keyline-4841/RUN.md
+app:
+  url: http://127.0.0.1:4841/
+steps:
+  - id: launch-home
+    action: navigate
+    url: http://127.0.0.1:4841/
+    expected: SAMPLE label + H1 "Quiet, until you need it." + primary CTA "Reserve one" visible before scroll.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/keyline-4841/cards/01-launch-home.md
+  - id: assert-hero-cta
+    action: assertVisible
+    target: Reserve one
+    expected: Amber CTA in first viewport. Type field visible. No Stripe.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/keyline-4841/cards/02-assert-hero-cta.md
+  - id: type-listen
+    action: tapOn
+    target: TYPE ANYTHING
+    expected: Input present. Typing does not submit a hard step.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/keyline-4841/cards/03-type-listen.md
+  - id: tap-proof
+    action: tapOn
+    target: Proof
+    expected: #proof or "No hard cut" band in view. Same night palette.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/keyline-4841/cards/04-tap-proof.md
+  - id: scroll-proof
+    action: scroll
+    direction: down
+    expected: vs comparison visible. No jump-cut to a new world.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/keyline-4841/cards/05-scroll-proof.md
+  - id: tap-reserve
+    action: tapOn
+    target: Reserve one
+    expected: #reserve or #listen hash. No charge. publish not executed.
+    hard: true
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/keyline-4841/cards/06-tap-reserve.md

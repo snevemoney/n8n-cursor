@@ -28,9 +28,11 @@ description: >-
 - `ask-log.py` extracts operator asks into `ASKS.md`. Use that for the ask log; use this for the full sitting.
 - `session-bootstrap` starts a new dump. Not a transcript reader.
 
+**Law:** Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting. Open `#hive`. Refresh: `python3 scripts/hive/os/sync-sessions.py`. This CLI is the one-id Cursor deep read.
+
 ## When
 
-Evens says read my Cursor chats / local sessions / what we said in Cursor / give Grok my chats. A desk needs a prior sitting. Not a publish. Not a vault dump.
+Evens says read my Cursor chats / local sessions / what we said in Cursor / give Grok my chats. A desk needs a prior sitting. Not a publish. Not a vault dump. Do not ask Evens to paste.
 
 ## Card (required before the model)
 

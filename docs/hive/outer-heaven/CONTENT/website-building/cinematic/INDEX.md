@@ -1,6 +1,7 @@
 # Cinematic site pack
 
 - [PLAYBOOK.md](./PLAYBOOK.md) — **v2 locked 2026-08-13**: 3 refs→style bible, one-paragraph brief, house rules, fail-the-build, video hero (not WebGL). No GOD-MODE copy.
+- [TASTE-WINNER-ORB-SCROLL.md](./TASTE-WINNER-ORB-SCROLL.md) — **2026-09-02**: orb-scroll-demo (plate+scrub) feels more premium than cinematic-website.
 - [DEMO_BRIEF.md](./DEMO_BRIEF.md) — v1 AI Partner landing kickoff
 - [motion-ref-pack.md](./motion-ref-pack.md) — 3 refs (Inkwell, Streets of Punk, fromanother) **P0**
 - [brand-call.md](./brand-call.md) — dark premium; signature = light leak + film grain **P0**

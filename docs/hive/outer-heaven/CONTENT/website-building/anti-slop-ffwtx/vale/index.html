@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<!--
+  SAMPLE · Vale Desk · hive-os anti-slop emit from FFWtxjvW2ts stills.
+  Named ref: Fora four planes + AIS FAQ lock. Not AIS. Not for deploy.
+  Serve: http://127.0.0.1:4840/
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vale Desk — sit with people who already hit the wall</title>
+  <meta name="description" content="SAMPLE. Four named planes on scroll. Not a named client. Publish stays HITL.">
+  <style>
+    :root {
+      --ink: #07090e;
+      --ridge-far: #141c2c;
+      --ridge-mid: #24344f;
+      --mist: #8ea4b8;
+      --snow: #e8e4dc;
+      --cream: #f2efe6;
+      --pine: #0a120e;
+      --pine-mid: #15241c;
+      --dim: #6d7d8e;
+      --line: rgba(232, 228, 220, 0.12);
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; background: var(--ink); }
+    body {
+      background: var(--ink);
+      color: var(--snow);
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    .serif { font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; }
+    .kicker {
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 11px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--mist);
+    }
+    a { color: inherit; }
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 44px;
+      padding: 0 22px;
+      border-radius: 999px;
+      background: var(--cream);
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      border: 0;
+      cursor: pointer;
+    }
+    .cta.ghost {
+      background: transparent;
+      color: var(--snow);
+      border: 1px solid var(--line);
+    }
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 80;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      background: rgba(7, 9, 14, .72);
+      backdrop-filter: blur(16px) saturate(1.2);
+      border-bottom: 1px solid var(--line);
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; letter-spacing: .04em;
+    }
+    .mark {
+      width: 28px; height: 28px; border-radius: 8px;
+      border: 1px solid var(--line);
+      display: grid; place-items: center;
+      font-size: 11px; color: var(--cream);
+    }
+    .nav-links { display: flex; gap: 22px; font-size: 13px; color: var(--mist); }
+    .nav-links a { text-decoration: none; }
+    .nav-links a:hover { color: var(--snow); }
+    .hero {
+      position: relative;
+      min-height: 100svh;
+      display: grid;
+      place-items: end center;
+      padding: 120px 24px 72px;
+      overflow: hidden;
+    }
+    .layers { position: absolute; inset: 0; pointer-events: none; }
+    .layer { position: absolute; inset: 0; will-change: transform; }
+    .sky {
+      background:
+        radial-gradient(1200px 520px at 50% 18%, #2a3d5c 0%, transparent 62%),
+        linear-gradient(180deg, #0c1220 0%, #07090e 70%);
+    }
+    .ridge-far {
+      background:
+        radial-gradient(ellipse 90% 48% at 50% 86%, var(--ridge-far) 40%, transparent 41%);
+    }
+    .ridge-mid {
+      background:
+        radial-gradient(ellipse 110% 42% at 18% 92%, var(--ridge-mid) 36%, transparent 37%),
+        radial-gradient(ellipse 90% 38% at 78% 94%, #1c2b42 34%, transparent 35%);
+    }
+    .window-wrap {
+      display: grid;
+      place-items: center;
+      padding-top: 8vh;
+    }
+    .desk-window {
+      width: min(560px, 78vw);
+      border-radius: 16px;
+      background: rgba(10, 14, 22, .78);
+      border: 1px solid rgba(232, 228, 220, .16);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .45);
+      overflow: hidden;
+    }
+    .desk-chrome {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      color: var(--dim);
+      font-size: 11px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #3a4556; }
+    .desk-body { display: grid; grid-template-columns: 140px 1fr; min-height: 220px; }
+    .desk-side {
+      padding: 16px 12px;
+      border-right: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--mist);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .desk-side span.active { color: var(--cream); }
+    .desk-main { padding: 22px 20px; }
+    .desk-main h3 { font-size: 18px; margin-bottom: 6px; }
+    .desk-main p { color: var(--mist); font-size: 13px; margin-bottom: 16px; }
+    .pines {
+      background:
+        radial-gradient(ellipse 18% 46% at 8% 108%, var(--pine) 50%, transparent 51%),
+        radial-gradient(ellipse 16% 40% at 22% 110%, var(--pine-mid) 50%, transparent 51%),
+        radial-gradient(ellipse 20% 52% at 50% 112%, var(--pine) 50%, transparent 51%),
+        radial-gradient(ellipse 17% 44% at 78% 110%, var(--pine-mid) 50%, transparent 51%),
+        radial-gradient(ellipse 22% 56% at 96% 114%, var(--pine) 50%, transparent 51%);
+    }
+    .hero-copy {
+      position: relative;
+      z-index: 4;
+      text-align: center;
+      max-width: 720px;
+    }
+    .hero-copy h1 {
+      font-size: clamp(2.2rem, 6vw, 4.4rem);
+      line-height: 1.05;
+      letter-spacing: -.03em;
+      font-weight: 500;
+      margin: 14px 0 16px;
+      color: var(--snow);
+    }
+    .hero-copy .lede {
+      color: var(--mist);
+      max-width: 460px;
+      margin: 0 auto 22px;
+      font-size: 15px;
+    }
+    .hero-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .sample {
+      position: absolute;
+      top: 76px;
+      left: 28px;
+      z-index: 5;
+      font-size: 10px;
+      letter-spacing: .14em;
+      color: var(--dim);
+      text-transform: uppercase;
+    }
+    section { position: relative; z-index: 3; padding: 88px 28px; }
+    .wrap { max-width: 1080px; margin: 0 auto; }
+    .split {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 1.4fr;
+      gap: 40px;
+      align-items: start;
+    }
+    h2 {
+      font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+      letter-spacing: -.03em;
+      font-weight: 500;
+      margin: 10px 0 12px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .card {
+      background: rgba(16, 22, 34, .86);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px 16px 20px;
+      min-height: 132px;
+      transform: translateY(var(--lift, 0px));
+      transition: transform .4s var(--ease), border-color .2s;
+    }
+    .card:hover { border-color: rgba(242, 239, 230, .28); }
+    .card .n { font-size: 11px; color: var(--mist); margin-bottom: 18px; }
+    .card h3 { font-size: 16px; font-weight: 550; }
+    .faq-lock {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+    .faq-cats {
+      position: sticky;
+      top: 88px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .faq-cats button {
+      text-align: left;
+      background: transparent;
+      color: var(--mist);
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .faq-cats button[aria-selected="true"] {
+      color: var(--snow);
+      background: rgba(255,255,255,.04);
+      border-color: var(--line);
+    }
+    .faq-panel {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .faq-item + .faq-item { border-top: 1px solid var(--line); }
+    .faq-item button {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: var(--snow);
+      border: 0;
+      padding: 18px 20px;
+      font: inherit;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+    }
+    .faq-item p {
+      display: none;
+      padding: 0 20px 18px;
+      color: var(--mist);
+      font-size: 14px;
+    }
+    .faq-item[data-open="true"] p { display: block; }
+    .end {
+      min-height: 72vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      overflow: hidden;
+    }
+    .end .layers { opacity: .95; }
+    .end-copy { position: relative; z-index: 4; max-width: 560px; padding: 0 20px 8vh; }
+    footer {
+      padding: 28px;
+      color: var(--dim);
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--line);
+    }
+    @media (max-width: 760px) {
+      .nav-links { display: none; }
+      .desk-body { grid-template-columns: 1fr; }
+      .desk-side { display: none; }
+      .split, .faq-lock, .cards { grid-template-columns: 1fr; }
+      .faq-cats { position: static; flex-direction: row; overflow: auto; }
+      .hero { padding-bottom: 48px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .layer, .card { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sample">SAMPLE · not AIS · not for deploy · 127.0.0.1:4840</div>
+  <nav>
+    <a class="brand" href="#top"><span class="mark">VD</span><span>Vale Desk</span></a>
+    <div class="nav-links">
+      <a href="#desks">Desks</a>
+      <a href="#faq">Answers</a>
+      <a href="#join">Join</a>
+    </div>
+    <a class="cta" href="#join">Join the next sitting</a>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="layers" aria-hidden="true">
+      <div class="layer sky" data-rate="0.02"></div>
+      <div class="layer ridge-far" data-rate="0.15"></div>
+      <div class="layer ridge-mid" data-rate="0.35"></div>
+      <div class="layer window-wrap" data-rate="-0.18">
+        <div class="desk-window">
+          <div class="desk-chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span> classroom</div>
+          <div class="desk-body">
+            <div class="desk-side">
+              <span class="active">Classroom</span>
+              <span>Sittings</span>
+              <span>Members</span>
+              <span>Hold-outs</span>
+            </div>
+            <div class="desk-main">
+              <h3 class="serif">Vale Desk</h3>
+              <p>Twelve sittings. Someone already hit this wall.</p>
+              <a class="cta" href="#join">Join now</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="layer pines" data-rate="0.55"></div>
+    </div>
+    <div class="hero-copy">
+      <div class="kicker">Four planes · scroll owns them</div>
+      <h1 class="serif">sit with people who already hit the wall.</h1>
+      <p class="lede">Ridge, window, pines. The picture moves because you moved. Free to show up. SAMPLE copy — not a live join.</p>
+      <div class="hero-actions">
+        <a class="cta" href="#join">Join the next sitting</a>
+        <a class="cta ghost" href="#desks">See the desks</a>
+      </div>
+    </div>
+  </header>
+
+  <section id="desks">
+    <div class="wrap split">
+      <div>
+        <div class="kicker">Desks</div>
+        <h2 class="serif">Cards that stack as you stay.</h2>
+        <p style="color:var(--mist);max-width:320px">Named after the AIS card-stack still (`02`). Ours is Vale, not their courses.</p>
+      </div>
+      <div class="cards" id="stack">
+        <article class="card"><div class="n">01</div><h3>Start here</h3></article>
+        <article class="card"><div class="n">02</div><h3>Desk hours</h3></article>
+        <article class="card"><div class="n">03</div><h3>Build tape</h3></article>
+        <article class="card"><div class="n">04</div><h3>First emit</h3></article>
+        <article class="card"><div class="n">05</div><h3>Watchdog</h3></article>
+        <article class="card"><div class="n">06</div><h3>Hold</h3></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="kicker">FAQ lock</div>
+      <h2 class="serif">Answers to the questions that come up most.</h2>
+      <div class="faq-lock" style="margin-top:28px">
+        <div class="faq-cats" role="tablist">
+          <button type="button" role="tab" aria-selected="true" data-cat="general">General</button>
+          <button type="button" role="tab" aria-selected="false" data-cat="sittings">Sittings</button>
+          <button type="button" role="tab" aria-selected="false" data-cat="access">Access</button>
+        </div>
+        <div class="faq-panel" id="faq-panel">
+          <div class="faq-item" data-cat="general" data-open="true">
+            <button type="button">What is Vale Desk?</button>
+            <p>A SAMPLE community landing. Four named planes (far ridge, mid ridge, classroom window, pines) move at different scroll rates. Not AI Automation Society.</p>
+          </div>
+          <div class="faq-item" data-cat="general">
+            <button type="button">Is this a live join?</button>
+            <p>No. Join is a hash on this page. Publish / book stays HITL.</p>
+          </div>
+          <div class="faq-item" data-cat="sittings">
+            <button type="button">What happens in a sitting?</button>
+            <p>SAMPLE: one bite, one done-check, Watchdog after. We do not invent a member count.</p>
+          </div>
+          <div class="faq-item" data-cat="sittings">
+            <button type="button">Do I need a new host?</button>
+            <p>No. This page is local 127.0.0.1. A new host is usually a dodge.</p>
+          </div>
+          <div class="faq-item" data-cat="access">
+            <button type="button">Can I deploy this?</button>
+            <p>Not from this sitting. Preview ≠ prod.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="end" id="join">
+    <div class="layers" aria-hidden="true">
+      <div class="layer sky" data-rate="0.04"></div>
+      <div class="layer ridge-far" data-rate="0.12"></div>
+      <div class="layer pines" data-rate="0.4"></div>
+    </div>
+    <div class="end-copy">
+      <div class="kicker">Same planes come back</div>
+      <h2 class="serif">Start where the last sitting left the wall.</h2>
+      <p style="color:var(--mist);margin:12px 0 22px">CTA color is cream. Nothing else may wear it. Book stays you.</p>
+      <a class="cta" href="#top">Join the next sitting</a>
+    </div>
+  </section>
+
+  <footer>
+    <span>Vale Desk · SAMPLE · refs: Fora layers + AIS FAQ lock + 21st.dev scroll shape</span>
+    <span>Publish HITL · cousin: Keyline :4841</span>
+  </footer>
+
+  <script>
+    (function () {
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var layers = [].slice.call(document.querySelectorAll(".layer[data-rate]"));
+      var cards = [].slice.call(document.querySelectorAll("#stack .card"));
+      function scrub() {
+        if (reduce) return;
+        var y = window.scrollY || 0;
+        layers.forEach(function (el) {
+          var r = parseFloat(el.getAttribute("data-rate") || "0");
+          el.style.transform = "translate3d(0," + (y * r) + "px,0)";
+        });
+        var stack = document.getElementById("stack");
+        if (stack) {
+          var rect = stack.getBoundingClientRect();
+          var t = 1 - Math.min(1, Math.max(0, rect.top / (window.innerHeight * 0.7)));
+          cards.forEach(function (c, i) {
+            c.style.setProperty("--lift", (-t * (i + 1) * 10) + "px");
+          });
+        }
+      }
+      window.addEventListener("scroll", scrub, { passive: true });
+      scrub();
+
+      var cats = [].slice.call(document.querySelectorAll(".faq-cats button"));
+      var items = [].slice.call(document.querySelectorAll(".faq-item"));
+      function show(cat) {
+        cats.forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-cat") === cat ? "true" : "false"); });
+        items.forEach(function (it) {
+          var on = it.getAttribute("data-cat") === cat;
+          it.style.display = on ? "block" : "none";
+          if (!on) it.setAttribute("data-open", "false");
+        });
+        var first = items.filter(function (it) { return it.getAttribute("data-cat") === cat; })[0];
+        if (first) first.setAttribute("data-open", "true");
+      }
+      cats.forEach(function (b) {
+        b.addEventListener("click", function () { show(b.getAttribute("data-cat")); });
+      });
+      items.forEach(function (it) {
+        it.querySelector("button").addEventListener("click", function () {
+          var open = it.getAttribute("data-open") === "true";
+          items.forEach(function (x) { if (x.getAttribute("data-cat") === it.getAttribute("data-cat")) x.setAttribute("data-open", "false"); });
+          it.setAttribute("data-open", open ? "false" : "true");
+        });
+      });
+      show("general");
+    })();
+  </script>
+</body>
+</html>

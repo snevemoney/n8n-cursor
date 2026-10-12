@@ -36,11 +36,15 @@ while IFS= read -r file; do
     
     ALLOWED=false
     for path in "${PATHS[@]}"; do
-        # Remove trailing /** and ** from path for pattern matching
-        clean_path=$(echo "$path" | sed 's|/\*\*$||' | sed 's|\*\*$||')
-        
-        # Check if file starts with the allowed path
-        if [[ "$file" == "$clean_path"* ]]; then
+        # Globs keep prefix matching. A bare path matches that file only,
+        # so root package.json and pnpm-lock.yaml do not allow other root files.
+        if [[ "$path" == *'*'* ]]; then
+            clean_path=$(echo "$path" | sed 's|/\*\*$||' | sed 's|\*\*$||')
+            if [[ "$file" == "$clean_path"* ]]; then
+                ALLOWED=true
+                break
+            fi
+        elif [[ "$file" == "$path" ]]; then
             ALLOWED=true
             break
         fi

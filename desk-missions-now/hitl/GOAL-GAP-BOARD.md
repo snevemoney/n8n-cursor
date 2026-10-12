@@ -19,7 +19,7 @@ Yellow orphans = **8** (named in `memories.md`). Continue.
 | Gap | On disk | Daily move | Last OBSERVED (2026-08-25) | Stop |
 |-----|---------|------------|----------------------------|------|
 | **`/workspace` missing** | Grok remotion trees MISSING on the Mac. SIGNAL_INDEX `/workspace` transcripts here = **0**. | TRIAGE any `/workspace` path. Copy stays Evens. | Still missing. Do not invent packets. | Never fabricate HOW THEY BUILT |
-| **16 steal/caption leftovers** | Ledger `steal_gap` **16**. 1803 is a count, not a to-do. | Prefer steal_gap + packet + `full.txt` + ACTION TRACE **on this checkout**. Else TRIAGE. | TRAIN-2 named: `X80ljdCPM_U` (packet committed on the Cloud-host fix). | Do not flip `COVERAGE_LEDGER.json` |
+| **16 steal/caption leftovers** | Ledger `steal_gap` **16**. 1803 is a count, not a to-do. | Prefer steal_gap + packet + `full.txt` + ACTION TRACE **on this checkout**. Else TRIAGE. | TRAIN-3 named: `2J3uX8iRNng` (packet + ACTION TRACE on this checkout). | Do not flip `COVERAGE_LEDGER.json` |
 | **Consultant dark** | Default five skips Consultant. | Wake only if TASK is consult-vs-build / doctor-vs-pharmacist / audit-first. | Still cold. Not a bug. | Do not “fix dark” by waking 17 |
 | **Hold-outs Watchdog-first** | Watchdog wrote `watchdog/hold-outs/X80ljdCPM_U.md` (on main). Hold-outs for `2J3uX8iRNng` live on [PR 89](https://github.com/snevemoney/n8n-cursor/pull/89), **ABSENT** this `origin/main` checkout. | Watchdog writes hold-outs before Forge. GRADE only in a sitting that did not write those hold-outs. | **OBSERVED 2026-08-29:** Forge attempt `desk-missions-now/forge/SIGNAL-TRAIN-2J3uX8iRNng.md` (OBSERVED only). Hold-outs unread. **WAITING** Watchdog GRADE sitting. | Builder does not fill GRADE |
 | **Retrieve default-off** | `scripts/hive/os/signal-retrieve.py` on `main` after merge. | Retrieve only if TASK matches a domain → ≤3 refs. No match → NONE. | Default-off still the law. | Never dump SIGNAL_INDEX |
@@ -31,7 +31,7 @@ Yellow orphans = **8** (named in `memories.md`). Continue.
 **TRIAGE decoy:** `karpathy-wiki-nate-herk` — no ACTION TRACE heading.  
 **Retired invent:** `factory-os-train-plane` — PR 47. Do not merge. Do not hold-out.
 
-**Last OBSERVED (2026-08-25 · Watchdog GRADE):** `desk-missions-now/watchdog/X80ljdCPM_U-GRADE.md` = **pass** vs hold-outs + ACTION TRACE. Leftovers named (skill `.md` missing on main · retrieve holes · caption UNKNOWN). Next sitting = Researcher pick or HITL leftover. Do not start TRAIN-3 unless Evens names it. Yellow orphans = 8, continue.
+**Last OBSERVED (2026-08-28 · Watchdog hold-outs):** `desk-missions-now/watchdog/hold-outs/2J3uX8iRNng.md` filed. Packet TRAIN (`full.txt` 6825 words + ACTION TRACE). Retrieve THEME `eval-harness` ≤3 refs. No Forge attempt. No GRADE. Next sitting = Forge OBSERVED only. Yellow orphans = 8, continue.
 
 **Last OBSERVED (2026-08-29 · Forge TRAIN Stage 3):** Attempt filed `desk-missions-now/forge/SIGNAL-TRAIN-2J3uX8iRNng.md` (OBSERVED only). Packet TRAIN (`full.txt` 6825 words + ACTION TRACE). Retrieve THEME `eval-harness` ≤3 refs. Hold-outs exist on PR 89, unread, not rewritten. No GRADE. Next = Watchdog GRADE sitting. Yellow orphans = 8, continue.
 

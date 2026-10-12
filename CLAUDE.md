@@ -1,6 +1,12 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting.
+
+Open Slack workspace **Hive** → `#hive` (`C0BTH1TMFC5`). Then read [`docs/MATRIX.md`](docs/MATRIX.md) and `docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`. Read all four folders under `CONTENT/os/sessions/`. Exact SSOT message: `docs/hive/outer-heaven/CONTENT/os/sessions/SLACK.md`.
+
+Vault INDEX: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/CONTENT/os/sessions/INDEX.md`
+
+This file also provides guidance when working with code in this repository.
 
 ## Project Overview
 

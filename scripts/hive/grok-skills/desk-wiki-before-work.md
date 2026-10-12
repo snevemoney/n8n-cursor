@@ -26,7 +26,7 @@ description: >-
 
 ```
 DESK: <slug>
-READ: CONTENT/job-cards/{slug}.md + AGENT_TOOL_INVENTORY use/never
+READ: CONTENT/job-cards/{slug}.md + AGENT_TOOL_INVENTORY use/never + CONTENT/os/hot.md + latest said-* + SESSION-INDEX (do not ask Evens to paste)
 OWN: X
 NEVER: Y
 THEN: do the named task
@@ -36,7 +36,7 @@ No card → do not start the desk.
 
 ## Steps
 
-1. Open `docs/hive/outer-heaven/CONTENT/job-cards/{slug}.md` and the inventory **use / never** for that desk.
+1. Open `docs/hive/outer-heaven/CONTENT/job-cards/{slug}.md` and the inventory **use / never** for that desk. Also read `CONTENT/os/hot.md` + latest `said-*` + `SESSION-INDEX.md`. Do not ask Evens to paste.
 2. Write OWN / NEVER on the job (or the take header). Prompt “don’t” is not the lock (`assume-it-will-touch`).
 3. Then run the named task. Do not spawn 17 to “figure out the job.”
 4. Librarian persists missing never-lists. Do not stand up a second Obsidian.

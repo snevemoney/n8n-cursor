@@ -244,6 +244,21 @@ const scorpion_obsidian_context: ToolHandler = async () => {
   return status
 }
 
+const TERMINAL_STATUS = new Set([
+  'DONE',
+  'PASS',
+  'VERIFIED',
+  'LIVE',
+  'SHIPPED',
+  'CLOSED',
+])
+
+function isTerminalClaim(status: string): boolean {
+  const raw = status.trim()
+  const upper = raw.toUpperCase()
+  return TERMINAL_STATUS.has(upper) || raw.toLowerCase() === 'done'
+}
+
 const scorpion_register_outcome: ToolHandler = async (params) => {
   const missionId = String(params.missionId || params.correlationId || '').trim()
   const summary = String(params.summary || '').trim()
@@ -260,12 +275,24 @@ const scorpion_register_outcome: ToolHandler = async (params) => {
       { status: 400 },
     )
   }
+  const requested = String(params.status || 'IMPLEMENTED')
+  if (isTerminalClaim(requested)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        code: 'TERMINAL_PROOF_REQUIRED',
+        error: 'Terminal status is only accepted from hive-state.transition_job',
+        hold: 'IMPLEMENTED',
+      },
+      { status: 400 },
+    )
+  }
   const body: Record<string, unknown> = {
     correlationId: missionId,
     jobType: String(params.jobType || 'handoff.register'),
     goal: String(params.goal || summary),
     source: String(params.source || 'telegram'),
-    status: String(params.status || 'done'),
+    status: requested,
     registerTo: target,
     summary,
   }
@@ -454,7 +481,7 @@ const n8n_trigger_catalog_webhook: ToolHandler = async (params) => {
         jobType: 'n8n.webhook.trigger',
         goal: `Triggered catalog workflow ${entry.name}`,
         source: 'telegram',
-        status: 'done',
+        status: 'IMPLEMENTED',
         registerTo: entry.registerTo === 'ce' ? 'ce' : entry.registerTo === 'both' ? 'both' : 'scorpion',
         summary: `n8n catalog trigger ${entry.name}`,
         metadata: { workflow: entry.name, url },
@@ -564,7 +591,7 @@ const hive_send_report: ToolHandler = async (params) => {
       jobType: 'report.notify',
       goal: 'Outer Heaven hive golden-path report (Big Boss)',
       source: 'telegram',
-      status: 'done',
+      status: 'IMPLEMENTED',
       registerTo: 'scorpion',
       summary: `Telegram report ${gp.passCount ?? '?'}/${gp.total ?? '?'} golden paths`,
       metadata: { topicId, agentId: params.agentId ?? 'bigboss' },

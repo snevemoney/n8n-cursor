@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<!--
+  SAMPLE · Keyline · hive-os anti-slop emit from FFWtxjvW2ts stills.
+  Named ref: Lowkey listen field + hard-cut fail. Not Lowkey. Not for deploy.
+  Serve: http://127.0.0.1:4841/
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Keyline — quiet, until you need it</title>
+  <meta name="description" content="SAMPLE. Type and the object answers. No hard cut. Publish stays HITL.">
+  <style>
+    :root {
+      --night: #0b0b0d;
+      --panel: #141418;
+      --steel: #9aa0a8;
+      --paper: #f3efe6;
+      --amber: #e08a3a;
+      --lamp: #f0c27a;
+      --line: rgba(243, 239, 230, .12);
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; background: var(--night); }
+    body {
+      background: var(--night);
+      color: var(--paper);
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    .kicker {
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 11px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--steel);
+    }
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 44px;
+      padding: 0 22px;
+      border-radius: 999px;
+      background: var(--amber);
+      color: #1a0f06;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      border: 0;
+    }
+    .cta.ghost {
+      background: transparent;
+      color: var(--paper);
+      border: 1px solid var(--line);
+    }
+    nav {
+      position: fixed;
+      top: 18px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 80;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      padding: 0 10px 0 14px;
+      background: rgba(20, 20, 24, .78);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      backdrop-filter: blur(16px);
+    }
+    .mark {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: #1c1c22;
+      border: 1px solid var(--line);
+      display: grid; place-items: center;
+      font-size: 10px; letter-spacing: .08em;
+    }
+    nav a { color: var(--steel); text-decoration: none; font-size: 13px; }
+    nav a:hover { color: var(--paper); }
+    .sample {
+      position: absolute;
+      top: 84px;
+      left: 24px;
+      z-index: 5;
+      font-size: 10px;
+      letter-spacing: .14em;
+      color: #5c6168;
+      text-transform: uppercase;
+    }
+    .hero {
+      min-height: 100svh;
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 32px;
+      align-items: center;
+      padding: 120px 48px 64px;
+      background:
+        radial-gradient(ellipse 50% 40% at 82% 28%, rgba(240, 194, 122, .18), transparent 55%),
+        radial-gradient(ellipse 40% 30% at 10% 80%, rgba(224, 138, 58, .08), transparent 50%),
+        linear-gradient(180deg, #101014 0%, #0b0b0d 70%);
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 4.2rem);
+      letter-spacing: -.04em;
+      line-height: 1.02;
+      font-weight: 560;
+      margin: 12px 0 14px;
+    }
+    .lede { color: var(--steel); max-width: 420px; margin-bottom: 22px; }
+    .listen label {
+      display: block;
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 11px;
+      letter-spacing: .12em;
+      color: var(--steel);
+      margin-bottom: 8px;
+    }
+    .listen input {
+      width: min(100%, 360px);
+      height: 48px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #111114;
+      color: var(--paper);
+      padding: 0 14px;
+      font: inherit;
+      outline: none;
+    }
+    .listen input:focus { border-color: var(--amber); }
+    .hero-actions { display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+    .board {
+      position: relative;
+      min-height: 340px;
+      display: grid;
+      place-items: center;
+    }
+    .kbd {
+      width: min(100%, 560px);
+      background: #16161b;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 18px 16px 20px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    .row { display: flex; justify-content: center; gap: 6px; margin-bottom: 6px; }
+    .key {
+      min-width: 36px;
+      height: 36px;
+      border-radius: 7px;
+      background: #22222a;
+      color: #c9cdd3;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      border: 1px solid #2c2c34;
+      transition: background .12s var(--ease), color .12s, border-color .12s;
+    }
+    .key.wide { min-width: 64px; }
+    .key.enter {
+      min-width: 72px;
+      background: #3a2412;
+      color: var(--amber);
+      border-color: #6a3d16;
+    }
+    .key.on {
+      background: var(--amber);
+      color: #1a0f06;
+      border-color: var(--amber);
+    }
+    .key.enter.on { box-shadow: 0 0 18px rgba(224, 138, 58, .45); }
+    .lamp {
+      position: absolute;
+      right: 8%;
+      top: 4%;
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(240,194,122,.45), transparent 70%);
+      pointer-events: none;
+    }
+    section { padding: 88px 48px; }
+    .wrap { max-width: 1040px; margin: 0 auto; }
+    h2 { font-size: clamp(1.8rem, 3vw, 2.5rem); letter-spacing: -.03em; margin: 8px 0 14px; }
+    .vs {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: stretch;
+      margin-top: 28px;
+    }
+    .vs article {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      min-height: 180px;
+    }
+    .vs .win { border-color: rgba(224, 138, 58, .45); }
+    .vs header { display: flex; justify-content: space-between; color: var(--steel); font-size: 12px; margin-bottom: 14px; }
+    .pill {
+      width: 42px; height: 42px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: var(--amber); color: #1a0f06;
+      align-self: center; font-size: 12px; font-weight: 700;
+    }
+    .proof { color: var(--steel); font-size: 14px; }
+    .end {
+      text-align: center;
+      padding-bottom: 120px;
+      background: linear-gradient(180deg, #0b0b0d, #12110f 70%);
+    }
+    footer {
+      padding: 24px 48px 36px;
+      color: #5c6168;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--line);
+    }
+    @media (max-width: 860px) {
+      .hero, .vs { grid-template-columns: 1fr; }
+      .pill { display: none; }
+      nav { width: calc(100% - 24px); justify-content: space-between; }
+      .hero, section, footer { padding-left: 20px; padding-right: 20px; }
+      .key { min-width: 28px; height: 30px; font-size: 10px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .key { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sample">SAMPLE · not Lowkey · not for deploy · 127.0.0.1:4841</div>
+  <nav>
+    <span class="mark">LK</span>
+    <a href="#listen">Listen</a>
+    <a href="#proof">Proof</a>
+    <a class="cta" href="#reserve">Reserve one</a>
+  </nav>
+
+  <header class="hero" id="listen">
+    <div>
+      <div class="kicker">Low-profile mechanical · SAMPLE</div>
+      <h1>Quiet, until you need it.</h1>
+      <p class="lede">A 65% board, eleven millimetres. Linear switches, PBT caps, one amber Enter. Type anything — the keyboard below is listening.</p>
+      <div class="listen">
+        <label for="typebox">TYPE ANYTHING. THE KEYBOARD BELOW IS LISTENING.</label>
+        <input id="typebox" maxlength="48" autocomplete="off" placeholder="hello" value="hello">
+      </div>
+      <div class="hero-actions">
+        <a class="cta" href="#reserve">Reserve one</a>
+        <a class="cta ghost" href="#proof">See the cut we refused</a>
+      </div>
+    </div>
+    <div class="board" aria-hidden="true">
+      <div class="lamp"></div>
+      <div class="kbd" id="kbd">
+        <div class="row">
+          <span class="key" data-k="q">Q</span><span class="key" data-k="w">W</span><span class="key" data-k="e">E</span>
+          <span class="key" data-k="r">R</span><span class="key" data-k="t">T</span><span class="key" data-k="y">Y</span>
+          <span class="key" data-k="u">U</span><span class="key" data-k="i">I</span><span class="key" data-k="o">O</span>
+          <span class="key" data-k="p">P</span>
+        </div>
+        <div class="row">
+          <span class="key" data-k="a">A</span><span class="key" data-k="s">S</span><span class="key" data-k="d">D</span>
+          <span class="key" data-k="f">F</span><span class="key" data-k="g">G</span><span class="key" data-k="h">H</span>
+          <span class="key" data-k="j">J</span><span class="key" data-k="k">K</span><span class="key" data-k="l">L</span>
+          <span class="key enter" data-k="Enter">↵</span>
+        </div>
+        <div class="row">
+          <span class="key wide" data-k="Shift">⇧</span>
+          <span class="key" data-k="z">Z</span><span class="key" data-k="x">X</span><span class="key" data-k="c">C</span>
+          <span class="key" data-k="v">V</span><span class="key" data-k="b">B</span><span class="key" data-k="n">N</span>
+          <span class="key" data-k="m">M</span>
+          <span class="key wide" data-k=" ">␣</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="proof">
+    <div class="wrap">
+      <div class="kicker">No hard cut</div>
+      <h2>The desk you have, not a jump-cut showroom.</h2>
+      <p class="proof">Tape still `20-lowkey-hard-cut.jpg` is the leftover we will not ship. This band eases out of the hero. Same night, same lamp, same amber.</p>
+      <div class="vs">
+        <article class="win">
+          <header><span>KEYLINE</span><span>128 WPM · SAMPLE</span></header>
+          <p>Hold and talk. Ums cleaned. Your words land four times faster than a 40-wpm hunt.</p>
+        </article>
+        <div class="pill">vs</div>
+        <article>
+          <header><span>KEYBOARD</span><span>32 WPM · SAMPLE</span></header>
+          <p>You think at 200. You type at 40. The object is late to the sentence.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="end" id="reserve">
+    <div class="kicker">Amber is the only ask</div>
+    <h2>Reserve one when you mean it.</h2>
+    <p class="proof" style="max-width:420px;margin:0 auto 22px">This button does not charge. Publish / pay stays Evens. Unique color: amber. Nothing else may wear it except the Enter key.</p>
+    <a class="cta" href="#listen">Reserve one</a>
+  </section>
+
+  <footer>
+    <span>Keyline · SAMPLE · refs: Lowkey listen + hard-cut fail + Lemon product-in-use shape</span>
+    <span>Publish HITL · cousin: Vale :4840</span>
+  </footer>
+
+  <script>
+    (function () {
+      var box = document.getElementById("typebox");
+      var keys = [].slice.call(document.querySelectorAll(".key"));
+      function light() {
+        var last = (box.value.slice(-1) || "").toLowerCase();
+        keys.forEach(function (k) {
+          var tok = (k.getAttribute("data-k") || "").toLowerCase();
+          k.classList.toggle("on", tok && tok === last);
+        });
+      }
+      box.addEventListener("input", light);
+      box.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          keys.forEach(function (k) { k.classList.toggle("on", k.getAttribute("data-k") === "Enter"); });
+        }
+      });
+      light();
+    })();
+  </script>
+</body>
+</html>

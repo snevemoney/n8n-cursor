@@ -65,7 +65,7 @@ should_alert() {
 
 register_outcome() {
   local summary="$1"
-  local status="${2:-done}"
+  local status="${2:-IMPLEMENTED}"
   [[ -z "${HIVE_MACHINE_TOKEN:-}" ]] && return 0
   curl -sS --max-time 12 -X POST "${BASE}/scorpion/api/hive/register" \
     -H "Authorization: Bearer ${HIVE_MACHINE_TOKEN}" \
@@ -257,7 +257,7 @@ summary="watchdog checks_ok=${checks_ok} issues=${issues} healed=${healed} disk=
 log "SUMMARY ${summary}"
 
 if [[ "$issues" -eq 0 ]]; then
-  register_outcome "$summary" "done"
+  register_outcome "$summary" "IMPLEMENTED"
   emit_telemetry "INFO" "INFO" "$summary"
   exit 0
 fi

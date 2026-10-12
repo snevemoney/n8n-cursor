@@ -39,10 +39,43 @@
         "properties": {
           "id": { "type": "string" },
           "name": { "type": "string" },
-          "status": { "type": "string", "enum": ["working", "yellow", "done"] },
+          "status": {
+            "type": "string",
+            "enum": [
+              "working",
+              "yellow",
+              "done",
+              "IMPLEMENTED",
+              "BEHAVIOR_PASS",
+              "RECEIPT_UNPROVEN",
+              "VERIFYING",
+              "BLOCKED",
+              "PARTIAL",
+              "DONE",
+              "PASS",
+              "VERIFIED",
+              "LIVE",
+              "SHIPPED",
+              "CLOSED"
+            ]
+          },
           "desk": { "type": "string" },
           "updated": { "type": "string" },
-          "note": { "type": "string" }
+          "note": { "type": "string" },
+          "owner": { "type": "string" },
+          "expected_artifact": { "type": "string" },
+          "wake_condition": { "type": "string" },
+          "stall_timeout": { "type": "string" },
+          "builder": { "type": "string" },
+          "proofPermit": { "type": "string" },
+          "terminal_rejected": { "type": "string" },
+          "closes_work": { "type": "boolean" },
+          "required_evidence": { "type": "array", "items": { "type": "string" } },
+          "evidence": { "type": "array" },
+          "verifier": { "type": "object" },
+          "environment": { "type": "object" },
+          "session": { "type": "object" },
+          "receipt": { "type": "object" }
         }
       }
     },
@@ -81,6 +114,31 @@
         "roadblocks": { "type": "string" },
         "promotion": { "type": "string" },
         "updated": { "type": "string" }
+      }
+    },
+    "post_fix_cohort": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["armed", "adopted", "compare_to_historical_floors", "historical_floors", "counters"],
+      "properties": {
+        "armed": { "type": "boolean" },
+        "adopted": { "type": "boolean" },
+        "compare_to_historical_floors": { "type": "boolean" },
+        "historical_floors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "unsupported_completion_sessions",
+            "artifact_only_rows",
+            "divergence_instances"
+          ],
+          "properties": {
+            "unsupported_completion_sessions": { "type": "integer", "const": 39 },
+            "artifact_only_rows": { "type": "integer", "const": 34 },
+            "divergence_instances": { "type": "integer", "const": 18 }
+          }
+        },
+        "counters": { "type": "object" }
       }
     },
     "log": {
