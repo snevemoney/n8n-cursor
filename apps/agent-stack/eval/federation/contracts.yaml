@@ -1,0 +1,39 @@
+bite_9a:
+  name: Session Federation
+  verbs: [sessions.search, sessions.read]
+  pass_means: Jarvis can find and cite a real sitting
+  pass_does_not_mean: Jarvis can run that platform
+bite_9b:
+  name: Harness Federation
+  verbs: [probe, job.start, job.status, job.continue, job.cancel, result]
+  supported_today: [cursor_task, grok_desks_in_cursor_chat]
+  unavailable:
+    chatgpt_job_start: stack law — no ChatGPT desktop/Work install
+    claude_code_worker: stack law — no Claude Code CLI install
+    codex_worker: stack law — no Codex CLI install
+  never: mark 9B PASS from 9A session-read
+external_session_required:
+  - platform
+  - surface
+  - native_session_id
+  - machine
+  - workspace
+  - project
+  - branch
+  - worktree
+  - source_mtime
+  - indexed_at
+  - stale_after
+  - freshness_status
+  - content_fingerprint
+  - continuation_available
+  - continuation_mode
+  - native_continuation_ref
+  - parent_session
+  - handoff_from
+  - handoff_to
+  - provenance
+continuation_mode: [native_session, new_handoff, unavailable]
+freshness_status: [fresh, stale, unknown]
+authority_chain: [requested_by, routed_by, executed_by, evidence_from, verified_by]
+handoff_char_cap: 4000

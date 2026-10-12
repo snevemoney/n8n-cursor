@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -26,9 +27,34 @@ IDX = _load("agent_stack_school_index_test", INDEX)
 
 
 class SchoolIndexTest(unittest.TestCase):
+    def setUp(self) -> None:
+        # Catalog documents grow; test the original partial-harvest contract on fixed data.
+        temp = tempfile.TemporaryDirectory(prefix="school-contract-")
+        self.addCleanup(temp.cleanup)
+        root = Path(temp.name)
+        grok, cursor = root / "grok", root / "cursor"
+        grok.mkdir(); cursor.mkdir()
+        courses = ["BUS203", *[f"BUS{n}" for n in range(100, 141)]]
+        rows = []
+        for course in courses:
+            slug = "mktg-value-stp-mix-plan-checklists" if course == "BUS203" else f"course-{course.lower()}"
+            (grok / f"{slug}.md").write_text(f"# Fixture ({course})\n**Course:** {course}\n## When\nFixture topic\n")
+            rows.append(f"| {course} | `{slug}` | topic | CS406 PRDV217 |")
+        triggers = root / "saylor-skill-triggers.md"
+        triggers.write_text("Count: **42**\n| course | slug | when | never |\n" + "\n".join(rows))
+        complete = root / "saylor-catalog-complete.md"
+        complete.write_text("Unique courses **164**\nCOMM311 ESLHub\n")
+        remaining = root / "remaining.md"
+        remaining.write_text("| course | slug |\n| BUS612 | `missing-course` |\n")
+        empty = root / "empty.md"; empty.write_text("")
+        patcher = mock.patch.multiple(IDX, ROOT=root, GROK_SKILLS=grok, CURSOR_SKILLS=cursor,
+            TRIGGERS=triggers, CATALOG_COMPLETE=complete, REMAINING=remaining,
+            LIVE_BEATS=empty, PARALLEL=empty)
+        patcher.start(); self.addCleanup(patcher.stop)
+
     def test_claim_164_harvest_file_is_not_164(self) -> None:
-        claim_text = COMPLETE.read_text(encoding="utf-8")
-        harvest_text = TRIGGERS.read_text(encoding="utf-8")
+        claim_text = IDX.CATALOG_COMPLETE.read_text(encoding="utf-8")
+        harvest_text = IDX.TRIGGERS.read_text(encoding="utf-8")
         self.assertIn("Unique courses **164**", claim_text)
         self.assertIn("Count: **42**", harvest_text)
         snap = IDX.build_snapshot()
@@ -42,6 +68,14 @@ class SchoolIndexTest(unittest.TestCase):
             snap["named_courses"] + snap["unnamed_enrolled_delta"],
             164,
         )
+
+    def test_complete_harvest_does_not_claim_partial_count(self) -> None:
+        IDX.TRIGGERS.write_text(IDX.TRIGGERS.read_text().replace("Count: **42**", "Count: **164**"))
+        snap = IDX.build_snapshot()
+        self.assertEqual(snap["harvest_table_count"], 164)
+        self.assertIn("Count: **164**", snap["note"])
+        self.assertNotIn("not 164 rows", snap["note"])
+        self.assertEqual(snap["on_disk"], 42)
 
     def test_on_disk_matches_course_tagged_files(self) -> None:
         live = IDX.scan()

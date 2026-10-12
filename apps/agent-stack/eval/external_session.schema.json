@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jarvis-external-session",
+  "title": "ExternalSession",
+  "type": "object",
+  "required": [
+    "platform",
+    "surface",
+    "native_session_id",
+    "title",
+    "source_path",
+    "source_mtime",
+    "indexed_at",
+    "freshness_status",
+    "continuation_available",
+    "continuation_mode",
+    "provenance"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "platform": {
+      "type": "string",
+      "enum": ["jarvis", "cursor", "grok", "claude", "claude-code", "claude-web", "chatgpt", "codex"]
+    },
+    "surface": {
+      "type": "string",
+      "enum": ["desktop", "web", "cli", "mobile", "remote", "file"]
+    },
+    "native_session_id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string" },
+    "created_at": { "type": ["string", "null"] },
+    "updated_at": { "type": ["string", "null"] },
+    "machine": { "type": ["string", "null"] },
+    "workspace": { "type": ["string", "null"] },
+    "project": { "type": ["string", "null"] },
+    "branch": { "type": ["string", "null"] },
+    "worktree": { "type": ["string", "null"] },
+    "source_path": { "type": "string" },
+    "native_ref": { "type": ["string", "null"] },
+    "source_mtime": { "type": ["string", "null"] },
+    "indexed_at": { "type": ["string", "null"] },
+    "stale_after": { "type": ["string", "null"] },
+    "freshness_status": { "type": "string", "enum": ["fresh", "stale", "unknown"] },
+    "content_fingerprint": { "type": ["string", "null"] },
+    "last_user_ask": { "type": ["string", "null"] },
+    "short_summary": { "type": "string" },
+    "continuation_available": { "type": "boolean" },
+    "continuation_mode": {
+      "type": "string",
+      "enum": ["native_session", "new_handoff", "unavailable"]
+    },
+    "native_continuation_ref": { "type": ["string", "null"] },
+    "parent_session": { "type": ["string", "null"] },
+    "handoff_from": { "type": ["string", "null"] },
+    "handoff_to": { "type": ["string", "null"] },
+    "provenance": { "type": "string" }
+  }
+}

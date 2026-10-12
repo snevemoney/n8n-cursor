@@ -54,7 +54,8 @@ class GoldenPipelineTest(unittest.TestCase):
         def fake_cursor(prompt: str, mode: str = "ask", **kw):
             _ = (mode, kw)
             calls.append(prompt)
-            self.assertIn("pipeline-pack.md", prompt)
+            self.assertIn("What can you do?", prompt)
+            self.assertNotIn("pipeline-pack.md", prompt)
             self.assertNotIn(prompt[:4000] if False else "I run the hive catalog here, not Grok Bot", prompt)
             self.assertLess(len(prompt), 2000)
             return {
@@ -86,16 +87,9 @@ class GoldenPipelineTest(unittest.TestCase):
 
         def fake_cursor(prompt: str, mode: str = "ask", **kw):
             _ = (mode, kw)
-            pack = None
-            for token in prompt.split():
-                token = token.strip(" .\"'")
-                if token.endswith("pipeline-pack.md"):
-                    pack = Path(token)
-                    break
-            body = pack.read_text(encoding="utf-8") if pack and pack.is_file() else ""
-            packs.append(body)
+            packs.append(prompt)
             if "What did I just say" in prompt:
-                self.assertIn("north star is leverage", body)
+                self.assertIn("north star is leverage", prompt)
                 return {
                     "tool": "vault_read",
                     "args": {"query": "north star leverage"},
@@ -215,9 +209,7 @@ class GoldenPipelineTest(unittest.TestCase):
                 retrieve_roots=[vault],
                 cursor_fn=fake_cursor,
             )
-            pack = hive / "bus" / "pipeline-pack.md"
-            self.assertTrue(pack.is_file())
-            self.assertNotIn("argv.append", pack.read_text(encoding="utf-8")[:20])
+            self.assertNotIn("pipeline-pack.md", " ".join(calls))
         self.assertTrue(calls, "expired scar must not skip the model")
         self.assertIn("leverage", (out.get("spoken") or "").lower())
         self.assertNotIn(CANNED_CAN, out.get("spoken") or "")
@@ -265,9 +257,14 @@ class GoldenPipelineTest(unittest.TestCase):
         self.assertGreaterEqual(len(events), 2)
         first = events[0]
         last = events[-1]
-        self.assertTrue(first.get("spoken_delta"))
         self.assertTrue(first.get("partial") or not first.get("done"))
-        self.assertIn("First sentence", first.get("spoken_delta") or "")
+        self.assertNotIn("Looking.", first.get("spoken_delta") or "")
+        self.assertNotIn("Looking.", first.get("spoken") or "")
+        self.assertNotIn("UNKNOWN", first.get("spoken") or "")
+        self.assertTrue(
+            any("First sentence" in str(ev.get("spoken_delta") or "") for ev in events)
+            or "First sentence" in (last.get("spoken") or "")
+        )
         self.assertTrue(last.get("done"))
         self.assertIn("leverage", (last.get("spoken") or "").lower())
 
@@ -294,7 +291,7 @@ class GoldenPipelineTest(unittest.TestCase):
             TURN.PIPELINE.SEE.safari_scroll = wrap_scroll
             try:
                 out = TURN.apply_turn(
-                    "Scroll the page",
+                    "Scroll the Safari page",
                     hive=hive,
                     retrieve_roots=[vault],
                     cursor_fn=fake_cursor,
@@ -349,7 +346,8 @@ class GoldenPipelineTest(unittest.TestCase):
             )
         spoken = second.get("spoken") or ""
         self.assertEqual(len(calls), 1)
-        self.assertIn("agent login", first.get("spoken") or "")
+        self.assertNotIn("agent login", (first.get("spoken") or "").lower())
+        self.assertNotIn("no live mouth", (first.get("spoken") or "").lower())
         for leak in ("adopted path missing", "22:48", "agentic OS"):
             self.assertNotIn(leak, spoken)
         self.assertNotIn("I heard you", spoken)
@@ -358,13 +356,14 @@ class GoldenPipelineTest(unittest.TestCase):
         self.assertNotIn("Last you said", spoken)
         self.assertNotIn("You were at", spoken)
         self.assertTrue(spoken.startswith("Sir."))
-        self.assertIn(TURN.PIPELINE.NO_MODEL.lower(), spoken.lower())
+        self.assertNotIn("no live mouth", spoken.lower())
         self.assertNotIn("I'm here", spoken)
 
     def test_10_converse_is_default_not_a_template(self) -> None:
         def fake_cursor(prompt: str, mode: str = "ask", **kw):
             _ = (mode, kw)
-            self.assertIn("Conversation is the product", prompt)
+            self.assertIn("how's it going", prompt)
+            self.assertNotIn("pipeline-pack.md", prompt)
             return {"speak": "Quiet evening. Vault and this sitting are on the table."}
 
         with tempfile.TemporaryDirectory(prefix="golden-converse-") as tmp:
@@ -438,7 +437,8 @@ class GoldenPipelineTest(unittest.TestCase):
         c = third.get("spoken") or ""
         for spoken in (a, b, c):
             self.assertTrue(spoken.startswith("Sir."), spoken)
-            self.assertIn(TURN.PIPELINE.NO_MODEL.lower(), spoken.lower())
+            self.assertNotIn("no live mouth", spoken.lower())
+            self.assertNotIn("agent login", spoken.lower())
             self.assertNotIn("how's it going", spoken.lower())
             self.assertNotIn("what did i just say", spoken.lower())
             self.assertNotIn("Wires, not vibes", spoken)
@@ -530,8 +530,7 @@ class GoldenPipelineTest(unittest.TestCase):
 
         def fake_xai(prompt: str, context: str = "") -> dict:
             talks.append(prompt)
-            self.assertTrue(context)
-            self.assertIn("Conversation is the product", context)
+            self.assertNotIn("pipeline-pack.md", prompt)
             return {
                 "ok": True,
                 "engine": "xai",

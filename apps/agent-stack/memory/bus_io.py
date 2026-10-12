@@ -174,6 +174,33 @@ def act_if_current(
     return result if applied["ok"] else None
 
 
+def commit_response(hive: Path, gen: int | None, apply, *, terminal: bool) -> dict | None:
+    """One terminal response owner per generation, under the existing bus lock.
+
+    This fences response writers only. Mic/watch observations retain their
+    existing act_if_current door and cannot reopen terminal delivery.
+    """
+    accepted = {"ok": False}
+
+    def commit(bus: dict) -> dict:
+        if bus.get("terminal_response_gen") == gen:
+            return bus
+        target = dict(bus)
+        if terminal:
+            for key in ("task_verified", "task_verified_gen", "browser_mission_id", "browser_mission_result"):
+                target.pop(key, None)
+        out = apply(target)
+        if not isinstance(out, dict):
+            return bus
+        if terminal:
+            out["terminal_response_gen"] = int(gen)
+        accepted["ok"] = True
+        return out
+
+    result = act_if_current(hive, gen, commit)
+    return result if accepted["ok"] else None
+
+
 def watch_stop_disarmed(bus: dict | None) -> bool:
     """True when Stop disarmed Watch and Evens has not pressed Watch again."""
     data = bus if isinstance(bus, dict) else {}
@@ -199,7 +226,26 @@ def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
     return bus_gen(mutate_bus(hive, apply))
 
 
-def cancel_turn_scoped(hive: Path, gen: int, spoken: str | None = None) -> bool:
+DARK_LINE = "The talk wire is dark this turn."
+CLIENT_DISCONNECTED = "Client disconnected. Turn cancelled."
+
+
+def produced_model_line(text: str) -> bool:
+    """A sentence already stored for this generation. Not the dark wire, not a lone Sir."""
+    body = " ".join((text or "").split())
+    if not body or body in {DARK_LINE, CLIENT_DISCONNECTED}:
+        return False
+    if body.lower() in {"sir.", "sir", "sir,"}:
+        return False
+    return True
+
+
+def cancel_turn_scoped(
+    hive: Path,
+    gen: int,
+    spoken: str | None = None,
+    request: str | None = None,
+) -> bool:
     """Cancel only while `gen` is still the running generation.
 
     A stale request's watchdog must never kill a newer turn: if the bus has
@@ -208,6 +254,14 @@ def cancel_turn_scoped(hive: Path, gen: int, spoken: str | None = None) -> bool:
     `spoken` is the line the pane may paint. A user stop leaves it empty so
     the line stays "Stopped. Standing by." A wall timeout passes the dark
     wire instead, so a slow model is not recorded as a stop.
+
+    A dark wall does not replace a model sentence this same request already
+    published. `request` is that utterance. When it matches the bus, the
+    published line stays and this returns False.
+
+    The fence stays on this generation. `begin_turn` already opened it.
+    Advancing `turn_gen` here would leave the bus on a generation with no
+    archive block. `cancel_gen` is what stops a late writer.
     """
     try:
         token = int(gen)
@@ -222,9 +276,21 @@ def cancel_turn_scoped(hive: Path, gen: int, spoken: str | None = None) -> bool:
         running = bus_gen(bus)
         if running != token or bus_cancel_gen(bus) >= running:
             return bus
+        asked = (request or "").strip()
+        if (
+            line in {DARK_LINE, CLIENT_DISCONNECTED}
+            and asked
+            and str(bus.get("utterance") or "").strip() == asked
+            and produced_model_line(str(bus.get("spoken") or ""))
+        ):
+            return bus
         hit["ok"] = True
         bus["cancel_gen"] = running
-        bus["turn_gen"] = running + 1
+        # Cancellation is this generation's terminal delivery, not the prior
+        # turn's status. The same lock fences late completion writers.
+        bus["terminal_response_gen"] = running
+        bus["response_ok"] = line == "Stopped. Standing by."
+        bus["response_ok_gen"] = running
         bus["phase"] = "idle"
         bus["job_status"] = "done"
         bus["spoken"] = line
@@ -264,3 +330,41 @@ def cancel_turn(hive: Path) -> int:
         return bus
 
     return bus_gen(mutate_bus(hive, apply))
+
+
+def commit_mission_response(hive: Path, mission_id: str, completion_id: str, apply) -> dict | None:
+    """Canonical terminal owner for queued background results, under the bus lock.
+
+    Reserve a fresh delivery generation only while conversation is idle. This
+    does not overwrite an active or already committed conversation generation.
+    The mission completion ID is deduplicated independently from turn IDs.
+    """
+    accepted = {"ok": False}
+    def commit(bus: dict) -> dict:
+        delivered = dict(bus.get("mission_terminal_commits") or {})
+        if mission_id in delivered or bus.get("job_status") == "working" or bus.get("mission_delivery_pending"):
+            return bus
+        if bus.get("phase") not in {None, "idle", "speak", "listen"}:
+            return bus
+        gen = bus_gen(bus) + 1
+        out = apply(dict(bus), gen)
+        if not isinstance(out, dict):
+            return bus
+        out["turn_gen"] = gen
+        out["terminal_response_gen"] = gen
+        delivered[mission_id] = {"completion_id": completion_id, "gen": gen}
+        out["mission_terminal_commits"] = delivered
+        out["mission_delivery_pending"] = {"mission_id": mission_id, "gen": gen, "spoken": out.get("spoken", ""), "verified": bool(out.get("task_verified"))}
+        accepted["ok"] = True
+        return out
+    result = mutate_bus(hive, commit)
+    return result if accepted["ok"] else None
+
+
+def acknowledge_mission_response(hive: Path, mission_id: str, gen: int) -> dict:
+    def ack(bus):
+        pending = bus.get("mission_delivery_pending") or {}
+        if pending.get("mission_id") == mission_id and pending.get("gen") == gen:
+            bus.pop("mission_delivery_pending", None)
+        return bus
+    return mutate_bus(hive, ack)

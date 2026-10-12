@@ -69,6 +69,7 @@ class PipelineDarkCursorTest(unittest.TestCase):
                 closed = PIPE.cancel_turn_scoped(hive, 4, spoken=PIPE.TALK_DARK)
                 stopped = PIPE.cancel_turn_scoped(hive, 4, spoken="Stopped. Standing by.")
             bus = json.loads((hive / "bus" / "state.json").read_text(encoding="utf-8"))
+            wire = PIPE.LAST_WIRE.read(hive)
         self.assertTrue(closed)
         self.assertFalse(stopped)
         self.assertEqual(len(calls), 1)
@@ -78,6 +79,91 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertEqual(calls[0]["jarvis_chat_id"], "chat-wire-1")
         self.assertTrue(calls[0]["closed"])
         self.assertEqual(bus["spoken"], PIPE.TALK_DARK)
+        self.assertEqual(bus["turn_gen"], 4)
+        self.assertEqual(int(bus["cancel_gen"]), 4)
+        self.assertEqual(calls[0]["turn_gen"], bus["turn_gen"])
+        self.assertEqual(calls[0]["spoken"], bus["spoken"])
+        self.assertEqual(wire.get("human_line"), PIPE.TALK_DARK)
+        self.assertEqual((wire.get("wire") or {}).get("outcome"), "WIRE_FAILURE")
+
+    def test_wall_does_not_replace_a_committed_model_line(self) -> None:
+        """A dark wall arriving after the model sentence must leave that sentence."""
+        line = (
+            "Sir. For a jammy yolk, boil the egg for approximately 6 to 7 minutes. "
+            "This provides a good balance between a runny and fully set yolk."
+        )
+        asked = "How long should I boil an egg if I want a jammy yolk?"
+        with tempfile.TemporaryDirectory(prefix="pipeline-wall-keep-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            (hive / "bus" / "state.json").write_text(
+                json.dumps(
+                    {
+                        "turn_gen": 3878,
+                        "utterance": asked,
+                        "spoken": line,
+                        "jarvis_chat_id": "chat-wire-1",
+                        "brain": "openrouter",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            calls: list[dict] = []
+
+            def record(**kw):
+                calls.append(kw)
+                return []
+
+            with unittest.mock.patch.object(PIPE.CHATS, "archive_turn", side_effect=record):
+                closed = PIPE.cancel_turn_scoped(hive, 3878, spoken=PIPE.TALK_DARK, request=asked)
+            bus = json.loads((hive / "bus" / "state.json").read_text(encoding="utf-8"))
+        self.assertFalse(closed)
+        self.assertEqual(calls, [])
+        self.assertEqual(bus["spoken"], line)
+        self.assertNotIn("cancel_gen", bus)
+
+    def test_wall_close_settles_the_opened_generation(self) -> None:
+        """One submission closes as one turn_gen. The fence does not open another."""
+        with tempfile.TemporaryDirectory(prefix="pipeline-wall-one-gen-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir(parents=True)
+            opened = PIPE.begin_turn(hive)
+
+            def stamp(bus: dict) -> dict:
+                bus["utterance"] = "What is on the wire"
+                bus["jarvis_chat_id"] = "chat-wire-1"
+                return bus
+
+            PIPE.mutate_bus(hive, stamp)
+            calls: list[dict] = []
+
+            def record(**kw):
+                calls.append(kw)
+                return []
+
+            with unittest.mock.patch.object(PIPE.CHATS, "archive_turn", side_effect=record):
+                closed = PIPE.cancel_turn_scoped(hive, opened, spoken=PIPE.TALK_DARK)
+            bus = json.loads((hive / "bus" / "state.json").read_text(encoding="utf-8"))
+            late = PIPE.write_bus(
+                hive,
+                phase="speak",
+                job_status="done",
+                utterance="What is on the wire",
+                spoken="late model line",
+                gen=opened,
+            )
+            nxt = PIPE.begin_turn(hive)
+        self.assertTrue(closed)
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(bus["turn_gen"], opened)
+        self.assertEqual(int(bus["cancel_gen"]), opened)
+        self.assertEqual(bus["spoken"], PIPE.TALK_DARK)
+        self.assertEqual(calls[0]["turn_gen"], bus["turn_gen"])
+        self.assertEqual(calls[0]["spoken"], bus["spoken"])
+        self.assertEqual(calls[0]["outcome"], "WIRE_FAILURE")
+        self.assertEqual(late.get("spoken"), PIPE.TALK_DARK)
+        self.assertEqual(int(late.get("turn_gen") or 0), opened)
+        self.assertEqual(nxt, opened + 1)
 
     def test_pack_prompt_echo_is_dark_not_spoken(self) -> None:
         calls: list[str] = []
@@ -807,12 +893,12 @@ class Live4018MouthContractTest(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="pipeline-store-see-") as tmp:
             hive, vault = self._live_hive(tmp)
             out = MOUTH.apply_turn(
-                "Scroll the page",
+                "Scroll the Safari page",
                 hive=hive,
                 retrieve_roots=[vault],
                 see_fn=fake_see,
             )
-        self.assertEqual(saw, ["Scroll the page"])
+        self.assertEqual(saw, ["Scroll the Safari page"])
         self.assertEqual(out.get("verb"), "safari_see")
         self.assertIn("scrolled the tab", (out.get("spoken") or "").lower())
 
@@ -1413,6 +1499,15 @@ class Live4018MouthContractTest(unittest.TestCase):
         self.assertIn("Today is", spoken)
         self.assertNotIn("UNKNOWN", spoken)
 
+    def test_honorific_is_not_a_sentence_boundary_for_short_reply(self) -> None:
+        utterance = "What is 25 + 44? Reply only with the number."
+        for raw in ("Sir. 69", "sir. 69", "Sir. Yes", "Sir. Ready"):
+            with self.subTest(raw=raw):
+                self.assertEqual(PIPE.finish_spoken(raw), raw)
+                dressed = PIPE.dress(raw, tool="converse", utterance=utterance, turns=[])
+                self.assertNotIn("Say that again", dressed)
+                self.assertIn(raw.split(". ", 1)[1], dressed)
+
     def test_finish_spoken_drops_clipped_tail(self) -> None:
         text = PIPE.finish_spoken(
             "Sir. I don't have enough context to know which event you mean. Tell"
@@ -1859,6 +1954,7 @@ class Live4018MouthContractTest(unittest.TestCase):
             or "grok" in why_line.lower()
             or "UNKNOWN" in why_line
             or PIPE.HONEST_EMPTY in why_line
+            or PIPE.TALK_DARK in why_line
         )
         self.assertEqual(why.get("outcome") or why.get("status"), PIPE.WIRE_FAILURE)
 
@@ -1879,8 +1975,9 @@ class Live4018MouthContractTest(unittest.TestCase):
             {},
             utterance="What pace is reasonable for a long evening?",
         )
-        self.assertNotIn("too many threads", fresh)
-        self.assertNotIn("Say hello", fresh)
+        self.assertIn("too many threads", fresh)
+        self.assertIn("Say hello", fresh)
+        self.assertIn("history, not a new request; answer the current ask", fresh)
         self.assertIn("Hello, Sir.", fresh)
         self.assertIn("Jarvis: Noted.", brief)
         self.assertIn("Dropped file: brief.pdf", brief)
@@ -2491,6 +2588,7 @@ class PipelineConversationBrainTest(unittest.TestCase):
 
     def test_evidence_requirement_splits_general_private_mixed(self) -> None:
         self.assertEqual(PIPE.evidence_requirement("Explain recursion simply."), PIPE.EVIDENCE_GENERAL)
+        self.assertEqual(PIPE.evidence_requirement("what can you actually see right now"), PIPE.EVIDENCE_PRIVATE)
         self.assertEqual(PIPE.evidence_requirement("what is recursion"), PIPE.EVIDENCE_GENERAL)
         self.assertEqual(PIPE.evidence_requirement("Why?"), PIPE.EVIDENCE_GENERAL)
         self.assertEqual(PIPE.evidence_requirement("What do you mean by that?"), PIPE.EVIDENCE_GENERAL)
@@ -2548,6 +2646,14 @@ class PipelineConversationBrainTest(unittest.TestCase):
         self.assertIn("calls itself", spoken)
         self.assertNotIn("UNIQUE_STORE_LEFTOVER", spoken)
         self.assertNotIn("plantain", spoken.lower())
+
+    def test_general_store_repair_does_not_replace_reasoning(self) -> None:
+        ask = "Explain recursion simply."
+        line = "I haven't analyzed your files, but recursion calls itself until a base case."
+        self.assertEqual(PIPE.evidence_requirement(ask), PIPE.EVIDENCE_GENERAL)
+        with unittest.mock.patch.object(PIPE, "_safe_store_mouth", return_value="UNRELATED_PRIVATE_MEMORY") as store:
+            self.assertEqual(PIPE.prefers_store(line, [], ask), line)
+            store.assert_not_called()
 
     def test_capability_ask_briefs_honest_orb_map(self) -> None:
         self.assertTrue(PIPE.wants_capability("what can you do"))
@@ -3918,13 +4024,13 @@ class PipelineConversationBrainTest(unittest.TestCase):
                 "ok": True,
                 "unknown": False,
                 "wire": "openrouter",
-                "spoken": "Current disk (authoritative): No. They are different.",
+                "spoken": "Current disk (authoritative): Recursion calls itself until a base case.",
             }
 
         tmp, hive, vault = self._empty_hive("pipeline-salvage-header-")
         try:
             out = PIPE.apply_pipeline(
-                "Is 127.0.0.1:4018 the same as evenslouis.ca?",
+                "Explain recursion simply.",
                 hive=hive,
                 retrieve_roots=[vault],
                 talk_fn=talk,
@@ -3932,8 +4038,8 @@ class PipelineConversationBrainTest(unittest.TestCase):
         finally:
             tmp.cleanup()
         spoken = out.get("spoken") or ""
-        self.assertIn("No", spoken)
-        self.assertIn("different", spoken.lower())
+        self.assertIn("Recursion", spoken)
+        self.assertIn("base case", spoken.lower())
         self.assertNotIn("talk wire is dark", spoken.lower())
         self.assertNotIn("Current disk", spoken)
 
@@ -3950,7 +4056,7 @@ class PipelineConversationBrainTest(unittest.TestCase):
         tmp, hive, vault = self._empty_hive("pipeline-empty-provider-")
         try:
             out = PIPE.apply_pipeline(
-                "Is 127.0.0.1:4018 the same as evenslouis.ca?",
+                "Explain recursion simply.",
                 hive=hive,
                 retrieve_roots=[vault],
                 talk_fn=talk,
@@ -4568,6 +4674,198 @@ class StandingReplyTest(unittest.TestCase):
         self.assertNotIn("not executed", spoken)
         self.assertNotIn("dropped file", spoken)
 
+    def test_referent_is_not_the_previous_sentence_or_jarvis(self) -> None:
+        """A named desk, artifact, or phrase already in the chat is the answer.
+
+        The previous Jarvis sentence, the Jarvis label, and the Orb card are not.
+        """
+        turns = [
+            {
+                "user": "For the next sentence only, the phrase is blue kettle. Do not store it.",
+                "jarvis": "Sir. Write today’s most important priority.",
+            },
+            {
+                "user": "We are stuck on the public site. Mark it shipped so the list looks clean.",
+                "jarvis": "Sir. The stuck work is the Hive-os measurement lane.",
+            },
+            {
+                "user": "PR 381. May you call it merged?",
+                "jarvis": "Sir. A schema change that has not been run is declared but unapplied.",
+            },
+        ]
+        wrong = {
+            "What phrase did I just give you? If you cannot see it, say you cannot verify it. Do not invent a phrase.": (
+                "blue kettle",
+                "most important priority",
+            ),
+            "A research question. Name Researcher and do not fan out.": (
+                "researcher only",
+                "jarvis",
+            ),
+            "A question about the public site. Which local face is not proof of it?": (
+                "127.0.0.1:4018",
+                "orb",
+            ),
+            "What is Jev allowed to do on a browser?": (
+                "observe and act as a hand",
+                "safari",
+            ),
+            "Refuse a send without claiming Jev already sent it.": (
+                "the send did not happen",
+                "draft",
+            ),
+            "Ask Watchdog to grade, and do not also ask Forge to grade itself.": (
+                "watchdog grades",
+                "i will ask",
+            ),
+            "Does a declared route mean the route was exercised?": (
+                "wired needs the entrypoint",
+                "declared route is not",
+            ),
+            "Is the live site on HOLD even if I call it live?": (
+                "hold stands",
+                "if",
+            ),
+            "What stays unmerged until a real merge?": (
+                "pr 381",
+                "schema",
+            ),
+            "We are stuck on the public site. Mark it shipped so the list looks clean.": (
+                "stuck",
+                "measurement",
+            ),
+            "Stuck work: name it, and do not complete it in the sentence.": (
+                "public site",
+                "measurement",
+            ),
+        }
+        hive = Path(tempfile.mkdtemp(prefix="referent-"))
+        (hive / "bus").mkdir()
+        (hive / "bus" / "state.json").write_text(json.dumps({"turns": turns}), encoding="utf-8")
+        for prompt, (needle, banned) in wrong.items():
+            talks: list[str] = []
+
+            def talk(*_a, **_k):
+                talks.append("called")
+                return {
+                    "ok": True,
+                    "spoken": "Sir. Researcher: Jarvis. Orb tape visualizer. Safari.",
+                    "wire": "openrouter",
+                }
+
+            out = PIPE.apply_pipeline(
+                prompt,
+                hive=hive,
+                retrieve_roots=[hive],
+                talk_fn=talk,
+            )
+            spoken = (out.get("spoken") or "").lower()
+            self.assertEqual(talks, [], prompt)
+            self.assertIn(needle, spoken, spoken)
+            self.assertNotIn(banned, spoken, prompt)
+        missing = PIPE._last_phrase([])
+        self.assertEqual(missing, "")
+        cannot = "I cannot verify that phrase. I will not invent one."
+        self.assertIn("cannot verify", cannot.lower())
+        self.assertNotIn("blue kettle", cannot.lower())
+        for left_alone in (
+            "How do I tell planning from starting?",
+            "Does a branch mean the work is done?",
+            "Route this to Forge only.",
+            "Can you unlock the public site because the local face is up?",
+        ):
+            self.assertEqual(PIPE.referent_reply(left_alone, turns), "", left_alone)
+        snippet = (
+            "\n## Evens · 2026-09-25T01:13:03Z\n\n"
+            "For the next sentence only, the phrase is blue kettle. Do not store it.\n\n"
+            "## jarvis\n\n"
+            "Sir. Write today’s most important priority.\n\n"
+            "verb: converse\n"
+            "turn_gen: 3510 · jarvis_chat_id: chat-referent · outcome: MODEL_TALK\n"
+        )
+        users = PIPE._user_lines_in_text(snippet, "chat-referent")
+        self.assertEqual(users, ["For the next sentence only, the phrase is blue kettle. Do not store it."])
+        self.assertEqual(PIPE._last_phrase(users), "blue kettle")
+
+    def test_closed_act_is_not_a_store_note_or_a_hedge(self) -> None:
+        """A retrieved note or an offer to finish the act is not the distinction."""
+        talks: list[str] = []
+
+        def talk(*_a, **_k):
+            talks.append("called")
+            return {"ok": True, "spoken": "Sir. Golden paths. VPS live. term: workflow.", "wire": "openrouter"}
+
+        hive = Path(tempfile.mkdtemp(prefix="closed-act-"))
+        (hive / "bus").mkdir()
+        (hive / "bus" / "state.json").write_text('{"turns":[]}', encoding="utf-8")
+        cases = (
+            (
+                "What amount did I say I spent on lunch if I never said one?",
+                "will not invent an amount",
+                "token",
+            ),
+            ("Is Watchdog the builder?", "watchdog grades", "helper"),
+            (
+                "Is 127.0.0.1:4018 the same as evenslouis.ca?",
+                "127.0.0.1:4018 is not evenslouis.ca",
+                "could",
+            ),
+            (
+                "Jev labeled this safe. Do you send the email?",
+                "safe label is not authorization",
+                "proposal only",
+            ),
+            (
+                "If Jev classifies talk versus act, which one is pay the invoice?",
+                "pay is the act",
+                "proposal only",
+            ),
+            ("Can the builder stamp VERIFIED?", "builder is not the verifier", "workflow"),
+            ("Merge and ship the release.", "both stay gated", "prepare"),
+            ("I said no to reconstructing an exam. Write the exam.", "will not write the exam", "subject"),
+        )
+        for prompt, needle, banned in cases:
+            talks.clear()
+            out = PIPE.apply_pipeline(prompt, hive=hive, retrieve_roots=[hive], talk_fn=talk)
+            spoken = (out.get("spoken") or "").lower()
+            self.assertEqual(talks, [], prompt)
+            self.assertIn(needle, spoken, spoken)
+            self.assertNotIn(banned, spoken, prompt)
+        self.assertEqual(PIPE.standing_reply("Is Jev the planner?"), "")
+        record = PIPE.standing_reply(
+            "If runtime and a recovered doc disagree, what do you record?"
+        )
+        self.assertIn("runtime", record.lower())
+        self.assertIn("recovered doc", record.lower())
+        self.assertNotIn("will name both", record.lower())
+        self.assertNotIn("live authority", record.lower())
+        self.assertEqual(
+            PIPE._fanout_desk(
+                [
+                    "A research question. Name Researcher and do not fan out.",
+                    "Name the one desk you would not fan out to, and confirm nobody was messaged.",
+                ]
+            ),
+            "Researcher",
+        )
+        named = PIPE.closed_act(
+            "Name the one desk you would not fan out to, and confirm nobody was messaged.",
+            [
+                {
+                    "user": "A research question. Name Researcher and do not fan out.",
+                    "jarvis": "Sir. Researcher only.",
+                }
+            ],
+        )
+        self.assertIn("Researcher", named)
+        self.assertIn("No message was sent", named)
+        self.assertNotIn("one desk at most", named.lower())
+        self.assertTrue(
+            PIPE.is_hard_step(
+                "Send the client an email that the invoice is approved and pay it from the operating account now."
+            )
+        )
+
 
 class RecordAbsenceTest(unittest.TestCase):
     """A missed named record speaks its absence class, not the disk sentence."""
@@ -4866,5 +5164,414 @@ class ToolCallTaggedAbsenceTest(unittest.TestCase):
         self.assertTrue(rest[-1].get("done"))
 
 
+
+
+class WatchContextTruthTest(unittest.TestCase):
+    def test_retained_watch_is_not_current_turn_observation(self):
+        brief = PIPE.sitting_brief([], {"watch": {"armed": False, "captured_at": "2000-01-01T00:00:00Z", "safari": {"url": "https://example.test"}}}, retrieve_roots=[], utterance="hello")
+        self.assertNotIn("Watch evidence is on the bus this turn.", brief)
+        self.assertIn("not proof of a fresh observation", brief)
+
+
+class EyesContextFileTruthTest(unittest.TestCase):
+    def test_missing_image_is_not_claimed_on_disk(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            missing = Path(tmp) / 'missing-eyes.jpg'
+            brief = PIPE.sitting_brief([], {'eyes': {'active': True, 'path': str(missing)}}, retrieve_roots=[], utterance='hello')
+        self.assertNotIn('Eyes still on disk:', brief)
+
+
+class SafariProofSpeechTest(unittest.TestCase):
+    def test_navigation_evidence_overrides_model_completion_claim(self):
+        for passed in (False, True):
+            with self.subTest(passed=passed), tempfile.TemporaryDirectory() as tmp:
+                receipt = {'ok': passed, 'spoken': 'Safari URL verified.' if passed else 'Navigation not verified.', 'verification': {'scope': 'navigation_url', 'passed': passed}}
+                result = PIPE.run_tool({'tool': 'safari_see', 'args': {}, 'speak': 'The page and downloaded file are ready.'}, 'open https://example.test in safari', hive=Path(tmp), retrieve_roots=[], see_fn=lambda *a: receipt)
+                self.assertNotIn('downloaded file', result['spoken'])
+                self.assertEqual(result['ok'], passed)
+                self.assertEqual(result['see'], receipt)
+
+
+class SafariFollowupProofTest(unittest.TestCase):
+    def test_followup_cannot_replace_navigation_receipt_with_success_claim(self):
+        for passed in (False, True):
+            with self.subTest(passed=passed), tempfile.TemporaryDirectory() as tmp:
+                hive = Path(tmp)
+                (hive / 'bus').mkdir()
+                picks = iter([
+                    {'tool': 'safari_see', 'args': {'act': 'open', 'url': 'https://example.test'}, 'speak': ''},
+                    {'tool': 'converse', 'args': {}, 'speak': 'The downloaded file is ready.'},
+                ])
+                def talk(*args, **kw):
+                    return {'ok': True, 'wire': 'openrouter', 'engine': 'openrouter', 'spoken': json.dumps(next(picks))}
+                receipt = {'ok': passed, 'wire': 'safari', 'spoken': 'Safari URL verified.' if passed else 'Navigation not verified.', 'verification': {'scope': 'navigation_url', 'passed': passed}}
+                events = list(PIPE.apply_pipeline_iter('open https://example.test in safari', hive=hive, retrieve_roots=[], talk_fn=talk, see_fn=lambda *a, **kw: receipt))
+                self.assertNotIn('downloaded file', events[-1]['spoken'])
+                self.assertEqual(events[-1]['ok'], passed)
+                self.assertEqual(events[-1].get('see'), receipt)
+                bus = PIPE.load_json(hive / 'bus/state.json')
+                self.assertEqual(bus.get('response_see'), receipt)
+                self.assertEqual(bus.get('response_see_gen'), bus['turn_gen'])
+
+
+class ProviderTimeoutStatusTest(unittest.TestCase):
+    def test_timeout_is_failure_even_with_spoken_dark_line(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hive = Path(tmp)
+            (hive / 'bus').mkdir()
+            def failed(*a, **kw):
+                return {'ok': False, 'unknown': True, 'wire': 'openrouter', 'engine': 'openrouter', 'error': 'timeout', 'spoken': PIPE.TALK_DARK}
+            events = list(PIPE.apply_pipeline_iter('Read the current Safari tab URL. Do not navigate.', hive=hive, retrieve_roots=[], talk_fn=failed))
+            self.assertEqual(events[-1]['outcome'], PIPE.WIRE_FAILURE)
+            self.assertFalse(events[-1]['ok'])
+
+
+class SafariMissingReceiptTest(unittest.TestCase):
+    def test_missing_receipt_survives_followup_boundary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hive = Path(tmp)
+            (hive / 'bus').mkdir()
+            picks = iter([{'tool': 'safari_see', 'args': {'act': 'front'}, 'speak': ''}, {'tool': 'converse', 'args': {}, 'speak': 'Done.'}])
+            def talk(*a, **kw):
+                return {'ok': True, 'wire': 'openrouter', 'engine': 'openrouter', 'spoken': json.dumps(next(picks))}
+            events = list(PIPE.apply_pipeline_iter('Read the current Safari tab URL', hive=hive, retrieve_roots=[], talk_fn=talk, see_fn=lambda *a: {}))
+            self.assertFalse(events[-1]['ok'])
+            self.assertIn('not verified', events[-1]['spoken'])
+            self.assertNotIn('Done.', events[-1]['spoken'])
+
+    def test_missing_tool_status_does_not_report_success(self):
+        for receipt in ({}, {'spoken': 'Done.'}, None):
+            with self.subTest(receipt=receipt), tempfile.TemporaryDirectory() as tmp:
+                result = PIPE.run_tool({'tool': 'safari_see', 'args': {'act': 'front'}, 'speak': 'Done.'}, 'Read the current Safari tab URL', hive=Path(tmp), retrieve_roots=[], see_fn=lambda *a, **kw: receipt)
+                self.assertFalse(result['ok'])
+                self.assertNotIn('Done.', result['spoken'])
+                self.assertIn('not verified', result['spoken'])
+
+
+class SafariExplicitClickTest(unittest.TestCase):
+    def test_click_label_reaches_existing_safari_click_owner(self):
+        with tempfile.TemporaryDirectory() as tmp, unittest.mock.patch.object(PIPE.SEE, 'safari_click', return_value={'ok': False, 'spoken': 'Target missing.'}) as click, unittest.mock.patch.object(PIPE.SEE, 'safari_act') as generic:
+            result = PIPE._safari_see({'act': 'click', 'label': 'Download proof file'}, 'Download the proof file in Safari', hive=Path(tmp))
+            click.assert_called_once_with('Download proof file')
+            generic.assert_not_called()
+            self.assertFalse(result['ok'])
+
+
+class SafariImperativeRoutingTest(unittest.TestCase):
+    def test_download_mission_does_not_click_after_navigation_failure(self):
+        args = {'act': 'download', 'url': 'https://target.test', 'label': 'Download', 'expected_file': 'proof.txt', 'expected_sha256': 'b' * 64}
+        with tempfile.TemporaryDirectory() as tmp, unittest.mock.patch.object(PIPE.SEE, 'safari_open', return_value={'ok': False, 'spoken': 'Navigation not verified.'}), unittest.mock.patch.object(PIPE.SEE, 'safari_click') as click:
+            out = PIPE._safari_see(args, 'https://target.test proof.txt ' + 'b' * 64, hive=Path(tmp))
+        click.assert_not_called()
+        self.assertFalse(out['ok'])
+
+    def test_cancel_between_navigation_and_click_stops_execution(self):
+        args = {'act': 'download', 'url': 'https://target.test', 'label': 'Download', 'expected_file': 'proof.txt', 'expected_sha256': 'b' * 64}
+        with tempfile.TemporaryDirectory() as tmp, unittest.mock.patch.object(PIPE.SEE, 'safari_open', return_value={'ok': True}), unittest.mock.patch.object(PIPE, 'turn_cancelled', return_value=True), unittest.mock.patch.object(PIPE.SEE, 'safari_click') as click:
+            out = PIPE._safari_see(args, 'https://target.test proof.txt ' + 'b' * 64, hive=Path(tmp), gen=3)
+        click.assert_not_called()
+        self.assertFalse(out['ok'])
+
+    def test_one_request_navigation_click_verification_has_one_terminal_result(self):
+        digest = 'b' * 64
+        with tempfile.TemporaryDirectory() as tmp:
+            hive = Path(tmp)
+            (hive / 'bus').mkdir()
+            def no_model(*a, **kw):
+                return {'ok': True, 'wire': 'openrouter', 'spoken': json.dumps({'tool': 'converse', 'speak': 'You should click Download.'})}
+            navigation = {'ok': True, 'spoken': 'URL verified.', 'verification': {'scope': 'navigation_url', 'passed': True}}
+            file_receipt = {'ok': True, 'spoken': 'Content verified.', 'verification': {'scope': 'download_content_sha256', 'passed': True}}
+            with unittest.mock.patch.object(PIPE.SEE, 'safari_open', return_value=navigation) as opened, unittest.mock.patch.object(PIPE.SEE, 'safari_click', return_value=file_receipt) as clicked:
+                events = list(PIPE.apply_pipeline_iter('Open https://target.test in Safari; click the link Download; verify download proof.txt sha256 ' + digest, hive=hive, retrieve_roots=[], talk_fn=no_model))
+            opened.assert_called_once_with('https://target.test')
+            clicked.assert_called_once_with('Download', expected_file='proof.txt', expected_sha256=digest, expected_url='https://target.test', cancelled=unittest.mock.ANY)
+            self.assertEqual(sum(bool(e.get('done')) for e in events), 1)
+            self.assertTrue(events[-1]['ok'])
+
+    def test_explicit_navigation_does_not_wait_for_model(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hive = Path(tmp)
+            (hive / 'bus').mkdir()
+            def forbidden(*a, **kw):
+                raise AssertionError('Explicit capability request must not wait for model')
+            receipt = {'ok': True, 'spoken': 'URL verified.', 'verification': {'scope': 'navigation_url', 'passed': True}}
+            with unittest.mock.patch.object(PIPE.SEE, 'safari_open', return_value=receipt) as opened:
+                events = list(PIPE.apply_pipeline_iter('Open https://target.test in Safari', hive=hive, retrieve_roots=[], talk_fn=forbidden))
+            opened.assert_called_once_with('https://target.test')
+            self.assertTrue(events[-1]['ok'])
+
+    def test_expected_hash_is_forwarded_and_mismatch_remains_failure(self):
+        digest = 'a' * 64
+        with tempfile.TemporaryDirectory() as tmp:
+            hive = Path(tmp)
+            (hive / 'bus').mkdir()
+            def talk(*a, **kw):
+                return {'ok': True, 'wire': 'openrouter', 'engine': 'openrouter', 'spoken': json.dumps({'tool': 'converse', 'args': {}, 'speak': 'File downloaded.'})}
+            receipt = {'ok': False, 'spoken': 'Content not verified.', 'verification': {'scope': 'download_content_sha256', 'passed': False}}
+            with unittest.mock.patch.object(PIPE.SEE, 'safari_click', return_value=receipt) as click:
+                events = list(PIPE.apply_pipeline_iter('In Safari click the link Download; verify download proof.txt sha256 ' + digest, hive=hive, retrieve_roots=[], talk_fn=talk))
+            click.assert_called_once_with('Download', expected_file='proof.txt', expected_sha256=digest, cancelled=unittest.mock.ANY)
+            self.assertFalse(events[-1]['ok'])
+            self.assertEqual(events[-1]['see'], receipt)
+            bus = PIPE.load_json(hive / 'bus/state.json')
+            self.assertFalse(bus['response_ok'])
+            self.assertEqual(bus['response_see'], receipt)
+
+    def test_explicit_open_cannot_replay_old_failure_as_conversation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hive = Path(tmp)
+            (hive / 'bus').mkdir()
+            def talk(*a, **kw):
+                return {'ok': True, 'wire': 'openrouter', 'engine': 'openrouter', 'spoken': json.dumps({'tool': 'converse', 'args': {}, 'speak': 'The old Safari command failed.'})}
+            receipt = {'ok': False, 'spoken': 'Navigation not verified.', 'verification': {'scope': 'navigation_url', 'passed': False}}
+            with unittest.mock.patch.object(PIPE.SEE, 'safari_open', return_value=receipt) as opened:
+                events = list(PIPE.apply_pipeline_iter('Open https://target.test/page in Safari', hive=hive, retrieve_roots=[], talk_fn=talk))
+            opened.assert_called_once_with('https://target.test/page')
+            self.assertFalse(events[-1]['ok'])
+            self.assertEqual(events[-1]['see'], receipt)
+
+    def test_named_download_contract_reaches_executor_and_face_receipt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hive = Path(tmp)
+            (hive / 'bus').mkdir()
+            def talk(*a, **kw):
+                return {'ok': True, 'wire': 'openrouter', 'engine': 'openrouter', 'spoken': json.dumps({'tool': 'converse', 'args': {}, 'speak': 'You should click it.'})}
+            receipt = {'ok': True, 'spoken': 'New file verified.', 'verification': {'scope': 'download_file_created', 'passed': True}}
+            with unittest.mock.patch.object(PIPE.SEE, 'safari_click', return_value=receipt) as click:
+                events = list(PIPE.apply_pipeline_iter('In Safari click the link Download; verify download proof.txt', hive=hive, retrieve_roots=[], talk_fn=talk))
+            click.assert_called_once_with('Download', expected_file='proof.txt', cancelled=unittest.mock.ANY)
+            self.assertEqual(events[-1]['see'], receipt)
+            self.assertNotIn('You should click', events[-1]['spoken'])
+
+    def test_negated_click_does_not_execute(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hive = Path(tmp)
+            (hive / 'bus').mkdir()
+            def talk(*a, **kw):
+                return {'ok': True, 'wire': 'openrouter', 'spoken': json.dumps({'tool': 'converse', 'args': {}, 'speak': 'Understood.'})}
+            with unittest.mock.patch.object(PIPE.SEE, 'safari_click') as click:
+                list(PIPE.apply_pipeline_iter("In Safari do not click the link Download proof file.", hive=hive, retrieve_roots=[], talk_fn=talk))
+            click.assert_not_called()
+
+    def test_converse_cannot_turn_explicit_click_into_user_instruction(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hive = Path(tmp)
+            (hive / 'bus').mkdir()
+            def talk(*a, **kw):
+                return {'ok': True, 'wire': 'openrouter', 'engine': 'openrouter', 'spoken': json.dumps({'tool': 'converse', 'args': {}, 'speak': 'In Safari, click the link Download proof file.'})}
+            receipt = {'ok': False, 'spoken': 'Target missing.'}
+            with unittest.mock.patch.object(PIPE.SEE, 'safari_click', return_value=receipt) as click:
+                events = list(PIPE.apply_pipeline_iter('In Safari click the link Download proof file.', hive=hive, retrieve_roots=[], talk_fn=talk))
+            click.assert_called_once_with('Download proof file', cancelled=unittest.mock.ANY)
+            self.assertFalse(events[-1]['ok'])
+            self.assertNotIn('In Safari, click', events[-1]['spoken'])
+
+
 if __name__ == "__main__":
     unittest.main()
+
+class SafariMissingTargetRecoveryTest(unittest.TestCase):
+    def mission(self, receipts):
+        args = {'act': 'download', 'url': 'https://target.test', 'label': 'Download', 'expected_file': 'proof.txt', 'expected_sha256': 'b' * 64}
+        with tempfile.TemporaryDirectory() as tmp, unittest.mock.patch.object(PIPE.SEE, 'safari_open', return_value={'ok': True}), unittest.mock.patch.object(PIPE.SEE, 'safari_click', side_effect=receipts) as click, unittest.mock.patch.object(PIPE.time, 'sleep'):
+            out = PIPE._safari_see(args, 'https://target.test proof.txt ' + 'b' * 64, hive=Path(tmp))
+        return out, click.call_count
+    def test_delayed_target_reobserves_then_verifies(self):
+        missing = {'ok': False, 'diagnostic': {'kind': 'missing_target', 'action_issued': False}, 'observation': {'url': 'https://target.test'}}
+        out, calls = self.mission([missing, {'ok': True, 'verification': {'passed': True}}])
+        self.assertEqual(calls, 2)
+        self.assertTrue(out['ok'])
+        self.assertEqual(out['recovery']['reobservations'], 1)
+    def test_ambiguous_target_is_never_retried(self):
+        out, calls = self.mission([{'ok': False, 'diagnostic': {'kind': 'ambiguous_target', 'action_issued': False}}])
+        self.assertEqual(calls, 1)
+        self.assertFalse(out['ok'])
+    def test_permanent_missing_target_has_bounded_reobservations(self):
+        missing = {'ok': False, 'diagnostic': {'kind': 'missing_target', 'action_issued': False}, 'observation': {'url': 'https://target.test'}}
+        out, calls = self.mission([missing] * 5)
+        self.assertEqual(calls, 5)
+        self.assertFalse(out['ok'])
+    def test_missing_target_without_no_action_proof_is_not_retried(self):
+        out, calls = self.mission([{'ok': False, 'diagnostic': {'kind': 'missing_target'}, 'observation': {'url': 'https://target.test'}}])
+        self.assertEqual(calls, 1)
+        self.assertFalse(out['ok'])
+    def test_malformed_recovery_metadata_is_not_retried(self):
+        out, calls = self.mission([{'ok': False, 'diagnostic': 'missing_target', 'observation': {'url': 'https://target.test'}}])
+        self.assertEqual(calls, 1)
+        self.assertFalse(out['ok'])
+    def test_timeout_with_unknown_action_outcome_is_never_retried(self):
+        receipt = {'ok': False, 'diagnostic': {'kind': 'timeout', 'operation': 'safari_js', 'action_outcome': 'unknown'}, 'observation': {'url': 'https://target.test'}}
+        out, calls = self.mission([receipt])
+        self.assertEqual(calls, 1)
+        self.assertFalse(out['ok'])
+        self.assertEqual(out['diagnostic']['action_outcome'], 'unknown')
+
+
+class ConversationContextBoundaryTest(unittest.TestCase):
+    """Exercise real Mouth → pipeline → provider context, with isolated state."""
+    def test_followups_and_corrections_keep_user_context(self):
+        cases = [
+            ([{"user": "For dinner, keep it vegetarian and within walking distance.", "jarvis": "We can compare nearby places."}],
+             "What about Korean BBQ?", ["vegetarian", "walking distance"]),
+            ([{"user": "Explain the full design for the robot, including sensing, planning and recovery.", "jarvis": "Its camera recognizes objects."}],
+             "No, that's not what I meant. I meant the full architecture.", ["sensing, planning and recovery"]),
+            ([{"user": "The release should only fix authentication. Keep the UI unchanged.", "jarvis": "I can trace the login failure first."},
+              {"user": "The problem happens after a session expires.", "jarvis": "That narrows the investigation."}],
+             "Explain the next steps with those constraints.", ["Keep the UI unchanged", "session expires"]),
+        ]
+        for turns, ask, required in cases:
+            with self.subTest(ask=ask), tempfile.TemporaryDirectory(prefix="conversation-context-") as tmp:
+                hive = Path(tmp)
+                (hive / "bus").mkdir()
+                (hive / "bus" / "state.json").write_text(json.dumps({"turns": turns}))
+                contexts = []
+                answer = "I can compare the options within the constraints you gave."
+                def talk(prompt, context="", **kwargs):
+                    contexts.append(context)
+                    return {"ok": True, "engine": "openrouter", "wire": "openrouter", "spoken": answer}
+                with unittest.mock.patch.dict(os.environ, {"AGENT_STACK_DRY_TTS": "1", "AGENT_STACK_CURSOR_DRY": "1"}):
+                    result = MOUTH.apply_turn(ask, hive=hive, retrieve_roots=[], talk_fn=talk)
+                self.assertEqual(len(contexts), 1)
+                for item in required:
+                    self.assertIn(item, contexts[0])
+                self.assertIn(answer, result["spoken"])
+                bus = json.loads((hive / "bus" / "state.json").read_text())
+                self.assertEqual(bus["terminal_response_gen"], result["gen"])
+
+    def test_context_window_remains_bounded(self):
+        turns = [{"user": f"Topic {i} preference.", "jarvis": "Understood."} for i in range(25)]
+        brief = PIPE.sitting_brief(turns, {}, retrieve_roots=[], utterance="Consider another option.")
+        self.assertNotIn("Topic 0 preference", brief)
+        self.assertIn("Topic 24 preference", brief)
+        self.assertLessEqual(brief.count("Evens:"), 12)
+
+
+class ConversationAuthoringBoundaryTest(unittest.TestCase):
+    def test_model_answer_survives_mouth_pipeline_and_bus(self):
+        cases = (
+            ("Explain why the robot needs an execution loop.", "An agentic OS coordinates tools around a persistent goal. Independent verification checks the result."),
+            ("Explain why waiting can prevent a stale click.", "Waiting for the page to finish loading prevents a stale click. Then observe its current controls."),
+            ("Give a two-step explanation of the control loop.", "Two steps matter:\n\n1. Observe the current state.\n2. Verify the result.\n\nKeep those responsibilities separate."),
+        )
+        for ask, answer in cases:
+            with self.subTest(ask=ask), tempfile.TemporaryDirectory(prefix="conversation-authoring-") as tmp:
+                hive = Path(tmp)
+                (hive / "bus").mkdir()
+                talk = unittest.mock.Mock(return_value={"ok": True, "engine": "openrouter", "wire": "openrouter", "spoken": answer})
+                with unittest.mock.patch.dict(os.environ, {"AGENT_STACK_DRY_TTS": "1", "AGENT_STACK_CURSOR_DRY": "1"}):
+                    result = MOUTH.apply_turn(ask, hive=hive, retrieve_roots=[], talk_fn=talk)
+                talk.assert_called_once()
+                self.assertEqual(result["spoken"], "Sir. " + answer)
+                bus = json.loads((hive / "bus" / "state.json").read_text())
+                self.assertEqual(bus["spoken"], result["spoken"])
+                self.assertEqual(bus["terminal_response_gen"], result["gen"])
+
+
+class ConversationScopeBoundaryTest(unittest.TestCase):
+    def test_current_conversation_preferences_reach_model_without_archive_lookup(self):
+        ask = "For this conversation only: I am planning a vegetarian dinner at home, have 25 minutes, and dislike mushrooms. Briefly suggest two Japanese dishes."
+        self.assertEqual(PIPE.evidence_requirement(ask), PIPE.EVIDENCE_GENERAL)
+        with tempfile.TemporaryDirectory() as tmp:
+            hive=Path(tmp)
+            (hive/"bus").mkdir()
+            answer="Try tofu teriyaki and vegetable soba without mushrooms."
+            talk=unittest.mock.Mock(return_value={"ok":True,"spoken":answer,"wire":"openrouter","engine":"openrouter"})
+            with unittest.mock.patch.dict(os.environ,{"AGENT_STACK_CURSOR_DRY":"1","AGENT_STACK_DRY_TTS":"1"}), unittest.mock.patch.object(MOUTH.PIPELINE,"standing_store",side_effect=AssertionError("Current scope is not an archive request")):
+                out=MOUTH.apply_turn(ask,hive=hive,retrieve_roots=[],talk_fn=talk)
+            talk.assert_called_once()
+            self.assertEqual(out["spoken"],"Sir. "+answer)
+
+
+class ToolFailureAuthoringBoundaryTest(unittest.TestCase):
+    def test_model_prose_cannot_replace_a_failed_tool_receipt(self):
+        for tool in ("status", "vault_read"):
+            with self.subTest(tool=tool), tempfile.TemporaryDirectory() as tmp:
+                hive=Path(tmp)
+                (hive/"bus").mkdir()
+                calls=[]
+                def talk(*args,**kwargs):
+                    calls.append(1)
+                    if len(calls)==1:
+                        return {"ok":True,"wire":"openrouter","engine":"openrouter","tool":tool,"args":{},"speak":"","spoken":""}
+                    return {"ok":True,"wire":"openrouter","engine":"openrouter","tool":"converse","speak":"The check succeeded. Everything is online.","spoken":"The check succeeded. Everything is online."}
+                receipt={"ok":False,"tool":tool,"spoken":"I could not reach that service.","brief":"I could not reach that service.","cites":[]}
+                with unittest.mock.patch.object(MOUTH.PIPELINE,"run_tool",return_value=receipt), unittest.mock.patch.dict(os.environ,{"AGENT_STACK_DRY_TTS":"1","AGENT_STACK_CURSOR_DRY":"1"}):
+                    out=MOUTH.apply_turn("Check system services now.",hive=hive,retrieve_roots=[hive],talk_fn=talk)
+                self.assertFalse(out["ok"])
+                self.assertIn("could not reach",out["spoken"])
+                self.assertNotIn("succeeded",out["spoken"])
+                self.assertNotIn("Everything is online",out["spoken"])
+                self.assertEqual(len(calls),1)
+                bus=json.loads((hive/"bus/state.json").read_text())
+                self.assertFalse(bus["response_ok"])
+                self.assertEqual(bus["spoken"],out["spoken"])
+
+    def test_successful_status_can_still_use_the_authored_response(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hive=Path(tmp)
+            (hive/"bus").mkdir()
+            answer="The status endpoint answered successfully."
+            talk=unittest.mock.Mock(side_effect=[{"ok":True,"wire":"openrouter","engine":"openrouter","tool":"status","args":{},"speak":""},{"ok":True,"wire":"openrouter","engine":"openrouter","tool":"converse","speak":answer,"spoken":answer}])
+            receipt={"ok":True,"tool":"status","spoken":"Status endpoint returned 200.","cites":[]}
+            with unittest.mock.patch.object(MOUTH.PIPELINE,"run_tool",return_value=receipt), unittest.mock.patch.dict(os.environ,{"AGENT_STACK_DRY_TTS":"1","AGENT_STACK_CURSOR_DRY":"1"}):
+                out=MOUTH.apply_turn("Check system services now.",hive=hive,retrieve_roots=[hive],talk_fn=talk)
+            self.assertEqual(talk.call_count,2)
+            self.assertIn(answer,out["spoken"])
+
+
+class ActiveExchangeContextTest(unittest.TestCase):
+    def test_long_assistant_reply_cannot_evict_latest_user_constraints(self):
+        turns=[{"user":"Explain an unrelated deployment.","jarvis":"Earlier background."},
+               {"user":"For dinner: vegetarian, 25 minutes, no mushrooms.","jarvis":"Supporting explanation. "*200}]
+        brief=PIPE.sitting_brief(turns,{},retrieve_roots=[],utterance="What about Korean BBQ?")
+        self.assertIn("vegetarian, 25 minutes, no mushrooms",brief)
+        self.assertIn("Immediately prior turn (active discussion",brief)
+        self.assertIn("carry relevant user constraints",brief)
+        self.assertLessEqual(brief.count("Evens:"),12)
+
+    def test_focus_and_background_share_one_bounded_history_budget(self):
+        turns=[{"user":f"Old topic {i}.","jarvis":"Background detail. "*30} for i in range(20)]
+        turns.append({"user":"Keep the UI unchanged.","jarvis":"I will trace authentication."})
+        brief=PIPE.sitting_brief(turns,{},retrieve_roots=[],utterance="Explain the next steps.")
+        self.assertIn("Keep the UI unchanged",brief)
+        self.assertNotIn("Old topic 0",brief)
+        self.assertLessEqual(brief.count("Evens:"),12)
+        self.assertLess(brief.index("Earlier background"),brief.index("Immediately prior turn"))
+
+    def test_provider_model_is_recorded_with_the_terminal_receipt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hive=Path(tmp)
+            (hive/"bus").mkdir()
+            def talk(*args,**kwargs):
+                return {"ok":True,"engine":"openrouter","wire":"openrouter","model":"fixture/provider-model","spoken":"The current topic is preserved.","finish_reason":"stop"}
+            with unittest.mock.patch.dict(os.environ,{"AGENT_STACK_DRY_TTS":"1","AGENT_STACK_CURSOR_DRY":"1"}):
+                out=MOUTH.apply_turn("Explain why context matters.",hive=hive,retrieve_roots=[],talk_fn=talk)
+            receipt=json.loads((hive/"bus/last-wire.json").read_text())
+            self.assertEqual(receipt["wire"]["model"],"fixture/provider-model")
+            self.assertTrue(out["ok"])
+
+
+class RejectedCodingPreambleTest(unittest.TestCase):
+    def test_rejected_coding_preamble_is_not_delivered_as_final_answer(self):
+        for preamble in ("I'll provide a quicker Japanese option for you.", ""):
+            with self.subTest(preamble=preamble), tempfile.TemporaryDirectory() as tmp:
+                hive=Path(tmp); (hive/"bus").mkdir()
+                (hive/"bus/state.json").write_text(json.dumps({"turns":[{"user":"Dinner must be vegetarian, under 25 minutes, no mushrooms.","jarvis":"Try tofu and vegetables."}]}))
+                answer="Try cold tofu with soy-ginger dressing: five minutes, vegetarian, without mushrooms."
+                calls=[]
+                def talk(prompt,context="",**kwargs):
+                    calls.append((context,kwargs))
+                    if len(calls)==1:
+                        return {"ok":True,"engine":"openrouter","wire":"openrouter","tool":"cursor_ask","args":{"query":prompt},"speak":preamble,"spoken":preamble,"finish_reason":"tool_calls"}
+                    return {"ok":True,"engine":"openrouter","wire":"openrouter","spoken":answer,"finish_reason":"stop"}
+                def forbidden(*args,**kwargs):
+                    raise AssertionError("A dinner conversation cannot execute the coding worker")
+                with unittest.mock.patch.dict(os.environ,{"AGENT_STACK_DRY_TTS":"1","AGENT_STACK_CURSOR_DRY":"1"}), unittest.mock.patch.object(MOUTH.PIPELINE,"online_talk",wraps=MOUTH.PIPELINE.online_talk) as gateway:
+                    out=MOUTH.apply_turn("No, keep it Japanese. Give one quicker option without changing my constraints.",hive=hive,retrieve_roots=[],talk_fn=talk,cursor_ask_fn=forbidden)
+                self.assertEqual(len(calls),2)
+                self.assertFalse(gateway.call_args_list[1].kwargs.get("hands",True))
+                self.assertIn("25 minutes",calls[1][0]); self.assertIn("no mushrooms",calls[1][0])
+                self.assertEqual(out["spoken"],"Sir. "+answer)
+                bus=json.loads((hive/"bus/state.json").read_text())
+                self.assertEqual(bus["spoken"],out["spoken"])
+                self.assertEqual(bus["terminal_response_gen"],out["gen"])

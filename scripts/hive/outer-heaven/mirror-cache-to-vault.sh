@@ -26,9 +26,35 @@ fi
 DEST="$HIVE_OBSIDIAN_VAULT/00_Outer_Heaven"
 mkdir -p "$DEST"
 
+# Protect vault CHRONICLE (and similar) from smaller/stale cache overwrites.
+# Claude Code 2026-10-11: vault Aug chronicle ~2.3MB vs cache ~39KB.
+# Bash 3.2 safe. Skip when vault file is larger than cache copy.
+EXCL_FILE="$(mktemp)"
+trap 'rm -f "$EXCL_FILE"' EXIT
+: > "$EXCL_FILE"
+if [[ -d "$CACHE/CHRONICLE" && -d "$DEST/CHRONICLE" ]]; then
+  # portable find; no mapfile
+  find "$CACHE/CHRONICLE" -type f 2>/dev/null | while IFS= read -r cfile; do
+    rel="${cfile#$CACHE/}"
+    vfile="$DEST/$rel"
+    if [[ -f "$vfile" ]]; then
+      csize=$(wc -c < "$cfile" | tr -d ' ')
+      vsize=$(wc -c < "$vfile" | tr -d ' ')
+      if [[ "$vsize" -gt "$csize" ]]; then
+        echo "$rel" >> "$EXCL_FILE"
+        echo "mirror-cache-to-vault: PROTECT larger vault $rel (vault=${vsize} cache=${csize})"
+      fi
+    fi
+  done
+fi
+
+RSYNC_ARGS=(-a --exclude '.DS_Store')
+if [[ -s "$EXCL_FILE" ]]; then
+  RSYNC_ARGS+=(--exclude-from="$EXCL_FILE")
+fi
+
 if command -v timeout >/dev/null 2>&1; then
-  if timeout "$TIMEOUT_SEC" rsync -a \
-    --exclude '.DS_Store' \
+  if timeout "$TIMEOUT_SEC" rsync "${RSYNC_ARGS[@]}" \
     "$CACHE/" "$DEST/"; then
     echo "mirror-cache-to-vault: ok → $DEST"
     # Graph index lives at vault root
@@ -42,4 +68,4 @@ if command -v timeout >/dev/null 2>&1; then
   exit 0
 fi
 
-rsync -a --exclude '.DS_Store' "$CACHE/" "$DEST/" && echo "mirror-cache-to-vault: ok → $DEST"
+rsync "${RSYNC_ARGS[@]}" "$CACHE/" "$DEST/" && echo "mirror-cache-to-vault: ok → $DEST"

@@ -110,6 +110,7 @@ def bus_write(
     jarvis_agent_chat_id: str | None = None,
     harness_mode: str | None = None,
     gen: int | None = None,
+    execution: dict | None = None,
 ) -> dict:
     def apply(bus: dict) -> dict:
         bus.update(
@@ -125,6 +126,24 @@ def bus_write(
                 "updated_at": now_iso(),
             }
         )
+        if job_status == "done":
+            bus.pop("response_see", None)
+            bus.pop("response_see_gen", None)
+            bus.pop("response_ok", None)
+            bus.pop("response_ok_gen", None)
+            if gen is not None:
+                result = {"ok": True}
+                if execution is not None:
+                    apply_execution_receipt(result, execution)
+                bus["response_ok"] = result["ok"]
+                bus["response_ok_gen"] = int(gen)
+        # Receipt belongs to the same atomic terminal claim as the spoken result.
+        if execution is not None:
+            bus["execution"] = execution
+            bus["execution_gen"] = gen
+        else:
+            bus.pop("execution", None)
+            bus.pop("execution_gen", None)
         if jarvis_chat_id == "":
             bus.pop("jarvis_chat_id", None)
         elif jarvis_chat_id:
@@ -144,7 +163,11 @@ def bus_write(
     act = getattr(PIPELINE, "act_if_current", None)
     if act is None:
         return PIPELINE.mutate_bus(hive, apply)
-    out = act(hive, gen, apply)
+    bus_io = getattr(PIPELINE, "BUS_IO", None)
+    if bus_io is not None and hasattr(bus_io, "commit_response"):
+        out = bus_io.commit_response(hive, gen, apply, terminal=job_status == "done")
+    else:
+        out = act(hive, gen, apply)
     if out is None:
         return PIPELINE.load_json(hive / "bus" / "state.json")
     return out
@@ -184,11 +207,13 @@ def speak_local(text: str) -> None:
 def _turn_event(
     *,
     spoken: str,
+    ok: bool = True,
     verb: str,
     host: str,
     cites: list | None = None,
     wires: list | None = None,
     args=None,
+    see: dict | None = None,
     done: bool = True,
     spoken_delta: str = "",
     partial: bool = False,
@@ -199,9 +224,10 @@ def _turn_event(
     outcome: str | None = None,
     source: str | None = None,
     gen: int | None = None,
+    mission: dict | None = None,
 ) -> dict:
     ev = {
-        "ok": True,
+        "ok": ok,
         "verb": verb,
         "ask": False,
         "spoken": spoken,
@@ -220,10 +246,27 @@ def _turn_event(
         "source": source,
         "status": outcome,
     }
+    if mission is not None:
+        ev["mission_id"] = mission.get("mission_id")
+        ev["task_verified"] = bool(mission.get("task_verified"))
+    if isinstance(see, dict):
+        ev["see"] = see
     if gen is not None:
         ev["gen"] = int(gen)
         ev["turn_gen"] = int(gen)
     return ev
+
+
+def apply_execution_receipt(event: dict, receipt: dict) -> dict:
+    """One terminal interpretation of operational and task evidence."""
+    event["execution"] = receipt
+    event["ok"] = bool(receipt.get("ok"))
+    # The current Watch executor proves transitions only. No independent
+    # task-proof producer is wired here, so a receipt cannot self-certify.
+    if "stroke" in receipt:
+        event["ok"] = False
+        event["task_verified"] = False
+    return event
 
 
 def _door_speak(
@@ -233,6 +276,7 @@ def _door_speak(
     verb: str,
     retrieve_roots: list[Path] | None = None,
     gen: int | None = None,
+    execution: dict | None = None,
 ) -> dict:
     if gen is not None and hasattr(PIPELINE, "turn_cancelled") and PIPELINE.turn_cancelled(hive, gen):
         return _turn_event(
@@ -250,7 +294,7 @@ def _door_speak(
     bus = load_json(hive / "bus" / "state.json")
     prior = PIPELINE.load_turns(bus)
     next_turns = prior if verb == "idle" else PIPELINE.append_turn(prior, utterance, text)
-    bus_write(
+    committed = bus_write(
         hive,
         phase="speak",
         job_status="done",
@@ -260,7 +304,9 @@ def _door_speak(
         wires=[verb],
         turns=next_turns,
         gen=gen,
+        execution=execution,
     )
+    text = str(committed.get("spoken") or text)
     if gen is not None and hasattr(PIPELINE, "turn_cancelled") and PIPELINE.turn_cancelled(hive, gen):
         return _turn_event(
             spoken="Stopped. Standing by.",
@@ -288,9 +334,13 @@ def _door_speak(
             )
         except OSError:
             pass
-    return _turn_event(
+    event = _turn_event(
         spoken=text, verb=verb, host="local", wires=[verb], spoken_delta=text, gen=gen
     )
+    receipt = committed.get("execution")
+    if isinstance(receipt, dict) and committed.get("execution_gen") == gen:
+        apply_execution_receipt(event, receipt)
+    return event
 
 
 def apply_turn_iter(
@@ -394,6 +444,16 @@ def apply_turn_iter(
             gen=token,
         )
         return
+    # A disabled executor is a blocked action, not a conversational task.
+    action_text = re.sub(r"^(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:please\s+)?", "", spoken, flags=re.I)
+    screen_action = bool(PIPELINE.SCREEN_ACT_RE.match(action_text))
+    explicit_browser = bool(re.search(r"\b(?:safari|https?://)", spoken, re.I))
+    if not watch_on and screen_action and not explicit_browser:
+        receipt = {"ok": False, "reason": "desktop_not_armed", "action_issued": False,
+                   "spoken": "Desktop is off. Enable Desktop in Orb so I can perform this action."}
+        yield _door_speak(hive, spoken, receipt["spoken"], "watch", retrieve_roots,
+                          gen=token, execution=receipt)
+        return
     owns_watch = bool(
         watch_on
         and hasattr(PIPELINE, "watch_owns_turn")
@@ -416,7 +476,7 @@ def apply_turn_iter(
             )
             return
         text = str(got.get("spoken") or "Watch is on.")
-        yield _door_speak(hive, spoken, text, "watch", retrieve_roots, gen=token)
+        yield _door_speak(hive, spoken, text, "watch", retrieve_roots, gen=token, execution=got)
         return
     if hasattr(PIPELINE, "wants_eyes") and PIPELINE.wants_eyes(spoken):
         bus = load_json(hive / "bus" / "state.json")
@@ -480,7 +540,10 @@ def apply_turn_iter(
         if is_ask_leak(delta):
             delta = ""
         yield _turn_event(
+            ok=bool(out.get("ok")),
             spoken=text,
+            see=out.get("see"),
+            mission=out if out.get("mission_id") else None,
             verb=str(out.get("verb") or out.get("tool") or "pipeline"),
             host="pipeline",
             cites=out.get("cites") or [],
@@ -531,8 +594,8 @@ def apply_turn(
         last = ev
     if speak:
         speak_local(str(last.get("spoken") or ""))
-    return {
-        "ok": True,
+    result = {
+        "ok": bool(last.get("ok", True)),
         "verb": last.get("verb") or "pipeline",
         "ask": False,
         "spoken": last.get("spoken") or "",
@@ -548,6 +611,10 @@ def apply_turn(
         "source": last.get("source"),
         "status": last.get("status") or last.get("outcome"),
     }
+    for key in ("execution", "gen", "turn_gen", "mission_id", "task_verified"):
+        if key in last:
+            result[key] = last[key]
+    return result
 
 
 def self_test() -> dict:

@@ -30,7 +30,7 @@ RECALL_RE = re.compile(
     r"\bwhat did we (?:say|talk|decide|do)\b|"
     r"\b(?:in|from) (?:the )?(?:claude|cursor|chatgpt|grok|groq|codex|jarvis|obsidian)\b|"
     r"\b(?:chats?|sittings?|sessions?)\b.{0,80}\b(?:claude|cursor|chatgpt|grok|groq|codex|jarvis)\b|"
-    r"\b(?:last sitting|that sitting|that chat|this chat)\b|"
+    r"\b(?:last sitting|that sitting|that chat)\b|"
     r"\bremember when\b"
     r")",
     re.I,
@@ -43,7 +43,8 @@ ALL_SESSIONS_RE = re.compile(
     r"\blast\b.{0,40}\b(?:chat )?sessions?\b.{0,48}\b(?:all|every)\b.{0,24}\b(?:platforms?|surfaces?)\b|"
     r"\bcan you see (?:the |my |our )?(?:chats?|sessions?|sittings?)\b|"
     r"\bsee (?:the |my |our )?(?:chats?|sessions?)\b.{0,80}\b(?:claude|cursor|chatgpt|grok|groq|codex|obsidian)\b|"
-    r"\bthis (?:chat|sitting|conversation|thread)\b|"
+    r"^\s*this (?:chat|sitting|conversation|thread)\s*[.!?]?\s*$|"
+    r"\b(?:see|read|show|open)\s+this (?:chat|sitting|conversation|thread)\b|"
     r"\bbetween (?:all )?(?:the )?platforms\b"
     r")",
     re.I,
@@ -418,11 +419,12 @@ def archive_turn(
     outcome: str | None = None,
     closed: bool = False,
 ) -> list[Path]:
-    """Write the session block for a turn that still owns the bus.
+    """Write the session block for one generation.
 
-    `closed` records a turn that already left the bus, including a wall
-    timeout stamped WIRE_FAILURE. That close is the receipt. It is not a
-    second live turn.
+    A live turn must still own the bus. `closed` is the receipt after the
+    cancel fence, including a wall timeout stamped WIRE_FAILURE. The fence
+    keeps that turn_gen on the bus and sets cancel_gen so a late writer
+    cannot replace the line. `closed` does not open a second generation.
     """
     if hive is not None and not closed:
         path = HERE / "bus_io.py"
