@@ -18,24 +18,17 @@ class MissionController:
 
     @staticmethod
     def _terminal_commit_id(request, state):
-        # JARVIS_ONE_MIND=1: deterministic sha256(mission id + verified outcome). Off: uuid4, unchanged.
-        import os
-        if os.environ.get('JARVIS_ONE_MIND', '') != '1':
-            return uuid.uuid4().hex
-        import importlib.util
-        import sys
-        name = 'agent_stack_one_mind_trace_for_browser'
-        if name not in sys.modules:
-            path = Path(__file__).resolve().parent / 'one_mind' / 'trace.py'
-            pkg_spec = importlib.util.spec_from_file_location('agent_stack_one_mind', path.parent / '__init__.py', submodule_search_locations=[str(path.parent)])
-            pkg = importlib.util.module_from_spec(pkg_spec); sys.modules['agent_stack_one_mind'] = pkg; pkg_spec.loader.exec_module(pkg)
-            spec = importlib.util.spec_from_file_location('agent_stack_one_mind.trace', path)
-            mod = importlib.util.module_from_spec(spec); sys.modules['agent_stack_one_mind.trace'] = mod; spec.loader.exec_module(mod)
-            sys.modules[name] = mod
+        # Deterministic terminal-commit id 'ter_' + sha256(mission id, verified outcome); same
+        # formula as one_mind.trace.terminal_commit_id, inlined so this path never imports
+        # one_mind. Replaces uuid4 (byte-identity waived for this path, Evens GO 2026-10-12).
+        import hashlib
+        import json
         verified = bool(state.get('verified'))
         outcome = {'status': state.get('status'), 'verified': verified,
                    'accepted': sorted(r.get('flow_id') for r in state.get('results', []) if verified and r.get('verified'))}
-        return sys.modules[name].terminal_commit_id(request['mission_id'], outcome)
+        dig = hashlib.sha256(json.dumps(outcome, sort_keys=True, default=str, separators=(',', ':')).encode()).hexdigest()
+        raw = json.dumps([request['mission_id'], 'terminal', dig], separators=(',', ':'))
+        return 'ter_' + hashlib.sha256(raw.encode()).hexdigest()[:24]
 
     def _assert_source_current(self, request):
         expected = request.get('source_manifest')

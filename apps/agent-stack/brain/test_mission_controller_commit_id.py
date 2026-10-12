@@ -1,5 +1,6 @@
-"""Browser MissionController terminal_commit_id: uuid4 with JARVIS_ONE_MIND off (unchanged),
-deterministic sha256(mission id + verified outcome) with it on. Same execute_mission code path."""
+"""Browser MissionController terminal_commit_id: deterministic 'ter_' sha256(mission id + verified
+outcome) regardless of JARVIS_ONE_MIND (replaces uuid4; Evens GO 2026-10-12). Matches
+one_mind.trace.terminal_commit_id and never imports one_mind."""
 import importlib.util, os, re, sys, tempfile, unittest, uuid
 from pathlib import Path
 from unittest.mock import patch
@@ -21,15 +22,30 @@ async def failed_mission(tmp):
 
 
 class CommitIdTests(unittest.IsolatedAsyncioTestCase):
-    async def test_flag_off_keeps_uuid4(self):
+    async def test_flag_off_deterministic_ter_and_no_one_mind_import(self):
         with patch.dict(os.environ, {'JARVIS_ONE_MIND': ''}):
             with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
                 first, second = await failed_mission(a), await failed_mission(b)
         for row in (first, second):
             self.assertEqual(row['status'], 'FAILED')
-            self.assertRegex(row['terminal_commit_id'], r'^[0-9a-f]{32}$')
-            self.assertEqual(uuid.UUID(hex=row['terminal_commit_id']).version, 4)
-        self.assertNotEqual(first['terminal_commit_id'], second['terminal_commit_id'])
+            self.assertRegex(row['terminal_commit_id'], r'^ter_[0-9a-f]{24}$')
+        self.assertEqual(first['terminal_commit_id'], second['terminal_commit_id'])
+        self.assertFalse([m for m in sys.modules if m.startswith('agent_stack_one_mind')])
+
+    def test_matches_one_mind_trace_formula(self):
+        spec3 = importlib.util.spec_from_file_location('commit_id_mc2', HERE / 'mission_controller.py')
+        mc = importlib.util.module_from_spec(spec3); spec3.loader.exec_module(mc)
+        pkg_spec = importlib.util.spec_from_file_location('om_cid', HERE / 'one_mind' / '__init__.py', submodule_search_locations=[str(HERE / 'one_mind')])
+        pkg = importlib.util.module_from_spec(pkg_spec); sys.modules['om_cid'] = pkg; pkg_spec.loader.exec_module(pkg)
+        tspec = importlib.util.spec_from_file_location('om_cid.trace', HERE / 'one_mind' / 'trace.py')
+        tr = importlib.util.module_from_spec(tspec); sys.modules['om_cid.trace'] = tr; tspec.loader.exec_module(tr)
+        try:
+            state = {'status': 'VERIFIED', 'verified': True, 'results': [{'flow_id': 'f2', 'verified': True}, {'flow_id': 'f1', 'verified': True}]}
+            outcome = {'status': 'VERIFIED', 'verified': True, 'accepted': ['f1', 'f2']}
+            self.assertEqual(mc.MissionController._terminal_commit_id({'mission_id': 'm1'}, state), tr.terminal_commit_id('m1', outcome))
+        finally:
+            for k in [k for k in sys.modules if k.startswith('om_cid')]:
+                del sys.modules[k]
 
     async def test_flag_on_replay_gives_same_id(self):
         with patch.dict(os.environ, {'JARVIS_ONE_MIND': '1'}):
@@ -52,7 +68,7 @@ class CommitIdTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(fn(req, ok), fn(req, dict(ok)))
             self.assertNotEqual(fn(req, ok), fn(req, ok | {'status': 'PARTIAL', 'verified': False}))
         with patch.dict(os.environ, {'JARVIS_ONE_MIND': ''}):
-            self.assertNotEqual(fn(req, ok), fn(req, ok))
+            self.assertEqual(fn(req, ok), fn(req, dict(ok)))
 
 
 if __name__ == '__main__':
