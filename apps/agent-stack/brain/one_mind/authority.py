@@ -12,14 +12,14 @@ AutonomyMode = _p.AutonomyMode
 AuthorityEnvelope = _p.AuthorityEnvelope
 HARD_ACTIONS = _p.HARD_ACTIONS
 MODES = tuple(m.value for m in AutonomyMode)
-LIMIT_KEYS = ('actions', 'seconds', 'spend_usd', 'retries')
+LIMIT_KEYS = ('actions', 'seconds', 'spend_usd', 'retries', 'model_usd')
 
 
 @dataclass(frozen=True)
 class MissionAuthority(AuthorityEnvelope):
     authorized_systems: tuple = ()
     confirm_actions: tuple = ()  # outward/destructive: always need explicit confirmation
-    limits: tuple = (('actions', 50), ('seconds', 900), ('spend_usd', 0), ('retries', 3))
+    limits: tuple = (('actions', 50), ('seconds', 900), ('spend_usd', 0), ('retries', 3), ('model_usd', 0.5))
 
     def limit(self, key):
         return dict(self.limits).get(key, 0)

@@ -23,7 +23,7 @@ import run as G  # noqa: E402
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--cap', type=float, default=0.50); a = ap.parse_args()
     cap = min(a.cap, 0.50)
-    model = os.environ.get('JARVIS_ONE_MIND_CODING_MODEL', '').strip()
+    model = os.environ.get('JARVIS_ONE_MIND_CODING_MODEL', '').strip()  # or route via model_routing aliases
     missing = [n for n, ok in (('JARVIS_ONE_MIND=1', os.environ.get('JARVIS_ONE_MIND') == '1'),
                                ('litellm key env', L.live_available()), ('JARVIS_ONE_MIND_CODING_MODEL', bool(model))) if not ok]
     if missing:
