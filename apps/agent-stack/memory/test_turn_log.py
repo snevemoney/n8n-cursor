@@ -28,6 +28,19 @@ class TurnLogTest(unittest.TestCase):
         self.assertEqual(row["tools"], ["vault_read", "converse"])
         self.assertTrue(row["ts"].endswith("Z"))
 
+    def test_row_carries_no_transcript_text(self):
+        t0 = time.time()
+        secret_ask, secret_reply = "my bank pin is 4417 zebra", "Sir. Your pin 4417 zebra is noted."
+        events = [{"verb": "converse", "ok": True, "spoken": secret_reply, "utterance": secret_ask,
+                   "spoken_delta": secret_reply, "cites": [{"snippet": secret_reply}], "args": {"q": secret_ask}}]
+        talk = {"t": t0 + 0.1, "model": "m/x", "prompt": secret_ask, "spoken": secret_reply}
+        line = json.dumps(TL.build_row(started=t0, ended=t0 + 1, events=events, talk=talk, inject={}))
+        self.assertNotIn("4417", line)
+        self.assertNotIn("zebra", line)
+        allowed = {"ts", "model", "primary_model", "fallback", "latency_ms", "talk_latency_ms", "est_tokens_in",
+                   "est_tokens_out", "injected_context", "tools", "verb", "ok", "outcome", "gen"}
+        self.assertEqual(set(json.loads(line)), allowed)
+
     def test_stale_talk_record_is_not_this_turn(self):
         t0 = time.time()
         row = TL.build_row(started=t0, ended=t0 + 0.01, events=[{"verb": "stop"}], talk={"t": t0 - 5, "model": "old"}, inject={})
