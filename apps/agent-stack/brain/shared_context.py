@@ -76,31 +76,84 @@ def stale_hours() -> float:
         return 24.0
 
 
-def stamp(path: Path, now: float | None = None) -> str:
-    """'as of 2026-10-10 22:30 local, 1.2 days old[, STALE ...]' from the file mtime (F07)."""
+# Durable rule/profile/index files change rarely; live-state files (ACTIVE_TASKS, FLEET_STATUS) go stale fast.
+DURABLE_FILES = frozenset({
+    "AGENT_RULES.md", "JARVIS_CONTEXT.md", "SHARED_MEMORY.md", "MAC_SHARED_MEMORY.md",
+    "OPERATOR_PROFILE.md", "TOOLS_AND_REPOS.md", "SKILLS_INDEX.md", "LEARNINGS.md",
+})
+
+
+def stale_after(name: str) -> float:
+    """Hours before a file counts as stale: JARVIS_DURABLE_STALE_HOURS (168) for durable files."""
+    if name in DURABLE_FILES:
+        try:
+            return max(0.0, float(os.environ.get("JARVIS_DURABLE_STALE_HOURS") or 168))
+        except ValueError:
+            return 168.0
+    return stale_hours()
+
+
+HEADER_DATE_RE = re.compile(r"\b(20\d\d-\d\d-\d\d)\b(?:[^\n]{0,30}?\b(\d\d:\d\d)\b)?")
+
+
+def private_dir() -> Path:
+    """Private shared files live outside every repo (default ~/.grok-private)."""
+    return Path(os.environ.get("JARVIS_PRIVATE_DIR") or (Path.home() / ".grok-private")).expanduser()
+
+
+def resolve(root: Path, name: str) -> Path:
+    """root/name, else the private dir copy. Symlinks from the public dir resolve either way."""
+    path = root / name
+    if path.is_file():
+        return path
+    alt = private_dir() / name
+    return alt if alt.is_file() else path
+
+
+def content_time(path: Path) -> tuple[float, str, float]:
+    """(content_ts, label, copy_mtime). The header date is the content date; a sync only moves mtime.
+
+    A header time may sit a few words after the date ("2026-10-10 rev 2 (22:30 ET)").
+    A date with no time is labelled day-only and aged from the end of that day, never midnight,
+    so a file is not reported older than it can be.
+    """
     try:
         mtime = path.stat().st_mtime
     except OSError:
-        return "date unknown"
-    now = time.time() if now is None else now
-    # A synced copy gets a fresh mtime; a date in the file header is the content date. Use the older.
+        return 0.0, "date unknown", 0.0
     try:
         with path.open("r", encoding="utf-8", errors="ignore") as fh:
             head = fh.read(300)
     except OSError:
         head = ""
-    found = re.search(r"\b(20\d\d-\d\d-\d\d)(?:[ T](\d\d:\d\d))?", head)
+    found = HEADER_DATE_RE.search(head)
     if found:
         try:
-            dated = time.mktime(time.strptime(found.group(1) + " " + (found.group(2) or "00:00"), "%Y-%m-%d %H:%M"))
-            mtime = min(mtime, dated)
+            if found.group(2):
+                ts = time.mktime(time.strptime(found.group(1) + " " + found.group(2), "%Y-%m-%d %H:%M"))
+                label = time.strftime("%Y-%m-%d %H:%M", time.localtime(ts))
+            else:
+                ts = time.mktime(time.strptime(found.group(1) + " 23:59", "%Y-%m-%d %H:%M"))
+                label = found.group(1) + " (day only)"
+            if ts <= mtime + 60:
+                return ts, label, mtime
         except ValueError:
             pass
-    age_h = max(0.0, (now - mtime) / 3600.0)
-    when = time.strftime("%Y-%m-%d %H:%M", time.localtime(mtime))
+    return mtime, time.strftime("%Y-%m-%d %H:%M", time.localtime(mtime)), mtime
+
+
+def stamp(path: Path, now: float | None = None) -> str:
+    """'as of <content date> local, N h old[, copy synced <mtime>][; STALE ...]' (F07)."""
+    ts, label, mtime = content_time(path)
+    if not ts:
+        return "date unknown"
+    now = time.time() if now is None else now
+    age_h = max(0.0, (now - ts) / 3600.0)
     age = f"{age_h:.0f} h old" if age_h < 48 else f"{age_h / 24:.1f} days old"
-    line = f"as of {when} local, {age}"
-    if age_h > stale_hours():
+    line = f"as of {label} local, {age}"
+    if mtime - ts > 3600:
+        line += f", copy synced {time.strftime('%Y-%m-%d %H:%M', time.localtime(mtime))}"
+    if age_h > stale_after(path.name):
         line += "; STALE: dated notes, not live state; say the date and verify before calling anything current"
     return line
 
@@ -172,7 +225,7 @@ def retrieval_files(root: Path) -> list[Path]:
     for name in names:
         if name in DENY_FILES or DENY_NAME_RE.search(name):
             continue
-        path = root / name
+        path = resolve(root, name)
         if path.is_file():
             out.append(path)
     return out
@@ -270,6 +323,27 @@ def retrieve_entries(query: str, *, root: Path | None = None) -> list[dict]:
     return out
 
 
+def answerable_from_shared(query: str, *, root: Path | None = None) -> bool:
+    """True when shared memory, or the always-loaded JARVIS_CONTEXT/AGENT_RULES, covers the ask.
+
+    Used to answer without hands; it adds nothing to the prompt (the base files are already in it).
+    """
+    if not enabled():
+        return False
+    if IDENTITY_RE.search(query or "") or retrieve_entries(query, root=root):
+        return True
+    q = _terms(query)
+    if len(q) < 2:
+        return False
+    base = root or shared_dir()
+    need = max(2, min_ratio() * len(q))
+    for name in (PRIMARY, *OPTIONAL):
+        for heading, entry in split_entries(_read(resolve(base, name))):
+            if len(q & _terms(entry + " " + heading)) >= need:
+                return True
+    return False
+
+
 def retrieved_block(query: str) -> tuple[str, list[dict]]:
     rows = retrieve_entries(query)
     if not rows:
@@ -280,6 +354,34 @@ def retrieved_block(query: str) -> tuple[str, list[dict]]:
     return text, [{"file": r["file"], "heading": r["heading"]} for r in rows]
 
 
+AGE_CLAIM_RE = re.compile(
+    r"(?P<file>\b[A-Z][A-Z0-9_]*(?:\.grok-shared)?\.md\b)(?P<mid>[^\n]{0,80}?)\b(?P<num>\d+(?:\.\d+)?)\s*(?P<unit>hours?|hrs?|h|days?)\s+old\b",
+)
+
+
+def correct_ages(text: str, *, root: Path | None = None, now: float | None = None) -> str:
+    """Rewrite '<FILE>.md ... N hours old' to the age computed now from the file's content date.
+
+    The model copies ages out of earlier replies in the chat history (live: '47 hours old' long
+    after the fix). Only the age number changes, and only for a shared file that exists.
+    """
+    if not text or "old" not in text:
+        return text
+    base = root or shared_dir()
+    now = time.time() if now is None else now
+
+    def fix(m: re.Match) -> str:
+        path = resolve(base, m.group("file"))
+        ts, _label, _mtime = content_time(path) if path.is_file() else (0.0, "", 0.0)
+        if not ts:
+            return m.group(0)
+        age_h = max(0.0, (now - ts) / 3600.0)
+        age = f"{age_h:.0f} hours" if age_h < 48 else f"{age_h / 24:.1f} days"
+        return f"{m.group('file')}{m.group('mid')}{age} old"
+
+    return AGE_CLAIM_RE.sub(fix, text)
+
+
 def shared_system_block(*, use_cache: bool = True) -> tuple[str, list[str]]:
     got = load_shared_context(use_cache=use_cache)
     if not got.get("text"):
@@ -288,7 +390,8 @@ def shared_system_block(*, use_cache: bool = True) -> tuple[str, list[str]]:
     text = (
         "Shared fleet context (read from disk this turn; cite the file name when you use it: "
         + ", ".join(files)
-        + "):\n"
+        + "). Each [shared:...] header carries the content date and an age computed now; "
+        "if you mention a file's age, quote that header, never an age from an earlier reply:\n"
         + got["text"]
     )
     return text, files
@@ -372,17 +475,14 @@ def drift_report(root: Path | None = None, now: float | None = None) -> dict:
     now = time.time() if now is None else now
     rows, missing, stale = [], [], []
     for name in EXPECTED_FILES:
-        path = base / name
+        path = resolve(base, name)
         if not path.is_file():
             missing.append(name)
             continue
-        try:
-            age_h = (now - path.stat().st_mtime) / 3600.0
-        except OSError:
-            missing.append(name)
-            continue
-        rows.append({"file": name, "age_hours": round(age_h, 1)})
-        if age_h > stale_hours():
+        ts, label, _mtime = content_time(path)
+        age_h = (now - ts) / 3600.0
+        rows.append({"file": name, "age_hours": round(age_h, 1), "as_of": label})
+        if age_h > stale_after(name):
             stale.append(name)
     return {"dir": str(base), "present": rows, "missing": missing, "stale": stale,
             "ok": not missing and not stale}

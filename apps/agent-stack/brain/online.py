@@ -407,6 +407,63 @@ def _read_http_body(res, timeout: float) -> bytes:
     raise TimeoutError("response body stalled")
 
 
+def talk_hedge_sec() -> float:
+    """Seconds before a second identical talk request races the first. 0 turns it off."""
+    raw = (os.environ.get("JARVIS_TALK_HEDGE_SEC") or "").strip()
+    if not raw:
+        return 9.0
+    try:
+        return max(0.0, float(raw))
+    except ValueError:
+        return 9.0
+
+
+def _hedged_http_json(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0) -> dict:
+    """_http_json, plus one identical backup request if the first is still out after hedge seconds.
+
+    Profiled live: the same prompt took 5-17 s, with 20 s timeouts about 1 turn in 6. The tail
+    is provider queueing, not prompt size. The first reply to land wins; the loser is ignored.
+    Cost: a second request only on slow turns.
+    """
+    hedge = talk_hedge_sec()
+    if hedge <= 0 or hedge >= timeout - 2:
+        return _http_json(url, data=data, headers=headers, timeout=timeout)
+    done = threading.Event()
+    box: list = []
+    state = {"out": 0}
+    lock = threading.Lock()
+    began = time.monotonic()
+
+    def go(budget: float) -> None:
+        try:
+            got = ("ok", _http_json(url, data=data, headers=headers, timeout=budget))
+        except Exception as exc:  # noqa: BLE001
+            got = ("err", exc)
+        with lock:
+            state["out"] -= 1
+            box.append(got)
+            # Done on the first success, or on an error with nothing else still out.
+            if got[0] == "ok" or state["out"] <= 0:
+                done.set()
+
+    def launch(budget: float, name: str) -> None:
+        with lock:
+            state["out"] += 1
+        threading.Thread(target=go, args=(budget,), daemon=True, name=name).start()
+
+    launch(timeout, "talk-a")
+    if not done.wait(hedge):
+        launch(max(1.0, timeout - (time.monotonic() - began)), "talk-b")
+    done.wait(max(0.0, timeout - (time.monotonic() - began)) + 0.5)
+    with lock:
+        for kind, val in box:
+            if kind == "ok":
+                return val
+        if box:
+            raise box[-1][1]
+    raise TimeoutError("talk request timed out")
+
+
 def _http_json(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0) -> dict:
     raw = None if data is None else json.dumps(data).encode("utf-8")
     req = urllib.request.Request(
@@ -1100,6 +1157,9 @@ def _tool_pick_from_message(msg: dict) -> dict | None:
     return {"tool": name, "args": args, "speak": str(msg.get("content") or "").strip()}
 
 
+WORKER_MAX_TOKENS = int(os.environ.get("JARVIS_WORKER_MAX_TOKENS") or 600)
+
+
 def call_openrouter_messages(
     messages: list[dict],
     tools: list[dict],
@@ -1123,7 +1183,8 @@ def call_openrouter_messages(
             "messages": messages,
             "tools": tools,
             "tool_choice": "auto",
-            "max_tokens": OPENROUTER_MAX_TOKENS,
+            "parallel_tool_calls": True,
+            "max_tokens": WORKER_MAX_TOKENS,
             "reasoning": {"enabled": False},
         }
         try:
@@ -1139,8 +1200,14 @@ def call_openrouter_messages(
         pick = _tool_pick_from_message(msg)
         if pick:
             first = (msg.get("tool_calls") or [{}])[0]
+            calls = []
+            for i, tc in enumerate(msg.get("tool_calls") or []):
+                one = _tool_pick_from_message({"tool_calls": [tc]}) if isinstance(tc, dict) else None
+                if one:
+                    calls.append({"tool": one["tool"], "args": one.get("args") or {}, "call_id": str(tc.get("id") or f"call_{i}")})
             return {
                 "ok": True,
+                "calls": calls,
                 "tool": pick["tool"],
                 "args": pick.get("args") or {},
                 "call_id": str(first.get("id") or "call_0"),
@@ -1213,6 +1280,17 @@ def call_openrouter(
     })
     if isinstance(got, dict) and got.get("ok"):
         got.setdefault("primary_model", primary)
+        try:
+            aged = _shared_mod().correct_ages(str(got.get("spoken") or ""))
+        except Exception:  # noqa: BLE001
+            aged = str(got.get("spoken") or "")
+        if aged != got.get("spoken"):
+            got["spoken"] = aged
+        backed = bool(LAST_INJECT.get("snippets"))
+        cleaned = unbacked_memory_claim(str(got.get("spoken") or ""), backed=backed)
+        if cleaned != got.get("spoken"):
+            got["spoken"] = cleaned
+            got["claim_fixed"] = True
         if not any(got.get(k) for k in ("tool", "tool_calls", "hand", "action", "verb", "args")):
             fixed = unverified_claim(str(got.get("spoken") or ""))
             if fixed != got.get("spoken"):
@@ -1228,6 +1306,25 @@ TALK_CLAIM_RE = re.compile(
     r"|now\s+open\s+in)\b",
     re.I,
 )
+
+
+# "As you confirmed earlier", "like you told me before": claims about past turns.
+MEMORY_CLAIM_RE = re.compile(
+    r"[,;]?\s*\b(?:as|like)\s+(?:you|we)\s+(?:already\s+|just\s+)?"
+    r"(?:confirmed|said|mentioned|told\s+me|noted|agreed|discussed|established)"
+    r"(?:\s+(?:earlier|before|previously|last\s+time))?\b[,;]?"
+    r"|[,;]?\s*\b(?:you|we)\s+(?:already\s+)?(?:confirmed|agreed|told\s+me)\s+(?:that\s+)?(?:earlier|before|previously)\b[,;]?",
+    re.I,
+)
+
+
+def unbacked_memory_claim(text: str, *, backed: bool) -> str:
+    """Drop 'as you confirmed earlier'-style phrases unless retrieved context backs them."""
+    if backed or not text or not MEMORY_CLAIM_RE.search(text):
+        return text
+    out = MEMORY_CLAIM_RE.sub("", text)
+    out = re.sub(r"\s+([.,;!?])", r"\1", out)
+    return re.sub(r"[ \t]{2,}", " ", out).strip()
 
 
 def unverified_claim(text: str) -> str:
@@ -1313,7 +1410,7 @@ def _call_openrouter_inner(
         finish = ""
         try:
             if with_tools:
-                data = _http_json(
+                data = _hedged_http_json(
                     OPENROUTER_URL,
                     data=_openrouter_payload(
                         mid,
@@ -1363,6 +1460,22 @@ def _call_openrouter_inner(
                         msg = raw_msg if isinstance(raw_msg, dict) else {}
                         finish = _choice_finish_reason(choices[0])
                     text = str(msg.get("content") or "").strip()
+                elif talk_hedge_sec() > 0:
+                    # Hedged plain request: the stream path had no backup, and live 20 s
+                    # stream stalls hit 2 of 7 no-hands turns. The reply is used whole either way.
+                    data = _hedged_http_json(
+                        OPENROUTER_URL,
+                        data=_openrouter_payload(mid, user, stream=False, max_tokens=max_tokens, images=stills),
+                        headers=headers,
+                        timeout=attempt,
+                    )
+                    choices = data.get("choices") if isinstance(data, dict) else None
+                    msg = {}
+                    if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+                        raw_msg = choices[0].get("message")
+                        msg = raw_msg if isinstance(raw_msg, dict) else {}
+                        finish = _choice_finish_reason(choices[0])
+                    text = _strip_scratchpad(str(msg.get("content") or "").strip())
                 else:
                     request_started = time.monotonic()
                     with _http_open(

@@ -1,6 +1,7 @@
 """Turn-relevant shared-memory retrieval: match, caps, denylist, opt-out, log metadata."""
 import importlib.util
 import os
+import time
 import tempfile
 import unittest
 from pathlib import Path
@@ -113,6 +114,37 @@ class RetrievalTest(unittest.TestCase):
         self.assertIn("MAC_SHARED_MEMORY.md", rep["stale"])
         self.assertNotIn("CURRENT_STATE.md", [r["file"] for r in rep["present"]])
         self.assertFalse(rep["ok"])
+
+    def test_f07_time_a_few_words_after_date_is_used(self):
+        # Live AGENT_RULES header: "2026-10-10 rev 2 (22:30 ET)" used to age from midnight (47 h, not 25 h).
+        f = self.root / "AGENT_RULES.md"
+        f.write_text("# AGENT_RULES 2023-11-01 rev 2 (22:30 ET). Durable.\n- rule\n")
+        ts, label, _ = SC.content_time(f)
+        self.assertEqual(label, "2023-11-01 22:30")
+        line = SC.stamp(f, now=ts + 25 * 3600)
+        self.assertIn("25 h old", line)
+        self.assertIn("copy synced", line)
+        self.assertNotIn("STALE", line)  # durable file, under 168 h
+
+    def test_f07_day_only_date_is_never_aged_from_midnight(self):
+        f = self.root / "LEARNINGS.md"
+        f.write_text("# LEARNINGS compiled 2023-11-01\n")
+        ts, label, _ = SC.content_time(f)
+        self.assertIn("day only", label)
+        self.assertEqual(time.strftime("%H:%M", time.localtime(ts)), "23:59")
+
+    def test_live_state_file_goes_stale_fast(self):
+        f = self.root / "ACTIVE_TASKS.md"
+        os.utime(f, (time.time() - 30 * 3600,) * 2)
+        self.assertIn("STALE", SC.stamp(f))
+
+    def test_private_dir_fallback(self):
+        with tempfile.TemporaryDirectory() as priv:
+            (Path(priv) / "SECURITY_TODO.md").write_text("x")
+            (Path(priv) / "OPERATOR_PROFILE.md").write_text("# p 2023-11-01 10:00\n- tz ET\n")
+            with mock.patch.dict(os.environ, {"JARVIS_PRIVATE_DIR": priv}):
+                self.assertEqual(SC.resolve(self.root, "OPERATOR_PROFILE.md").parent, Path(priv))
+                self.assertNotIn("SECURITY_TODO.md", [p.name for p in SC.retrieval_files(self.root)])
 
     def test_f07_header_date_beats_fresh_sync_mtime(self):
         (self.root / "SHARED_MEMORY.md").write_text("# SHARED_MEMORY (2023-11-01 22:30 ET)\n- studio save export open\n")

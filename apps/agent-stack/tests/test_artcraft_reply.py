@@ -18,7 +18,7 @@ def _load(name, rel):
 class ArtCraftReplyTest(unittest.TestCase):
     def test_user_folders_kept_private_paths_dropped(self):
         persona = _load("ac_persona", "mouth/persona.py")
-        out = persona.wrap("Save into `~/Movies` or `~/Documents/Studio`, then open it. Key at /Users/x/secret.env and ~/.ssh/id.",
+        out = persona.wrap("Save into `~/Movies` or `~/Documents/Studio`, then open it. Key at /Users/x/secret.env and ~/.ssh/id.",  # public-guard: allow (fixture)
                            verb="converse", utterance="where do studio files go")
         self.assertIn("~/Movies", out)
         self.assertIn("~/Documents/Studio", out)

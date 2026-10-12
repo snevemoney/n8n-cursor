@@ -4,6 +4,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -61,6 +62,28 @@ class HonestClaims(unittest.TestCase):
         self.assertEqual(online.unverified_claim(text), text)
 
 
+class MemoryClaims(unittest.TestCase):
+    LIVE = ("Good evening, sir. I'm operational and ready to assist. The system shows I'm running on "
+            "`deepseek/deepseek-chat-v3.1` via OpenRouter as you confirmed earlier.")
+
+    def test_live_as_you_confirmed_earlier_is_dropped_without_context(self):
+        out = online.unbacked_memory_claim(self.LIVE, backed=False)
+        self.assertNotIn("confirmed", out)
+        self.assertTrue(out.endswith("via OpenRouter."))
+
+    def test_kept_when_retrieved_context_backs_it(self):
+        self.assertEqual(online.unbacked_memory_claim(self.LIVE, backed=True), self.LIVE)
+
+    def test_other_phrasings(self):
+        for t in ("Like you told me before, save to Movies.", "You already confirmed that earlier, so I'll proceed.",
+                  "As we discussed, ArtCraft saves to Documents."):
+            self.assertNotRegex(online.unbacked_memory_claim(t, backed=False).lower(), r"told me|confirmed|discussed")
+
+    def test_plain_text_untouched(self):
+        t = "You can confirm the model at /api/wires."
+        self.assertEqual(online.unbacked_memory_claim(t, backed=False), t)
+
+
 class SafeCites(unittest.TestCase):
     def test_no_absolute_paths_in_turn_cites(self):
         home = os.path.expanduser("~")
@@ -114,6 +137,83 @@ class RetrievalThreshold(unittest.TestCase):
         rows = sc.retrieve_entries("Where should I save an ArtCraft project and how do I open it?")
         self.assertTrue(rows)
         self.assertIn("ArtCraft", rows[0]["heading"])
+
+
+class CraftFastRoute(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.pl = _load("r3_pipeline", "brain/pipeline.py")
+
+    def test_imperative_naming_app_routes_to_craft(self):
+        got = self.pl.explicit_craft_pick("In GridCraft, make a new blank workbook, put Proof in A1, save it as x.xlsx.")
+        self.assertEqual(got["tool"], "craft")
+        self.assertEqual(got["args"]["app"], "gridcraft")
+
+    def test_memory_answered_question_runs_without_hands(self):
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "MAC_SHARED_MEMORY.md").write_text("## ArtCraft\n- Save ArtCraft projects in ~/Documents/ArtCraft and open them from the app.\n")
+            with mock.patch.dict(os.environ, {"JARVIS_SHARED_DIR": d}):
+                self.assertTrue(self.pl.shared_memory_answers("Where should I save an ArtCraft project and how do I open it?"))
+                self.assertFalse(self.pl.shared_memory_answers("Save my ArtCraft project now"))
+                self.assertFalse(self.pl.shared_memory_answers("What is the weather in Paris?"))
+
+    def test_questions_and_chat_stay_with_talk(self):
+        for t in ("Where should I save an ArtCraft project and how do I see it?", "How do I make a chart in GridCraft?",
+                  "Good evening Jarvis", "Make me laugh", "gridcraft"):
+            self.assertIsNone(self.pl.explicit_craft_pick(t), t)
+
+
+class AgeCorrection(unittest.TestCase):
+    def test_copied_age_is_recomputed_from_content_date(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "AGENT_RULES.md"
+            f.write_text("# AGENT_RULES 2023-11-01 rev 2 (22:30 ET)\n")
+            ts, _, _ = sc.content_time(f)
+            live = "According to the AGENT_RULES.md file from 2023-11-01 (47 hours old, verify current status), only Watchdog"
+            out = sc.correct_ages(live, root=Path(d), now=ts + 26 * 3600)
+            self.assertIn("(26 hours old", out)
+            self.assertNotIn("47", out)
+            self.assertEqual(sc.correct_ages("NOPE.md is 5 hours old", root=Path(d)), "NOPE.md is 5 hours old")
+
+
+class HedgedTalk(unittest.TestCase):
+    def test_backup_request_wins_when_first_is_slow(self):
+        import threading, time as _t
+        calls = []
+
+        def fake(url, data=None, headers=None, timeout=20):
+            calls.append(1)
+            if len(calls) == 1:
+                _t.sleep(2.0)
+                return {"who": "slow"}
+            return {"who": "fast"}
+
+        with mock.patch.object(online, "_http_json", fake), mock.patch.dict(os.environ, {"JARVIS_TALK_HEDGE_SEC": "0.3"}):
+            began = _t.monotonic()
+            self.assertEqual(online._hedged_http_json("u", timeout=10), {"who": "fast"})
+            self.assertLess(_t.monotonic() - began, 1.8)
+
+    def test_fast_error_is_not_delayed_or_doubled(self):
+        calls = []
+
+        def boom(url, data=None, headers=None, timeout=20):
+            calls.append(1)
+            raise ValueError("http 400")
+
+        with mock.patch.object(online, "_http_json", boom), mock.patch.dict(os.environ, {"JARVIS_TALK_HEDGE_SEC": "5"}):
+            with self.assertRaises(ValueError):
+                online._hedged_http_json("u", timeout=10)
+        self.assertEqual(len(calls), 1)
+
+    def test_identity_question_needs_no_hands(self):
+        pl = _load("r3_pipeline_id", "brain/pipeline.py")
+        self.assertTrue(pl.shared_memory_answers("What model are you running on right now?"))
+
+
+class AgeQuote(unittest.TestCase):
+    def test_system_block_says_quote_header_age(self):
+        src = (ROOT / "brain/shared_context.py").read_text()
+        self.assertIn("never an age from an earlier reply", src)
 
 
 if __name__ == "__main__":
