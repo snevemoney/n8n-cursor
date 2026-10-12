@@ -622,8 +622,11 @@ class SharedBrainContextTest(unittest.TestCase):
             root = Path(tmp); self._write(root)
             text = MOD.shared_context_block(root)
         self.assertTrue(text.startswith("Shared brain (read-only):"))
-        for name in ("CURRENT_STATE.md", "OPERATOR_PROFILE.md", "TOOLS_AND_REPOS.md", "SKILLS_INDEX.md"):
-            self.assertIn(f"[{name}]", text)
+        for name in ("OPERATOR_PROFILE.md", "TOOLS_AND_REPOS.md", "SKILLS_INDEX.md"):
+            self.assertIn(f"[{name} | as of ", text)
+        # One loader: CURRENT_STATE.md (key/backup notes) is never read.
+        self.assertNotIn("CURRENT_STATE.md", text)
+        self.assertNotIn("Rotate keys", text)
         self.assertIn("2 skills: a11y-pass, teach", text)
         self.assertIn("Lead with a plain summary.", text)
         self.assertNotIn("<!--", text)
@@ -635,6 +638,14 @@ class SharedBrainContextTest(unittest.TestCase):
             text = MOD.shared_context_block(root)
         self.assertIn("line 44", text)
         self.assertNotIn("line 45", text)
+
+    def test_per_file_char_cap(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-stack-shared-") as tmp:
+            root = Path(tmp)
+            (root / "OPERATOR_PROFILE.md").write_text("\n".join("z" * 400 for _ in range(40)), encoding="utf-8")
+            with mock.patch.dict(os.environ, {"JARVIS_SHARED_FILE_MAX_CHARS": "500"}):
+                text = MOD.shared_context_block(root)
+        self.assertLess(text.count("z"), 501)
 
     def test_missing_dir_and_opt_out(self) -> None:
         self.assertEqual(MOD.shared_context_block(Path("/tmp/no-such-shared-dir")), "")

@@ -10,11 +10,10 @@ SHARED_MEMORY.md, ACTIVE_TASKS.md and operator-preference files. Capped per file
 (JARVIS_SHARED_SNIPPET_FILE_MAX_CHARS, 1200) and in total (JARVIS_SHARED_RETRIEVE_MAX_CHARS, 2400).
 CURRENT_STATE.md, SECURITY_TODO.md and any secret/key-looking entry are never read.
 
-Overlap with main: PR #606 (memory/store.py shared_context_block) loads the *public* repo copy
-of os/shared (CURRENT_STATE head, OPERATOR_PROFILE, TOOLS_AND_REPOS, SKILLS_INDEX) into the
-store pack, gated by the same JARVIS_SHARED_CONTEXT=0. Same flag, same meaning ("0" = off);
-this module also accepts false/off/no. This module reads the *private* ~/.grok-shared and
-retrieves only turn-relevant entries, so on merge both stay; see PROOF.md for the plan.
+One loader: memory/store.py (ex-PR #606 shared_context_block and #599 fleet_context_block)
+delegates here. pack_block() serves the store pack (OPERATOR_PROFILE, TOOLS_AND_REPOS, SKILLS_INDEX;
+CURRENT_STATE.md is no longer read); fleet_context_block() is skipped when the system prompt already
+carries the private JARVIS_CONTEXT.md. JARVIS_SHARED_CONTEXT=0 turns all of it off.
 """
 from __future__ import annotations
 
@@ -277,3 +276,53 @@ def model_self_report(model: str, primary: str = "", provider: str = "OpenRouter
     if first and first != mid:
         line += f" The configured primary `{first}` did not answer; `{mid}` is the fallback that fired."
     return line
+
+
+# --- The one shared-context loader (also serves memory/store.py, ex-PR #606 / #599) ---
+# (file, line cap, mode). CURRENT_STATE.md is deliberately absent: it carries key/backup notes.
+PACK_FILES = (
+    ("OPERATOR_PROFILE.md", 45, "head"),
+    ("TOOLS_AND_REPOS.md", 30, "head"),
+    ("SKILLS_INDEX.md", 1, "names"),
+)
+PACK_NAMES_CHARS = 1500
+
+
+def _clean_lines(text: str) -> list[str]:
+    return [ln for ln in text.splitlines() if ln.strip() and not ln.lstrip().startswith("<!--")]
+
+
+def pack_block(base: Path, files=PACK_FILES) -> str:
+    """ONE-BRAIN files for the store pack: denylisted, line- and char-capped, date-stamped."""
+    if not enabled():
+        return ""
+    file_cap = _int_env("JARVIS_SHARED_FILE_MAX_CHARS", DEFAULT_FILE_MAX_CHARS)
+    out: list[str] = []
+    for name, cap, mode in files:
+        if name in DENY_FILES or DENY_NAME_RE.search(name):
+            continue
+        target = Path(base) / name
+        if not target.is_file():
+            continue
+        text = _read(target)
+        if mode == "names":
+            names = [ln.split("`")[1] for ln in text.splitlines() if ln.startswith("| `") and ln.count("`") >= 2]
+            if not names:
+                continue
+            joined = ", ".join(names)
+            if len(joined) > PACK_NAMES_CHARS:
+                joined = joined[:PACK_NAMES_CHARS].rsplit(", ", 1)[0] + ", …"
+            body = f"{len(names)} skills: {joined}"
+        else:
+            body = "\n".join(_clean_lines(text)[:cap])
+        body = body[:file_cap]
+        if body:
+            out.append(f"[{name} | {stamp(target)}]\n{body}")
+    if not out:
+        return ""
+    return "Shared brain (read-only):\n" + "\n\n".join(out)
+
+
+def system_owns_fleet_context() -> bool:
+    """True when the system prompt already carries the private JARVIS_CONTEXT.md (no double load)."""
+    return enabled() and (shared_dir() / PRIMARY).is_file()
