@@ -66,7 +66,7 @@ Missing path on that SHA → STOP and report the SHA. Paths exist + this host is
 
 Do not scoop the dirty `hive/desk` checkout.
 
-**Law:** Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting. Open `#hive`. INDEX: `CONTENT/os/sessions/INDEX.md`.
+**Law:** Hive Slack is the shared room. Cursor, Grok, Claude, and ChatGPT each read Grok, Claude, ChatGPT, and Cursor. Same brain. Same session store. Slack Hive is how they see each other without pasting. Open `#hive`. INDEX: `CONTENT/os/sessions/Recent Conversations.md`.
 
 ## Since cap / current truth (2026-08-27)
 

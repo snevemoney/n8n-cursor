@@ -1,0 +1,89 @@
+{
+  "honest_empty": "I don't have that on disk.",
+  "items": [
+    {
+      "id": "operator-memory",
+      "expect": "gold",
+      "prompt": "What do my operator memory four north stars say about leverage and attention?",
+      "locator": "OPERATOR_MEMORY.md",
+      "must_contain": "protecting attention"
+    },
+    {
+      "id": "north-star",
+      "expect": "gold",
+      "prompt": "What is my north star thesis about a one-person business?",
+      "locator": "NORTH_STAR.md",
+      "must_contain": "one-person business that behaves like a company"
+    },
+    {
+      "id": "vault-map",
+      "expect": "gold",
+      "prompt": "What does my vault map say this organism is?",
+      "locator": "CONTENT/VAULT_MAP.md",
+      "must_contain": "one-person multi-business automation company"
+    },
+    {
+      "id": "research-lane",
+      "expect": "gold",
+      "prompt": "What constraint pattern is in my research lane note — Acquire, Grow, or Cut?",
+      "locator": "CONTENT/LANE.md",
+      "must_contain": "Acquire / Grow / Cut"
+    },
+    {
+      "id": "glossary-philanthropy",
+      "expect": "gold",
+      "prompt": "In my Outer Heaven glossary, what is Philanthropy?",
+      "locator": "OUTER_HEAVEN_GLOSSARY.md",
+      "must_contain": "philanthropic-ai-agent"
+    },
+    {
+      "id": "weekly-scoreboard",
+      "expect": "gold",
+      "prompt": "What does my weekly scoreboard say about the 20hr target?",
+      "locator": "WEEKLY_SCOREBOARD.md",
+      "must_contain": "20hr target met"
+    },
+    {
+      "id": "live-facts",
+      "expect": "gold",
+      "prompt": "What do the hive-os live facts say about building mode?",
+      "locator": "CONTENT/topics/live-facts-hive-os.md",
+      "must_contain": "Building mode"
+    },
+    {
+      "id": "mentor-orb",
+      "expect": "gold",
+      "prompt": "What sitting is written in tonight's mentor pass report?",
+      "locator": "CONTENT/os/reports/mentor.md",
+      "must_contain": "SITTING:"
+    },
+    {
+      "id": "neg-quantum-turtle",
+      "expect": "honest_empty",
+      "prompt": "What does my note on quantum-turtle-invoices say?",
+      "locator": "",
+      "must_contain": ""
+    },
+    {
+      "id": "neg-purple-zeppelin",
+      "expect": "honest_empty",
+      "prompt": "Read my Obsidian note titled purple-zeppelin-payroll-ritual.",
+      "locator": "",
+      "must_contain": ""
+    },
+    {
+      "id": "gen-sky",
+      "expect": "general",
+      "prompt": "Why is the sky blue?",
+      "locator": "",
+      "must_contain": ""
+    },
+    {
+      "id": "gen-spreadsheet",
+      "expect": "general",
+      "prompt": "What is a spreadsheet?",
+      "locator": "",
+      "must_contain": ""
+    }
+  ]
+}

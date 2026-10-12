@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jarvis-scoreboard",
+  "title": "Jarvis production scoreboard",
+  "type": "object",
+  "required": ["schema_version", "checked_at", "rows", "kpis", "defects"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "checked_at": { "type": "string" },
+    "source": { "type": "string" },
+    "rows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/row" }
+    },
+    "kpis": {
+      "type": "object",
+      "required": ["manual_context_transfers", "handoff_context_efficiency"],
+      "additionalProperties": false,
+      "properties": {
+        "manual_context_transfers": { "$ref": "#/$defs/kpi" },
+        "handoff_context_efficiency": { "$ref": "#/$defs/kpi" }
+      }
+    },
+    "defects": {
+      "type": "object",
+      "required": ["p0", "p1", "p2", "p3"],
+      "additionalProperties": false,
+      "properties": {
+        "p0": { "type": "integer", "minimum": 0 },
+        "p1": { "type": "integer", "minimum": 0 },
+        "p2": { "type": "integer", "minimum": 0 },
+        "p3": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "UNPROVEN", "DEGRADED", "UNAVAILABLE"]
+    },
+    "kpi": {
+      "type": "object",
+      "required": ["id", "status", "target", "observed"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "status": { "$ref": "#/$defs/status" },
+        "target": { "type": ["string", "number"] },
+        "observed": { "type": ["string", "number", "null"] },
+        "reason": { "type": "string" }
+      }
+    },
+    "row": {
+      "type": "object",
+      "required": ["id", "layer", "status", "checked_at", "reason", "probe"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "layer": {
+          "type": "string",
+          "enum": ["experience", "interop", "session", "harness", "kpi"]
+        },
+        "status": { "$ref": "#/$defs/status" },
+        "checked_at": { "type": ["string", "null"] },
+        "n_runs": { "type": "integer", "minimum": 0 },
+        "n_ok": { "type": "integer", "minimum": 0 },
+        "p50_ms": { "type": ["number", "null"] },
+        "p95_ms": { "type": ["number", "null"] },
+        "max_ms": { "type": ["number", "null"] },
+        "reason": { "type": "string" },
+        "probe": { "type": "string" }
+      }
+    }
+  }
+}

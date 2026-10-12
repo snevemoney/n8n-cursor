@@ -12,14 +12,29 @@ if (!vault || !fs.existsSync(vault)) {
 }
 
 const linkRe = /\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g;
-const skipDirs = new Set(['.obsidian', '.hive', '.git', 'node_modules']);
+const skipDirs = new Set([
+  '.obsidian',
+  '.hive',
+  '.git',
+  'node_modules',
+  'CURSOR_CHATS',
+  'CURSOR_LIVE',
+  'wiki',
+  'agentic',
+  '_staging',
+]);
+const skipFiles = new Set(['CHRONICLE/2026-08.md', 'TRANSCRIPT_INDEX.md']);
 
 function walk(dir, acc = []) {
   for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (ent.isSymbolicLink()) continue;
     if (skipDirs.has(ent.name)) continue;
     const p = path.join(dir, ent.name);
     if (ent.isDirectory()) walk(p, acc);
-    else if (ent.name.endsWith('.md')) acc.push(p);
+    else if (ent.name.endsWith('.md')) {
+      const rel = path.relative(vault, p).replace(/\\/g, '/');
+      if (!skipFiles.has(rel)) acc.push(p);
+    }
   }
   return acc;
 }

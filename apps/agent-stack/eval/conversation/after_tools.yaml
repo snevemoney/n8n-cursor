@@ -1,0 +1,5 @@
+id: after_tools
+claim: After a tool, Jarvis speaks like a person, not a workflow engine
+ask: check the vault note then tell me in one sentence
+fail_if: Tool vault_read returned / Step 1 of 4
+verdict: UNPROVEN

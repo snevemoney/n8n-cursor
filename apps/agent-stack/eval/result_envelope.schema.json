@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jarvis-result-envelope",
+  "title": "Cross-platform result envelope",
+  "type": "object",
+  "required": ["job_id", "status", "summary", "authority_chain", "evidence"],
+  "additionalProperties": false,
+  "properties": {
+    "job_id": { "type": "string" },
+    "parent_job": { "type": ["string", "null"] },
+    "platform": { "type": "string" },
+    "native_session_id": { "type": ["string", "null"] },
+    "status": {
+      "type": "string",
+      "enum": ["done", "blocked", "needs_user", "failed", "cancelled"]
+    },
+    "summary": { "type": "string" },
+    "authority_chain": {
+      "type": "object",
+      "required": ["requested_by", "routed_by", "executed_by", "evidence_from", "verified_by"],
+      "additionalProperties": false,
+      "properties": {
+        "requested_by": { "type": "string" },
+        "routed_by": { "type": "string" },
+        "executed_by": { "type": "string" },
+        "evidence_from": { "type": "string" },
+        "verified_by": { "type": "string" }
+      }
+    },
+    "evidence": { "type": "array", "items": { "type": "object" } },
+    "files_changed": { "type": "array", "items": { "type": "string" } },
+    "artifacts": { "type": "array", "items": { "type": "string" } },
+    "remaining_risks": { "type": "array", "items": { "type": "string" } },
+    "continuation_ref": { "type": ["string", "null"] },
+    "handoff_chars": { "type": "integer", "minimum": 0 }
+  }
+}

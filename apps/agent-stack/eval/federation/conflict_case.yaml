@@ -1,0 +1,26 @@
+id: conflict-cursor-grok-vault
+claim: One coordinator survives conflicting evidence
+setup:
+  cursor:
+    source: cursor_live
+    claim: A
+    note: current checkout says generation fence is opt-in per writer
+  grok:
+    source: stale_session
+    claim: B
+    freshness_status: stale
+    note: old Grok sitting says OpenClaw is the Jarvis identity
+  vault:
+    source: live_vault
+    claim: C
+    note: live Obsidian decision — Jarvis is the coordinator; OpenClaw is a delegate
+expected:
+  conflict: true
+  surfaced: true
+  blended: false
+  chosen: C
+  chosen_source: live_vault
+fail_if:
+  - merge A+B+C into one confident answer
+  - prefer stale Grok over live vault
+  - hide the disagreement

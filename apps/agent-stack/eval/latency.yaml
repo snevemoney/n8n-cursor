@@ -1,0 +1,9 @@
+measure_later: true
+do_not_invent_first_spoken_budget: true
+budgets:
+  visual_ack_ms: 200
+  stop: feels_immediate
+  first_spoken: p50_p95_from_first_20_live_turns
+  vault_lookup: no_dead_pause_or_phase_looking
+  tts: must_not_block_stop_or_type
+source: last-wire + Face log timestamps

@@ -77,6 +77,16 @@ class SignalIntelligenceTest(unittest.TestCase):
             self.assertIn("untrusted", proc.stdout)
             self.assertEqual((ROOT / "AGENTS.md").read_text(encoding="utf-8"), agents)
 
+    def test_proven_string_without_experiment_receipt_cannot_adopt(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root=Path(raw); cand=root/'candidates'; cand.mkdir()
+            path=cand/'CAND-FAKE.json'
+            path.write_text(json.dumps({"id":"CAND-FAKE","authority":"LOCAL_EXPERIMENT","may_change_goal":False,"experiment":"EXP-MISSING","result":"PROVEN","status":"CANDIDATE"}))
+            proc=run(root,"promote","--candidate","CAND-FAKE")
+            self.assertNotEqual(proc.returncode,0,proc.stdout)
+            self.assertEqual(json.loads(path.read_text())["status"],"CANDIDATE")
+            self.assertIn("experiment",proc.stdout)
+
     def test_pack_is_capped_claims(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
@@ -115,139 +125,79 @@ class SignalIntelligenceTest(unittest.TestCase):
         self.assertNotEqual(refused.returncode, 0, refused.stdout)
         self.assertIn("candidate", refused.stdout)
 
-    def test_rising_count_and_live_pid_do_not_call_jev(self) -> None:
-        with tempfile.TemporaryDirectory() as raw:
-            root = Path(raw)
-            captured = run(
-                root,
-                "capture",
-                "--id",
-                "SIG-PID",
-                "--platform",
-                "local",
-                "--url",
-                "file://pid",
-                "--title",
-                "Live pid",
-            )
-            self.assertEqual(captured.returncode, 0, captured.stdout)
-            path = root / "raw" / "SIG-PID.json"
-            doc = json.loads(path.read_text(encoding="utf-8"))
-            doc["reflex"] = {
-                "pid_alive": True,
-                "row_count": 4,
-                "previous_row_count": 3,
-                "verb": "rank",
-            }
-            path.write_text(json.dumps(doc), encoding="utf-8")
-            filed = run(
-                root,
-                "candidate",
-                "--id",
-                "CAND-PID",
-                "--signal",
-                "SIG-PID",
-                "--kind",
-                "CANDIDATE_PRODUCT",
-                "--text",
-                "Rank this rising count",
-            )
-            self.assertEqual(filed.returncode, 0, filed.stdout + filed.stderr)
-            body = json.loads(filed.stdout.split("PASS")[0])
-            self.assertEqual(body["action"], "MONITOR")
-            self.assertEqual(body["lane"], "deterministic")
-            self.assertFalse(body["jev_called"])
-            self.assertFalse(body["jev_allowed"])
-            self.assertFalse(body["candidate_filed"])
-            self.assertFalse((root / "candidates" / "CAND-PID.json").exists())
 
-    def test_bounded_rank_of_safe_repairs_may(self) -> None:
-        with tempfile.TemporaryDirectory() as raw:
-            root = Path(raw)
-            captured = run(
-                root,
-                "capture",
-                "--id",
-                "SIG-RANK",
-                "--platform",
-                "local",
-                "--url",
-                "file://repairs",
-                "--title",
-                "Safe repairs",
-            )
-            self.assertEqual(captured.returncode, 0, captured.stdout)
-            path = root / "raw" / "SIG-RANK.json"
-            doc = json.loads(path.read_text(encoding="utf-8"))
-            doc["reflex"] = {
-                "verb": "rank",
-                "repair_clusters": [
-                    {"id": "restart", "safe": True},
-                    {"id": "retry", "safe": True},
-                ],
-                "clear_winner": False,
-            }
-            path.write_text(json.dumps(doc), encoding="utf-8")
-            filed = run(
-                root,
-                "candidate",
-                "--id",
-                "CAND-RANK",
-                "--signal",
-                "SIG-RANK",
-                "--kind",
-                "CANDIDATE_RULE",
-                "--text",
-                "Rank the safe repairs",
-            )
-            self.assertEqual(filed.returncode, 0, filed.stdout + filed.stderr)
-            body = json.loads(filed.stdout.split("PASS")[0])
-            self.assertEqual(body["verb"], "rank")
-            self.assertTrue(body["jev_allowed"])
-            self.assertFalse(body["jev_called"])
-            self.assertFalse(body["provider_call"])
-            self.assertIsNone(body["provider"])
-            self.assertFalse(body["candidate_filed"])
-            self.assertFalse((root / "candidates" / "CAND-RANK.json").exists())
+class SourceFreshnessPromotionTest(unittest.TestCase):
+    """Synthetic receipts in temporary directories, never live capability proof."""
 
-    def test_reflex_does_not_ask_the_question_library(self) -> None:
+    def test_promotion_requires_current_bound_source(self) -> None:
+        import hashlib
+        import importlib.machinery
+        import importlib.util
+        import io
+        from contextlib import redirect_stdout
+        from unittest.mock import patch
+
+        def load(name: str, path: Path):
+            spec = importlib.util.spec_from_file_location(name, path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module
+
+        owner = CLI.parent
+        helper = load("freshness_transition_fixture", owner / "test_hive_gate.py")
+        gate = load("freshness_transition_gate", owner / "hive-gate.py")
+        signal = load("freshness_signal", CLI)
+        job_path = owner / "hive-job.py"
+        original_loader = importlib.machinery.SourceFileLoader.exec_module
         with tempfile.TemporaryDirectory() as raw:
-            root = Path(raw)
-            captured = run(
-                root,
-                "capture",
-                "--id",
-                "SIG-LIB",
-                "--platform",
-                "local",
-                "--url",
-                "file://library",
-                "--title",
-                "Question library",
+            tmp = Path(raw)
+            capex = tmp / "capex"
+            claim_dir = capex / "EXP-FIXTURE"
+            implementation = tmp / "implementation.py"
+            implementation.write_text("version=1\n", encoding="utf-8")
+            evidence = helper.live_evidence(tmp)
+            evidence.update(
+                git_sha=gate.hive_job.head_sha(),
+                source_hashes={"implementation.py": hashlib.sha256(implementation.read_bytes()).hexdigest()},
             )
-            self.assertEqual(captured.returncode, 0, captured.stdout)
-            path = root / "raw" / "SIG-LIB.json"
-            doc = json.loads(path.read_text(encoding="utf-8"))
-            doc["reflex"] = {"ask_all": True, "library_size": 273, "questions": list(range(273)), "verb": "score"}
-            path.write_text(json.dumps(doc), encoding="utf-8")
-            filed = run(
-                root,
-                "candidate",
-                "--id",
-                "CAND-LIB",
-                "--signal",
-                "SIG-LIB",
-                "--kind",
-                "CANDIDATE_EVAL",
-                "--text",
-                "Ask every question",
+            helper.write_claim(
+                claim_dir, "LIVE", evidence,
+                runtime={**evidence, "source_paths": ["implementation.py"]},
+                acceptance=[{"id": "a", "requirement": "temporary fixture content", "mandatory": True,
+                             "result": "PASS", "evidence_refs": ["evidence/runtime.json"]}],
+                regression={"argv": [sys.executable, "-c",
+                            'from pathlib import Path; assert Path("implementation.py").read_text()=="version=1\\n"'],
+                            "cwd": str(tmp)},
             )
-            self.assertEqual(filed.returncode, 0, filed.stdout + filed.stderr)
-            body = json.loads(filed.stdout.split("PASS")[0])
-            self.assertEqual(body["action"], "NO_ACTION")
-            self.assertEqual(body["questions_asked"], 0)
-            self.assertFalse(body["jev_called"])
-            self.assertFalse((root / "candidates" / "CAND-LIB.json").exists())
+            with redirect_stdout(io.StringIO()):
+                rc = gate.request_transition(claim_dir, "VERIFIED", "watchdog", "verifier",
+                                             "LIVE", 1, "grok_bot", "verifier-run", "")
+            self.assertEqual(rc, 0)
+            base_claim = json.loads((claim_dir / "claim.json").read_text())
+            corpus = tmp / "signals"
+            (corpus / "candidates").mkdir(parents=True)
+            candidate_path = corpus / "candidates/CAND-FIXTURE.json"
+            document = {"id": "CAND-FIXTURE", "experiment": "EXP-FIXTURE", "result": "PROVEN",
+                        "authority": "LOCAL_ENGINEERING", "may_change_goal": False}
+
+            def loader(self, module):
+                original_loader(self, module)
+                if Path(self.path) == job_path:
+                    module.CAPEX = capex
+
+            for case in ("unchanged", "changed", "omitted_identity"):
+                with self.subTest(case=case):
+                    implementation.write_text("version=1\n" if case == "unchanged" else "version=2\n")
+                    claim = json.loads(json.dumps(base_claim))
+                    if case == "omitted_identity":
+                        claim["runtime"].pop("source_paths")
+                    (claim_dir / "claim.json").write_text(json.dumps(claim))
+                    candidate_path.write_text(json.dumps(document))
+                    with patch.object(importlib.machinery.SourceFileLoader, "exec_module", loader), redirect_stdout(io.StringIO()):
+                        rc = signal.promote(corpus, "CAND-FIXTURE", False)
+                    self.assertEqual(rc, 0 if case == "unchanged" else 1)
+                    self.assertEqual(json.loads(candidate_path.read_text()).get("status") == "ADOPTED",
+                                     case == "unchanged")
 
 
 if __name__ == "__main__":

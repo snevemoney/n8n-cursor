@@ -1,0 +1,15 @@
+record:
+  target: local | ssh
+  host: null | outerheaven
+  cwd: string
+  command_class: read | test | diagnose | hard_step
+  pid: int | null
+  job_id: string
+  started_at: iso
+  status: running | done | failed | cancelled
+  exit_code: int | null
+  bounded_output: string
+  artifacts: [path]
+follow_up: inspect this job_id; do not relaunch
+hard_step_classes: [deploy, delete, rotate, publish, pay, vps_start]
+call_vps_today: probe only; not this job record
