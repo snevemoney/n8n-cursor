@@ -170,6 +170,28 @@ class _Session:
         return self.call(self.inspect_tool, {})
 
 
+# Words that claim a visible side effect, and the tool names that would prove it.
+CLAIM_RE = re.compile(
+    r"\b(now\s+open|opened|is\s+open|launched|sent|emailed|posted|published|uploaded|shared)\b",
+    re.I,
+)
+PROOF_TOOL_RE = re.compile(r"open|launch|reveal|show|send|mail|post|publish|upload|share", re.I)
+
+
+def honest_claim(text: str, steps: list[dict], app: str) -> str:
+    """Drop sentences that claim an open/send no tool result confirms."""
+    if not text or not CLAIM_RE.search(text):
+        return text
+    if any(row.get("ok") and PROOF_TOOL_RE.search(str(row.get("tool") or "")) for row in steps or []):
+        return text
+    # Trim a trailing ", and it's now open in X ..." clause first so the true part survives.
+    text = re.sub(r",?\s+and\s+(?:it's|it\s+is|is)\s+now\s+open\b[^.!?]*", "", text, flags=re.I)
+    keep = [s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s and not CLAIM_RE.search(s)]
+    ran = ", ".join(str(r.get("tool")) for r in steps or [] if r.get("ok")) or "no tool"
+    note = f"I ran {ran} in {app}; no tool opened or sent anything, so I am not claiming that."
+    return " ".join(keep + [note]).strip()
+
+
 def _pick_inspect(tools: list[dict]) -> str:
     names = [str(t["name"]) for t in tools]
     for name in names:
@@ -386,11 +408,11 @@ def run(args: dict, utterance: str, *, model_fn, session_fn=session, budget_sec:
     if stopped:
         spoken = stopped
     elif steps and final:
-        spoken = final
+        spoken = honest_claim(final, steps, app)
     elif steps:
         spoken = f"Ran {', '.join(row['tool'] for row in steps)} in {app}."
     else:
-        spoken = final or f"I did not change anything in {app}."
+        spoken = honest_claim(final, steps, app) if final else f"I did not change anything in {app}."
     return {
         "ok": ok,
         "wire": "craft",

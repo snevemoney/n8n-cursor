@@ -36,6 +36,32 @@ QUIET_THINK_RE = re.compile(
 )
 
 
+def _safe_path(value: str) -> str:
+    """HOME-relative or file-name-only: never an absolute machine path."""
+    text = str(value or "")
+    home = os.path.expanduser("~")
+    if home and home != "/" and text.startswith(home + "/"):
+        return "~/" + text[len(home) + 1 :]
+    if text.startswith("/"):
+        return text.rstrip("/").rsplit("/", 1)[-1]
+    return text
+
+
+def safe_cites(cites) -> list:
+    """Citations as /api/turn sends them: no absolute paths, no 'abs' key."""
+    out = []
+    for c in cites or []:
+        if isinstance(c, dict):
+            row = {k: v for k, v in c.items() if k not in ("abs", "abspath", "absolute")}
+            for k in ("path", "file", "source"):
+                if isinstance(row.get(k), str):
+                    row[k] = _safe_path(row[k])
+            out.append(row)
+        elif isinstance(c, str):
+            out.append(_safe_path(c))
+    return out
+
+
 def _load_mod(name: str, path: Path):
     sys.modules.pop(name, None)
     spec = importlib.util.spec_from_file_location(name, path)
@@ -149,7 +175,7 @@ def bus_write(
                 "utterance": utterance,
                 "permission_ask": permission_ask,
                 "spoken": spoken,
-                "cites": cites or [],
+                "cites": safe_cites(cites),
                 "wires": wires or [],
                 "updated_at": now_iso(),
             }
@@ -261,7 +287,7 @@ def _turn_event(
         "spoken": spoken,
         "host": host,
         "args": args,
-        "cites": cites or [],
+        "cites": safe_cites(cites),
         "wires": wires or [],
         "done": done,
         "partial": partial,

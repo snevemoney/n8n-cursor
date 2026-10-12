@@ -60,7 +60,7 @@ OPENROUTER_ATTEMPT_SEC = _sec_env("JARVIS_TALK_ATTEMPT_SEC", 20.0)
 OPENROUTER_WALL_SEC = _sec_env("JARVIS_TALK_WALL_SEC", 22.0)
 TALK_DARK = "The talk wire is dark this turn."
 OPENROUTER_MAX_TOKENS = 512
-OPENROUTER_RETRIEVE_TOKENS = 512
+OPENROUTER_RETRIEVE_TOKENS = int(os.environ.get("JARVIS_TALK_MAX_TOKENS") or 320)  # short spoken answers; cut ArtCraft latency
 LENGTH_RETRY_TOKENS = 640
 LENGTH_MISS = "UNKNOWN. That answer ran out of room."
 OPENROUTER_HANDS = (
@@ -1213,7 +1213,29 @@ def call_openrouter(
     })
     if isinstance(got, dict) and got.get("ok"):
         got.setdefault("primary_model", primary)
+        if not any(got.get(k) for k in ("tool", "tool_calls", "hand", "action", "verb", "args")):
+            fixed = unverified_claim(str(got.get("spoken") or ""))
+            if fixed != got.get("spoken"):
+                got["spoken"] = fixed
+                got["claim_fixed"] = True
     return got
+
+
+# A talk reply runs no hand, so it cannot have opened, sent or launched anything.
+TALK_CLAIM_RE = re.compile(
+    r"\b(?:I(?:'ve|\s+have)?\s+(?:just\s+|now\s+)?(?:opened|sent|launched|emailed|posted|published|uploaded|saved)"
+    r"|(?:is|it's|it\s+is)\s+now\s+open"
+    r"|now\s+open\s+in)\b",
+    re.I,
+)
+
+
+def unverified_claim(text: str) -> str:
+    """Drop first-person done-claims from a tool-less talk reply and say so plainly."""
+    if not text or not TALK_CLAIM_RE.search(text):
+        return text
+    keep = [s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s and not TALK_CLAIM_RE.search(s)]
+    return " ".join(keep + ["I have not opened or sent anything from this answer; no tool ran."]).strip()
 
 
 def _call_openrouter_inner(

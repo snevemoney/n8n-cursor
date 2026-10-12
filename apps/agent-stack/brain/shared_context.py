@@ -214,9 +214,27 @@ def _entry_label(heading: str, entry: str) -> str:
     return f"{head} > {bold.group(1).strip()[:60]}" if bold else head
 
 
+IDENTITY_RE = re.compile(
+    r"\b(what|which)\s+(ai\s+)?(model|llm|engine)\b|\bwho\s+are\s+you\b|\bwhat\s+are\s+you\b|\bare\s+you\s+(claude|gpt|grok|gemini|deepseek)\b",
+    re.I,
+)
+
+
+def min_ratio() -> float:
+    try:
+        return max(0.0, min(1.0, float(os.environ.get("JARVIS_SHARED_RETRIEVE_MIN_RATIO") or 0.5)))
+    except ValueError:
+        return 0.5
+
+
 def retrieve_entries(query: str, *, root: Path | None = None) -> list[dict]:
-    """Turn-relevant entries: [{file, heading, text, score}]. Empty when off or no match."""
-    if not enabled():
+    """Turn-relevant entries: [{file, heading, text, score}]. Empty when off or no match.
+
+    Identity asks ("what model are you") are answered by the self-report line,
+    so they retrieve nothing. Otherwise an entry must cover at least
+    min_ratio() of the ask's content words, so one shared word is not enough.
+    """
+    if not enabled() or IDENTITY_RE.search(query or ""):
         return []
     q = _terms(query)
     if not q:
@@ -235,7 +253,8 @@ def retrieve_entries(query: str, *, root: Path | None = None) -> list[dict]:
             score = len(hits) + (1 if q & _terms(heading) else 0)
             scored.append((score, path.name, heading, entry, stamp(path)))
     floor = 2 if len(q) >= 3 else 1
-    scored = [r for r in scored if r[0] >= floor]
+    need = min_ratio() * len(q)
+    scored = [r for r in scored if r[0] >= floor and r[0] >= need]
     scored.sort(key=lambda r: -r[0])
     out: list[dict] = []
     used_total = 0
@@ -257,7 +276,7 @@ def retrieved_block(query: str) -> tuple[str, list[dict]]:
         return "", []
     text = "Shared memory entries relevant to this ask (cite file and heading when used):\n" + "\n".join(
         f"[{r['file']} :: {r['heading']} | {r['as_of']}]\n{r['text']}" for r in rows
-    )
+    ) + "\nIf these entries answer the ask, answer from them directly in at most three short sentences; do not call a tool to look it up again."
     return text, [{"file": r["file"], "heading": r["heading"]} for r in rows]
 
 
