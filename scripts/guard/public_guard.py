@@ -18,6 +18,8 @@ from pathlib import Path
 # Private shared files live in ~/.grok-private, never in the repo.
 PRIVATE_NAME_RE = re.compile(
     r"(^|/)(ACTIVE_TASKS|MAC_SHARED_MEMORY|SECURITY_TODO|CURRENT_STATE)\.md$"
+    r"|(^|/)(PLATFORM_DIGEST|OBSIDIAN_HUB_CONTRACT)\.md$"
+    r"|(^|/)(SHARED_MEMORY_TIMELINE|OBSIDIAN_STALE_CATCHUP)[^/]*\.md$"
     r"|(^|/)[^/]*\.grok-shared\.md$"
     r"|(^|/)gold_vault\.local\.json$"
     r"|(^|/)jarvis-turns\.jsonl$"
