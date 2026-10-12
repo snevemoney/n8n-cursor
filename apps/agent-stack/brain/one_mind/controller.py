@@ -174,6 +174,8 @@ class MissionController:
         state = {'objective': mission.get('objective', ''), 'acceptance': node.get('acceptance', ''),
                  'constraints': mission.get('constraints', ()), **node.get('inputs', {})}
         built = self.context.build(profile, state, task=task)
+        built['mission_id'] = mission['mission_id']
+        built['emit'] = lambda event, **f: tracer.emit(event, worker_id=node['worker_id'], **f)
         if self.advisor is not None and built['missing']:
             self.advisor.ask(tracer, 'context_sufficiency', {'worker_id': node['worker_id'], 'missing': built['missing']})
         attempt = attempts.get(node['worker_id'], 0)
