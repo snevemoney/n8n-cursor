@@ -1,0 +1,5 @@
+id: no_sir_spam
+claim: Product voice is not repetitive Sir
+ask: a five-turn casual chat
+fail_if: every line starts with Sir
+verdict: UNPROVEN

@@ -6,11 +6,26 @@ Overwrite each hand. Scars.jsonl is the history.
 """
 from __future__ import annotations
 
+import importlib.util
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 
 NAME = "last-wire.json"
+HERE = Path(__file__).resolve().parent
+
+
+def _bus_io():
+    path = HERE / "bus_io.py"
+    spec = importlib.util.spec_from_file_location("agent_stack_bus_io_wire", path)
+    if spec is None or spec.loader is None:
+        return None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+BUS_IO = _bus_io()
 
 
 def now_iso() -> str:
@@ -24,7 +39,20 @@ def path_for(hive: Path) -> Path:
 def _clean_wire(raw: dict | None) -> dict:
     src = raw if isinstance(raw, dict) else {}
     out = {}
-    for key in ("path", "scar", "url", "error", "job_id"):
+    for key in (
+        "path",
+        "scar",
+        "url",
+        "error",
+        "job_id",
+        "source",
+        "outcome",
+        "evidence",
+        "provider",
+        "model",
+        "tool",
+        "finish_reason",
+    ):
         val = src.get(key)
         if val is None or val == "":
             out[key] = None
@@ -42,6 +70,8 @@ def write(
     wire: dict | None = None,
     utterance: str = "",
     retried: bool = False,
+    gen: int | None = None,
+    closed: bool = False,
 ) -> dict:
     row = {
         "verb": (verb or "").strip()[:40],
@@ -53,6 +83,36 @@ def write(
         "at": now_iso(),
     }
     dest = path_for(hive)
+    held = {"ok": False}
+
+    def apply(bus: dict) -> dict:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(json.dumps(row, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
+        held["ok"] = True
+        return bus
+
+    if closed and BUS_IO is not None and hasattr(BUS_IO, "mutate_bus"):
+        # The fence has set cancel_gen on this generation. act_if_current
+        # would drop the receipt. Write it only while this gen still owns the bus.
+        def settle(bus: dict) -> dict:
+            if gen is not None:
+                try:
+                    token = int(gen)
+                except (TypeError, ValueError):
+                    return bus
+                if int(BUS_IO.bus_gen(bus)) != token:
+                    return bus
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(json.dumps(row, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
+            held["ok"] = True
+            return bus
+
+        BUS_IO.mutate_bus(hive, settle)
+        return row if held["ok"] else {}
+    if BUS_IO is not None and hasattr(BUS_IO, "act_if_current"):
+        if BUS_IO.act_if_current(hive, gen, apply) is None or not held["ok"]:
+            return {}
+        return row
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(row, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
     return row
@@ -78,6 +138,10 @@ def inspect_line(row: dict | None) -> str:
     bits = [f"Last hand: {last.get('verb') or 'none'}."]
     if w.get("path"):
         bits.append(f"path={w['path']}.")
+    if w.get("outcome"):
+        bits.append(f"outcome={w['outcome']}.")
+    if w.get("source"):
+        bits.append(f"source={w['source']}.")
     if w.get("job_id"):
         bits.append(f"job={w['job_id']}.")
     if w.get("scar"):

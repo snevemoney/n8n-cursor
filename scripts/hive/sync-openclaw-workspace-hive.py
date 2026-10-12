@@ -758,4 +758,11 @@ Before every build/refactor: read `BUILD_PHILOSOPHY.md`. Evaluate against SOFTWA
 
 
 if __name__ == "__main__":
+    import sys as _sys
+    from pathlib import Path as _Path
+
+    _sys.path.insert(0, str(_Path(__file__).resolve().parent))
+    from openclaw_refuse import refuse_mutate
+
+    refuse_mutate("sync OpenClaw workspaces into /root/.openclaw")
     main()

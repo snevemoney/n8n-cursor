@@ -1,0 +1,6 @@
+id: idle_20min
+claim: After twenty minutes idle, follow-up still uses the same sitting
+ask: come back and say what about the thing we just dropped
+fail_if: re-upload required; new sitting; forgot the drop
+verdict: UNPROVEN
+hitl: Evens waits

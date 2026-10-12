@@ -404,7 +404,7 @@ tags: [theme-hub]
 
 ## See also
 
-- [[THEMES/README]]
+- [[00_Outer_Heaven/THEMES/Theme Hub Guide]]
 - [[OUTER_HEAVEN_LIBRARY]]
 """
         path = themes_dir / f"{theme_id}.md"

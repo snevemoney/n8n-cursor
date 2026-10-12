@@ -56,6 +56,7 @@ SLACK_ROOM = (
     "Slack Hive is how they see each other without pasting."
 )
 SLACK_INDEX_REL = "docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md"
+SESSION_HEADS_FILENAME = "Recent Conversations.md"
 SLACK_HIVE_CHANNEL_DEFAULT = "C0BTH1TMFC5"
 
 OFFICIAL = {
@@ -651,6 +652,51 @@ def write_text(path: Path, body: str) -> None:
     path.write_text(body if body.endswith("\n") else body + "\n", encoding="utf-8")
 
 
+ARCHIVE_PROTECT_RE = re.compile(
+    r"(?m)^(?:"
+    r"archive_type:\s*(?:conversation_text|cursor_pointer|archive_alias)"
+    r"|source:\s*(?:claude-code|grok-archive|claude-desktop-local|claude-web-export)"
+    r")\s*$"
+)
+
+
+def is_protected_archive_note(path: Path) -> bool:
+    """True when a sessions note is a full archive and must not be stub-replaced."""
+    if not path.is_file():
+        return False
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")[:12000]
+    except OSError:
+        return False
+    return bool(ARCHIVE_PROTECT_RE.search(text))
+
+
+def alias_md(row: dict[str, Any], points_to: str, reason: str) -> str:
+    title = clean_ask(str(row.get("title") or row.get("ask") or row.get("id") or "session"), 120)
+    target = points_to.replace(".md", "").lstrip("/")
+    if not target.startswith("00_Outer_Heaven/") and not target.startswith("CONTENT/"):
+        target = f"00_Outer_Heaven/CONTENT/os/{target}" if target.startswith("sessions/") else target
+    return "\n".join(
+        [
+            "---",
+            "alias: true",
+            "archive_type: archive_alias",
+            f"surface: {row.get('surface')}",
+            f"id: {row.get('id')}",
+            f"date: {row.get('mtime') or ''}",
+            f"points_to: {points_to}",
+            "---",
+            "",
+            f"# {title}",
+            "",
+            reason,
+            "",
+            f"Body: [[{target}]].",
+            "",
+        ]
+    )
+
+
 def stub_md(row: dict[str, Any]) -> str:
     title = row.get("title") or row.get("ask") or row.get("id") or "session"
     return "\n".join(
@@ -687,6 +733,8 @@ def render_four_index(by_surface: dict[str, list[dict[str, Any]]], *, at: str) -
         "",
         FOUR_X_FOUR,
         "",
+        "Doors: [[00_Outer_Heaven/CONTENT/os/sessions/Conversation Timeline]] · [[00_Outer_Heaven/CONTENT/os/sessions/Archive Coverage]] — dated archive. Table below is latest heads only.",
+        "",
         "| surface | id | title | date | path |",
         "|---|---|---|---|---|",
     ]
@@ -697,7 +745,7 @@ def render_four_index(by_surface: dict[str, list[dict[str, Any]]], *, at: str) -
             lines.append(
                 f"| {surface} | `{row.get('id')}` | {title[:80]} | {row.get('mtime') or ''} | `{rel}` |"
             )
-    lines += ["", f"[[hot]] · [[GRAPH]] · [[HOST]]", ""]
+    lines += ["", "[[00_Outer_Heaven/CONTENT/os/hot]] · [[OS-GRAPH]] · [[HOST]]", ""]
     return "\n".join(lines)
 
 
@@ -712,9 +760,44 @@ def write_session_store(os_root: Path, by_surface: dict[str, list[dict[str, Any]
             sid = str(row.get("id") or "").replace("/", "-")
             if not sid:
                 continue
-            write_text(folder / f"{sid}.md", stub_md(row))
+            dest = folder / f"{sid}.md"
+            if is_protected_archive_note(dest):
+                n += 1
+                continue
+            nested = [
+                p
+                for p in folder.rglob(f"{sid}.md")
+                if p != dest and is_protected_archive_note(p)
+            ]
+            if nested:
+                try:
+                    points = str(nested[0].relative_to(os_root.parent.parent))
+                except ValueError:
+                    points = str(nested[0])
+                if "CONTENT/os/sessions/" not in points:
+                    points = f"CONTENT/os/sessions/{surface}/{nested[0].parent.name}/{sid}.md"
+                write_text(
+                    dest,
+                    alias_md(row, points, "Desk transcript (not this stub)."),
+                )
+                n += 1
+                continue
+            if surface == "claude":
+                write_text(
+                    dest,
+                    alias_md(
+                        row,
+                        "CONTENT/os/sessions/Conversation Timeline.md",
+                        "Title-only head. Not a transcript.",
+                    ),
+                )
+                n += 1
+                continue
+            write_text(dest, stub_md(row))
             n += 1
         counts[surface] = n
+    write_text(store / SESSION_HEADS_FILENAME, render_four_index(by_surface, at=at))
+    # Union with main: keep main's INDEX.md beside Evens's "Recent Conversations.md".
     write_text(store / "INDEX.md", render_four_index(by_surface, at=at))
     write_text(
         store / "INDEX.json",
@@ -744,7 +827,7 @@ def write_session_store(os_root: Path, by_surface: dict[str, list[dict[str, Any]
             "",
             FOUR_X_FOUR,
             "",
-            "SSOT: [[sessions/INDEX]] — `CONTENT/os/sessions/INDEX.md`. Slack: `#hive`.",
+            "SSOT: [[00_Outer_Heaven/CONTENT/os/sessions/Recent Conversations]] — `CONTENT/os/sessions/Recent Conversations.md`. Slack: `#hive`.",
             "",
             "[[hot]] · [[GRAPH]] · [[HOST]]",
             "",
@@ -757,6 +840,8 @@ def write_session_store(os_root: Path, by_surface: dict[str, list[dict[str, Any]
 def write_attach_index(repo: Path, by_surface: dict[str, list[dict[str, Any]]], *, at: str) -> Path:
     attach = repo_attach_os_root(repo) / "sessions"
     attach.mkdir(parents=True, exist_ok=True)
+    write_text(attach / SESSION_HEADS_FILENAME, render_four_index(by_surface, at=at))
+    # Union with main: keep main's INDEX.md beside Evens's "Recent Conversations.md".
     write_text(attach / "INDEX.md", render_four_index(by_surface, at=at))
     write_text(
         attach / "README.md",
@@ -773,7 +858,7 @@ def write_attach_index(repo: Path, by_surface: dict[str, list[dict[str, Any]]], 
             ]
         ),
     )
-    return attach / "INDEX.md"
+    return attach / SESSION_HEADS_FILENAME
 
 
 def write_bundle(
@@ -809,7 +894,7 @@ def write_bundle(
     )
     return {
         "said": str(said_path),
-        "index": str(os_root / "sessions" / "INDEX.md"),
+        "index": str(os_root / "sessions" / SESSION_HEADS_FILENAME),
         "paste": str(os_root / "PASTE-PACK.md"),
         "hot": str(hot_path),
         **{f"n_{k}": str(v) for k, v in counts.items()},
@@ -888,7 +973,7 @@ def render_slack_snapshot(
         FOUR_X_FOUR,
         "",
         f"*INDEX:* `{SLACK_INDEX_REL}`",
-        "https://github.com/snevemoney/n8n-cursor/blob/main/docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md",
+        "https://github.com/snevemoney/n8n-cursor/blob/main/docs/hive/outer-heaven/CONTENT/os/sessions/Recent%20Conversations.md",
         f"*hot / said:* {hot_line or at} · `{said_rel}`",
         "",
     ]

@@ -1,0 +1,11 @@
+{
+  "name": "@hive/agent-stack",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "One Jarvis pipeline: context file, one Cursor pick, one tool, butler speak. Face/mic/TTS on 127.0.0.1:4018.",
+  "type": "module",
+  "scripts": {
+    "test": "python3 scripts/test_suite.py"
+  }
+}

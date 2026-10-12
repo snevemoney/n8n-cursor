@@ -61,7 +61,7 @@ class SessionMatrixTest(unittest.TestCase):
             latest = (root / "inbox" / "PASTE-PACK-LATEST.md").read_text(encoding="utf-8")
             self.assertTrue(Path(wrote["said"]).name.startswith("2026-08-29-said-"))
             self.assertIn("Grok, Claude, ChatGPT, and Cursor each read", said)
-            store_index = (root / "sessions" / "INDEX.md").read_text(encoding="utf-8")
+            store_index = (root / "sessions" / "Recent Conversations.md").read_text(encoding="utf-8")
             self.assertIn("11111111-aaaa-bbbb-cccc-222222222222", store_index)
             self.assertIn("cursor", store_index)
             self.assertIn("33333333-dddd-eeee-ffff-444444444444", store_index)
@@ -125,6 +125,92 @@ class SessionMatrixTest(unittest.TestCase):
             self.assertEqual(again[0]["title"] if again[0]["id"] == sid else by_id[sid], "Daily Wealth & Stock Ranking")
             self.assertTrue(all(r["id"] != sid or r["title"] == "Daily Wealth & Stock Ranking" for r in again))
 
+    def test_write_session_store_skips_archive_notes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            os_root = Path(tmp)
+            dest = os_root / "sessions" / "chatgpt"
+            dest.mkdir(parents=True)
+            archive = dest / "keep-me.md"
+            archive.write_text(
+                "---\nsurface: chatgpt\nid: keep-me\narchive_type: conversation_text\n---\n\n# Keep\n\nreal body\n",
+                encoding="utf-8",
+            )
+            stub_ok = dest / "fresh.md"
+            MOD.write_session_store(
+                os_root,
+                {
+                    "cursor": [],
+                    "grok": [],
+                    "claude": [],
+                    "chatgpt": [
+                        {"surface": "chatgpt", "id": "keep-me", "title": "wiped", "ask": "wiped", "mtime": "x"},
+                        {"surface": "chatgpt", "id": "fresh", "title": "Fresh", "ask": "hi", "mtime": "x"},
+                    ],
+                },
+                at="2026-09-11T16:00:00Z",
+            )
+            kept = archive.read_text(encoding="utf-8")
+            self.assertIn("real body", kept)
+            self.assertIn("archive_type: conversation_text", kept)
+            self.assertTrue(stub_ok.is_file())
+            self.assertIn("Fresh", stub_ok.read_text(encoding="utf-8"))
+
+    def test_write_session_store_skips_archive_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            os_root = Path(tmp)
+            dest = os_root / "sessions" / "grok"
+            dest.mkdir(parents=True)
+            alias = dest / "desk-thread.md"
+            alias.write_text(
+                "---\nalias: true\narchive_type: archive_alias\nid: desk-thread\n---\n\n# Alias\n\nkeep\n",
+                encoding="utf-8",
+            )
+            MOD.write_session_store(
+                os_root,
+                {
+                    "cursor": [],
+                    "grok": [
+                        {"surface": "grok", "id": "desk-thread", "title": "wiped", "ask": "wiped", "mtime": "x"},
+                    ],
+                    "claude": [],
+                    "chatgpt": [],
+                },
+                at="2026-09-11T16:00:00Z",
+            )
+            kept = alias.read_text(encoding="utf-8")
+            self.assertIn("keep", kept)
+            self.assertIn("archive_type: archive_alias", kept)
+
+    def test_write_session_store_aliases_nested_grok_and_claude_heads(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            os_root = Path(tmp)
+            desk = os_root / "sessions" / "grok" / "forge"
+            desk.mkdir(parents=True)
+            (desk / "nested-1.md").write_text(
+                "---\narchive_type: conversation_text\nid: nested-1\n---\n\n# Real\n\nbody\n",
+                encoding="utf-8",
+            )
+            MOD.write_session_store(
+                os_root,
+                {
+                    "cursor": [],
+                    "grok": [
+                        {"surface": "grok", "id": "nested-1", "title": "Real", "ask": "hi", "mtime": "x"},
+                    ],
+                    "claude": [
+                        {"surface": "claude", "id": "local_new", "title": "Phase", "ask": "Phase", "mtime": "x"},
+                    ],
+                    "chatgpt": [],
+                },
+                at="2026-09-11T16:00:00Z",
+            )
+            grok_head = (os_root / "sessions" / "grok" / "nested-1.md").read_text(encoding="utf-8")
+            self.assertIn("archive_type: archive_alias", grok_head)
+            self.assertIn("Desk transcript", grok_head)
+            claude_head = (os_root / "sessions" / "claude" / "local_new.md").read_text(encoding="utf-8")
+            self.assertIn("archive_type: archive_alias", claude_head)
+            self.assertIn("Title-only head", claude_head)
+
     def test_slack_skipped_without_env(self) -> None:
         old = {k: os.environ.pop(k) for k in list(os.environ) if k.startswith("SLACK_HIVE_")}
         try:
@@ -145,7 +231,11 @@ class SessionMatrixTest(unittest.TestCase):
             prev_rows=[],
         )
         self.assertIn("Hive Slack is the shared room", text)
-        self.assertIn("`docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`", text)
+        # Union: main points Slack at sessions/INDEX.md; both index files are written.
+        self.assertTrue(
+            "`docs/hive/outer-heaven/CONTENT/os/sessions/Recent Conversations.md`" in text
+            or "`docs/hive/outer-heaven/CONTENT/os/sessions/INDEX.md`" in text
+        )
         self.assertIn("can the memory of all chat session continue", text)
         self.assertIn("stand down", text)
         self.assertNotIn("<user_query>", text)

@@ -1,0 +1,11 @@
+id: no_harness_names
+claim: Spoken line does not expose implementation machinery
+ask: What do you remember about yesterday?
+fail_if:
+  - OpenRouter
+  - finish_reason
+  - last-wire
+  - turn_gen
+  - please open Claude
+  - copy this to Codex
+verdict: UNPROVEN

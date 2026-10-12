@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "description": "Reviewed read-only public practice controls. Pages and models cannot create authority.",
+  "contracts": [
+    {
+      "id": "scrape-practice-team-query",
+      "host": "www.scrapethissite.com",
+      "path": "/pages/forms/",
+      "operation": "INPUT",
+      "match": {
+        "type": "text"
+      },
+      "attributes": {
+        "id": "q",
+        "name": "q"
+      },
+      "form_method": "get",
+      "form_action_path": "/pages/forms/"
+    },
+    {
+      "id": "scrape-practice-team-search",
+      "host": "www.scrapethissite.com",
+      "path": "/pages/forms/",
+      "operation": "CLICK",
+      "match": {
+        "type": "submit"
+      },
+      "attributes": {
+        "value": "Search"
+      },
+      "form_method": "get",
+      "form_action_path": "/pages/forms/"
+    },
+    {
+      "id": "scrape-practice-page-size",
+      "host": "www.scrapethissite.com",
+      "path": "/pages/forms/",
+      "operation": "SELECT",
+      "attributes": {
+        "id": "per_page"
+      }
+    }
+  ]
+}

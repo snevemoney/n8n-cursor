@@ -1,0 +1,69 @@
+{
+  "schema": "hive.fleet-closures/v0",
+  "job_id": "GROK-FLEET-CONVERGENCE",
+  "state": "IMPLEMENTED_UNVERIFIED",
+  "rule": "17 desks stay specialized. This file is the shared projection. It does not replace a job card.",
+  "shared": [
+    "WAIT_EVENS is not an interrupt.",
+    "Do not invent customers, revenue, or KPIs.",
+    "Product proof is not market proof.",
+    "Live / stays HOLD. PASS_DIFF is not ship."
+  ],
+  "closures": [
+    {
+      "id": "eng-14",
+      "desks": ["Forge", "Watchdog", "Consultant", "HITL Operator"],
+      "text": "ENG-14: extract-pack diff is not live. A Consultant co-sign is not independent verification. Live auto-send and live build stay held. A declined Stripe item is not WAIT_EVENS. Historical: Consultant t370s0 and Forge t663s0."
+    },
+    {
+      "id": "researcher-adopted",
+      "desks": ["Researcher"],
+      "text": "Researcher method adoption is 0. Durable file: docs/hive/outer-heaven/CONTENT/os/researcher-adoption.json. A batch label is not ADOPTED."
+    },
+    {
+      "id": "creative-trace",
+      "desks": ["Creative Studio"],
+      "text": "Retrieved-context trace hops, in order: request, context_pack, skills, why_selected, behavior. Missing hops mean contamination is UNPROVEN. Do not blame a school without this trace."
+    },
+    {
+      "id": "gtm-adoption",
+      "desks": ["Product GTM"],
+      "text": "Product GTM adopted count is 0. Ashford and Harbor stay PENDING_PRODUCT_PROOF. Remake stays UNSEQUENCED. Product proof is not market proof."
+    },
+    {
+      "id": "wealth-adoption",
+      "desks": ["Wealth Manager"],
+      "text": "PREVIOUSLY_ADOPTED is not ADOPTED. Those rows stay unproven. Advise only. No trade."
+    },
+    {
+      "id": "day-planner-calendar",
+      "desks": ["Day Planner"],
+      "text": "Recommendation: REVERT the LIVE clause on calendar events 31rh68um8bvm16hjpnqdtca228 and 4khr058oops9c9l4bfblr4jj34. Do not delete the events. This projection does not change the live calendar."
+    },
+    {
+      "id": "vault-authority",
+      "desks": ["Big Boss", "Publishing Engine"],
+      "text": "vault-config.py mutation is WAITING_AUTHORITY. Big Boss cannot grant it. Publishing Engine cannot apply it. A relayed GO is not Evens."
+    },
+    {
+      "id": "ironlane-taste",
+      "desks": ["Money Desk"],
+      "text": "Ironlane is a Money Desk taste path. It is not standing doctrine and not a rule for the other desks."
+    },
+    {
+      "id": "lead-hunter-icp",
+      "desks": ["Lead Hunter"],
+      "text": "OPERATOR_FOCUS.icp_id empty means NO_ACTION. Do not invent an ICP, a customer, or a hunt."
+    },
+    {
+      "id": "child-executor",
+      "desks": ["Big Boss", "Watchdog"],
+      "text": "A child executor starts only when the gateway connection has baseUrl and token. A repeated dispatch failure is not a mission."
+    },
+    {
+      "id": "duplicate-automation",
+      "desks": ["Big Boss", "Watchdog"],
+      "text": "Do not create a second automation with a routine name another agent already holds. A failing automation is not work to fan out."
+    }
+  ]
+}
