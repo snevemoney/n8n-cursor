@@ -46,10 +46,10 @@ class SharedContextTest(unittest.TestCase):
         self.assertIn("never-send-7731", got["text"])
 
     def test_rules_dropped_when_over_cap(self):
-        with mock.patch.dict(os.environ, {"JARVIS_SHARED_CONTEXT_MAX_CHARS": "60"}):
+        with mock.patch.dict(os.environ, {"JARVIS_SHARED_CONTEXT_MAX_CHARS": "160"}):
             got = SC.load_shared_context(use_cache=False)
         self.assertEqual(got["files"], ["JARVIS_CONTEXT.md"])
-        self.assertLessEqual(got["chars"], 60)
+        self.assertLessEqual(got["chars"], 160)
 
     def test_primary_truncated_to_cap(self):
         (self.root / "JARVIS_CONTEXT.md").write_text("x" * 5000, encoding="utf-8")

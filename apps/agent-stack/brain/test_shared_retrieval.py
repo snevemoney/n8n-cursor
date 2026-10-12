@@ -90,6 +90,22 @@ class RetrievalTest(unittest.TestCase):
             got = SC.load_shared_context(use_cache=False)
         self.assertLessEqual(got["chars"], 1100)
 
+    def test_f07_context_is_date_stamped_and_stale_marked(self):
+        old = self.root / "MAC_SHARED_MEMORY.md"
+        os.utime(old, (1_700_000_000, 1_700_000_000))
+        rows = SC.retrieve_entries("Where should you save and export my studio project so I can open it?")
+        self.assertIn("as of 2023-11-", rows[0]["as_of"])
+        self.assertIn("STALE", rows[0]["as_of"])
+        fresh = SC.stamp(self.root / "ACTIVE_TASKS.md")
+        self.assertIn("as of", fresh)
+        self.assertNotIn("STALE", fresh)
+        text, _ = SC.retrieved_block("Where should you save and export my studio project so I can open it?")
+        self.assertIn("STALE", text)
+        os.utime(self.root / "JARVIS_CONTEXT.md", (1_700_000_000, 1_700_000_000))
+        got = SC.load_shared_context(use_cache=False)
+        self.assertIn("[shared:JARVIS_CONTEXT.md | as of 2023-11-", got["text"])
+        self.assertIn("STALE", got["text"])
+
     def test_opt_out(self):
         with mock.patch.dict(os.environ, {"JARVIS_SHARED_CONTEXT": "0"}):
             self.assertEqual(SC.retrieve_entries("studio save export open"), [])
