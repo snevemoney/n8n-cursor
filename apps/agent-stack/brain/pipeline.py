@@ -503,6 +503,49 @@ MACOS = _load("agent_stack_macos_read", STACK / "hands" / "macos_read.py")
 SENSES = _load("agent_stack_face_senses", STACK / "face" / "senses.py")
 PRO = _load("agent_stack_pro", STACK / "hands" / "pro.py")
 CRAFT = _load("agent_stack_craft", STACK / "hands" / "craft.py")
+
+
+_CRAFT_APPS = tuple(getattr(CRAFT, "APPS", ()) or ())
+_CRAFT_ASK_RE = re.compile(r"^(?:what|where|which|who|why|how|when|should|can|could|would|do|does|is|are)\b", re.I)
+_CRAFT_ACT_RE = re.compile(
+    r"\b(make|create|new|put|set|write|fill|add|insert|save|export|draw|edit|build|resize|crop|rename|type)\b", re.I
+)
+
+
+_SC_PL = None
+
+
+def shared_memory_answers(spoken: str) -> bool:
+    """A question the shared memory already answers needs no hand.
+
+    Live: the ArtCraft save/open question picked vault_read and spoke an unrelated
+    LANE.md line, while MAC_SHARED_MEMORY's ArtCraft entry was already in the prompt.
+    """
+    text = (spoken or "").strip()
+    if not text or os.environ.get("JARVIS_SHARED_NO_HANDS", "1") == "0":
+        return False
+    if not (_CRAFT_ASK_RE.match(text) or text.endswith("?")):
+        return False
+    try:
+        global _SC_PL
+        if _SC_PL is None:
+            _SC_PL = _load("agent_stack_shared_context_pl", STACK / "brain" / "shared_context.py")
+        # "What model are you?" is answered by the self-report line. Live: one of three
+        # identical asks picked the status hand and read hive health instead (25 s).
+        return bool(_SC_PL.answerable_from_shared(text))
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def explicit_craft_pick(spoken: str) -> dict | None:
+    """{tool: craft, args: {app, task}} for 'In GridCraft, make ... save ...'; None for questions/other asks."""
+    text = (spoken or "").strip()
+    if not text or not _CRAFT_APPS or _CRAFT_ASK_RE.match(text) or text.endswith("?"):
+        return None
+    m = re.search(r"\b(" + "|".join(_CRAFT_APPS) + r")\b", text, re.I)
+    if not m or not _CRAFT_ACT_RE.search(text):
+        return None
+    return {"tool": "craft", "args": {"app": m.group(1).lower(), "task": text}, "speak": ""}
 ONLINE = _load("agent_stack_online", HERE / "online.py")
 JEV = _load("agent_stack_jev_preflight", HERE / "jev_preflight.py")
 
@@ -5801,6 +5844,14 @@ def apply_pipeline_iter(
         if pick is not None:
             brain = "cursor"
 
+    if pick is None and os.environ.get("JARVIS_CRAFT_FAST", "1") != "0":
+        # An imperative that names a Craft app goes straight to the craft hand.
+        # Profiled live: the talk model's routing round cost 10-19 s of a 28 s GridCraft turn.
+        fast = explicit_craft_pick(spoken_in)
+        if fast:
+            pick = fast
+            brain = "craft_fast"
+
     if pick is None and (talk_fn is not None or cursor_fn is None):
         brief = pack_text or sitting_brief(prior_turns, bus_now, retrieve_roots, spoken_in)
         if pack_text:
@@ -5808,7 +5859,10 @@ def apply_pipeline_iter(
             if extra and extra not in pack_text:
                 brief = f"{pack_text}\n\n{extra}"
         provider_brief = brief
-        talked = online_talk(spoken_in, brief, talk_fn=talk_fn, images=_vision_urls(hive))
+        talked = online_talk(
+            spoken_in, brief, talk_fn=talk_fn, images=_vision_urls(hive),
+            **({"hands": False} if shared_memory_answers(spoken_in) else {}),
+        )
         if token and turn_cancelled(hive, token):
             return
         if isinstance(talked, dict):

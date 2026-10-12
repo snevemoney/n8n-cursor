@@ -36,6 +36,32 @@ QUIET_THINK_RE = re.compile(
 )
 
 
+def _safe_path(value: str) -> str:
+    """HOME-relative or file-name-only: never an absolute machine path."""
+    text = str(value or "")
+    home = os.path.expanduser("~")
+    if home and home != "/" and text.startswith(home + "/"):
+        return "~/" + text[len(home) + 1 :]
+    if text.startswith("/"):
+        return text.rstrip("/").rsplit("/", 1)[-1]
+    return text
+
+
+def safe_cites(cites) -> list:
+    """Citations as /api/turn sends them: no absolute paths, no 'abs' key."""
+    out = []
+    for c in cites or []:
+        if isinstance(c, dict):
+            row = {k: v for k, v in c.items() if k not in ("abs", "abspath", "absolute")}
+            for k in ("path", "file", "source"):
+                if isinstance(row.get(k), str):
+                    row[k] = _safe_path(row[k])
+            out.append(row)
+        elif isinstance(c, str):
+            out.append(_safe_path(c))
+    return out
+
+
 def _load_mod(name: str, path: Path):
     sys.modules.pop(name, None)
     spec = importlib.util.spec_from_file_location(name, path)
@@ -149,7 +175,7 @@ def bus_write(
                 "utterance": utterance,
                 "permission_ask": permission_ask,
                 "spoken": spoken,
-                "cites": cites or [],
+                "cites": safe_cites(cites),
                 "wires": wires or [],
                 "updated_at": now_iso(),
             }
@@ -261,7 +287,7 @@ def _turn_event(
         "spoken": spoken,
         "host": host,
         "args": args,
-        "cites": cites or [],
+        "cites": safe_cites(cites),
         "wires": wires or [],
         "done": done,
         "partial": partial,
@@ -371,7 +397,7 @@ def _door_speak(
     return event
 
 
-def apply_turn_iter(
+def _apply_turn_iter_inner(
     utterance: str,
     *,
     approved: bool = False,
@@ -619,6 +645,44 @@ def apply_turn_iter(
             source=out.get("source"),
             gen=out.get("gen") or out.get("turn_gen") or token,
         )
+
+
+_TURN_LOG = None
+
+
+def _turn_log():
+    global _TURN_LOG
+    if _TURN_LOG is None:
+        _TURN_LOG = _load_mod("agent_stack_turn_log", Path(__file__).resolve().parent.parent / "memory" / "turn_log.py")
+    return _TURN_LOG
+
+
+def _talk_records() -> tuple[dict, dict]:
+    online = getattr(PIPELINE, "ONLINE", None) or ONLINE
+    talk = getattr(online, "LAST_TALK", None) or {}
+    inject = getattr(online, "LAST_INJECT", None) or {}
+    return dict(talk), dict(inject)
+
+
+def apply_turn_iter(utterance: str, **kw):
+    """The turn, then one JSONL log line when it finishes. Logging never breaks a turn."""
+    import time as _time
+
+    started = _time.time()
+    events: list[dict] = []
+    try:
+        for ev in _apply_turn_iter_inner(utterance, **kw):
+            if isinstance(ev, dict) and not ev.get("partial"):
+                events.append(ev)
+            yield ev
+    finally:
+        try:
+            log = _turn_log()
+            if log.log_path() is not None:
+                talk, inject = _talk_records()
+                log.append(log.build_row(started=started, ended=_time.time(), events=events, talk=talk, inject=inject))
+        except Exception:  # noqa: BLE001
+            pass
 
 
 def apply_turn(

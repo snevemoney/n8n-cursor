@@ -6,7 +6,7 @@
   "created_at": "2026-09-10T00:00:00Z",
   "updated_at": "2026-09-10T00:00:00Z",
   "machine": "mac",
-  "workspace": "/Users/evenslouis/n8n-cursor",
+  "workspace": "~/n8n-cursor",
   "project": "jarvis",
   "branch": "cursor/jarvis-one-pipeline-4282",
   "worktree": null,

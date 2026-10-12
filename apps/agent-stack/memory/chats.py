@@ -12,7 +12,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 REPO_OH = ROOT / "docs/hive/outer-heaven"
-DEFAULT_VAULT_OH = Path.home() / "Documents/My_Billion_Dollar_Vault/00_Outer_Heaven"
+DEFAULT_VAULT_OH = Path(os.environ.get("JARVIS_VAULT_DIR") or (Path.home() / "Documents/My_Billion_Dollar_Vault")).expanduser() / "00_Outer_Heaven"
 CACHE_OH = Path.home() / ".grokbot/outer-heaven"
 SESSIONS_REL = Path("CONTENT/os/sessions")
 SURFACES = (
