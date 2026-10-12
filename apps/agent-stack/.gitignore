@@ -15,5 +15,5 @@ eval/computer/watch-live.json
 eval/scoreboard.draft.json
 # Private gold needles (verbatim vault excerpts).
 face/gold_vault.local.json
-# Per-turn JSONL log.
-data/
+# Per-turn JSONL log (default lives in the repo-root logs/, also ignored there).
+jarvis-turns.jsonl
