@@ -1,0 +1,3 @@
+#!/bin/sh
+# Install: sh scripts/guard/install-hooks.sh   (blocks private shared files, /Users paths, secrets)
+exec python3 "$(git rev-parse --show-toplevel)/scripts/guard/public_guard.py" --staged

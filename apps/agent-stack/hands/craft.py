@@ -47,7 +47,10 @@ HARD_RE = re.compile(r"\b(send|e-?mail|mail|share|upload|publish|post|deploy|pay
 # Reading a signature or a share list does not sign or share.
 READ_ONLY_RE = re.compile(r"\b(list|inspect|get|verify|validate|query)\b", re.I)
 # Past this many tools a provider rejects the call or the step drowns in schema.
-TOOL_CAP = 48
+TOOL_CAP = int(os.environ.get("CRAFT_TOOL_CAP") or 16)
+SAVE_RE = re.compile(r"(^|_)(save|export)", re.I)
+STOP_AFTER_SAVE = (os.environ.get("CRAFT_STOP_AFTER_SAVE") or "1") != "0"
+DESC_CAP = int(os.environ.get("CRAFT_DESC_CAP") or 240)
 CORE_RE = re.compile(r"inspect|command|^(new|open|save|export|undo|redo|session|doc_(new|open|save|export|select|close))", re.I)
 WORD_RE = re.compile(r"[a-z]{3,}")
 # A model that types the step log instead of calling the tool is claiming acts that never ran.
@@ -170,6 +173,28 @@ class _Session:
         return self.call(self.inspect_tool, {})
 
 
+# Words that claim a visible side effect, and the tool names that would prove it.
+CLAIM_RE = re.compile(
+    r"\b(now\s+open|opened|is\s+open|launched|sent|emailed|posted|published|uploaded|shared)\b",
+    re.I,
+)
+PROOF_TOOL_RE = re.compile(r"open|launch|reveal|show|send|mail|post|publish|upload|share", re.I)
+
+
+def honest_claim(text: str, steps: list[dict], app: str) -> str:
+    """Drop sentences that claim an open/send no tool result confirms."""
+    if not text or not CLAIM_RE.search(text):
+        return text
+    if any(row.get("ok") and PROOF_TOOL_RE.search(str(row.get("tool") or "")) for row in steps or []):
+        return text
+    # Trim a trailing ", and it's now open in X ..." clause first so the true part survives.
+    text = re.sub(r",?\s+and\s+(?:it's|it\s+is|is)\s+now\s+open\b[^.!?]*", "", text, flags=re.I)
+    keep = [s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s and not CLAIM_RE.search(s)]
+    ran = ", ".join(str(r.get("tool")) for r in steps or [] if r.get("ok")) or "no tool"
+    note = f"I ran {ran} in {app}; no tool opened or sent anything, so I am not claiming that."
+    return " ".join(keep + [note]).strip()
+
+
 def _pick_inspect(tools: list[dict]) -> str:
     names = [str(t["name"]) for t in tools]
     for name in names:
@@ -235,7 +260,7 @@ def tool_schemas(live: _Session, task: str = "") -> list[dict]:
                 "type": "function",
                 "function": {
                     "name": name,
-                    "description": str(t.get("description") or "")[:600],
+                    "description": str(t.get("description") or "")[:DESC_CAP],
                     "parameters": schema,
                 },
             }
@@ -266,7 +291,7 @@ def _system(app: str, instructions: str) -> str:
         [
             f"You drive {app} through its tools for Jarvis. You are a worker, not the voice.",
             f"{app} notes: {_clip(instructions, 600)}",
-            "Call one tool per turn. File paths are relative to ~/Documents/Craft unless he named one.",
+            "Call every step you already know in one turn as parallel tool calls; they run in order. File paths are relative to ~/Documents/Craft unless he named one.",
             "Each tool reply carries the app's real inspect after the act. Only tool replies are facts.",
             "When the task is met, call no tool and reply with one short spoken sentence of what the last inspect shows.",
             "Never claim an act you did not call. Send, pay, deploy, book, publish and Post are refused.",
@@ -354,30 +379,58 @@ def run(args: dict, utterance: str, *, model_fn, session_fn=session, budget_sec:
                 messages.append({"role": "user", "content": "That reply typed results as text. Text runs nothing. Call the tool, or reply with one plain sentence."})
                 continue
             break
-        params = got.get("args") if isinstance(got.get("args"), dict) else {}
-        if tool not in allowed:
-            stopped = f"The model picked {tool}, which {app} does not offer. I stopped."
+        batch = [c for c in (got.get("calls") or []) if isinstance(c, dict) and c.get("tool")]
+        if not batch:
+            batch = [{"tool": tool, "args": got.get("args"), "call_id": got.get("call_id")}]
+        # Parallel tool calls run in order in one model round; inspect once after the batch.
+        # Profiled live: 5 model rounds x ~4 s was the whole 22-29 s GridCraft turn.
+        plan = []
+        for n, call in enumerate(batch):
+            name = str(call.get("tool") or "")
+            params = call.get("args") if isinstance(call.get("args"), dict) else {}
+            if name not in allowed:
+                stopped = f"The model picked {name}, which {app} does not offer. I stopped."
+                break
+            refusal = hard_step(app, name, params)
+            if refusal:
+                stopped = refusal
+                break
+            plan.append((name, params, str(call.get("call_id") or f"call_{len(steps) + n + 1}")))
+        if stopped:
             break
-        refusal = hard_step(app, tool, params)
-        if refusal:
-            stopped = refusal
-            break
-        did = live.call(tool, params)
+        results = []
+        for name, params, call_id in plan:
+            did = live.call(name, params)
+            results.append((name, params, call_id, did))
+            if not did["ok"]:
+                break
         after = live.observe()
-        steps.append(
-            {"tool": tool, "params": params, "ok": did["ok"], "result": did["text"], "after": after["text"], "observed": after["answered"]}
-        )
-        call_id = str(got.get("call_id") or f"call_{len(steps)}")
         messages.append(
             {
                 "role": "assistant",
                 "content": None,
-                "tool_calls": [{"id": call_id, "type": "function", "function": {"name": tool, "arguments": json.dumps(params)}}],
+                "tool_calls": [
+                    {"id": cid, "type": "function", "function": {"name": name, "arguments": json.dumps(params)}}
+                    for name, params, cid, _did in results
+                ],
             }
         )
-        messages.append({"role": "tool", "tool_call_id": call_id, "content": _tool_reply(did, after)})
-        if not did["ok"]:
-            stopped = f"{app} refused {tool}: {_clip(did['text'], 160)}"
+        for i, (name, params, call_id, did) in enumerate(results):
+            last = i == len(results) - 1
+            steps.append(
+                {"tool": name, "params": params, "ok": did["ok"], "result": did["text"],
+                 "after": after["text"] if last else "", "observed": after["answered"]}
+            )
+            reply = _tool_reply(did, after) if last else f"{'ok' if did['ok'] else 'FAILED'}: {_clip(did['text'], 400)}"
+            messages.append({"role": "tool", "tool_call_id": call_id, "content": reply})
+        failed = next((r for r in results if not r[3]["ok"]), None)
+        if failed:
+            stopped = f"{app} refused {failed[0]}: {_clip(failed[3]['text'], 160)}"
+            break
+        if STOP_AFTER_SAVE and SAVE_RE.search(results[-1][0]) and after["answered"]:
+            # A save that ends the batch is the end of the job; skip a narration-only model round (~5 s).
+            saved = next((str(v) for v in results[-1][1].values() if isinstance(v, str) and "." in v), "")
+            final = f"Done in {app}: ran {', '.join(row['tool'] for row in steps)}" + (f"; saved {saved}." if saved else ".")
             break
     else:
         stopped = f"I hit the {MAX_STEPS}-step limit in {app}."
@@ -386,11 +439,11 @@ def run(args: dict, utterance: str, *, model_fn, session_fn=session, budget_sec:
     if stopped:
         spoken = stopped
     elif steps and final:
-        spoken = final
+        spoken = honest_claim(final, steps, app)
     elif steps:
         spoken = f"Ran {', '.join(row['tool'] for row in steps)} in {app}."
     else:
-        spoken = final or f"I did not change anything in {app}."
+        spoken = honest_claim(final, steps, app) if final else f"I did not change anything in {app}."
     return {
         "ok": ok,
         "wire": "craft",

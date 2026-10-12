@@ -1365,6 +1365,9 @@ def browser_progress_line(state, control):
         return 'The browser mission is planning its workflows.'
     if ids and not required:
         return f'All {len(ids)} browser flows were skipped.'
+    if skipped & ids and status=='verified':
+        # A requested flow that was skipped is not verified work (archive turn 4052).
+        status='not verified, because a requested flow was skipped'
     line=f'{verified} of {len(required)} required browser flows are verified; {finished} have finished. The mission is {status}.'
     if skipped & ids:
         count=len(skipped & ids)
