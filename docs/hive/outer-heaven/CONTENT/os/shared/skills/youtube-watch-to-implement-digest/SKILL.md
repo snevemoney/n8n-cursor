@@ -125,3 +125,12 @@ Packet: `/workspace/research/packets/signals-close-20260924-1014/`
 **X spend-cap fail-closed:** `get_users_me` PROVE (@snevemoney / 514498939) + `get_users_bookmarks` 403 spend-cap-reached = **quiet**. Credits (free≈91.33 prepaid≈2.4 total≈93.73) ≠ bookmark unlock. Never Mac xurl primary. Dump `~/.grokbot/x-bookmarks.json` synced 2026-09-23T21:06:58Z count=707 — **not** live this fire; do not invent IDs / do not restamp as live pull.
 
 **Repo extract:** no new concrete `owner/name` in this fire. Prior QUEUE `jsmastery-pro/skills` unchanged (do not install).
+
+## Enrich 2026-10-12: caption fallback chain, box-proven (packet `/workspace/research/packets/codex-yt12-20261012/`)
+PROVE on box, 12 videos, 2026-10-12 ~19:00 ET:
+1. Parallel `yt-dlp --skip-download --write-auto-subs --sub-format json3` → 7/12 OK, rest HTTP 429.
+2. **Retry one at a time with `sleep 20` between ids** → 3 more recovered (429 is rate limit, not a block).
+3. Still blocked ("Sign in to confirm you're not a bot") → `yt-dlp -f 'ba[ext=m4a]/ba'` audio download often still works a minute later → `/workspace/.venvs/whisper/bin/fw-transcribe <audio> <outdir> --model small` (CPU int8, ~2 min per 13-min video). **The `whisper` binary named above does not exist; `fw-transcribe` is the real CLI.**
+4. `oh-transcribe` returned HTTP 202 "YouTube bot-check from VPS IP; queued for box fallback worker" — treat as not-done, continue with step 3.
+5. fw-transcribe uses VAD: check for >20 s gaps between segments and re-run that slice (`ffmpeg -ss A -to B` + `--offset A`); one 13-min video lost 90 s until sliced.
+Count a video done only when a transcript file exists, not when the packet folder exists.
