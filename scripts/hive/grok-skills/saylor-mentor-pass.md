@@ -30,14 +30,15 @@ Every hive / site / money turn — start, middle, and end. Evens does not have t
 
 ```
 LANE: hive-os | agency
-SCHOOL: one course (plain name ok)
-SAYS: what the school means on this exact work (one paragraph)
+SCHOOL: catalog — 164 claimed / N on disk (never one course code)
+LENS: this-turn beat only (SHELF, or one named course)
+SAYS: what the catalog means on this exact work (one paragraph)
 NOW: what to decide or put in the system before the next edit
 THEN: do the work through that lens
-WATCH: anti-trigger for this school
+WATCH: anti-trigger — one course is not the university
 ```
 
-Cap: **one idea this turn**. **1–3 skills this sitting**. No LANE → ask once. No invented KPI. Do not dump the catalog.
+Cap: **one idea this turn**. **1–3 skills this sitting**. No LANE → ask once. No invented KPI. Do not dump 164 manuals. SCHOOL is the Saylor catalog claim, not BUS206.
 
 ## End card (sitting close)
 
@@ -58,7 +59,7 @@ NEXT: one guided action · HITL if send/pay/deploy/book/publish
 
 ## Grok Consultant
 
-Same live card on every Consultant turn that is hive/site/money. Brief injects “live this turn,” not a slug list. Do not list 42.
+Same live card on every Consultant turn that is hive/site/money. Brief injects “live this turn,” not a slug list. SCHOOL is the catalog. Do not list 164.
 
 ## Cursor
 
@@ -70,4 +71,4 @@ Send / pay / deploy / book / publish = Evens.
 
 ## Never
 
-Dump 42 skills · invent a KPI · merge hive-os $ with agency $ · exam reconstruction · end-stamp without a live beat · Claude Cowork/Code, Codex, ChatGPT, Gemini, Coda, Vapi, Abacus
+Dump 164 manuals · stamp BUS206 as the school · invent a KPI · merge hive-os $ with agency $ · exam reconstruction · end-stamp without a live beat · Claude Cowork/Code, Codex, ChatGPT, Gemini, Coda, Vapi, Abacus

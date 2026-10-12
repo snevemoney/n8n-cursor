@@ -26,6 +26,11 @@ _bus_spec = importlib.util.spec_from_file_location("event_bus", ROOT / "scripts/
 assert _bus_spec and _bus_spec.loader
 event_bus = importlib.util.module_from_spec(_bus_spec)
 _bus_spec.loader.exec_module(event_bus)
+_fc_path = ROOT / "scripts/hive/os/fleet-closures.py"
+_fc_spec = importlib.util.spec_from_file_location("fleet_closures", _fc_path)
+assert _fc_spec and _fc_spec.loader
+fc = importlib.util.module_from_spec(_fc_spec)
+_fc_spec.loader.exec_module(fc)
 
 SHARED_CONTEXT_PATH = Path.home() / ".grokbot/shared-context.json"
 MAX_BRIEF_CHARS = 4500
@@ -65,16 +70,41 @@ def _read_tail(path: Path, max_lines: int = 80) -> str:
     return "\n".join(lines[-max_lines:])
 
 
-def _extract_section(text: str, heading: str, max_chars: int = 1200) -> str:
+STANDING_LOCKS_REL = "CONTENT/topics/standing-locks-20260903.md"
+STANDING_LOCKS_MAX = 4000
+
+
+def _extract_section(
+    text: str,
+    heading: str,
+    max_chars: int = 1200,
+    which: str = "first",
+) -> str:
     pattern = rf"^## {re.escape(heading)}\s*$"
-    m = re.search(pattern, text, re.MULTILINE)
-    if not m:
+    matches = list(re.finditer(pattern, text, re.MULTILINE))
+    if not matches:
         return ""
+    if which == "last":
+        m = matches[-1]
+    elif which == "first":
+        m = matches[0]
+    else:
+        raise ValueError(f"which must be first or last, got {which!r}")
     rest = text[m.end() :]
     nxt = re.search(r"^## ", rest, re.MULTILINE)
     body = rest[: nxt.start()] if nxt else rest
     body = body.strip()
     return body[:max_chars] + ("…" if len(body) > max_chars else "")
+
+
+def _standing_locks(root: Path) -> str:
+    path = root / STANDING_LOCKS_REL
+    if not path.is_file():
+        return ""
+    text = path.read_text(encoding="utf-8", errors="replace").strip()
+    if len(text) <= STANDING_LOCKS_MAX:
+        return text
+    return text[:STANDING_LOCKS_MAX] + "…"
 
 
 def _chronicle_summaries(root: Path, n: int = 3) -> list[str]:
@@ -180,6 +210,17 @@ def _tool_assignment_line(agent: str) -> str:
     if not use:
         return ""
     return f"Use: {use}. Never: {never}."
+
+
+def _focus_icp() -> str:
+    path = ROOT / "docs/hive/outer-heaven/CONTENT/OPERATOR_FOCUS.json"
+    if not path.is_file():
+        return ""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return ""
+    return str(data.get("icp_id") or "").strip()
 
 
 def _operator_focus_line() -> str:
@@ -354,8 +395,9 @@ def build_brief(
         "project": project,
         "sourceRoot": str(root),
         "northStars": _extract_section(mem_text, "Four north stars", 900),
-        "decisions": _extract_section(mem_text, "DECISIONS (seeded)", 600),
-        "goals": _extract_section(mem_text, "GOALS (seeded)", 600),
+        "decisions": _extract_section(mem_text, "DECISIONS (seeded)", 600, which="last"),
+        "goals": _extract_section(mem_text, "GOALS (seeded)", 600, which="last"),
+        "standingLocks": _standing_locks(root),
         "chronicleRecent": _chronicle_summaries(root, 3),
         "graphHubs": _graph_hubs(root, 10),
         "recentCursorChats": _cursor_chat_titles(root, 10),
@@ -370,6 +412,8 @@ def build_brief(
     if read_note:
         brief["noteExcerpt"] = _read_note(root, read_note)
 
+    fleet_closure = fc.render_for(agent, icp=_focus_icp())
+    brief["fleetClosure"] = fleet_closure
     job_card = _job_card_brief(root, agent)
     brief["jobCard"] = job_card
     brief["mentor"] = _mentor_block(agent)
@@ -381,6 +425,8 @@ def build_brief(
         f"Capture: {brief['captureFreshness']}",
         "",
     ]
+    if fleet_closure:
+        md_parts.extend(["## Fleet closure", fleet_closure, ""])
     if job_card:
         md_parts.extend(["## Job card", job_card, ""])
     if brief.get("mentor"):
@@ -389,6 +435,10 @@ def build_brief(
         md_parts.extend(["## Tools", brief["toolAssignment"], ""])
     if brief.get("vaultAccess"):
         md_parts.extend(["## Vault (Mac closed)", brief["vaultAccess"], ""])
+    if brief.get("standingLocks"):
+        md_parts.extend(["## Standing locks", brief["standingLocks"], ""])
+    if brief.get("decisions"):
+        md_parts.extend(["## Decisions (latest seeded)", brief["decisions"], ""])
     md_parts.extend(
         [
             "## North stars",
@@ -526,6 +576,10 @@ def self_test() -> list[str]:
         errors.append("brief missing mentor bind")
     if "LIVE this turn" not in (b.get("markdown") or ""):
         errors.append("brief mentor is still an end stamp")
+    if "WAIT_EVENS is not an interrupt" not in (b.get("markdown") or ""):
+        errors.append("brief missing shared WAIT_EVENS closure")
+    if "ENG-14" not in (b.get("markdown") or ""):
+        errors.append("Watchdog brief missing ENG-14 closure")
     c = build_brief(agent="Consultant")
     if "saylor-course-skill" not in (c.get("markdown") or ""):
         errors.append("Consultant brief missing course-skill router")

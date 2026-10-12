@@ -1,0 +1,37 @@
+mode: natural_phrasing
+gated_until: bites-3-8-engineering-pass
+journeys:
+  - id: evening
+    steps:
+      - talk casually
+      - interrupt
+      - change subject
+      - come back later
+      - drop a file
+      - ask a follow-up
+      - ask to remember something
+    watch: Evens
+    restart: Evens
+    verdict: UNPROVEN
+  - id: latency
+    measure: [visual_ack, stop, first_spoken, vault_lookup, tts_nonblocking]
+    first_spoken: record p50 p95 from first 20 live turns; do not invent a budget
+    verdict: UNPROVEN
+  - id: zero_silent
+    claim: waits longer than a beat have an honest phase from backend state
+    fail_if: frozen THINK; nothing happened
+    verdict: UNPROVEN
+  - id: degrade
+    break_one_at_a_time: [provider, openclaw, tts_worker, vault_path, camera, screen, network]
+    expected: name the dark wire; keep the sitting; recover when it returns
+    verdict: UNPROVEN
+  - id: soak
+    duration: hours
+    turns: 50
+    watch_for: [latency_creep, zombie_tts, stale_watch, temp_files, ui_slowdown]
+    verdict: UNPROVEN
+  - id: cold_start
+    path: start.sh or Jarvis Orb.app
+    fail_if: leftover server; manual repair; test fixture
+    verdict: UNPROVEN
+    hitl: Evens

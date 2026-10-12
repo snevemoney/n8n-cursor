@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """Talk hosts and live wires. Local face only. No Ollama.
 
-Talk harness is Cursor CLI (cloud). Memory is the store
-(vault + repo + sessions + hive). No Ollama. Do not nag for xAI keys.
+Talk owner is OpenRouter. Cursor CLI is the cursor_ask hand.
+Memory is the store (vault first for about-me). No Ollama. Do not nag for xAI keys.
 """
 from __future__ import annotations
 
 import base64
+import importlib.util
 import json
 import os
 import re
 import shutil
+import socket
+import ssl
 import subprocess
 import threading
 import time
@@ -27,13 +30,167 @@ XAI_URL = "https://api.x.ai/v1/chat/completions"
 GROKBOT_CONN = Path.home() / ".grokbot/local-exec-daemon-connection.json"
 DEFAULT_VPS = "root@69.62.66.78"
 DEFAULT_MODEL = "grok-4"
-SPEAK_CAP = 900
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+DEFAULT_OPENROUTER_MODEL = "nex-agi/nex-n2.5-mini:free"
+# 2026-10-10: nvidia/nemotron-3.5-lightning:free hung past the talk wall (30s, no reply)
+# and starved the paid fallback. Removed; add a free model back only after a live probe.
+OPENROUTER_FALLBACKS = ()
+# Same host. Used when :free hits the daily door (free-models-per-day-high-balance).
+# Not ChatGPT, Claude, or Gemini as the product mouth.
+# qwen/qwen3-235b-a22b removed: OpenRouter deprecated it 2026-10-09 (HTTP 404).
+OPENROUTER_PAID_FALLBACKS = (
+    "deepseek/deepseek-chat-v3.1",
+)
+# Same host. Used only when a still is attached and :free vision is 429.
+# Not ChatGPT, Claude, or Gemini as the product mouth.
+OPENROUTER_VISION_FALLBACKS = (
+    "deepseek/deepseek-v4-flash-vision-exp",
+)
+OPENROUTER_ATTEMPT_SEC = 10.0
+OPENROUTER_WALL_SEC = 20.0
+TALK_DARK = "The talk wire is dark this turn."
+OPENROUTER_MAX_TOKENS = 512
+OPENROUTER_RETRIEVE_TOKENS = 512
+LENGTH_RETRY_TOKENS = 640
+LENGTH_MISS = "UNKNOWN. That answer ran out of room."
+OPENROUTER_HANDS = (
+    {
+        "type": "function",
+        "function": {
+            "name": "browser_mission",
+            "description": "Start broad read-only web research across one or more sites with bounded Browser Use workflows and Jev step decisions. Also report status, cancel a mission, or skip one flow. A start receipt is not verified task success. Use status for progress and the verified final answer. The user can keep talking while work runs.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "action": {"type": "string", "enum": ["start", "status", "cancel", "skip", "amend"]},
+                    "mission_id": {"type": "string"},
+                    "flow_id": {"type": "string"},
+                },
+                "required": ["action"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "vault_read",
+            "description": "Read the vault map, a named vault room, or the timeline. Not a last-chat keyword mash.",
+            "parameters": {
+                "type": "object",
+                "properties": {"query": {"type": "string"}},
+                "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "safari_see",
+            "description": "Read the current Safari tab, list tabs, open a URL, scroll, click a named page link/button, or grab the screen. Use this tool to execute an explicit Safari request instead of repeating instructions. A click result does not verify the requested task. Send, pay, deploy, book and publish remain blocked.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "act": {"type": "string"},
+                    "url": {"type": "string"},
+                    "label": {"type": "string", "description": "Exact visible link or button text for act=click."},
+                    "expected_file": {"type": "string", "description": "User-specified filename to verify newly created in Downloads after click. Never invent it."},
+                    "expected_sha256": {"type": "string", "description": "User-provided expected artifact SHA256; never invent a hash."},
+                },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "cursor_ask",
+            "description": "Ask Cursor CLI about this repo's code. Not for last sittings or what he is talking about with Cursor.",
+            "parameters": {
+                "type": "object",
+                "properties": {"query": {"type": "string"}},
+                "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "craft",
+            "description": "Do a task inside one of the Craft desktop apps (spreadsheet, docs, slides, images, vectors, PDF, video, audio, CAD, photo develop, effects, design). The hand inspects, acts, and inspects again. Send, pay, deploy, book and publish remain blocked.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "app": {
+                        "type": "string",
+                        "enum": [
+                            "cadcraft", "deckcraft", "designcraft", "effectcraft", "filmcraft", "gridcraft",
+                            "lightcraft", "pdfcraft", "photocraft", "soundcraft", "vectorcraft", "wordcraft",
+                        ],
+                    },
+                    "task": {"type": "string", "description": "What he asked for, in his words."},
+                },
+                "required": ["app", "task"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "status",
+            "description": "Report live wires.",
+            "parameters": {
+                "type": "object",
+                "properties": {"which": {"type": "string"}},
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "refuse_hard_step",
+            "description": "Refuse send, pay, deploy, book, or publish.",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+)
+OPENROUTER_MAC_ACT = (
+    {
+        "type": "function",
+        "function": {
+            "name": "mac_act",
+            "description": "One mouse or key act on the front Mac app. Only while Watch is armed.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "op": {"type": "string"},
+                    "x": {"type": "number"},
+                    "y": {"type": "number"},
+                    "text": {"type": "string"},
+                    "direction": {"type": "string"},
+                    "label": {"type": "string"},
+                },
+                "required": ["op"],
+            },
+        },
+    },
+)
+VISION_DARK = "UNKNOWN. Vision model is dark."
+SPEAK_CAP = 280
 ALLOWED_ENV = (
     "XAI_API_KEY",
     "GROK_API_KEY",
     "GROK_MODEL",
     "GROKBOT_BASE_URL",
     "GROKBOT_TOKEN",
+    "ELEVENLABS_API_KEY",
+    "ELEVEN_LABS_API_KEY",
+    "ELEVENLABS_VOICE_ID",
+    "OPENROUTER_API_KEY",
+    "OPENROUTER_MODEL",
+    "OPENROUTER_VISION_MODEL",
+    "JARVIS_BROWSER_PYTHON",
+    "JARVIS_BROWSER_PLANNER_MODEL",
+    "JARVIS_BROWSER_TEXT_MODEL",
+    "JARVIS_BROWSER_EXECUTABLE",
 )
 LOGIN_UNKNOWN = (
     "UNKNOWN. Cursor agent needs a one-time login. "
@@ -43,24 +200,54 @@ NO_REPLY = "UNKNOWN. Cursor harness returned no reply."
 _CURSOR_LOCK = threading.Lock()
 _CURSOR_PROC: subprocess.Popen | None = None
 _CURSOR_CANCELLED = False
+_LOGIN_OK_UNTIL = 0.0
+LOGIN_CACHE_SEC = 60.0
 SYS = (
-    "You are Jarvis for Evens Louis, the coordinator. Conversation is the product. "
+    "You are Jarvis for Evens Louis, the coordinator. "
+    "The store is memory, not permission to think. "
+    "Private claims need disk evidence this turn. General talk may reason without a cite. "
+    "Do not say you lack something on disk unless the ask required private evidence and it missed. "
+    "If the brief says no personal evidence, reason generally and name the missing fact. Do not invent it. "
+    "A dark talk wire is not a vault miss. Do not replace healthy prose with a store snippet. "
     "Cursor CLI is one worker, not the brain. Face+voice, this coordinator, adapters. "
-    "Hear what he said, answer that, then stop. Sir, light wit only when it is earned. "
-    "The store (vault, this repo, sessions, hive) is memory. Safari is the browser adapter. "
-    "Grok Bot is a desk. Neither is the skull. Tools only when a hand is needed — "
-    "not because a word like marketing or funnel appeared. "
+    "Hear what he said, answer that at the depth he asked, then stop. Sir, light wit only when it is earned. "
+    "The store (vault, this repo, sessions, hive) is optional context, not the spoken product. "
+    "Safari is the browser adapter. "
+    "Grok Bot is a desk. Neither is the skull. The store may be in the brief this turn. "
+    "The live store is already in the brief: vault map, session index, last Cursor ask, yesterday. "
+    "The durable knowledge source is the live Obsidian vault. This turn is read-memory only. "
+    "Do not claim that anything Evens says becomes durable Obsidian memory. Do not write notes. "
+    "Do not deny a loaded store. Do not say UNKNOWN or no live mouth when the store answered a private ask. "
+    "Do not keyword-search the vault for chats. "
+    "If Retrieved cites current disk, that value wins over earlier turns this sitting. "
+    "Call safari_see or status when those asks match. "
+    "cursor_ask is repo code only. Last Cursor sitting is already in the store. "
+    "Do not wait for him to say harness. Do not say you only see this Orb chat. "
+    "Do not fire a school skill because a word like marketing or funnel appeared. "
     "Keep delegated work until it finishes or Evens is needed. "
     "Hard steps (send, pay, deploy, book, publish) stay Evens. "
-    "Never invent Claude, ChatGPT, Gemini, or Ollama. Speak short."
+    "Never invent Claude, ChatGPT, Gemini, or Ollama. "
+    "Never identify as Nex, Nemotron, or any model name. You are Jarvis. "
+    "Do not recite door lines (Watch, Standing by, Tap Watch). "
+    "When he asks what you can do, name this Orb's real doors only: talk, vault, Safari, "
+    "Watch, Eyes, file drop, voice, Focus, Cursor ask. "
+    "Do not invent web search, plugins, image generation, a Chrome extension, or 24/7 scheduled tasks. "
+    "Do not dump a catalog unless he asked. "
+    "No thinking-process scratchpad."
 )
 
 
-def clip_spoken(text: str, cap: int = SPEAK_CAP) -> str:
+def clip_spoken(text: str, cap: int = SPEAK_CAP, *, finished: bool = False) -> str:
+    """Keep a completed answer intact; bound only unfinished leftovers.
+
+    Provider token budgets already bound generation. A speech/display adapter
+    must not silently discard an answer's opening or its qualifications.
+    """
     body = (text or "").strip()
-    if len(body) <= cap:
+    if finished or len(body) <= cap:
         return body
-    cut = body[:cap]
+    limit = cap
+    cut = body[:limit]
     for mark in (". ", "? ", "! ", "\n"):
         idx = cut.rfind(mark)
         if idx >= 80:
@@ -86,6 +273,130 @@ def was_cancelled() -> bool:
     return _CURSOR_CANCELLED
 
 
+_SSL_SYSTEM_CA = "/etc/ssl/cert.pem"
+
+
+def talk_ssl_context() -> ssl.SSLContext:
+    """Verify TLS. Mac framework Python 3.12 ships an empty CA store.
+
+    urllib then raises URLError before any HTTP status, and every talk turn
+    becomes "OpenRouter returned no text." Load the OS bundle only when the
+    default store is empty. Verification stays on.
+    """
+    ctx = ssl.create_default_context()
+    if ctx.get_ca_certs():
+        return ctx
+    for cafile in _ssl_ca_candidates():
+        try:
+            ctx.load_verify_locations(cafile=cafile)
+        except (OSError, ssl.SSLError):
+            continue
+        if ctx.get_ca_certs():
+            break
+    return ctx
+
+
+def _ssl_ca_candidates() -> list[str]:
+    """CA bundles to try: macOS path first, then OpenSSL's default, then certifi."""
+    out: list[str] = []
+    paths = [_SSL_SYSTEM_CA]
+    try:
+        paths.append(ssl.get_default_verify_paths().cafile or "")
+        paths.append(ssl.get_default_verify_paths().openssl_cafile or "")
+    except Exception:
+        pass
+    try:
+        import certifi  # type: ignore
+
+        paths.append(certifi.where())
+    except Exception:
+        pass
+    for path in paths:
+        if path and path not in out and os.path.isfile(path):
+            out.append(path)
+    return out
+
+
+def _http_open(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0):
+    raw = None if data is None else json.dumps(data).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=raw,
+        headers={"Content-Type": "application/json", **(headers or {})},
+        method="POST" if data is not None else "GET",
+    )
+    return urllib.request.urlopen(req, timeout=timeout, context=talk_ssl_context())
+
+
+def _response_socket(res):
+    """Socket that `HTTPResponse.read` is blocked on, when this is a real urlopen body."""
+    fp = getattr(res, "fp", None)
+    raw = getattr(fp, "raw", None)
+    sock = getattr(raw, "_sock", None)
+    return sock if sock is not None else raw
+
+
+def _abort_response(res) -> None:
+    """Unblock a body read that ignored the socket timeout. Same urllib response."""
+    sock = _response_socket(res)
+    if sock is not None:
+        shutdown = getattr(sock, "shutdown", None)
+        if callable(shutdown):
+            try:
+                shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+        closer = getattr(sock, "close", None)
+        if callable(closer):
+            try:
+                closer()
+            except OSError:
+                pass
+    closer = getattr(res, "close", None)
+    if callable(closer):
+        try:
+            closer()
+        except OSError:
+            pass
+
+
+def _read_http_body(res, timeout: float) -> bytes:
+    """Read one response body. A stall raises TimeoutError within `timeout`.
+
+    `urlopen(..., timeout=)` bounds the handshake and headers. A chunked TLS
+    body can stay inside `ssl.read` after that, which is what the Face wall
+    caught. The body uses the same deadline. If the read is still blocked,
+    the socket is closed so `ssl.read` returns.
+    """
+    limit = max(0.0, float(timeout))
+    if limit == 0.0:
+        return res.read()
+    sock = _response_socket(res)
+    if sock is not None:
+        try:
+            sock.settimeout(limit)
+        except OSError:
+            pass
+    box: dict = {}
+
+    def _run() -> None:
+        try:
+            box["body"] = res.read()
+        except Exception as exc:
+            box["err"] = exc
+
+    worker = threading.Thread(target=_run, name="http-body", daemon=True)
+    worker.start()
+    worker.join(limit)
+    if not worker.is_alive():
+        if "err" in box:
+            raise box["err"]
+        return box.get("body", b"")
+    _abort_response(res)
+    worker.join(1.0)
+    raise TimeoutError("response body stalled")
+
+
 def _http_json(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0) -> dict:
     raw = None if data is None else json.dumps(data).encode("utf-8")
     req = urllib.request.Request(
@@ -94,8 +405,12 @@ def _http_json(url: str, *, data: dict | None = None, headers: dict | None = Non
         headers={"Content-Type": "application/json", **(headers or {})},
         method="POST" if data is not None else "GET",
     )
-    with urllib.request.urlopen(req, timeout=timeout) as res:
-        body = res.read().decode("utf-8", errors="replace")
+    started = time.monotonic()
+    with urllib.request.urlopen(req, timeout=timeout, context=talk_ssl_context()) as res:
+        remaining = float(timeout) - (time.monotonic() - started) if timeout > 0 else timeout
+        if timeout > 0 and remaining <= 0:
+            raise TimeoutError("response headers exhausted request budget")
+        body = _read_http_body(res, remaining).decode("utf-8", errors="replace")
         code = res.status
     if not body.strip():
         return {"ok": True, "http": code}
@@ -112,7 +427,7 @@ def _http_json(url: str, *, data: dict | None = None, headers: dict | None = Non
 
 def _http_code(url: str, timeout: float = 8.0) -> int:
     try:
-        with urllib.request.urlopen(url, timeout=timeout) as res:
+        with urllib.request.urlopen(url, timeout=timeout, context=talk_ssl_context()) as res:
             return int(res.status)
     except urllib.error.HTTPError as exc:
         return int(exc.code)
@@ -127,6 +442,37 @@ def grok_api_key() -> str:
 def has_xai_key() -> bool:
     """Yes/no only. Never log or return the secret."""
     return bool(grok_api_key())
+
+
+def openrouter_api_key() -> str:
+    return (os.environ.get("OPENROUTER_API_KEY") or "").strip()
+
+
+def has_openrouter_key() -> bool:
+    """Yes/no only. Never log or return the secret."""
+    return bool(openrouter_api_key())
+
+
+def openrouter_model() -> str:
+    return (os.environ.get("OPENROUTER_MODEL") or DEFAULT_OPENROUTER_MODEL).strip() or DEFAULT_OPENROUTER_MODEL
+
+
+def openrouter_vision_model() -> str:
+    return (os.environ.get("OPENROUTER_VISION_MODEL") or "").strip()
+
+
+def still_data_url(path: Path) -> str | None:
+    if not path.is_file():
+        return None
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        return None
+    if not raw or len(raw) > 1_500_000:
+        return None
+    suffix = path.suffix.lower()
+    mime = "image/png" if suffix == ".png" else "image/webp" if suffix == ".webp" else "image/jpeg"
+    return f"data:{mime};base64,{base64.b64encode(raw).decode('ascii')}"
 
 
 def parse_dotenv(path: Path) -> dict[str, str]:
@@ -231,6 +577,17 @@ def try_agent_login() -> dict:
 
 def grok_model() -> str:
     return (os.environ.get("GROK_MODEL") or DEFAULT_MODEL).strip() or DEFAULT_MODEL
+
+
+def _public_model_slug(value: str) -> str:
+    """Model id for the HUD. Never a key."""
+    slug = (value or "").strip()
+    if not slug:
+        return ""
+    low = slug.lower()
+    if low.startswith("sk-") or "api_key" in low or "bearer " in low:
+        return ""
+    return slug[:80]
 
 
 def _well_formed_file_key(key_b64: str) -> bool:
@@ -363,25 +720,39 @@ def agent_cmd() -> list[str] | None:
 def wire_report() -> dict:
     gw = grokbot_gateway()
     grokbot = "live" if gw and gw.get("base") else ("sealed" if gw and gw.get("sealed") else "dark")
+    if openrouter_api_key():
+        talk, talk_model, mode = "openrouter", _public_model_slug(openrouter_model()), "talk"
+    elif grok_api_key():
+        talk, talk_model, mode = "xai", _public_model_slug(grok_model()), "talk"
+    elif grokbot == "live":
+        talk, talk_model, mode = "grokbot", "", "talk"
+    elif agent_cmd():
+        talk, talk_model, mode = "dark", "", "harness"
+    else:
+        talk, talk_model, mode = "dark", "", "dark"
     return {
         "ok": True,
         "local": "face+mic+tts",
         "ollama": "refused",
+        "talk": talk,
+        "talk_model": talk_model,
+        "mode": mode,
         "wires": {
             "brain": "store",
-            "store": "vault+repo+sessions+hive",
-            "grok": "talk" if grok_api_key() else "off",
+            "store": "live",
+            "grok": "live" if grok_api_key() else "off",
+            "openrouter": "live" if openrouter_api_key() else "off",
             "grokbot": grokbot,
-            "hive": "http",
-            "vps": "ssh",
-            "cursor": "harness" if agent_cmd() else "dark",
-            "vault": "store",
-            "calendar": "macos",
-            "mail": "macos",
-            "invoice": "vault",
-            "safari": "macos",
-            "files": "mdfind",
-            "catalog": "grok-skills",
+            "hive": "live",
+            "vps": "unprobed",
+            "cursor": "live" if agent_cmd() else "dark",
+            "vault": "live",
+            "calendar": "unprobed",
+            "mail": "unprobed",
+            "invoice": "unprobed",
+            "safari": "unprobed",
+            "files": "unprobed",
+            "catalog": "live",
         },
         "need": [] if agent_cmd() else ["Cursor agent CLI"],
     }
@@ -394,6 +765,590 @@ def unknown_grok() -> dict:
         "wire": "grok",
         "spoken": "UNKNOWN. Grok is a desk host, not the store.",
         "engine": "unknown",
+    }
+
+
+def _looks_like_scratchpad(text: str) -> bool:
+    """CoT / factory scratchpad only. Numbered answers and the word in prose stay."""
+    low = (text or "").lower()
+    if "thinking process" in low:
+        return True
+    if re.search(r"(?:^|\n)\s*(?:here'?s a |my |hidden )?scratchpad\s*:", low):
+        return True
+    if re.search(r"\b(?:hidden )?scratchpad\b.{0,24}\b(?:step|analyze|analyse|reasoning)\b", low):
+        return True
+    if re.search(
+        r"(?m)^\s*\d+\.\s+(?:analyze|analyse|understand|identify|reason|think about|step)\b",
+        low,
+    ):
+        return True
+    return False
+
+
+def _first_spoken_ready(text: str) -> bool:
+    """Face/TTS may start on the first real sentence. Do not cut the HTTP stream."""
+    line = (text or "").strip()
+    body = re.sub(r"^(?:sir[,.]?\s*)+", "", line, flags=re.I).strip()
+    if len(body) < 8 or _looks_like_scratchpad(body):
+        return False
+    # Watch JSON uses decimals. Do not treat {"x":0.5,"y":0.28} as spoken.
+    if body.startswith("{") or body.startswith("["):
+        return False
+    return bool(re.search(r"[.!?](?:\s|$)", body))
+
+
+def _strip_scratchpad(text: str) -> str:
+    """Keep spoken prose. Drop a thinking-process tail on the finished text."""
+    body = (text or "").strip()
+    if not body:
+        return ""
+    if body.startswith("{") or body.startswith("["):
+        return body
+    cut = None
+    for pat in (
+        r"(?is)(?:^|\n)\s*(?:here'?s a |my |hidden )?scratchpad\s*:",
+        r"(?is)(?:^|\n)\s*here'?s a thinking process\b",
+        r"(?is)(?:^|\n)\s*thinking process\s*:",
+    ):
+        found = re.search(pat, body)
+        if found:
+            cut = found.start() if cut is None else min(cut, found.start())
+    if cut is not None:
+        return body[:cut].strip()
+    if _looks_like_scratchpad(body):
+        return ""
+    return body
+
+
+def _talk_finished(finish: str) -> bool:
+    """Healthy complete talk is finished. Length leftovers are not."""
+    return (finish or "").lower() != "length"
+
+
+def unfinished_clause(text: str) -> bool:
+    body = (text or "").strip()
+    if not body:
+        return True
+    return body[-1] not in ".!?…"
+
+
+def _usable_length_text(text: str) -> str:
+    """Keep a finished sentence after a length cap. Drop mid-clause leftovers."""
+    body = complete_spoken(text)
+    if not body or _looks_like_scratchpad(body) or unfinished_clause(body):
+        return ""
+    return body
+
+
+def complete_spoken(text: str) -> str:
+    """Drop a clipped last word. Do not split URLs on dots."""
+    body = (text or "").strip()
+    if not body or body[-1] in ".!?…":
+        return body
+    match = None
+    for found in re.finditer(r"[.!?](?=\s+\S)", body):
+        match = found
+    if match is None:
+        return body
+    tail = body[match.end() :].strip()
+    if not tail or re.match(r"https?://", tail, re.I) or re.search(r"[/:]", tail):
+        return body
+    if len(tail.split()) <= 3 and len(tail) <= 24:
+        return body[: match.end()].strip()
+    return body
+
+
+def _choice_finish_reason(choice) -> str:
+    if not isinstance(choice, dict):
+        return ""
+    return str(choice.get("finish_reason") or "").strip()
+
+
+def _length_miss() -> dict:
+    return {
+        "ok": False,
+        "unknown": True,
+        "wire": "openrouter",
+        "engine": "openrouter",
+        "error": "length",
+        "finish_reason": "length",
+        "spoken": LENGTH_MISS,
+    }
+
+
+def _read_openrouter_stream(res, timeout: float | None = None) -> tuple[str, str]:
+    if timeout is None:
+        return _consume_openrouter_stream(res)
+    if timeout <= 0:
+        raise TimeoutError("stream headers exhausted request budget")
+    box: dict = {}
+
+    def read() -> None:
+        try:
+            box["result"] = _consume_openrouter_stream(res)
+        except Exception as exc:
+            box["error"] = exc
+
+    worker = threading.Thread(target=read, name="openrouter-stream", daemon=True)
+    worker.start()
+    worker.join(timeout)
+    if worker.is_alive():
+        _abort_response(res)
+        worker.join(1.0)
+        raise TimeoutError("response stream stalled")
+    if "error" in box:
+        raise box["error"]
+    return box["result"]
+
+
+def _consume_openrouter_stream(res) -> tuple[str, str]:
+    acc = ""
+    reason = ""
+    for raw in res:
+        if isinstance(raw, bytes):
+            line = raw.decode("utf-8", errors="replace").strip()
+        else:
+            line = str(raw or "").strip()
+        if not line:
+            continue
+        if line.startswith("data:"):
+            payload = line[5:].strip()
+        else:
+            continue
+        if payload == "[DONE]":
+            break
+        try:
+            chunk = json.loads(payload)
+        except json.JSONDecodeError:
+            continue
+        choices = chunk.get("choices") if isinstance(chunk, dict) else None
+        if not isinstance(choices, list) or not choices:
+            continue
+        first = choices[0] if isinstance(choices[0], dict) else {}
+        delta = first.get("delta") if isinstance(first.get("delta"), dict) else {}
+        acc += str((delta or {}).get("content") or "")
+        found = _choice_finish_reason(first)
+        if found:
+            reason = found
+    return _strip_scratchpad(acc), reason
+
+
+def _openrouter_length_retry(
+    mid: str,
+    user: str,
+    stills: list,
+    headers: dict,
+    *,
+    timeout: float = 10.0,
+) -> tuple[str, str]:
+    finish_user = f"{user}\n\nFinish the thought. Do not recap. No scratchpad."
+    try:
+        data = _http_json(
+            OPENROUTER_URL,
+            data=_openrouter_payload(
+                mid,
+                finish_user,
+                stream=False,
+                max_tokens=LENGTH_RETRY_TOKENS,
+                images=stills,
+            ),
+            headers=headers,
+            timeout=max(1.0, float(timeout)),
+        )
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError):
+        return "", "length"
+    choices = data.get("choices") if isinstance(data, dict) else None
+    msg: dict = {}
+    reason = "length"
+    if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+        raw_msg = choices[0].get("message")
+        msg = raw_msg if isinstance(raw_msg, dict) else {}
+        reason = _choice_finish_reason(choices[0]) or "length"
+    return str(msg.get("content") or "").strip(), reason
+
+
+def _openrouter_payload(
+    model: str,
+    user: str,
+    *,
+    stream: bool,
+    max_tokens: int | None = None,
+    with_tools: bool = False,
+    images: list | None = None,
+    extra_tools: list | None = None,
+    hands: bool = True,
+) -> dict:
+    content: str | list
+    stills = [str(u) for u in (images or []) if str(u or "").startswith("data:image")]
+    if stills:
+        parts: list[dict] = [{"type": "text", "text": user}]
+        for url in stills[:3]:
+            parts.append({"type": "image_url", "image_url": {"url": url}})
+        content = parts
+    else:
+        content = user
+    body = {
+        "model": model,
+        "temperature": 0.2,
+        "max_tokens": int(max_tokens or OPENROUTER_MAX_TOKENS),
+        "stream": stream,
+        "messages": [
+            {"role": "system", "content": SYS},
+            {"role": "user", "content": content},
+        ],
+    }
+    if model in OPENROUTER_PAID_FALLBACKS:
+        # The conversational token ceiling needs answer tokens, not an unfinished thinking trace.
+        body["reasoning"] = {"enabled": False}
+    if with_tools:
+        tools = list(OPENROUTER_HANDS) if hands else []
+        if extra_tools:
+            tools.extend(list(extra_tools))
+        if tools:
+            body["tools"] = tools
+            body["tool_choice"] = "auto"
+    return body
+
+
+def _tool_pick_from_message(msg: dict) -> dict | None:
+    calls = msg.get("tool_calls") if isinstance(msg, dict) else None
+    if not isinstance(calls, list) or not calls:
+        return None
+    first = calls[0] if isinstance(calls[0], dict) else {}
+    fn = first.get("function") if isinstance(first.get("function"), dict) else {}
+    name = str(fn.get("name") or "").strip()
+    if not name:
+        return None
+    raw_args = fn.get("arguments")
+    args: dict = {}
+    if isinstance(raw_args, dict):
+        args = raw_args
+    elif isinstance(raw_args, str) and raw_args.strip():
+        try:
+            parsed = json.loads(raw_args)
+        except json.JSONDecodeError:
+            parsed = {}
+        if isinstance(parsed, dict):
+            args = parsed
+    return {"tool": name, "args": args, "speak": str(msg.get("content") or "").strip()}
+
+
+def call_openrouter_messages(
+    messages: list[dict],
+    tools: list[dict],
+    *,
+    model_chain: tuple | list,
+    attempt_sec: float = 25.0,
+) -> dict:
+    """Worker tool loop turn: real chat messages, real tool roles. Not the talk mouth.
+
+    A flat text transcript invites the model to continue it and invent tool
+    results. Tool messages do not. Returns {ok, tool, args, call_id, text, model, error}.
+    """
+    key = openrouter_api_key()
+    if not key:
+        return {"ok": False, "unknown": True, "error": "OpenRouter key is dark."}
+    headers = {"Authorization": f"Bearer {key}", "HTTP-Referer": "http://127.0.0.1:4018", "X-Title": "Jarvis"}
+    last_err = "no model"
+    for mid in [m for m in model_chain if m]:
+        body = {
+            "model": mid,
+            "messages": messages,
+            "tools": tools,
+            "tool_choice": "auto",
+            "max_tokens": OPENROUTER_MAX_TOKENS,
+            "reasoning": {"enabled": False},
+        }
+        try:
+            data = _http_json(OPENROUTER_URL, data=body, headers=headers, timeout=attempt_sec)
+        except urllib.error.HTTPError as exc:
+            last_err = f"{mid}: http {exc.code}"
+            continue
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            last_err = f"{mid}: {type(exc).__name__}"
+            continue
+        choice = ((data.get("choices") or [{}])[0]) if isinstance(data, dict) else {}
+        msg = choice.get("message") if isinstance(choice.get("message"), dict) else {}
+        pick = _tool_pick_from_message(msg)
+        if pick:
+            first = (msg.get("tool_calls") or [{}])[0]
+            return {
+                "ok": True,
+                "tool": pick["tool"],
+                "args": pick.get("args") or {},
+                "call_id": str(first.get("id") or "call_0"),
+                "text": "",
+                "model": mid,
+            }
+        text = str(msg.get("content") or "").strip()
+        if text and str(choice.get("finish_reason") or "").lower() != "length":
+            return {"ok": True, "tool": "", "args": {}, "call_id": "", "text": text, "model": mid}
+        last_err = f"{mid}: {'length' if text else 'empty'}"
+    return {"ok": False, "unknown": True, "error": f"UNKNOWN. {last_err}."}
+
+
+def openrouter_hand_names() -> set[str]:
+    names: set[str] = set()
+    for row in (*OPENROUTER_HANDS, *OPENROUTER_MAC_ACT):
+        fn = row.get("function") if isinstance(row, dict) else None
+        name = str((fn or {}).get("name") or "").strip()
+        if name:
+            names.add(name)
+    return names
+
+
+def usable_openrouter(got) -> bool:
+    """Keep a validated hand even when the model sent no narration."""
+    if not isinstance(got, dict) or not got.get("ok") or got.get("unknown"):
+        return False
+    spoken = str(got.get("spoken") or got.get("speak") or "").strip()
+    if spoken and not spoken.upper().startswith("UNKNOWN"):
+        return True
+    tool = str(got.get("tool") or "").strip()
+    args = got.get("args")
+    return bool(tool) and tool in openrouter_hand_names() and isinstance(args, dict)
+
+
+def call_openrouter(
+    prompt: str,
+    context: str = "",
+    *,
+    images: list | None = None,
+    extra_tools: list | None = None,
+    hands: bool = True,
+) -> dict:
+    """OpenRouter chat. Free first. Paid fallback on the same host when :free is 429.
+
+    Not ChatGPT, Claude, or Gemini as the product mouth.
+    """
+    key = openrouter_api_key()
+    if not key:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "openrouter",
+            "engine": "openrouter",
+            "spoken": "UNKNOWN. OpenRouter key is dark.",
+        }
+    user = prompt.strip()
+    brief = (context or "").strip()
+    if brief:
+        user = f"Live context:\n{brief}\n\nCurrent ask:\n{user}"
+    stills = [str(u) for u in (images or []) if str(u or "").startswith("data:image")]
+    if stills and not openrouter_vision_model() and not extra_tools:
+        # Try the talk model first; if every host rejects images, VISION_DARK.
+        pass
+    max_tokens = OPENROUTER_RETRIEVE_TOKENS if brief else OPENROUTER_MAX_TOKENS
+    with_tools = bool(hands or extra_tools)
+    models: list[str] = []
+    vision = openrouter_vision_model() if stills else ""
+    primary = openrouter_model()
+    vision_paid = OPENROUTER_VISION_FALLBACKS if stills else ()
+    for mid in (vision, primary, *OPENROUTER_FALLBACKS, *vision_paid, *OPENROUTER_PAID_FALLBACKS):
+        if mid and mid not in models:
+            models.append(mid)
+    free_quota_dead = False
+    if stills and not models:
+        return {
+            "ok": False,
+            "unknown": True,
+            "wire": "openrouter",
+            "engine": "openrouter",
+            "spoken": VISION_DARK,
+        }
+    last_err = "no model"
+    headers = {
+        "Authorization": f"Bearer {key}",
+        "HTTP-Referer": "http://127.0.0.1:4018",
+        "X-Title": "Jarvis",
+    }
+    wall_start = time.monotonic()
+    for mid in models:
+        if free_quota_dead and str(mid).endswith(":free"):
+            last_err = "http 429"
+            continue
+        spent = time.monotonic() - wall_start
+        remain = OPENROUTER_WALL_SEC - spent
+        if remain < 1.0:
+            last_err = "timeout"
+            break
+        attempt = min(OPENROUTER_ATTEMPT_SEC, remain)
+        text = ""
+        pick = None
+        finish = ""
+        try:
+            if with_tools:
+                data = _http_json(
+                    OPENROUTER_URL,
+                    data=_openrouter_payload(
+                        mid,
+                        user,
+                        stream=False,
+                        max_tokens=max_tokens,
+                        with_tools=True,
+                        images=stills,
+                        extra_tools=extra_tools,
+                        hands=hands,
+                    ),
+                    headers=headers,
+                    timeout=attempt,
+                )
+                choices = data.get("choices") if isinstance(data, dict) else None
+                msg = {}
+                if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+                    raw_msg = choices[0].get("message")
+                    msg = raw_msg if isinstance(raw_msg, dict) else {}
+                    finish = _choice_finish_reason(choices[0])
+                pick = _tool_pick_from_message(msg)
+                text = str(msg.get("content") or "").strip()
+                if not pick and not text and (finish or "").lower() != "length":
+                    err = data.get("error") if isinstance(data, dict) else None
+                    last_err = str(
+                        (err or {}).get("message") if isinstance(err, dict) else err or data.get("http") or "empty"
+                    )
+                    continue
+            else:
+                if stills:
+                    data = _http_json(
+                        OPENROUTER_URL,
+                        data=_openrouter_payload(
+                            mid,
+                            user,
+                            stream=False,
+                            max_tokens=max_tokens,
+                            images=stills,
+                        ),
+                        headers=headers,
+                        timeout=attempt,
+                    )
+                    choices = data.get("choices") if isinstance(data, dict) else None
+                    msg = {}
+                    if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+                        raw_msg = choices[0].get("message")
+                        msg = raw_msg if isinstance(raw_msg, dict) else {}
+                        finish = _choice_finish_reason(choices[0])
+                    text = str(msg.get("content") or "").strip()
+                else:
+                    request_started = time.monotonic()
+                    with _http_open(
+                        OPENROUTER_URL,
+                        data=_openrouter_payload(
+                            mid, user, stream=True, max_tokens=max_tokens, images=stills
+                        ),
+                        headers=headers,
+                        timeout=attempt,
+                    ) as res:
+                        remaining = min(
+                            attempt - (time.monotonic() - request_started),
+                            OPENROUTER_WALL_SEC - (time.monotonic() - wall_start),
+                        )
+                        text, finish = _read_openrouter_stream(res, timeout=remaining)
+        except urllib.error.HTTPError as exc:
+            last_err = f"http {int(exc.code)}"
+            if int(exc.code) == 429 and str(mid).endswith(":free"):
+                free_quota_dead = True
+            if int(exc.code) not in {400, 422}:
+                continue
+            try:
+                remain = OPENROUTER_WALL_SEC - (time.monotonic() - wall_start)
+                if remain < 1.0:
+                    last_err = "timeout"
+                    break
+                data = _http_json(
+                    OPENROUTER_URL,
+                    data=_openrouter_payload(
+                        mid, user, stream=False, max_tokens=max_tokens, images=stills
+                    ),
+                    headers=headers,
+                    timeout=min(OPENROUTER_ATTEMPT_SEC, remain),
+                )
+            except urllib.error.HTTPError as retry_exc:
+                last_err = f"http {int(retry_exc.code)}"
+                continue
+            except (urllib.error.URLError, TimeoutError, OSError) as retry_exc:
+                last_err = type(retry_exc).__name__
+                continue
+            choices = data.get("choices") if isinstance(data, dict) else None
+            if isinstance(choices, list) and choices:
+                msg = choices[0].get("message") if isinstance(choices[0], dict) else {}
+                pick = pick or _tool_pick_from_message(msg if isinstance(msg, dict) else {})
+                text = str((msg or {}).get("content") or "").strip()
+                finish = _choice_finish_reason(choices[0]) or finish
+            if not pick and not text and (finish or "").lower() != "length":
+                err = data.get("error") if isinstance(data, dict) else None
+                last_err = str((err or {}).get("message") if isinstance(err, dict) else err or data.get("http") or "empty")
+                continue
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            last_err = type(exc).__name__
+            continue
+        if pick:
+            return {
+                "ok": True,
+                "unknown": False,
+                "wire": "openrouter",
+                "engine": "openrouter",
+                "tool": pick.get("tool"),
+                "args": pick.get("args") or {},
+                "speak": pick.get("speak") or "",
+                "spoken": clip_spoken(
+                    str(pick.get("speak") or ""),
+                    finished=_talk_finished(finish),
+                ),
+                "model": mid,
+                "finish_reason": finish or None,
+            }
+        hit_length = (finish or "").lower() == "length"
+        if hit_length:
+            kept = _usable_length_text(text)
+            retry_finish = finish
+            if not kept:
+                remain = OPENROUTER_WALL_SEC - (time.monotonic() - wall_start)
+                more = ""
+                if remain >= 1.0:
+                    more, retry_finish = _openrouter_length_retry(
+                        mid, user, stills, headers, timeout=min(10.0, remain)
+                    )
+                kept = _usable_length_text(more)
+            if kept:
+                return {
+                    "ok": True,
+                    "unknown": False,
+                    "wire": "openrouter",
+                    "engine": "openrouter",
+                    "spoken": clip_spoken(
+                        kept,
+                        finished=_talk_finished(retry_finish),
+                    ),
+                    "model": mid,
+                    "finish_reason": retry_finish or None,
+                }
+            return _length_miss()
+        text = _strip_scratchpad(complete_spoken(text))
+        if text and not _looks_like_scratchpad(text):
+            return {
+                "ok": True,
+                "unknown": False,
+                "wire": "openrouter",
+                "engine": "openrouter",
+                "spoken": clip_spoken(text, finished=_talk_finished(finish)),
+                "model": mid,
+                "finish_reason": finish or None,
+            }
+        if text and _looks_like_scratchpad(text):
+            last_err = "scratchpad"
+            continue
+        last_err = "empty"
+    if last_err == "timeout":
+        spoken = TALK_DARK
+    else:
+        spoken = VISION_DARK if stills else f"UNKNOWN. OpenRouter returned no text. {last_err}."
+    return {
+        "ok": False,
+        "unknown": True,
+        "wire": "openrouter",
+        "engine": "openrouter",
+        "error": last_err,
+        "spoken": spoken,
     }
 
 
@@ -544,7 +1499,36 @@ def call_grokbot(prompt: str, context: str = "") -> dict:
     }
 
 
+def _named_openrouter_failure(got) -> bool:
+    """429 / length / named OpenRouter miss. Do not hide these in the Grok desk."""
+    if not isinstance(got, dict):
+        return False
+    if str(got.get("wire") or got.get("engine") or "").lower() not in {"openrouter", ""}:
+        return False
+    err = str(got.get("error") or "").lower()
+    spoken = str(got.get("spoken") or "").lower()
+    finish = str(got.get("finish_reason") or "").lower()
+    blob = f"{err} {spoken} {finish}"
+    return bool(
+        got.get("unknown")
+        and (
+            "429" in blob
+            or "length" in blob
+            or "openrouter" in spoken
+            or "timeout" in blob
+            or "talk wire is dark" in spoken
+            or finish == "length"
+        )
+    )
+
+
 def call_grok(prompt: str, context: str = "") -> dict:
+    if openrouter_api_key():
+        got = call_openrouter(prompt, context)
+        if usable_openrouter(got):
+            return got
+        if _named_openrouter_failure(got):
+            return got
     if grok_api_key():
         got = call_xai(prompt, context)
         if isinstance(got, dict) and got.get("ok") and not got.get("unknown"):
@@ -606,7 +1590,9 @@ def call_vps() -> dict:
                 "-o",
                 "ConnectTimeout=8",
                 target,
-                "hostname; uptime; df -h / | tail -1",
+                "hostname; uptime; df -h / | tail -1; "
+                "if curl -fsS --max-time 2 http://127.0.0.1:18789/health >/dev/null 2>&1; "
+                "then echo OPENCLAW_HEALTH=up; else echo OPENCLAW_HEALTH=down; fi",
             ],
             capture_output=True,
             text=True,
@@ -618,13 +1604,24 @@ def call_vps() -> dict:
         err = (proc.stderr or proc.stdout or "no key or host down").strip()[:180]
         return {"ok": False, "unknown": True, "wire": "vps", "spoken": f"UNKNOWN. VPS SSH to {target} failed. {err}"}
     lines = [ln.strip() for ln in (proc.stdout or "").splitlines() if ln.strip()]
-    host = lines[0] if lines else target
-    rest = " ".join(lines[1:]) if len(lines) > 1 else ""
+    health = "unproven"
+    kept: list[str] = []
+    for ln in lines:
+        if ln.startswith("OPENCLAW_HEALTH="):
+            health = ln.split("=", 1)[1].strip() or "unproven"
+        else:
+            kept.append(ln)
+    host = kept[0] if kept else target
+    rest = " ".join(kept[1:]) if len(kept) > 1 else ""
     spoken = f"VPS {host} live. {rest}".strip()
+    if health == "up":
+        spoken += " OpenClaw gateway health up on loopback 18789."
+    elif health == "down":
+        spoken += " OpenClaw gateway down. Delegate only — not a second Jarvis."
     token = (os.environ.get("HOSTINGER_API_TOKEN") or "").strip()
     if not token:
         spoken += " Hostinger API token is dark — SSH used instead."
-    return {"ok": True, "wire": "vps", "spoken": spoken, "host": host}
+    return {"ok": True, "wire": "vps", "spoken": spoken, "host": host, "openclaw_health": health}
 
 
 def call_cursor() -> dict:
@@ -660,6 +1657,16 @@ def cursor_login_error(text: str) -> bool:
         or "needs a one-time login" in blob
         or "please run 'agent login'" in blob
     )
+
+
+def cursor_ready_cached() -> bool:
+    """Reuse a fresh login for one minute. Do not spawn `agent status` on every Hello."""
+    global _LOGIN_OK_UNTIL
+    if _LOGIN_OK_UNTIL > time.time():
+        return True
+    ok = cursor_logged_in()
+    _LOGIN_OK_UNTIL = (time.time() + LOGIN_CACHE_SEC) if ok else 0.0
+    return ok
 
 
 def cursor_logged_in() -> bool:
@@ -836,7 +1843,7 @@ def _cursor_argv(cmd: list[str], prompt: str, *, mode: str, resume: str | None) 
     if chat:
         argv.extend(["--resume", chat])
     argv.append((prompt or "").strip())
-    timeout = 90 if use_mode == "agent" else 45
+    timeout = 90 if use_mode == "agent" else 18
     return argv, use_mode, chat, timeout
 
 
@@ -1019,6 +2026,85 @@ def call_cursor_turn(prompt: str, *, mode: str = "ask", resume: str | None = Non
     }
 
 
+CONVERSE_TIMEOUT = 25
+CONVERSE_SYS = (
+    "You are Jarvis for Evens Louis, the coordinator. "
+    "Answer in one short spoken line. "
+    "Never invent Claude, ChatGPT, Gemini, or Ollama. "
+    "Never identify as Nex, Nemotron, or any model name."
+)
+
+
+def call_cursor_converse(utterance: str) -> dict:
+    """One-shot `agent -p` text mouth. Cursor login only. No xAI. No Grok Bot unseal.
+
+    Same binary and HOME as Terminal. No --resume (pack-echo chats stay out).
+    Do not loop `agent login`.
+    """
+    if os.environ.get("AGENT_STACK_CURSOR_DRY") == "1":
+        return _cursor_fail("UNKNOWN. Cursor print is dry.")
+    cmd = agent_cmd()
+    if not cmd:
+        return _cursor_fail("UNKNOWN. Cursor agent CLI is missing.")
+    if not cursor_logged_in():
+        return _cursor_fail(LOGIN_UNKNOWN)
+    prompt = f"{CONVERSE_SYS}\n\n{(utterance or '').strip()}"
+    argv = [
+        *cmd,
+        "-p",
+        "--trust",
+        "--workspace",
+        str(ROOT),
+        "--output-format",
+        "text",
+        "--mode",
+        "ask",
+        prompt,
+    ]
+    global _CURSOR_PROC, _CURSOR_CANCELLED
+    _CURSOR_CANCELLED = False
+    try:
+        with _CURSOR_LOCK:
+            proc = subprocess.run(
+                argv,
+                capture_output=True,
+                text=True,
+                timeout=CONVERSE_TIMEOUT,
+                cwd=str(ROOT),
+                env=agent_env(),
+            )
+    except subprocess.TimeoutExpired:
+        return _cursor_fail("UNKNOWN. Cursor timed out. Say stop, or ask again shorter.")
+    except OSError as exc:
+        return _cursor_fail(f"UNKNOWN. Cursor agent failed: {exc}.")
+    if _CURSOR_CANCELLED:
+        return _cursor_fail("", cancelled=True)
+    text = (proc.stdout or "").strip()
+    err = (proc.stderr or "").strip()
+    if not text and cursor_login_error(err):
+        return _cursor_fail(LOGIN_UNKNOWN)
+    if not text:
+        return _cursor_fail(f"UNKNOWN. Cursor agent returned no text. {err[:180]}".strip())
+    return {
+        "ok": True,
+        "unknown": False,
+        "wire": "cursor",
+        "engine": "cursor-cli",
+        "spoken": clip_spoken(text),
+        "mode": "ask",
+    }
+
+
+def _macos_mod():
+    path = ROOT / "apps/agent-stack/hands/macos_read.py"
+    spec = importlib.util.spec_from_file_location("agent_stack_macos_read_online", path)
+    if spec is None or spec.loader is None:
+        return None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def status(which: str = "all") -> dict:
     want = (which or "all").lower()
     parts: list[dict] = []
@@ -1028,9 +2114,16 @@ def status(which: str = "all") -> dict:
         parts.append(call_vps())
     if want in ("all", "cursor"):
         parts.append(call_cursor())
+    mac = None
+    if want in ("all", "calendar", "mail", "files"):
+        mac = _macos_mod()
+    if want in ("all", "calendar") and mac is not None:
+        parts.append(mac.calendar_today())
+    if want in ("all", "mail") and mac is not None:
+        parts.append(mac.mail_unread())
     if not parts:
         parts = [call_hive(), call_vps(), call_cursor()]
-    spoken = " ".join(str(p.get("spoken") or "") for p in parts).strip()
+    spoken = " ".join(str(p.get("spoken") or "").replace("UNKNOWN. ", "") for p in parts).strip()
     return {
         "ok": all(p.get("ok") for p in parts),
         "verb": "status",

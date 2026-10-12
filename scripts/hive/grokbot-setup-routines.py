@@ -37,6 +37,7 @@ call = _setup_mod.call
 load_automation_registry = _setup_mod.load_automation_registry
 save_automation_registry = _setup_mod.save_automation_registry
 automation_key = _setup_mod.automation_key
+other_agent_has_routine = _setup_mod.other_agent_has_routine
 AUTOMATION_REGISTRY = _setup_mod.AUTOMATION_REGISTRY
 
 ROUTINES_PATH = _conn_dir / "grok-agent-routines.json"
@@ -268,6 +269,11 @@ def provision_trigger_routines(
             skipped += 1
             continue
 
+        if other_agent_has_routine(registry, agent_id, auto_name):
+            print(f"  duplicate routine refused: {auto_name} → {name}")
+            skipped += 1
+            continue
+
         try:
             call(base, headers, "POST", "/api/createAgentAutomation", {"id": agent_id, "spec": spec})
             registry.add(key)
@@ -371,6 +377,11 @@ def main() -> int:
             if key not in registry:
                 registry.add(key)
             print(f"  exists: {auto_name} → {name}")
+            skipped += 1
+            continue
+
+        if other_agent_has_routine(registry, agent_id, auto_name):
+            print(f"  duplicate routine refused: {auto_name} → {name}")
             skipped += 1
             continue
 

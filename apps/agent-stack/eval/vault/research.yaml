@@ -1,0 +1,38 @@
+verb: vault.research
+not: vault.lookup
+steps:
+  - question
+  - query_decomposition
+  - candidate_note_retrieval
+  - inspect_headings_sections
+  - optional_linked_note_expansion
+  - dedupe_live_vault_vs_mirror
+  - temporal_recency_reasoning
+  - evidence_ranking
+  - answer_with_exact_provenance
+lookup_vs_research:
+  lookup: What was the lamp code?
+  research: How has my Jarvis architecture changed from the original OpenClaw idea to what we are building now?
+synthesis_case:
+  id: openclaw-to-now
+  question: How has my Jarvis architecture changed from the original OpenClaw idea to what we are building now?
+  cannot_be: one keyword hit
+  must:
+    - cite exact live-vault notes
+    - live vault beats repo replica
+    - name OpenClaw as delegate not identity if that is the durable decision
+also_prove:
+  - write then query
+  - edit then old answer gone
+  - rename still finds
+  - stale mirror loses
+index_health:
+  - vault root
+  - indexed document count
+  - last index refresh
+  - last filesystem change observed
+  - index version
+  - stale or not
+  - blocked namespaces
+  - index errors
+stale_index_must_not: speak as authority

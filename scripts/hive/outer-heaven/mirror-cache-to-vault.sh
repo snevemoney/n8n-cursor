@@ -26,9 +26,28 @@ fi
 DEST="$HIVE_OBSIDIAN_VAULT/00_Outer_Heaven"
 mkdir -p "$DEST"
 
+# Do not let a thin cache shard overwrite a fat vault chronicle (Aug 2026 wipe).
+PROTECT=()
+if [[ -d "$DEST/CHRONICLE" ]]; then
+  shopt -s nullglob
+  for shard in "$DEST/CHRONICLE"/*.md; do
+    base="$(basename "$shard")"
+    src="$CACHE/CHRONICLE/$base"
+    [[ -f "$src" ]] || continue
+    dest_bytes="$(stat -f%z "$shard" 2>/dev/null || stat -c%s "$shard")"
+    src_bytes="$(stat -f%z "$src" 2>/dev/null || stat -c%s "$src")"
+    if (( dest_bytes > src_bytes * 2 && dest_bytes > 100000 )); then
+      echo "mirror-cache-to-vault: protect CHRONICLE/$base (${dest_bytes}B vault vs ${src_bytes}B cache)"
+      PROTECT+=(--exclude "CHRONICLE/$base")
+    fi
+  done
+  shopt -u nullglob
+fi
+
 if command -v timeout >/dev/null 2>&1; then
   if timeout "$TIMEOUT_SEC" rsync -a \
     --exclude '.DS_Store' \
+    "${PROTECT[@]}" \
     "$CACHE/" "$DEST/"; then
     echo "mirror-cache-to-vault: ok → $DEST"
     # Graph index lives at vault root
@@ -42,4 +61,4 @@ if command -v timeout >/dev/null 2>&1; then
   exit 0
 fi
 
-rsync -a --exclude '.DS_Store' "$CACHE/" "$DEST/" && echo "mirror-cache-to-vault: ok → $DEST"
+rsync -a --exclude '.DS_Store' "${PROTECT[@]}" "$CACHE/" "$DEST/" && echo "mirror-cache-to-vault: ok → $DEST"
