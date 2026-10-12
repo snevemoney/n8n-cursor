@@ -60,7 +60,7 @@ Host: routine|cron|n8n-legacy|BLOCKED-needs-X
 ```
 
 ## Pair
-- [cheap-read-expensive-decide](sand-workflow:cheap-read-expensive-decide) for research budget
+- [match-model-to-task](sand-workflow:match-model-to-task) for research budget
 - [context-before-tokens](sand-workflow:context-before-tokens) before stuffing calendars into a thread
 - [research-signal-to-skills](sand-workflow:research-signal-to-skills) on close
 
@@ -75,7 +75,7 @@ Packet: `/workspace/research/packets/x-bookmarks/20260917-1048/`.
 - Any named repo = **RESEARCH-OK** → [awesome-skill-import-gate](sand-workflow:awesome-skill-import-gate) propose; never silent install.
 - OpenBot = already on watch list; **BLOCKED** as hive face (Grok Bot stays face).
 - TradingAgents = advise-only Wealth desk pattern; **BLOCKED** auto-trade.
-- HyperFrames / MoneyPrinterTurbo short-video factories → Remotion + whisper-caption-gap **WORKAROUND** (not Claude/HyperFrames face).
+- HyperFrames / MoneyPrinterTurbo short-video factories → Remotion + summarize-audio-video **WORKAROUND** (not Claude/HyperFrames face).
 - LibreChat / opencodex multi-model UIs → **BLOCKED** second chat face; Cursor+Grok **WORKAROUND**.
 - VoxCPM local voice clone → **RESEARCH-OK**; ElevenLabs MCP may already cover generation — do not dual-face.
 

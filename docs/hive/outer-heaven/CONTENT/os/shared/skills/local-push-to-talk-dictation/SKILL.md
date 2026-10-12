@@ -11,7 +11,7 @@ description: >-
 **Remap:** Claude Code one-shot → **Cursor** agent on Mac. Hive does not install a second Claude desktop.
 
 ## When
-Operator wants push-to-talk dictation that stays on-device (privacy / cost), feeding [voice-ramble-session-context](sand-workflow:voice-ramble-session-context) dumps.
+Operator wants push-to-talk dictation that stays on-device (privacy / cost), feeding [session-bootstrap](sand-workflow:session-bootstrap) dumps.
 
 ## Architecture (FACT from tape)
 Shell (Swift Mac app) · HUD waveform · hotkey (Fn / right-control) · mic audio · STT (macOS Speech Analyzer/Transcriber; Parakeet fallback) · optional local LLM cleanup · text injection at cursor · history + custom dictionary.
@@ -38,7 +38,7 @@ Shell (Swift Mac app) · HUD waveform · hotkey (Fn / right-control) · mic audi
 | STT fallback | Parakeet local model (HF curl) — **WORKAROUND** |
 | Cloud Wispr | **BLOCKED** — local app **WORKAROUND** |
 | Claude Code | **BLOCKED** — Cursor **WORKAROUND** |
-| Caption Whisper (YouTube L2) | [whisper-caption-gap](sand-workflow:whisper-caption-gap) — different job — **PROVE** on box |
+| Caption Whisper (YouTube L2) | [summarize-audio-video](sand-workflow:summarize-audio-video) — different job — **PROVE** on box |
 
 ## Prompts
 **ASR source:** `yt:IMQw3aHjf2Q` Whisper LIVE (Pat Simmons). FACT architecture from tape.
@@ -73,7 +73,7 @@ Prefer Apple native for Mac path (no HF required); ship Parakeet instructions fo
 ```
 Add dictionary phrases: [Claude Code, brand, people].
 Prove correction appears in history.
-Then dump dictation → goals · constraints · links · success check ([voice-ramble-session-context]).
+Then dump dictation → goals · constraints · links · success check ([session-bootstrap]).
 ```
 
 ## Tibo morning dump (`yt:4qjEgPojjzM`)
@@ -118,4 +118,4 @@ For email: write reply in my voice from thread context + dictation only.
 **Anti-triggers:** do not mint a Clicky/heyclicky desk or cloud STT SKU; do not treat Remotion as relevant; Whisper YouTube L2 ≠ this product.
 
 ## X bookmarks 20261001-1028-desktop (`x:2105367304817250566` @Jhaddix)
-Verbose multi-page dictation of current understanding STRENGTHENS the dump path feeding voice-ramble. Dictation remains input, not SKU. Pair [voice-ramble-session-context](sand-workflow:voice-ramble-session-context).
+Verbose multi-page dictation of current understanding STRENGTHENS the dump path feeding voice-ramble. Dictation remains input, not SKU. Pair [session-bootstrap](sand-workflow:session-bootstrap).

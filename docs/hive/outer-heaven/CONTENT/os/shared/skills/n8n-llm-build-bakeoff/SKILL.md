@@ -8,14 +8,14 @@ description: >-
   cheapest model that passes. Triggers: "which model builds n8n best", "cheapest
   model for n8n", "model bakeoff", "compare models on n8n", new frontier/open model
   release. Anti-triggers: picking a model for runtime agent calls inside a workflow
-  (use cheap-read-expensive-decide / match-model-to-task), production n8n edits.
+  (use match-model-to-task / match-model-to-task), production n8n edits.
 ---
 # n8n LLM build bakeoff (cheapest model that passes)
 
 **Owner:** Researcher (method + rubric) · Forge (runs the contestants in a Cursor cloud agent) · Watchdog (verifies grades from workflow JSON + execution files)
 **Platform:** isolated n8n ([n8n-box-sandbox](sand-workflow:n8n-box-sandbox)) + a coding harness with the **n8n MCP server** (OpenCode / Claude Code / Cursor agent). Model calls via OpenRouter (key lives in Cursor → run inside a Cursor cloud agent).
 **Install:** none on box. Kit: `/workspace/research/youtube-daily/l2-20261010/i-mBOC3dbZU/recreation/` → `grade_n8n_workflow.py`, `cost_ledger.py`, `task1_reference.workflow.json`, `task2_*_reference.workflow.json`, `variants/`.
-**Related:** [cheap-read-expensive-decide](sand-workflow:cheap-read-expensive-decide) · [n8n-kit-forge](sand-workflow:n8n-kit-forge) · [eval-harness-scope](sand-workflow:eval-harness-scope)
+**Related:** [match-model-to-task](sand-workflow:match-model-to-task) · [n8n-legacy-ops](sand-workflow:n8n-legacy-ops) · [four-blank-before-build](sand-workflow:four-blank-before-build)
 **Source:** `yt:i-mBOC3dbZU` (n8n × Flowgrammer, 30:28) — setup 0:47–1:18, prompt 1 t0092, good T1 2:04–2:47, prompt 2 t0765, good T2 13:10–14:52, DQ calls 18:21–27:55, totals t1695, recommendation 29:10–29:20. Packet `/workspace/research/youtube-daily/l2-20261010/i-mBOC3dbZU/`.
 
 ## Recipe

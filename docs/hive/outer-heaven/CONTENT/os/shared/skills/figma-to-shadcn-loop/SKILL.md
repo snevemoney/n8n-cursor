@@ -45,7 +45,7 @@ Do not call Mobbin search unless a paid plan is confirmed live.
 
 ## X bookmarks 2026-08-27 15:19 — Beautiful UI chrome
 Source: x:2092883541482692728 to https://beautifului.dev/ (FACT).
-AI-app primitives (thinking, stream, approval, tool chips) remap through Shadcn here. Pair with ai-product-ui-primitives. Do not vendor the kit. Cinematic heroes still use cinematic-site-recipe.
+AI-app primitives (thinking, stream, approval, tool chips) remap through Shadcn here. Pair with ui-compose. Do not vendor the kit. Cinematic heroes still use cinematic-site-recipe.
 
 ## Lukas Mobbin MCP tape 2026-09-03 (`yt:B5qFifAe7u0`) title-only
 Title FACT. Workflow claims UNVERIFIED (no L2). Tooling close: connector live, search paid-blocked. Do not L2 this video just to rediscover the paywall.

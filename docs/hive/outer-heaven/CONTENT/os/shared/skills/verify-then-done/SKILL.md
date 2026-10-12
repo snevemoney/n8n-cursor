@@ -3,6 +3,7 @@ name: Verify then done
 description: >-
   Use before calling any AI build or research task done — prove it the way a
   human would, with a bounded goal and rewind on wrong turns.
+merged_from: [superpowers-verify-before-done]
 ---
 # Verify, then done
 
@@ -144,3 +145,26 @@ Packet: `/workspace/research/youtube-daily/l2-20260923/Vok_nReMFaU/`
 
 ## Enrich 2026-10-10: evidence pack per agent change (`yt:bs1qPy_CWkM` IBM)
 Before you call an agent change done, attach answers to: what changed · why · what could break · downstream impact · objective met (tested). PROVE: `evidence_pack.py` builds this from git + a test command.
+
+---
+
+## Merged from `superpowers-verify-before-done` (2026-10-11)
+
+- Original description: Use before claiming complete/fixed/passing — fresh verification evidence required; remaps obra/superpowers verification-before-completion to verify-then-done + check-forge-done.
+- Unique content carried: fresh-evidence-before-claim rule
+
+# Superpowers verify before done
+
+Source: obra/superpowers `verification-before-completion` (MIT).
+
+## When
+About to claim done, fixed, green, or ready to PR/merge.
+
+## Do
+1. Iron law: no completion claim without fresh verification evidence from this run.
+2. Run the named check (`harness-ci.sh`, tests, click path). Paste exit code / path.
+3. Forge-done: implement→critic + Watchdog critic. `check-forge-done.py --slice-id …` exit 0 after critic closes.
+4. Pair verify-then-done. Looks good without a click = fail for sites.
+
+## Don't
+Self-PASS. Claim Stage 5 as license to ship live `/`. Skip evidence.

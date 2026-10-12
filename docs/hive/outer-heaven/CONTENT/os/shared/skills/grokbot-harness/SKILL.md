@@ -100,7 +100,7 @@ Tapes: Nate `yt:TMPUUyQC5aM` (Whisper CAPTION_GAP recovery); Eric GrowthEngineX 
 
 ### Nate week hacks — remap (FACT numbered from tape)
 
-1. **Grill-me** until shared understanding → [interview-to-desk](sand-workflow:interview-to-desk). Drag-in Claude/Codex grill skill = import into Grok, do not install Claude desktop.
+1. **Grill-me** until shared understanding → [agent-job-card](sand-workflow:agent-job-card). Drag-in Claude/Codex grill skill = import into Grok, do not install Claude desktop.
 2. **One chief.** Operator talks only to Big Boss. Specialists are one-job. Delegate first; chief does the work only if no specialist fits. Bring results back.
 3. After grill-me, **ask chief to propose specialists**. Refuse a second chief / generic helper / thumbnail-spam bot.
 4. **Two memories.** Shared wiki vs per-desk notes — say which you are writing. Plugins (Gmail/Calendar) are org-wide.

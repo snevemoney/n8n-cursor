@@ -2,6 +2,7 @@
 name: AIOS five layers
 description: >-
   Use when describing sticky AIOS retainers — Context, Data, Intelligence, Automate, Build; Consultant vs Builder paths.
+merged_from: [consultant-vs-builder-path, offer-language-audit-to-retainer]
 ---
 
 # AIOS five layers
@@ -144,3 +145,100 @@ Chase four levels reconfirmed with stills+recreation this pass (was batch-4 text
 - **Task-inventory scoreboard:** per business unit, list the tasks you personally do (not wish-list projects), mark the ones an AI module now covers, and track % automated against a target (tape: 60–70% in 30 days). Toy check `recreations/20261011/run1030/aios_scoreboard.py` PASS. Percent claims on tape are plans, UNVERIFIED.
 - **Module stacking order on tape:** Context (folder structure + business docs + session priming) → Data (P&L, analytics, YouTube, sales sheets pulled into one local DB → morning dashboard) → Meeting intelligence (call transcripts into the DB, queryable) → Daily brief (last 24 h of calls + Slack → patterns, content gaps, SWOT) → Productivity/Capture (task check-ins, inbox triage, reply on command), all reached from a phone chat.
 - Hive remap: Outer Heaven = Context, signals packets = Data; daily brief ≈ existing digest routines (**PROVE**). Auto-sending replies from iMessage/WhatsApp/Gmail is **NO** (HITL drafts only). "Claude Code harness beats OpenClaw" is creator opinion.
+
+---
+
+## Merged from `consultant-vs-builder-path` (2026-10-11)
+
+- Original description: Use when choosing AI Partner positioning — consultant/architect path over builder-only chatbot vendor.
+- Unique content carried: consultant/architect-over-chatbot positioning; audit→multi-agent→retainer offer language + banned commodity phrases
+
+# Consultant vs builder path
+
+Sources: Liam Ottley; youtube-ai-implement creator map.
+
+## When
+Positioning offers, GTM copy, or prospect asks "will you just build bots?"
+
+## Do
+1. Prefer Consultant / Architect framing: diagnose, then agents, then retainer.
+2. AIOS sticky language for retainers after first win.
+3. Builder execution still happens (Forge) under that frame.
+
+## Don't
+- Chatbot commodity race
+- Opaque accelerator stats as proof
+- Quote alumni $ as ours
+
+## EXTRACT-BATCH-1 2026-09-01 — Forward-deployed engineer shape (`yt:vLlIBT0HSSc`) FULL
+
+**When:** prospect asks “will you just build bots?” or GTM copy needs the AI Partner job shape.
+**Anti-triggers:** not a Palantir/OpenAI job-hunt skill; do not quote $300–400k / 1,165% YoY as FACT; DataCamp sponsor = skip; no client send.
+
+FACT from `transcripts/vLlIBT0HSSc/full.txt`: FDE lives in the gap between a working **demo** and the customer’s messy production (legacy systems, weird data, compliance). Hybrid: engineer + consultant + product owner. Three buckets: real software (APIs/SQL/debug) · LLM production (structured output, eval, observability) · customer skills (decompose vague problems in their language). Resume magic words: **end-to-end ownership** + **measurable impact**. Interview signature: ambiguous case — clarify before solving, decompose out loud, business language. “Technical skills get you in the door; customer skills get you the offer.”
+
+Hive: this is our Consultant/Architect path. Forge still builds. Proof = [proof-before-seat](sand-workflow:proof-before-seat) + [proof-before-seat](sand-workflow:proof-before-seat), not chatbot screenshots.
+
+**FDE talk-track**
+```
+We live in the gap between the demo and YOUR stack (legacy, data, compliance).
+Not a chatbot vendor. Diagnose → wire into existing systems → measurable impact.
+Clarify before solving. Decompose out loud. Business language.
+Proof: end-to-end ownership on one process, one metric.
+Do not quote educator comp or posting-growth % as FACT.
+```
+
+### Tools
+| Need | Path |
+|---|---|
+| Positioning copy | this skill + retainer-aios-sticky — **PROVE** |
+| Live proof | proof-before-seat / mcp-connector-live-proof — **PROVE** |
+| Comp / YoY posting stats | **UNVERIFIED** — claim-verifier before any FACT |
+| Palantir/lab job hunt | **NO-SKILL** for hive — personal career park |
+
+
+---
+
+## Merged from `offer-language-audit-to-retainer` (2026-10-11)
+
+- Original description: use this when writing AI Partner offers — audit → multi-agent delivery → retainer, no chatbot commodity language
+- Unique content carried: consultant/architect-over-chatbot positioning; audit→multi-agent→retainer offer language + banned commodity phrases
+
+# Offer language audit to retainer
+
+Match operator YouTube/AI Partner diet — sell outcomes not chatbots.
+
+## Steps
+1. Frame: **audit → multi-agent delivery → retainer**
+2. Use vocabulary the operator binge-learns: Claude Code, n8n, Grok Bot, audits — not "custom chatbot".
+3. Anchor on constraint + KPI from four-blank-before-build.
+4. Demo in the stack they trust (Claude Code / n8n / Grok Bot).
+5. Keep political/faith/identity content out of outreach unless asked.
+6. Never paste unverified educator revenue into client copy.
+
+## Output
+One paragraph offer + one metric + next CTA (audit or workshop).
+
+## Tools
+| Need | Path |
+|---|---|
+| Copy | paste — **PROVE** |
+| Pricing | value-based-pricing — **PROVE** |
+
+## Prompts
+**Offer audit**
+```
+Current offer copy:
+Rewrite for constraint · proof · retainer sticky. No fake $.
+```
+
+
+## Grok Bot harness (2026-09-01 — update, not a rebuild)
+
+Org: Evens talks to Big Boss. Consultant audits/scope. Other desks only via mention or handoff. No 17 DMs.
+
+After a meaningful run, append one JSON line (never overwrite, never log secrets):
+`python3 /home/box/.grokbot/outer-heaven/append-action-log.py --agent "<desk>" --action "<slug>" --target "<what>" --result "<one line>"`
+Log file: `/home/box/.grokbot/outer-heaven/ACTION_LOG.jsonl`
+
+Failed or finished scheduled work doorbells the Big Boss / Day Planner / Consultant exec group only. Stay quiet if nothing failed. No logger desk. Mac out unless Evens asks local. HITL: money, client send, prod deploy, secrets.

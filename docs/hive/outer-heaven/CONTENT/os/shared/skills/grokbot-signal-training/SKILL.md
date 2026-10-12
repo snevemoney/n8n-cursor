@@ -20,19 +20,19 @@ YouTube + X bookmarks + Instagram reels/posts are **training data**: demos, exam
 | **Skills** | Markdown recipes under workflows/ |
 | **Workflows/routines** | Skills + scheduled/event triggers |
 
-Close with [signal-to-stack](sand-workflow:signal-to-stack) + [research-signal-to-skills](sand-workflow:research-signal-to-skills).
+Close with [research-signal-to-skills](sand-workflow:research-signal-to-skills) + [research-signal-to-skills](sand-workflow:research-signal-to-skills).
 
 ## YouTube path (hive)
 1. **Ingest:** logged-in box YouTube / history JSON / WL — not Composio-first.
 2. **Index:** title, duration, chapters, timedtext timestamps, existing `transcripts/<id>/full.txt`. Do not download yet.
-3. **Watch:** [goal-directed-watch](sand-workflow:goal-directed-watch) — windows + modality from the steal goal. Transcript first. If a video has no transcript, run `oh-transcribe <url>` ([owned-tools](sand-workflow:owned-tools); output goes to /workspace/transcripts/<id>.txt). If that fails → [whisper-caption-gap](sand-workflow:whisper-caption-gap) on a **slice**, not the whole file. Frames/clip only if the steal is visual. Never ingest at a fixed fps. If CAPTION_GAP already noted (e.g. `5CSXUsljJ_E`), do not re-Whisper unless another worker lands audio.
+3. **Watch:** [goal-directed-watch](sand-workflow:goal-directed-watch) — windows + modality from the steal goal. Transcript first. If a video has no transcript, run `oh-transcribe <url>` ([owned-tools](sand-workflow:owned-tools); output goes to /workspace/transcripts/<id>.txt). If that fails → [summarize-audio-video](sand-workflow:summarize-audio-video) on a **slice**, not the whole file. Frames/clip only if the steal is visual. Never ingest at a fixed fps. If CAPTION_GAP already noted (e.g. `5CSXUsljJ_E`), do not re-Whisper unless another worker lands audio.
 4. **Extract:** chapters, steals, don’ts, prompts, tools named in the tape.
 5. **Implement:** enrich/create skill; update SIGNAL_INDEX.
 6. **Demonstrate (optional):** Teach a Task / learn-from-demonstration while following a tutorial → skill (Nate tip #7).
 7. **Routine:** attach only if recurring (daily YT digest already exists). Routine instruction names **skill + delegate**.
 
 ## Grill-me + chief (from Nate week)
-- Import/adapt grill-me skill → interview until shared understanding ([interview-to-desk](sand-workflow:interview-to-desk)).
+- Import/adapt grill-me skill → interview until shared understanding ([agent-job-card](sand-workflow:agent-job-card)).
 - One pinned chief; specialists one-job; shared wiki vs private desk notes.
 - Log work as owner / status / link (GitHub issue or Drive) — not ClickUp-required.
 
@@ -65,7 +65,7 @@ Close with [signal-to-stack](sand-workflow:signal-to-stack) + [research-signal-t
 **Video → skill**
 ```
 Process this YouTube [url/id]:
-1) Prefer transcripts/<id>/full.txt if caption_store=whisper_box_asr (FACT ASR) — else timedtext / whisper-caption-gap
+1) Prefer transcripts/<id>/full.txt if caption_store=whisper_box_asr (FACT ASR) — else timedtext / summarize-audio-video
 2) Steals vs never (label FACT vs INFERENCE)
 3) Prompts to copy 4) Tools PROVE/WORKAROUND/BLOCKED
 5) Create/enrich skill id 6) Update SIGNAL_INDEX row
@@ -78,7 +78,7 @@ Video urls/ids: …
 Hive path (NOT Jotform Agents install):
 1) Select / open target skill or new skill id
 2) Ingest transcript (Whisper or timedtext) into knowledge bullets
-3) Write Prompts + Tools sections; close via signal-to-stack
+3) Write Prompts + Tools sections; close via research-signal-to-skills
 4) Optional: Teach a Task demonstration while watching tutorial → skill (Nate tip #7)
 Do NOT install Jotform AI Agents / Eden / second knowledge product.
 ```
@@ -107,7 +107,7 @@ Hive path: GitHub issue or Drive tracker (ClickUp NOT required).
 | Need | Path |
 |---|---|
 | History / WL JSON | youtube-daily scrapes — **PROVE** |
-| Transcript | timedtext / existing transcript / whisper-caption-gap / Whisper LIVE full.txt — **PROVE** |
+| Transcript | timedtext / existing transcript / summarize-audio-video / Whisper LIVE full.txt — **PROVE** |
 | Skills disk | /home/box/agent-data/workflows — **PROVE** |
 | Composio YouTube | optional playlist proxy — **WORKAROUND** (not required for digest) |
 | Jotform Agents | **NO-SKILL** / do not install — hive YT→skill path instead |
@@ -536,10 +536,10 @@ Packet: `/workspace/research/packets/x-bookmarks/20260918-1338/`
 ### Cluster close
 | Add | Action |
 |---|---|
-| Jev ultrafast + gilgNYC (x:2100411068426469552 · x:2100786001765371926) | enrich `cheap-read-expensive-decide` · RESEARCH-OK via import-gate · **no install** |
+| Jev ultrafast + gilgNYC (x:2100411068426469552 · x:2100786001765371926) | enrich `match-model-to-task` · RESEARCH-OK via import-gate · **no install** |
 | svpino bypass (x:2100591905868509643) | **NO-SKILL** / QUARANTINE (no CAPTCHA/paywall recipes) |
 | hlibtrazanov block library (x:2100564186614898813) | enrich `reference-driven-video-production` |
-| 3D gradients + don't-ask-AI + voice glow | enrich `cinematic-site-recipe` · `ai-product-ui-primitives` · `own-motion-kit` · `taste-redesign-enrich` |
+| 3D gradients + don't-ask-AI + voice glow | enrich `cinematic-site-recipe` · `ui-compose` · `own-motion-kit` · `redesign-existing-projects` |
 | Mac notch Grok/Rive (x:2100662110107664574) | enrich **this skill only** · notch face **NO** · WORKAROUND = Grok Bot chat UI we already have |
 | Hiring Motion Designer · Cyril article | **NO-SKILL** |
 
@@ -564,7 +564,7 @@ SSOT: `CONTENT/topics/signal-overnight-demo-loops-20260918.md` · skill [signal-
 Token-meter: ≤1 per lane/night. Cloudflare preview RESEARCH-OK; Origin/box WORKAROUND. live `/` HOLD until approve.
 
 ## Overnight C_STACK pointer
-`yt:rW3eyvrSqio` closed 2026-09-21 — enrich mcp-connector-demo + subscription-refund-hunter; recreation under `l2-20260921/rW3eyvrSqio/`. No mint-per-URL.
+`yt:rW3eyvrSqio` closed 2026-09-21 — enrich mcp-connector-live-proof + find-costs-to-cut; recreation under `l2-20260921/rW3eyvrSqio/`. No mint-per-URL.
 
 ## Signals close 2026-09-22 10:17 ET
 

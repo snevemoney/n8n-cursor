@@ -81,7 +81,7 @@ FACT (captions+stills): Grok Bot **Dialbot** template places outbound calls via 
 ## X bookmarks 2026-09-17 Reception catalog (no install)
 Source: `@ElevenLabs` Reception pitch `2100262886916358361` · packet `x-bookmarks/20260917-1048/`.
 - Machine: missed-call → answer / FAQ / book / text confirm.
-- Steal as: this skill + [speed-to-lead-demo](sand-workflow:speed-to-lead-demo) pattern (HITL, building mode).
+- Steal as: this skill + [nate-five-buy-workflows](sand-workflow:nate-five-buy-workflows) pattern (HITL, building mode).
 - **NO-SKILL install** ElevenLabs Reception / voice-SDR farm as hive face.
 - Setup time / lost-customer $ = **UNVERIFIED**.
 

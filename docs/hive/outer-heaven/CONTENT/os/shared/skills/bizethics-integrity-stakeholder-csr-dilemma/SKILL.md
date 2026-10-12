@@ -169,8 +169,8 @@ Unit 7. Occupational fit includes **values alignment**. A professional of integr
 
 ## 4. Adjacent skills (do not merge)
 
-- **Intro-to-business survey (ethics/CSR as a named constraint)** → BUS101 `intro-biz-survey-checklists`
-- **Frontline CS integrity / complaint ethics** → BUS107 `custsvc-impression-needs-channel-complaint-experience`
+- **Intro-to-business survey (ethics/CSR as a named constraint)** → BUS101 `mgmt-polc-manager-checklists`
+- **Frontline CS integrity / complaint ethics** → BUS107 `grad-sales-process-spin-loyalty-brand`
 - **Black-letter business law / fiduciary as law** → BUS205 (no clustered skill in this harvest's BUS set yet; do not pretend BUS200 owns the statute)
 - **POLC as the manager's job** → BUS208 `mgmt-polc-manager-checklists`
 - **Three-level OB, culture-as-Schein, conflict/BATNA** → BUS209 `ob-three-levels-motivation-culture-conflict`

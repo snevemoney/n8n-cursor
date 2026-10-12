@@ -21,7 +21,7 @@ Session start, after a steal, before you call research or a build done.
 5. 17 bots share one computer. A second bot is not a vault. Share-a-Bot copies config only.
 6. Recurring work = skill plus trigger. Verifier is a different node than the builder.
 7. Motion: remocn Stage plus owned Cursor.tsx. SimulatedCursor vetoed. Then npx remotion skills add in the Remotion repo. No hosted Remotion MCP after 2026-08-31.
-8. Box IP blocked (YouTube 429 / bot wall / IpBlocked): signed-in box Chrome read-only, then Whisper slices if audio lands ([whisper-caption-gap](sand-workflow:whisper-caption-gap)), then honest CAPTION_GAP, then ask for a paste. "Route traffic through this computer" is an Evens standing exception (2026-10-07 ~9:20 PM ET) for network egress only: he flips it himself; if it is on and his Mac is online, retry the read through it first; if his Mac is offline, run this ladder and say so. Never toggle it for him or use the Mac for anything beyond egress.
+8. Box IP blocked (YouTube 429 / bot wall / IpBlocked): signed-in box Chrome read-only, then Whisper slices if audio lands ([summarize-audio-video](sand-workflow:summarize-audio-video)), then honest CAPTION_GAP, then ask for a paste. "Route traffic through this computer" is an Evens standing exception (2026-10-07 ~9:20 PM ET) for network egress only: he flips it himself; if it is on and his Mac is online, retry the read through it first; if his Mac is offline, run this ladder and say so. Never toggle it for him or use the Mac for anything beyond egress.
 9. Attention: at most 3 parallel streams on one desk. Do not spawn 15 agents or 15 copies of the same Monday job.
 10. One Bot weekly meter. SuperGrok plus Cursor together do not double it. Check usage before a binge hunt.
 11. Deterministic work (fetch, boot dev server, eval) = a script the skill names, not an extra prompt.
@@ -43,7 +43,7 @@ Session start, after a steal, before you call research or a build done.
 - Memory write: wiki-ingest plus update_state memory — PROVE
 - Login wall: request_box_help / secret-request — PROVE
 - Verify: verify-then-done / golden-test-loop — PROVE (separate node)
-- Motion: remotion-brief-to-render plus remocn-motion-library plus remotion-official-skills-import — PROVE
+- Motion: motion-pipeline plus own-motion-kit plus motion-pipeline — PROVE
 - 1Password-for-Claude / Claude desktop — BLOCKED
 - Hosted Remotion MCP after 2026-08-31 — BLOCKED
 - Studio WebMCP — WORKAROUND official skills (Codex-only today)
@@ -79,7 +79,7 @@ Drop (leisure / closed / link-only):
 Then loop.
 
 ## Jump + memory (2026-08-28 weekday load)
-15. Jump adapters, not desks: Claude Code CLI/Web and Codex CLI/Cloud via jump-surface packet. ChatGPT desktop = packet only. Claude desktop / Cowork still BLOCKED. Mac `~/.grokbot/jumps/CURRENT.md` is known-stale — write the packet on the box / Outer Heaven. Do not wait on the Mac. Do not mint an 18th desk.
+15. Jump adapters, not desks: Claude Code CLI/Web and Codex CLI/Cloud via session-handoff packet. ChatGPT desktop = packet only. Claude desktop / Cowork still BLOCKED. Mac `~/.grokbot/jumps/CURRENT.md` is known-stale — write the packet on the box / Outer Heaven. Do not wait on the Mac. Do not mint an 18th desk.
 16. Persistent memory: Outer Heaven + persistent-bot-memory (Librarian). No hosted memory SaaS. Provider memory is cache.
 
 ## Weekday routines (2026-08-26)
@@ -123,7 +123,7 @@ Claude Code tricks → Cursor + Grok. Do not install Claude desktop / Cowork / c
 - Skill descriptions: one-line what + when-to-fire + anti-triggers. Vague overlapping descriptions = skill never loads.
 - Path-scoped rules beat one giant always-on brain. Human-only notes as comments that models skip.
 - Do not install Stop Slop / Caveman / ccusage from the talk (star counts UNVERIFIED). Gate via awesome-skill-import-gate.
-- Claude Design / frontend-design skill still BLOCKED → cinematic-site-recipe.
+- Claude Design / landing-page-design skill still BLOCKED → cinematic-site-recipe.
 
 ## Primeagen Origin git-host 2026-08-30 (`yt:AFQW-b2WaRU`) watch-page PROVE, timedtext CAPTION_GAP
 Vincent (ex-GitHub, Cursor) write-up as stated in the talk — Continuity WAL+S3 vs GitHub Spokes 3-phase commit. Treat architecture details as FACT-as-stated, not re-checked.
@@ -282,10 +282,10 @@ Fri load. Overnight demo morning **QUIET** succeeded 2026-10-02 ~08:01 ET (`pack
 Mon load (catch-up after Fri Oct2). Overnight demo morning **QUIET** succeeded 2026-10-05 ~08:05 ET (`packets/overnight-demo-queue/latest.json`); A_BUILD `LmV0OiNjw8c` still built_awaiting_preview; C CLOSED remaining=0; B already morning_sent. Overnight `live_slash=HOLD` stamp = stale template (standing locks stay LIVE). SIGNAL_INDEX SoT catch-up fold Oct3 Cap≤1 `A4_TFHzqAAg` (saas-sprint-six-ps + stack-pick enrich) + Oct4 Cap unused (0 builders; not a miss) + Oct2 X desktop ingest merged **1431** + corpus QUIESCENT_PARTIAL_ONLY honesty (390/217/282; HEARTBEAT-20261005T124210Z) + capability-compare BLOCKED_CONTINUITY. OH SIGNAL_INDEX mirror had drifted behind workspace canonical over the weekend — resync mirror on every Mon load (check mtime + tail rows, not just header). YT SoT Present 2026-10-03/04; 2026-10-05 not yet — fail-closed. Phase1 = research-signal-to-skills enrich. Extra Monday clones left alone. RAM ~6 GiB quiet.
 
 ## Weekday load 2026-10-06
-Tue load. Overnight demo morning succeeded 2026-10-06 ~08:04 ET; A_BUILD `LmV0OiNjw8c` still built_awaiting_preview. SIGNAL_INDEX catch-up fold Oct5 signals-close (X 1435) + X 16:15 ingest FAILED (Watchdog owns) + web-intel Oct5 PARTIAL + YT Oct5 0 builders (Cap unspent) + corpus QUIESCENT 390/217/282. **Rule 8 FIX:** old "Settings, Beta, egress" path was not on the verified app-ui map; replaced with the read-only browser → Whisper → CAPTION_GAP → paste ladder and the route-traffic CONFLICT. Oct5 16:00–16:12 bulk SKILL.md mtime touch = sync artifact, not new skills. Phase1 = whisper-caption-gap enrich. Extra Monday clones left alone. RAM ~5.5 GiB quiet.
+Tue load. Overnight demo morning succeeded 2026-10-06 ~08:04 ET; A_BUILD `LmV0OiNjw8c` still built_awaiting_preview. SIGNAL_INDEX catch-up fold Oct5 signals-close (X 1435) + X 16:15 ingest FAILED (Watchdog owns) + web-intel Oct5 PARTIAL + YT Oct5 0 builders (Cap unspent) + corpus QUIESCENT 390/217/282. **Rule 8 FIX:** old "Settings, Beta, egress" path was not on the verified app-ui map; replaced with the read-only browser → Whisper → CAPTION_GAP → paste ladder and the route-traffic CONFLICT. Oct5 16:00–16:12 bulk SKILL.md mtime touch = sync artifact, not new skills. Phase1 = summarize-audio-video enrich. Extra Monday clones left alone. RAM ~5.5 GiB quiet.
 
 ## Weekday load 2026-10-07
 Wed load. Overnight demo morning **QUIET** ~08:01 ET (top-level `updated_et` not restamped on QUIET mornings — document only); A_BUILD `LmV0OiNjw8c` still built_awaiting_preview. Since Tue: YT Oct6 Cap≤1 `uvIopT_2sY0` → new [claude-code-mods](sand-workflow:claude-code-mods) (Forge; box CLI 2.1.250 < 2.1.287); X Oct6 pulls all +0 (SoT 1435); corpus QUIESCENT 390/217/23, heartbeat now 2h. **Rule fix:** `CONTENT/skills/SKILL_CATALOG.json` had frozen at 2026-09-03 (400) vs 452 on disk, so 52 skills incl. the new one were invisible to skill-recall-by-use. Resynced; research-signal-to-skills step 8b now indexes mints in the same run. On each weekday load, check `ls workflows | wc -l` against catalog `total`. Oct7 01:49–02:00 bulk mtime = sync artifact. Extra Monday clones left alone. RAM ~5 GiB quiet.
 
 ## Weekday load 2026-10-09 (Fri)
-Oct8 fire marked succeeded but left no run-log/State row → covered here. Rule 8 FIX: route-traffic "CONFLICT/stays OFF" was stale vs Evens's Oct7 ~9:20 PM standing egress-only exception (topic + step 8 + whisper-caption-gap fixed). Folded Oct8 STOP→lift consent-in-chat rule, frontier model routing + OpenRouter-in-Cursor, bookmark review 1,201 (99 enrich proposals pending Evens, not applied), Jarvis PR #591 draft, Oct8 YT digest / signals-close / X 17:13 FAILED. SoT 1443. Corpus QUIESCENT 390/217/23. OH SIGNAL_INDEX mirror resynced (+Oct7 close). Phase1 research-signal-to-skills enrich. Clones untouched. No fan-out.
+Oct8 fire marked succeeded but left no run-log/State row → covered here. Rule 8 FIX: route-traffic "CONFLICT/stays OFF" was stale vs Evens's Oct7 ~9:20 PM standing egress-only exception (topic + step 8 + summarize-audio-video fixed). Folded Oct8 STOP→lift consent-in-chat rule, frontier model routing + OpenRouter-in-Cursor, bookmark review 1,201 (99 enrich proposals pending Evens, not applied), Jarvis PR #591 draft, Oct8 YT digest / signals-close / X 17:13 FAILED. SoT 1443. Corpus QUIESCENT 390/217/23. OH SIGNAL_INDEX mirror resynced (+Oct7 close). Phase1 research-signal-to-skills enrich. Clones untouched. No fan-out.

@@ -7,6 +7,7 @@ description: >-
   is taste/money/architecture. Anti-triggers: installing TypeSafe Jev as hive
   face, quoting vendor 193×/$ as FACT, replacing writing/code/math/reasoning
   calls, live `/` product ship while building mode HOLD.
+merged_from: [decision-model-patterns]
 ---
 
 # System-One decision gate
@@ -14,7 +15,7 @@ description: >-
 **Owner:** Researcher (extract) · Forge (wire) · Watchdog (meter).  
 **Platform:** Grok Bot + Cursor. **Install:** `none (process-only)` — local recreation only.  
 **Source:** Devsplainers `yt:B-1nLUAixzI` L2 `/workspace/research/youtube-daily/l2-20260918/B-1nLUAixzI/` (GHOST Sep-18 REDO close 2026-09-21).  
-**Pairs:** [cheap-read-expensive-decide](sand-workflow:cheap-read-expensive-decide).
+**Pairs:** [match-model-to-task](sand-workflow:match-model-to-task).
 
 ## When
 - Routing tickets / emails / alerts / tool-calls to a **closed** label set
@@ -40,7 +41,7 @@ description: >-
 | Need | Path | Label |
 |---|---|---|
 | Local gate + 5/1 proof | `l2-20260918/B-1nLUAixzI/recreation/decision_gate.py` → `gate-run.json` | **PROVE** |
-| Model routing doctrine | cheap-read-expensive-decide | **PROVE** (process) |
+| Model routing doctrine | match-model-to-task | **PROVE** (process) |
 | TypeSafe Jev hosted API / SDK | — | **BLOCKED** |
 | Vendor 193× / $ / calibration chart | — | **UNVERIFIED** |
 | Jev / jev-ultrafast as hive face | — | **BLOCKED** |
@@ -79,7 +80,7 @@ Primitives (Choice/Score/Null) unchanged. **NEW** = wire the gate into the agent
 
 Still **BLOCKED**: TypeSafe API, `langchain-typesafe`, Jev as hive face, live `/` product.
 Still **UNVERIFIED**: vendor 200×/400× and “more reliable than LLM-as-judge”.
-Pairs: [cheap-read-expensive-decide](sand-workflow:cheap-read-expensive-decide) · [agent-harness-loops](sand-workflow:agent-harness-loops) · [eval-harness-scope](sand-workflow:eval-harness-scope).
+Pairs: [match-model-to-task](sand-workflow:match-model-to-task) · [agent-harness-loops](sand-workflow:agent-harness-loops) · [four-blank-before-build](sand-workflow:four-blank-before-build).
 
 
 ## CapEx OpenRouter Jev (2026-09-22)
@@ -167,3 +168,36 @@ Labels: endpoint/config/questions = FACT (frames). Vendor 20–200×/40–1000×
 - The earlier cited `harness_route_risk_judge.py` never existed on disk; the table above now points to `/workspace/research/packets/signals-2mo-backlog-20261010/recreations/20261011/run1430/harness_judge.py` (7/7 PASS, deterministic stand-in).
 - LangChain's three uses, now read from the transcript: a PII yes/no with probability (LLM ~5 s vs near-instant), a **tool-call middleware** that asks "would this call delete important files?" before execution, and a **rubric judge** for online evals (input + question + agent answer + grading criteria).
 - Jarvis pattern: one preflight call answers several questions at once (about the vault? addressed to the assistant? request complete? needs send/call/delete?). The "needs confirm" answer routes to a human; it never authorizes the act.
+
+---
+
+## Merged from `decision-model-patterns` (2026-10-11)
+
+- Original description: Use when a workflow has a fuzzy micro-decision (route, flag, score, classify) to wire into code with a cheap decision model (Jev-style) or LLM, using fan-out, confidence gates, composite scores, and intent routing.
+- Unique content carried: wiring patterns + 3 extra files from decision-model-patterns
+- Original support files moved to `merged/decision-model-patterns/` (browser_decision_agent.py, decision_patterns.py, menu_decision_loop.py); relative paths in this section resolve there.
+
+# Decision-model patterns
+Source: `yt:LzweTaOzvVo` The AI Automators (2026-10-10 two-week full watch). Docs: docs.typesafe.ai/patterns.
+
+## Steps
+1. Find the fuzzy step in a workflow you already understand. Write the **smallest useful question**.
+2. Pick the type: **null** (P(yes)), **choice** (from supplied options), or **score** (0–1).
+3. **Speculative fan-out**: send every question you might need in one request. Code ignores the answers that don't apply.
+4. **Confidence gate**: below the threshold → clarify or escalate, never act. Tune thresholds on 20+ of your own examples.
+5. **Composite score**: score each factor separately, then combine with weights you own.
+6. **Intent routing**: a gated choice at the entrance picks the handler.
+7. A generative LLM writes text only after the code has chosen the path. Permission checks and confirmations stay in code.
+
+## Proof
+`decision_patterns.py` (this folder) → `6/6 PASS` with a stub `decide()`. Swap in the real model call. A real-model threshold sweep is BLOCKED_CURSOR_USAGE (key lives in Cursor).
+Related: [agentic-app-policy-workflow](sand-workflow:agentic-app-policy-workflow) (deterministic spine), [match-model-to-task](sand-workflow:match-model-to-task).
+
+## Enrich 2026-10-10: fixed-menu decision loop (`yt:8ijN8LGljKg` Creator Magic)
+On a timer: build a small snapshot → the model returns ONE choice from a fixed menu with a probability → confidence gate → hard limits in code → act in **DRY_RUN** first. `menu_decision_loop.py` 4/4. The hive uses this for routing and ops, never trading (market-watch-no-trade).
+
+## Enrich 2026-10-10: same category, other vendors (`yt:No-JPdFvYWU` Fireship)
+OpenAI's **Decisions API** (tiny Luna model picks from a fixed list) and **Fastino GLiNER 2.5** (open-weight, local, "up to 8x faster") do the same job as Jev. Keep `decide()` vendor-neutral so you can swap them.
+
+## Enrich 2026-10-10: numbered-elements browser agent (`yt:zac3kEUwIlg` Simon Scrapes on Jev)
+Don't screenshot. List the interactive elements as numbered data → ask 2 choice questions in one call (action type; element # or none) → act only if both have confidence ≥ 0.7, else escalate → re-read after the page settles. PROVE: `browser_decision_agent.py` (local fixture, 5-step signup; strict threshold escalates).

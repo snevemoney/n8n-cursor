@@ -35,7 +35,7 @@ FACT from `transcripts/nS2FrgXN-EY/full.txt`:
 - Follow-up email: draft from call context + knowledge base, HITL send. Fast between calls, slow with the prospect.
 - Same-day coaching from scored calls beats a weekly recap.
 
-Hive: named desks as the 17-job story. Drafts only — [inbound-followup-draft-only](sand-workflow:inbound-followup-draft-only) + [no-send-architecture](sand-workflow:no-send-architecture). Voice closer → HOLD.
+Hive: named desks as the 17-job story. Drafts only — [warm-draft-hitl](sand-workflow:warm-draft-hitl) + [no-send-architecture](sand-workflow:no-send-architecture). Voice closer → HOLD.
 
 **Around-the-call packet**
 ```
@@ -51,7 +51,7 @@ Never: AI voice SDR, Clay farm, unattended dialer
 | Need | Path |
 |---|---|
 | Knowledge / talk-track draft | Grok + this skill — **PROVE** |
-| Follow-up draft | inbound-followup-draft-only — **PROVE** |
+| Follow-up draft | warm-draft-hitl — **PROVE** |
 | Live dialer / Clay / Vapi | **BLOCKED** — would work if operator asked for a HITL phone path we already own |
-| Call recording STT | whisper-caption-gap / disk transcript — **WORKAROUND** |
+| Call recording STT | summarize-audio-video / disk transcript — **WORKAROUND** |
 | Client send | **BLOCKED** |

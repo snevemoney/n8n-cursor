@@ -57,12 +57,12 @@ After a plan is accepted, drop the exploration (file reads / dead ends) from the
 2. Prefer **artifacts + notes** over transcript replay: topic files, SIGNAL_INDEX pointers, SKILL_DELTA, ACTION_LOG — same job as "history notes."
 3. When the window is poisoned (drift, wrong plan, leisure noise): **fresh loop with invariants** (job card + standing locks + 8–15 line keep list) — hive analogue of `new_context`, not a Codex install.
 4. Pair **token-meter** (max-3 streams, no ack fan-out) with this skill. Bigger Cursor context ≠ more parallel desks.
-5. Codex CLI / Claude Code as hive face stay **BLOCKED** → [jump-surface](sand-workflow:jump-surface) packet only. Do not install Codex experimental mode as a second harness.
+5. Codex CLI / Claude Code as hive face stay **BLOCKED** → [session-handoff](sand-workflow:session-handoff) packet only. Do not install Codex experimental mode as a second harness.
 6. Competitive "Cursor one-shot Codex/Claude" marketing → **UNVERIFIED**; still run verify-then-done on our builds.
 
 ### Sibling bookmarks same fire (title-only / NO-SKILL)
 - `x:2097808059254951972` @ashen_one Unity CLI AI mini-game — builder curiosity; no Unity game farm skill; leisure-adjacent **NO-SKILL** unless operator asks game lane.
-- `x:2096047546024206347` @theaaron Grok Bot + Codex CLI + Astra 6 on VM — reinforce Grok-first + jump-surface; no Codex desktop face.
+- `x:2096047546024206347` @theaaron Grok Bot + Codex CLI + Astra 6 on VM — reinforce Grok-first + session-handoff; no Codex desktop face.
 - `x:2099105429296939119` @dev_TEMITAYO SE-2026 POV meme — **NO-SKILL** leisure/meme.
 
 ## Enrich 2026-10-11: code map instead of the grep loop (yt:cyIWQHYoUg8, AI LABS)

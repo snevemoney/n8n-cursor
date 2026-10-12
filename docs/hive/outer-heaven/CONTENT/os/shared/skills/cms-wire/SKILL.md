@@ -17,7 +17,7 @@ description: >-
 ## Done when
 - Schema checked in
 - Preview path works or explicitly N/A
-- Ownership written in client-handoff notes
+- Ownership written in website-build-pipeline notes
 
 ## Live enrich (wave-N-20260909-65-69)
 - `yt:3DWuhBWQ-Ug` — client must edit assets/content without code; code-owned CMS vs Framer/Webflow. Prefer schema CMS (Sanity/Payload) with draft/preview + publisher ownership documented.

@@ -44,7 +44,7 @@ description: >-
 | Need | Modality | How |
 |---|---|---|
 | Spoken steal, captions exist | **transcript** | Read the timestamped slice. Speed = instant. |
-| Spoken steal, CAPTION_GAP | **audio slice** | ffmpeg `-ss t0 -to t1 -vn` then [whisper-caption-gap](sand-workflow:whisper-caption-gap) on the slice only |
+| Spoken steal, CAPTION_GAP | **audio slice** | ffmpeg `-ss t0 -to t1 -vn` then [summarize-audio-video](sand-workflow:summarize-audio-video) on the slice only |
 | UI / diagram / cursor | **frames** | ffmpeg `-ss t -frames:v 1` or scene-cut in the window. Not 1fps of the whole tape |
 | Motion / click path still unclear after frames | **clip** | Cut `t0–t1` mp4 (at most 30s). Dispatch watchVideo on the **clip**, with the goal in the prompt. Never the 2h source |
 | Live player chrome (speed control, captions toggle) | **desktop** | browserUse then computerUse seek + playback speed. Last resort |
@@ -112,7 +112,7 @@ videoReview is for artifacts we generated. watchVideo is for operator/signal tap
 |---|---|
 | Index | timedtext / chapters / `transcripts/<id>/full.txt` — **PROVE** |
 | Cut / frames | box `ffmpeg` `ffprobe` — **PROVE** |
-| ASR on a slice | whisper-caption-gap — **PROVE** |
+| ASR on a slice | summarize-audio-video — **PROVE** |
 | Clip understand | Task watchVideo on the cut file — **PROVE** |
 | Live player | browserUse then computerUse — **WORKAROUND** |
 | Mac / Comfy / second video agent | **BLOCKED** — box only |

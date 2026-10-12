@@ -38,7 +38,7 @@ The primary can only see each bot's name, title, and description. If description
 Golden asks route ≥90% on the description the primary actually sees, plus 3 live handoffs observed.
 
 ## X bookmarks 20261007-1032-desktop (`x:2107573382229188645` @OpenAIDevs Decisions API)
-Routing atom: a desk-route pick is a **choice** question (fixed list of desks, returns confidence). Candidate experiment: run the golden routing asks through a typed choice gate (e.g. OpenAI Decisions API `choice`, public beta, `gpt-6-luna`) and compare against the card-based harness; low confidence routes to Big Boss. **EXPERIMENT_REQUIRED**, vendor speed claim UNVERIFIED. See cheap-read-expensive-decide same stamp.
+Routing atom: a desk-route pick is a **choice** question (fixed list of desks, returns confidence). Candidate experiment: run the golden routing asks through a typed choice gate (e.g. OpenAI Decisions API `choice`, public beta, `gpt-6-luna`) and compare against the card-based harness; low confidence routes to Big Boss. **EXPERIMENT_REQUIRED**, vendor speed claim UNVERIFIED. See match-model-to-task same stamp.
 
 ## Auto model routing (Grok Bot, announced 2026-10-07) — `yt:MgvwZaDPCs4` Nate Herk, packet `/workspace/research/youtube-daily/l2-20261009/MgvwZaDPCs4/`
 FACT (Elon posts on tape): Grok Bot now picks the back-end model per task (Claude Opus 5.5, MidJourney, Suno, other APIs); simple asks → small fast models, complex → large; most bot requests will go to a fast Grok 4.8 when it ships. No UI, no visibility into which model/effort ran, no per-skill pin (as of 2026-10-09).

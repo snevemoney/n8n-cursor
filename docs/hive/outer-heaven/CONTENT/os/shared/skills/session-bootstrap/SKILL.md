@@ -3,6 +3,7 @@ name: Session bootstrap
 description: >-
   Use at the start of a new Grok/Cursor work session — dump context once, then
   short loops; open SIGNAL_INDEX for research pointers; skills as recipes.
+merged_from: [outer-heaven-brief-first, voice-ramble-session-context]
 ---
 # Session bootstrap
 
@@ -27,7 +28,7 @@ One tree (vault + OH CONTENT + packets). Daily dump once, then short loops. Swip
 2. Dump once, save to packet / OH note.
 3. Short loops: one ask, one result, verify, next.
 4. Prefer editing a skill over re-prompting.
-5. After new research: update SIGNAL_INDEX + run signal-to-stack.
+5. After new research: update SIGNAL_INDEX + run research-signal-to-skills.
 6. Context before tokens (x:2092462057379729861): select, order, compress. Do not paste a 100-cap bookmark window into chat. Use context-before-tokens.
 
 ## Don't
@@ -108,7 +109,7 @@ Live pull path = `user-X` MCP on my computer (not Mac xurl). Working set: `/home
 Cursor `/goal` (FACT @cursor_ai): for long CloudAgent / desk sits, name one long-lived objective + done-when; keep going until complete — same idea as dump-once then short loops.
 Claude mega-packs / Obsidian vault loop / Fable: remap to Cursor+Grok; do not install a *second hive face*. Research OK.
 Open Bot / CopilotKit / tool-watch repos: research-ok — propose via import-gate; not a hard keep-out.
-n8n “agent uses workflows as tools”: prefer scripts; n8n legacy tool surface only — see n8n-kit-researcher.
+n8n “agent uses workflows as tools”: prefer scripts; n8n legacy tool surface only — see n8n-legacy-ops.
 Cold-DM / “41 signups” posts = UNVERIFIED metrics; study OK; live send = Tier-3 HITL only (not a research keep-out).
 Packet: `/workspace/research/packets/x-bookmarks/20260903-live/`.
 
@@ -259,3 +260,96 @@ When spinning Cursor CloudAgent environments: dump **install / login / test reci
 - **Rulings file.** Keep a dated, one-line-per-decision RULINGS file of settled questions that are never re-argued, and point playbooks at it with explicit "stop for human here" marks (x:2089731611063677396).
 - **Short prompt plus context files.** Load ABOUT-ME and a banned-phrases style file, give a three-line task, end with "ask clarifying questions before starting", and edit the original prompt rather than stacking follow-ups (x:2043267894382088314, x:2044385252655968287).
 - **Skill/index drift heartbeat** (yt:5AfSB0sWihw, Simon Scrapes). At session start, compare the skill folders on disk with the index doc (CLAUDE.md/README) and report undocumented or stale entries. Skills also point to one shared brand-context folder (voice, ICP, good samples) rather than copying it. PROVE: `skill_index_drift.py` (this folder) → finds 1 undocumented and 1 stale, ok.
+
+---
+
+## Merged from `outer-heaven-brief-first` (2026-10-11)
+
+- Original description: use this at the start of routines or decisions — load shared Outer Heaven brief from cache/VPS
+- Unique content carried: grill-me/dictation dump start; Outer Heaven brief load from cache/VPS
+
+# Outer Heaven brief first
+
+Shared institutional memory — Path A cache, Path B VPS. Never Scorpion as memory host.
+
+## Steps
+1. Run: `python3 scripts/hive/os/outer-heaven-brief.py --agent "<Your Agent Name>"`
+2. If Mac asleep / cloud: add `--source vps`
+3. Deep read one note when needed: `--read OPERATOR_MEMORY.md` (or a CONTENT path)
+4. Prefer `~/.grokbot/outer-heaven` cache; Obsidian vault is human edit / best-effort mirror
+5. After durable decisions: ask Librarian to canonize — don't invent a second memory plane
+
+## Lane packs (JIT)
+- Taste/offer: CONTENT/operator-youtube-dossier.md
+- Pricing/delivery: CONTENT/nate-herk-dossier.md
+- Audits/agents: CONTENT/related-youtubers/
+- Websites: CONTENT/website-building/
+
+## Signal knowledge map (2026-08-22)
+After brief loads: if the wake is research / steal / Demkinn / YT / bookmarks, open **SIGNAL_INDEX**:
+- Canonical: `/workspace/research/SIGNAL_INDEX.md`
+- OH mirror: `CONTENT/SIGNAL_INDEX.md` (Mac `~/.grokbot/outer-heaven/` when awake)
+Do not reload every raw signal file unless the index points there.
+
+## Matrix 2026-08-26
+After the brief, load hive-smarter-loop. Open topics/. Do not dump L2 into OM.
+
+
+---
+
+## Merged from `voice-ramble-session-context` (2026-10-11)
+
+- Original description: Use when: New project / max context session start — grill-me interview or dictation dump then short loops; local push-to-talk optional.
+- Unique content carried: grill-me/dictation dump start; Outer Heaven brief load from cache/VPS
+
+# Voice-ramble session context dump
+
+**Owner desk:** Big Boss  
+**Lane:** hive-os  
+**Sources:** tape-walk eMPWBunaOic Karpathy prompting 2.0; session-bootstrap; Nate grill-me `yt:TMPUUyQC5aM`; Pat Simmons local dictation `yt:IMQw3aHjf2Q`.
+
+## When
+New project / max context session start; quarterly plans; before building an automation.
+
+## Do
+1. Long ramble **or** grill-me interview until shared understanding ([agent-job-card](sand-workflow:agent-job-card)).
+2. Prefer local push-to-talk when available ([local-push-to-talk-dictation](sand-workflow:local-push-to-talk-dictation)) so dumps stay on-device.
+3. Agent reconstructs goals · constraints · links · success check.
+4. Light edits after; then recipes / skills.
+5. Persist durable facts to shared wiki; keep private notes desk-local.
+
+## Don't
+- Always 10-min prompts
+- Skip verify after
+- Require Wispr cloud / Claude Code for dictation
+- Paste secrets into the dump
+
+## Done when
+Reusable artifact on disk (brief, packet, checklist, or skill note) — not chat-only.
+
+## Tools
+| Need | Path |
+|---|---|
+| Dump | session-bootstrap / agent-job-card — **PROVE** |
+| Local dictation | local-push-to-talk-dictation — **WORKAROUND** for Wispr |
+| Whisper (file audio) | whisper path if audio file — **PROVE** |
+| Wispr Flow cloud | **BLOCKED** — local app **WORKAROUND** |
+
+## Prompts
+**Ramble dump**
+```
+Paste/transcript:
+Goals · constraints · links · success check. One dump then short loops.
+```
+
+**Grill me**
+```
+Relentlessly interview me about [topic] until shared understanding.
+Then write owns/never/wake/done-when and propose desk/skills. No build mid-confusion.
+```
+
+## X bookmarks 20261001-1028-desktop — verbose dump (`x:2105367304817250566` @Jhaddix)
+**FACT (preview):** Prompt-engineering tip — speak/write **verbose**: when dictating problems, solutions, architecture, best practices, dump **pages** of current understanding to the model (not a one-line ask).
+**Map:** STRENGTHENS this skill + [grill-me-into-prompt](sand-workflow:grill-me-into-prompt) + [local-push-to-talk-dictation](sand-workflow:local-push-to-talk-dictation). Session start = long dump of what you already believe, then short verify loops.
+**Label:** STRENGTHENS_EXISTING · process-only · **PROVE** (hive already dumps via voice-ramble / grill-me).
+Platform: **Grok Bot + Cursor**. Install: **none (process-only)**. Anti: mint a new "verbose prompting" skill; treat as leisure tip only.

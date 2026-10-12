@@ -8,7 +8,7 @@ description: >-
 ---
 # EffectCraft headless motion
 
-**Owner:** Forge runs it · Creative Studio owns the cut · pairs with [when-remotion](sand-workflow:when-remotion) and [motion-pipeline](sand-workflow:motion-pipeline).
+**Owner:** Forge runs it · Creative Studio owns the cut · pairs with [motion-pipeline](sand-workflow:motion-pipeline) and [motion-pipeline](sand-workflow:motion-pipeline).
 **Platform:** Grok Bot box. **Install:** release tarball only (no cargo build, no desktop) — **PROVE** (v0.8.0 run headless 2026-10-11, L2 `yt:5mi_tYSdkWQ`). Named-tool import stays behind [awesome-skill-import-gate](sand-workflow:awesome-skill-import-gate).
 
 ## Source (FACT, yt:5mi_tYSdkWQ FUTC + GitHub storytold/effectcraft, Apache-2.0/MIT)
@@ -20,7 +20,7 @@ FUTC drove EffectCraft by hand (Track Motion on his nose) and then via Claude Co
 - A tape shows After Effects / an AE clone and we need the technique, not just a screenshot.
 
 ## Anti-triggers
-- Code-first motion (charts, timed captions, TSX comps) → [when-remotion](sand-workflow:when-remotion) / [remotion-brief-to-render](sand-workflow:remotion-brief-to-render).
+- Code-first motion (charts, timed captions, TSX comps) → [motion-pipeline](sand-workflow:motion-pipeline) / [motion-pipeline](sand-workflow:motion-pipeline).
 - Generative plates / Seedance-class clips → [motion-pipeline](sand-workflow:motion-pipeline) (Higgsfield).
 - Likeness/IP-filter evasion → [media-gen-cost-gate](sand-workflow:media-gen-cost-gate) refuses it; do not.
 

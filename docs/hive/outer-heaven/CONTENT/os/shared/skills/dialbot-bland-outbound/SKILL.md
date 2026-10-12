@@ -70,7 +70,7 @@ Packet: `/workspace/research/packets/x-bookmarks/20260930-1616-desktop/` · `x:2
 9. `rhasspy/piper` 10. `snakers4/silero-vad`
 
 **Map:** Catalog = RESEARCH-OK watchlist / import-gate propose cluster — **not** hive install this fire.
-- Box STT path stays [whisper-caption-gap](sand-workflow:whisper-caption-gap) (**PROVE**).
+- Box STT path stays [summarize-audio-video](sand-workflow:summarize-audio-video) (**PROVE**).
 - Outbound phone stays Bland Dialbot (**BLOCKED** until connector+credits).
 - LiveKit Agents / Piper / Kokoro / OpenVoice / CosyVoice / Fish Speech / Coqui / Silero = **CANDIDATE** research; do not replace Bland as hive face without Tier-3 + import-gate.
 

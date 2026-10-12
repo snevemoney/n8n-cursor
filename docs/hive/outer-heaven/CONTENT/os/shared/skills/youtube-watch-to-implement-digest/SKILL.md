@@ -16,7 +16,7 @@ Weekly History/Liked/WL AI titles; or “train agent from these YouTube urls.”
 ## Do
 1. FACT title list
 2. ≤3 ranked implementables
-3. Skill close each via [research-signal-to-skills](sand-workflow:research-signal-to-skills) + [signal-to-stack](sand-workflow:signal-to-stack)
+3. Skill close each via [research-signal-to-skills](sand-workflow:research-signal-to-skills) + [research-signal-to-skills](sand-workflow:research-signal-to-skills)
 4. Skip leisure productization
 5. **YT → knowledge** (Jotform pattern): paste video urls → extract bullets into skill body / prompt-pack / SIGNAL_INDEX — do **not** install Jotform AI Agents
 
@@ -29,14 +29,14 @@ Weekly History/Liked/WL AI titles; or “train agent from these YouTube urls.”
 Reusable artifact on disk (brief, packet, checklist, or skill note) — not chat-only. Weekday close may reuse morning SoT + Cap≤1 without re-scrape when NEW_SINCE_MORNING unproven.
 
 ## CAPTION_GAP (2026-08-22)
-When YouTube timedtext returns 429 / CAPTION_GAP: run `oh-transcribe <url>` first ([owned-tools](sand-workflow:owned-tools)). If it fails (YouTube is bot-blocked on the VPS as of 2026-10-11), run [whisper-caption-gap](sand-workflow:whisper-caption-gap) on the box (`/workspace/.venvs/whisper/bin/whisper --model small`). Save transcript beside the packet. Never install Whisper on VPS. **PROVE:** CLI installed on box. If another worker owns Whisper for that id, note CAPTION_GAP and continue with page recovery / chapters.
+When YouTube timedtext returns 429 / CAPTION_GAP: run `oh-transcribe <url>` first ([owned-tools](sand-workflow:owned-tools)). If it fails (YouTube is bot-blocked on the VPS as of 2026-10-11), run [summarize-audio-video](sand-workflow:summarize-audio-video) on the box (`/workspace/.venvs/whisper/bin/whisper --model small`). Save transcript beside the packet. Never install Whisper on VPS. **PROVE:** CLI installed on box. If another worker owns Whisper for that id, note CAPTION_GAP and continue with page recovery / chapters.
 
 ## Tools
 | Need | Path |
 |---|---|
 | History JSON | /workspace/youtube-history-*.json + youtube-daily scrapes — **PROVE** |
 | L2 md | youtube-daily/ — **PROVE** |
-| Whisper | whisper-caption-gap — **PROVE** |
+| Whisper | summarize-audio-video — **PROVE** |
 | Jotform Agents | **NO-SKILL** — do not install |
 | X bookmarks | user-X MCP; spend-cap 403 → fail-closed quiet (credits ≠ unlock) |
 | Morning SoT | youtube-daily scrape / history.md — prefer over SQLite |
@@ -57,7 +57,7 @@ No Jotform install. CAPTION_GAP → whisper worker or page recovery.
 ```
 
 ## Connector preference (2026-08-22)
-Prefer **logged-in box YouTube** + history JSON + whisper-caption-gap. Composio YouTube toolkit is optional (playlist proxy only; no true watch history; caption download only for owned videos). Do not require Composio for daily digests.
+Prefer **logged-in box YouTube** + history JSON + summarize-audio-video. Composio YouTube toolkit is optional (playlist proxy only; no true watch history; caption download only for owned videos). Do not require Composio for daily digests.
 
 ## Geerling dQ841Pd6YvQ (2026-08-26)
 **PROVE** timedtext + watch page. Packet: `/workspace/research/packets/signals-20260826/GEERLING-dQ841Pd6YvQ.md`. Steal = published-voice clone risk (OSS Qwen3-TTS / ElevenLabs). **No TTS SKU.** Not STT — do not route to local-push-to-talk-dictation.

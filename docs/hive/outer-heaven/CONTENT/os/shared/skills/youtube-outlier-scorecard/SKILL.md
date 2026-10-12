@@ -32,7 +32,7 @@ Operator names a channel (or a tracked niche with a named handle). After L2 if a
 |---|---|---|
 | Public channel / watch pages | WebFetch and/or box Chrome | **PROVE** |
 | View counts on the public page | same | **PROVE** (FACT) |
-| Timedtext / captions | existing whisper-caption-gap or page chapters | **WORKAROUND** — do **not** install TranscriptAPI |
+| Timedtext / captions | existing summarize-audio-video or page chapters | **WORKAROUND** — do **not** install TranscriptAPI |
 | TranscriptAPI / paid YT analytics / RPM | not installed, not ours | **BLOCKED** — would work if we had YouTube Analytics or a revenue connector. Leave `$` UNVERIFIED. |
 | Private / unlisted / members-only | not public | **BLOCKED** — public uploads only |
 

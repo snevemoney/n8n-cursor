@@ -3,6 +3,7 @@ name: Golden test loop
 description: >-
   Use when designing or auditing a recurring agent loop — trigger, task, success
   check, log; verify before declare done; no unattended harness installs.
+merged_from: [binary-self-eval-skills, osmani-tdd, superpowers-tdd]
 ---
 # Golden test loop
 
@@ -179,7 +180,7 @@ No Priors interview. Remap Claude Code / Codex / OpenClaw → Grok Bot + Cursor 
 
 Steal:
 - Typing is not the verb. Express will to **multiple bounded agents**; optimize the **instructions** (skills), not the chat. "Everything is a skill issue."
-- Auto-research only when a candidate is **cheap to verify** (tape analog: validation-loss commit you can just check). If you cannot check without Evens, do not loop — run [eval-harness-scope](sand-workflow:eval-harness-scope) four blanks first.
+- Auto-research only when a candidate is **cheap to verify** (tape analog: validation-loss commit you can just check). If you cannot check without Evens, do not loop — run [four-blank-before-build](sand-workflow:four-blank-before-build) four blanks first.
 - A research org is a set of markdown files (`program.md` roles + how they connect). Hive: this loop card + skills + `/home/box/.grokbot/outer-heaven/ACTION_LOG.jsonl`. Do not mint a program.md product.
 - Untrusted internet workers ("blockchain of commits") **BLOCKED**. Hive workers = named desks + CloudAgent on owned repos. Verifiable = tests / click / packet path.
 - Human job = the **few bits** agents cannot invent. Write markdown **for agents**, not HTML theater for humans.
@@ -265,3 +266,77 @@ Enrich-only / checklist-only / CapEx fixture replay ≠ Transferred.
 
 ## Enrich 2026-10-10: evidence-driven testing (yt:blI10_91xgA, Ras Mic "software factory is all skills")
 Reproduce first and capture the BEFORE state while the bug is cheapest to observe, then fix, then capture AFTER with repo checks plus runtime evidence. A green test without a reproduced failure doesn't count as proof. This matches the existing loop; the citation adds the before-capture step.
+
+---
+
+## Merged from `binary-self-eval-skills` (2026-10-11)
+
+- Original description: Use to improve a skill overnight — binary pass/fail evals on golden cases; rewrite skill.md from failures.
+- Unique content carried: tests-first rule; failing-check-first; binary pass/fail overnight skill eval
+
+# Binary self eval skills
+
+Sources: Simon Scrapes binary self-eval loops.
+
+## When
+A skill is used repeatedly and quality drifts.
+
+## Do
+1. Define golden cases with pass/fail.
+2. Run the skill; log fails.
+3. Patch the skill.md the same day (improve-system-writeback).
+
+## Don't
+- Vague 1-10 vibes without binary gates
+- Hoard new skills instead of fixing the failing one
+
+## Enrich 2026-10-10: skill A/B is the eval (`yt:bEJuF9JltYE` Supabase eval)
+Same model, same tasks, with vs without the skill → the delta is the skill's value (Supabase: Sonnet 78% → higher with the agent skill). Job ready at `/workspace/research/packets/youtube-2wk-fullwatch-20261010/_cursor_jobs/skill_ab_eval.py`. BLOCKED_CURSOR_USAGE (OpenRouter key in Cursor only).
+
+
+---
+
+## Merged from `osmani-tdd` (2026-10-11)
+
+- Original description: Use when implementing logic or fixing bugs — tests first or with the change; remaps Osmani test-driven-development to hive golden-test-loop.
+- Unique content carried: tests-first rule; failing-check-first; binary pass/fail overnight skill eval
+
+# Osmani TDD
+
+Source: addyosmani/agent-skills `test-driven-development` (MIT). Pair: golden-test-loop / verify-then-done.
+
+## When
+New logic, bugfix, behavior change.
+
+## Do
+1. Name the failing check (test, script exit, click path).
+2. Implement until the check passes.
+3. Keep deterministic work in a named script when possible.
+4. Agent-said-done without executed list = FAIL.
+
+## Don't
+Ship without a runnable check. Unattended client send.
+
+
+---
+
+## Merged from `superpowers-tdd` (2026-10-11)
+
+- Original description: Use when implementing features or bugfixes — write the failing check first; remaps obra/superpowers test-driven-development to hive (golden-test-loop / check-forge-done).
+- Unique content carried: tests-first rule; failing-check-first; binary pass/fail overnight skill eval
+
+# Superpowers TDD
+
+Source: obra/superpowers `test-driven-development` (MIT). Packet: `/workspace/research/packets/obra-superpowers/skills/test-driven-development/`.
+
+## When
+New features, bug fixes, behavior changes — before implementation.
+
+## Do
+1. Name the failing check (test, script exit, click path).
+2. Watch it fail for the right reason.
+3. Minimal code until it passes.
+4. Pair [Osmani TDD](sand-workflow:golden-test-loop) + golden-test-loop. Agent-said-done without executed check = FAIL.
+
+## Don't
+Skip the fail. Install hooks/scripts from Superpowers. Ship live `/` to "prove" green.

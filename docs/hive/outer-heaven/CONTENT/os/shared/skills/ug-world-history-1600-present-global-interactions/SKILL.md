@@ -15,6 +15,7 @@ description: >
   survey. Do not use for HIST362 revolutions-as-a-course, HIST363
   industrialization-as-a-course, GEOG101, ARTH101, Western Civ,
   AP World dumps, ACE/webcam exam-taking, or exam reconstruction.
+merged_from: [ug-industrialization-global-perspectives, ug-modern-revolutions-comparative-political, ug-world-regional-geography]
 ---
 
 # World history 1600–present: oceans first, then the right revolution, then the right war (clustered)
@@ -161,3 +162,275 @@ The pass is **new global markets and systems of trade and information exchange**
 4. Place the **date-cluster** (1648 / 1789 / 1914 / 1939 / 1991) on the right job.
 5. Hand off HIST362 / HIST363 / GEOG101 / ARTH101 when the prompt is actually those courses.
 6. Do not invent ACE credit. Do not sit the final.
+
+---
+
+## Merged from `ug-industrialization-global-perspectives` (2026-10-11)
+
+- Original description: Frame an undergraduate global-industrialization question using the Saylor HIST363 school: industry as a course from ancient and early-modern production through England's first industrial, social and environmental consequences, second-industrial mass production and labor, 20th-century industrial war and crisis, and alternative Soviet / Chinese / Indian models. Keep first vs second industrial distinct; keep industrial revolution distinct from political revolution. Use when a prompt asks how industry developed, spread, and shaped everyday life as a course. Do not use for HIST103 survey, HIST362 political-revolutions, GEOG101, ARTH101, ECON101/102, ACE exam-taking, exam reconstruction, or sending.
+- Unique content carried: one section per course code
+
+# Global industrialization: theory first, then the right industrial seat (clustered)
+
+**Use when:** a task asks how to place an industry-as-a-course question in the Saylor HIST363 school.
+
+**Do not use when:** HIST103; HIST362; GEOG101; ARTH101; ECON101/102; sitting ACE; exam reconstruction; sending; inventing live Units 9–10.
+
+This is **one** skill. Eight listed live units, one argument: **most students already have a Watt-and-1789 story; this pass is industry as a course — theory and ancient/early-modern Europe-and-Asia before England, first vs second industrial in their own seats, labor/environment/empire first-class, alternative models not collapsed into Manchester.**
+
+## 0. Hygiene
+
+- Label **school**. Global industrialization (Saylor HIST363). **65 h / 6.5 CEU.** LMS **745**. ACE **N**. Cert **70% / 14-day / max 3**. Not 39 h. Not LMS 33.
+- Eight **listed live** units: Theories of Economic Change; Ancient and Early Modern Industry; Capitalism, Agriculture, Industry, and Trade; Industrial Revolution in England; Social and Political Impact; Mass Production, Labor, Consumer Society; Economic Crisis and War in the 20th Century; Alternative Models.
+- Six **live** CLOs.
+- Chrome FREE (exam closes paused; do not sit BUS607). **Never send.**
+
+## 1. Procedure — six checks
+
+### Check A — Identity
+
+| Prompt smells like | Hand off |
+|---|---|
+| World survey | **HIST103** |
+| Political revolutions as a set | **HIST362** |
+| Markets as econ models | **ECON101/102** |
+| Take the final / send | **refuse** |
+| Industry as a course | **this skill** |
+
+### Check B — Theory + ancient/early-modern (Units 1–2)
+
+What the process is, which theory claims it. Ancient and early-modern Europe **and Asia** already had industry.
+
+### Check C — Groundwork + England as hinge (Units 3–4)
+
+Capitalism, agriculture, industry, trade. England is a **hinge**, not the origin myth. First industrial here.
+
+### Check D — Consequences + second industrial (Units 5–6)
+
+Social/political impact. Labor, environment, empire first-class. Mass production, labor movement, consumer society = **second** industrial — keep distinct from Unit 4.
+
+### Check E — War, crisis, alternative models (Units 7–8)
+
+20th-c. industrial war and crisis. Soviet / Chinese / Indian models ≠ Manchester.
+
+### Check F — Never send
+
+Encode the job. Stop.
+
+## 2. Worked patterns (shape only)
+
+**Theory or ancient production first?** Check B.
+
+**First or second industrial?** Checks C–D.
+
+**Manchester or an alternative model?** Check E.
+
+**HIST363 or HIST362?** Industry as a course → this skill. Political revolution set → HIST362.
+
+## 3. Refuse / redirect
+
+Exam reconstruction; sitting the final; sending; HIST103/362/GEOG/ARTH/ECON as if this were those maps; inventing Units 9–10; CS120.
+
+## 4. Adjacent
+
+HIST362 (previous cluster), HIST103 skip, GEOG101 skip, ARTH101 skip redo, ECON not this map, Saylor HIST363 exam (do not encode).
+
+## 5. What not to encode
+
+Exam items. Fake SAYA. 65 h as 39 h. SNLS ten units as live. Forums. Sending.
+
+## 6. Output shape
+
+1. Name the school (HIST363 industry as a course) and what it is not (HIST362, HIST103, ECON).
+2. Name the seat (theory / ancient / England hinge / first vs second / labor-env-empire / alternative model).
+3. **Never send.** Do not sit the final.
+
+## 7. Guest vs login
+
+Guest has: catalog, LMS 745, eight listed units, six CLOs, 65 h, ACE N.
+Guest does not have: Units 9–10 as live titles, item banks.
+
+## 8. Pass encoded
+
+Finishing HIST363 means you can follow industry as a course: theory, ancient/early-modern, England as hinge, first vs second industrial, labor/environment/empire, alternative models. It does not mean you finished HIST362-as-this-map, and it does not mean anyone sent a paper.
+
+
+---
+
+## Merged from `ug-modern-revolutions-comparative-political` (2026-10-11)
+
+- Original description: Frame an undergraduate modern-revolutions question using the Saylor HIST362 school: distinguish political vs social vs industrial vs agricultural vs scientific revolution, keep Atlantic cases (America / France / Haiti) in their own seats, keep Mexico–Latin America–Philippines from collapsing into 1789, treat Hobbesian social-contract failure as the live causal frame, and treat violence vs nonviolence as a first-class comparison. Use when a prompt compares English 1688, America, France, Haiti, Mexico, or other modern political revolutions as a set. Do not use for HIST103 survey, HIST363 industrialization-as-a-course, GEOG101, ARTH101, ACE exam-taking, exam reconstruction, or sending.
+- Unique content carried: one section per course code
+
+# Modern revolutions: type first, then the right Atlantic case, then extra-Atlantic (clustered)
+
+**Use when:** a task asks how to place a comparative political-revolution question in the Saylor HIST362 school.
+
+**Do not use when:** HIST103; HIST363; GEOG101; ARTH101; sitting ACE; exam reconstruction; sending; inventing live Units 5–11.
+
+This is **one** skill. Four listed live units, one argument: **most students already have a French-Revolution story; this pass is comparative political revolution — type and theory before 1776, Haiti/Mexico/Latin America/Philippines as a titled bundle, violence and nonviolence both first-class, Hobbes not Marx as the opening frame.**
+
+## 0. Hygiene
+
+- Label **school**. Comparative modern revolutions (Saylor HIST362). **39 h / 3.9 CEU.** LMS **872**. ACE **N**. Cert **70% / 14-day / max 3**. Not 85 h. Not LMS 32.
+- Four **listed live** units: Nature of Revolution; American Revolution; French Revolution and Its Legacy; Haiti, Mexico, Latin America, and the Philippines.
+- Nine **live** CLOs.
+- Next: **HIST363**. Chrome FREE (exam closes paused; do not sit BUS607). **Never send.**
+
+## 1. Procedure — six checks
+
+### Check A — Identity
+
+| Prompt smells like | Hand off |
+|---|---|
+| 400-year world survey | **HIST103** |
+| Industry as a course | **HIST363** |
+| World regions | **GEOG101** |
+| Art style | **ARTH101** |
+| Take the final / send | **refuse** |
+| Compare political revolutions as a set | **this skill** |
+
+### Check B — Type + theory (Unit 1)
+
+Political vs social vs agricultural vs scientific. This course pass is **political**. Hobbesian social-contract failure. Enlightenment. 1688 as a live-adjacent subunit, not a fifth unit title.
+
+### Check C — America, then France (Units 2–3)
+
+Keep **America** and **France** in their own seats. France’s legacy ≠ 1789-as-the-whole-map.
+
+### Check D — Extra-Atlantic bundle (Unit 4)
+
+**Haiti, Mexico, Latin America, and the Philippines** as one titled bundle. Do not fold them into 1789.
+
+### Check E — Violence vs nonviolence; women and working class
+
+Both first-class. Women **and working class** (live CLO). Primary documents: review, do not dump.
+
+### Check F — Never send
+
+Encode the job. Stop.
+
+## 2. Worked patterns (shape only)
+
+**Which type of revolution?** Check B.
+
+**Which Atlantic case?** Check C.
+
+**Is this Unit 4’s bundle?** Check D.
+
+**HIST362 or HIST103?** Comparative political set → this skill. Connected world survey → HIST103.
+
+**HIST362 or HIST363?** Political revolution → this skill. Industry as a course → HIST363.
+
+## 3. Refuse / redirect
+
+Exam reconstruction; sitting the final; sending; HIST103/363/GEOG101/ARTH101 as if this were those maps; inventing Units 5–11; CS120.
+
+## 4. Adjacent
+
+HIST363 (next), HIST103 (skip, in bar), GEOG101 skip, ARTH101 skip redo, Saylor HIST362 exam (do not encode).
+
+## 5. What not to encode
+
+Exam items. Fake SAYA. 39 h as 85 h. SNLS eleven units as live. Forums. Sending.
+
+## 6. Output shape
+
+1. Name the school (HIST362 comparative political revolutions) and what it is not (HIST103, HIST363).
+2. Name the seat (type / America / France / Unit 4 bundle / violence-nonviolence).
+3. **Never send.** Do not sit the final.
+
+## 7. Guest vs login
+
+Guest has: catalog, LMS 872, four listed units, nine CLOs, 39 h, ACE N.
+Guest does not have: Units 5–11 as live titles, item banks.
+
+## 8. Pass encoded
+
+Finishing HIST362 means you can type a revolution, keep America/France/Haiti in their seats, treat Mexico–Latin America–Philippines as a titled bundle, and score violence vs nonviolence. It does not mean you finished HIST103-as-this-map or HIST363, and it does not mean anyone sent a paper.
+
+
+---
+
+## Merged from `ug-world-regional-geography` (2026-10-11)
+
+- Original description: Frame an undergraduate world-regional-geography question using the Saylor GEOG101 school: divide the world into ten live regions, keep a spatial perspective, keep physical and human characteristics both first-class, apply diffusion / distance decay / core-periphery / centrifugal-centripetal / rural-to-urban, and do not collapse Russia into Europe or South Asia into East Asia. Use when a prompt asks where a place sits in a world-regions course, why a landscape or city is there, or how regions connect via hazards or colonialism. Do not use for HIST103 400-year survey, HIST363 industry, ARTH101 style, PHIL203 environmental ethics, GIS-as-a-SKU, ENGL, PSYCH, POLSC, ACE/webcam exam-taking, or exam reconstruction.
+- Unique content carried: one section per course code
+
+# World regional geography: region first, then spatial concept (clustered)
+
+**Use when:** a task asks how to **place a location or process** in the Saylor GEOG101 **undergraduate world-regional-geography** school — which of the ten live regions it belongs to, whether the question is physical or human, which geographic concept (diffusion, distance decay, core-periphery, etc.) does the job, or how maps/spatial perspective distinguish geography from history or political science.
+
+**Do not use when:** HIST103 event-dating; HIST363 industrialization; ARTH101 style; PHIL203 environmental ethics; GIS/remote-sensing as the whole course; ENGL; PSYCH101; POLSC*; reconstructing or sitting Saylor/ACE exams.
+
+This is **one** skill. Ten live units, one argument: **most students already have a country list; this course's pass is regions + spatial perspective — physical and human together, Russia not Europe, South Asia not East Asia, Oceania not skipped.**
+
+## 0. Hygiene
+
+- Label **school**. Undergraduate **world regional geography** (Saylor GEOG101). Social Science / Geography. **37 h / 3.7 CEU.** LMS **1145** (`/course/geog101`). ACE **SAYA-0044**, 3 LD, through **05-31-2028**. Completing the free 70% certificate is **not** that recommendation. ACE exam: **$5, proctored, 14-day, max 3** — **do not sit**. Certificate final: **7-day** wait. No guest-visible textbook.
+- Label **claim vs data**. Live **10 units / 37 h / LMS 1145**. Guest truncated. ACE **current**. Re-fetch transfer rules if needed.
+- Regions-as-a-course ≠ world-history survey ≠ industry course ≠ environmental ethics ≠ GIS SKU.
+- Live intro: **ten regions**; physical (location, climate, terrain, hazards) and human (culture, language, cities, economy, conflict); **spatial perspective**; maps.
+- Eleven **live** CLOs (locate regions; spatial perspective vs other disciplines; maps; tools/methods; population distribution; colonialism/borders; location vs communication/development; hazards/environment interconnectedness; conflict as human geography; apply diffusion/distance decay/centrifugal-centripetal/core-periphery/globalization/rural-to-urban; internal/external processes on physical landscape).
+- Ten **live** units: Introduction to Geography; Europe; Russia; North America; Middle and South America; Sub-Saharan Africa; North Africa and Southwest Asia; South Asia; East and Southeast Asia; Oceania.
+
+## 1. Procedure — six checks
+
+### Check A — Identity
+
+| Prompt smells like | Hand off |
+|---|---|
+| 1648 / 1789 / 1914 as a *survey* | **HIST103** |
+| Industry as a *course* | **HIST363** |
+| Land ethic / NEPA | **PHIL203** |
+| Style / five-step look | **ARTH101** |
+| Regime type / political science intro | **POLSC101** |
+| Take ACE / Saylor final | **refuse** |
+| Which region, physical or human, which spatial concept | **this skill** |
+
+### Check B — Unit 1 tools
+
+Maps; spatial vs historical vs political; geographers' methods. Concepts named in CLO 10 live here as *tools* before they are applied to a region.
+
+### Check C — Euro-Atlantic cluster (Units 2–5)
+
+**Europe** ≠ **Russia** (own unit). **North America** ≠ **Middle and South America**. Mexico is not automatically the US unit. Colonialism/borders (CLO 6) often fire here and in Africa/Asia.
+
+### Check D — Africa–SW Asia (Units 6–7)
+
+**Sub-Saharan Africa** ≠ **North Africa and Southwest Asia**. Do not dump "Africa" or "the Middle East" as one region.
+
+### Check E — Asia–Oceania (Units 8–10)
+
+**South Asia** ≠ **East and Southeast Asia**. **Oceania is live** — do not skip. Hazards/earthquakes (intro questions) often fire on the Pacific rim — still name the **region unit**.
+
+### Check F — Concepts and connections
+
+If the prompt is "why is this city here / why this conflict / why this quake": name **region** + **physical or human** + **concept** (core-periphery, diffusion, centrifugal, etc.). Interconnected hazards are CLO 8, not a PHIL203 ethics question.
+
+## 2. Typical traps
+
+- Country list ≠ region.
+- Russia ≠ Eastern Europe.
+- South Asia ≠ East Asia.
+- Unit 6 ≠ Unit 7.
+- Oceania skipped.
+- Physical-only or human-only answers fail.
+- ACE SAYA-0044 ≠ free certificate. Not SAYA-0036/0011/0045.
+- HIST103 dates are not this pass.
+
+## 3. Refuse
+
+Exam reconstruction; sitting ACE/webcam; ENGL/PSYCH/POLSC harvest collision; GIS as the SKU; inventing an 11th region.
+
+## 4. Adjacent
+
+HIST103, HIST363, ARTH101, PHIL203, POLSC101, ACE sitting (do not encode).
+
+## 5. Output shape
+
+1. Name the school (GEOG101 world regional geography) and what it is not.
+2. Name the **live region unit**.
+3. Say whether the job is **physical, human, or both**.
+4. Name the **spatial concept** if one is doing work.
+5. Do not sit ACE. Do not sit the certificate final.

@@ -1,6 +1,7 @@
 ---
 name: JARVIS assistant core
-description: Use when building or judging a "JARVIS" personal voice assistant: router, plugin registry, swappable cloud or local brain, and confirmation gates on risky plugins like computer control or purchases.
+description: >-
+  Use when building or judging a "JARVIS" personal voice assistant: router, plugin registry, swappable cloud or local brain, and confirmation gates on risky plugins like computer control or purchases.
 ---
 # JARVIS assistant core
 Sources (2026-10-10 two-week full watch): `yt:K_cha25S4Qo` FatihMakes Mark 53/56, plus the Zubair Trabzada JARVIS series and DeepCantCode (see the packet SUMMARY).

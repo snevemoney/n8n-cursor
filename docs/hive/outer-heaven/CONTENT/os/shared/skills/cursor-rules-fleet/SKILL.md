@@ -34,7 +34,7 @@ FACT from `transcripts/U6k4MeVks_Y/full.txt`:
 - Effort is not linear (extra-high → ultra may be ~1% quality for 5× tokens). Default medium unless complex.
 - Outside tools: connectors (Gmail/Calendar) · plugins/MCP · **CLI often more complete** (GitHub CLI vs GitHub MCP). Prefer the one that is already connected.
 - Agentic OS folder: `raw/` → `wiki/` (with index.md at each level) → `output/`. Indexes beat stuffing the window. Pair [wiki-ingest](sand-workflow:wiki-ingest) + [context-before-tokens](sand-workflow:context-before-tokens).
-- Remap Claude Code desktop → Cursor Cloud agent + Grok. Voice ramble → [voice-ramble-session-context](sand-workflow:voice-ramble-session-context).
+- Remap Claude Code desktop → Cursor Cloud agent + Grok. Voice ramble → [session-bootstrap](sand-workflow:session-bootstrap).
 
 **Cursor fleet card**
 ```

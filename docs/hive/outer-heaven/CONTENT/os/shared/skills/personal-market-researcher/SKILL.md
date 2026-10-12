@@ -28,7 +28,7 @@ Reusable artifact on disk (brief, packet, checklist, or skill note) — not chat
 | Need | Path |
 |---|---|
 | Web | WebSearch/WebFetch — **PROVE** |
-| Pain | paid-pain-points — **PROVE** |
+| Pain | ai-ideas-from-pain — **PROVE** |
 
 ## Prompts
 **Market brief**

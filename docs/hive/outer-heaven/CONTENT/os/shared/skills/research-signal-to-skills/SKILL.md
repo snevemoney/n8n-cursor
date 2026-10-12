@@ -5,6 +5,7 @@ description: >-
   Demkinn/dossier packet — research is not done until skills are enriched or
   created AND each skill is proven, worked around, or explicitly blocked on
   missing X.
+merged_from: [signal-to-stack]
 ---
 # Research signal → skills (mandatory close)
 
@@ -38,7 +39,7 @@ A STEAL_SHEET row alone is **not** done. A SKILL.md that assumes Claude desktop,
 5. File operate-nevers + ping Librarian.
 6. Write **SKILL_DELTA.md** with: enriched · new · NO-SKILL · **PROVE/WORKAROUND/BLOCKED** table · sources.
 7. Tell operator skill changes in plain language. Surface every BLOCKED “would work if we had X” in chat (not only in a file).
-8. Index closed signals in `/workspace/research/SIGNAL_INDEX.md` (+ OH mirror) via [signal-to-stack](sand-workflow:signal-to-stack) four buckets.
+8. Index closed signals in `/workspace/research/SIGNAL_INDEX.md` (+ OH mirror) via [research-signal-to-skills](sand-workflow:research-signal-to-skills) four buckets.
    8b. **Minted a skill this run?** Same run, add it to `CONTENT/skills/SKILL_CATALOG.json` (id/name/description, plus a bucket in `primary`/`tags` or `unassigned`) and a bucket line in `SKILL_STRUCTURE.md`; copy both to `/workspace/research/skills-structure/`. A skill that is not indexed is invisible to [skill-recall-by-use](sand-workflow:skill-recall-by-use). Check: `ls workflows | wc -l` == catalog `total`.
 
 ## Prefer our stack
@@ -54,10 +55,10 @@ Grok Bot + Cursor + Gmail/Calendar/GitHub plugins + box browser + existing workf
 - Re-arm paused weekly-intel clones from a signal close
 
 ## Video L2 caption fallback
-If a video has no transcript (CAPTION_GAP / timedtext 429), run `oh-transcribe <url>` first ([owned-tools](sand-workflow:owned-tools); output goes to /workspace/transcripts/<id>.txt). Only if that fails (YouTube is currently bot-blocked on the VPS) → [goal-directed-watch](sand-workflow:goal-directed-watch) then [whisper-caption-gap](sand-workflow:whisper-caption-gap) on a **slice**, box only. Never whole-file 1fps or watchVideo on a 30+ min source. Then continue skill close (PROVE/WORKAROUND/BLOCKED).
+If a video has no transcript (CAPTION_GAP / timedtext 429), run `oh-transcribe <url>` first ([owned-tools](sand-workflow:owned-tools); output goes to /workspace/transcripts/<id>.txt). Only if that fails (YouTube is currently bot-blocked on the VPS) → [goal-directed-watch](sand-workflow:goal-directed-watch) then [summarize-audio-video](sand-workflow:summarize-audio-video) on a **slice**, box only. Never whole-file 1fps or watchVideo on a 30+ min source. Then continue skill close (PROVE/WORKAROUND/BLOCKED).
 
 ## Four buckets (required)
-Close via [signal-to-stack](sand-workflow:signal-to-stack): **prompts · tools · skills · workflows**. A skill with empty Prompts + no tool path is not done.
+Close via [research-signal-to-skills](sand-workflow:research-signal-to-skills): **prompts · tools · skills · workflows**. A skill with empty Prompts + no tool path is not done.
 
 ## Tools
 | Need | Path |
@@ -87,7 +88,7 @@ Packet: …
 Advise-only? yes
 Prices invented? no
 Strategy preference (dated): …
-Skill ids: event-driven-investment-decision / …
+Skill ids: prediction-event-expectations / …
 HITL L4 before any add/trim
 NO-SKILL: auto-trade routines
 ```
@@ -130,13 +131,13 @@ Topics: `beat-spy-tier-a-20260908.md` · `aapl-event-hold-20260909.md` · `refer
 Close rules:
 - Wealth packets = **advise-only**. Skills may exist; **NO-SKILL** for auto-trade / order-send routines. HITL L4 before add/trim. Never invent prices. Dated preferences supersede after reassess.
 - Video doctrine: Remotion crew ≠ whole studio. Blender CLI / NLE = **BLOCKED** (would work if on box) → Remotion composite + Juno **WORKAROUND**. Hosted Remotion MCP still **BLOCKED**.
-- Skills enriched (Platform Grok Bot + Cursor · Install `none (process-only)` unless Remotion repo skills already live): `event-driven-investment-decision` · `reference-driven-video-production` · `remotion-visual-intelligence-director`.
+- Skills enriched (Platform Grok Bot + Cursor · Install `none (process-only)` unless Remotion repo skills already live): `prediction-event-expectations` · `reference-driven-video-production` · `reference-driven-video-production`.
 - SIGNAL_INDEX #80–82. No desk fan-out. No clone re-arm.
 
 ## Bookmark fire stamp 2026-09-09 10:51 ET
 Live X bookmarks close: packet `/workspace/research/packets/x-bookmarks/20260909-1051/` · user-X PROVE count=99 · +5/−5.
 - Enrich: `reference-driven-video-production` (NetworkChuck AI-edit vs Adobe = RESEARCH-OK watch; Remotion+Juno WORKAROUND; NLE BLOCKED).
-- Cross-ref: `remotion-visual-intelligence-director`.
+- Cross-ref: `reference-driven-video-production`.
 - NO-SKILL: Astra classic-game RE/ports (SuperAstra, Wind Waker phone, AAA-on-iPad, DramaAlert) — leisure.
 - STEAL_SHEET + DEEP_SUMMARIES + SIGNAL_INDEX #84. Don'ts → Librarian. No catalog dump. No clone re-arm.
 
@@ -180,7 +181,7 @@ SoT: `/workspace/research/youtube-daily/2026-09-10.md` · packet `packets/youtub
 ## YT daily stamp 2026-09-11
 SoT: `/workspace/research/youtube-daily/2026-09-11.md` · packet `packets/youtube-daily-20260911/` · L2 `youtube-daily/l2-20260911/Weom9fQnnJ0/`.
 - Today Fri = **2** (1 builder DeepSeek Flash + 1 leisure Wolverine news). Yesterday = **64**. WL not opened.
-- Prove-one: `yt:Weom9fQnnJ0` Flash-as-flagship → `cheap-read-expensive-decide` + `match-model-to-task` enrich · DeepSeek API **BLOCKED** · recreation `route_jobs.py` PROVE.
+- Prove-one: `yt:Weom9fQnnJ0` Flash-as-flagship → `match-model-to-task` + `match-model-to-task` enrich · DeepSeek API **BLOCKED** · recreation `route_jobs.py` PROVE.
 - Queued title-only: `Fmr_72cYZo8`, `jXzpwdtwVyk`, prior `60a0nHFefn4`, `mitzci4FsOg`.
 - SIGNAL_INDEX #87. No desk fan-out. No clone re-arm.
 
@@ -190,7 +191,7 @@ Close rules for fires already on SIGNAL_INDEX #90–94 (State was stale at #83�
 
 ### #90 YT 2026-09-12 Dialbot + OpenAI Cloud Agents
 - SoT `youtube-daily/2026-09-12.md` · Today 0 / Yesterday 49 · WL not opened.
-- Enrich: `dialbot-bland-outbound` · `phone-hitl-routine` · `speed-to-lead-demo`.
+- Enrich: `dialbot-bland-outbound` · `phone-hitl-routine` · `nate-five-buy-workflows`.
 - Live Bland call **BLOCKED** (connector+credits+voice). OpenAI Agents live **BLOCKED** → Cursor CloudAgent + Grok + Gmail/Calendar **WORKAROUND**.
 - Leisure / title-only shelf = NO-SKILL expand. $ = UNVERIFIED.
 
@@ -207,7 +208,7 @@ Close rules for fires already on SIGNAL_INDEX #90–94 (State was stale at #83�
 
 ### #92 YT 2026-09-14 Matt Penny Remotion
 - SoT `youtube-daily/2026-09-14.md` · Today 4 / Yesterday 78.
-- Enrich `remotion-brief-to-render` · `when-remotion` · **new** `remotion-asset-dictionaries`.
+- Enrich `motion-pipeline` · `motion-pipeline` · **new** `motion-pipeline`.
 - D PARTIAL honesty. Claude desktop / Applied AI Mastermind rent / Brave / Inworld/HeyGen **BLOCKED**. Higgsfield spend HITL.
 
 ### #93 Signals close 2026-09-14 Context Decay
@@ -253,7 +254,7 @@ Packet roots: `packets/x-bookmark-videos-fullwatch-20260922/` · `packets/liked-
 - Sep 18 dump (~60 videos → 30 builder / 28 gray / 2 leisure skip) · **GRAY 28/28 + BUILDER 30/30 CLOSED**.
 - Path: oldest-builder-first because live X bookmarks still **spend-capped** (post-Sep18 blocked until cap reset).
 - Close bar: frame/storyboard + transcript/captions when available · CAPTION_GAP → B PARTIAL honesty · enrich **pointers** into owned skills · **no mint** · leisure skip = NO-SKILL.
-- Primary enrich targets already touched overnight: `agent-harness-loops` · `cinematic-site-recipe` · `still-to-scroll-hero` · `n8n-kit-hitl` · `persistent-bot-memory` · `system-one-decision-gate` · `cheap-read-expensive-decide` · `match-model-to-task` · `free-for-dev-vendor-cuts` · `awesome-skill-import-gate` · `desktop-computer-use-creative` · `skill-authoring`.
+- Primary enrich targets already touched overnight: `agent-harness-loops` · `cinematic-site-recipe` · `cinematic-site-recipe` · `n8n-legacy-ops` · `persistent-bot-memory` · `system-one-decision-gate` · `match-model-to-task` · `match-model-to-task` · `find-costs-to-cut` · `awesome-skill-import-gate` · `desktop-computer-use-creative` · `skill-authoring`.
 - Tweet $/Astra/product claims on-tape = **UNVERIFIED**. Game-RE / phone exploit visuals = **NO-SKILL** (offensive keep-out).
 - Twin posts → one close, cross-link ids. Cap ≤1 concurrent fullwatch.
 
@@ -299,7 +300,7 @@ Fail-closed YT SoT · school bar #16 · builder no-rent #17 · portfolio proof #
 ## Bookmark fire stamp 2026-09-23 desktop (spend-cap WORKAROUND)
 Live desktop CDP pull: packet `/workspace/research/packets/x-bookmarks/20260923-desktop/` · count **112** · +49/−33/overlap 63 · prev `2026-09-18T17:38:51Z`.
 - Method: desktop-cdp-oneshot (API bookmarks still spend-capped) — **PROVE** for list; preview-only true-read.
-- Enrich: `system-one-decision-gate` · `cheap-read-expensive-decide` · `desktop-computer-use-creative` · `agent-harness-loops` · `match-model-to-task` · `remotion-official-skills-import` · `remotion-brief-to-render`.
+- Enrich: `system-one-decision-gate` · `match-model-to-task` · `desktop-computer-use-creative` · `agent-harness-loops` · `match-model-to-task` · `motion-pipeline` · `motion-pipeline`.
 - NO-SKILL: Jev money/Meta-ads/trader spam · leisure R&M/Rive slap/product-show.
 - NEED-WATCH-LATER Cap≤1: Opus motion + Theo “using Jev wrong” (held queue in packet).
 - No mint · no A–E fullwatch · no 17-desk fan-out · live `/` LIVE (Tier-3 HITL).
@@ -369,7 +370,7 @@ Platform: **Grok Bot + Cursor**. Install: **none (process-only)**.
 
 ## YT daily stamp 2026-09-25
 SoT: `/workspace/research/youtube-daily/2026-09-25.md` · L2 `youtube-daily/l2-20260925/b9_kJn0zm5U/` · Cap≤1 A–E **PASS**.
-- CAPTION_GAP 429 → goal-directed-watch + whisper-caption-gap slices **PROVE**.
+- CAPTION_GAP 429 → goal-directed-watch + summarize-audio-video slices **PROVE**.
 - Enrich: `tool-permission-not-prompt` · `agent-harness-loops`. Minted 0. Shelf HOLD title-only.
 - Docker Sandboxes / Claude Code sandbox settings **BLOCKED** (would work if…). Prod keys out of workspace = recipe.
 - SIGNAL_INDEX: defer to next smarter-loop index pass (this fire = packet + delta on disk).
@@ -454,7 +455,7 @@ Platform: **Grok Bot + Cursor**. Install: **none (process-only)**.
 
 **Catch-up since Wed 08:48 State (FACT)**
 - SIGNAL_INDEX / signals-close **2026-09-30 ~09:56 ET** stamped after Wed smarter-loop: Cap≤1 `yt:zaLQ0AnY9dI` CLOSED A–E · skill `agent-harness-loops` enriched (jev_harness_hooks_demo exit 0) · X spend-cap quiet · packet `packets/signals-close-20260930-0953/` · SIGNAL_INDEX mtime **2026-09-30 16:22 ET** (NEWER than topic State).
-- Skill mtimes since yesterday smarter-loop: `agent-harness-loops` · `whisper-caption-gap` · plus out-of-bucket motion/websites/Jev/GTM touches at ~16:21 ET (leave non-research-signals for owner desks).
+- Skill mtimes since yesterday smarter-loop: `agent-harness-loops` · `summarize-audio-video` · plus out-of-bucket motion/websites/Jev/GTM touches at ~16:21 ET (leave non-research-signals for owner desks).
 - YT SoT Present: `youtube-daily/2026-09-30.md` (Cap≤1 closed). Missing at path this fire: `2026-09-28.md` · `2026-10-01.md` — fail-closed, do not invent.
 
 **X last-good 1349 (unchanged)**
@@ -554,3 +555,83 @@ Source: `packets/bookmark-review-1201-20261008/` (1,201 bookmarks, DONE 1191 / F
 
 ## Enrich 2026-10-10: X-bookmark backlog study (signals-2mo-backlog-20261010)
 - **Mine your own traces.** Besides harvesting outside signals, scan your own STATE.jsonl and logs for repeated stage sequences and turn the frequent ones into skills (x:2089532183455084569). PROVE: `trace_miner.py` (this folder) on the youtube-2wk runner STATE → top sequence DOWNLOADING > TRANSCRIBING > DONE x12, which is already the durable-runner skill. The miner rediscovers known skills, so it works.
+
+---
+
+## Merged from `signal-to-stack` (2026-10-11)
+
+- Original description: Use after any research signal (YouTube L2, bookmarks, Demkinn, dossier) — extract prompts, tools, skills, and workflows. Chat findings alone = failure.
+- Unique content carried: extract prompts/tools/skills/workflows checklist
+
+# Signal → stack (4 buckets)
+
+**Owner:** Researcher. Pairs with [research-signal-to-skills](sand-workflow:research-signal-to-skills).
+
+Every signal close must leave artifacts in **all four** (or explicit N/A):
+
+| Bucket | What it is | Where it lives |
+|---|---|---|
+| **Prompts** | Copy-paste text the desk reuses | skill body `## Prompts` and/or `/workspace/research/prompt-packs/` |
+| **Tools** | Connectors/CLIs we use (or BLOCKED “would work if X”) | skill proof table + GetMcpServerStatus |
+| **Skills** | Reusable markdown recipes (workflows) | `/home/box/agent-data/workflows/<id>/SKILL.md` |
+| **Workflows** | Same files + routines that fire them | workflows + automations |
+
+## Steps
+1. List steals from the signal (FACT/INFERENCE).
+2. For each steal: write/enrich **prompt** (template), name **tools** (PROVE/WORKAROUND/BLOCKED), create/enrich **skill**, attach to **routine** only if recurring.
+3. Write `SKILL_DELTA.md` with the 4-bucket table.
+4. NO-SKILL quarantine stays for farms/pentest/etc.
+
+## Never
+- Skill with no prompt and no tool path
+- “Owned” while assuming missing Claude/Comfy/Eden/Vapi
+- New agents / icp_id from a signal
+
+## Tools
+| Need | Path |
+|---|---|
+| Prompts | prompt-packs/ + skill ## Prompts — **PROVE** |
+| Tools | MCP/CLI proof table — **PROVE** |
+| Skills/Workflows | /home/box/agent-data/workflows — **PROVE** |
+
+## Prompts
+**4 buckets**
+```
+Signal: …
+Prompts (copy-paste): …
+Tools (PROVE/WORKAROUND/BLOCKED): …
+Skills (ids): …
+Workflows/routines: … or N/A
+```
+
+## Update the knowledge map
+After closing a signal: add/adjust a row in `/workspace/research/SIGNAL_INDEX.md` (theme → path → skills → prompt packs). Librarian promotes to Outer Heaven CONTENT when Mac is up.
+
+## Overnight / weekday close (2026-09-08)
+When packets or skills land overnight (W17 stabilize, import-gate fleets, RAM hygiene, ranked CapEx recs), the **same weekday smarter-loop** must close the 4 buckets into `SIGNAL_INDEX.md` — chat/packet alone = failure.
+
+Close checklist (Researcher):
+1. Packet path under `/workspace/research/packets/`
+2. Skills already on disk (enrich ids) — no mall clone
+3. Tools: PROVE / WORKAROUND / BLOCKED (Blender MCP = BLOCKED until operator ask)
+4. Workflows/routines: N/A unless already armed; never re-arm paused weekly-intel clones
+5. Append SIGNAL_INDEX row + OH mirror; append run-log
+
+Mon Sep 8 regression: stagger CapEx proof is Day Planner/Consultant/BB — research-signal-to-skills only indexes, does not stack morning burns.
+
+## Enrich — C_STACK overnight (yt:rW3eyvrSqio · 2026-09-21)
+When signal is vendor agent+MCP UI (Astra/Codex/Zapier): remap to owned connectors + runnable recreation; enrich existing skills; **no mint-per-URL**. Close with L2 A–E honesty (PARTIAL ok when live vendor BLOCKED). SSOT: `signal-overnight-demo-loops`.
+
+## Overnight C_STACK note 2026-09-21 — `yt:PXMJ6FS7llk`
+
+Full-course tape → **Prove-ONE** scoped pattern only (`dated-csv-daily-ledger`). 4 buckets closed into L2 `SKILL_DELTA.md` + enrich `host-automations-outside-subscription` / `n8n-legacy-ops`. No mint-per-URL.
+
+## Overnight C_STACK note 2026-09-21 — `yt:yjBHheCB6Ek`
+
+n8n vision TA tape → **Prove-ONE** pattern `vision-signal-action`. 4 buckets closed into L2 `SKILL_DELTA.md` + enrich `n8n-legacy-ops` / `mcp-connector-live-proof`. Runnable fixture recreation; no mint-per-URL; no broker.
+
+## Enrich 2026-09-21 — live_adds prove_one (yt:VE5dsWll06M)
+When WL next is parked fluff (e.g. WLvQCIUWebs beginner-agent), CapEx C may jump to `live_adds` with `prove_one_flag`. Close with L2 A–E, clear flag, point wl_next at next non-fluff builder. Leave A_BUILD untouched under Cap ≤1 C.
+
+## Overnight C_STACK — yt:QCjMBOEhpLE (2026-09-21T20:39:14-04:00)
+PROVE `native-data-table-narrow-query` · L2 `l2-20260921/QCjMBOEhpLE/` · next `budTmdQfXYU`

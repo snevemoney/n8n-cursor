@@ -61,7 +61,7 @@ Reusable artifact on disk (brief, packet, checklist, or skill note) — not chat
 Steal: clone 2+ **public** experts who already have a body of work (YouTube first), ingest their corpus, then one skill loops every member into a single memo. Operator decides.
 
 ### Sequence
-1. Interview the operator (goals 1y / 5y / 10y). Voice dump OK — [voice-ramble-session-context](sand-workflow:voice-ramble-session-context). Wispr Flow cloud **BLOCKED**; [local-push-to-talk-dictation](sand-workflow:local-push-to-talk-dictation) **WORKAROUND**.
+1. Interview the operator (goals 1y / 5y / 10y). Voice dump OK — [session-bootstrap](sand-workflow:session-bootstrap). Wispr Flow cloud **BLOCKED**; [local-push-to-talk-dictation](sand-workflow:local-push-to-talk-dictation) **WORKAROUND**.
 2. Name 2+ board members with **public** training data. Prefer creators already on disk under `/workspace/research/youtube-daily/transcripts/<id>/full.txt`. Do not require Composio YouTube.
 3. Ingest FACT quotes into a packet / Outer Heaven topic (state vs event via [wiki-ingest](sand-workflow:wiki-ingest)). Label INFERENCE.
 4. Skill `ask-the-board`: loop every member, then one combined memo with disagreements called out. Write the frame to [decision-ledger-md](sand-workflow:decision-ledger-md).

@@ -44,9 +44,9 @@ Feature-list offers; default Rung 1 on intentional premium SLA; inventing volume
 ## Tools
 | Need | Path |
 |---|---|
-| Pain | paid-pain-points — **PROVE** |
+| Pain | ai-ideas-from-pain — **PROVE** |
 | Door list | `~/.grokbot/research/competitor-door-watch-list.md` — **PROVE** |
-| Door watch | competitor-door-watch — **PROVE** (Tue routine; cite, don't duplicate spam) |
+| Door watch | competitor-monitor — **PROVE** (Tue routine; cite, don't duplicate spam) |
 
 ## Prompts
 **Position**

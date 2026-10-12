@@ -5,6 +5,7 @@ description: >-
   user shares, or deciding Remotion vs Blender vs NLE for a shot —
   producer/director pipeline, not Remotion-only. Anti-triggers: leisure meme
   farms; promising Blender/NLE when absent; copying reference branding.
+merged_from: [remotion-visual-intelligence-director, wealth-video-narration-composition]
 ---
 # Reference-driven video production mode
 
@@ -232,7 +233,7 @@ cd /home/box/n8n-cursor/apps/portfolio-brief-remotion
 
 ### Steal (FACT patterns)
 - Faceless caption-led modernize before→after (UI chrome as actor; no talking head required).
-- Carter “create” step (Video-Use/HyperFrames) → **WORKAROUND** Remotion + whisper-caption-gap; do not install Claude desktop / HyperFrames as hive face.
+- Carter “create” step (Video-Use/HyperFrames) → **WORKAROUND** Remotion + summarize-audio-video; do not install Claude desktop / HyperFrames as hive face.
 - Higgsfield = optional raw plates only — Remotion preferred assemble.
 - GHL / paid-ads CTA overlays in marketing samples = **REFUSE**.
 
@@ -262,7 +263,7 @@ Packet: `/workspace/research/packets/x-bookmarks/20260916-1721/`.
 Packet: `/workspace/research/packets/x-bookmarks/20260917-1048/`.
 
 - **Launch video virality bookmark** (@titouangillet_ quoting ElevenLabs Reception): treat as reference for launch-video-e2e craft (brief→HITL→organic). View-count claims = **UNVERIFIED**. Do not watchVideo vendor promo as L2 unless operator asks.
-- **HyperFrames / MoneyPrinterTurbo** in @brenzhills GitHub list: same Carter remap — Remotion + whisper-caption-gap **WORKAROUND**; HyperFrames not hive face (**BLOCKED** install).
+- **HyperFrames / MoneyPrinterTurbo** in @brenzhills GitHub list: same Carter remap — Remotion + summarize-audio-video **WORKAROUND**; HyperFrames not hive face (**BLOCKED** install).
 - Pair topic SSOT: `CONTENT/topics/launch-video-e2e-process-20260914.md`.
 
 ## X bookmarks 20260917-1334 — launch-video craft cluster
@@ -376,7 +377,7 @@ Cross-pointer: HeyGen Video API / Minimax H3 catalog — RESEARCH-OK Cap HELD; h
 
 
 ## X bookmark enrich 20261001-1318-desktop (`x:2105375124195021274` @RaphaelAubryy)
-Reference: code-first motion batch open-source pipeline (Opus 5.5). Taste/process ref for reference-driven production; Cap HELD until Article digested. Pair remotion-brief-to-render.
+Reference: code-first motion batch open-source pipeline (Opus 5.5). Taste/process ref for reference-driven production; Cap HELD until Article digested. Pair motion-pipeline.
 
 ## Enrich 2026-10-10: own studio over a gen API, cost-gated (`yt:9dgBRv6bTkw` Zubair)
 Wrap any paid generation API (Higgsfield etc.): **preview the cost → budget gate → explicit confirm → async submit and poll → ledger**. `gen_studio_costgate.py` (mock provider). You still pay per call; you save only the subscription UI.
@@ -397,3 +398,90 @@ Fills in the earlier "block a 3D previz" claim with a watched walkthrough (produ
 - Don't: leave the turn count or end frame loose in the blocking. The video's run gave 4 turns instead of 3 and ended on the back, and the fix belongs in blocking, not another paid run. Name the image tool explicitly or the agent may switch to a paid connector on its own.
 - Reported cost (creator's claim, unverified): about 140 Higgsfield credits and 5% of a ChatGPT Pro 5x weekly allowance.
 - Proof: `recreations/20261011/blocking-ref/block.py` renders a 9.75 s wireframe blocking clip (zoom-out, 3 turns, three 1 s holds at the front angle, ease per half-turn) with PIL + ffmpeg, no Blender needed. No paid generation was run.
+
+---
+
+## Merged from `remotion-visual-intelligence-director` (2026-10-11)
+
+- Original description: Use when building Remotion scenes inside the wealth show — chart JOB system, object storytelling, event/scenario/decision visuals. Pair with Reference-driven video production for full pipeline routing. Anti-triggers: generic landing Remotion; leisure meme farms; inventing prices.
+- Unique content carried: chart JOB system + event/scenario visuals; narration-vs-storyboard and dead-air rules
+
+# Remotion Visual Intelligence Director
+
+Remotion layer inside Reference-driven video production. Comprehension > beauty. Data-driven only. Label ESTIMATE/FORECAST/RUMOR/SCENARIO.
+
+## Platform / Install
+- **Platform:** Grok Bot + Cursor + Remotion
+- **Install:** `none (process-only)` for this skill; use live Remotion portfolio-brief engine. Pair [reference-driven-video-production](sand-workflow:reference-driven-video-production).
+
+## Feel
+Bloomberg terminal + Apple keynote + CNBC motion + documentary pacing. Never PowerPoint-to-MP4, sequential text boxes, generic AI finance art, endless TA, talking-head slides.
+
+## Jobs
+part-whole · trend · bridge · ranking · distribution/risk · relationships · flow · KPI · market data · dense tables.
+
+## Musts
+Show the thing (logo/product/object). Event tags CONFIRMED/EXPECTED/RUMORED/SPECULATIVE. Scenario fans not fake point forecasts. Portfolio decision + what-if simulators. Sankey follow-the-money. Honest SPY/drawdown. Products stay on screen while charts draw. Director/critic multi-pass. When Blender assets exist, composite them; when not, use strong 2.5D silhouettes and note the kit gap.
+
+## Tools
+| Need | Path |
+|---|---|
+| Remotion charts / decision sims | portfolio-brief engine — **PROVE** |
+| Blender assets | **BLOCKED** until CLI — 2.5D silhouettes **WORKAROUND** |
+| Hosted Remotion MCP | **BLOCKED** |
+| Adobe / AI NLE finish | **BLOCKED** until wired — stay on Remotion composite; see reference-driven-video-production bookmark watch |
+
+## Anti-triggers
+- Not for generic landing-page Remotion (use cinematic-site-recipe / motion-pipeline).
+- Not for leisure meme farms.
+- Do not invent prices or claim FACT on rumored product shots.
+- Do not chase Adobe/AI-NLE switch from X bookmark hype (2026-09-09 NetworkChuck cluster).
+
+See also: Reference-driven video production skill for Blender/NLE/kits/reference_breakdown.
+
+## X bookmarks stamp 2026-09-09 10:51 ET
+Cross-ref packet `/workspace/research/packets/x-bookmarks/20260909-1051/`: NetworkChuck AI-edit vs Adobe = RESEARCH-OK watch only under parent doctrine skill; Remotion scenes stay the PROVE path.
+
+
+---
+
+## Merged from `wealth-video-narration-composition` (2026-10-11)
+
+- Original description: Use before writing or rendering any Remotion wealth/findings video — separates narration from storyboard, kills dead air and empty-frame composition, and requires a render-review gate.
+- Unique content carried: chart JOB system + event/scenario visuals; narration-vs-storyboard and dead-air rules
+
+# Wealth video narration and composition
+
+## Highest-impact fails (do not ship with these)
+1. **Empty composition** — meaningful content stuck in the upper quarter; vacant canvas. Fix: product, chart, or main figure is the largest element; fill the frame.
+2. **Dead time** — long quiet gaps while graphics sit still. Flag holds **>2 seconds** unless a reveal/comparison earns them. Time the timeline to completed narration + reading time. Prefer a shorter cut over padded runtime.
+3. **Narration that reads production instructions** — never speak: “Stamp Confirmed,” “Path Draws,” “Decision Sim,” “Preference Snaps,” “Catalyst chip,” “dense MG,” scene ids, or animation stage directions. Those belong only in animation direction fields.
+
+## Three fields per beat (required)
+| Field | Purpose |
+|---|---|
+| **Narration** | Natural speech: cause, consequence, uncertainty. Conversational. |
+| **On-screen text** | Short labels, figures, evidence status (CONFIRMED/RUMORED/SCENARIO). |
+| **Animation direction** | What moves/appears/stays — never spoken. |
+
+Pipeline: research findings → conversational script pass that strips storyboard jargon, unexplained acronyms, repeated conclusions, and number dumps → design 3 representative scenes (product, chart, portfolio comparison) at readable size → assemble timed to VO cues → render-review gate.
+
+## Visual hierarchy
+- Preserve FACT vs speculation color discipline.
+- Readable supporting text; restrained source line.
+- No viewer-facing labels like `PATH · DRAWS` or `dense MG`.
+- Stamps only for meaningful status changes — not decorative spam.
+- Transitions carry the subject forward (silhouette continuity), not empty title interludes.
+- Products need substantial screen space; concept/unannounced designs clearly labeled.
+- Charts: proportional time axes (or label “Selected closing prices”); shared scales for scenarios; never let a counting animation disagree with the final probability; separate return ranges from probability weights; show all scenarios together when comparing.
+- Decision sim: dollar outcomes for hold vs trim under same scenarios from verified position data — not a preference stamp alone.
+- Capital flow: animate amount splitting; timeline advances with what evidence appears when.
+
+## Story spine
+Build around developing tension (e.g. great product vs priced-in expectations). Each visual answers curiosity the previous shot created. Finish with one decision, the strongest reason, and what observation would change it — do not triple-repeat the recommendation.
+
+## Render-review gate (before ship)
+Check: text size, wasted space, narration↔visual alignment, quiet intervals >2s, number labels vs chart geometry, whether each scene adds information. Review actual rendered frames/audio — not only the script.
+
+## Pacing note
+More slides/effects alone does **not** fix composition, dead air, or robotic VO. Prefer fewer, larger, narration-timed boards over stamp spam.

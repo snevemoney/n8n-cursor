@@ -69,8 +69,8 @@ FACT four pillars: **Coordination · Creativity · Clarity · Coaching**. Tape b
 
 | C | Existing desk / skill |
 |---|---|
-| Coordination | Day Planner + [calendar-day-prep](sand-workflow:calendar-day-prep) + [inbox-clean](sand-workflow:inbox-clean). Gmail+Calendar **PROVE**. Drafts paused. |
-| Creativity | Creative Studio + [workspace-sheets-docs-slides](sand-workflow:workspace-sheets-docs-slides) + a **brand skill** (colors/type/layout locked). |
+| Coordination | Day Planner + [meeting-prep-focus-defender](sand-workflow:meeting-prep-focus-defender) + [inbox-clean](sand-workflow:inbox-clean). Gmail+Calendar **PROVE**. Drafts paused. |
+| Creativity | Creative Studio + [office-artifact-pack](sand-workflow:office-artifact-pack) + a **brand skill** (colors/type/layout locked). |
 | Clarity | [document-processing-microdemo](sand-workflow:document-processing-microdemo) / [public-web-extract-md](sand-workflow:public-web-extract-md) — explain a contract/report; do not sign. |
 | Coaching | [personal-decision-analyst](sand-workflow:personal-decision-analyst) — judgment stays with Evens. |
 

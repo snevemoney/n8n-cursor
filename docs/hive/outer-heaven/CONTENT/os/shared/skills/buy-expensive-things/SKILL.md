@@ -2,6 +2,7 @@
 name: Buy expensive things smarter (Demkinn #41)
 description: >-
   Use when: Big purchase. Demkinn #41. Owner Personal CFO.
+merged_from: [buy-expensive-smarter]
 ---
 # Buy expensive things smarter (Demkinn #41)
 
@@ -16,7 +17,7 @@ description: >-
 | Need | Path |
 |---|---|
 | Spec / review research | WebSearch/WebFetch — **PROVE** |
-| cheap-read-expensive-decide | workflow — **PROVE** companion |
+| match-model-to-task | workflow — **PROVE** companion |
 | Purchase / checkout | **BLOCKED** without ASK |
 | Claim check on 'save $X' | claim-verifier (#47) — **PROVE** |
 
@@ -53,3 +54,27 @@ Big purchase
 
 ## Done when
 Reusable artifact on disk (brief, packet, checklist, or skill note) — not chat-only.
+
+---
+
+## Merged from `buy-expensive-smarter` (2026-10-11)
+
+- Original description: Alias for Demkinn #41. Canonical workflow id is buy-expensive-things. Use buy-expensive-things. Distinct from cheap-read-expensive-decide (model routing).
+- Unique content carried: distinction note vs cheap-read-expensive-decide
+
+# Buy expensive smarter (alias)
+
+**Canonical:** [buy-expensive-things](sand-workflow:buy-expensive-things) (Demkinn #41)  
+**Not:** match-model-to-task (model routing)
+
+## Tools
+| Need | Path |
+|---|---|
+| Canonical skill | buy-expensive-things — **PROVE** |
+| Model routing | match-model-to-task — **PROVE** (different skill) |
+
+## Prompts
+**Redirect**
+```
+Use workflow buy-expensive-things (Demkinn #41). Do not use this alias id for new packets.
+```

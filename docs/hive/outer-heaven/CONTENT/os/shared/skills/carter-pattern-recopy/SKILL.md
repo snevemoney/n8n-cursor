@@ -47,7 +47,7 @@ description: >-
 | Ops/content calendar | owned-dashboard-scaffold (ops) |
 | Script factory (yap/repurpose/hooks) | Comms/Creative prompt skills (process-only) |
 | Carousel / social card / slides | Remotion / static generators |
-| Edit / captions / motion | [remotion-brief-to-render](sand-workflow:remotion-brief-to-render) + whisper-caption-gap |
+| Edit / captions / motion | [motion-pipeline](sand-workflow:motion-pipeline) + summarize-audio-video |
 | Interactive lead magnets | A4 CapEx owned host (not GHL) |
 | Packaging titles/thumbs | Publishing Engine HITL |
 

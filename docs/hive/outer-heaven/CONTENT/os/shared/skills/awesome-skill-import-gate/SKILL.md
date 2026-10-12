@@ -22,7 +22,7 @@ Then research-signal-to-skills for **clusters only** — one skill per cluster, 
 6. Never mint agents or icp_id from a list.
 
 ## Prefer our stack
-Grok + Cursor + connected MCP (Gmail, Calendar, Drive, GitHub, Higgsfield, Canva, Playwright, Hostinger, …). Remap Claude-desktop demos → Cursor. Remap cloud STT catalogs → whisper-caption-gap on box.
+Grok + Cursor + connected MCP (Gmail, Calendar, Drive, GitHub, Higgsfield, Canva, Playwright, Hostinger, …). Remap Claude-desktop demos → Cursor. Remap cloud STT catalogs → summarize-audio-video on box.
 
 ## Never
 - Full clone of awesome into grok-skills
@@ -38,7 +38,7 @@ AI-readable condensed plugin index beats scrolling a marketing site — same gat
 - Apache Maka incubating — watch only, too early.
 
 ## Simon 37 2026-08-30 (`yt:RDeofKimDxo`) watch-page PROVE
-Talk named Stop Slop, Caveman, ccusage. Star counts UNVERIFIED. Do **not** install from the video. Same gate as TNNT: cluster, COVERED/GAP/NO-SKILL, then maybe one skill. Simple-English / anti-slop already covered by hive-smarter-loop + bmad-slop + improve-system-writeback. Claude frontend-design skill BLOCKED.
+Talk named Stop Slop, Caveman, ccusage. Star counts UNVERIFIED. Do **not** install from the video. Same gate as TNNT: cluster, COVERED/GAP/NO-SKILL, then maybe one skill. Simple-English / anti-slop already covered by hive-smarter-loop + bmad-slop + improve-system-writeback. Claude landing-page-design skill BLOCKED.
 
 ## EXTRACT-BATCH-1 2026-09-01 — DeepSeek harness (`yt:f51ICIoHcjY`) FULL
 
@@ -205,7 +205,7 @@ Enrich-only / checklist-only / re-fixture replay ≠ Transferred.
 | Title as taste signal | FACT |
 | Repo identity / stars / $ saved | **UNVERIFIED** (title-only) |
 | Auto-install from video CTA | **BLOCKED** until gate + operator |
-| Pair | [free-for-dev-vendor-cuts](sand-workflow:free-for-dev-vendor-cuts) |
+| Pair | [find-costs-to-cut](sand-workflow:find-costs-to-cut) |
 
 Packet: `packets/signal-miss-backfill-20260917/watch-later/`
 
@@ -221,7 +221,7 @@ Packet: `/workspace/research/packets/x-bookmarks/20260918-1338/` · x:2100411068
 | Repo URL as bookmark signal | **FACT** |
 | Stars / speed / $ claims | **UNVERIFIED** |
 | Auto-install this fire | **BLOCKED** |
-| Pair | [cheap-read-expensive-decide](sand-workflow:cheap-read-expensive-decide) |
+| Pair | [match-model-to-task](sand-workflow:match-model-to-task) |
 
 
 ## Claude Code mods 2026-10-02 (`x:2105721434807083061`) desktop live + blog PROVE

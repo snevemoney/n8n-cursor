@@ -15,7 +15,7 @@ Sources enriched: Cole rotting second-brain `yt:xOFkpf9KgKg` — decided/rejecte
 
 ## Steps
 1. After a consequential choice, append one ledger row (not a chat-only memory).
-2. Wire from session-bootstrap / wiki-ingest / compact-hive-from-chats when summarizing.
+2. Wire from session-bootstrap / wiki-ingest / persistent-bot-memory when summarizing.
 3. Before re-litigating a parked idea, grep the ledger first.
 
 ## Never

@@ -2,6 +2,7 @@
 name: Client delivery checklist Grok-first
 description: >-
   Use when: Paid delivery start — Grok/Cursor delivery OS; n8n legacy fallback only.
+merged_from: [client-delivery-checklist]
 ---
 # Client delivery checklist Grok-first
 
@@ -75,7 +76,7 @@ Watch Later add. Transcript **CAPTION_GAP** this pass (signed-out watch page). T
 Title only. Do not add a voice-agent SKU. Receipts + one leak, not Vapi/call farms. $ UNVERIFIED.
 
 ## Nate 3 agency mistakes (`DoHPZf7jEQ4`) — captions PROVE 2026-08-26
-FACT on tape: (1) built a personal assistant that was not the constraint (2) no KPI (3) guessed the price. Steal we already run: diagnose the clog, one number with baseline, value not hourly. His $20K retainer / $100K-mo sale stay UNVERIFIED as ours. Do not quote. Grill-me at end of discovery = interview-to-desk. Silence after the pain question.
+FACT on tape: (1) built a personal assistant that was not the constraint (2) no KPI (3) guessed the price. Steal we already run: diagnose the clog, one number with baseline, value not hourly. His $20K retainer / $100K-mo sale stay UNVERIFIED as ours. Do not quote. Grill-me at end of discovery = agent-job-card. Silence after the pain question.
 
 ## WL26-100 L2 2026-08-26 — voice HOLD + Nate 3 mistakes (PROVE tape)
 
@@ -147,10 +148,38 @@ Cross-links: Serop middleware honesty (`kXO4fIwxaDg`) · Nate five buys (`tgjYMy
 Packet: `packets/signal-miss-backfill-20260917/watch-later/`
 
 
-## Merged from client-delivery-checklist (2026-10-11 gap audit; original text kept)
+## Merged from client-delivery-checklist-grok-first (2026-10-11 gap audit; original text kept)
 
 
 ### Client delivery checklist
+
+Sources: Nate 60/30/10 and client-hosted n8n; youtube-ai-implement P1 #6.
+
+## When
+Handing a paid or trial install to a client.
+
+## Do
+1. Prefer Grok plugins + Cursor. Client-hosted n8n only when required.
+2. QA ladder: happy path, fail path, mobile, form submit.
+3. Loom handover of the outcome, not the canvas.
+4. 60/30/10 split of build / harden / document as a planning check.
+5. DONE_WHEN with Watchdog click.
+
+## Don't
+- Resell n8n as SaaS without license clarity
+- Skip HITL on send
+- Leave credentials in chat
+
+---
+
+## Merged from `client-delivery-checklist` (2026-10-11)
+
+- Original description: DEPRECATED alias: use client-delivery-checklist-grok-first (merged 2026-10-11). Kept so old links do not break.
+- Unique content carried: none (alias stub)
+
+# Client delivery checklist (DEPRECATED)
+
+> Merged into `client-delivery-checklist-grok-first/SKILL.md` on 2026-10-11. Use that one.
 
 Sources: Nate 60/30/10 and client-hosted n8n; youtube-ai-implement P1 #6.
 

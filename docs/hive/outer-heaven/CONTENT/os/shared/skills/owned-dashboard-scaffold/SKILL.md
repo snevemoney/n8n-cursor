@@ -42,7 +42,7 @@ description: >-
 |---|---|
 | Static HTML+JSON fixture | Packet `demos/a2-*` — **PROVE** lite |
 | Next + sqlite CapEx app | Forge implement — **WORKAROUND** pending / Documented method ready |
-| n8n ACTIVE append | n8n-kit-forge / researcher — **PROVE** when ACTIVE |
+| n8n ACTIVE append | n8n-legacy-ops / researcher — **PROVE** when ACTIVE |
 | ScrapeCreators API | **BLOCKED/REFUSE** default — would work if funded + operator waive; prefer public paste + Whisper |
 | GHL / Lovable host | **REFUSE** — owned Next/static WORKAROUND |
 | X live competitor feed | **BLOCKED** until auth — manual paste WORKAROUND |
