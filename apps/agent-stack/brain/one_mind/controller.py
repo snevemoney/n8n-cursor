@@ -114,6 +114,11 @@ class MissionController:
                 if event.get('cancel'):
                     status = 'CANCELLED'
                     break
+                if event.get('pause'):
+                    remaining = [n['worker_id'] for n in nodes if n['worker_id'] not in results]
+                    paused |= set(remaining)
+                    tracer.emit('mission.approval_pause', node='user_pause', paused=sorted(remaining))
+                    continue
                 affected = S.dependents(nodes, [event['node']])
                 by_id[event['node']].update(event.get('changes', {}))
                 kept = sorted(w for w in results if w not in affected)
