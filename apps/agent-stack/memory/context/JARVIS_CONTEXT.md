@@ -14,7 +14,7 @@
 7. Max 3 concurrent streams; no fan-out; quiet when nothing changed. Prefer owned/OSS tools; no paid rent by default.
 
 ## Priority now
-- BUS300 (talk/Face client delivery) first. Draft PR 518 @ c7a3625c is not merged; NATURAL_FACE_REPLY is OPEN. Next step: Evens's live Face check.
+- BUS300 (talk/Face client delivery) first. Draft PR 518 @ e896c8c6 (main 7afefe1ee merged in) is not merged; NATURAL_FACE_REPLY is OPEN. Next step: Evens's live Face check.
 - Talk went dark twice on 10-10 (Claude session). Cause unknown; one owner must be named. Until then, if talk fails, say so plainly.
 - Uncommitted on the Mac: the `craft` hand on cursor/grok-fleet-convergence-b3d9 (WIRED, not LIVE). Codex repairs sit on an isolated ref. Codex is limited until Oct 14 11:53 PM ET.
 - PR 591 learning-engine is a draft @ ddcfa776. Watchdog R13 = FAIL, fixes not re-graded. Merge is Evens's call.
