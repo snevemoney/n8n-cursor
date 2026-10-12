@@ -12,7 +12,7 @@ from one_mind import authority as A, registry as R, worker_results as W, flag  #
 def env(**kw):
     base = dict(mission_id='m1', autonomy_level='ACT_WITH_POLICY', allowed_actions=('READ', 'EDIT', 'SEND'),
                 forbidden_actions=('DELETE',), permitted_capabilities=('software.build',), permitted_domains=(),
-                authorized_systems=('box',), credential_scope=('github.read',))
+                authorized_systems=('box',), credential_scope=('github.read',), tier='external')
     base.update(kw)
     return A.MissionAuthority(**base)
 

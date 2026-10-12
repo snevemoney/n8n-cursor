@@ -7,7 +7,7 @@ def coding_authority(mission_id, **kw):
     base = dict(mission_id=mission_id, autonomy_level='ACT_WITH_POLICY', allowed_actions=('READ', 'EDIT', 'TEST', 'REVIEW'),
                 forbidden_actions=('DELETE', 'DEPLOY', 'SEND', 'PUBLISH', 'PAY'),
                 permitted_capabilities=('software.build', 'software.verify', 'software.review'),
-                permitted_domains=(), authorized_systems=('box',))
+                permitted_domains=(), authorized_systems=('box',), tier='sandbox_write')
     base.update(kw)
     return MissionAuthority(**base)
 

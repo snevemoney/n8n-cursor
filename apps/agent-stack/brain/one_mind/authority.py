@@ -12,6 +12,13 @@ AutonomyMode = _p.AutonomyMode
 AuthorityEnvelope = _p.AuthorityEnvelope
 HARD_ACTIONS = _p.HARD_ACTIONS
 MODES = tuple(m.value for m in AutonomyMode)
+TIERS = ('read_only', 'sandbox_write', 'worktree_write', 'external')
+ACTION_TIER = {'READ': 'read_only', 'TEST': 'read_only', 'REVIEW': 'read_only', 'EXTRACT': 'read_only',
+               'NAVIGATE': 'read_only', 'CLICK': 'read_only', 'INPUT': 'read_only',
+               'EDIT': 'sandbox_write', 'WRITE': 'sandbox_write', 'COMMIT': 'worktree_write'}
+# Anything that sends, spends or deploys: always approval, whatever the tier, mode or allow-list.
+ALWAYS_APPROVAL = ('SEND', 'PAY', 'SPEND', 'PURCHASE', 'TRANSFER', 'BOOK', 'PUBLISH', 'DEPLOY', 'PUSH', 'MERGE',
+                   'EMAIL', 'POST', 'DELETE', 'AUTHENTICATE')
 LIMIT_KEYS = ('actions', 'seconds', 'spend_usd', 'retries', 'model_usd')
 
 
@@ -20,6 +27,7 @@ class MissionAuthority(AuthorityEnvelope):
     authorized_systems: tuple = ()
     confirm_actions: tuple = ()  # outward/destructive: always need explicit confirmation
     limits: tuple = (('actions', 50), ('seconds', 900), ('spend_usd', 0), ('retries', 3), ('model_usd', 0.5))
+    tier: str = 'read_only'
 
     def limit(self, key):
         return dict(self.limits).get(key, 0)
@@ -41,6 +49,8 @@ class MissionAuthority(AuthorityEnvelope):
             if key not in LIMIT_KEYS or isinstance(number, bool) or not isinstance(number, (int, float)) or number < 0:
                 raise ValueError('invalid authority limit')
         value['limits'] = limits
+        if value.get('tier', 'read_only') not in TIERS:
+            raise ValueError('invalid authority tier')
         envelope = cls(**value)
         AutonomyMode(envelope.autonomy_level)
         return envelope
@@ -62,8 +72,13 @@ class MissionAuthority(AuthorityEnvelope):
             over = value > self.limit(key) if key == 'spend_usd' else value >= self.limit(key)
             if over:
                 return 'BLOCK'
+        if self.tier not in TIERS:
+            return 'BLOCK'
+        needed = 'external' if action in ALWAYS_APPROVAL else ACTION_TIER.get(action, 'external')
+        if TIERS.index(self.tier) < TIERS.index(needed):
+            return 'BLOCK'
         verdict = AuthorityEnvelope.decide(self, action, capability, domains)
-        if verdict == 'AUTO_EXECUTE' and (action in self.confirm_actions or action in HARD_ACTIONS):
+        if verdict == 'AUTO_EXECUTE' and (action in self.confirm_actions or action in HARD_ACTIONS or action in ALWAYS_APPROVAL):
             return 'REQUIRE_APPROVAL'
         return verdict
 
