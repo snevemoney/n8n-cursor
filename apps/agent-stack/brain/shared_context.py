@@ -70,6 +70,29 @@ def _int_env(name: str, default: int) -> int:
         return default
 
 
+def stale_hours() -> float:
+    try:
+        return max(0.0, float(os.environ.get("JARVIS_SHARED_STALE_HOURS") or 24))
+    except ValueError:
+        return 24.0
+
+
+def stamp(path: Path, now: float | None = None) -> str:
+    """'as of 2026-10-10 22:30 local, 1.2 days old[, STALE ...]' from the file mtime (F07)."""
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return "date unknown"
+    now = time.time() if now is None else now
+    age_h = max(0.0, (now - mtime) / 3600.0)
+    when = time.strftime("%Y-%m-%d %H:%M", time.localtime(mtime))
+    age = f"{age_h:.0f} h old" if age_h < 48 else f"{age_h / 24:.1f} days old"
+    line = f"as of {when} local, {age}"
+    if age_h > stale_hours():
+        line += "; STALE: dated notes, not live state; say the date and verify before calling anything current"
+    return line
+
+
 def _read(path: Path) -> str:
     try:
         return path.read_text(encoding="utf-8", errors="ignore").strip()
@@ -94,11 +117,14 @@ def load_shared_context(*, use_cache: bool = True) -> dict:
     body = _read(root / PRIMARY)[:file_cap] if file_cap else ""
     if body and cap:
         blocks: list[str] = []
-        head = f"[shared:{PRIMARY}]\n"
+        head = f"[shared:{PRIMARY} | {stamp(root / PRIMARY)}]\n"
         room = cap - len(head)
-        if len(body) > room:
+        if room < 40:
+            body = ""
+        elif len(body) > room:
             body = body[: max(0, room - 14)].rstrip() + "\n[truncated]"
             out["truncated"] = True
+    if body and cap:
         blocks.append(head + body)
         out["files"].append(PRIMARY)
         used = len(blocks[0])
@@ -106,7 +132,7 @@ def load_shared_context(*, use_cache: bool = True) -> dict:
             extra = _read(root / name)
             if len(extra) > file_cap:
                 extra = extra[: max(0, file_cap - 12)].rstrip() + "\n[truncated]"
-            block = f"[shared:{name}]\n{extra}"
+            block = f"[shared:{name} | {stamp(root / name)}]\n{extra}"
             if extra and used + 2 + len(block) <= cap:
                 blocks.append(block)
                 out["files"].append(name)
@@ -195,21 +221,21 @@ def retrieve_entries(query: str, *, root: Path | None = None) -> list[dict]:
             if not hits:
                 continue
             score = len(hits) + (1 if q & _terms(heading) else 0)
-            scored.append((score, path.name, heading, entry))
+            scored.append((score, path.name, heading, entry, stamp(path)))
     floor = 2 if len(q) >= 3 else 1
     scored = [r for r in scored if r[0] >= floor]
     scored.sort(key=lambda r: -r[0])
     out: list[dict] = []
     used_total = 0
     used_file: dict[str, int] = {}
-    for score, name, heading, entry in scored:
+    for score, name, heading, entry, when in scored:
         if len(out) >= 6:
             break
         if used_file.get(name, 0) + len(entry) > per_file or used_total + len(entry) > total:
             continue
         used_file[name] = used_file.get(name, 0) + len(entry)
         used_total += len(entry)
-        out.append({"file": name, "heading": _entry_label(heading, entry), "text": entry, "score": score})
+        out.append({"file": name, "heading": _entry_label(heading, entry), "text": entry, "score": score, "as_of": when})
     return out
 
 
@@ -218,7 +244,7 @@ def retrieved_block(query: str) -> tuple[str, list[dict]]:
     if not rows:
         return "", []
     text = "Shared memory entries relevant to this ask (cite file and heading when used):\n" + "\n".join(
-        f"[{r['file']} :: {r['heading']}]\n{r['text']}" for r in rows
+        f"[{r['file']} :: {r['heading']} | {r['as_of']}]\n{r['text']}" for r in rows
     )
     return text, [{"file": r["file"], "heading": r["heading"]} for r in rows]
 
