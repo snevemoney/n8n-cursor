@@ -84,3 +84,15 @@ def test_leading_no_before_a_verb_is_a_correction_not_a_negation():
     assert P.correction_text("no, open the notes app") == "Open the notes app"
     assert P.correction_text("no thanks") == "no thanks"
     assert P.correction_text("no I don't want that") == "no I don't want that"
+
+
+def test_pull_up_my_thing_routes_to_notes():
+    assert _pick("can you pull up my posting automations")["tool"] == "vault_read"
+    assert _pick("bring up my profile blurbs")["tool"] == "vault_read"
+    assert _pick("pull up my screen") .get("tool") != "vault_read"
+
+
+def test_model_invented_file_read_asks_instead_of_guessing(tmp_path):
+    got = P._run_tool_inner({"tool": "workspace_read", "args": {"op": "read", "path": "~/.ssh/config"}, "speak": ""},
+                            "choose", hive=tmp_path, retrieve_roots=[])
+    assert got["tool"] == "say" and "which file" in got["spoken"].lower()

@@ -1020,6 +1020,9 @@ CLICK_UNNAMED_LINE = ("I can't click for you yet; you click. Tell me the button'
 COST_FOLLOW_RE = re.compile(r"\bhow\s+much\s+(?:did|does|was)\s+(?:that|this|it)(?:\s+one)?\s+cost\b", re.I)
 RESEARCH_RE = re.compile(r"\b(?:do|make|run)\s+(?:an?\s+)?online\s+research\s+(?:about|on|for)\s+\S|\bresearch\s+online\s+(?:about|on|for)\s+\S", re.I)
 RESEARCH_LEAD_RE = re.compile(r"^.*?\bonline\s+research\s+(?:about|on|for)\s+|^.*?\bresearch\s+online\s+(?:about|on|for)\s+", re.I)
+FILE_EXT_RE = re.compile(r"\.\w{2,4}\b")
+PULL_UP_MY_RE = re.compile(r"\b(?:pull|bring)\s+up\s+my\s+(?!screen\b|files?\b|downloads\b|desktop\b|documents\b|repos?\b)\w|"
+                           r"\b(?:find|show)\s+(?:me\s+)?my\s+(?!screen\b|files?\b|downloads\b|desktop\b|documents\b|repos?\b)\w", re.I)
 SCREEN_WORD_RE = re.compile(r"\b(?:screen|display|monitor|see|look|watch|showing|pop-?up|window)\b", re.I)
 
 
@@ -1049,6 +1052,9 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
         if named:
             return {"tool": "pointer", "args": {}, "speak": ""}
         return {"tool": "say", "args": {}, "speak": CLICK_UNNAMED_LINE}
+    if PULL_UP_MY_RE.search(u) and not FILE_EXT_RE.search(u) and not is_hard_step(u):
+        # "pull up my social bios": a thing in his notes, not a folder path. Read the vault, never refuse on folders.
+        return {"tool": "vault_read", "args": {"query": u}, "speak": ""}
     if RESEARCH_RE.search(u):
         q = RESEARCH_LEAD_RE.sub("", u).strip(" ?.!") or u
         return {"tool": "web_search", "args": {"query": q}, "speak": ""}
@@ -5486,7 +5492,13 @@ def _run_tool_inner(
     if tool == "workspace_read":
         wr = _workspace_read_hand()
         wargs = dict(args) if args.get("op") else wr.args_from_utterance(utterance)
-        if wargs.get("op") == "ls" and not str(wargs.get("path") or "") and re.search(r"\b(?:pull\s+up|find|show)\s+(?:me\s+)?my\b", utterance or "", re.I):
+        wpath = str(wargs.get("path") or "")
+        invented = wargs.get("op") == "read" and wpath and Path(wpath).name.lower() not in (utterance or "").lower()
+        if invented and not PULL_UP_MY_RE.search(utterance or ""):
+            # Live: "Decide" became a read of a path he never said. Ask, don't guess.
+            return {"ok": True, "tool": "say", "spoken": "You didn't name a file, so I didn't open one. Which file do you mean?",
+                    "wires": ["voice"], "cites": [], "sent": False, "task_verified": False, "outcome": TOOL_LOOP}
+        if invented or (wargs.get("op") == "ls" and not wpath and PULL_UP_MY_RE.search(utterance or "")):
             # "pull up my social bios": a named thing, not a folder. Look in his notes instead of refusing.
             return _run_tool_inner({"tool": "vault_read", "args": {"query": utterance}, "speak": ""}, utterance, hive=hive,
                                    retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn,
