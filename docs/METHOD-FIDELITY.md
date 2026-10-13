@@ -63,3 +63,12 @@ Not changed: Z03, Z01 and Z09 remain FAIL (not captured), for the reasons above.
 | Z06 / Z07 / Z40 phone | no phone agent (telephony on HOLD) | **FAIL (HOLD)** |
 | Z42 approval-by-call | approval record + card exist (Z60), no call, no execution | **PARTIAL** (workaround only) |
 | Z66 review→do chain, Z69 stale speech on stop, Z73 gestures, Z77/Z78/Z79 connect tools, Z81 heartbeat, Z86/Z87 automation contract + prove-before-done | not built this round | **FAIL (not built)** |
+
+## Batch 6 (14:47-14:57 ET, commits 6eccd9deb + 329e726db): live probes ~/jarvis-proof/b5/cap6.json, cap7.json
+| M | Live | Verdict |
+|---|---|---|
+| Z84 tool gap | "check the GitHub stars on my Figma file" → 0.06 s "Figma isn't in your arsenal yet, sir, so I can't reach it from here and I won't guess. Connect Figma as a tool…" (checked against the MCP inventory) | **MATCH** |
+| Z34 follow-up offer | after the invoice draft: "Shall I pop a reminder on your calendar to chase the payment in a week?" (open question; lapses via Z56) | **PARTIAL**: comes after a local draft, not a booked call; the calendar write is gated by Evens |
+| Z68 research critique | query now "how to improve YouTube channel landing page ideas", answered with sources in 2.3 s after "On it." | **PARTIAL**: no screen share (Evens-gated), no "let me do some digging" ack, no numbered offences |
+| Z81 heartbeat | built into the talk stream loop (one line if no words after 8 s); in the live probe the first words came at 7.8 s, so it didn't fire | **PARTIAL (not triggered live)** |
+| Z67 placeholders | filter built (numbers he didn't give become "X"); live, the ask routed to vault_read and wrote no bullets | **FAIL (routing)** |
