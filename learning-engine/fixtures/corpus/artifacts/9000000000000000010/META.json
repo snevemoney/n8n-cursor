@@ -1,0 +1,19 @@
+{
+  "id": "9000000000000000010",
+  "url": "https://example.com/synthetic/9000000000000000010",
+  "author_username": "synthetic_author_d",
+  "retrieved_at": "2026-09-26T00:11:16Z",
+  "duration_sec": 51.83,
+  "raw_files": ["clip.mp4"],
+  "stills_count": 2,
+  "transcript_chars": 42,
+  "transcript_source": "whisper_small",
+  "completeness": {"has_local_video": true, "has_transcript": true, "has_keyframes": true},
+  "status": "OK",
+  "error": null,
+  "classification": "INGEST_PARTIAL",
+  "keyframe_policy": "adaptive_scene_temporal_interest_nocap",
+  "completed_at": "2026-09-26T00:11:41+00:00",
+  "worker_id": "synthetic-worker",
+  "capex_outcome": true
+}

@@ -1,0 +1,6 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:03.000
+recovered vtt speech from the timedtext path after whisper ran out of memory
+The synthetic verifier runs in a fresh context and checks every step of the agent loop before anyone commits a change.

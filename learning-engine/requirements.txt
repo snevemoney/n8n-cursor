@@ -1,0 +1,2 @@
+# learning-engine v0 uses the Python 3.11+ standard library only.
+# No third-party packages. This file exists so the isolation is explicit.

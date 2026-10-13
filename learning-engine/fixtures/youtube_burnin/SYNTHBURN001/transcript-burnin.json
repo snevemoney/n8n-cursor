@@ -1,0 +1,9 @@
+{
+  "video_id": "SYNTHBURN001",
+  "description": "do not leak this description or the watch URL",
+  "url": "https://example.com/watch?v=SYNTHBURN001",
+  "captions": [
+    {"id": "c1", "text": "[ 0.1- 4.5] invented burnt-in line about a factory loop"},
+    {"id": "c2", "text": "[00:01.2 - 00:04.5] second invented line on the stills"}
+  ]
+}
