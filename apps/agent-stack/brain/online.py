@@ -57,6 +57,10 @@ def _sec_env(name: str, default: float) -> float:
 
 
 OPENROUTER_ATTEMPT_SEC = _sec_env("JARVIS_TALK_ATTEMPT_SEC", 20.0)
+# Hedge target: a different, faster model. Probed live 2026-10-12 on a ~4.5k-token rules prompt:
+# mistral-small-3.2 0.9 s, qwen3-30b-a3b 3.4 s, deepseek-chat-v3.1 4.2 s (tail 20 s+). The reply names it.
+OPENROUTER_FAST_MODEL = (os.environ.get("JARVIS_TALK_FAST_MODEL") or "mistralai/mistral-small-3.2-24b-instruct").strip()
+TALK_MISS = "UNKNOWN. The talk model returned no text in time this turn (primary and fast backup both). Ask me again."
 OPENROUTER_WALL_SEC = _sec_env("JARVIS_TALK_WALL_SEC", 22.0)
 TALK_DARK = "The talk wire is dark this turn."
 OPENROUTER_MAX_TOKENS = 512
@@ -69,9 +73,29 @@ STATUS_ASK_RE = re.compile(
     re.I,
 )
 STATUS_ASK_REPLY = (
-    "I have not run a live status check this turn, so I won't claim the tools are ready. "
+    "I haven't run a live status check this turn, so I can't vouch for any tool right now. "
     "Say 'run status' and I'll read the real Orb door and hive health."
 )
+PASS_ASK_RE = re.compile(r"\bwho\b[^?\n]{0,40}\b(?:issue|give|grant|grade|sign)s?\b[^?\n]{0,30}\bpass(?:es)?\b", re.I)
+PASS_RULE_RE = re.compile(r"self-PASS|issues\s+verdicts|cannot\s+grade", re.I)
+
+
+def pass_rule_reply(prompt: str) -> str:
+    """'Who may issue a PASS?' answered from the live AGENT_RULES.md line, no model call (live 7-20 s)."""
+    p = (prompt or "").strip()
+    if not p or not PASS_ASK_RE.search(p if len(p) <= 600 else p[-300:]):
+        return ""
+    try:
+        from brain import shared_context  # noqa: PLC0415
+
+        text = (shared_context.shared_dir() / "AGENT_RULES.md").read_text(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        return ""
+    for line in text.splitlines():
+        if PASS_RULE_RE.search(line):
+            quote = re.sub(r"^[\s>*#\-\d.]+", "", line).strip().strip("*")
+            return f"Per AGENT_RULES.md: \"{quote[:300]}\""
+    return ""
 
 
 def is_status_ask(prompt: str) -> bool:
@@ -436,14 +460,21 @@ def talk_hedge_sec() -> float:
     """Seconds before a second identical talk request races the first. 0 turns it off."""
     raw = (os.environ.get("JARVIS_TALK_HEDGE_SEC") or "").strip()
     if not raw:
-        return 9.0
+        return 5.0
     try:
         return max(0.0, float(raw))
     except ValueError:
-        return 9.0
+        return 5.0
 
 
-def _hedged_http_json(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0) -> dict:
+def _hedged_http_json(
+    url: str,
+    *,
+    data: dict | None = None,
+    headers: dict | None = None,
+    timeout: float = 20.0,
+    backup_data: dict | None = None,
+) -> dict:
     """_http_json, plus one identical backup request if the first is still out after hedge seconds.
 
     Profiled live: the same prompt took 5-17 s, with 20 s timeouts about 1 turn in 6. The tail
@@ -459,9 +490,12 @@ def _hedged_http_json(url: str, *, data: dict | None = None, headers: dict | Non
     lock = threading.Lock()
     began = time.monotonic()
 
-    def go(budget: float) -> None:
+    def go(budget: float, body: dict | None = None, tag: str = "a") -> None:
         try:
-            got = ("ok", _http_json(url, data=data, headers=headers, timeout=budget))
+            out = _http_json(url, data=body if body is not None else data, headers=headers, timeout=budget)
+            if isinstance(out, dict) and tag == "b" and backup_data is not None:
+                out = {**out, "_hedge_winner": "b"}
+            got = ("ok", out)
         except Exception as exc:  # noqa: BLE001
             got = ("err", exc)
         with lock:
@@ -471,14 +505,14 @@ def _hedged_http_json(url: str, *, data: dict | None = None, headers: dict | Non
             if got[0] == "ok" or state["out"] <= 0:
                 done.set()
 
-    def launch(budget: float, name: str) -> None:
+    def launch(budget: float, name: str, body: dict | None = None, tag: str = "a") -> None:
         with lock:
             state["out"] += 1
-        threading.Thread(target=go, args=(budget,), daemon=True, name=name).start()
+        threading.Thread(target=go, args=(budget, body, tag), daemon=True, name=name).start()
 
     launch(timeout, "talk-a")
     if not done.wait(hedge):
-        launch(max(1.0, timeout - (time.monotonic() - began)), "talk-b")
+        launch(max(1.0, timeout - (time.monotonic() - began)), "talk-b", backup_data, "b")
     done.wait(max(0.0, timeout - (time.monotonic() - began)) + 0.5)
     with lock:
         for kind, val in box:
@@ -1378,8 +1412,20 @@ STATUS_HEADER_RE = re.compile(
 )
 
 
+GREETING_CLAIM_RE = re.compile(
+    r"\bI(?:'m|\s+am)\s+(?:fully\s+)?(?:operational|online)(?:\s*(?:,|and)\s*ready\s+to\s+(?:assist|serve|help)(?:\s+you)?(?:\s+this\s+evening)?)?"
+    r"|\bI(?:'m|\s+am)\s+ready\s+to\s+assist(?:\s+you)?(?:\s+this\s+evening)?",
+    re.I,
+)
+
+
 def unbacked_status_claim(text: str, *, backed: bool) -> str:
     """Drop sentences that assert live Orb/tool health unless a live check backs them."""
+    if text and STATUS_ASK_REPLY in text:
+        return text
+    if text and not backed:
+        # Greeting filler: "I'm operational and ready to assist" is a health claim nobody checked.
+        text = GREETING_CLAIM_RE.sub("I'm here", text)
     if backed or not text or not (STATUS_CLAIM_RE.search(text) or STATUS_HEADER_RE.search(text)):
         return text
     parts = re.split(r"(?<=[.!?])\s+|\n+", text.strip())
@@ -1432,6 +1478,10 @@ def _call_openrouter_inner(
     """
     if not (hands or extra_tools or images) and is_status_ask(prompt):
         return {"ok": True, "unknown": False, "wire": "local", "engine": "status-ask", "spoken": STATUS_ASK_REPLY, "model": "none"}
+    if not (hands or extra_tools or images):
+        rule = pass_rule_reply(prompt)
+        if rule:
+            return {"ok": True, "unknown": False, "wire": "local", "engine": "rule-cache", "spoken": rule, "model": "none"}
     key = openrouter_api_key()
     if not key:
         return {
@@ -1554,12 +1604,20 @@ def _call_openrouter_inner(
                 elif talk_hedge_sec() > 0:
                     # Hedged plain request: the stream path had no backup, and live 20 s
                     # stream stalls hit 2 of 7 no-hands turns. The reply is used whole either way.
+                    fast = OPENROUTER_FAST_MODEL if OPENROUTER_FAST_MODEL and OPENROUTER_FAST_MODEL != mid else ""
                     data = _hedged_http_json(
                         OPENROUTER_URL,
                         data=_openrouter_payload(mid, user, stream=False, max_tokens=max_tokens, images=stills),
                         headers=headers,
                         timeout=attempt,
+                        backup_data=(
+                            _openrouter_payload(fast, user, stream=False, max_tokens=max_tokens, images=stills, primary=fast)
+                            if fast
+                            else None
+                        ),
                     )
+                    if isinstance(data, dict) and data.pop("_hedge_winner", "") == "b":
+                        mid = fast
                     choices = data.get("choices") if isinstance(data, dict) else None
                     msg = {}
                     if isinstance(choices, list) and choices and isinstance(choices[0], dict):
@@ -1680,7 +1738,9 @@ def _call_openrouter_inner(
     if last_err == "timeout":
         spoken = TALK_DARK
     else:
-        spoken = VISION_DARK if stills else f"UNKNOWN. OpenRouter returned no text. {last_err}."
+        # Never speak a raw exception name ("TimeoutError") to Evens.
+        why = f" ({last_err})" if str(last_err).startswith("http ") else ""
+        spoken = VISION_DARK if stills else f"{TALK_MISS}{why}"
     return {
         "ok": False,
         "unknown": True,

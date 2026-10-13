@@ -93,7 +93,7 @@ class StatusClaimTests(unittest.TestCase):
         with mock.patch.object(online, "openrouter_api_key", side_effect=AssertionError("no model call")):
             got = online._call_openrouter_inner("Status check: are all your tools ready?", hands=False)
         self.assertTrue(got["ok"])
-        self.assertIn("not run a live status check", got["spoken"])
+        self.assertIn("haven't run a live status check", got["spoken"])
         self.assertNotRegex(got["spoken"].lower(), r"returned no text|timeout|operational")
         self.assertFalse(online.is_status_ask("What model are you running on right now?"))
 
