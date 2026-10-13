@@ -69,6 +69,15 @@ def _resolve(raw: str, roots: list[Path]) -> tuple[Path | None, str]:
     return real, ""
 
 
+def _words():
+    import importlib.util, sys
+    name = "agent_stack_workspace_words"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name("workspace_words.py"))
+        mod = importlib.util.module_from_spec(spec); sys.modules[name] = mod; spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
 def _git(d: Path, *args: str) -> tuple[int, str]:
     try:
         r = subprocess.run(["git", "-C", str(d), *args], capture_output=True, text=True, timeout=5)
@@ -149,11 +158,7 @@ def run(args: dict, roots=None) -> dict[str, Any]:
         untracked = sum(1 for ln in lines if ln.startswith("??"))
         changed = len(lines) - untracked
         repo = Path(top).name
-        if not lines:
-            sp = f"git status in {repo}: working tree clean, no uncommitted changes."
-        else:
-            sp = (f"git status in {repo}: {changed} modified or staged file{'s' if changed != 1 else ''} and "
-                  f"{untracked} untracked entr{'ies' if untracked != 1 else 'y'}: there are uncommitted changes.")
+        sp = _words().status_spoken(repo, changed, untracked)
         return {"ok": True, "op": op, "repo": repo, "changed": changed, "untracked": untracked, "spoken": sp}
     return _deny("unknown op", op)
 
@@ -162,13 +167,12 @@ _FILE = re.compile(r"\b([\w.\-/~]+\.(?:md|txt|py|json|toml|ya?ml|sh|js|ts|cfg|in
 # Secret-looking file asks still go through _resolve, which refuses them (SECRET_NAME / SECRET_DIR).
 _SECRET_ASK = re.compile(r"(?<![\w/])(~?/?(?:[\w.\-]+/)*(?:\.env(?:\.[\w-]+)?|id_(?:rsa|dsa|ecdsa|ed25519)(?:\.pub)?|\.netrc|\.npmrc|\.pypirc)"
                          r"|~?/?(?:[\w.\-]+/)*\.(?:ssh|grok-private|gnupg|aws)(?:/[\w.\-]+)*)", re.I)
-_STATUS = re.compile(r"\bgit\s+status\b|\buncommitted\b|\b(?:working\s+)?tree\s+(?:is\s+)?clean\b|\blocal\s+changes\b", re.I)
 _FOLDER = re.compile(r"\b(?:in|from|inside)\s+(?:my\s+|the\s+)?(downloads|desktop|documents)\b", re.I)
 
 
 def args_from_utterance(u: str) -> dict:
     s = u or ""
-    if _STATUS.search(s) and not _FILE.search(s):
+    if _words().STATUS_ASK.search(s) and not _FILE.search(s):
         return {"op": "status", "path": ""}
     sec = _SECRET_ASK.search(s)
     if sec and re.search(r"\b(read|open|show|cat|print|display|what'?s in)\b", s, re.I):
