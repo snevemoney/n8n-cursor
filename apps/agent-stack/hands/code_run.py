@@ -99,7 +99,7 @@ def run(args: dict | None = None) -> dict:
 
 
 _FENCE = re.compile(r"```(?:python|py)?\s*\n(.*?)```", re.S | re.I)
-_INLINE = re.compile(r"\brun\s+this\s+python\s*:\s*(.+)$", re.I | re.S)
+_INLINE = re.compile(r"\brun\s+this\s+python\b[^:\n]{0,40}:\s*(.+)$", re.I | re.S)
 
 
 def args_from_utterance(u: str) -> dict:

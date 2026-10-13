@@ -1024,6 +1024,18 @@ def fixed_route(utterance: str) -> dict | None:
     return None
 
 
+def _code_author_hand():
+    if "hands.code_author" in sys.modules:  # same instance as a package import (tests swap CHAT on it)
+        return sys.modules["hands.code_author"]
+    name = "agent_stack_code_author"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "code_author.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
 def _web_search_hand():
     name = "agent_stack_web_search"
     if name not in sys.modules:
@@ -5065,7 +5077,16 @@ def _run_tool_inner(
         }
     if tool == "code_run":
         hd = _code_run_hand()
-        got = hd.run(dict(args) if args else hd.args_from_utterance(utterance))
+        eff = dict(args) if args else hd.args_from_utterance(utterance)
+        if not str(eff.get("code") or "").strip() and _code_author_hand().wants_author(utterance):
+            au = _code_author_hand().author(utterance)
+            if au.get("ok"):
+                confirm_arm(hive, "code_run", {"code": au["code"], "test": au["test"], "critic_model": au["critic_model"]}, utterance)
+            return {"ok": bool(au.get("ok")), "tool": tool, "spoken": str(au.get("spoken") or ""),
+                    "wires": ["code_run"], "cites": [], "sent": False, "task_verified": False,
+                    "code_run_meta": {"ok": bool(au.get("ok")), "ran": False, "authored": bool(au.get("ok")),
+                                      "builder_model": au.get("builder_model"), "critic_model": au.get("critic_model")}}
+        got = hd.run({k: v for k, v in eff.items() if k in ("code", "test")})
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["code_run"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "code_run_meta": hd.log_meta(got)}
