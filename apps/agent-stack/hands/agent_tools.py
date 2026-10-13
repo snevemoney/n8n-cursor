@@ -296,6 +296,14 @@ def op_craft_inspect(app: str, path: str) -> dict:
     return {"ok": True, "verified": True, "spoken": _scrub(f"{real.name} in {app}: {summary}.")}
 
 
+# ---------------------------------------------------------------- fan-out: up to 3 scratch-sandboxed workers, one merged report
+def op_fanout(args: dict, approved: bool = False) -> dict:
+    PERM().log_action("fanout", f"{len(args.get('tasks') or [])} tasks", "allow")
+    # op_code is looked up at call time so tests (and a future smarter worker) can replace it
+    return _load("fanout", "fanout.py").run({**args, "approved": bool(approved or args.get("approved"))},
+                                            code_worker=lambda ask, repo: op_code(repo, ask, "jarvis/fanout"))
+
+
 # ---------------------------------------------------------------- Google reads by name, sent-mail duplicate guard
 def op_gws_read(kind: str, name: str, rng: str | None = None) -> dict:
     PERM().log_action("cli", f"gws read {kind}", "allow")
@@ -416,6 +424,8 @@ def _step(s: dict, approved: bool) -> dict:
         return op_repo(s.get("repo", ""), s.get("action", ""), **{k: v for k, v in s.items() if k not in {"op", "repo", "action"}})
     if op == "mcp_list":
         return op_mcp_list(s.get("server", ""))
+    if op == "fanout":
+        return op_fanout({k: v for k, v in s.items() if k != "op"}, approved)
     if op == "craft_inspect":
         return op_craft_inspect(s.get("app", ""), s.get("path", ""))
     if op == "gws_read":
@@ -440,7 +450,7 @@ def run(args: dict | None = None, approved: bool = False) -> dict:
     if len(steps) == 1 and steps[0].get("op") == "code":
         got = op_code(steps[0].get("repo", ""), steps[0].get("goal", ""), steps[0].get("branch") or "jarvis/code")
         return got
-    if len(steps) == 1 and (steps[0].get("op") in {"gws_read", "sent_check", "craft_inspect"}
+    if len(steps) == 1 and (steps[0].get("op") in {"gws_read", "sent_check", "craft_inspect", "fanout"}
                             or (steps[0].get("op") == "cli" and (steps[0].get("argv") or [""])[0] == "gws")):
         return _step(steps[0], approved)  # one Google read: answer in a sentence, not a step report
     ranked = rank_skills(goal, 1) if args.get("goal") else []
@@ -487,6 +497,13 @@ def _gws_argv(u: str) -> list[str] | None:
         return None
 
 
+def _fanout_args(u: str) -> dict:
+    try:
+        return _load("fanout", "fanout.py").args_from_utterance(u)
+    except Exception:  # noqa: BLE001
+        return {}
+
+
 def _gws_reads_args(u: str) -> dict | None:
     """Docs/Sheets by name and the sent-mail duplicate check; a broken helper never takes the turn down."""
     try:
@@ -498,7 +515,7 @@ def _gws_reads_args(u: str) -> dict | None:
 
 def wants(u: str) -> bool:
     return bool(_LIST.search(u or "") or _CODE.match(u or "") or _TASK.search(u or "") or _CLI.match(u or "") or _MCPC.search(u or "")
-                or _gws_argv(u) or _gws_reads_args(u))
+                or _gws_argv(u) or _gws_reads_args(u) or bool(_fanout_args(u)))
 
 
 def args_from_utterance(u: str) -> dict:
@@ -531,6 +548,9 @@ def args_from_utterance(u: str) -> dict:
     argv = _gws_argv(u)
     if argv:
         return {"op": "cli", "argv": argv}
+    fan = _fanout_args(u)
+    if fan:
+        return {"op": "fanout", **fan}
     return _gws_reads_args(u) or {}
 
 
