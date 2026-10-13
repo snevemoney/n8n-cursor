@@ -19,6 +19,9 @@
 - BUS300 (talk/Face client delivery) first. Live Face :4018 owner is in ACTIVE_TASKS (Grok Consultant as of 2026-10-11). PR #616 merged to main 2026-10-12 16:43 ET (7afefe1ee); :4018 runs main via LaunchAgent `ai.grok.jarvis-face`. Builder evidence only — not a PASS.
 - Draft PR 518 history still relevant for NATURAL_FACE_REPLY; confirm current head before claiming. Live Face check remains Evens/Watchdog.
 - Dirty Mac fleet branch `cursor/grok-fleet-convergence-b3d9` has large uncommitted churn — do not mass-edit without an owner freeze.
+- BUS300 (talk/Face client delivery) first. Draft PR 518 @ e896c8c6 (main 7afefe1ee merged in) is not merged; NATURAL_FACE_REPLY is OPEN. Next step: Evens's live Face check.
+- Talk went dark twice on 10-10 (Claude session). Cause unknown; one owner must be named. Until then, if talk fails, say so plainly.
+- Uncommitted on the Mac: the `craft` hand on cursor/grok-fleet-convergence-b3d9 (WIRED, not LIVE). Codex repairs sit on an isolated ref. Codex is limited until Oct 14 11:53 PM ET.
 - PR 591 learning-engine is a draft @ ddcfa776. Watchdog R13 = FAIL, fixes not re-graded. Merge is Evens's call.
 
 ## Fleet (17 desks; Big Boss orchestrates above them)
@@ -42,3 +45,8 @@
 
 ## Open questions for Evens (ask only when relevant)
 - What does BUS300 mean (Jarvis slice or CapEx gate code)? · Who owns Jarvis talk? · Fix the VPS services or pause the Claude health routines? · PR 518 / PR 591 merge.
+
+<!-- BEGIN capability-atlas-20261012 -->
+## Capability atlas
+Read the capability atlas at atlas/ATLAS.md (this folder; ~/.grok-shared/atlas/ATLAS.md) before choosing a tool; you can do what other platforms do in your own way. Handoffs: atlas/HANDOFFS.md. Content default: ArtCraft (atlas/ARTCRAFT.md); no Higgsfield spend without Evens's per-job OK and a quote.
+<!-- END capability-atlas-20261012 -->

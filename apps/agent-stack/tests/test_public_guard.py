@@ -20,6 +20,13 @@ class PublicGuardTest(unittest.TestCase):
             self.assertTrue(G.check_names([p]), p)
         self.assertEqual(G.check_names(["docs/hive/outer-heaven/CONTENT/os/shared/AGENT_RULES.md"]), [])
 
+    def test_digest_timeline_obsidian_notes_blocked(self):
+        base = "docs/hive/outer-heaven/CONTENT/os/shared/"
+        for n in ("PLATFORM_DIGEST.md", "SHARED_MEMORY_TIMELINE_2026-08-to-10.md",
+                  "OBSIDIAN_HUB_CONTRACT.md", "OBSIDIAN_STALE_CATCHUP_2026-10-12.md"):
+            self.assertTrue(G.check_names([base + n]), n)
+        self.assertEqual(G.check_names([base + "SHARED_MEMORY.md"]), [])
+
     def test_absolute_home_path_blocked_home_relative_ok(self):
         user = "eve" + "nslouis"
         self.assertTrue(G.scan_text("a.py", [(1, f'VAULT = "/Users/{user}/Documents/v"')]))
