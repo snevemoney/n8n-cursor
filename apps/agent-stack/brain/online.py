@@ -202,6 +202,7 @@ OPENROUTER_HANDS = (
             },
         },
     },
+    {"type": "function", "function": {"name": "code_run", "description": "Run a small Python snippet and its test in a no-network sandbox (10 s cap, temp dir). Pass the code; report pass/fail truthfully.", "parameters": {"type": "object", "properties": {"code": {"type": "string"}, "test": {"type": "string"}}}}},
     {
         "type": "function",
         "function": {

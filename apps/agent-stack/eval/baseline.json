@@ -1,6 +1,7 @@
 {
   "passing": [
     "browser",
+    "coding",
     "computer",
     "context",
     "files",
@@ -14,6 +15,6 @@
     "web",
     "workflows"
   ],
-  "passed": 13,
+  "passed": 14,
   "total": 17
 }
