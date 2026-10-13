@@ -1749,7 +1749,7 @@
           + `<div class="foot">● ${r.vault_hit >= 0.6 ? "VAULT HAS IT · NAMED" : "VAULT · NO NOTE"} · ${pc(r.vault_hit)}`
           + `${r.vault_note ? " · " + esc(String(r.vault_note).toUpperCase().slice(0, 40)) : ""} · ${r.ms} MS</div>`;
         el.classList.add("on");
-        reflexHideAt = Date.now() + 12000;
+        reflexHideAt = Date.now() + 4000;  // shown before the answer, then out of its way
       }
       if (reflexHideAt && Date.now() > reflexHideAt) { el.classList.remove("on"); reflexHideAt = 0; }
     }
