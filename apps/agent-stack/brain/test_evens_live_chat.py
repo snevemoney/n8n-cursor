@@ -108,3 +108,7 @@ def test_short_dismissal_gets_a_fixed_ack_not_the_previous_reply():
         r = P.live_chat_route(u)
         assert r and r["tool"] == "say" and r["speak"] == P.DISMISS_LINE
     assert P.live_chat_route("I don't care about the cost, just open my notes on the launch plan please") is None
+
+
+def test_show_cursor_is_harmless_demo():
+    assert _pick("Jarvis, show me your cursor")["tool"] == "pointer_demo"

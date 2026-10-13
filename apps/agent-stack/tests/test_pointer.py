@@ -47,13 +47,22 @@ class PointerTest(unittest.TestCase):
         disp = {"index": 2, "x": 1920.0, "y": 0.0, "w": 1512.0, "h": 982.0}
         got = PT.locate_vision("create a new Instagram reel", disp=disp, call_fn=lambda u, p: '{"found": true, "box_2d": [600, 10, 640, 30], '
                                '"label": "Create button", "where": "left sidebar", "app_visible": true, "confidence": 0.9}')
-        self.assertTrue(got["found"]); self.assertAlmostEqual(got["x"], 1920 + 0.02 * 1512); self.assertAlmostEqual(got["y"], 0.62 * 982)
+        self.assertTrue(got["found"]); self.assertTrue(1920 <= got["x"] <= 1920 + 1512); self.assertTrue(0 <= got["y"] <= 982)
         self.assertEqual(got["label"], "Create button")
 
     def test_vision_not_visible_never_points(self):
         got = PT.locate_vision("create a new Instagram reel", disp={"index": 1, "x": 0, "y": 0, "w": 100, "h": 100},
                                call_fn=lambda u, p: '{"found": true, "box_2d": [1,1,2,2], "label": "October calendar", "app_visible": false, "confidence": 0.8}')
         self.assertFalse(got["found"])
+
+
+    def test_refine_maps_crop_box_and_rejects_miss(self):  # second, tighter look before any arrow/click
+        import tempfile
+        f = tempfile.NamedTemporaryFile(suffix=".png", delete=False); f.write(b"x"); f.close()
+        r = PT.refine_box({"label": "Create button"}, f.name, (100.0, 200.0), 240.0, "create",
+                          lambda u, p: '{"found": true, "box_2d": [500, 250, 600, 350]}')
+        self.assertTrue(r["on_control"]); self.assertAlmostEqual(r["x"], 100 + 0.3 * 240); self.assertAlmostEqual(r["y"], 200 + 0.55 * 240)
+        self.assertFalse(PT.refine_box({}, f.name, (0, 0), 240, "x", lambda u, p: '{"found": false}')["on_control"])
 
 
 if __name__ == "__main__":

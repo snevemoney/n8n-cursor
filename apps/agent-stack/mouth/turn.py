@@ -781,6 +781,11 @@ def _apply_turn_iter_inner(
     screen_action = bool(PIPELINE.SCREEN_ACT_RE.match(action_text))
     explicit_browser = bool(re.search(r"\b(?:safari|https?://)", spoken, re.I))
     _z02_click = PIPELINE._pointer_hand().wants_click(spoken)  # Z02: arrow + confirm click, not the Watch desktop
+    if _z02_click and not watch_on and not PIPELINE.is_hard_step(spoken):
+        # Desktop (Watch) off: a named click is the Z02 hand -> arrow + one-shot confirm (run_tool arms it); Watch keeps clicks when on.
+        got = PIPELINE.run_tool({"tool": "pointer_click", "args": {}}, spoken, hive=hive, retrieve_roots=retrieve_roots, gen=token)
+        yield _door_speak(hive, spoken, str(got.get("spoken") or ""), "pointer_click", retrieve_roots, gen=token, execution=got)
+        return
     if not watch_on and screen_action and not explicit_browser and not _z02_click:
         receipt = {"ok": False, "reason": "desktop_not_armed", "action_issued": False,
                    "spoken": "Desktop is off. Enable Desktop in Orb so I can perform this action."}
@@ -789,7 +794,6 @@ def _apply_turn_iter_inner(
         return
     owns_watch = bool(
         watch_on
-        and not _z02_click
         and hasattr(PIPELINE, "watch_owns_turn")
         and PIPELINE.watch_owns_turn(spoken, watch_row)
     )

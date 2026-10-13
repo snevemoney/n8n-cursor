@@ -32,6 +32,13 @@ SYN = {"create": ["create", "new", "plus", "+"], "reel": ["reel", "reels"], "set
        "notifications": ["notifications"], "share": ["share"], "post": ["post", "create"]}
 
 
+def live() -> bool:
+    """Real screen side effects (capture, vision call, arrow, cursor, click) only inside the running Face (serve.py).
+    15:43 repeats: mouth/test_turn.py's apply_turn("click next") reached the real hand and drew arrows every test run."""
+    return (Path(sys.argv[0] or "").name == "serve.py" and not os.environ.get("PYTEST_CURRENT_TEST")
+            and os.environ.get("JARVIS_POINTER_OFF") != "1")
+
+
 def wants_pointer(u: str) -> bool:
     return bool(WANT_RE.search(u or ""))
 
@@ -87,6 +94,8 @@ def _grab(shot: str, wall: float = 6.0) -> _Grab:
 
 
 def locate(kws: list[str]) -> dict:
+    if not live():
+        return {"found": False, "why": "pointer is off outside the live Face"}
     loc = _bin("jarvis_locate")
     if loc is None or not kws:
         return {"found": False, "why": "locator unavailable" if loc is None else "no keywords"}
@@ -126,6 +135,8 @@ def locate(kws: list[str]) -> dict:
 
 
 def draw(x: float, y: float, label: str, seconds: int = SHOW_SEC) -> bool:
+    if not live():
+        return False
     b = _bin("pointer_arrow")
     if b is None:
         return False
@@ -286,6 +297,8 @@ def last_target() -> dict | None:
 
 
 def close_button(owner: str = "") -> dict:
+    if not live():
+        return {"found": False, "why": "pointer is off outside the live Face"}
     b = _bin("jarvis_winclose")
     if b is None:
         return {"found": False, "why": "window locator unavailable"}
@@ -353,13 +366,15 @@ APP_BUILD = OVERLAY / "build_click_app.sh"
 def _click_app() -> Path | None:
     exe = CLICK_APP / "Contents" / "MacOS" / "jarvis_click"
     src = OVERLAY / "jarvis_click.swift"
-    if not exe.is_file() or (src.is_file() and src.stat().st_mtime > exe.stat().st_mtime):
+    if not exe.is_file():  # never auto-rebuild: a rebuild changes the ad-hoc signature and drops his Accessibility switch
         subprocess.run(["bash", str(APP_BUILD)], capture_output=True, timeout=240)
     return CLICK_APP if exe.is_file() else None
 
 
 def _via_app(args: list[str], wall: float = 12.0) -> dict:
     """Launch the helper through LaunchServices so macOS checks Jarvis Click.app's own grant (not python's)."""
+    if not live():
+        return {"ok": False, "why": "pointer is off outside the live Face"}
     app = _click_app()
     if app is None:
         return {"ok": False, "why": "click helper isn't built"}
@@ -395,7 +410,27 @@ PERMISSION_LINE = ("I didn't click: macOS hasn't switched on Accessibility for J
 
 def click_do(x: float, y: float, label: str, *, run_fn=None) -> dict:
     """Jarvis's floating cursor glides to (x, y), pulses, one left click, Evens's cursor restored. Only after confirm."""
-    got = (run_fn or _via_app)([f"{x:.1f}", f"{y:.1f}", label])
+    if run_fn is None:
+        if not live():
+            return {"ok": False, "clicked": False, "spoken": "I didn't click: the pointer is off outside the live Face."}
+        pre = click_preflight()
+        if not pre.get("post_event_allowed"):
+            return {"ok": False, "clicked": False, "why": "post_event_denied", "binary": str(CLICK_APP),
+                    "spoken": PERMISSION_LINE.format(app=str(CLICK_APP))}
+        # the visible Jarvis cursor is drawn from the Face, same path as the arrow Evens sees (15:43: the helper's window never showed)
+        try:
+            hx, hy = cursor_display()["cursor"]
+        except Exception:  # noqa: BLE001
+            hx, hy = x, y
+        cur = _bin("pointer_cursor")
+        if cur is not None:
+            subprocess.Popen([str(cur), f"{hx:.1f}", f"{hy:.1f}", f"{x:.1f}", f"{y:.1f}"], stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL, start_new_session=True)
+            import time as _t
+            _t.sleep(1.05)  # glide 0.75 s + pulse 0.3 s, then the real click lands
+        got = _via_app([f"{x:.1f}", f"{y:.1f}", label, f"{hx:.1f}", f"{hy:.1f}"])
+    else:
+        got = run_fn([f"{x:.1f}", f"{y:.1f}", label])
     if got.get("ok"):
         return {"ok": True, "clicked": True, "spoken": f"Clicked the {label}."}
     if got.get("why") == "post_event_denied":
@@ -406,6 +441,8 @@ def click_do(x: float, y: float, label: str, *, run_fn=None) -> dict:
 
 def dock_hint(kws: list[str]) -> dict | None:
     """An installed app named in the ask whose icon is in a hidden Dock: point at the Dock edge, say so, no guessing."""
+    if not live():
+        return None
     for k in kws:
         name = k.capitalize()
         app = next((p for p in (f"/Applications/{name}.app", f"/System/Applications/{name}.app",
@@ -499,6 +536,8 @@ def locate_vision(utterance: str, *, key: str = "", call_fn=None, disp=None) -> 
     """Silent capture of the display under the cursor -> vision box -> global points. Screenshot deleted at once."""
     import base64
     import time as _t
+    if call_fn is None and not live():
+        return {"found": False, "error": True, "why": "pointer is off outside the live Face"}
     key = key or os.environ.get("OPENROUTER_API_KEY", "").strip()
     if not key and call_fn is None:
         return {"found": False, "error": True, "why": "vision key is dark"}
@@ -508,11 +547,15 @@ def locate_vision(utterance: str, *, key: str = "", call_fn=None, disp=None) -> 
     small = shot[:-4] + ".jpg"
     t0 = _t.time()
     try:
-        subprocess.run(["pkill", "-f", "Caches/jarvis/pointer_arrow"], capture_output=True)
-        _t.sleep(0.12)
-        subprocess.run(["screencapture", "-x", "-D", str(d["index"]), "-t", "png", shot], capture_output=True, timeout=8)
-        subprocess.run(["sips", "-s", "format", "jpeg", "-s", "formatOptions", "70", "-Z", "1280", shot, "--out", small], capture_output=True, timeout=8)
-        url = "data:image/jpeg;base64," + base64.b64encode(Path(small).read_bytes()).decode()
+        if live():
+            subprocess.run(["pkill", "-f", "Caches/jarvis/pointer_arrow"], capture_output=True)
+            _t.sleep(0.12)
+            subprocess.run(["screencapture", "-x", "-D", str(d["index"]), "-t", "png", shot], capture_output=True, timeout=8)
+        if live():
+            subprocess.run(["sips", "-s", "format", "jpeg", "-s", "formatOptions", "70", "-Z", "1280", shot, "--out", small], capture_output=True, timeout=8)
+            url = "data:image/jpeg;base64," + base64.b64encode(Path(small).read_bytes()).decode()
+        else:
+            url = "data:image/jpeg;base64,"  # tests: injected call_fn, no capture
         prompt = VISION_PROMPT.format(ask=(utterance or "")[:200])
         raw, errs = None, []
         for mdl in ([None] if call_fn else [VISION_MODEL, "google/gemini-2.5-flash-lite", "google/gemini-2.5-flash"]):
@@ -531,6 +574,9 @@ def locate_vision(utterance: str, *, key: str = "", call_fn=None, disp=None) -> 
             raise RuntimeError("all vision models failed")
         m = re.search(r"\{.*\}", raw or "", re.S)
         got = json.loads(m.group(0)) if m else {}
+        if isinstance(got, dict):
+            got["_ask"] = utterance
+        got["refine"] = _refine(got, shot, d, call_fn=call_fn, key=key) if isinstance(got, dict) and got.get("found") else None
     except Exception as exc:  # noqa: BLE001 — network/model fault: caller may fall back
         return {"found": False, "error": True, "why": f"vision unavailable ({type(exc).__name__})"}
     finally:
@@ -551,6 +597,11 @@ def locate_vision(utterance: str, *, key: str = "", call_fn=None, disp=None) -> 
     y0, x0, y1, x1 = [float(v) / 1000.0 for v in box]
     x = d["x"] + (x0 + x1) / 2 * d["w"]
     y = d["y"] + (y0 + y1) / 2 * d["h"]
+    ref = got.get("refine")
+    if isinstance(ref, dict):
+        if not ref.get("on_control"):
+            return {"found": False, "why": "a closer look didn't confirm the control is there"}
+        x, y = ref["x"], ref["y"]
     return {"found": True, "x": x, "y": y, "w": (x1 - x0) * d["w"], "h": (y1 - y0) * d["h"], "label": str(got.get("label") or ""),
             "where": str(got.get("where") or ""), "role": "vision", "source": "vision", "display": d}
 
@@ -564,3 +615,76 @@ def locate_smart(utterance: str, kws: list[str]) -> dict:
     if o.get("found") and str(o.get("label") or "").strip().lower() in kws:
         return o
     return {"found": False, "why": v.get("why") or "no exact match"}
+
+
+REFINE_PT = 240  # second look: a 240x240 pt crop around the first box, re-asked for a tight box (fixes 16 pt / 25 px misses)
+REFINE_PROMPT = ("This is a zoomed crop of the user's screen. Find the {label} (what the user wants: \"{ask}\"). Reply JSON only: "
+                 "{{\"found\": true|false, \"box_2d\": [ymin, xmin, ymax, xmax] normalized 0-1000 within THIS crop, tight around the "
+                 "clickable control itself}}. If that control is not in this crop, reply {{\"found\": false}}.")
+
+
+def refine_box(first: dict, crop_png: str, crop_origin: tuple, crop_pts: float, ask: str, call) -> dict:
+    """Pure part (testable): ask the model about the crop and map its box back to global points."""
+    import base64
+    url = "data:image/png;base64," + base64.b64encode(Path(crop_png).read_bytes()).decode()
+    raw = call(url, REFINE_PROMPT.format(label=str(first.get("label") or "control"), ask=(ask or "")[:160]))
+    m = re.search(r"\{.*\}", raw or "", re.S)
+    got = json.loads(m.group(0)) if m else {}
+    box = got.get("box_2d")
+    if not (got.get("found") and isinstance(box, list) and len(box) == 4):
+        return {"on_control": False}
+    y0, x0, y1, x1 = [float(v) / 1000.0 for v in box]
+    return {"on_control": True, "x": crop_origin[0] + (x0 + x1) / 2 * crop_pts, "y": crop_origin[1] + (y0 + y1) / 2 * crop_pts,
+            "box": box}
+
+
+def _refine(got: dict, shot: str, d: dict, *, call_fn=None, key: str = "") -> dict | None:
+    box = got.get("box_2d")
+    if not (isinstance(box, list) and len(box) == 4):
+        return None
+    y0, x0, y1, x1 = [float(v) / 1000.0 for v in box]
+    cx, cy = (x0 + x1) / 2 * d["w"], (y0 + y1) / 2 * d["h"]  # display-local points
+    ox = min(max(cx - REFINE_PT / 2, 0), max(d["w"] - REFINE_PT, 0))
+    oy = min(max(cy - REFINE_PT / 2, 0), max(d["h"] - REFINE_PT, 0))
+    try:
+        wpx = int(subprocess.run(["sips", "-g", "pixelWidth", shot], capture_output=True, text=True).stdout.split()[-1])
+    except (ValueError, IndexError):
+        return None
+    sc = wpx / d["w"]
+    crop = shot[:-4] + "-crop.png"
+    try:
+        subprocess.run(["sips", "-c", str(int(REFINE_PT * sc)), str(int(REFINE_PT * sc)), "--cropOffset", str(int(oy * sc)), str(int(ox * sc)),
+                        shot, "--out", crop], capture_output=True, timeout=8)
+        call = call_fn or (lambda u, p: _vision_call(u, p, key, "google/gemini-2.5-flash"))
+        r = refine_box(got, crop, (d["x"] + ox, d["y"] + oy), REFINE_PT, got.get("_ask", ""), call)
+        try:
+            with open(Path.home() / "jarvis-main" / "logs" / "pointer-debug.log", "a") as fh:
+                fh.write(json.dumps({"refine": r, "first_center": [d["x"] + cx, d["y"] + cy]}) + "\n")
+        except OSError:
+            pass
+        return r
+    except Exception:  # noqa: BLE001 — refine is a check; a fault keeps the first box
+        return None
+    finally:
+        try:
+            os.unlink(crop)
+        except OSError:
+            pass
+
+
+CURSOR_DEMO_RE = re.compile(r"\bshow\s+(?:me\s+)?(?:your|the)\s+(?:jarvis\s+)?cursor\b", re.I)
+
+
+def cursor_demo() -> dict:
+    """Harmless demo Evens can say: Jarvis's cursor glides from his pointer to the middle of that display and pulses. No click."""
+    if not live():
+        return {"ok": False, "spoken": "My cursor only runs in the live Face."}
+    d = cursor_display()
+    hx, hy = d["cursor"]
+    tx, ty = d["x"] + d["w"] / 2, d["y"] + d["h"] / 2
+    cur = _bin("pointer_cursor")
+    if cur is None:
+        return {"ok": False, "spoken": "I couldn't build my cursor overlay."}
+    subprocess.Popen([str(cur), f"{hx:.1f}", f"{hy:.1f}", f"{tx:.1f}", f"{ty:.1f}"], stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True)
+    return {"ok": True, "spoken": "Watch the screen your mouse is on: my blue Jarvis cursor is gliding to the middle now. Nothing gets clicked."}

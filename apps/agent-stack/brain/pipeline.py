@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -1063,6 +1063,8 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
         return {"tool": "handback", "args": {}, "speak": ""}  # really disarms Watch; no invented deletion
     if COST_FOLLOW_RE.search(u):
         return {"tool": "cost_card", "args": {}, "speak": ""}
+    if _pointer_hand().CURSOR_DEMO_RE.search(u):
+        return {"tool": "pointer_demo", "args": {}, "speak": ""}  # Z02: harmless cursor demo, no click
     if _pointer_hand().wants_click(u) and not is_hard_step(u):
         return {"tool": "pointer_click", "args": {}, "speak": ""}  # Z02: arrow + one-shot confirm, then one click
     if CLICK_ASK_RE.search(u) and not is_hard_step(u):
@@ -5471,6 +5473,10 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["cost_card"],
                 "cites": got.get("cites") or [], "meter": got.get("meter") or [], "sent": False, "task_verified": bool(got.get("ok")),
                 "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
+    if tool == "pointer_demo":
+        got = _pointer_hand().cursor_demo()
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": got["spoken"], "wires": ["pointer"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "pointer_click":
         if "x" not in args:  # unconfirmed miss: nothing to click, say why
             miss = _pointer_hand().click_target(utterance)
@@ -6312,7 +6318,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "cost_card", "results_recall", "prebrief")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
