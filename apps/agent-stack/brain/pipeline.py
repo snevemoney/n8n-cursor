@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "results_recall", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -1017,6 +1017,8 @@ def model_free_route(spoken_in: str) -> dict | None:
         return {"tool": "memory", "args": _memory_hand().args_from_utterance(spoken_in), "speak": ""}
     if wants_continuity_status(spoken_in):
         return None
+    if _results_mem().wants_results(spoken_in):
+        return {"tool": "results_recall", "args": {}, "speak": ""}
     if _cost_hand().wants_cost(spoken_in):
         return {"tool": "cost_card", "args": {}, "speak": ""}
     if _pointer_hand().wants_pointer(spoken_in) and not is_hard_step(spoken_in):
@@ -1180,6 +1182,16 @@ def _plan_hand():
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
     return sys.modules[name]
+
+
+def _results_mem():
+    key = "agent_stack_results_mem"
+    if key not in sys.modules:
+        spec = importlib.util.spec_from_file_location(key, STACK / "memory" / "results.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[key] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[key]
 
 
 def _cost_hand():
@@ -5088,7 +5100,13 @@ def run_tool(pick: dict, utterance: str, **kw) -> dict:
             "sent": False,
             "hook": "pre_tool",
         })
-    return hooked_result(_run_tool_inner(pick, utterance, **kw))
+    got = hooked_result(_run_tool_inner(pick, utterance, **kw))
+    try:  # Z11: every finished result is written back to the long-term results ledger
+        if got.get("ok"):
+            _results_mem().write_back(str(got.get("tool") or tool), utterance, got)
+    except Exception:  # noqa: BLE001
+        pass
+    return got
 
 
 def _run_tool_inner(
@@ -5246,6 +5264,9 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["screen_see"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "screen_see_meta": hd.log_meta(got)}
+    if tool == "results_recall":
+        return {"ok": True, "tool": tool, "spoken": _results_mem().spoken_recent(), "wires": ["results"], "cites": [],
+                "sent": False, "task_verified": True, "outcome": TOOL_LOOP}
     if tool == "cost_card":
         got = _cost_hand().run(utterance)
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["cost_card"],
@@ -6059,7 +6080,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "results_recall")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
