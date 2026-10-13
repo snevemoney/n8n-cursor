@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "workspace_read", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "memory", "workspace_read", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -712,6 +712,20 @@ WORKSPACE_READ_RE = re.compile(
 )
 
 
+def _memory_hand():
+    name = "agent_stack_memory"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "memory.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def wants_memory(utterance: str) -> bool:
+    return bool(_memory_hand().INTENT_RE.search(utterance or ""))
+
+
 def wants_workspace_read(utterance: str) -> bool:
     """Explicit read-only file / folder / git ask. Goes to hands/workspace_read, never a guess."""
     return bool(WORKSPACE_READ_RE.search(utterance or ""))
@@ -754,6 +768,8 @@ ACK_SKIP = frozenset({"say"})
 
 def model_free_route(spoken_in: str) -> dict | None:
     """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
+    if wants_memory(spoken_in):
+        return {"tool": "memory", "args": _memory_hand().args_from_utterance(spoken_in), "speak": ""}
     if wants_continuity_status(spoken_in):
         return None
     early = fixed_route(spoken_in)
@@ -2608,7 +2624,7 @@ def assemble_pack(
         "Put the answer in speak after the hand runs. "
         "Hands: vault_read, safari_see, cursor_ask, craft, status, refuse_hard_step. mac_act only while Watch is armed. "
         "craft drives a Craft app: args {app, task}. "
-        'JSON: {"tool":"converse"|"vault_read"|"workspace_read"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
+        'JSON: {"tool":"converse"|"vault_read"|"memory"|"workspace_read"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
     )
     return "\n".join(lines).rstrip() + "\n"
 
@@ -2835,7 +2851,7 @@ def pick_prompt(pack_path: Path, utterance: str) -> str:
         "Answer what he said. Follow-ups use the sitting turns in the pack.\n"
         "Store loads this turn. Last Cursor chat is the last Cursor sitting. Do not keyword-search the vault for chats.\n"
         "JSON preferred, prose speak is also fine:\n"
-        '{"tool":"converse"|"vault_read"|"workspace_read"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}\n'
+        '{"tool":"converse"|"vault_read"|"memory"|"workspace_read"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}\n'
     )
 
 
@@ -4698,6 +4714,12 @@ def run_tool(
             "web_search_meta": ws.log_meta(got),
             "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN,
         }
+    if tool == "memory":
+        mem = _memory_hand()
+        got = mem.run(dict(args) if args.get("op") else mem.args_from_utterance(utterance))
+        return {"ok": got["ok"], "tool": tool, "spoken": got["spoken"],
+                "wires": ["memory"], "cites": [], "sent": False,
+                "task_verified": got["ok"], "memory_meta": got["log"]}
     if tool == "workspace_read":
         wr = _workspace_read_hand()
         wargs = dict(args) if args.get("op") else wr.args_from_utterance(utterance)
@@ -5339,7 +5361,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "web_search", "say", "status", "safari_see")
+DETERMINISTIC_HANDS = ("memory", "workspace_read", "web_search", "say", "status", "safari_see")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
