@@ -1088,7 +1088,9 @@ def model_free_route(spoken_in: str) -> dict | None:
         # Rank 16: a screen ask is the whole display (screen_see), not the Safari tab.
         early = {"tool": "screen_see", "args": {}, "speak": ""}
     if early is None and not is_hard_step(spoken_in):
-        if _workbench_hand().wants_mode(spoken_in) or _workbench_hand().wants_workbench(spoken_in):
+        if _agent_tools_hand().wants(spoken_in):  # explicit agent ops (scratch repo X:, gh/git, mcp) beat workbench
+            early = {"tool": "agent_tools", "args": {}, "speak": ""}
+        elif _workbench_hand().wants_mode(spoken_in) or _workbench_hand().wants_workbench(spoken_in):
             early = {"tool": "workbench", "args": {}, "speak": ""}
         elif _pickup_hand().wants_pickup(spoken_in):
             early = {"tool": "pickup", "args": {}, "speak": ""}
@@ -1096,8 +1098,6 @@ def model_free_route(spoken_in: str) -> dict | None:
             early = {"tool": "drafts", "args": {}, "speak": ""}
         elif wants_rules(spoken_in):
             early = {"tool": "rules", "args": {}, "speak": ""}
-        elif _agent_tools_hand().wants(spoken_in):
-            early = {"tool": "agent_tools", "args": {}, "speak": ""}
         elif wants_mcp_call(spoken_in):
             early = {"tool": "mcp_call", "args": {}, "speak": ""}
         elif wants_plan(spoken_in):
