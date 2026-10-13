@@ -87,9 +87,9 @@ def pass_rule_reply(prompt: str) -> str:
     if not p or not PASS_ASK_RE.search(p if len(p) <= 600 else p[-300:]):
         return ""
     try:
-        from brain import shared_context  # noqa: PLC0415
-
-        text = (shared_context.shared_dir() / "AGENT_RULES.md").read_text(encoding="utf-8", errors="replace")
+        # Path-loaded like the rest of the talk stack: the Face process has no `brain` package
+        # on sys.path, so `from brain import shared_context` failed silently live on :4018.
+        text = (_shared_mod().shared_dir() / "AGENT_RULES.md").read_text(encoding="utf-8", errors="replace")
     except Exception:  # noqa: BLE001
         return ""
     for line in text.splitlines():

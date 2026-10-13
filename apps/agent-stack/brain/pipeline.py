@@ -519,7 +519,8 @@ _SC_PL = None
 
 PLAIN_ASK_RE = re.compile(
     r"^\s*(?:(?:can|could)\s+you\s+)?(?:explain|describe|define|summari[sz]e|tell\s+me\s+(?:about|what|a|how|why)|what\s+(?:is|are|does|do|can)\b|"
-    r"why\s+(?:is|are|do|does)\b|how\s+(?:does|do|is)\b|name\s+(?:\w+\s+)?things|give\s+me\s+(?:a|an|one)\b)",
+    r"why\s+(?:is|are|do|does)\b|how\s+(?:does|do|is)\b|name\s+(?:\w+\s+)?things|give\s+me\s+(?:a|an|one)\b|"
+    r"(?:are\s+you|am\s+I|is\s+\w+)\s+allowed\s+to\b|who\s+(?:can|may|is\s+allowed\s+to|gets\s+to)\b|what\s+should\s+I\b|where\s+do(?:es)?\b)",
     re.I,
 )
 HAND_ASK_RE = re.compile(

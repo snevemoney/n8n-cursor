@@ -85,10 +85,25 @@ class RoundFiveTests(unittest.TestCase):
 
     def test_plain_questions_skip_hands(self):
         from brain import pipeline
-        for q in ("Explain what a CANDIDATE means here.", "Name three things you can do for me.", "What can you do?", "Tell me about the Orb."):
+        for q in ("Explain what a CANDIDATE means here.", "Name three things you can do for me.", "What can you do?", "Tell me about the Orb.",
+                  "Are you allowed to rotate keys?", "Who can merge PRs?", "What should I focus on tomorrow morning?"):
             self.assertTrue(pipeline.plain_question(q), q)
         for q in ("Open Safari and look at the screen", "Search my vault for Maya", "run status", "Explain what's on my screen"):
             self.assertFalse(pipeline.plain_question(q), q)
+
+    def test_pass_rule_without_brain_package_on_path(self):
+        import importlib.util, subprocess
+        here = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as d:
+            Path(d, "AGENT_RULES.md").write_text("- no self-PASS. Watchdog (or Evens) issues verdicts.\n")
+            code = (
+                "import importlib.util,sys;"
+                f"s=importlib.util.spec_from_file_location('x', r'{here / 'brain' / 'online.py'}');m=importlib.util.module_from_spec(s);s.loader.exec_module(m);"
+                "print(bool(m.pass_rule_reply('Who is allowed to issue a PASS?')))"
+            )
+            out = subprocess.run([sys.executable, "-c", code], cwd=d, env={**os.environ, "JARVIS_SHARED_DIR": d, "PYTHONPATH": ""},
+                                 capture_output=True, text=True, timeout=60)
+        self.assertEqual(out.stdout.strip().splitlines()[-1], "True", out.stderr[-400:])
 
     def test_pass_shortcut_on_hands_path(self):
         from brain import pipeline
