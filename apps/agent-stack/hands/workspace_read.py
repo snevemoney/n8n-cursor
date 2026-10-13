@@ -26,7 +26,11 @@ def default_roots() -> list[Path]:
     if env:
         return [Path(p).expanduser() for p in env.split(os.pathsep) if p.strip()]
     home = Path.home()
-    return [home / "jarvis-main", home / "Downloads", home / "code"]
+    # The running working tree comes first, so "what branch/head" reports the code that is actually serving
+    # (fix: :4019 ran from ~/jarvis-honesty but answered with ~/jarvis-main's head).
+    running = Path(__file__).resolve().parents[3]
+    out = [running] if (running / ".git").exists() else []
+    return out + [r for r in (home / "jarvis-main", home / "Downloads", home / "code") if r != running]
 
 
 def _roots(roots) -> list[Path]:
