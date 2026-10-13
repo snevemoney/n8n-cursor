@@ -33,6 +33,15 @@ class StatusClaimTests(unittest.TestCase):
         t = "Sir. Options:\n- GridCraft is available for sheets\n- DeckCraft is ready for slides"
         self.assertEqual(online.unbacked_status_claim(t, backed=False), t)
 
+    def test_inline_bold_readiness_list_dropped(self):
+        live = ("Sir. Good evening. Let me check the status of my available tools on this Orb: - **Eyes stills**: Ready \u2014 can capture "
+                "screen images. - **File drop**: Ready \u2014 for evidence intake only. - **Focus**: Available \u2014 attention tool. "
+                "Is there a specific capability you'd like to test?")
+        out = online.unbacked_status_claim(live, backed=False)
+        self.assertNotRegex(out, r"\*\*: (Ready|Available)")
+        self.assertIn("not run a live status check", out)
+        self.assertIn("specific capability", out)
+
     def test_plain_reply_untouched(self):
         t = "Sir. Good evening. I'm ready to help; what are we working on?"
         self.assertEqual(online.unbacked_status_claim(t, backed=False), t)
