@@ -21,6 +21,8 @@ STACK = Path(__file__).resolve().parents[1]
 DEADLINE_S = 5.0
 CACHE_S = 600.0  # reuse a good tools/list for 10 minutes (read-only list, same spec)
 _TOOLS_CACHE: dict = {}
+_WARMING: dict = {}
+WARM_DEADLINE_S = 15.0
 NAME_OK = re.compile(r"^[\w.\-]{1,64}$")
 
 
@@ -41,7 +43,7 @@ def allowlist() -> set[str]:
     return {s.strip() for s in raw.split(",") if s.strip()}
 
 
-def _list_tools(spec: dict) -> list[str] | None:
+def _list_tools(spec: dict, deadline: float | None = None) -> list[str] | None:
     env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": os.environ.get("HOME", "")}
     env.update(spec.get("env") or {})
     try:
@@ -56,7 +58,7 @@ def _list_tools(spec: dict) -> list[str] | None:
             out.put(line)
 
     threading.Thread(target=_reader, daemon=True).start()
-    end = time.monotonic() + DEADLINE_S
+    end = time.monotonic() + (deadline or DEADLINE_S)
 
     def send(msg: dict) -> None:
         proc.stdin.write(json.dumps(msg) + "\n"); proc.stdin.flush()  # type: ignore[union-attr]
@@ -106,6 +108,9 @@ def run(args: dict | None = None, *, servers: dict | None = None, allow: set | N
     if not spec:
         return {"ok": False, "server": name, "tools": [], "spoken": f"I can't find a stdio config for {name}."}
     key = json.dumps(spec, sort_keys=True, default=str)
+    flight = _WARMING.get(key)
+    if servers is None and flight is not None:
+        flight.wait(DEADLINE_S)  # a background warm already started this server; don't start a second one
     hit = _TOOLS_CACHE.get(key)
     if servers is None and hit and time.monotonic() - hit[0] < CACHE_S:
         tools = hit[1]  # same server spec answered recently; a busy Mac can't push it past the deadline
@@ -125,10 +130,24 @@ _GENERIC = {"your", "my", "the", "read-only", "readonly", "mcp", "server", "allo
 
 def warm() -> None:
     """Fill the tools/list cache for allowlisted servers (read-only). Called in the background after an
-    inventory ask, so the follow-up call answers inside the deadline on a busy Mac."""
+    inventory ask, so the follow-up call answers inside the deadline on a busy Mac. Nobody waits on the
+    warm itself, so it may take up to WARM_DEADLINE_S; a hung server is still stopped."""
     for name in sorted(allowlist()):
         try:
-            run({"server": name})
+            spec = _inventory().server_spec(name)
+            if not spec:
+                continue
+            key = json.dumps(spec, sort_keys=True, default=str)
+            hit = _TOOLS_CACHE.get(key)
+            if (hit and time.monotonic() - hit[0] < CACHE_S) or key in _WARMING:
+                continue
+            ev = _WARMING[key] = threading.Event()
+            try:
+                tools = _list_tools(spec, WARM_DEADLINE_S)
+                if tools is not None:
+                    _TOOLS_CACHE[key] = (time.monotonic(), tools)
+            finally:
+                ev.set(); _WARMING.pop(key, None)
         except Exception:
             pass
 

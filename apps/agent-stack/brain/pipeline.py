@@ -5163,7 +5163,7 @@ def _run_tool_inner(
     if tool == "mcp_inventory":
         mi = _mcp_inventory_hand()
         got = mi.run({})
-        try:  # warm the read-only tools/list cache for the likely follow-up call
+        try:  # warm the read-only MCP tool-list cache for the likely follow-up call
             import threading as _th
             _th.Thread(target=_mcp_call_hand().warm, daemon=True).start()
         except Exception:
