@@ -1,5 +1,16 @@
 {
  "files": {
+  "checks/locked/code_run/01-runs-tests.sh": "30aa4a2f230cb30326dbc4965e5a0f9855d2b283bda7c5a6c80a86547d0fa150",
+  "checks/locked/code_run/02-no-network.sh": "af3af4bf3b00a8ea9b33f314c87e11f2d2b9b1a14da06190f3c72a9598ba8d68",
+  "checks/locked/code_run/03-time-cap.sh": "4dd07aa38f33812b1b566910bd3a54412ea1f0756b4321f66b715d8cfff70ab1",
+  "checks/locked/code_run/04-repo-untouched.sh": "f0700d87334ef2f99f31f8032f02ebf966a986e4135bcd3e06c0c629e9a0f86a",
+  "checks/locked/code_run/05-routes-asks.sh": "a73ca99710d1f5f0edf92a5f8443c2e1ec965c2a24f4587869ac773f9f02297c",
+  "checks/locked/code_run/06-honest-without-code.sh": "497910d48db7fb6f0af3110cd953f59199d9a89c58998fd353d8332353ec7dc2",
+  "checks/locked/code_run/90-wired.sh": "edafbf675549788e773fcc8052202803efc9d2813712535cacdd65338b455d71",
+  "checks/locked/code_run/91-every-place.sh": "acc123304592a65831bd3911bc9ecec2c1899ab2b46f47b4a09d4e34f5779906",
+  "checks/locked/code_run/92-existing-tests.sh": "05eeb6872f5a5d0a7cc546215f32d1c49e4a63c4b3fb4db9974c91ba139a339c",
+  "checks/locked/code_run/93-eval-no-regression.sh": "888863729f28d309029646f014c1fc4bbe1fc6699219bd16c0e053bd4dbd9a21",
+  "checks/locked/code_run/94-other-features.sh": "4a4fc8208739f9ec2e64c5f92863395a755471ee83cf5727af9ca528b0a11da7",
   "checks/locked/honesty/01-promise-becomes-cant-yet.sh": "61f0278237bdf83a45056219f02152d736491660ac4914626089ab3132d725de",
   "checks/locked/honesty/02-replay-zero-promises.sh": "6b3fb2abb0a841790e30d31045a44a635d2eb2300b39a15c5f728ac2bab0e832",
   "checks/locked/honesty/03-real-answers-untouched.sh": "43925e2e40f4fb20fa8b13a80b396580a7a23b075aadf21ef8984ba02b4b79f2",
