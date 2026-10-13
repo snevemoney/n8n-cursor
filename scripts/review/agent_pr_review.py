@@ -14,7 +14,9 @@ class llm:
 n=sys.argv[1]; repo=sys.argv[sys.argv.index('--repo')+1] if '--repo' in sys.argv else 'snevemoney/n8n-cursor'
 def gh(*a,ok_codes=(0,)):
   r=subprocess.run(['gh',*a,'-R',repo],capture_output=True,text=True)
-  if r.returncode not in ok_codes: sys.exit(f"gh {a[0]} {a[1]} failed ({r.returncode}): {r.stderr.strip()[:500]}")
+  # gh pr checks: 8 = pending, 1 = some check failed (but then it still prints the check table); 1 with no table = real error
+  if r.returncode not in ok_codes or (r.returncode==1 and '\t' not in r.stdout):
+    sys.exit(f"gh {a[0]} {a[1]} failed ({r.returncode}): {r.stderr.strip()[:500]}")
   return r.stdout
 meta=json.loads(gh('pr','view',n,'--json','title,body,files,additions,deletions'))
 LIMIT=24000; full=gh('pr','diff',n); truncated=len(full)>LIMIT; diff=full[:LIMIT]
@@ -26,6 +28,8 @@ sysm=("You are a strict code reviewer. Review ONLY the diff. Axes: correctness, 
       "as '- [axis] file:line — issue — fix'. Never invent files or lines not in the diff. If diff truncated, say so.")
 rev=llm.chat([{'role':'system','content':sysm},{'role':'user','content':f"PR #{n}: {meta['title']}\n+{meta['additions']}/-{meta['deletions']} in {len(meta['files'])} files\nFailing checks: {fails or 'none'}\n\n{diff}"}],tag='g11-pr-review',temperature=0,max_tokens=900)
 out=f'REVIEW-{n}.md'
+import re
+if truncated: rev=re.sub(r'(?im)^(\W*verdict\W*)\s*(APPROVE|REQUEST_CHANGES|COMMENT)\b',r'\1 INCOMPLETE (diff truncated; was \2)',rev)
 open(out,'w').write(f"# Local agent review — PR #{n} {meta['title']}\nFailing checks at review time: {', '.join(fails) or 'none'}\n{'**Diff truncated: review incomplete.**' if truncated else ''}\nAdvisory only (COMMENT); human/critic decides.\n\n{rev}\n")
 print(out)
 if '--post' in sys.argv: subprocess.run(['gh','pr','review',n,'-R',repo,'--comment','--body-file',out],check=True)
