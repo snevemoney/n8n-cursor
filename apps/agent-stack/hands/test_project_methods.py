@@ -90,6 +90,16 @@ def test_secrets_refused_before_persisting(project):
     assert not list((project / "launch" / "Inputs").iterdir())
 
 
+@pytest.mark.parametrize("prefix", ["ghp_", "github_pat_", "xai-", "refresh_token=", "client_secret=", "Bearer "])
+def test_credential_formats_are_rejected_in_sources_and_price_provenance(project, prefix):
+    fake = prefix + "exampleCredentialMarker0123456789"
+    with pytest.raises(ValueError, match="Secret-looking"):
+        pm.intake(project, "launch", fake, "fixture")
+    out = pm.run("project launch quote: fixture; 0.10; 1; " + fake + "; 1", root=project)
+    assert not out["ok"] and fake not in out["spoken"]
+    assert not list((project / "launch" / "Inputs").iterdir())
+
+
 def test_checkpoints_can_be_read_after_reloading_module(project):
     pm.checkpoint(project, "Launch", "What is done?", "The brief was reviewed")
     files = list((project / "launch" / "Process").glob("answer-*.json"))

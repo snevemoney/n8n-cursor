@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 MAX_TEXT = 64_000
-SECRET = re.compile(r"(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk|ghp|gho)-[A-Za-z0-9_-]{16,}|\b(?:api[_-]?key|password|access[_-]?token)\s*[:=]\s*[\"']?[A-Za-z0-9_./+-]{12,})", re.I)
+SECRET = re.compile(r"(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk-|xai-|ghp_|gho_|github_pat_)[A-Za-z0-9_-]{16,}|\b(?:api[_-]?key|password|(?:access|refresh|id)[_-]?token|client[_-]?secret)\s*[:=]\s*[\"']?[A-Za-z0-9_./+-]{12,}|\bBearer\s+[A-Za-z0-9_./+-]{20,})", re.I)
 NAME = re.compile(r"[a-z0-9][a-z0-9-]{0,63}\Z")
 
 
@@ -364,6 +364,7 @@ def quote(unit_price, count, *, model, source, ceiling):
         raise ValueError("Prices and ceiling must be finite and nonnegative")
     if not source or not model:
         raise ValueError("A model and observed price source are required")
+    model, source = clean_text(model), clean_text(source)
     total = price * count
     return {"model": model, "unit_price": str(price), "count": count, "total": str(total),
             "source": source, "within_ceiling": total <= limit, "executed": False}
