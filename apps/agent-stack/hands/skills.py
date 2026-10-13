@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import os
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -92,7 +93,56 @@ def run(args: dict, roots=None) -> dict[str, Any]:
         return {"ok": True, "op": op, "name": name, "text": text, "truncated": len(data) > MAX_BYTES, "first_step": step,
                 "spoken": f"The {name} skill: {hit[1] or 'no description'}."
                           + (f" Its first step: {step}" if step else " It lists no numbered steps.")}
+    if op == "run":
+        return run_step(found, str((args or {}).get("name") or ""), int((args or {}).get("step") or 1))
     return {"ok": False, "op": op, "error": "unknown op", "spoken": "I can't read that: unknown skills op."}
+
+
+_NUMBERED = re.compile(r"^\s*(\d+)[.)]\s*(.{4,300})$", re.M)
+_CMD = re.compile(r"`([^`]{2,160})`")
+
+
+def _agent_tools():
+    import importlib.util as _u
+    key = "agent_stack_agent_tools"
+    if key not in sys.modules:
+        spec = _u.spec_from_file_location(key, STACK / "hands" / "agent_tools.py")
+        mod = _u.module_from_spec(spec); sys.modules[key] = mod; spec.loader.exec_module(mod)
+    return sys.modules[key]
+
+
+def run_step(found: dict, name: str, step: int = 1) -> dict[str, Any]:
+    """Execute one numbered step of a skill. Only a backticked command on the read-only CLI allowlist
+    (agent_tools.op_cli: git log/diff/status..., gh view/list...) is ever run; anything else is held, not run."""
+    hit = found.get(name) if name and "/" not in name and "\\" not in name and name not in (".", "..") else None
+    if hit is None:
+        return {"ok": False, "op": "run", "verified": False, "spoken": "I can't run that: I have no skill by that name."}
+    body = re.sub(r"\A---.*?\n---\s*\n", "", hit[0].read_text(errors="ignore")[:MAX_BYTES], flags=re.S)
+    steps = {int(n): t.strip() for n, t in reversed(_NUMBERED.findall(body))}
+    text = steps.get(step)
+    if not text:
+        return {"ok": False, "op": "run", "name": name, "verified": False, "spoken": f"The {name} skill has no step {step}."}
+    cmds = _CMD.findall(text)
+    if not cmds:
+        return {"ok": False, "op": "run", "name": name, "step": step, "step_text": text, "verified": False,
+                "spoken": f"Step {step} of {name} is \"{text[:160]}\". It has no command I can run, so nothing was run."}
+    cmd = cmds[0].strip()
+    if re.search(r"[<>|;&$]", cmd):
+        return {"ok": False, "op": "run", "name": name, "step": step, "command": cmd, "verified": False,
+                "spoken": f"Step {step} of {name} is `{cmd}`; it has a placeholder or shell syntax, so I didn't run it."}
+    import shlex
+    try:
+        argv = shlex.split(cmd)
+    except ValueError:
+        argv = []
+    got = _agent_tools().op_cli(argv)
+    if got.get("gated") or not got.get("ok"):
+        return {"ok": False, "op": "run", "name": name, "step": step, "command": cmd, "verified": False, "gated": bool(got.get("gated")),
+                "spoken": f"Step {step} of {name} is `{cmd}`. Not run: {got.get('spoken')}"}
+    out = str(got.get("output") or "").strip()
+    return {"ok": True, "op": "run", "name": name, "step": step, "command": cmd, "verified": got.get("exit") == 0,
+            "exit": got.get("exit"), "output": out,
+            "spoken": f"Ran step {step} of the {name} skill: `{cmd}` (exit {got.get('exit')}). Output: " + (out[:700] or "(empty)")}
 
 
 _READ = re.compile(r"\b(?:read|open|show)\s+(?:me\s+)?(?:the\s+)?([\w.\-]+)\s+skill\b"
@@ -109,7 +159,14 @@ def first_step(text: str) -> str:
     return m.group(1).strip().rstrip(".") + "." if m else ""
 
 
+_RUN = re.compile(r"\brun\b(?:\s+(?:the\s+)?(?:(first|1st|second|2nd|third|3rd)|step\s+(\d+))\s*(?:step)?\s+of)?\s+(?:the\s+|my\s+)?([\w.\-]+)\s+skill\b", re.I)
+_ORD = {"first": 1, "1st": 1, "second": 2, "2nd": 2, "third": 3, "3rd": 3}
+
+
 def args_from_utterance(u: str) -> dict:
+    r = _RUN.search(u or "")
+    if r:
+        return {"op": "run", "name": r.group(3), "step": int(r.group(2) or _ORD.get((r.group(1) or "first").lower(), 1))}
     if _FIRST.search(u or ""):
         return {"op": "read", "name": "#first"}
     m = _READ.search(u or "")
@@ -119,5 +176,5 @@ def args_from_utterance(u: str) -> dict:
 def log_meta(result: dict) -> dict:
     """Metadata only: op, ok, counts. Never skill text."""
     r = result or {}
-    return {"op": r.get("op"), "ok": bool(r.get("ok")), "skills": len(r.get("skills") or []),
+    return {"op": r.get("op"), "ok": bool(r.get("ok")), "skills": len(r.get("skills") or []), "ran": r.get("op") == "run" and bool(r.get("verified")),
             "chars": len(str(r.get("text") or "")), "truncated": bool(r.get("truncated"))}

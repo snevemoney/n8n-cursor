@@ -1106,6 +1106,8 @@ def model_free_route(spoken_in: str) -> dict | None:
     if early is None and not is_hard_step(spoken_in):
         if _agent_tools_hand().wants(spoken_in):  # explicit agent ops (scratch repo X:, gh/git, mcp) beat workbench
             early = {"tool": "agent_tools", "args": {}, "speak": ""}
+        elif _skills_hand()._RUN.search(spoken_in):  # "run (step N of) the X skill": execute it, read-only CLI only
+            early = {"tool": "skills", "args": {}, "speak": ""}
         elif _workbench_hand().wants_mode(spoken_in) or _workbench_hand().wants_workbench(spoken_in):
             early = {"tool": "workbench", "args": {}, "speak": ""}
         elif _pickup_hand().wants_pickup(spoken_in):
@@ -5587,7 +5589,7 @@ def _run_tool_inner(
             "wires": ["skills"],
             "cites": [],
             "sent": False,
-            "task_verified": bool(got.get("ok")),
+            "task_verified": bool(got.get("verified")) if got.get("op") == "run" else bool(got.get("ok")),
             "skills_meta": sk.log_meta(got),
         }
     if tool == "memory":
