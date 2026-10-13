@@ -752,6 +752,19 @@ ACK_LINE = "On it."
 ACK_SKIP = frozenset({"say"})
 
 
+def model_free_route(spoken_in: str) -> dict | None:
+    """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
+    if wants_continuity_status(spoken_in):
+        return None
+    early = fixed_route(spoken_in)
+    if early is None and not is_hard_step(spoken_in):
+        if wants_workspace_read(spoken_in):
+            early = {"tool": "workspace_read", "args": {}, "speak": ""}
+        elif wants_web_search(spoken_in):
+            early = {"tool": "web_search", "args": {}, "speak": ""}
+    return early
+
+
 def fixed_route(utterance: str) -> dict | None:
     """Phrase -> hand, no model. None means: keep today's path (model pick)."""
     u = (utterance or "").strip()
@@ -5902,14 +5915,7 @@ def apply_pipeline_iter(
     if token and turn_cancelled(hive, token):
         return
     # Loop on_it: decide the model-free route now so the very first chunk can be the ack line.
-    early = None
-    if not wants_continuity_status(spoken_in):
-        early = fixed_route(spoken_in)
-        if early is None and not is_hard_step(spoken_in):
-            if wants_workspace_read(spoken_in):
-                early = {"tool": "workspace_read", "args": {}, "speak": ""}
-            elif wants_web_search(spoken_in):
-                early = {"tool": "web_search", "args": {}, "speak": ""}
+    early = model_free_route(spoken_in)
     ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""
     yield _pipeline_event(
         ok=True,

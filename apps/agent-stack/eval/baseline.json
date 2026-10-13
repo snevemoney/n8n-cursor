@@ -1,0 +1,15 @@
+{
+  "passing": [
+    "browser",
+    "computer",
+    "context",
+    "files",
+    "repos",
+    "tools",
+    "voice",
+    "vps",
+    "web"
+  ],
+  "passed": 9,
+  "total": 17
+}

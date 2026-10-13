@@ -1,0 +1,24 @@
+name: jarvis-probe-eval
+# Replays the 17 Jarvis probe asks offline (no model, no network, no secrets) and fails on a routing regression.
+on:
+  pull_request:
+    paths:
+      - "apps/agent-stack/**"
+permissions:
+  contents: read
+jobs:
+  probe-eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/agent-stack
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Replay 17 probes vs baseline
+        working-directory: apps/agent-stack
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python3 eval/eval_probes.py
