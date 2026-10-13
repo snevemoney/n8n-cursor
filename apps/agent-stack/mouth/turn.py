@@ -446,12 +446,12 @@ def _apply_turn_iter_inner(
     if not spoken:
         yield _door_speak(hive, spoken, "Holding. Say Jarvis, or tap Space.", "idle", retrieve_roots)
         return
-    try:  # Z99: a pasted secret is moved to .env.local and never echoed or sent to a model
+    try:  # Z99 + methods asks: a pasted secret is moved to .env.local and never echoed or sent to a model
         _mr = PIPELINE._load("agent_stack_methods_router", PIPELINE.STACK / "hands" / "methods_router.py")
         if _mr.wants(spoken):
             _got = _mr.run(spoken)
             _tok_m = PIPELINE.begin_turn(hive) if hasattr(PIPELINE, "begin_turn") else None
-            yield _door_speak(hive, "[secret withheld]", _got["spoken"], "methods_router", retrieve_roots, gen=_tok_m, execution=_got)
+            yield _door_speak(hive, "[secret withheld]" if _got.get("secret") else spoken, _got["spoken"], "methods_router", retrieve_roots, gen=_tok_m, execution=_got)
             return
     except (ImportError, OSError, RuntimeError):
         pass
