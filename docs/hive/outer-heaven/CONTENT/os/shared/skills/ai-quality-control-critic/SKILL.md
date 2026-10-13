@@ -28,3 +28,11 @@ Before public or client-facing ship. Also before a build commit (pre-implementat
 
 ## Never
 Creator self-PASS. Auto-publish. New SKU. Treat UNVERIFIED revenue as proof.
+
+## Judge calibration: one question per evaluator (2026-10-12, proven on box)
+Source: yt:qZj7sqmidqA (Laurie Voss, Arize, "From Vibes to Production") [1:17:34]–[1:29:12]. Proof: `/workspace/research/packets/missed-signals-20261012/proofs/judge-calibration/` (re-run with `python3 run.py`).
+1. Treat any LLM or Jev judge as a classifier. Hand-label a small set (≥20), run the judge, and report agreement, precision and recall. Agreement alone hides which way it's wrong.
+2. One dimension per evaluator. A rubric that bundles N criteria is N evaluators. Box result on 26 labelled posts (Jev judge): 5-criteria "god" rubric agreement 0.769 with recall 0.40 (it silently failed 6 of 10 true passes), versus a single-question judge at 0.923 (P 0.90 / R 0.90).
+3. Tighten a rubric only from the disagreements, then re-measure. Wording "tightened" blind scored lower (0.885).
+4. Test both directions (cases where the behaviour should and should not happen). Judge with a different vendor than the generator (self-preference bias), and watch position and length bias. These points come from the talk and are unverified here.
+Critic PASS still ≠ send.

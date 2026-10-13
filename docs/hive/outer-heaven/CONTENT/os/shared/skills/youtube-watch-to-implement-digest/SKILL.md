@@ -134,3 +134,11 @@ PROVE on box, 12 videos, 2026-10-12 ~19:00 ET:
 4. `oh-transcribe` returned HTTP 202 "YouTube bot-check from VPS IP; queued for box fallback worker" — treat as not-done, continue with step 3.
 5. fw-transcribe uses VAD: check for >20 s gaps between segments and re-run that slice (`ffmpeg -ss A -to B` + `--offset A`); one 13-min video lost 90 s until sliced.
 Count a video done only when a transcript file exists, not when the packet folder exists.
+
+## Enrich 2026-10-12 (missed-signals sweep, box-proven; packet `/workspace/research/packets/missed-signals-20261012/`)
+1. **Look for an existing transcript before downloading anything.** Check `packets/youtube-2wk-fullwatch-20261010/videos/<id>/transcripts/full.tsv`, `youtube-daily/l2-*/<id>/`, `youtube-daily/repass-*/<id>/` and `packets/codex-yt12-*/`. 7 of 36 "missed" videos already had full transcripts; their ledger rows were just stale (RUNNER_DONE with no CLOSED row, or backlog FAILED rows never updated).
+2. **Status = item state, not files.** RUNNER_DONE without a CLOSED row = PARTIAL (transcript, no method). A backlog FAILED row may be stale, so re-check the disk.
+3. **Chunk long audio at 20 min.** fw-transcribe on a 1h51 file was OOM-killed (3.1 GB RSS, 4 GB cap). `ffmpeg -ss S -t 1200 -ac 1 -ar 16000` slices + `--offset S` finished 65-min and 2h-class files. Delete each slice and the source audio right after (disk ran at 97%).
+4. **Default VAD can drop most of a talk over a music bed.** wQ0duoTeAAU (11 min) gave 957 chars with fw-transcribe's default VAD versus 4,942 with `vad_parameters=dict(threshold=0.15,min_silence_duration_ms=3000,speech_pad_ms=600)` and `condition_on_previous_text=False`. The tuned pass still writes filler ("So So So", stray foreign words) over pure music, so flag those spans; don't quote them. Sanity check: chars per minute < ~150 means re-run.
+5. **Pass `--lang` per video.** Japanese videos run with the default `en` come out as broken English. Use `ja` captions or `--lang ja`.
+6. **Captions came back mid-run.** Several ids that got 429 at 20:40 ET downloaded captions at ~21:30 ET. Run the queue in two passes (captions first, audio+ASR second) and retry captions before spending CPU on ASR.
