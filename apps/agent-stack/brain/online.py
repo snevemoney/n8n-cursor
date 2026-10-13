@@ -324,6 +324,10 @@ ALLOWED_ENV = (
     "JARVIS_BROWSER_PLANNER_MODEL",
     "JARVIS_BROWSER_TEXT_MODEL",
     "JARVIS_BROWSER_EXECUTABLE",
+    "N8N_MCP_ACCESS_TOKEN",
+    "N8N_MCP_REFRESH_TOKEN",
+    "HOSTINGER_MCP_ACCESS_TOKEN",
+    "HOSTINGER_MCP_REFRESH_TOKEN",
 )
 LOGIN_UNKNOWN = (
     "UNKNOWN. Cursor agent needs a one-time login. "
@@ -951,7 +955,9 @@ def default_env_files() -> list[Path]:
         ROOT / ".env",
         ROOT / ".env.dev",
         ROOT / ".env.local",
+        ROOT / ".env.mcp",
         ROOT / "apps" / "scorpion" / ".env.local",
+        Path.home() / "jarvis-int" / ".env.mcp",
         Path.home() / ".env",
     ]
 

@@ -482,6 +482,12 @@ def skill_text(name: str, cap: int = 3000) -> str:
 # ---------------------------------------------------------------- HTTP / URL MCP servers
 def http_spec(name: str) -> dict | None:
     """Internal only: url + header values from the same configs. Never returned or logged."""
+    try:
+        on = _load_brain_online()
+        if on is not None and hasattr(on, "load_existing_env"):
+            on.load_existing_env()
+    except Exception:
+        pass
     inv = _load("mcp_inventory", "mcp_inventory.py")
     for _src, path in inv.DEFAULT_PATHS:
         path = Path(path)
@@ -513,10 +519,17 @@ def _http_rpc(spec: dict, calls: list[dict], deadline: float) -> list[dict | Non
     import urllib.error
     sess: dict = {}
     end = time.monotonic() + deadline
+    # Prefer older first (n8n); fall back to Hostinger-supported versions on -32022.
+    versions = ["2025-03-26", "2025-06-18", "2025-11-25"]
+    proto = (spec.get("protocol") or os.environ.get("JARVIS_MCP_PROTOCOL") or "").strip()
+    if proto:
+        versions = [proto] + [v for v in versions if v != proto]
 
-    def post(msg: dict) -> dict | None:
+    def post(msg: dict, protocol: str) -> dict | None:
         h = {"Content-Type": "application/json", "Accept": "application/json, text/event-stream",
-             "MCP-Protocol-Version": "2025-03-26", **spec.get("headers", {})}
+             "MCP-Protocol-Version": protocol,
+             "User-Agent": "JarvisMCP/1.0 (Macintosh; compatible)",
+             **spec.get("headers", {})}
         if sess.get("id"):
             h["Mcp-Session-Id"] = sess["id"]
         req = urllib.request.Request(spec["url"], data=json.dumps(msg).encode(), headers=h, method="POST")
@@ -536,15 +549,33 @@ def _http_rpc(spec: dict, calls: list[dict], deadline: float) -> list[dict | Non
                             return m
                 return None
             return json.loads(body) if body.strip() and "id" in msg else None
-    out: list = []
-    post({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-03-26", "capabilities": {},
-          "clientInfo": {"name": "jarvis", "version": "1"}}})
+
+    chosen = versions[0]
+    init_msg = {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+        "protocolVersion": chosen, "capabilities": {}, "clientInfo": {"name": "jarvis", "version": "1"}}}
+    last_err: Exception | None = None
+    for ver in versions:
+        init_msg["params"]["protocolVersion"] = ver
+        try:
+            post(init_msg, ver)
+            chosen = ver
+            last_err = None
+            break
+        except urllib.error.HTTPError as e:
+            last_err = e
+            body = e.read().decode("utf-8", errors="replace") if e.fp else ""
+            if e.code == 400 and "Unsupported protocol version" in body:
+                continue
+            raise
+    if last_err is not None:
+        raise last_err
     try:
-        post({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        post({"jsonrpc": "2.0", "method": "notifications/initialized"}, chosen)
     except Exception:
         pass
+    out: list = []
     for i, c in enumerate(calls, start=2):
-        out.append(post({"jsonrpc": "2.0", "id": i, **c}))
+        out.append(post({"jsonrpc": "2.0", "id": i, **c}, chosen))
     return out
 
 
