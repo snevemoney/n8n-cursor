@@ -62,6 +62,7 @@ def run(u: str, *, notes: list, drafts: Path | None = None) -> dict:
                      + (f" + record {rec[0]}" if rec else "") + "\n- Status: draft, not sent\n", encoding="utf-8")
     spoken = (lead + f"Drafting the {r['kind']} now: {money} for {what}." + prec
               + (" The email to him is not drafted or sent yet: say 'draft the email' and I will; sending stays with you." if r["email"] else "")
-              + (f" It's in your drafts as {f.name}." if f else ""))
+              + (f" It's in your drafts as {f.name}." if f else "")
+              + (" Shall I pop a reminder on your calendar to chase the payment in a week?" if r["kind"] == "invoice" else ""))
     return {"ok": True, "tool": "entity_ack", "spoken": spoken, "record": rec[1] if rec else None, "parsed": r,
             "cites": [str(f)] if f else [], "wires": ["entity_ack"], "sent": False, "task_verified": True}

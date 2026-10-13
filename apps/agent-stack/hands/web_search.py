@@ -254,6 +254,20 @@ def log_meta(got: dict[str, Any]) -> dict[str, Any]:
             "n_results": int(got.get("results") or len(got.get("cites") or []))}
 
 
+GENERIC_Q = {"ideas", "idea", "info", "information", "details", "more", "it", "this", "that", "stuff", "things", "tips", "options"}
+
+
+def better_query(q: str, utterance: str) -> str:
+    """Z68: 'roast my channel page and do some research online for ideas' must not search the word 'ideas'."""
+    if (q or "").strip(" ?.").lower() not in GENERIC_Q and len((q or "").split()) > 1:
+        return q
+    u = re.sub(r"^\s*(?:hey\s+)?jarvis[,.]?\s*", "", utterance or "", flags=re.I)
+    u = re.sub(r"\b(?:and\s+)?(?:do|run|go)\s+(?:some\s+)?(?:research|digging|a search)\s+(?:online|on the web)?(?:\s+(?:if you need to|for \w+))?", "", u, flags=re.I)
+    u = re.sub(r"\b(?:roast|critique|review|tear apart)\s+(?:my\s+)?", "how to improve ", u, flags=re.I)
+    u = re.sub(r"\bmy\b", "a", u, flags=re.I).strip(" ,.?")
+    return (u + (" " + q.strip() if q and q.strip().lower() in GENERIC_Q else "")).strip() or q
+
+
 def query_from_utterance(utterance: str) -> str:
     q = re.sub(r"^\s*(?:please\s+)?(?:search\s+(?:the\s+)?(?:web|internet|online)(?:\s+for)?|look\s+(?:it\s+)?up\s+online|"
                r"google|web\s+search(?:\s+for)?)\s*[:,-]?\s*", "", utterance or "", flags=re.I)

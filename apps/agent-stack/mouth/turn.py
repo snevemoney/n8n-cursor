@@ -561,6 +561,21 @@ def _apply_turn_iter_inner(
             _notes = _REFLEX._vault_index() if _REFLEX is not None else []
             got = _ea.run(spoken, notes=_notes, drafts=None if os.environ.get("PYTEST_CURRENT_TEST") else PIPELINE._drafts_hand().drafts_dir())
             yield _door_speak(hive, spoken, got["spoken"], "entity_ack", retrieve_roots, gen=token, execution=got)
+            if got["parsed"]["kind"] == "invoice":  # Z34 offer can lapse (Z56)
+                _lp = PIPELINE._load("agent_stack_lapse", PIPELINE.STACK / "hands" / "lapse.py")
+                PIPELINE.mutate_bus(Path(hive), lambda b: _lp.open_q(b, topic="payment reminder", ask="Shall I pop a reminder on your calendar?",
+                                    pending=f"No payment reminder for {got['parsed']['who']} is on your calendar."))
+            return
+    except Exception:  # noqa: BLE001
+        pass
+    # Z84 (dCK 10:49): an app with no tool -> "<App> isn't in your arsenal yet", nothing improvised.
+    try:
+        _tg = PIPELINE._load("agent_stack_toolgap", PIPELINE.STACK / "hands" / "toolgap.py")
+        _inv = PIPELINE._load("agent_stack_mcp_inventory", PIPELINE.STACK / "hands" / "mcp_inventory.py").inventory()[0]
+        _gap = _tg.gap(spoken, [str(x.get("name") or "") for x in _inv])
+        if _gap:
+            yield _door_speak(hive, spoken, _gap, "toolgap", retrieve_roots, gen=token,
+                              execution={"ok": True, "tool": "toolgap", "spoken": _gap, "wires": ["mcp_inventory"], "sent": False})
             return
     except Exception:  # noqa: BLE001
         pass
@@ -761,6 +776,26 @@ def _reflex(utterance: str) -> dict | None:
         return None
 
 
+HEARTBEAT_SEC = float(os.environ.get("JARVIS_HEARTBEAT_SEC") or 8)
+HEARTBEAT = "Still checking, sir; the wires are being fashionably slow."
+
+
+def _placeholders(text: str, utterance: str) -> str:
+    """Z67 (1ILap 5:14): in generated docs, a number Evens did not give becomes 'X', not an invented stat."""
+    given = set(re.findall(r"\d[\d,.]*", utterance or ""))
+
+    def sub(m):
+        tok = m.group(0)
+        if tok.rstrip(".,") in {g.rstrip(".,") for g in given}:
+            return tok
+        if re.match(r"^\d{1,2}\.$", tok) and (m.start() == 0 or text[m.start() - 1] in "\n "):
+            return tok  # list numbering
+        if re.match(r"^(?:19|20)\d\d$", tok.rstrip(".,")):
+            return tok  # years
+        return ("$" if tok.startswith("$") else "") + "X" + ("%" if tok.endswith("%") else "")
+    return re.sub(r"\$?\d[\d,.]*%?", sub, text)
+
+
 def apply_turn_iter(utterance: str, **kw):
     """The turn, then one JSONL log line when it finishes. Logging never breaks a turn."""
     import time as _time
@@ -780,8 +815,40 @@ def apply_turn_iter(utterance: str, **kw):
         PIPELINE.mutate_bus(kw.get("hive") or HIVE, _lp.answered)
     except Exception:  # noqa: BLE001
         pass
+    gen_doc = bool(re.search(r"\b(?:write|draft|create|make|generate|rewrite)\b.{0,40}\b(?:bullets?|resume|summary|bio|post|doc(?:ument)?|proposal|landing page|copy|headline|email)\b", utterance or "", re.I))
+    import queue as _q
+    import threading as _th2
+    box: _q.Queue = _q.Queue()
+
+    def _pump():
+        try:
+            for _ev in _apply_turn_iter_inner(utterance, **kw):
+                box.put(("ev", _ev))
+        except BaseException as _e:  # noqa: BLE001
+            box.put(("err", _e))
+        box.put(("end", None))
+    _th2.Thread(target=_pump, daemon=True).start()
+
+    def _inner():
+        beat = False
+        while True:
+            try:
+                kind, val = box.get(timeout=0.25 if beat else max(0.1, HEARTBEAT_SEC - (_time.time() - started)))
+            except _q.Empty:
+                if not beat and _time.time() - started >= HEARTBEAT_SEC:
+                    beat = True  # Z81 (dCK 4:34): ONE in-persona heartbeat on a slow turn, never a stream of fillers (Z53)
+                    yield _turn_event(spoken=HEARTBEAT, verb="think", host="local", wires=["heartbeat"],
+                                      spoken_delta=HEARTBEAT, done=False, partial=True, gen=None)
+                continue
+            if kind == "end":
+                return
+            if kind == "err":
+                raise val
+            if gen_doc and isinstance(val, dict) and not val.get("partial") and val.get("verb") in ("converse", "drafts", "think", None):
+                val = dict(val, spoken=_placeholders(str(val.get("spoken") or ""), utterance))
+            yield val
     try:
-        for ev in _apply_turn_iter_inner(utterance, **kw):
+        for ev in _inner():
             if first_ms is None and isinstance(ev, dict) and str(ev.get("spoken_delta") or "").strip():
                 first_ms = int((_time.time() - started) * 1000)
             if isinstance(ev, dict) and not ev.get("partial"):

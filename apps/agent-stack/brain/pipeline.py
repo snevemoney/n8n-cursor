@@ -5331,6 +5331,7 @@ def _run_tool_inner(
     if tool == "web_search":
         ws = _web_search_hand()
         q = str(args.get("query") or "") or ws.query_from_utterance(utterance)
+        q = ws.better_query(q, utterance) if hasattr(ws, "better_query") else q
         got = ws.run({"query": q})
         return {
             "ok": bool(got.get("ok")),
