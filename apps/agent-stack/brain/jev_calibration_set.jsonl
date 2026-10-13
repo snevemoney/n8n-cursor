@@ -1,0 +1,115 @@
+{"id": "c-r01", "utterance": "explain what a CANDIDATE means", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r02", "utterance": "what is the difference between PASS and CANDIDATE", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r03", "utterance": "describe the orb in one sentence", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r04", "utterance": "what can you do", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r05", "utterance": "name three things you can help with", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r06", "utterance": "who can issue a PASS", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r07", "utterance": "are you allowed to merge pull requests", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r08", "utterance": "what's the plan for PR 619", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r09", "utterance": "how are you tonight", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r10", "utterance": "thanks", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r11", "utterance": "good evening jarvis", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r12", "utterance": "what model are you running on", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r13", "utterance": "tell me a joke", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r14", "utterance": "why is the sky blue", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r15", "utterance": "where do ArtCraft projects get saved", "label": "converse", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r16", "utterance": "run status", "label": "status", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r17", "utterance": "status check: are all your tools ready", "label": "status", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r18", "utterance": "are you online", "label": "status", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r19", "utterance": "what did I just say", "label": "recall", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r20", "utterance": "remind me what we decided", "label": "recall", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r21", "utterance": "what did you tell me earlier", "label": "recall", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r22", "utterance": "read my vault note on lanes", "label": "local_read", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r23", "utterance": "show me the lane file", "label": "local_read", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r24", "utterance": "what's in my vault about the studio", "label": "local_read", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r25", "utterance": "open safari", "label": "tool", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r26", "utterance": "look at my screen", "label": "tool", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r27", "utterance": "click the download button", "label": "tool", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r28", "utterance": "take a screenshot", "label": "tool", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r29", "utterance": "in GridCraft make a sheet and save it", "label": "craft", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r30", "utterance": "create a poster in PhotoCraft", "label": "craft", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r31", "utterance": "send the invoice to Bob now", "label": "hard_step", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r32", "utterance": "merge the PR", "label": "hard_step", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r33", "utterance": "deploy it to production now", "label": "hard_step", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r34", "utterance": "pay the bill", "label": "hard_step", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r35", "utterance": "delete that file", "label": "hard_step", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r36", "utterance": "publish the post", "label": "hard_step", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r37", "utterance": "um", "label": "unclear", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r38", "utterance": "so the", "label": "unclear", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r39", "utterance": "and then the", "label": "unclear", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r41", "utterance": "let's think about tomorrow's schedule", "label": "other", "source": "jev_replay_set", "synthetic": true}
+{"id": "c-r42", "utterance": "I had a weird day", "label": "other", "source": "jev_replay_set", "synthetic": true}
+{"id": "p-mcp", "utterance": "What MCP servers or tools can you call right now? List them.", "label": "local_read", "source": "probes17", "synthetic": true}
+{"id": "p-tools", "utterance": "Use a tool: list the files in my Downloads folder.", "label": "local_read", "source": "probes17", "synthetic": true}
+{"id": "p-skills", "utterance": "Which skills do you have installed? Name three.", "label": "local_read", "source": "probes17", "synthetic": true}
+{"id": "p-workflows", "utterance": "Run the feature-loop workflow status for me.", "label": "local_read", "source": "probes17", "synthetic": true}
+{"id": "p-memory", "utterance": "Remember that my favourite test color is teal.", "label": "memory", "source": "probes17", "synthetic": true}
+{"id": "p-memory2", "utterance": "What is my favourite test color?", "label": "memory", "source": "probes17", "synthetic": true}
+{"id": "p-context", "utterance": "What repo and branch are you working from right now?", "label": "local_read", "source": "probes17", "synthetic": true}
+{"id": "p-loops", "utterance": "Start a loop that checks disk space every 10 minutes.", "label": "local_read", "source": "probes17", "synthetic": true}
+{"id": "p-web", "utterance": "Search the web: what is the latest stable Python release?", "label": "web_search", "source": "probes17", "synthetic": true}
+{"id": "p-browser", "utterance": "Open example.com in the browser and tell me the page title.", "label": "tool", "source": "probes17", "synthetic": true}
+{"id": "p-computer", "utterance": "Take a screenshot of my screen and describe it.", "label": "tool", "source": "probes17", "synthetic": true}
+{"id": "p-jev", "utterance": "Ask Jev whether I should merge PR 619.", "label": "local_read", "source": "probes17", "synthetic": true}
+{"id": "p-repos", "utterance": "Which repos do you have installed locally?", "label": "local_read", "source": "probes17", "synthetic": true}
+{"id": "p-coding", "utterance": "Write a python function that reverses a string and run its test.", "label": "local_read", "source": "probes17", "synthetic": true}
+{"id": "p-files", "utterance": "Read the first line of README.md in your repo.", "label": "local_read", "source": "probes17", "synthetic": true}
+{"id": "p-vps", "utterance": "What is the status of my Hostinger VPS?", "label": "status", "source": "probes17", "synthetic": true}
+{"id": "p-voice", "utterance": "Say hello out loud.", "label": "tool", "source": "probes17", "synthetic": true}
+{"id": "x001", "utterance": "what is a draft pull request", "label": "converse", "source": "consultant-labelled", "synthetic": true}
+{"id": "x002", "utterance": "explain the feature loop in two sentences", "label": "converse", "source": "consultant-labelled", "synthetic": true}
+{"id": "x003", "utterance": "how does the replay eval work", "label": "converse", "source": "consultant-labelled", "synthetic": true}
+{"id": "x004", "utterance": "why is the stack a candidate and not a pass", "label": "converse", "source": "consultant-labelled", "synthetic": true}
+{"id": "x005", "utterance": "tell me about kokoro", "label": "converse", "source": "consultant-labelled", "synthetic": true}
+{"id": "x006", "utterance": "what does jev do", "label": "converse", "source": "consultant-labelled", "synthetic": true}
+{"id": "x007", "utterance": "good morning jarvis", "label": "converse", "source": "consultant-labelled", "synthetic": true}
+{"id": "x008", "utterance": "thank you", "label": "converse", "source": "consultant-labelled", "synthetic": true}
+{"id": "x009", "utterance": "how are you this morning", "label": "converse", "source": "consultant-labelled", "synthetic": true}
+{"id": "x010", "utterance": "what should I work on first today", "label": "converse", "source": "consultant-labelled", "synthetic": true}
+{"id": "x011", "utterance": "describe the honesty check", "label": "converse", "source": "consultant-labelled", "synthetic": true}
+{"id": "x012", "utterance": "who is allowed to merge", "label": "converse", "source": "consultant-labelled", "synthetic": true}
+{"id": "x013", "utterance": "run status", "label": "status", "source": "consultant-labelled", "synthetic": true}
+{"id": "x014", "utterance": "system status please", "label": "status", "source": "consultant-labelled", "synthetic": true}
+{"id": "x015", "utterance": "are your tools ready", "label": "status", "source": "consultant-labelled", "synthetic": true}
+{"id": "x016", "utterance": "are you online", "label": "status", "source": "consultant-labelled", "synthetic": true}
+{"id": "x017", "utterance": "status check on the stack", "label": "status", "source": "consultant-labelled", "synthetic": true}
+{"id": "x018", "utterance": "give me a status report", "label": "status", "source": "consultant-labelled", "synthetic": true}
+{"id": "x019", "utterance": "are all your tools ready right now", "label": "status", "source": "consultant-labelled", "synthetic": true}
+{"id": "x020", "utterance": "what did I just say", "label": "recall", "source": "consultant-labelled", "synthetic": true}
+{"id": "x021", "utterance": "remind me what you told me about the PR", "label": "recall", "source": "consultant-labelled", "synthetic": true}
+{"id": "x022", "utterance": "what did you just tell me", "label": "recall", "source": "consultant-labelled", "synthetic": true}
+{"id": "x023", "utterance": "last thing I said was what", "label": "recall", "source": "consultant-labelled", "synthetic": true}
+{"id": "x024", "utterance": "remember that the demo is on friday", "label": "memory", "source": "consultant-labelled", "synthetic": true}
+{"id": "x025", "utterance": "forget the demo date", "label": "memory", "source": "consultant-labelled", "synthetic": true}
+{"id": "x026", "utterance": "what do you remember about me", "label": "memory", "source": "consultant-labelled", "synthetic": true}
+{"id": "x027", "utterance": "please remember my desk is the Watchdog", "label": "memory", "source": "consultant-labelled", "synthetic": true}
+{"id": "x028", "utterance": "recall my favourite color", "label": "memory", "source": "consultant-labelled", "synthetic": true}
+{"id": "x029", "utterance": "read the first line of program.md", "label": "local_read", "source": "consultant-labelled", "synthetic": true}
+{"id": "x030", "utterance": "what branch is this", "label": "local_read", "source": "consultant-labelled", "synthetic": true}
+{"id": "x031", "utterance": "list the files in my downloads", "label": "local_read", "source": "consultant-labelled", "synthetic": true}
+{"id": "x032", "utterance": "which skills do you have", "label": "local_read", "source": "consultant-labelled", "synthetic": true}
+{"id": "x033", "utterance": "show me the feature-loop skill", "label": "local_read", "source": "consultant-labelled", "synthetic": true}
+{"id": "x034", "utterance": "which mcp servers are set up", "label": "local_read", "source": "consultant-labelled", "synthetic": true}
+{"id": "x035", "utterance": "start a loop that checks the vps every 30 minutes", "label": "local_read", "source": "consultant-labelled", "synthetic": true}
+{"id": "x036", "utterance": "list my loops", "label": "local_read", "source": "consultant-labelled", "synthetic": true}
+{"id": "x037", "utterance": "ask jev whether this is ready", "label": "local_read", "source": "consultant-labelled", "synthetic": true}
+{"id": "x038", "utterance": "read my vault note on jarvis", "label": "local_read", "source": "consultant-labelled", "synthetic": true}
+{"id": "x039", "utterance": "what voice engine are you using", "label": "local_read", "source": "consultant-labelled", "synthetic": true}
+{"id": "x040", "utterance": "open example.com in safari", "label": "tool", "source": "consultant-labelled", "synthetic": true}
+{"id": "x041", "utterance": "take a screenshot", "label": "tool", "source": "consultant-labelled", "synthetic": true}
+{"id": "x042", "utterance": "look at my screen", "label": "tool", "source": "consultant-labelled", "synthetic": true}
+{"id": "x043", "utterance": "click the download button in safari", "label": "tool", "source": "consultant-labelled", "synthetic": true}
+{"id": "x044", "utterance": "turn on watch mode", "label": "tool", "source": "consultant-labelled", "synthetic": true}
+{"id": "x045", "utterance": "send the invoice to the client now", "label": "hard_step", "source": "consultant-labelled", "synthetic": true}
+{"id": "x046", "utterance": "pay this bill", "label": "hard_step", "source": "consultant-labelled", "synthetic": true}
+{"id": "x047", "utterance": "deploy it to prod", "label": "hard_step", "source": "consultant-labelled", "synthetic": true}
+{"id": "x048", "utterance": "merge the pr now", "label": "hard_step", "source": "consultant-labelled", "synthetic": true}
+{"id": "x049", "utterance": "delete the old branch now", "label": "hard_step", "source": "consultant-labelled", "synthetic": true}
+{"id": "x050", "utterance": "publish this post now", "label": "hard_step", "source": "consultant-labelled", "synthetic": true}
+{"id": "x051", "utterance": "um", "label": "unclear", "source": "consultant-labelled", "synthetic": true}
+{"id": "x052", "utterance": "uh so", "label": "unclear", "source": "consultant-labelled", "synthetic": true}
+{"id": "x053", "utterance": "hmm", "label": "unclear", "source": "consultant-labelled", "synthetic": true}
+{"id": "x054", "utterance": "and then the", "label": "unclear", "source": "consultant-labelled", "synthetic": true}
+{"id": "x055", "utterance": "search the web for kokoro onnx", "label": "web_search", "source": "consultant-labelled", "synthetic": true}
+{"id": "x056", "utterance": "web search latest node version", "label": "web_search", "source": "consultant-labelled", "synthetic": true}
+{"id": "x057", "utterance": "look it up online: python 3.14 release date", "label": "web_search", "source": "consultant-labelled", "synthetic": true}

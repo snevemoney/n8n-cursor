@@ -6436,6 +6436,14 @@ def apply_pipeline_iter(
             ran = {"ok": True, "tool": "converse", "spoken": line, "wires": ["jev"], "cites": [], "sent": False,
                    "from_store": False, "unknown": False, "model_available": False, "outcome": STORE_DIRECT}
 
+    if pick is None and ran is None and JEVR is not None and hasattr(JEVR, "assist"):
+        # Jev ASSIST (router only, calibrated, fail-open 800 ms): may suggest a safe hand on the model path.
+        _assist = JEVR.assist(spoken_in)
+        if _assist:
+            pick = {"tool": _assist["tool"], "args": {}, "speak": ""}
+            brain = "jev_assist"
+            JEVR.log_assist(hive, spoken_in, _assist, used=True, ms=_assist.get("ms"))
+
     if pick is None and (talk_fn is not None or cursor_fn is None):
         brief = pack_text or sitting_brief(prior_turns, bus_now, retrieve_roots, spoken_in)
         if pack_text:

@@ -43,7 +43,7 @@ HANDLERS = ("memory", "converse", "status", "recall", "local_read", "tool", "cra
 _RULES: list[tuple[str, float, re.Pattern]] = [
     ("hard_step", 1.0, re.compile(r"\b(send|email|text|pay|purchase|buy|deploy|merge|publish|post|delete|wire\s+money|transfer)\b.{0,40}\b(it|this|that|the|to|now|invoice|pr|money|\$)", re.I)),
     ("memory", 0.9, re.compile(r"^\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?(?:remember|forget|recall)\b|^\s*what\s+do\s+you\s+remember\b", re.I)),
-    ("status", 0.9, re.compile(r"\b(run\s+status|status\s+(?:check|report)|are\s+(?:all\s+)?(?:your\s+)?tools\s+ready|system\s+status|are\s+you\s+(?:up|online|working))\b", re.I)),
+    ("status", 0.9, re.compile(r"\b(run\s+status|status\s+(?:check|report)|are\s+(?:all\s+)?(?:your\s+)?tools\s+ready|system\s+status|are\s+you\s+(?:up|online|working))\b(?!\s+(?:from|on|in)\b)", re.I)),
     ("recall", 0.9, re.compile(r"\b(what\s+did\s+(?:I|you|we)\s+(?:just\s+)?(?:say|ask|tell)|remind\s+me\s+what|earlier\s+you\s+said|last\s+thing\s+(?:I|you)\s+said)\b", re.I)),
     # web_search hand: explicit web lookups (advisory label only).
     ("web_search", 0.9, re.compile(r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b|\blook\s+(?:it\s+)?up\s+online\b|\bweb\s+search\b|\bgoogle\s+(?:the|for|what|who|how)\b", re.I)),
@@ -366,3 +366,64 @@ def replay(path: Path = REPLAY_SET, picker=pick_skill) -> dict[str, Any]:
 
 if __name__ == "__main__":
     print(json.dumps(replay(), indent=1))
+
+
+# --- 7. ASSIST for the router only (FINISH-LIST rank 15) -------------------------------------------
+# Jev may SUGGEST one safe routing hand on the model path, only after calibration passed, within
+# 800 ms (fail-open). Never a hard step, never an action, never authoritative.
+CALIBRATION = Path(__file__).resolve().parents[1] / "eval" / "jev_calibration.json"
+ASSIST_BUDGET_MS = 800
+ASSIST_TOOLS = {"status": "status"}
+
+
+def _calibration() -> dict[str, Any]:
+    try:
+        return json.loads(CALIBRATION.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {"assist_ok": False, "threshold": 1.01, "brier": None}
+
+
+def assist(utterance: str, budget_ms: int = ASSIST_BUDGET_MS) -> dict[str, Any] | None:
+    if not _flag("JARVIS_JEV_ASSIST", "1"):
+        return None
+    cal = _calibration()
+    if not cal.get("assist_ok"):
+        return None
+    import threading
+    import time as _t
+    box: dict[str, Any] = {}
+    t0 = _t.monotonic()
+
+    def _run() -> None:
+        try:
+            box["pick"] = pick_skill(utterance)
+        except Exception:  # noqa: BLE001
+            box["pick"] = None
+
+    th = threading.Thread(target=_run, daemon=True)
+    th.start()
+    th.join(max(0.0, budget_ms / 1000.0))
+    pick = box.get("pick")
+    if th.is_alive() or not pick:
+        return None
+    tool = ASSIST_TOOLS.get(str(pick.get("handler")))
+    if not tool or float(pick.get("confidence") or 0) < float(cal.get("threshold") or 1.01):
+        return None
+    return {"tool": tool, "handler": pick.get("handler"), "confidence": pick.get("confidence"),
+            "mode": "ASSIST", "authoritative": False, "ms": int((_t.monotonic() - t0) * 1000)}
+
+
+def log_assist(hive: Path, utterance: str, pick: dict | None, *, used: bool, ms: int | None) -> dict | None:
+    """Metadata only (no utterance text). Carries the calibration Brier score."""
+    cal = _calibration()
+    row = {"ts": datetime.now(timezone.utc).isoformat(), "mode": "ASSIST", "authoritative": False,
+           "handler": (pick or {}).get("handler"), "confidence": (pick or {}).get("confidence"),
+           "used": bool(used), "ms": ms, "brier": cal.get("brier"), "words": len((utterance or "").split())}
+    try:
+        out = Path(hive) / "bus" / LOG_NAME
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row, ensure_ascii=True) + "\n")
+    except OSError:
+        pass
+    return row
