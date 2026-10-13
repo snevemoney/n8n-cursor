@@ -1020,6 +1020,25 @@ def _crash_fallback(utterance: str) -> dict | None:
     return _turn_event(spoken=line, verb="converse", host="pipeline", wires=["converse", "crash_fallback"], spoken_delta=line)
 
 
+REPEAT_MIN_CHARS = 20
+REPEAT_LINE = "Sorry, sir, I was about to repeat myself. Say that again and I will answer it properly."
+
+
+def _is_repeat(spoken: str, previous: str, utterance: str, previous_utterance: str) -> bool:
+    """True when a reply is Jarvis's last line word for word, given for a different ask."""
+    norm = lambda t: re.sub(r"^sir\s+", "", re.sub(r"\s+", " ", re.sub(r"[^\w\s]", "", str(t or "").lower())).strip())
+    a, b = norm(spoken), norm(previous)
+    return len(a) >= REPEAT_MIN_CHARS and a == b and norm(utterance) != norm(previous_utterance)
+
+
+def _previous_exchange(hive) -> tuple[str, str]:
+    try:
+        bus = PIPELINE.load_json(Path(hive) / "bus" / "state.json") or {}
+    except (OSError, TypeError, ValueError):
+        return "", ""
+    return str(bus.get("spoken") or ""), str(bus.get("utterance") or "")
+
+
 def apply_turn_iter(utterance: str, **kw):
     """The turn, then one JSONL log line when it finishes. Logging never breaks a turn."""
     import time as _time
@@ -1040,8 +1059,13 @@ def apply_turn_iter(utterance: str, **kw):
     except Exception:  # noqa: BLE001
         pass
     gen_doc = bool(re.search(r"\b(?:write|draft|create|make|generate|rewrite)\b.{0,40}\b(?:bullets?|resume|summary|bio|post|doc(?:ument)?|proposal|landing page|copy|headline|email)\b", utterance or "", re.I))
+    prev_line, prev_ask = _previous_exchange(kw.get("hive") or HIVE)
+
     def _inner():
         for val in _apply_turn_iter_inner(utterance, **kw):
+            if (isinstance(val, dict) and not val.get("partial") and val.get("verb") in ("converse", None)
+                    and _is_repeat(str(val.get("spoken") or ""), prev_line, utterance, prev_ask)):
+                val = dict(val, spoken=REPEAT_LINE, spoken_delta=REPEAT_LINE if val.get("spoken_delta") else val.get("spoken_delta"))
             if gen_doc and isinstance(val, dict) and not val.get("partial") and val.get("verb") in ("converse", "drafts", "think", None):
                 val = dict(val, spoken=_placeholders(str(val.get("spoken") or ""), utterance))
             yield val
