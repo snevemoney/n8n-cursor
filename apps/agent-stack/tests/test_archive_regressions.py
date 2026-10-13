@@ -39,7 +39,10 @@ class ArchiveRegressionTest(unittest.TestCase):
             text = persona.wrap(case["payload"], verb=case["verb"], utterance="x")
             ok = persona.wrap("Saved example.xlsx.", verb=case["verb"], utterance="x")
         self.check(case, text)
-        self.assertIn("Done.", ok)  # success keeps the beat; the guard is specific
+        # The guard is specific: a real success keeps its result. The old "Done." beat on a repeat was removed on
+        # purpose by the honesty loop (0f27d0fa4: never "Again, sir. Done."), so assert the result, not the beat.
+        self.assertIn("Saved example.xlsx", ok)
+        self.assertNotIn("Again, sir. Done.", ok)
 
     def test_turn_4068_does_not_deny_file_capability(self):
         persona = _load("reg_persona_b", "mouth/persona.py")

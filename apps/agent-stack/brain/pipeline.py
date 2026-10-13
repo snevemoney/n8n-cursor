@@ -716,7 +716,7 @@ WORKSPACE_READ_RE = re.compile(
 def _memory_hand():
     name = "agent_stack_memory"
     if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "memory.py")
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "remember.py")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
@@ -3676,7 +3676,11 @@ def voice_status_line() -> str:
     except Exception:
         return "I can't read my voice engine right now, so I'm text only."
     if got.get("engine") in ("dark", "kokoro-dark-python"):
-        return str(got.get("spoken") or "I have no voice engine working right now, so I'm text only.")
+        # Honest no-engine line, plus the volume answer the ask wanted: volume can't fix a dark engine (R14).
+        line = str(got.get("spoken") or "I have no voice engine working right now, so I'm text only.")
+        if "volume" not in line.lower():
+            line += " Your volume is not the problem; raising it won't help until a voice engine is running."
+        return line
     return str(got.get("spoken") or "") + " If you hear nothing, raise system volume or tap Stop, then speak again."
 
 

@@ -57,7 +57,21 @@ WORD_RE = re.compile(r"[a-z]{3,}")
 ECHO_RE = re.compile(r"\bStep \d+:|Inspect (before|after)|→ (ok|FAILED)\b", re.I)
 
 
-from hands.mcp_call import LIST_METHOD as _LIST_METHOD
+def _load_list_method() -> str:
+    # Load by file path like the rest of the stack: launchd runs with no PYTHONPATH, so `hands.` is not importable.
+    import importlib.util
+    import sys as _sys
+    name = "agent_stack_mcp_call"
+    mod = _sys.modules.get(name)
+    if mod is None:
+        spec = importlib.util.spec_from_file_location(name, Path(__file__).resolve().parent / "mcp_call.py")
+        mod = importlib.util.module_from_spec(spec)
+        _sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return mod.LIST_METHOD
+
+
+_LIST_METHOD = _load_list_method()
 
 
 class CraftError(RuntimeError):

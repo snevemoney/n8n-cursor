@@ -12,6 +12,11 @@ import unittest
 import unittest.mock
 from pathlib import Path
 
+
+# Tests must never write Evens's real memory (~/.grok-private/jarvis-memory.json): it was full of maple/lantern-7 rows.
+import os as _os_mem, tempfile as _tmp_mem
+_os_mem.environ["JARVIS_MEMORY_FILE"] = _os_mem.path.join(_tmp_mem.mkdtemp(prefix="jarvis-test-mem-"), "memory.json")
+
 SCRIPT = Path(__file__).resolve().parent / "pipeline.py"
 TURN = Path(__file__).resolve().parent.parent / "mouth" / "turn.py"
 
@@ -346,7 +351,9 @@ class PipelineDarkCursorTest(unittest.TestCase):
             self.assertIn("maple", lines[0].lower())
             self.assertEqual(lines[1], "converse")
             self.assertEqual(lines[2], "model=False")
-            self.assertEqual(len(calls), 1)
+            # "Remember that ..." is now answered by the deterministic memory hand (771885ed4), so the dark model is
+            # never asked; the old "exactly one cursor call" expectation predates that hand.
+            self.assertEqual(calls, [])
 
     def test_read_my_local_operator_memory_uses_the_existing_file(self) -> None:
         def dark_cursor(prompt: str, mode: str = "ask", **kw):
