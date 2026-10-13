@@ -1189,7 +1189,7 @@
             bargeSince = 0;
             pressStop();
             $("spoken").textContent = "Go ahead, I'm listening.";
-            scheduleRestart(120);
+            scheduleRestart(TTS_COOLDOWN);
           }
         } else {
           bargeSince = 0;
