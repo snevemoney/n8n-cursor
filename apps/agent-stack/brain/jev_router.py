@@ -44,6 +44,8 @@ _RULES: list[tuple[str, float, re.Pattern]] = [
     ("hard_step", 1.0, re.compile(r"\b(send|email|text|pay|purchase|buy|deploy|merge|publish|post|delete|wire\s+money|transfer)\b.{0,40}\b(it|this|that|the|to|now|invoice|pr|money|\$)", re.I)),
     ("status", 0.9, re.compile(r"\b(run\s+status|status\s+(?:check|report)|are\s+(?:all\s+)?(?:your\s+)?tools\s+ready|system\s+status|are\s+you\s+(?:up|online|working))\b", re.I)),
     ("recall", 0.9, re.compile(r"\b(what\s+did\s+(?:I|you|we)\s+(?:just\s+)?(?:say|ask|tell)|remind\s+me\s+what|earlier\s+you\s+said|last\s+thing\s+(?:I|you)\s+said)\b", re.I)),
+    # web_search hand: explicit web lookups (advisory label only).
+    ("web_search", 0.9, re.compile(r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b|\blook\s+(?:it\s+)?up\s+online\b|\bweb\s+search\b|\bgoogle\s+(?:the|for|what|who|how)\b", re.I)),
     # workspace_read hand: repo/branch/file/folder asks are a local read (advisory label only).
     ("local_read", 0.9, re.compile(r"\b(?:what|which)\s+(?:repo|repos|branch)\b|\b(?:read|open)\b.{0,40}\.(?:md|txt|py|json)\b|\blist\b.{0,30}\b(?:downloads|desktop|documents)\b", re.I)),
     ("local_read", 0.9, re.compile(r"\b(read|open|show)\s+(?:me\s+)?(?:my|the)\s+(?:vault|note|notes|file|lane|doc)\b|\bin\s+(?:my|the)\s+vault\b", re.I)),
