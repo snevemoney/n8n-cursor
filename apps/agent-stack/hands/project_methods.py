@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 MAX_TEXT = 64_000
-SECRET = re.compile(r"(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk-|xai-|ghp_|gho_|github_pat_)[A-Za-z0-9_-]{16,}|\b(?:api[_-]?key|password|(?:access|refresh|id)[_-]?token|client[_-]?secret)\s*[:=]\s*[\"']?[A-Za-z0-9_./+-]{12,}|\bBearer\s+[A-Za-z0-9_./+-]{20,})", re.I)
+SECRET = re.compile(r"(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk-|xai-|ghp_|gho_|github_pat_|xox[abp]-)[A-Za-z0-9_-]{16,}|\bAKIA[0-9A-Z]{16}\b|\bAIza[A-Za-z0-9_-]{20,}|\bya29\.[A-Za-z0-9_-]{20,}|(?<![A-Za-z0-9])(?:[A-Za-z][A-Za-z0-9_-]*[_-])?(?:api[_-]?key|password|token|(?:access|refresh|id)[_-]?token|client[_-]?secret|secret[_-]?key)[\"']?\s*[:=]\s*[\"']?[A-Za-z0-9_./+-]{12,}|\bBearer\s+[A-Za-z0-9_./+-]{20,})", re.I)
 NAME = re.compile(r"[a-z0-9][a-z0-9-]{0,63}\Z")
 
 
@@ -56,7 +56,7 @@ def child(root: Path, *parts):
 
 
 def write_new(path: Path, text: str):
-    path.parent.mkdir(parents=True, exist_ok=True)
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     # O_EXCL avoids replacing user work or immutable sources.
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     with os.fdopen(fd, "w", encoding="utf-8") as f:
@@ -66,7 +66,7 @@ def write_new(path: Path, text: str):
 
 
 def atomic_json(path: Path, row):
-    path.parent.mkdir(parents=True, exist_ok=True)
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     fd, tmp = tempfile.mkstemp(prefix=".project-", dir=path.parent)
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
@@ -87,9 +87,10 @@ def create(root: Path, name: str, goal: str, done: str, role="Jarvis"):
                 "role": clean_text(role), "created": stamp(), "human_vault": "read-only"}
     if project.exists():
         raise ValueError("Project already exists; its files were preserved")
-    project.mkdir(parents=True)
+    child(root).mkdir(parents=True, exist_ok=True, mode=0o700)
+    project.mkdir(mode=0o700)
     for folder in ("Inputs", "Process", "Outputs", "Feedback"):
-        child(project, folder).mkdir()
+        child(project, folder).mkdir(mode=0o700)
     write_new(child(project, "PROJECT.md"), "# " + name + "\n\n" +
               "\n".join(f"- {k}: {v}" for k, v in contract.items()) + "\n")
     write_new(child(project, "contract.json"), json.dumps(contract, indent=2))
@@ -146,9 +147,19 @@ def source_review(root, project, ident, quality, evidence):
     row = json.loads(raw.read_text())
     if hashlib.sha256(row["text"].encode()).hexdigest() != ident:
         raise ValueError("Source contents no longer match their captured ID")
-    assessment = {"id": ident, "quality": quality, "evidence": clean_text(evidence),
-                  "at": stamp(), "raw_sha256": hashlib.sha256(raw.read_bytes()).hexdigest()}
-    atomic_json(child(p, "Process", "source-review-" + ident + ".json"), assessment)
+    import fcntl
+    evidence = clean_text(evidence)
+    path = child(p, "Process", "source-review-" + ident + ".json")
+    lock_path = child(p, "Process", "source-review-" + ident + ".lock")
+    with os.fdopen(os.open(lock_path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600), "a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        prior = json.loads(path.read_text()) if path.exists() else None
+        history = (prior.get("history", []) + [{k:v for k,v in prior.items() if k != "history"}]) if prior else []
+        assessment = {"id": ident, "quality": quality, "evidence": evidence,
+                      "at": stamp(), "raw_sha256": hashlib.sha256(raw.read_bytes()).hexdigest(),
+                      "revision": (prior.get("revision", 0) if prior else 0) + 1,
+                      "assessment_only": True, "history": history}
+        atomic_json(path, assessment)
     return assessment
 
 
@@ -375,11 +386,14 @@ def anchored_audit(evidence):
     out = {}
     for name, row in evidence.items():
         score = row.get("score")
-        if score not in {0, 1, 3, 5} or isinstance(score, bool):
+        if not isinstance(score, int) or score not in {0, 1, 3, 5} or isinstance(score, bool):
             raise ValueError("Only the 0, 1, 3 and 5 rubric anchors are allowed")
         if score and not row.get("sources"):
             raise ValueError("A nonzero score needs evidence sources")
-        out[name] = {"score": score, "sources": list(row.get("sources", [])),
+        citations = row.get("sources", [])
+        if not isinstance(citations, list):
+            raise ValueError("Evidence sources must be a list")
+        out[clean_text(name)] = {"score": score, "sources": [clean_text(s) for s in citations],
                      "reason": clean_text(row.get("reason", "No evidence"))}
     next_one = min(out, key=lambda n: out[n]["score"]) if out else None
     return {"at": stamp(), "criteria": out, "next_one": next_one, "verified": False}

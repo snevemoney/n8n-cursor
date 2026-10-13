@@ -90,7 +90,7 @@ def test_secrets_refused_before_persisting(project):
     assert not list((project / "launch" / "Inputs").iterdir())
 
 
-@pytest.mark.parametrize("prefix", ["ghp_", "github_pat_", "xai-", "refresh_token=", "client_secret=", "Bearer "])
+@pytest.mark.parametrize("prefix", ["ghp_", "github_pat_", "xai-", "refresh_token=", "client_secret=", "Bearer ", "OPENROUTER_API_KEY=", "GITHUB_TOKEN=", "STRIPE_SECRET_KEY=", "MY_PASSWORD=", "xoxb-", "ya29.", "AIza"])
 def test_credential_formats_are_rejected_in_sources_and_price_provenance(project, prefix):
     fake = prefix + "exampleCredentialMarker0123456789"
     with pytest.raises(ValueError, match="Secret-looking"):
@@ -98,6 +98,25 @@ def test_credential_formats_are_rejected_in_sources_and_price_provenance(project
     out = pm.run("project launch quote: fixture; 0.10; 1; " + fake + "; 1", root=project)
     assert not out["ok"] and fake not in out["spoken"]
     assert not list((project / "launch" / "Inputs").iterdir())
+
+
+def test_reassessment_preserves_conflict_and_raw_source(project):
+    row = pm.intake(project, "launch", "Delivery is Friday", "meeting:12")
+    original = Path(row["path"]).read_bytes()
+    pm.source_review(project, "launch", row["id"], "conflicting", "contract:2 names Thursday")
+    current = pm.source_review(project, "launch", row["id"], "source-backed", "amendment:3 resolves the conflict")
+    assert current["revision"] == 2 and current["assessment_only"]
+    assert current["history"][0]["quality"] == "conflicting"
+    assert current["history"][0]["evidence"] == "contract:2 names Thursday"
+    assert Path(row["path"]).read_bytes() == original
+    assert (project / "launch").stat().st_mode & 0o777 == 0o700
+
+
+def test_audit_rejects_float_scores_and_secret_citations():
+    with pytest.raises(ValueError):
+        pm.anchored_audit({"test": {"score": 3.0, "sources": ["capture:1"]}})
+    with pytest.raises(ValueError):
+        pm.anchored_audit({"test": {"score": 1, "sources": ["GITHUB_TOKEN=" + "notAnActualCredential012345"]}})
 
 
 def test_checkpoints_can_be_read_after_reloading_module(project):

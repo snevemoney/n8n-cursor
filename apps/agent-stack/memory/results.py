@@ -46,7 +46,7 @@ def wants_results(u: str) -> bool:
 
 
 def write_back(hand: str, ask: str, got: dict) -> bool:
-    if hand not in PRODUCERS or not isinstance(got, dict):
+    if hand not in PRODUCERS or not isinstance(got, dict) or got.get("read_only_summary"):
         return False
     spoken = " ".join(str(got.get("spoken") or "").split())
     if not spoken or SECRET_RE.search(spoken) or SECRET_RE.search(ask or ""):

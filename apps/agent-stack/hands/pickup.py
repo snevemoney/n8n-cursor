@@ -106,7 +106,7 @@ def run(utterance: str, *, chat=None) -> dict:
                 raise ValueError("Unknown disposition")
         except (OSError, ValueError, TypeError):
             return {"ok": False, "spoken": "The Jarvis remaining-work ledger could not be validated. I cannot claim it is complete."}
-        return {"ok": True, "files": [ledger.name], "cites": [str(ledger)], "task_verified": False,
+        return {"ok": True, "files": [ledger.name], "cites": [str(ledger)], "task_verified": False, "read_only_summary": True,
                 "spoken": f"Jarvis still has {counts['OPEN']} open E–J methods and {counts['PARTIAL CANDIDATE']} partial candidates; {counts['HOLD / SKIP REASON']} have documented holds. Earlier video methods, connector access and the original 30 capabilities also need full verification. The complete remaining-work list is in METHODS-E-J.md."}
     files = pick(utterance)
     if not files:

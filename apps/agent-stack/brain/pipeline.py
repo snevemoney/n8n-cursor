@@ -5564,7 +5564,8 @@ def _run_tool_inner(
     if tool == "pickup":
         got = _pickup_hand().run(utterance)
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
-                "wires": ["pickup"], "cites": [], "sent": False, "task_verified": bool(got.get("ok")),
+                "wires": ["pickup"], "cites": got.get("cites") or [], "sent": False,
+                "read_only_summary": bool(got.get("read_only_summary")), "task_verified": bool(got.get("task_verified", got.get("ok"))),
                 "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "drafts":
         got = _drafts_hand().run(utterance)

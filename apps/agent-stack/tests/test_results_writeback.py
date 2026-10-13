@@ -29,6 +29,11 @@ class WritebackTest(unittest.TestCase):
         self.assertEqual([r["hand"] for r in rows], ["drafts"])
         self.assertIn("Zubair", rows[0]["ask"])
 
+    def test_status_answer_does_not_create_a_result_note_or_card(self):
+        self.assertFalse(R.write_back("pickup", "what still needs finishing on Jarvis", {
+            "ok": True, "spoken": "Work remains", "read_only_summary": True}))
+        self.assertFalse(self.log.exists())
+
     def test_run_tool_writes_and_recall_reads(self):
         hive = Path(tempfile.mkdtemp())
         got = P.run_tool({"tool": "multistep"}, "Do these: 1) tell me today's date, 2) what time is it", hive=hive, retrieve_roots=None)
