@@ -614,6 +614,8 @@ def _sse_deltas(res):
             obj = json.loads(body)
         except ValueError:
             continue
+        if isinstance(obj, dict) and isinstance(obj.get("usage"), dict):
+            _note_usage(obj)  # the raced talk stream: OpenRouter's billed usage arrives in the last chunk
         ch = (obj.get("choices") or [{}])[0] if isinstance(obj, dict) else {}
         delta = ((ch.get("delta") or {}).get("content") or "") if isinstance(ch, dict) else ""
         yield delta, (ch.get("finish_reason") or "") if isinstance(ch, dict) else ""
