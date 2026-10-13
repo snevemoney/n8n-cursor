@@ -101,7 +101,31 @@ def _bing(query: str, timeout: float) -> list[dict[str, str]]:
         return parse_bing(r.read(600_000).decode("utf-8", "replace"))
 
 
-ENGINES = [_ddg, _bing]
+def parse_brave(body: str) -> list[dict[str, str]]:
+    """Brave Search web snippets -> url/title/snippet (text is data)."""
+    strip = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<!--.*?-->|<[^>]+>", "", s or "", flags=re.S))).strip()
+    out = []
+    for blk in re.split(r'<div class="snippet [^"]*" data-pos="\d+" data-type="web"', body or "")[1:]:
+        m = re.search(r'<a href="(https?://[^"]+)"', blk)
+        t = re.search(r'search-snippet-title[^"]*" title="([^"]*)"', blk)
+        c = re.search(r'<div class="content [^"]*">(.*?)</div>', blk, re.S)
+        if not m or "brave.com" in urllib.parse.urlparse(m.group(1)).netloc:
+            continue
+        snip = re.sub(r"^\d+ \w+ ago -\s*", "", strip(c.group(1)) if c else "")
+        out.append({"url": html.unescape(m.group(1)), "title": html.unescape(t.group(1)) if t else "", "snippet": snip})
+    return out
+
+
+def _brave(query: str, timeout: float) -> list[dict[str, str]]:
+    """Brave Search HTML results (second engine), GET only."""
+    url = "https://search.brave.com/search?q=" + urllib.parse.quote_plus(query)
+    cp = subprocess.run(["curl", "-s", "-L", "--max-time", str(max(1, int(timeout))), "-A", UA, url],
+                        capture_output=True, timeout=timeout + 1)
+    return parse_brave(cp.stdout[:900_000].decode("utf-8", "replace"))
+
+
+# DuckDuckGo first, then Brave; Bing (keyword-only) is the last resort.
+ENGINES = [_ddg, _brave, _bing]
 
 
 def _default_fetch(query: str, timeout: float) -> list[dict[str, str]]:
