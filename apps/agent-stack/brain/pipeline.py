@@ -134,7 +134,7 @@ SAFARI_NEGATE_RE = re.compile(
     re.I,
 )
 WATCH_CMD_RE = re.compile(
-    r"^(?:hey\s+)?(?:jarvis[,.]?\s*)?watch(?:\s+(?:this|the)?\s*(?:screen|desktop))?\s*[.!]?\s*$",
+    r"^(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:watch(?:\s+(?:this|the|my)?\s*(?:screen|desktop))?|(?:i'?m\s+)?shar(?:e|ing)\s+my\s+screen(?:\s+with\s+you)?)\s*[.!]?\s*$",
     re.I,
 )
 SCREEN_ACT_RE = re.compile(
