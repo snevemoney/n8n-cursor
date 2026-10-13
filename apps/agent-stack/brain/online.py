@@ -1582,7 +1582,7 @@ STATUS_HEADER_RE = re.compile(
 
 
 GREETING_CLAIM_RE = re.compile(
-    r"\bI(?:'m|\s+am)\s+(?:fully\s+)?(?:operational|online)(?:\s*(?:,|and)\s*ready\s+to\s+(?:assist|serve|help)(?:\s+you)?(?:\s+this\s+evening)?)?"
+    r"\bI(?:'m|\s+am)\s+(?:here\s+and\s+)?(?:fully\s+)?(?:operational|online)(?:\s*(?:,|and)\s*ready\s+to\s+(?:assist|serve|help)(?:\s+you)?(?:\s+this\s+evening)?)?"
     r"|\bI(?:'m|\s+am)\s+ready\s+to\s+assist(?:\s+you)?(?:\s+this\s+evening)?",
     re.I,
 )

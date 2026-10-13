@@ -22,6 +22,8 @@ class FastAnswerTests(unittest.TestCase):
         )
         self.assertNotRegex(out.lower(), r"operational|ready to assist")
         self.assertIn("How may I help you?", out)
+        out2 = online.unbacked_status_claim("Sir. Good evening, sir. I'm here and operational. How may I assist you?", backed=False)
+        self.assertNotIn("operational", out2.lower())
 
     def test_pass_rule_from_agent_rules(self):
         with tempfile.TemporaryDirectory() as d:
