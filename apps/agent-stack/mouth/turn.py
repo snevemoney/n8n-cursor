@@ -427,6 +427,14 @@ def _apply_turn_iter_inner(
         _tok = PIPELINE.begin_turn(hive) if hasattr(PIPELINE, "begin_turn") else None
         yield _door_speak(hive, spoken, line, "stop", retrieve_roots, gen=_tok)
         return
+    try:  # Z40: 'cancel' while a simulated call waits at CONFIRM closes that card (otherwise it is a plain stop)
+        _ph0 = PIPELINE._load("agent_stack_phone_sim", PIPELINE.STACK / "hands" / "phone_sim.py")
+        if _ph0.CANCEL_RE.search(spoken or "") and _ph0._load().get("state") == "CONFIRM":
+            got = _ph0.run(spoken)
+            yield _door_speak(hive, spoken, got["spoken"], "phone_sim", retrieve_roots, gen=token, execution=got)
+            return
+    except Exception:  # noqa: BLE001
+        pass
     if STOP_RE.match(spoken):
         if ONLINE is not None and hasattr(ONLINE, "cancel_cursor"):
             ONLINE.cancel_cursor()
@@ -572,7 +580,8 @@ def _apply_turn_iter_inner(
     try:
         _tg = PIPELINE._load("agent_stack_toolgap", PIPELINE.STACK / "hands" / "toolgap.py")
         _inv = PIPELINE._load("agent_stack_mcp_inventory", PIPELINE.STACK / "hands" / "mcp_inventory.py").inventory()[0]
-        _gap = _tg.gap(spoken, [str(x.get("name") or "") for x in _inv])
+        _pt = PIPELINE._pointer_hand()
+        _gap = None if (_pt.wants_pointer(spoken) or _pt.wants_click(spoken)) else _tg.gap(spoken, [str(x.get("name") or "") for x in _inv])
         if _gap:
             yield _door_speak(hive, spoken, _gap, "toolgap", retrieve_roots, gen=token,
                               execution={"ok": True, "tool": "toolgap", "spoken": _gap, "wires": ["mcp_inventory"], "sent": False})

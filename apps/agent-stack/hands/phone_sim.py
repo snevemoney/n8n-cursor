@@ -63,7 +63,7 @@ def run(u: str) -> dict:
                        f"before anything is booked.\"")
         _save(st)
         return {"ok": True, "tool": "phone_sim", "sent": False, "simulated": True, "card": card(st),
-                "spoken": (f"Simulated call to {st['who']}: ringing, then ended. I'd have asked only about {st['scope']} and said I'll check with my boss "
+                "spoken": (f"Simulated call to {st['who']}: ringing, then ended. I'd only {st['scope']}, then say I'll check with my boss "
                            "and call back. No real call went out; telephony is on hold, so no quote came back.")}
     m = CALL_RE.search(u or "")
     who = m.group("who").strip()
