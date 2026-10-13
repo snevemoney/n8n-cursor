@@ -1708,9 +1708,17 @@ def load_turns(bus: dict) -> list[dict]:
             continue
         user = str(row.get("user") or "").strip()
         jarvis = str(row.get("jarvis") or "").strip()
+        if FAILED_TURN_RE.search(jarvis):
+            # A provider miss is not something Jarvis said; replaying it teaches the model to parrot it.
+            jarvis = ""
         if user or jarvis:
             out.append({"user": user, "jarvis": jarvis})
     return out[-MAX_TURNS:]
+
+
+FAILED_TURN_RE = re.compile(
+    r"returned no text|talk wire is dark|no live mouth|ran out of room|\bTimeoutError\b", re.I
+)
 
 
 def append_turn(turns: list[dict], user: str, jarvis: str) -> list[dict]:
