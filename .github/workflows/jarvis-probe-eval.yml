@@ -1,0 +1,25 @@
+name: jarvis-probe-eval
+# Replays the 17-probe eval offline (no model, no network, no keys) on every PR that touches apps/agent-stack.
+on:
+  pull_request:
+    paths:
+      - "apps/agent-stack/**"
+permissions:
+  contents: read
+jobs:
+  probe-eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Replay probes against baseline
+        working-directory: apps/agent-stack
+        env:
+          AGENT_STACK_DRY_TTS: "1"
+          AGENT_STACK_CURSOR_DRY: "1"
+          JARVIS_TURN_LOG: "0"
+          JARVIS_JEV_LIVE: "0"
+        run: python3 eval/eval_probes.py
