@@ -12,11 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      # Trusted code only: run the reviewer from the default branch, never from the PR head (the PR is read via the API).
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Bootstrap check
+        run: test -f scripts/review/agent_pr_review.py || { echo "reviewer not on default branch yet; skipping"; exit 0; }
       - name: Agent review
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
         run: |
+          if [ ! -f scripts/review/agent_pr_review.py ]; then exit 0; fi
           if [ -z "$OPENROUTER_API_KEY" ]; then echo "no OPENROUTER_API_KEY secret; skipping"; exit 0; fi
-          python3 scripts/review/agent_pr_review.py ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --post
+          python3 scripts/review/agent_pr_review.py "$PR" --repo "$REPO" --post
