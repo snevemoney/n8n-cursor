@@ -224,3 +224,26 @@ def test_quote_command_changes_with_model_and_does_not_spend(project):
     assert two["ok"] and two["quote"]["within_ceiling"]
     bad = pm.run("project launch quote: engine-b; nonsense; 3; catalog:2; 0.29", root=project)
     assert not bad["ok"] and not two["quote"]["executed"]
+
+
+def test_lint_reports_explicit_conflicts_stale_inputs_and_unresolved_links(project):
+    from datetime import datetime, timezone, timedelta
+    row = pm.intake(project, "launch", "The delivery date conflicts with the contract", "contract:12", topic="brief", quality="conflicting")
+    future = datetime.now(timezone.utc) + timedelta(days=15)
+    (project / "launch" / "Outputs" / "brief.md").write_text("[[missing-topic]] #delivery")
+    report = pm.knowledge_report(project, "launch", now=future)
+    assert report["explicit_conflicts"][0]["source"] == row["id"]
+    assert report["stale"][0]["source"] == row["id"]
+    assert report["graph"]["unresolved"][0]["target"] == "missing-topic"
+    assert report["graph"]["tags"]["brief"] == ["delivery"]
+    assert not report["semantic_contradictions_checked"]
+    assert "Semantic contradictions have not been checked" in pm.run("project launch lint", root=project)["spoken"]
+
+
+def test_daily_summary_is_one_per_agent_day_and_preserves_original(project):
+    first = pm.run("project launch close day: Reviewed the brief; waiting on the owner", root=project)
+    before = Path(first["cites"][0]).read_bytes()
+    second = pm.run("project launch close day: Replace the summary", root=project)
+    assert first["ok"] and second["ok"] and "preserved" in second["spoken"]
+    assert Path(second["cites"][0]).read_bytes() == before
+    assert len(list((project / "launch" / "Process").glob("daily-*.md"))) == 1

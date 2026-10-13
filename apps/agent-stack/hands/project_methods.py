@@ -247,11 +247,12 @@ def graph(root):
     by_stem = {}
     for name, f in names.items():
         by_stem.setdefault(f.stem, []).append(name)
-    edges, unresolved, ambiguous = {}, [], []
+    edges, unresolved, ambiguous, tags = {}, [], [], {}
     for name, f in names.items():
         content = f.read_text(encoding="utf-8", errors="replace")
         if SECRET.search(content):
             continue
+        tags[name] = sorted(set(re.findall(r"(?<![\w/])#([a-zA-Z][\w/-]*)", content)))
         targets = []
         for link in re.findall(r"\[\[([^\]]+)\]\]", content):
             target = link.split("|", 1)[0].split("#", 1)[0].removesuffix(".md")
@@ -268,9 +269,48 @@ def graph(root):
         for target in targets:
             if target in incoming:
                 incoming[target].append(name)
-    return {"links": edges, "backlinks": incoming, "unresolved": unresolved,
+    return {"links": edges, "backlinks": incoming, "tags": tags, "unresolved": unresolved,
             "ambiguous": ambiguous, "orphans": [n for n in edges if not edges[n] and not incoming[n]],
             "dead_ends": [n for n in edges if not edges[n]], "capped": len(files) == 1000}
+
+
+def knowledge_report(root, project, *, now=None):
+    """Read-backed lint report; flags explicit conflicts, never invents contradictions."""
+    p = existing(root, project)
+    now = now or datetime.now(timezone.utc)
+    stale, conflicts, missing_reviews = [], [], []
+    for raw in sorted(child(p, "Inputs").glob("*.json")):
+        row = json.loads(child(p, "Inputs", raw.name).read_text())
+        assessment_path = child(p, "Process", "source-review-" + raw.stem + ".json")
+        assessment = json.loads(assessment_path.read_text()) if assessment_path.exists() else None
+        if assessment and assessment["raw_sha256"] != hashlib.sha256(raw.read_bytes()).hexdigest():
+            missing_reviews.append({"source": raw.stem, "reason": "source changed after review"})
+        elif (assessment or row).get("quality") == "conflicting":
+            conflicts.append({"source": raw.stem, "evidence": (assessment or {}).get("evidence", row["source"])})
+        elif (assessment or row).get("quality") != "source-backed":
+            missing_reviews.append({"source": raw.stem, "reason": "unreviewed"})
+        captured = datetime.fromisoformat(row["captured"])
+        if (now - captured).total_seconds() > 14 * 86400:
+            stale.append({"source": raw.stem, "captured": row["captured"], "reason": "older than 14 days; freshness check needed"})
+    return {"at": now.isoformat(), "graph": graph(child(p, "Outputs")), "stale": stale,
+            "explicit_conflicts": conflicts, "needs_review": missing_reviews,
+            "semantic_contradictions_checked": False, "verified": False}
+
+
+def close_day(root, project, summary, *, agent="Jarvis", day=None):
+    """One authored summary per agent/day, outside the human vault; retries preserve it."""
+    p = existing(root, project)
+    day = day or datetime.now().astimezone().date().isoformat()
+    try:
+        datetime.strptime(day, "%Y-%m-%d")
+    except ValueError:
+        raise ValueError("Use an ISO date for the daily summary") from None
+    path = child(p, "Process", "daily-" + day + "-" + slug(agent) + ".md")
+    if path.exists():
+        return {"path": str(path), "duplicate": True}
+    body = "---\ntype: daily-summary\nstatus: candidate\nupdated-by: " + slug(agent) + "\ndate: " + day + "\n---\n\n" + clean_text(summary) + "\n"
+    write_new(path, body)
+    return {"path": str(path), "duplicate": False}
 
 
 STAGES = {"planned": "Planned", "generating": "In the kitchen", "review": "Ready for review",
@@ -344,7 +384,7 @@ def anchored_audit(evidence):
     return {"at": stamp(), "criteria": out, "next_one": next_one, "verified": False}
 
 
-COMMAND = re.compile(r"^(?:hey\s+)?(?:jarvis[, .]+)?project\s+([a-z0-9-]+)\s+(create|context|draft|board|stage|quote|review queue|review|source review|capture|compile|checkpoint)\b(?:\s*:\s*|\s+)?(.*)$", re.I | re.S)
+COMMAND = re.compile(r"^(?:hey\s+)?(?:jarvis[, .]+)?project\s+([a-z0-9-]+)\s+(create|context|draft|board|stage|quote|lint|graph|close day|review queue|review|source review|capture|compile|checkpoint)\b(?:\s*:\s*|\s+)?(.*)$", re.I | re.S)
 
 
 def wants(text):
@@ -386,6 +426,18 @@ def run(text, *, root):
                 latest = max(checkpoints, key=lambda r: r["at"])
                 out["spoken"] += f" Latest saved answer: {latest['answer']}."
             out["cites"] = [str(child(p, "PROJECT.md"))]
+        elif action in {"lint", "graph"}:
+            p = existing(root, name)
+            result = knowledge_report(root, name) if action == "lint" else graph(child(p, "Outputs"))
+            graph_result = result["graph"] if action == "lint" else result
+            out["report"] = result
+            out["spoken"] = f"{len(graph_result['links'])} topic files; {len(graph_result['orphans'])} orphans, {len(graph_result['dead_ends'])} dead ends, {len(graph_result['unresolved'])} unresolved links."
+            if action == "lint":
+                out["spoken"] += f" {len(result['stale'])} sources need freshness checks; {len(result['explicit_conflicts'])} recorded conflicts; {len(result['needs_review'])} need source review. Semantic contradictions have not been checked."
+        elif action == "close day":
+            row = close_day(root, name, body)
+            out["spoken"] = "Today's summary already exists and was preserved." if row["duplicate"] else "Today's project summary is saved outside your vault."
+            out["cites"] = [row["path"]]
         elif action == "board":
             items = board(root, name)
             out["spoken"] = "No stage items." if not items else "; ".join(
