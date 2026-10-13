@@ -114,6 +114,21 @@ def safari_activate() -> dict:
     return {"ok": True, "wire": "safari", "spoken": "Safari is front."}
 
 
+POLL_SEC = 0.5
+MAX_READS = 8  # bounded tab reads after one open (never re-opens)
+
+
+def same_page(wanted: str, seen: str) -> bool:
+    """Same scheme-agnostic host (www. ignored) and path (trailing slash ignored); query must match if one was asked."""
+    import urllib.parse as up
+    a, b = up.urlparse((wanted or "").strip()), up.urlparse((seen or "").strip())
+    host = lambda u: (u.hostname or "").lower().removeprefix("www.")
+    path = lambda u: (u.path or "/").rstrip("/") or "/"
+    if not host(a) or host(a) != host(b) or path(a) != path(b):
+        return False
+    return not a.query or a.query == b.query
+
+
 def safari_open(url: str) -> dict:
     target = (url or "").strip()
     if not HTTP_RE.match(target):
@@ -126,7 +141,7 @@ def safari_open(url: str) -> dict:
         # Read back the postcondition once; never duplicate the navigation.
         observed = safari_front(timeout=2.0)
         actual = str(observed.get("url") or "")
-        passed = observed.get("ok") is True and observed.get("open") is True and actual == target
+        passed = observed.get("ok") is True and observed.get("open") is True and same_page(target, actual)
         return {"ok": passed, "wire": "safari", "spoken": f"Safari URL verified: {actual}" if passed else "Safari navigation timed out. The requested URL is not verified.", "verification": {"scope": "navigation_url", "passed": passed, "expected": target, "observed": actual}, "diagnostic": {"kind": "timeout", "operation": "safari_open", "timeout_seconds": exc.timeout, "recovery": "url_readback"}}
     except OSError as exc:
         return {"ok": False, "wire": "safari", "spoken": "Safari navigation could not start. The requested URL is not verified.", "diagnostic": {"kind": "os_error", "operation": "safari_open", "errno": exc.errno}}
@@ -134,20 +149,23 @@ def safari_open(url: str) -> dict:
         err = (proc.stderr or "").strip()[:160]
         return {"ok": False, "wire": "safari", "spoken": f"UNKNOWN. Safari open failed. {err}"}
     deadline = time.monotonic() + 12.0
-    actual = ""
+    actual, title = "", ""
     passed = False
-    for _ in range(3):
+    for _ in range(MAX_READS):
         remaining = deadline - time.monotonic()
         if remaining <= 0:
             break
-        observed = safari_front(timeout=remaining)
+        observed = safari_front(timeout=min(remaining, 4.0))
         actual = str(observed.get("url") or "").strip()
-        passed = observed.get("ok") is True and observed.get("open") is True and actual == target
+        title = str(observed.get("title") or "").strip()
+        passed = observed.get("ok") is True and observed.get("open") is True and same_page(target, actual)
         if passed or observed.get("ok") is not True:
             break
+        time.sleep(POLL_SEC)
     return {
-        "ok": passed, "wire": "safari", "url": actual, "requested_url": target,
-        "spoken": f"Safari URL verified: {actual}" if passed else "Navigation requested, but the requested Safari URL is not yet verified.",
+        "ok": passed, "wire": "safari", "url": actual, "requested_url": target, "title": title if passed else "",
+        "spoken": (f"Safari URL verified: {actual}. The page title is: {title or 'untitled'}." if passed
+                   else "Navigation requested, but the requested Safari URL is not yet verified."),
         "verification": {"scope": "navigation_url", "passed": passed, "expected": target, "observed": actual},
     }
 
