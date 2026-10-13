@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -918,7 +918,7 @@ ACK_SKIP = frozenset({"say"})
 # Confirm-before-act (verify round): screen_see sends the screen off the Mac, desk_dispatch acts as a send, and a
 # model-chosen code_run runs code Evens never typed. Each arms a one-shot pending row on the hive bus; only a short
 # explicit "yes/confirm" on the very next turn runs it. Anything else drops it.
-CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run")
+CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run", "pointer")
 CONFIRM_TTL_SEC = 120
 CONFIRM_YES_RE = re.compile(
     r"^\s*(?:yes|yep|yeah|confirm(?:ed)?|go\s+ahead|do\s+it|send\s+it|ok(?:ay)?)\b(?:[\s,]*(?:please|jarvis|sir|do\s+it|go\s+ahead))*[\s.!]*$",
@@ -927,6 +927,7 @@ CONFIRM_YES_RE = re.compile(
 CONFIRM_LINES = {
     "screen_see": "That would send a screenshot of your whole screen to the vision model, off this Mac. Say \"confirm\" to go ahead; I delete the screenshot afterwards.",
     "desk_dispatch": "That would put a job card for the {desk} desk on the hive bus, which acts as a send. Say \"confirm\" to send it.",
+    "pointer": "To point at it I'd send a screenshot of your whole screen to the vision model, off this Mac. Say \"confirm\" to go ahead; I delete the screenshot afterwards and I won't click anything.",
     "code_run": "I picked code to run that you didn't type. Say \"confirm\" to run it in the sandbox; anything else drops it.",
 }
 
@@ -1016,6 +1017,8 @@ def model_free_route(spoken_in: str) -> dict | None:
         return {"tool": "memory", "args": _memory_hand().args_from_utterance(spoken_in), "speak": ""}
     if wants_continuity_status(spoken_in):
         return None
+    if _pointer_hand().wants_pointer(spoken_in) and not is_hard_step(spoken_in):
+        return {"tool": "pointer", "args": {}, "speak": ""}
     if wants_handback(spoken_in):
         return {"tool": "handback", "args": {}, "speak": ""}
     if len(split_steps(spoken_in)) >= 2 and not is_hard_step(spoken_in):
@@ -1175,6 +1178,16 @@ def _plan_hand():
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
     return sys.modules[name]
+
+
+def _pointer_hand():
+    key = "agent_stack_pointer"
+    if key not in sys.modules:
+        spec = importlib.util.spec_from_file_location(key, STACK / "hands" / "pointer.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[key] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[key]
 
 
 def _pickup_hand():
@@ -5221,6 +5234,14 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["screen_see"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "screen_see_meta": hd.log_meta(got)}
+    if tool == "pointer":
+        def _vision_pt(prompt, images):
+            seen = online_talk(prompt, "", images=images, hands=False) or {}
+            return None if seen.get("unknown") else (seen.get("spoken") or seen.get("text"))
+        got = _pointer_hand().run(utterance, hive=hive, vision_fn=_vision_pt)
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["screen", "pointer"],
+                "cites": [], "sent": False, "task_verified": bool(got.get("found")),
+                "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "handback":
         return handback(hive, gen)
     if tool == "multistep":
@@ -6019,7 +6040,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
