@@ -1295,6 +1295,17 @@ def _start_prebrief_pump() -> None:
 
     threading.Thread(target=pump, daemon=True, name="prebrief-pump").start()
 
+    def lapse_pump():  # Z56: unanswered questions time out into one status line
+        while True:
+            time.sleep(15)
+            try:
+                lp = _load("agent_stack_lapse", STACK / "hands" / "lapse.py")
+                lp.tick(HIVE, mutate_fn=mutate_bus, inbox=Path(_results_mem().VAULT_INBOX))
+            except Exception:  # noqa: BLE001
+                continue
+
+    threading.Thread(target=lapse_pump, daemon=True, name="lapse-pump").start()
+
 
 def _cost_hand():
     key = "agent_stack_cost_card"
@@ -5386,7 +5397,9 @@ def _run_tool_inner(
                 "cites": list(got.get("cites") or []), "sent": False, "task_verified": bool(got.get("ok")),
                 "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "results_recall":
-        return {"ok": True, "tool": tool, "spoken": _results_mem().spoken_recent(), "wires": ["results"], "cites": [],
+        _rm = _results_mem()
+        _today = re.search(r"\b(?:we|today|my\s+day|the\s+day)\b", utterance or "", re.I)
+        return {"ok": True, "tool": tool, "spoken": _rm.spoken_today() if _today else _rm.spoken_recent(), "wires": ["results"], "cites": [],
                 "sent": False, "task_verified": True, "outcome": TOOL_LOOP}
     if tool == "cost_card":
         got = _cost_hand().run(utterance)
@@ -5430,6 +5443,14 @@ def _run_tool_inner(
                 "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "drafts":
         got = _drafts_hand().run(utterance)
+        if got.get("dup") and hive is not None:  # Z56: the Z51 flag is a question that can lapse
+            try:
+                _lp = _load("agent_stack_lapse", STACK / "hands" / "lapse.py")
+                _who = _drafts_hand()._who(utterance) or "that"
+                mutate_bus(Path(hive), lambda b: _lp.open_q(b, topic="duplicate draft", ask=str(got.get("spoken") or ""),
+                                                                  pending=f"No new draft to {_who} was made."))
+            except Exception:  # noqa: BLE001
+                pass
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["drafts"], "cites": [], "sent": False, "task_verified": bool(got.get("ok")),
                 "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}

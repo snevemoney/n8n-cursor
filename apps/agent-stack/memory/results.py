@@ -21,7 +21,14 @@ PRODUCERS = {"drafts", "workbench", "pickup", "web_search", "code_run", "loop", 
 MAX_ROWS = 2000
 SECRET_RE = re.compile(r"(?:api[_-]?key|bearer\s|sk-[A-Za-z0-9]{8,}|password|passwd|secret\s*[:=])", re.I)
 WANT_RE = re.compile(r"\bwhat\s+(?:did|have)\s+you\s+(?:do|done|finish(?:ed)?|get\s+done)\b(?:\s+(?:today|so\s+far|this\s+morning))?|"
-                     r"\b(?:your|recent)\s+results\b|\bwhat\s+results\b", re.I)
+                     r"\b(?:your|recent)\s+results\b|\bwhat\s+results\b|"
+                     r"\bwhat\s+(?:did|have)\s+we\s+(?:work(?:ed)?\s+on|do|done|get\s+done|cover(?:ed)?)\b|"
+                     r"\b(?:recap|summary|summari[sz]e)\s+(?:of\s+)?(?:today|my\s+day|the\s+day)\b", re.I)
+DID = {"drafts": "draft", "web_search": "web search", "code_run": "code run", "loop": "loop job", "vault_read": "note pull-up",
+       "cost_card": "meter check", "approval": "approval record", "pointer": "pointer", "workspace_read": "file read",
+       "memory": "memory save or recall", "multistep": "multi-step job", "plan": "plan", "browser_mission": "browser mission",
+       "desk_dispatch": "desk job card", "prebrief": "meeting prep", "mcp_call": "MCP call", "skills": "skill read",
+       "pickup": "pickup", "results_recall": "recap"}
 _LOCK = threading.Lock()
 
 
@@ -124,6 +131,32 @@ def recent(limit: int = 6, *, today_only: bool = True) -> list[dict]:
         day = datetime.now().astimezone().date()
         rows = [r for r in rows if datetime.fromisoformat(r["ts"]).astimezone().date() == day]
     return rows[-limit:]
+
+
+def _times(n: int) -> str:
+    return {1: "once", 2: "twice"}.get(n, f"{n} times")
+
+
+def spoken_today(rows: list[dict] | None = None, top: int = 4) -> str:
+    """Z58 (whIp 11:08): 'what did we work on today?' -> a short recap of today's finished work, newest first."""
+    rows = rows if rows is not None else recent(MAX_ROWS)
+    rows = [r for r in rows if r.get("ok", True)]
+    if not rows:
+        return "Nothing finished is logged today yet, sir."
+    groups: dict[str, list[dict]] = {}
+    for r in reversed(rows):
+        groups.setdefault(str(r.get("hand") or "other"), []).append(r)
+    bits = []
+    for hand, rs in list(groups.items())[:top]:
+        asks = list(dict.fromkeys(re.sub(r"^(?:hey\s+)?jarvis[,.]?\s*", "", str(r.get("ask") or ""), flags=re.I).strip().rstrip(".?!") for r in rs))
+        n = len(asks)
+        noun = DID.get(hand, hand.replace("_", " "))
+        noun = noun if n == 1 else (noun[:-1] + "ies" if noun.endswith("y") and not noun.endswith("ey") else noun + ("es" if noun.endswith(("sh", "ch")) else "s"))
+        bits.append(f"{n} {noun}" + (f", latest \"{asks[0][:60]}\"" if asks and asks[0] else ""))
+    more = len(groups) - len(bits)
+    first = str(rows[0].get("ts") or "")[11:16]
+    return (f"Today, sir, we finished {len({str(r.get('ask')) for r in rows})} distinct jobs. Most recent first: " + "; ".join(bits) + (f"; and {more} other kinds" if more > 0 else "")
+            + ". The full list is in your JARVIS INBOX.")
 
 
 def spoken_recent(limit: int = 6) -> str:

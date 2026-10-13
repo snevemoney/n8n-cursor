@@ -48,7 +48,7 @@ def addressed_p(u: str) -> float:
 
 
 STAKES_RE = re.compile(r"\b(?:send|email|text|message|post|publish|tweet|call|phone|dial|delete|remove|erase|wipe|trash|"
-                       r"buy|purchase|pay|spend|order|charge|subscribe|transfer|wire|merge|deploy)\b", re.I)
+                       r"buy|purchase|pay|spend|order|charge|subscribe|transfer|wire|merge|deploy|invoice|bill|refund)\b", re.I)
 STOP = set("jarvis can you could would please pull up show me my our the a an of to for and or what is are on in "
            "do did i about open find get tell give list read all".split())
 

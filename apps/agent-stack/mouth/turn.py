@@ -543,6 +543,21 @@ def _apply_turn_iter_inner(
                 return
     except Exception:  # noqa: BLE001
         pass
+    # Z52 (D5v4UuvtUXc 9:20): high stakes + vault miss + missing slots -> one compact question, nothing improvised.
+    try:
+        _sl = PIPELINE._load("agent_stack_slots", PIPELINE.STACK / "hands" / "slots.py").ask_for(spoken)
+        _rx2 = _reflex(spoken) or {}
+        if _sl and float(_rx2.get("stakes") or 0) >= 0.5 and float(_rx2.get("vault_hit") or 0) < 0.6:
+            got = {"ok": True, "tool": "slots", "spoken": _sl["spoken"], "missing": _sl["missing"], "wires": ["reflex", "slots"],
+                   "cites": [], "sent": False, "task_verified": True, "outcome": "ASK_NOTHING_IMPROVISED"}
+            PIPELINE.mutate_bus(Path(hive), lambda bus: dict(bus, reflex=dict(bus.get("reflex") or {}, verdict="ASK \u00b7 NOTHING IMPROVISED")))
+            yield _door_speak(hive, spoken, got["spoken"], "slots", retrieve_roots, gen=token, execution=got)
+            _lp = PIPELINE._load("agent_stack_lapse", PIPELINE.STACK / "hands" / "lapse.py")
+            PIPELINE.mutate_bus(Path(hive), lambda b: _lp.open_q(b, topic=_sl["noun"], ask=_sl["spoken"],
+                                pending=f"The {_sl['noun']} is not started yet; I still need " + " and ".join("whom" if m == "who" else "what it covers" for m in _sl["missing"]) + "."))
+            return
+    except Exception:  # noqa: BLE001
+        pass
     # Z60 (zdnijkAbknA 3:31-3:42, 4:26): a spoken conditional approval -> read-back + written approval record + inbox card.
     try:
         _ap = PIPELINE._load("agent_stack_approval", PIPELINE.STACK / "hands" / "approval.py")
@@ -559,6 +574,10 @@ def _apply_turn_iter_inner(
                 return bus
             PIPELINE.mutate_bus(Path(hive), _inbox)
             yield _door_speak(hive, spoken, got["spoken"], "approval", retrieve_roots, gen=token, execution=got)
+            _lp = PIPELINE._load("agent_stack_lapse", PIPELINE.STACK / "hands" / "lapse.py")
+            _r = got["record"]
+            PIPELINE.mutate_bus(Path(hive), lambda b: _lp.open_q(b, topic="calendar", ask="Did I get that right?",
+                                pending=f"The {_r['what']} booking{(', ' + _r['when']) if _r['when'] else ''}, is not on your calendar yet."))
             return
     except Exception:  # noqa: BLE001
         pass
@@ -736,6 +755,8 @@ def apply_turn_iter(utterance: str, **kw):
             reflex = dict(reflex, ms=round((_time.perf_counter() - t0) * 1000, 1))
             card = dict(reflex, ts=_time.time(), ask=str(utterance or "")[:80])
             PIPELINE.mutate_bus(kw.get("hive") or HIVE, lambda bus: dict(bus, reflex=card))
+        _lp = PIPELINE._load("agent_stack_lapse", PIPELINE.STACK / "hands" / "lapse.py")  # Z56: a new turn answers an open question
+        PIPELINE.mutate_bus(kw.get("hive") or HIVE, _lp.answered)
     except Exception:  # noqa: BLE001
         pass
     try:
