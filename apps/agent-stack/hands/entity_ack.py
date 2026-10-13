@@ -26,6 +26,24 @@ def parse(u: str) -> dict:
             "what": (f.group(1).strip() if f else ""), "email": bool(MAIL_RE.search(u))}
 
 
+def records_dir() -> Path:
+    import os
+    return Path(os.environ.get("JARVIS_RECORDS_DIR") or (Path.home() / ".jarvis" / "records"))
+
+
+def record_notes(root: Path | None = None) -> list:
+    """Private lead/client records (one .md per record, outside the repo) in the same (stem, tokens, path) shape as the vault index."""
+    root = root or records_dir()
+    out = []
+    try:
+        for p in sorted(root.glob("*.md")):
+            head = p.read_text(encoding="utf-8", errors="ignore")[:2000]
+            out.append((p.stem, re.findall(r"[A-Za-z]+", p.stem + " " + head), p))
+    except OSError:
+        pass
+    return out
+
+
 def find_record(who: str, notes: list) -> tuple[str, str] | None:
     toks = {t.lower() for t in who.split()}
     best = None
@@ -39,7 +57,13 @@ def find_record(who: str, notes: list) -> tuple[str, str] | None:
 
 def stored_amount(path: str) -> str:
     try:
-        m = AMT_RE.search(Path(path).read_text(encoding="utf-8", errors="ignore")[:20000])
+        text = Path(path).read_text(encoding="utf-8", errors="ignore")[:20000]
+        for ln in text.splitlines():  # a labelled amount line beats the first dollar figure anywhere in the note
+            if re.search(r"\b(?:amount|invoice|price|quote|deal|value|fee)\b", ln, re.I):
+                m = AMT_RE.search(ln)
+                if m:
+                    return (m.group(1) or m.group(2) or "").replace(",", "")
+        m = AMT_RE.search(text)
         return (m.group(1) or m.group(2) or "").replace(",", "") if m else ""
     except OSError:
         return ""
@@ -47,7 +71,7 @@ def stored_amount(path: str) -> str:
 
 def run(u: str, *, notes: list, drafts: Path | None = None) -> dict:
     r = parse(u)
-    rec = find_record(r["who"], notes)
+    rec = find_record(r["who"], record_notes()) or find_record(r["who"], notes)
     stored = stored_amount(rec[1]) if rec else ""
     amount = r["amount"] or stored  # Z71: the request's value wins over the record's
     money = f"${int(float(amount)):,}" if amount else "an amount you still need to give me"

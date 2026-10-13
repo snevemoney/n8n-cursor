@@ -5259,6 +5259,9 @@ def gen_rules(u: str) -> str:
     return "\n".join(rules)
 
 
+TOOL_HEARTBEAT = "Still checking, sir; the wires are being fashionably slow."
+
+
 def run_tool(pick: dict, utterance: str, **kw) -> dict:
     """Tool entry point: pre_tool gate, then the hand, then post_tool + stop_check."""
     tool = str((pick or {}).get("tool") or "")
@@ -5279,7 +5282,8 @@ def run_tool(pick: dict, utterance: str, **kw) -> dict:
             _rm = _results_mem()
             if _rm.write_back(str(got.get("tool") or tool), utterance, got) and kw.get("hive") is not None:
                 row = (_rm.recent(1, today_only=False) or [{}])[-1]
-                card = {"title": _rm.card_title(row), "fields": (got.get("meter") or _rm.card_fields(row)) + ([f"File: {c}" for c in (got.get("cites") or [])][:1] if got.get("meter") else []), "body": row.get("result", "")[:220], "ts": row.get("ts")}
+                card = {"title": _rm.card_title(row), "fields": (got.get("meter") or _rm.card_fields(row)) + ([f"File: {c}" for c in (got.get("cites") or [])][:1] if got.get("meter") else []), "body": row.get("result", "")[:220], "ts": row.get("ts"),
+                        "turn_gen": kw.get("gen")}  # card is bound to the turn that produced it; the pane never shows it over a later reply
 
                 def _inbox(bus: dict) -> dict:  # Z11 demo: a JARVIS INBOX card per finished result, "Got it" clears it
                     ib = bus.get("inbox") if isinstance(bus.get("inbox"), dict) else {}
@@ -7490,16 +7494,26 @@ def apply_pipeline_iter(
                 model_available=bool(brain),
                 gen=token,
             )
-        ran = run_tool(
-            pick or {},
-            spoken_in,
-            hive=hive,
-            retrieve_roots=retrieve_roots,
-            see_fn=see_fn,
-            status_fn=status_fn,
-            cursor_ask_fn=cursor_ask_fn,
-            gen=token,
-        )
+        # Z81 (dCK 4:34): a slow hand gets ONE in-persona heartbeat, then the real result. Never more than one (Z53).
+        _tbox: dict = {}
+
+        def _tool_worker() -> None:
+            try:
+                _tbox["ran"] = run_tool(pick or {}, spoken_in, hive=hive, retrieve_roots=retrieve_roots, see_fn=see_fn,
+                                        status_fn=status_fn, cursor_ask_fn=cursor_ask_fn, gen=token)
+            except BaseException as exc:  # noqa: BLE001
+                _tbox["err"] = exc
+        _tw = threading.Thread(target=_tool_worker, daemon=True, name="tool-heartbeat")
+        _tw.start()
+        _tw.join(float(os.environ.get("JARVIS_TOOL_HEARTBEAT_SEC") or 6))
+        if _tw.is_alive() and not (token and turn_cancelled(hive, token)):
+            yield _pipeline_event(ok=True, tool=str((pick or {}).get("tool") or "converse"), spoken=TOOL_HEARTBEAT, spoken_delta=TOOL_HEARTBEAT,
+                                  wires=[str((pick or {}).get("tool") or "converse"), "heartbeat"], cites=[], pack=None, done=False,
+                                  partial=True, brain=brain, model_available=bool(brain), gen=token)
+        _tw.join()
+        if "err" in _tbox:
+            raise _tbox["err"]
+        ran = _tbox["ran"]
         if ran.get("needs_talk") and not (token and turn_cancelled(hive, token)):
             retried = online_talk(
                 spoken_in,
