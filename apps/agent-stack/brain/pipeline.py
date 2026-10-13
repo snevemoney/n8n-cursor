@@ -1015,6 +1015,8 @@ BARE_CONSENT_RE = re.compile(r"^\s*(?:allow\s+it|go\s+for\s+it|go\s+ahead|do\s+i
 NO_PENDING_LINE = "Nothing is waiting for your OK right now, so I did nothing. Tell me what you want done."
 STOP_WATCH_RE = re.compile(r"^\s*(?:jarvis[\s,]*)?(?:please\s+)?stop\s+(?:watching|looking\s+at|seeing)\s+(?:my\s+|the\s+)?screen\b", re.I)
 CLICK_ASK_RE = re.compile(r"\b(?:can|could|would|will)\s+you\s+(?:please\s+)?(?:click|tap|press|close)\b|^\s*(?:please\s+)?click\s+(?:on\s+)?(?:the\s+)?x\b", re.I)
+CLICK_UNNAMED_LINE = ("I can't click for you yet; you click. Tell me the button's label, like \"the close button on the usage banner\", "
+                      "and I'll put a red arrow on it.")
 COST_FOLLOW_RE = re.compile(r"\bhow\s+much\s+(?:did|does|was)\s+(?:that|this|it)(?:\s+one)?\s+cost\b", re.I)
 RESEARCH_RE = re.compile(r"\b(?:do|make|run)\s+(?:an?\s+)?online\s+research\s+(?:about|on|for)\s+\S|\bresearch\s+online\s+(?:about|on|for)\s+\S", re.I)
 RESEARCH_LEAD_RE = re.compile(r"^.*?\bonline\s+research\s+(?:about|on|for)\s+|^.*?\bresearch\s+online\s+(?:about|on|for)\s+", re.I)
@@ -1031,7 +1033,10 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
     if COST_FOLLOW_RE.search(u):
         return {"tool": "cost_card", "args": {}, "speak": ""}
     if CLICK_ASK_RE.search(u) and not is_hard_step(u):
-        return {"tool": "pointer", "args": {}, "speak": ""}
+        named = [w for w in _pointer_hand().keywords(u) if w not in {"close", "dismiss", "x", "that", "this", "it"}]
+        if named:
+            return {"tool": "pointer", "args": {}, "speak": ""}
+        return {"tool": "say", "args": {}, "speak": CLICK_UNNAMED_LINE}
     if RESEARCH_RE.search(u):
         q = RESEARCH_LEAD_RE.sub("", u).strip(" ?.!") or u
         return {"tool": "web_search", "args": {"query": q}, "speak": ""}

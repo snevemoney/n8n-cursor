@@ -39,8 +39,13 @@ def test_hand_it_back_is_handback():
     assert _pick("hand it back now")["tool"] == "handback"
 
 
-def test_click_x_offers_the_pointer_not_a_flat_refusal():
-    assert _pick("can you click the X to dismiss this")["tool"] == "pointer"
+def test_click_x_with_no_label_is_honest_and_offers_the_arrow():
+    got = _pick("can you click the X to dismiss this")
+    assert got["tool"] == "say" and "red arrow" in got["speak"]
+
+
+def test_click_named_button_goes_to_pointer():
+    assert _pick("could you click the settings button")["tool"] == "pointer"
 
 
 def test_online_research_goes_to_cited_web_search():
