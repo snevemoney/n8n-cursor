@@ -176,7 +176,7 @@ def op_cli(argv: list[str], cwd: str | None = None) -> dict:
     PERM().log_action("cli", argv[0] + " " + rest[:80], "allow")
     try:
         p = subprocess.run([exe, *argv[1:]], capture_output=True, text=True, timeout=CLI_DEADLINE_S,
-                           cwd=cwd or str(Path.home()), stdin=subprocess.DEVNULL)
+                           cwd=cwd or (str(STACK.parents[1]) if argv[0] == "git" else str(Path.home())), stdin=subprocess.DEVNULL)
     except subprocess.TimeoutExpired:
         return {"ok": False, "verified": False, "spoken": f"{argv[0]} timed out after {CLI_DEADLINE_S}s."}
     text = _cap(_scrub(p.stdout or p.stderr))
