@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "rules", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "rules", "workbench", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -994,7 +994,9 @@ def model_free_route(spoken_in: str) -> dict | None:
         # Rank 16: a screen ask is the whole display (screen_see), not the Safari tab.
         early = {"tool": "screen_see", "args": {}, "speak": ""}
     if early is None and not is_hard_step(spoken_in):
-        if wants_rules(spoken_in):
+        if _workbench_hand().wants_mode(spoken_in) or _workbench_hand().wants_workbench(spoken_in):
+            early = {"tool": "workbench", "args": {}, "speak": ""}
+        elif wants_rules(spoken_in):
             early = {"tool": "rules", "args": {}, "speak": ""}
         elif wants_mcp_call(spoken_in):
             early = {"tool": "mcp_call", "args": {}, "speak": ""}
@@ -1133,6 +1135,16 @@ def _plan_hand():
     name = "agent_stack_plan"
     if name not in sys.modules:
         spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "plan.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _workbench_hand():
+    name = "agent_stack_workbench"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "workbench.py")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
@@ -5103,6 +5115,15 @@ def _run_tool_inner(
         eff = dict(args) if args else hd.args_from_utterance(utterance)
         if not str(eff.get("code") or "").strip() and _code_author_hand().wants_author(utterance):
             au = _code_author_hand().author(utterance)
+            perm = _workbench_hand().PERM()
+            if au.get("ok") and perm.auto_accept_edits():
+                # Auto-accept edits (Evens's toggle): authored code runs in the sandbox now, no confirm.
+                got = hd.run({"code": au["code"], "test": au["test"]})
+                perm.log_action("run_sandbox", "authored code", "allow", passed=bool(got.get("passed")), auto=True)
+                return {"ok": bool(got.get("ok")), "tool": tool,
+                        "spoken": str(au.get("spoken") or "").split(" nothing has run.")[0] + ". Auto-accept is on, so I ran it: " + str(got.get("spoken") or ""),
+                        "wires": ["code_run"], "cites": [], "sent": False, "task_verified": bool(got.get("passed")),
+                        "code_run_meta": hd.log_meta(got)}
             if au.get("ok"):
                 confirm_arm(hive, "code_run", {"code": au["code"], "test": au["test"], "critic_model": au["critic_model"]}, utterance)
             return {"ok": bool(au.get("ok")), "tool": tool, "spoken": str(au.get("spoken") or ""),
@@ -5141,6 +5162,12 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["screen_see"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "screen_see_meta": hd.log_meta(got)}
+    if tool == "workbench":
+        wb = _workbench_hand()
+        got = wb.set_mode(utterance) if wb.wants_mode(utterance) else wb.run(utterance)
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["workbench"], "cites": [], "sent": False, "task_verified": bool(got.get("ok")),
+                "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "rules":
         return {"ok": True, "tool": tool, "spoken": rules_spoken(), "wires": ["rules"], "cites": [],
                 "sent": False, "task_verified": True, "outcome": TOOL_LOOP}
@@ -5832,7 +5859,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
