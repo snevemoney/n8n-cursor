@@ -20,7 +20,17 @@ def log_path() -> Path | None:
     raw = (os.environ.get("JARVIS_TURN_LOG") or "").strip()
     if raw.lower() in {"0", "off", "false", "no"}:
         return None
-    return Path(raw).expanduser() if raw else DEFAULT_PATH
+    if raw:
+        return Path(raw).expanduser()
+    if _under_tests():  # tests never write Evens's real log; they get a per-process temp file
+        import tempfile
+        return Path(tempfile.gettempdir()) / f"jarvis-turns-test-{os.getpid()}.jsonl"
+    return DEFAULT_PATH
+
+
+def _under_tests() -> bool:
+    import sys
+    return "_pytest" in sys.modules or "unittest" in sys.modules
 
 
 _CHEAP_RE = __import__("re").compile(r"mini|flash|haiku|small|nano|lite|8b|7b|3b", __import__("re").I)
