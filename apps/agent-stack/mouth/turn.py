@@ -594,6 +594,13 @@ def _apply_turn_iter_inner(
         yield _door_speak(hive, spoken, _line, "clock", retrieve_roots, gen=token,
                           execution={"ok": True, "tool": "clock", "spoken": _line, "wires": ["local_clock"], "sent": False})
         return
+    # E–J project artifacts stay behind the existing hard-step gate and hush state.
+    if re.match(r"^(?:hey\s+)?(?:jarvis[, .]+)?project\s+[a-z0-9-]+\s+(?:create|context|review|capture|compile|checkpoint)\b", spoken, re.I):
+        _projects = PIPELINE._load("agent_stack_project_methods", PIPELINE.STACK / "hands" / "project_methods.py")
+        if _projects.wants(spoken):
+            got = _projects.run(spoken, root=Path(hive) / "project-artifacts")
+            yield _door_speak(hive, spoken, got["spoken"], "project_methods", retrieve_roots, gen=token, execution=got)
+            return
     # Z82 (dCK 4:39): "find my note about X" -> name the title, ask, then fetch on "open it/yes". Z83 grounded writing.
     try:
         _fp = Path.home() / ".jarvis" / "find_pending.json"
