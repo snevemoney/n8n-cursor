@@ -101,3 +101,10 @@ def test_model_invented_file_read_asks_instead_of_guessing(tmp_path):
 def test_bare_decide_asks_for_the_options_instead_of_repeating():
     got = _pick("you decide")
     assert got["tool"] == "say" and "options" in got["speak"]
+
+
+def test_short_dismissal_gets_a_fixed_ack_not_the_previous_reply():
+    for u in ("I don't care about that thing", "never mind", "forget about it"):
+        r = P.live_chat_route(u)
+        assert r and r["tool"] == "say" and r["speak"] == P.DISMISS_LINE
+    assert P.live_chat_route("I don't care about the cost, just open my notes on the launch plan please") is None

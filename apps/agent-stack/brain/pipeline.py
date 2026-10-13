@@ -1028,6 +1028,12 @@ RESEARCH_LEAD_RE = re.compile(r"^.*?\bonline\s+research\s+(?:about|on|for)\s+|^.
 FILE_EXT_RE = re.compile(r"\.\w{2,4}\b")
 PULL_UP_MY_RE = re.compile(r"\b(?:pull|bring)\s+up\s+my\s+(?!screen\b|files?\b|downloads\b|desktop\b|documents\b|repos?\b)\w|"
                            r"\b(?:find|show)\s+(?:me\s+)?my\s+(?!screen\b|files?\b|downloads\b|desktop\b|documents\b|repos?\b)\w", re.I)
+# "I don't care about your <thing>" / "never mind that" / "forget it": a dismissal. The talk model echoed its last
+# reply (hand-back line) to it. Short dismissals get one fixed ack and no model; longer ones carrying a new ask fall through.
+DISMISS_RE = re.compile(r"^\s*(?:jarvis[\s,]*)?(?:(?:i|we)\s+(?:don'?t|do\s+not)\s+care\s+(?:about|for)\b(?:\s+\S+){0,4}"
+                        r"|never\s*mind(?:\s+\S+){0,3}|forget\s+(?:about\s+)?(?:it|that|this|the\s+\S+|your\s+\S+)"
+                        r"|drop\s+(?:it|that))[\s.!]*$", re.I)
+DISMISS_LINE = "Understood, I'll drop that. What do you want instead?"
 SCREEN_WORD_RE = re.compile(r"\b(?:screen|display|monitor|see|look|watch|showing|pop-?up|window)\b", re.I)
 
 
@@ -1048,6 +1054,8 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
     u = spoken_in or ""
     if not had_pending and BARE_CONSENT_RE.match(u):
         return {"tool": "say", "args": {}, "speak": NO_PENDING_LINE}
+    if DISMISS_RE.match(u):
+        return {"tool": "say", "args": {}, "speak": DISMISS_LINE}
     if BARE_DECIDE_RE.match(u):
         # Live: a bare "Decide" got the previous reply repeated. Nothing names the choice, so ask once.
         return {"tool": "say", "args": {}, "speak": "Decide what? Name the two options and I'll pick one and say why."}
