@@ -171,11 +171,13 @@ CLI_ALLOW = {
     # Google Workspace CLI: positive match only (read helpers, or `<service> <resource…> list|get|query`). Sign-in, request
     # bodies, uploads, file output and any write-ish word fail closed to "needs Evens". A search term that happens to
     # contain such a word is gated too; that is the safe side to err on.
+    # The write-word check stops at `--params`, so a search term like "update plan" is not mistaken for a write verb; the
+    # flag check covers the whole line (DOTALL, so a newline cannot hide a flag).
     "gws": re.compile(
         r"^(?!.*(?:--json|--upload|--output|--sanitize)\b)"
-        r"(?!.*\b(?:send|reply|forward|insert|update|patch|delete|batch\w*|trash|untrash|modify|import|create|copy|move|"
-        r"watch|stop|clear|empty\w*|quickAdd|login|logout|export|auth)\b)"
-        rf"(?:{GWS_SERVICES})\s+(?:\+(?:triage|read|agenda)\b|(?:[\w.\-]+\s+){{1,3}}(?:list|get|query)(?:\s|$))"),
+        r"(?!(?:(?!\s--params\b).)*\b(?:send|reply|forward|insert|update|patch|delete|batch\w*|trash|untrash|modify|import|"
+        r"create|copy|move|watch|stop|clear|empty\w*|quickAdd|login|logout|export|auth)\b)"
+        rf"(?:{GWS_SERVICES})\s+(?:\+(?:triage|read|agenda)\b|(?:[\w.\-]+\s+){{1,3}}(?:list|get|query)(?:\s|$))", re.S),
 }
 CLI_GATED = re.compile(r"\b(merge|push|close|delete|create|edit|comment|review|release|deploy|reset|rebase|--force|-X\s*(POST|PUT|PATCH|DELETE))\b", re.I)
 
@@ -184,7 +186,9 @@ def op_cli(argv: list[str], cwd: str | None = None) -> dict:
     if not argv or argv[0] not in CLI_ALLOW:
         return {"ok": False, "verified": False, "spoken": f"{(argv or ['?'])[0]} isn't on the read-only CLI list."}
     rest = " ".join(argv[1:])
-    if CLI_GATED.search(rest) or not CLI_ALLOW[argv[0]].search(rest):
+    gate_text = rest.split(" --params ", 1)[0] if argv[0] == "gws" else rest  # a search term is data, not a verb
+    shape_ok = argv[0] != "gws" or _load("gws_natural", "gws_natural.py").argv_is_read_only(argv)
+    if CLI_GATED.search(gate_text) or not CLI_ALLOW[argv[0]].search(rest) or not shape_ok:
         PERM().log_action("cli", argv[0] + " " + rest[:80], "confirm")
         return {"ok": False, "verified": False, "gated": True, "spoken": f"`{argv[0]} {rest}` is not read-only. That needs Evens."}
     exe = shutil.which(argv[0], path=os.environ.get("PATH", "") + ":/opt/homebrew/bin:/usr/local/bin")
@@ -196,6 +200,11 @@ def op_cli(argv: list[str], cwd: str | None = None) -> dict:
                            cwd=cwd or (str(STACK.parents[1]) if argv[0] == "git" else str(Path.home())), stdin=subprocess.DEVNULL)
     except subprocess.TimeoutExpired:
         return {"ok": False, "verified": False, "spoken": f"{argv[0]} timed out after {CLI_DEADLINE_S}s."}
+    if argv[0] == "gws":  # speech, never raw JSON; a missing sign-in gets a plain answer
+        g = _load("gws_natural", "gws_natural.py")
+        res = g.speak(g.kind_of(argv[1:]), p.stdout or "", p.stderr or "", p.returncode)
+        return {"ok": res["ok"], "verified": res["ok"], "exit": p.returncode, "auth_missing": res["auth_missing"],
+                "spoken": _scrub(res["spoken"])}
     text = _cap(_scrub(p.stdout or p.stderr))
     ok = p.returncode == 0
     return {"ok": ok, "verified": ok and bool(text), "output": text, "exit": p.returncode,
@@ -320,6 +329,8 @@ def run(args: dict | None = None, approved: bool = False) -> dict:
     if len(steps) == 1 and steps[0].get("op") == "code":
         got = op_code(steps[0].get("repo", ""), steps[0].get("goal", ""), steps[0].get("branch") or "jarvis/code")
         return got
+    if len(steps) == 1 and steps[0].get("op") == "cli" and (steps[0].get("argv") or [""])[0] == "gws":
+        return _step(steps[0], approved)  # one Google read: answer in a sentence, not a step report
     ranked = rank_skills(goal, 1) if args.get("goal") else []
     skill = ranked[0] if ranked else skill_first(goal)
     if not steps:
@@ -357,8 +368,16 @@ _LIST = re.compile(r"\blist\s+(?:the\s+)?([\w.\-]+)\s+mcp\s+tools\b", re.I)
 _CODE = re.compile(r"^\s*(?:jarvis[,:]?\s*)?in\s+(?:the\s+)?scratch\s+repo\s+([\w.\-]+)\s*[,:]\s*(.+?)\s*$", re.I | re.S)
 
 
+def _gws_argv(u: str) -> list[str] | None:
+    try:
+        return _load("gws_natural", "gws_natural.py").argv_for(u)
+    except Exception:  # noqa: BLE001 — a broken helper must never take the turn down; the ask just isn't claimed
+        return None
+
+
 def wants(u: str) -> bool:
-    return bool(_LIST.search(u or "") or _CODE.match(u or "") or _TASK.search(u or "") or _CLI.match(u or "") or _MCPC.search(u or ""))
+    return bool(_LIST.search(u or "") or _CODE.match(u or "") or _TASK.search(u or "") or _CLI.match(u or "") or _MCPC.search(u or "")
+                or _gws_argv(u))
 
 
 def args_from_utterance(u: str) -> dict:
@@ -388,6 +407,9 @@ def args_from_utterance(u: str) -> dict:
             return {"op": "cli", "argv": shlex.split(m.group(1))}
         except ValueError:
             return {}
+    argv = _gws_argv(u)
+    if argv:
+        return {"op": "cli", "argv": argv}
     return {}
 
 
