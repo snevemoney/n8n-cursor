@@ -80,7 +80,8 @@ def note_for(row: dict) -> str:
     try:
         VAULT_INBOX.mkdir(exist_ok=True)
         slug = re.sub(r"[^\w -]+", "", row["ask"])[:48].strip() or row["hand"]
-        dest = VAULT_INBOX / f"{row['ts'][:10]} {row['ts'][11:16].replace(':', '')} {row['hand']} - {slug}.md"
+        local = datetime.fromisoformat(row["ts"]).astimezone()
+        dest = VAULT_INBOX / f"{local:%Y-%m-%d %H%M} {row['hand']} - {slug}.md"
         refs = "".join(f"\n- {r}" for r in row.get("refs") or [])
         dest.write_text(f"---\ntype: jarvis-result\nhand: {row['hand']}\nts: {row['ts']}\ntags: [jarvis-inbox]\n---\n"
                         f"# {card_title(row)}\n\n**Asked:** {row['ask']}\n\n{row['result']}\n" + (f"\n**Refs:**{refs}\n" if refs else ""),
