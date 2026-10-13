@@ -449,7 +449,7 @@ APP_BUILD = OVERLAY / "build_click_app.sh"
 def _click_app() -> Path | None:
     exe = CLICK_APP / "Contents" / "MacOS" / "jarvis_click"
     src = OVERLAY / "jarvis_click.swift"
-    if not exe.is_file():  # never auto-rebuild: a rebuild changes the ad-hoc signature and drops his Accessibility switch
+    if not exe.is_file():  # build only when missing; build_click_app.sh itself skips an unchanged source (a rebuild drops the grant)
         subprocess.run(["bash", str(APP_BUILD)], capture_output=True, timeout=240)
     return CLICK_APP if exe.is_file() else None
 
@@ -488,7 +488,7 @@ def click_preflight() -> dict:
 
 
 PERMISSION_LINE = ("I didn't click: macOS hasn't switched on Accessibility for Jarvis Click. In System Settings, Privacy & Security, "
-                   "Accessibility, turn on Jarvis Click ({app}), then ask me again. Nothing was clicked.")
+                   "Accessibility, turn on Jarvis Click ({app}); if it already shows on, switch it off and on again. Then ask me again. Nothing was clicked.")
 
 
 def _mouse() -> tuple | None:
@@ -827,6 +827,7 @@ def _refine(got: dict, shot: str, d: dict, *, call_fn=None, key: str = "") -> di
             pass
 
 
+CURSOR_DEMO_HOLD_SEC = 8
 CURSOR_DEMO_RE = re.compile(r"\bshow\s+(?:me\s+)?(?:your|the)\s+(?:jarvis\s+)?cursor\b", re.I)
 
 
@@ -837,9 +838,6 @@ def cursor_demo() -> dict:
     d = cursor_display()
     hx, hy = d["cursor"]
     tx, ty = d["x"] + d["w"] / 2, d["y"] + d["h"] / 2
-    cur = _bin("pointer_cursor")
-    if cur is None:
+    if not cursor_start((hx, hy), (tx, ty), CURSOR_DEMO_HOLD_SEC):
         return {"ok": False, "spoken": "I couldn't build my cursor overlay."}
-    subprocess.Popen([str(cur), f"{hx:.1f}", f"{hy:.1f}", f"{tx:.1f}", f"{ty:.1f}"], stdout=subprocess.DEVNULL,
-                     stderr=subprocess.DEVNULL, start_new_session=True)
     return {"ok": True, "spoken": "Watch the screen your mouse is on: my blue Jarvis cursor is gliding to the middle now. Nothing gets clicked."}
