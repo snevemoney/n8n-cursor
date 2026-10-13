@@ -13,7 +13,7 @@ def test_metered_cost_is_quoted_exactly(tmp_path):
     log = _log(tmp_path, [{"ts": "2026-10-13T20:00:00Z", "verb": "converse", "model": "deepseek/deepseek-chat-v3.1",
                            "usage_cost_usd": 0.0001234, "usage_tokens_in": 1500, "usage_tokens_out": 9}])
     got = C.run("What did that last answer cost?", log=log, fetch=lambda: b'{"data": []}')
-    assert "$0.000123" in got["spoken"] and "1500" in got["spoken"] and got["metered"]
+    assert "$0.0001234" in got["spoken"] and "1500" in got["spoken"] and got["metered"]
 
 
 def test_unmetered_turn_gives_no_number(tmp_path):

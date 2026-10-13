@@ -40,6 +40,11 @@ def last_turn(rows: list[dict]) -> dict:
     return {}
 
 
+def usd_text(usd) -> str:
+    """Exact as metered, no rounding to zero: 0.0000123 -> '0.0000123'."""
+    return f"{float(usd):.10f}".rstrip("0").rstrip(".") or "0"
+
+
 def last_turn_spoken(r: dict) -> dict:
     """Only real numbers: OpenRouter's metered usage for that turn, or 'no model call'. Never an estimate."""
     model = str(r.get("model") or "")
@@ -56,7 +61,7 @@ def last_turn_spoken(r: dict) -> dict:
                 "spoken": f"That last answer used {model}, but OpenRouter sent no usage report for it, so I don't have its real cost "
                           "and I won't guess a number."}
     return {"ok": True, "metered": True, "usd": float(usd), "row_ts": ts, "gen_id": r.get("usage_gen_id"),
-            "spoken": f"That last answer cost ${float(usd):.6f} on {model}: {r.get('usage_tokens_in')} tokens in, "
+            "spoken": f"That last answer cost ${usd_text(usd)} on {model}: {r.get('usage_tokens_in')} tokens in, "
                       f"{r.get('usage_tokens_out')} out, per OpenRouter's usage report for that turn (turn log {ts})."}
 
 
