@@ -5,6 +5,7 @@
     "computer",
     "context",
     "files",
+    "jev",
     "mcp",
     "memory",
     "repos",
@@ -15,6 +16,6 @@
     "web",
     "workflows"
   ],
-  "passed": 14,
+  "passed": 15,
   "total": 17
 }
