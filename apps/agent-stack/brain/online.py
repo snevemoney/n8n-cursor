@@ -618,6 +618,14 @@ def raced_stream(
     return "".join(parts).strip(), finish, win
 
 
+def stream_hedge_sec() -> float:
+    """First-token race start. Live soak: deepseek first token p95 ~11 s, mistral-small ~0.5 s."""
+    try:
+        return max(0.0, float(os.environ.get("JARVIS_TALK_STREAM_HEDGE_SEC") or 2.5))
+    except ValueError:
+        return 2.5
+
+
 def talk_hedge_sec() -> float:
     """Seconds before a second identical talk request races the first. 0 turns it off."""
     raw = (os.environ.get("JARVIS_TALK_HEDGE_SEC") or "").strip()
@@ -1784,7 +1792,7 @@ def _call_openrouter_inner(
                         stream_began = time.monotonic()
                         try:
                             text, finish, won = raced_stream(
-                                racers, headers=headers, timeout=attempt, hedge=talk_hedge_sec(), sink=stream_sink()
+                                racers, headers=headers, timeout=attempt, hedge=stream_hedge_sec(), sink=stream_sink()
                             )
                             mid = won
                             data = {"choices": [{"message": {"content": text}, "finish_reason": finish or "stop"}]}

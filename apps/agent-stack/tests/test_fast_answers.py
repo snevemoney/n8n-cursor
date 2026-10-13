@@ -76,6 +76,9 @@ class FastAnswerTests(unittest.TestCase):
 
 
 class RoundFiveTests(unittest.TestCase):
+    def test_stream_hedge_is_short(self):
+        self.assertLessEqual(online.stream_hedge_sec(), 3.0)
+
     def test_functioning_well_greeting_dropped(self):
         for t in ("Sir. Good evening, sir. I'm functioning well tonight - ready to assist. What's on your mind?",
                   "Sir. Good evening. I'm doing well and ready to serve you. What's on your mind?"):
@@ -86,7 +89,7 @@ class RoundFiveTests(unittest.TestCase):
     def test_plain_questions_skip_hands(self):
         from brain import pipeline
         for q in ("Explain what a CANDIDATE means here.", "Name three things you can do for me.", "What can you do?", "Tell me about the Orb.",
-                  "Are you allowed to rotate keys?", "Who can merge PRs?", "What should I focus on tomorrow morning?"):
+                  "Are you allowed to rotate keys?", "Who can merge PRs?", "What should I focus on tomorrow morning?", "What's the plan for PR 619?"):
             self.assertTrue(pipeline.plain_question(q), q)
         for q in ("Open Safari and look at the screen", "Search my vault for Maya", "run status", "Explain what's on my screen"):
             self.assertFalse(pipeline.plain_question(q), q)
