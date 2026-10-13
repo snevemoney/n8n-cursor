@@ -17,7 +17,7 @@ COMMANDS = [
 COMMANDS += [[sys.executable, "-m", "unittest", "discover", "-s", directory,
               "-p", "test_*.py", "-v"]
              for directory in ("brain", "face", "mouth", "memory", "hands", "tests", "eval", "eval/computer")]
-COMMANDS += [["node", "face/test_turn.cjs"]]
+COMMANDS += [["node", "face/test_turn.cjs"], ["node", "face/test_barge.cjs"]]
 
 def main():
     for command in COMMANDS:

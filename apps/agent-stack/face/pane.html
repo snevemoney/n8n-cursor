@@ -1141,8 +1141,59 @@
         err.name = "NotFoundError";
         throw err;
       }
-      state.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      state.stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
+      startBargeWatch();
       return streamLive();
+    }
+
+    // Z03 barge-in: while Jarvis speaks and the mic is live, sustained voice on the mic (louder than the
+    // echo-cancelled TTS bleed) cuts the speech off and hands the floor back. Mic level only; no audio leaves.
+    const BARGE = { floor: 0.045, ratio: 1.8, holdMs: 260, tick: 60 };
+    let bargeTimer = null, bargeSince = 0, micAnalyser = null, micBuf = null;
+    function micLevel(an, buf) {
+      an.getFloatTimeDomainData(buf);
+      let sum = 0;
+      for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+      return Math.sqrt(sum / buf.length);
+    }
+    function bargeHit(mic, tts, heldMs) {
+      return mic > BARGE.floor && mic > tts * BARGE.ratio && heldMs >= BARGE.holdMs;
+    }
+    window.__jarvisBarge = { BARGE, bargeHit };
+    function startBargeWatch() {
+      if (bargeTimer || !streamLive()) return;
+      try {
+        unlockAudio();
+        if (!audioCtx) return;
+        micAnalyser = audioCtx.createAnalyser();
+        micAnalyser.fftSize = 1024;
+        micBuf = new Float32Array(micAnalyser.fftSize);
+        audioCtx.createMediaStreamSource(state.stream).connect(micAnalyser);
+      } catch (e) { micAnalyser = null; return; }
+      let ttsBuf = null;
+      bargeTimer = setInterval(() => {
+        if (!micAnalyser || !state.armed || !ttsSpeaking()) { bargeSince = 0; return; }
+        const mic = micLevel(micAnalyser, micBuf);
+        let tts = 0;
+        if (ttsAnalyser) {
+          if (!ttsBuf || ttsBuf.length !== ttsAnalyser.fftSize) ttsBuf = new Float32Array(ttsAnalyser.fftSize);
+          tts = micLevel(ttsAnalyser, ttsBuf);
+        }
+        const now = Date.now();
+        if (mic > BARGE.floor && mic > tts * BARGE.ratio) {
+          if (!bargeSince) bargeSince = now;
+          if (bargeHit(mic, tts, now - bargeSince)) {
+            bargeSince = 0;
+            pressStop();
+            $("spoken").textContent = "Go ahead, I'm listening.";
+            scheduleRestart(120);
+          }
+        } else {
+          bargeSince = 0;
+        }
+      }, BARGE.tick);
     }
 
     function startListen() {
@@ -1779,8 +1830,8 @@
         if (line && !bus.mission_delivery_pending && !(bus.tool === "browser_mission" && bus.browser_mission_id && Array.from($("browserResults").children).some(el => el.dataset.missionId === bus.browser_mission_id)) && (newerReply || !now || isStatusLine(now) || isFallbackLine(now) || /^listening\.?$/i.test(now))) {
           $("spoken").textContent = line;
           state.renderedBusGen = Number(bus.turn_gen || 0);
-          if ($("heard")) $("heard").textContent = bus.utterance ? "› " + String(bus.utterance).slice(0, 160) : "";
-          if ($("heard") && bus.watch && bus.watch.armed && bus.watch.narration) $("heard").textContent = "▶ " + String(bus.watch.narration).slice(0, 160);
+          if (bus.utterance && $("heard") && $("heard") !== $("spoken")) $("heard").textContent = "› " + String(bus.utterance).slice(0, 160);
+          if (bus.watch && bus.watch.armed && bus.watch.narration && $("heard") && $("heard") !== $("spoken")) $("heard").textContent = "▶ " + String(bus.watch.narration).slice(0, 160);
         }
         if (bus.tool === "browser_mission" && bus.browser_mission_id &&
             Array.from($("browserResults").children).some(el => el.dataset.missionId === bus.browser_mission_id) &&
