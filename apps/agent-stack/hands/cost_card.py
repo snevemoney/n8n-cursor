@@ -17,7 +17,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 CACHE = Path.home() / "Library" / "Caches" / "jarvis" / "or-prices.json"
 WANT_RE = re.compile(r"\b(?:cost\s+card|what\s+(?:did|does|do)\s+(?:that|this|it|you|replies?)\s+cost|how\s+much\s+(?:have\s+you|did\s+you|"
-                     r"do\s+you)\s+(?:spend|spent|cost)|(?:today'?s|my)\s+(?:spend|costs?|bill)|cost\s+(?:so\s+far|today))\b", re.I)
+                     r"do\s+you)\s+(?:spend|spent|cost)|(?:today'?s|my)\s+(?:spend|costs?|bill)|cost\s+(?:so\s+far|today)|cost\s+guide|the\s+meter|"
+                     r"what\s+(?:does|do|did)\s+(?:each|every|all)\s+(?:\w+\s+){0,4}?cost|how\s+much\s+(?:does|do)\s+(?:each|every|you|jarvis)\b[^?]{0,40}cost|"
+                     r"(?:cost|price)\s+(?:of|per)\s+(?:each|every)\b)\b", re.I)
 WEB_FEE = 0.005      # perplexity/sonar per-request web_search fee (OpenRouter list)
 WEB_TOKENS = 400     # one sonar lookup, prompt + answer (estimate)
 CODE_TOKENS = (900, 500)  # one builder call (in, out), estimate
@@ -107,7 +109,21 @@ def run(utterance: str = "", *, log: Path | None = None, now: datetime | None = 
     n = sum(v["n"] for v in day.values())
     parts = [f"{c} {v['n']} (${v['usd']:.3f})" for c, v in day.items() if v["n"]]
     src = "OpenRouter list prices" if p else "no live price list, so model rows are $0"
+    # demo U-LXFzu6sGU 9:37 "The meter, everyday": typical cost per thing Jarvis does, plus a busy day
+    label = {"reply": "a spoken answer", "web": "live web research", "code": "a code or draft build", "tool": "a notes, tool or calendar action"}
+    def each(c):
+        v = day[c]
+        if not v["n"]:
+            return None
+        cents = v["usd"] / v["n"] * 100
+        return f"{label[c]} about {cents:.2f} cents" if cents >= 0.005 else f"{label[c]} free"
+    meter = [x for x in (each(c) for c in ("reply", "web", "code", "tool")) if x]
+    busy = 20 * (day["reply"]["usd"] / max(1, day["reply"]["n"])) + 5 * (day["tool"]["usd"] / max(1, day["tool"]["n"])) \
+        + 1 * (day["web"]["usd"] / max(1, day["web"]["n"]))
     return {"ok": True, "card": day, "total_usd": round(total, 4), "turns": n,
-            "spoken": (f"Cost card, an estimate from logged token counts and {src}: today {n} turns, about ${total:.2f} — "
+            "meter": meter, "busy_day_usd": round(busy, 3),
+            "spoken": ("The meter, typical cost each: " + "; ".join(meter) + ". Instant reflexes are free; they use no model. "
+                       f"A busy day (20 answers, 5 actions, 1 research) is about {busy * 100:.0f} cents. "
+                       f"Cost card, an estimate from logged token counts and {src}: today {n} turns, about ${total:.2f} — "
                        + ", ".join(parts) + f". The last turn was a {last_cls} turn, about ${last_usd:.4f}. "
                        "Pay-per-use on your own keys; no subscription.")}

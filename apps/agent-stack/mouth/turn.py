@@ -536,7 +536,7 @@ def _apply_turn_iter_inner(
                 and re.search(r"\b(?:pull|bring)\s+up\b|\b(?:show|open|find)\s+(?:me\s+)?my\b", spoken or "", re.I)):
             nb = _REFLEX.note_brief(_rx["vault_note"]) if _REFLEX is not None else {"ok": False}
             if nb.get("ok"):
-                got = {"ok": True, "tool": "vault_read", "spoken": f"Your {nb['name']} note is up, sir. {nb['gist']}",
+                got = {"ok": True, "tool": "vault_read", "spoken": f"Your {nb['name']} note is up. {nb['gist']}",
                        "cites": [nb["path"]], "wires": ["vault_read", "reflex"], "sent": False, "task_verified": True}
                 yield _door_speak(hive, spoken, got["spoken"], "vault_read", retrieve_roots, gen=token, execution=got)
                 return
