@@ -5737,7 +5737,8 @@ def _run_tool_inner(
 
 HANDBACK_RE = re.compile(
     r"^\W*(?:(?:ok(?:ay)?|stop|wait|hold on|jarvis)[,.!]?\s+)*(?:i'?ll\s+take\s+(?:it\s+)?(?:over|from\s+here|the\s+wheel)|"
-    r"hands\s+off|let\s+me\s+(?:take\s+over|drive|do\s+it)|give\s+me\s+(?:the\s+wheel|control)|my\s+wheel)\b",
+    r"hands\s+off|let\s+me\s+(?:take\s+over|drive|do\s+it)|give\s+me\s+(?:back\s+)?(?:the\s+)?(?:wheel|control|screen)(?:\s+back)?|my\s+wheel|"
+    r"i\s+want\s+to\s+take\s+(?:it\s+)?over|hand\s+(?:it|control|the\s+screen|me\s+the\s+screen)\s+back|hand\s+(?:me\s+)?(?:back\s+)?(?:the\s+)?(?:screen|control))\b",
     re.I,
 )
 
