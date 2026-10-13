@@ -1343,6 +1343,7 @@ STATUS_CLAIM_RE = re.compile(
     r"|\b(?:based\s+on\s+the\s+status\s+check|(?:the\s+)?status\s+check\s+I\s+(?:just\s+)?(?:completed|ran|did)|running\s+a\s+(?:live\s+)?status\s+check\s+now)\b"
     r"|\b(?:orb\s+)?doors?\b[^.\n]{0,30}?\b(?:operational|ready|readiness|online|green)\b"
     r"|\*\*[^*\n]{0,30}\breadiness\s*:?\s*\*\*"
+    r"|\bchecking\s+(?:tool\s+)?readiness\b|\b(?:talk|vault|safari|watch|eyes|openrouter|focus|voice)\b[^.\n]{0,40}?:\s*(?:live|responding|up|ok)\b"
     r"|\bready\s+to\s+serve\b|\bno\s+known\s+(?:blockages|issues|blockers)\b"
     r"|\ball\s+systems\s+(?:are\s+)?(?:go|nominal|green)"
     r"|\bfunctioning\s+(?:well\s+)?within\s+(?:normal\s+)?operational\s+parameters",
@@ -1353,7 +1354,7 @@ STATUS_CLAIM_RE = re.compile(
 # "**Operational:**", "Tools status:", "Ready:" headers over a tool list nobody checked.
 STATUS_HEADER_RE = re.compile(
     r"(?:^|[\s:])\**\s*(?:operational|tools?\s+status|status|ready|online|working|available)\s*:?\s*\**\s*:?\s*$"
-    r"|\**\s*(?:operational|tools?\s+status)\s*:?\s*\**\s*:?\s*[-*\u2022]\s",
+    r"|\**\s*(?:operational|tools?\s+status|(?:core\s+)?orb\s+doors)\s*:?\s*\**\s*:?\s*[-*\u2022]\s",
     re.I,
 )
 

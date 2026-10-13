@@ -74,6 +74,13 @@ class StatusClaimTests(unittest.TestCase):
         t = "Sir. All Orb doors operational: 5/5 healthz 200. Ready to serve."
         self.assertEqual(online.unbacked_status_claim(t, backed=True), t)
 
+    def test_core_orb_doors_live_list_dropped(self):
+        t = "Sir. Checking tool readiness: **Core Orb doors:** - Talk (OpenRouter): live - `deepseek` responding - Vault read-memory: live - access ok"
+        out = online.unbacked_status_claim(t, backed=False).lower()
+        self.assertNotRegex(out, r"vault read-memory|: live|checking tool readiness")
+        self.assertIn("not run a live status check", out)
+        self.assertEqual(online.unbacked_status_claim(t, backed=True), t)
+
     def test_rule_ask_detected(self):
         for q in ("Who is allowed to issue a PASS?", "Who can merge PRs?", "What are the rules for client sends?"):
             self.assertTrue(online.RULE_ASK_RE.search(q), q)
