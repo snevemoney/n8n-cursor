@@ -15,6 +15,7 @@ import shutil
 import socket
 import ssl
 import subprocess
+import queue
 import threading
 import time
 import urllib.error
@@ -57,10 +58,60 @@ def _sec_env(name: str, default: float) -> float:
 
 
 OPENROUTER_ATTEMPT_SEC = _sec_env("JARVIS_TALK_ATTEMPT_SEC", 20.0)
+# Hedge target: a different, faster model. Probed live 2026-10-12 on a ~4.5k-token rules prompt:
+# mistral-small-3.2 0.9 s, qwen3-30b-a3b 3.4 s, deepseek-chat-v3.1 4.2 s (tail 20 s+). The reply names it.
+OPENROUTER_FAST_MODEL = (os.environ.get("JARVIS_TALK_FAST_MODEL") or "mistralai/mistral-small-3.2-24b-instruct").strip()
+TALK_MISS = "UNKNOWN. The talk model returned no text in time this turn (primary and fast backup both). Ask me again."
 OPENROUTER_WALL_SEC = _sec_env("JARVIS_TALK_WALL_SEC", 22.0)
 TALK_DARK = "The talk wire is dark this turn."
 OPENROUTER_MAX_TOKENS = 512
+OPENROUTER_RULE_TOKENS = int(os.environ.get("JARVIS_RULE_MAX_TOKENS") or 160)
+OPENROUTER_STATUS_ASK_TOKENS = int(os.environ.get("JARVIS_STATUS_ASK_MAX_TOKENS") or 120)
+# "Status check: are all your tools ready?" with no status hand: live non-stream 320-token
+# calls returned 0 bytes in 20 s (hedge too). Honest answer is short: no live check this turn.
+STATUS_ASK_RE = re.compile(
+    r"\b(?:status\s+check|(?:are|is)\s+(?:all\s+)?(?:your|the|my)\s+(?:tools|systems|doors|hands|adapters)\s+(?:ready|up|online|working|ok)|tool\s+readiness|(?:are|is)\s+everything\s+(?:ready|up|working|online))",
+    re.I,
+)
+STATUS_ASK_REPLY = (
+    "I haven't run a live status check this turn, so I can't vouch for any tool right now. "
+    "Say 'run status' and I'll read the real Orb door and hive health."
+)
+PASS_ASK_RE = re.compile(r"\bwho\b[^?\n]{0,40}\b(?:issue|give|grant|grade|sign)s?\b[^?\n]{0,30}\bpass(?:es)?\b", re.I)
+PASS_RULE_RE = re.compile(r"self-PASS|issues\s+verdicts|cannot\s+grade", re.I)
+
+
+def pass_rule_reply(prompt: str) -> str:
+    """'Who may issue a PASS?' answered from the live AGENT_RULES.md line, no model call (live 7-20 s)."""
+    p = (prompt or "").strip()
+    if not p or not PASS_ASK_RE.search(p if len(p) <= 600 else p[-300:]):
+        return ""
+    try:
+        # Path-loaded like the rest of the talk stack: the Face process has no `brain` package
+        # on sys.path, so `from brain import shared_context` failed silently live on :4018.
+        text = (_shared_mod().shared_dir() / "AGENT_RULES.md").read_text(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        return ""
+    for line in text.splitlines():
+        if PASS_RULE_RE.search(line):
+            quote = re.sub(r"\s{2,}", " ", re.sub(r"^[\s>#\-\d.]+", "", line).replace("**", "")).strip()
+            return f"Per AGENT_RULES.md: \"{quote[:300]}\""
+    return ""
+
+
+def is_status_ask(prompt: str) -> bool:
+    """Readiness ask with no live check: answer honestly without a model call (live calls hung 20 s, then parroted errors)."""
+    p = (prompt or "").strip()
+    return bool(p) and bool(STATUS_ASK_RE.search(p if len(p) <= 600 else p[-300:]))
+
+
+RULE_ASK_RE = re.compile(
+    r"\b(?:who\s+(?:is\s+)?(?:allowed|can|may|gets\s+to)|(?:am\s+I|are\s+(?:you|we))\s+allowed|is\s+it\s+allowed"
+    r"|what(?:'s|\s+is|\s+are)\s+the\s+(?:rule|rules|policy|lock)s?\b|\bwho\s+(?:issues|grades|approves|merges))",
+    re.I,
+)
 OPENROUTER_RETRIEVE_TOKENS = int(os.environ.get("JARVIS_TALK_MAX_TOKENS") or 320)  # short spoken answers; cut ArtCraft latency
+OPENROUTER_PLAIN_TOKENS = int(os.environ.get("JARVIS_PLAIN_MAX_TOKENS") or 256)
 LENGTH_RETRY_TOKENS = 640
 LENGTH_MISS = "UNKNOWN. That answer ran out of room."
 OPENROUTER_HANDS = (
@@ -407,18 +458,272 @@ def _read_http_body(res, timeout: float) -> bytes:
     raise TimeoutError("response body stalled")
 
 
+_STREAM = threading.local()
+STREAM_SENTENCE_RE = re.compile(r"(.+?[.!?])(?:\s+|$)", re.S)
+
+
+def set_stream_sink(fn, *, turn_start: float | None = None) -> None:
+    """Per-thread callback for honest, sentence-buffered talk deltas (None turns it off)."""
+    _STREAM.sink = fn
+    if turn_start is not None:
+        _STREAM.turn_start = turn_start
+
+
+# Turn budget. Face TURN_WALL_SEC is 25 s. A streaming reply still going at the soft mark is
+# ended on its last whole sentence plus an honest wrap-up; every provider wait is also capped at
+# the hard mark so no turn can reach the wall. Override with JARVIS_TURN_SOFT_SEC / _HARD_SEC.
+TURN_SOFT_SEC = _sec_env("JARVIS_TURN_SOFT_SEC", 18.0)
+TURN_HARD_SEC = _sec_env("JARVIS_TURN_HARD_SEC", 21.0)
+SOFT_WRAP = "I'm cutting this short for time. Say continue and I'll pick up where I stopped."
+
+
+def set_turn_start(t: float | None = None) -> float:
+    """Mark the turn start (monotonic) on this thread. The talk worker inherits it via set_stream_sink."""
+    _STREAM.turn_start = time.monotonic() if t is None else float(t)
+    return _STREAM.turn_start
+
+
+def turn_start() -> float | None:
+    return getattr(_STREAM, "turn_start", None)
+
+
+def turn_left(mark: float, *, now: float | None = None, fallback_start: float | None = None) -> float:
+    """Seconds left before `mark` s after the turn start (inf when no start is known)."""
+    t0 = turn_start() or fallback_start
+    if t0 is None:
+        return float("inf")
+    return mark - ((time.monotonic() if now is None else now) - t0)
+
+
+def soft_wrap(text: str) -> str:
+    """Whole sentences already said, then the honest cut-short line. The clipped tail is dropped."""
+    body = (text or "").strip()
+    m = None
+    for m in re.finditer(r"[.!?](?:\s|$)", body):
+        pass
+    kept = body[: m.end()].strip() if m else ""
+    return f"{kept} {SOFT_WRAP}".strip()
+
+
+def stream_sink():
+    return getattr(_STREAM, "sink", None)
+
+
+def stream_sentence_ok(sentence: str) -> bool:
+    """A streamed sentence goes out only if no honesty filter would touch it. The full
+    reply is still filtered again at the end; this only keeps the live pane honest."""
+    s = (sentence or "").strip()
+    if not s:
+        return False
+    for rx in (STATUS_CLAIM_RE, STATUS_HEADER_RE, MEMORY_CLAIM_RE, TALK_CLAIM_RE, GREETING_CLAIM_RE):
+        if rx.search(s):
+            return False
+    return not _looks_like_scratchpad(s)
+
+
+def _sse_deltas(res):
+    """Yield (content_delta, finish_reason) from an OpenRouter SSE body."""
+    for raw in res:
+        line = raw.decode("utf-8", "replace").strip() if isinstance(raw, bytes) else str(raw).strip()
+        if not line.startswith("data:"):
+            continue
+        body = line[5:].strip()
+        if body == "[DONE]":
+            return
+        try:
+            obj = json.loads(body)
+        except ValueError:
+            continue
+        ch = (obj.get("choices") or [{}])[0] if isinstance(obj, dict) else {}
+        delta = ((ch.get("delta") or {}).get("content") or "") if isinstance(ch, dict) else ""
+        yield delta, (ch.get("finish_reason") or "") if isinstance(ch, dict) else ""
+
+
+def raced_stream(
+    payloads: list[tuple[str, dict]],
+    *,
+    headers: dict,
+    timeout: float,
+    hedge: float,
+    sink=None,
+    opener=None,
+    soft_at: float | None = None,
+    first_by: float | None = None,
+) -> tuple[str, str, str]:
+    """Stream the primary; after `hedge` s with no first token, also stream the backup.
+    The first model to send a content token wins and is streamed; the other is closed.
+    Returns (text, finish_reason, winning model). Raises TimeoutError if nobody answers.
+    `soft_at` (monotonic): if the winner is still streaming then, stop, keep whole sentences and
+    add SOFT_WRAP; finish_reason is "soft_deadline"."""
+    opener = opener or (lambda body, budget: _http_open(OPENROUTER_URL, data=body, headers=headers, timeout=budget))
+    began = time.monotonic()
+    lock = threading.Lock()
+    q: "queue.Queue" = queue.Queue()
+    st = {"winner": None, "open": {}, "live": 0}
+
+    def run(mid: str, body: dict, budget: float) -> None:
+        res = None
+        try:
+            res = opener(body, budget)
+            with lock:
+                if st["winner"] not in (None, mid):
+                    return
+                st["open"][mid] = res
+            for delta, finish in _sse_deltas(res):
+                with lock:
+                    if st["winner"] is None and delta:
+                        st["winner"] = mid
+                    mine = st["winner"] == mid
+                if not mine:
+                    if st["winner"] is not None:
+                        return
+                    continue
+                q.put(("d", mid, delta, finish))
+            with lock:
+                if st["winner"] == mid:
+                    q.put(("end", mid, "", ""))
+        except Exception as exc:  # noqa: BLE001
+            q.put(("err", mid, repr(exc), ""))
+        finally:
+            with lock:
+                st["live"] -= 1
+            q.put(("gone", mid, "", ""))
+            try:
+                if res is not None:
+                    res.close()
+            except Exception:  # noqa: BLE001
+                pass
+
+    def launch(i: int) -> None:
+        mid, body = payloads[i]
+        with lock:
+            st["live"] += 1
+        threading.Thread(target=run, args=(mid, body, max(1.0, timeout - (time.monotonic() - began))), daemon=True, name=f"talk-stream-{i}").start()
+
+    launch(0)
+    launched = 1
+    parts: list[str] = []
+    buf = ""
+    finish = ""
+    errs: list[str] = []
+    soft_cut = False
+    first_by = min(timeout, first_token_sec() if first_by is None else max(0.5, float(first_by)))
+    while True:
+        left = timeout - (time.monotonic() - began)
+        if st["winner"] is None:
+            # No first token yet: give up early so the plain race still fits the 25 s Face wall.
+            left = min(left, first_by - (time.monotonic() - began))
+        if left <= 0:
+            break
+        if soft_at is not None and st["winner"] is not None and parts and time.monotonic() >= soft_at:
+            soft_cut = True
+            break
+        wait = left
+        if soft_at is not None and st["winner"] is not None:
+            wait = max(0.01, min(wait, soft_at - time.monotonic()))
+        if st["winner"] is None and launched < len(payloads):
+            wait = max(0.05, min(left, hedge - (time.monotonic() - began)))
+        try:
+            kind, mid, val, fin = q.get(timeout=wait)
+        except queue.Empty:
+            if st["winner"] is None and launched < len(payloads):
+                launch(launched)
+                launched += 1
+            continue
+        if kind == "d":
+            parts.append(val)
+            finish = fin or finish
+            if sink is not None:
+                buf += val
+                while True:
+                    m = STREAM_SENTENCE_RE.match(buf)
+                    if not m or not re.search(r"[.!?]\s", buf + " "):
+                        break
+                    sent, buf = m.group(1), buf[m.end():]
+                    if stream_sentence_ok(sent):
+                        try:
+                            sink(sent.strip())
+                        except Exception:  # noqa: BLE001
+                            pass
+        elif kind == "end":
+            break
+        elif kind == "err":
+            errs.append(val)
+            # The primary failed before any token: race the backup now rather than at the hedge mark.
+            if st["winner"] is None and launched < len(payloads):
+                launch(launched)
+                launched += 1
+        elif kind == "gone":
+            with lock:
+                none_left = st["live"] <= 0
+            if none_left and (st["winner"] is None or st["winner"] == mid) and launched >= len(payloads):
+                break
+    with lock:
+        win = st["winner"]
+        for mid, res in list(st["open"].items()):
+            if mid != win or not parts:
+                try:
+                    res.close()
+                except Exception:  # noqa: BLE001
+                    pass
+    if not win:
+        raise TimeoutError(errs[-1] if errs else "no first token")
+    if soft_cut:
+        with lock:
+            for res in list(st["open"].values()):
+                try:
+                    res.close()
+                except Exception:  # noqa: BLE001
+                    pass
+        if sink is not None:
+            try:
+                sink(SOFT_WRAP)
+            except Exception:  # noqa: BLE001
+                pass
+        return soft_wrap("".join(parts)), "soft_deadline", win
+    return "".join(parts).strip(), finish, win
+
+
+def backup_stream_on() -> bool:
+    """The backup request after the first-token mark streams (JARVIS_TALK_BACKUP_STREAM=0: old plain race)."""
+    return os.environ.get("JARVIS_TALK_BACKUP_STREAM", "1").strip().lower() not in {"0", "off", "false", "no"}
+
+
+def first_token_sec() -> float:
+    """Max wait for any streamed first token before falling back (live :4019: a stalled pair cost 35 s)."""
+    try:
+        return max(1.0, float(os.environ.get("JARVIS_TALK_FIRST_TOKEN_SEC") or 8.0))
+    except ValueError:
+        return 8.0
+
+
+def stream_hedge_sec() -> float:
+    """First-token race start. Live soak: deepseek first token p95 ~11 s, mistral-small ~0.5 s."""
+    try:
+        return max(0.0, float(os.environ.get("JARVIS_TALK_STREAM_HEDGE_SEC") or 2.5))
+    except ValueError:
+        return 2.5
+
+
 def talk_hedge_sec() -> float:
     """Seconds before a second identical talk request races the first. 0 turns it off."""
     raw = (os.environ.get("JARVIS_TALK_HEDGE_SEC") or "").strip()
     if not raw:
-        return 9.0
+        return 5.0
     try:
         return max(0.0, float(raw))
     except ValueError:
-        return 9.0
+        return 5.0
 
 
-def _hedged_http_json(url: str, *, data: dict | None = None, headers: dict | None = None, timeout: float = 20.0) -> dict:
+def _hedged_http_json(
+    url: str,
+    *,
+    data: dict | None = None,
+    headers: dict | None = None,
+    timeout: float = 20.0,
+    backup_data: dict | None = None,
+) -> dict:
     """_http_json, plus one identical backup request if the first is still out after hedge seconds.
 
     Profiled live: the same prompt took 5-17 s, with 20 s timeouts about 1 turn in 6. The tail
@@ -434,9 +739,12 @@ def _hedged_http_json(url: str, *, data: dict | None = None, headers: dict | Non
     lock = threading.Lock()
     began = time.monotonic()
 
-    def go(budget: float) -> None:
+    def go(budget: float, body: dict | None = None, tag: str = "a") -> None:
         try:
-            got = ("ok", _http_json(url, data=data, headers=headers, timeout=budget))
+            out = _http_json(url, data=body if body is not None else data, headers=headers, timeout=budget)
+            if isinstance(out, dict) and tag == "b" and backup_data is not None:
+                out = {**out, "_hedge_winner": "b"}
+            got = ("ok", out)
         except Exception as exc:  # noqa: BLE001
             got = ("err", exc)
         with lock:
@@ -446,14 +754,14 @@ def _hedged_http_json(url: str, *, data: dict | None = None, headers: dict | Non
             if got[0] == "ok" or state["out"] <= 0:
                 done.set()
 
-    def launch(budget: float, name: str) -> None:
+    def launch(budget: float, name: str, body: dict | None = None, tag: str = "a") -> None:
         with lock:
             state["out"] += 1
-        threading.Thread(target=go, args=(budget,), daemon=True, name=name).start()
+        threading.Thread(target=go, args=(budget, body, tag), daemon=True, name=name).start()
 
     launch(timeout, "talk-a")
     if not done.wait(hedge):
-        launch(max(1.0, timeout - (time.monotonic() - began)), "talk-b")
+        launch(max(1.0, timeout - (time.monotonic() - began)), "talk-b", backup_data, "b")
     done.wait(max(0.0, timeout - (time.monotonic() - began)) + 0.5)
     with lock:
         for kind, val in box:
@@ -902,7 +1210,17 @@ def unfinished_clause(text: str) -> bool:
 def _usable_length_text(text: str) -> str:
     """Keep a finished sentence after a length cap. Drop mid-clause leftovers."""
     body = complete_spoken(text)
-    if not body or _looks_like_scratchpad(body) or unfinished_clause(body):
+    if not body or _looks_like_scratchpad(body):
+        return ""
+    if unfinished_clause(body):
+        # Keep the whole sentences already spoken (streamed to the Orb) instead of a second full
+        # call: a length re-ask cost a second answer and up to 10 s live. Needs real prose left.
+        m = None
+        for m in re.finditer(r"[.!?](?=\s)", body):
+            pass
+        kept = body[: m.end()].strip() if m else ""
+        if len(kept) >= 60 and not re.search(r"https?://\S*$", kept):
+            return kept
         return ""
     return body
 
@@ -1050,6 +1368,9 @@ def _shared_mod():
     return _SHARED_MOD
 
 
+SHARED_BLOCK_CHARS = int(os.environ.get("JARVIS_SHARED_BLOCK_CHARS") or 9000)
+
+
 def system_for(model: str = "", primary: str = "", provider: str = "OpenRouter", query: str = "") -> str:
     """SYS plus the shared fleet context. Records which files were injected."""
     parts = [SYS]
@@ -1058,6 +1379,10 @@ def system_for(model: str = "", primary: str = "", provider: str = "OpenRouter",
         block, files = _shared_mod().shared_system_block()
     except Exception:  # noqa: BLE001 — a missing shared dir never breaks talk
         block, files = "", []
+    if block and len(block) > SHARED_BLOCK_CHARS:
+        # Shorter system prompt: keep the head (identity, priorities, rules index); the
+        # retrieved snippets below carry the parts relevant to this ask.
+        block = block[:SHARED_BLOCK_CHARS].rsplit("\n", 1)[0] + "\n[shared context trimmed; relevant snippets follow]"
     if block:
         parts.append(block)
     snippets: list[dict] = []
@@ -1277,6 +1602,7 @@ def call_openrouter(
         "est_tokens_out": len(reply) // 4,
         "injected": list(LAST_INJECT.get("files") or []),
         "retrieved": [dict(r) for r in (LAST_INJECT.get("snippets") or [])],
+        "finish_reason": (str(got.get("finish_reason") or "") or None) if isinstance(got, dict) else None,
     })
     if isinstance(got, dict) and got.get("ok"):
         got.setdefault("primary_model", primary)
@@ -1290,6 +1616,10 @@ def call_openrouter(
         cleaned = unbacked_memory_claim(str(got.get("spoken") or ""), backed=backed)
         if cleaned != got.get("spoken"):
             got["spoken"] = cleaned
+            got["claim_fixed"] = True
+        stat = unbacked_status_claim(str(got.get("spoken") or ""), backed=bool(got.get("status_checked") or got.get("verb") == "status" or got.get("tool") == "status"))
+        if stat != got.get("spoken"):
+            got["spoken"] = stat
             got["claim_fixed"] = True
         if not any(got.get(k) for k in ("tool", "tool_calls", "hand", "action", "verb", "args")):
             fixed = unverified_claim(str(got.get("spoken") or ""))
@@ -1313,9 +1643,77 @@ MEMORY_CLAIM_RE = re.compile(
     r"[,;]?\s*\b(?:as|like)\s+(?:you|we)\s+(?:already\s+|just\s+)?"
     r"(?:confirmed|said|mentioned|told\s+me|noted|agreed|discussed|established)"
     r"(?:\s+(?:earlier|before|previously|last\s+time))?\b[,;]?"
-    r"|[,;]?\s*\b(?:you|we)\s+(?:already\s+)?(?:confirmed|agreed|told\s+me)\s+(?:that\s+)?(?:earlier|before|previously)\b[,;]?",
+    r"|[,;]?\s*\b(?:you|we)\s+(?:already\s+)?(?:confirmed|agreed|told\s+me)\s+(?:that\s+)?(?:earlier|before|previously)\b[,;]?"
+    # "as before", "same as before", "as I said earlier", "as last time"
+    r"|[,;]?\s*\b(?:(?:just|same)\s+)?as\s+(?:before|previously|last\s+time|earlier)\b[,;]?"
+    r"|\s+(?:remains?\s+|is\s+)?(?:unchanged|the\s+same)\s+(?:from|as|since)\s+(?:earlier|before|last\s+time)\b"
+    r"|[,;]?\s*\bas\s+I\s+(?:already\s+)?(?:said|mentioned|noted|told\s+you)(?:\s+(?:earlier|before|previously|last\s+time))?\b[,;]?",
     re.I,
 )
+
+# Live-status boasts a talk reply cannot back: "the Orb is stable", "all tools are ready".
+STATUS_CLAIM_RE = re.compile(
+    r"\b(?:the\s+)?orb\s+(?:is\s+)?(?:stable|running\s+smoothly|healthy|online)"
+    r"|\b(?:all|everything)\b(?:\s+(?:my|the|of|core|main|your))*\s+(?:tools|systems|functions|adapters|hands)\s+(?:are\s+)?(?:ready|online|operational|nominal|green|working|functional|available)"
+    r"|\beverything\s+(?:appears\s+to\s+be\s+|seems\s+(?:to\s+be\s+)?|is\s+)(?:working|running|fine|operational|ready)"
+    r"|\b(?:orb|vault|safari|talk|watch|desktop|tools?|adapters?|connection|connectivity|interface|memory\s+access|openrouter)\b[^.\n]{0,40}?"
+    r"\b(?:is|are)\s+(?:\w+\s+)?(?:stable|ready|operational|functional|responsive|active|accessible|available|working|reliable|healthy|online)\b"
+    r"|^\s*[-*\u2022]\s+[^\n]{0,40}?\b(?:orb|vault|safari|talk|watch|desktop|tools?|adapter|connection|openrouter|memory|browser)\b[^\n]{0,60}?\b(?:active|accessible|available|functional|operational|responsive|ready|online|working|stable)\b"
+    r"|(?:^|\s)[-*\u2022]\s+\*\*[^*\n]{1,40}\*\*\s*:[^\n*]{0,60}?\b(?:ready|available|active|online|operational|functional|working|stable)\b"
+    r"|\b(?:based\s+on\s+the\s+status\s+check|(?:the\s+)?status\s+check\s+I\s+(?:just\s+)?(?:completed|ran|did)|running\s+a\s+(?:live\s+)?status\s+check\s+now)\b"
+    r"|\b(?:orb\s+)?doors?\b[^.\n]{0,30}?\b(?:operational|ready|readiness|online|green)\b"
+    r"|\*\*[^*\n]{0,30}\breadiness\s*:?\s*\*\*"
+    r"|\bchecking\s+(?:tool\s+)?readiness\b|\b(?:talk|vault|safari|watch|eyes|openrouter|focus|voice)\b[^.\n]{0,40}?:\s*(?:live|responding|up|ok)\b"
+    r"|\bready\s+to\s+serve\b|\bno\s+known\s+(?:blockages|issues|blockers)\b"
+    r"|\ball\s+systems\s+(?:are\s+)?(?:go|nominal|green)"
+    r"|\bfunctioning\s+(?:well\s+)?within\s+(?:normal\s+)?operational\s+parameters",
+    re.I | re.M,
+)
+
+
+# "**Operational:**", "Tools status:", "Ready:" headers over a tool list nobody checked.
+STATUS_HEADER_RE = re.compile(
+    r"(?:^|[\s:])\**\s*(?:operational|tools?\s+status|status|ready|online|working|available)\s*:?\s*\**\s*:?\s*$"
+    r"|\**\s*(?:operational|tools?\s+status|(?:core\s+)?orb\s+doors)\s*:?\s*\**\s*:?\s*[-*\u2022]\s",
+    re.I,
+)
+
+
+GREETING_CLAIM_RE = re.compile(
+    r"\bI(?:'m|\s+am)\s+(?:here\s+and\s+)?(?:fully\s+)?(?:operational|online)(?:\s*(?:,|and)\s*ready\s+to\s+(?:assist|serve|help)(?:\s+you)?(?:\s+this\s+evening)?)?"
+    r"|\bI(?:'m|\s+am)\s+ready\s+to\s+assist(?:\s+you)?(?:\s+this\s+evening)?"
+    r"|\bI(?:'m|\s+am)\s+(?:functioning|running|working|doing)\s+(?:well|fine|smoothly|perfectly|normally)(?:\s+(?:tonight|today|this\s+evening))?(?:\s*[-–—,]\s*|\s+and\s+)?(?:ready\s+to\s+(?:assist|serve|help)(?:\s+you)?)?"
+    r"|\b(?:and\s+)?ready\s+to\s+(?:assist|serve)(?:\s+you)?(?:\s+(?:tonight|today|this\s+evening))?",
+    re.I,
+)
+
+
+def unbacked_status_claim(text: str, *, backed: bool) -> str:
+    """Drop sentences that assert live Orb/tool health unless a live check backs them."""
+    if text and STATUS_ASK_REPLY in text:
+        return text
+    if text and not backed:
+        # Greeting filler: "I'm operational and ready to assist" is a health claim nobody checked.
+        text = GREETING_CLAIM_RE.sub("I'm here", text)
+    if backed or not text or not (STATUS_CLAIM_RE.search(text) or STATUS_HEADER_RE.search(text)):
+        return text
+    parts = re.split(r"(?<=[.!?])\s+|\n+", text.strip())
+    keep, under_header = [], False
+    for x in parts:
+        if not x:
+            continue
+        if STATUS_HEADER_RE.search(x):
+            under_header = True
+            continue
+        if under_header and re.match(r"\s*[-*\u2022]\s+", x):
+            continue
+        under_header = False
+        if not STATUS_CLAIM_RE.search(x):
+            keep.append(x)
+    dropped = len([x for x in parts if x]) - len(keep)
+    if dropped >= 1 or not any(re.search(r"[A-Za-z]{3,}", x) and x.strip(" .") not in ("Sir", "sir") for x in keep):
+        keep.append("I'm online, but I have not run a live status check this turn; ask me to run status for real readings.")
+    return " ".join(keep).strip()
 
 
 def unbacked_memory_claim(text: str, *, backed: bool) -> str:
@@ -1347,6 +1745,12 @@ def _call_openrouter_inner(
 
     Not ChatGPT, Claude, or Gemini as the product mouth.
     """
+    if not (hands or extra_tools or images) and is_status_ask(prompt):
+        return {"ok": True, "unknown": False, "wire": "local", "engine": "status-ask", "spoken": STATUS_ASK_REPLY, "model": "none"}
+    if not (hands or extra_tools or images):
+        rule = pass_rule_reply(prompt)
+        if rule:
+            return {"ok": True, "unknown": False, "wire": "local", "engine": "rule-cache", "spoken": rule, "model": "none"}
     key = openrouter_api_key()
     if not key:
         return {
@@ -1366,6 +1770,14 @@ def _call_openrouter_inner(
         pass
     # No-hands answers (memory/rules questions) get the short cap too: live PASS answer ran 18-20 s at 512.
     max_tokens = OPENROUTER_RETRIEVE_TOKENS if (brief or not (hands or extra_tools)) else OPENROUTER_MAX_TOKENS
+    if not (hands or extra_tools) and RULE_ASK_RE.search(prompt or ""):
+        # Rule/permission asks ("who may issue a PASS?") need one quoted rule, not an essay: 20 s tails seen live.
+        max_tokens = min(max_tokens, OPENROUTER_RULE_TOKENS)
+    if not (hands or extra_tools or stills):
+        # Plain spoken questions: a long essay is what ran 18-20 s live. Cap tighter than retrieve.
+        max_tokens = min(max_tokens, OPENROUTER_PLAIN_TOKENS)
+    if not (hands or extra_tools) and STATUS_ASK_RE.search(prompt or ""):
+        max_tokens = min(max_tokens, OPENROUTER_STATUS_ASK_TOKENS)
     with_tools = bool(hands or extra_tools)
     models: list[str] = []
     vision = openrouter_vision_model() if stills else ""
@@ -1401,7 +1813,7 @@ def _call_openrouter_inner(
             last_err = "http 429"
             continue
         spent = time.monotonic() - wall_start
-        remain = OPENROUTER_WALL_SEC - spent
+        remain = min(OPENROUTER_WALL_SEC - spent, turn_left(TURN_HARD_SEC, fallback_start=wall_start))
         if remain < 1.0:
             last_err = "timeout"
             break
@@ -1464,12 +1876,58 @@ def _call_openrouter_inner(
                 elif talk_hedge_sec() > 0:
                     # Hedged plain request: the stream path had no backup, and live 20 s
                     # stream stalls hit 2 of 7 no-hands turns. The reply is used whole either way.
-                    data = _hedged_http_json(
-                        OPENROUTER_URL,
-                        data=_openrouter_payload(mid, user, stream=False, max_tokens=max_tokens, images=stills),
-                        headers=headers,
-                        timeout=attempt,
-                    )
+                    fast = OPENROUTER_FAST_MODEL if OPENROUTER_FAST_MODEL and OPENROUTER_FAST_MODEL != mid else ""
+                    data = None
+                    if stream_sink() is not None and os.environ.get("JARVIS_TALK_STREAM", "1") != "0":
+                        racers = [(mid, _openrouter_payload(mid, user, stream=True, max_tokens=max_tokens))]
+                        if fast:
+                            racers.append((fast, _openrouter_payload(fast, user, stream=True, max_tokens=max_tokens, primary=fast)))
+                        stream_began = time.monotonic()
+                        try:
+                            soft_left = turn_left(TURN_SOFT_SEC, fallback_start=wall_start)
+                            text, finish, won = raced_stream(
+                                racers, headers=headers, timeout=attempt, hedge=stream_hedge_sec(), sink=stream_sink(),
+                                soft_at=time.monotonic() + soft_left if soft_left != float("inf") else None,
+                            )
+                            mid = won
+                            data = {"choices": [{"message": {"content": text}, "finish_reason": finish or "stop"}]}
+                        except TimeoutError:
+                            # Streams failed to open or never sent a token by the first-token mark.
+                            attempt = max(0.0, attempt - (time.monotonic() - stream_began))
+                            if attempt < 2.0:
+                                raise
+                            if backup_stream_on():
+                                # Backup request, streamed: both models restart at once (backup first), so
+                                # the soft deadline can still end it on a whole sentence mid-reply.
+                                again = list(reversed(racers)) if len(racers) > 1 else racers
+                                again_began = time.monotonic()
+                                try:
+                                    soft_left = turn_left(TURN_SOFT_SEC, fallback_start=wall_start)
+                                    text, finish, won = raced_stream(
+                                        again, headers=headers, timeout=attempt, hedge=0.0, sink=stream_sink(),
+                                        soft_at=time.monotonic() + soft_left if soft_left != float("inf") else None,
+                                        first_by=attempt,
+                                    )
+                                    mid = won
+                                    data = {"choices": [{"message": {"content": text}, "finish_reason": finish or "stop"}]}
+                                except TimeoutError:
+                                    attempt = max(0.0, attempt - (time.monotonic() - again_began))
+                                    if attempt < 2.0:
+                                        raise
+                    if data is None:
+                        data = _hedged_http_json(
+                            OPENROUTER_URL,
+                            data=_openrouter_payload(mid, user, stream=False, max_tokens=max_tokens, images=stills),
+                            headers=headers,
+                            timeout=attempt,
+                            backup_data=(
+                                _openrouter_payload(fast, user, stream=False, max_tokens=max_tokens, images=stills, primary=fast)
+                                if fast
+                                else None
+                            ),
+                        )
+                    if isinstance(data, dict) and data.pop("_hedge_winner", "") == "b":
+                        mid = fast
                     choices = data.get("choices") if isinstance(data, dict) else None
                     msg = {}
                     if isinstance(choices, list) and choices and isinstance(choices[0], dict):
@@ -1499,7 +1957,7 @@ def _call_openrouter_inner(
             if int(exc.code) not in {400, 422}:
                 continue
             try:
-                remain = OPENROUTER_WALL_SEC - (time.monotonic() - wall_start)
+                remain = min(OPENROUTER_WALL_SEC - (time.monotonic() - wall_start), turn_left(TURN_HARD_SEC, fallback_start=wall_start))
                 if remain < 1.0:
                     last_err = "timeout"
                     break
@@ -1551,9 +2009,12 @@ def _call_openrouter_inner(
             kept = _usable_length_text(text)
             retry_finish = finish
             if not kept:
-                remain = OPENROUTER_WALL_SEC - (time.monotonic() - wall_start)
+                remain = min(
+                    OPENROUTER_WALL_SEC - (time.monotonic() - wall_start),
+                    turn_left(TURN_SOFT_SEC, fallback_start=wall_start),
+                )
                 more = ""
-                if remain >= 1.0:
+                if remain >= 3.0:
                     more, retry_finish = _openrouter_length_retry(
                         mid, user, stills, headers, timeout=min(10.0, remain)
                     )
@@ -1590,7 +2051,9 @@ def _call_openrouter_inner(
     if last_err == "timeout":
         spoken = TALK_DARK
     else:
-        spoken = VISION_DARK if stills else f"UNKNOWN. OpenRouter returned no text. {last_err}."
+        # Never speak a raw exception name ("TimeoutError") to Evens.
+        why = f" ({last_err})" if str(last_err).startswith("http ") else ""
+        spoken = VISION_DARK if stills else f"{TALK_MISS}{why}"
     return {
         "ok": False,
         "unknown": True,

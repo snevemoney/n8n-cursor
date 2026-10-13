@@ -147,8 +147,8 @@ FACTORY_PHRASE = (
         "",
     ),
     (re.compile(r"\bHID\b"), ""),
-    (re.compile(r"\bPID\s*\d+\b", re.I), ""),
-    (PR_NUM_RE, ""),
+    # PR numbers, PIDs and other literal ids are answer content ("What is the plan for PR 619?"),
+    # not factory crumbs. Live :4018 spoke "I don't see any reference to in ..." while these ran.
     (WATCHDOG_GRADE_RE, ""),
     (re.compile(r"factory\s+close[^.]*\.?", re.I), ""),
     (re.compile(r"forge\s+typecheck[^.]*\.?", re.I), ""),

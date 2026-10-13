@@ -1,0 +1,42 @@
+{"id": "r01", "utterance": "explain what a CANDIDATE means", "label": "converse", "synthetic": true}
+{"id": "r02", "utterance": "what is the difference between PASS and CANDIDATE", "label": "converse", "synthetic": true}
+{"id": "r03", "utterance": "describe the orb in one sentence", "label": "converse", "synthetic": true}
+{"id": "r04", "utterance": "what can you do", "label": "converse", "synthetic": true}
+{"id": "r05", "utterance": "name three things you can help with", "label": "converse", "synthetic": true}
+{"id": "r06", "utterance": "who can issue a PASS", "label": "converse", "synthetic": true}
+{"id": "r07", "utterance": "are you allowed to merge pull requests", "label": "converse", "synthetic": true}
+{"id": "r08", "utterance": "what's the plan for PR 619", "label": "converse", "synthetic": true}
+{"id": "r09", "utterance": "how are you tonight", "label": "converse", "synthetic": true}
+{"id": "r10", "utterance": "thanks", "label": "converse", "synthetic": true}
+{"id": "r11", "utterance": "good evening jarvis", "label": "converse", "synthetic": true}
+{"id": "r12", "utterance": "what model are you running on", "label": "converse", "synthetic": true}
+{"id": "r13", "utterance": "tell me a joke", "label": "converse", "synthetic": true}
+{"id": "r14", "utterance": "why is the sky blue", "label": "converse", "synthetic": true}
+{"id": "r15", "utterance": "where do ArtCraft projects get saved", "label": "converse", "synthetic": true}
+{"id": "r16", "utterance": "run status", "label": "status", "synthetic": true}
+{"id": "r17", "utterance": "status check: are all your tools ready", "label": "status", "synthetic": true}
+{"id": "r18", "utterance": "are you online", "label": "status", "synthetic": true}
+{"id": "r19", "utterance": "what did I just say", "label": "recall", "synthetic": true}
+{"id": "r20", "utterance": "remind me what we decided", "label": "recall", "synthetic": true}
+{"id": "r21", "utterance": "what did you tell me earlier", "label": "recall", "synthetic": true}
+{"id": "r22", "utterance": "read my vault note on lanes", "label": "local_read", "synthetic": true}
+{"id": "r23", "utterance": "show me the lane file", "label": "local_read", "synthetic": true}
+{"id": "r24", "utterance": "what's in my vault about the studio", "label": "local_read", "synthetic": true}
+{"id": "r25", "utterance": "open safari", "label": "tool", "synthetic": true}
+{"id": "r26", "utterance": "look at my screen", "label": "tool", "synthetic": true}
+{"id": "r27", "utterance": "click the download button", "label": "tool", "synthetic": true}
+{"id": "r28", "utterance": "take a screenshot", "label": "tool", "synthetic": true}
+{"id": "r29", "utterance": "in GridCraft make a sheet and save it", "label": "craft", "synthetic": true}
+{"id": "r30", "utterance": "create a poster in PhotoCraft", "label": "craft", "synthetic": true}
+{"id": "r31", "utterance": "send the invoice to Bob now", "label": "hard_step", "synthetic": true}
+{"id": "r32", "utterance": "merge the PR", "label": "hard_step", "synthetic": true}
+{"id": "r33", "utterance": "deploy it to production now", "label": "hard_step", "synthetic": true}
+{"id": "r34", "utterance": "pay the bill", "label": "hard_step", "synthetic": true}
+{"id": "r35", "utterance": "delete that file", "label": "hard_step", "synthetic": true}
+{"id": "r36", "utterance": "publish the post", "label": "hard_step", "synthetic": true}
+{"id": "r37", "utterance": "um", "label": "unclear", "synthetic": true}
+{"id": "r38", "utterance": "so the", "label": "unclear", "synthetic": true}
+{"id": "r39", "utterance": "and then the", "label": "unclear", "synthetic": true}
+{"id": "r40", "utterance": "", "label": "unclear", "synthetic": true}
+{"id": "r41", "utterance": "let's think about tomorrow's schedule", "label": "other", "synthetic": true}
+{"id": "r42", "utterance": "I had a weird day", "label": "other", "synthetic": true}

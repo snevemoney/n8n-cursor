@@ -51,6 +51,9 @@ def build_row(*, started: float, ended: float, events: list[dict], talk: dict | 
         "ok": bool(final.get("ok", True)),
         "outcome": final.get("outcome"),
         "gen": final.get("gen"),
+        "finish_reason": talk.get("finish_reason") or None,
+        # Soft-deadline resume: counts/ages only (stored, used, said_chars, parts, age_s), never text.
+        "resume": {k: v for k, v in (talk.get("resume") or {}).items() if k in {"stored", "used", "said_chars", "parts", "age_s"}} or None,
     }
 
 

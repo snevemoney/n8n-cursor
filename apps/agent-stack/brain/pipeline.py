@@ -11,7 +11,9 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import queue
 import re
+import threading
 import subprocess
 import sys
 import tempfile
@@ -515,6 +517,26 @@ _CRAFT_ACT_RE = re.compile(
 _SC_PL = None
 
 
+PLAIN_ASK_RE = re.compile(
+    r"^\s*(?:(?:can|could)\s+you\s+)?(?:explain|describe|define|summari[sz]e|tell\s+me\s+(?:about|what|a|how|why)|what\s+(?:is|are|does|do|can)\b|"
+    r"why\s+(?:is|are|do|does)\b|how\s+(?:does|do|is)\b|name\s+(?:\w+\s+)?things|give\s+me\s+(?:a|an|one)\b|"
+    r"(?:are\s+you|am\s+I|is\s+\w+)\s+allowed\s+to\b|who\s+(?:can|may|is\s+allowed\s+to|gets\s+to)\b|what\s+should\s+I\b|where\s+do(?:es)?\b|what'?s\s+the\s+(?:plan|status\s+of\s+(?:the\s+)?(?:pr|plan))\b)",
+    re.I,
+)
+HAND_ASK_RE = re.compile(
+    r"\b(?:open|look\s+at|read\s+(?:my|the)\s+(?:vault|file|screen)|safari|screen|search\s+(?:my|the)|in\s+(?:my|the)\s+vault|run\s+status|status\s+report|craft|cursor|watch\s+mode|click|type\s+into)\b",
+    re.I,
+)
+
+
+def plain_question(spoken: str) -> bool:
+    """'Explain X' / 'what can you do' needs words, not a hand. Live: these took the tool path at 16-17 s, unstreamed."""
+    text = (spoken or "").strip()
+    if not text or os.environ.get("JARVIS_PLAIN_NO_HANDS", "1") == "0":
+        return False
+    return bool(PLAIN_ASK_RE.match(text)) and not HAND_ASK_RE.search(text)
+
+
 def shared_memory_answers(spoken: str) -> bool:
     """A question the shared memory already answers needs no hand.
 
@@ -548,6 +570,32 @@ def explicit_craft_pick(spoken: str) -> dict | None:
     return {"tool": "craft", "args": {"app": m.group(1).lower(), "task": text}, "speak": ""}
 ONLINE = _load("agent_stack_online", HERE / "online.py")
 JEV = _load("agent_stack_jev_preflight", HERE / "jev_preflight.py")
+JEVR = _load("agent_stack_jev_router", HERE / "jev_router.py")
+RESUME = _load("agent_stack_resume", HERE / "resume.py")
+# Per-turn advisory context for the Jev router shadow row (turn start, preflight, advice).
+_JEV_TURN = threading.local()
+
+
+def _jev_reset() -> None:
+    _JEV_TURN.t0 = time.monotonic()
+    _JEV_TURN.pf = None
+    _JEV_TURN.advice = None
+
+
+def _jev_log(hive: Path, spoken_in: str, tool: str, wire: dict | None) -> None:
+    if JEVR is None:
+        return
+    try:
+        t0 = getattr(_JEV_TURN, "t0", None)
+        w = wire if isinstance(wire, dict) else {}
+        JEVR.log_turn(
+            hive, getattr(_JEV_TURN, "pf", None), advice=getattr(_JEV_TURN, "advice", None),
+            latency_ms=int((time.monotonic() - t0) * 1000) if t0 else None,
+            path=str(w.get("path") or tool or "") or None, outcome=str(w.get("outcome") or "") or None,
+            tool=tool, hard_step=is_hard_step(spoken_in),
+        )
+    except Exception:  # noqa: BLE001 -- shadow log never breaks a turn
+        pass
 
 
 # --- Ported from main (#09-27 Face commits): greeting, recall, local read,
@@ -1708,9 +1756,17 @@ def load_turns(bus: dict) -> list[dict]:
             continue
         user = str(row.get("user") or "").strip()
         jarvis = str(row.get("jarvis") or "").strip()
+        if FAILED_TURN_RE.search(jarvis):
+            # A provider miss is not something Jarvis said; replaying it teaches the model to parrot it.
+            jarvis = ""
         if user or jarvis:
             out.append({"user": user, "jarvis": jarvis})
     return out[-MAX_TURNS:]
+
+
+FAILED_TURN_RE = re.compile(
+    r"returned no text|talk wire is dark|no live mouth|ran out of room|\bTimeoutError\b", re.I
+)
 
 
 def append_turn(turns: list[dict], user: str, jarvis: str) -> list[dict]:
@@ -2477,6 +2533,19 @@ def wants_capability(utterance: str) -> bool:
     return bool(CAPABILITY_ASK_RE.search((utterance or "").strip()))
 
 
+# Per-turn trim: fewer, shorter history rows. Live prompts ran ~5.2k tokens; history is the cheapest cut.
+HISTORY_TURNS = int(os.environ.get("JARVIS_HISTORY_TURNS") or 6)
+HISTORY_USER_CHARS = int(os.environ.get("JARVIS_HISTORY_USER_CHARS") or 0)  # 0: user lines keep constraints; the char budget tail-trims them
+HISTORY_JARVIS_CHARS = int(os.environ.get("JARVIS_HISTORY_JARVIS_CHARS") or 320)
+
+
+def _clip_line(text: str, cap: int) -> str:
+    if cap <= 0:
+        return text
+    text = re.sub(r"\s+", " ", text or "").strip()
+    return text if len(text) <= cap else text[: cap - 1].rstrip() + "…"
+
+
 def sitting_brief(
     turns: list,
     bus: dict | None = None,
@@ -2492,7 +2561,7 @@ def sitting_brief(
         row
         for row in (turns or [])
         if isinstance(row, dict) and not is_door_turn(row)
-    ][-12:]
+    ][-HISTORY_TURNS:]
     follow = bool(utterance and is_conversational_follow_up(utterance))
     if follow and recent:
         recent = [
@@ -2504,8 +2573,8 @@ def sitting_brief(
         for index, row in enumerate(recent):
             if follow and index == len(recent) - 1:
                 recent_lines.append("Immediately prior turn (explain this answer, not older misses):")
-            user = str(row.get("user") or "").strip()
-            said = str(row.get("jarvis") or "").strip()
+            user = _clip_line(str(row.get("user") or "").strip(), HISTORY_USER_CHARS)
+            said = _clip_line(str(row.get("jarvis") or "").strip(), HISTORY_JARVIS_CHARS)
             if user:
                 recent_lines.append(f"Evens: {user}")
             if said:
@@ -3860,6 +3929,17 @@ def online_talk(prompt: str, pack_text: str, talk_fn=None, *, images=None, extra
     as talk. Tests that set AGENT_STACK_CURSOR_DRY skip live HTTP unless talk_fn
     is injected.
     """
+    if talk_fn is None and not images and not extra_tools:
+        # Deterministic answers ride every talk path, hands or not (live :4018 PASS asks took the hands path).
+        local = None
+        if hasattr(ONLINE, "is_status_ask") and ONLINE.is_status_ask(prompt):
+            local = (ONLINE.STATUS_ASK_REPLY, "status-ask")
+        elif hasattr(ONLINE, "pass_rule_reply"):
+            rule = ONLINE.pass_rule_reply(prompt)
+            if rule:
+                local = (rule, "rule-cache")
+        if local:
+            return {"ok": True, "unknown": False, "wire": "local", "engine": local[1], "spoken": local[0], "model": "none"}
     if talk_fn is not None:
         try:
             got = talk_fn(prompt, pack_text, images=images)
@@ -5332,6 +5412,7 @@ def _commit_spoken(
     next_turns = append_turn(prior_turns, spoken_in, text)
     if JEV is not None:
         JEV.record(hive, spoken_in, tool=tool, hard_step=is_hard_step(spoken_in))
+    _jev_log(hive, spoken_in, tool, wire)
     try:
         receipt = write_receipt(hive, turn_input=spoken_in, turn_output=text)
     except OSError:
@@ -5385,6 +5466,103 @@ def _commit_spoken(
     return text, first, rest
 
 
+
+def _resume_key(hive: Path) -> str:
+    return str(Path(hive).resolve()) if hive else ""
+
+
+def _resume_note(*, entry=None, used=False, stored=False) -> None:
+    """Resume metadata (counts only) onto LAST_TALK for the per-turn log."""
+    if RESUME is None or ONLINE is None or not hasattr(ONLINE, "LAST_TALK"):
+        return
+    try:
+        ONLINE.LAST_TALK["resume"] = RESUME.meta(entry, used=used, stored=stored)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _resume_after_talk(hive: Path, talked, *, ask: str, prior: dict | None = None) -> None:
+    """A reply cut at the soft deadline leaves its ask and said words for a later 'continue'."""
+    if RESUME is None or not isinstance(talked, dict):
+        return
+    if str(talked.get("finish_reason") or "") != "soft_deadline":
+        return
+    wrap = getattr(ONLINE, "SOFT_WRAP", "") if ONLINE is not None else ""
+    said = RESUME.strip_wrap(str(talked.get("spoken") or ""), wrap)
+    if prior:
+        entry = RESUME.store(_resume_key(hive), ask=prior["ask"], said=RESUME.joined(prior, said),
+                             model=str(talked.get("model") or ""), parts=int(prior.get("parts") or 1) + 1)
+    else:
+        entry = RESUME.store(_resume_key(hive), ask=ask, said=said, model=str(talked.get("model") or ""))
+    _resume_note(entry=entry, used=bool(prior), stored=bool(entry))
+
+
+def _resume_turn_iter(hive: Path, entry: dict, *, spoken_in: str, prior_turns: list, talk_fn, retrieve_roots, token):
+    """Dedicated 'continue' path: one no-hands talk call that goes on from the stored stop point."""
+    prompt = RESUME.continue_prompt(entry)
+    box: dict = {}
+    deltas: "queue.Queue" = queue.Queue()
+
+    def _worker() -> None:
+        try:
+            if talk_fn is None and ONLINE is not None:
+                try:
+                    ONLINE.set_stream_sink(deltas.put, turn_start=ONLINE.turn_start())
+                except TypeError:
+                    ONLINE.set_stream_sink(deltas.put)
+            box["got"] = online_talk(prompt, "", talk_fn=talk_fn, hands=False)
+        except Exception as exc:  # noqa: BLE001
+            box["err"] = exc
+        finally:
+            if talk_fn is None and ONLINE is not None:
+                ONLINE.set_stream_sink(None)
+            deltas.put(None)
+
+    threading.Thread(target=_worker, daemon=True, name="talk-resume").start()
+    said = ""
+    while True:
+        piece = deltas.get()
+        if piece is None:
+            break
+        if token and turn_cancelled(hive, token):
+            continue
+        said = f"{said} {piece}".strip()
+        yield _pipeline_event(
+            ok=True, tool="converse", spoken=said, spoken_delta=piece, wires=["converse", "resume"], cites=[],
+            pack=None, done=False, partial=True, brain="openrouter", model_available=True, gen=token,
+        )
+    got = box.get("got") if "err" not in box else None
+    if token and turn_cancelled(hive, token):
+        return
+    raw = str((got or {}).get("spoken") or "").strip() if isinstance(got, dict) else ""
+    ok = bool(raw) and bool((got or {}).get("ok", True)) and not talk_is_miss(raw)
+    if ok:
+        # Keep the chain (ask + everything said so far) so another 'continue' goes on from here too.
+        # Live :4029: the model ended a continuation after one sentence; a second 'continue' then repeated it.
+        wrap = getattr(ONLINE, "SOFT_WRAP", "") if ONLINE is not None else ""
+        chained = RESUME.store(_resume_key(hive), ask=entry["ask"], said=RESUME.joined(entry, RESUME.strip_wrap(raw, wrap)),
+                               model=str((got or {}).get("model") or ""), parts=int(entry.get("parts") or 1) + 1)
+        _resume_note(entry=chained, used=True, stored=bool(chained))
+    else:
+        # Keep the stop point so a second 'continue' can still pick it up.
+        RESUME.store(_resume_key(hive), ask=entry["ask"], said=entry["said"], model=entry.get("model") or "",
+                     parts=int(entry.get("parts") or 1))
+        raw = raw or TALK_DARK
+    outcome = MODEL_TALK if ok else WIRE_FAILURE
+    text, first, rest = _commit_spoken(
+        hive, spoken_in=spoken_in, prior_turns=prior_turns, tool="converse", raw=raw, wires=["converse", "resume"],
+        cites=[], ok=ok, pack=None, brain="openrouter", retrieve_roots=retrieve_roots, gen=token,
+        wire={"path": "resume", "tool": "converse", "outcome": outcome, "provider": "openrouter",
+              "model": (got or {}).get("model") if isinstance(got, dict) else None,
+              "finish_reason": (got or {}).get("finish_reason") if isinstance(got, dict) else None,
+              "error": None if ok else "resume_talk_miss"},
+    )
+    yield _pipeline_event(
+        ok=ok, tool="converse", spoken=text, spoken_delta=text if not said else "", wires=["converse", "resume"],
+        cites=[], pack=None, brain="openrouter", model_available=True, outcome=outcome, gen=token,
+    )
+
+
 def apply_pipeline_iter(
     utterance: str,
     *,
@@ -5401,6 +5579,8 @@ def apply_pipeline_iter(
 ):
     """Yield first speakable sentence, then the finished turn. Do not wait for done to speak."""
     spoken_in = (utterance or "").strip()
+    _turn_t0 = ONLINE.set_turn_start() if ONLINE is not None and hasattr(ONLINE, "set_turn_start") else None
+    _jev_reset()
     begin_turn_evidence()
     token = int(gen) if gen is not None else begin_turn(hive)
     if token and turn_cancelled(hive, token):
@@ -5450,6 +5630,18 @@ def apply_pipeline_iter(
             gen=token,
         )
         return
+    if RESUME is not None and RESUME.enabled():
+        _rkey = _resume_key(hive)
+        if RESUME.is_continue(spoken_in):
+            _entry = RESUME.take(_rkey)
+            if _entry:
+                yield from _resume_turn_iter(
+                    hive, _entry, spoken_in=spoken_in, prior_turns=prior_turns, talk_fn=talk_fn,
+                    retrieve_roots=retrieve_roots, token=token,
+                )
+                return
+        else:
+            RESUME.clear(_rkey)
     if is_reask_declined(spoken_in):
         text, first, rest = _commit_spoken(
             hive,
@@ -5553,6 +5745,10 @@ def apply_pipeline_iter(
         )
         return
 
+    # Jev preflight (ADVISORY): starts here, after the hard-step gate, before any slow call.
+    # Test doors (talk_fn/cursor_fn injected) never go to the network.
+    if JEVR is not None:
+        _JEV_TURN.pf = JEVR.start(spoken_in, **({"live": False} if (talk_fn is not None or cursor_fn is not None) else {}))
     write_bus(
         hive,
         phase="think",
@@ -5828,6 +6024,16 @@ def apply_pipeline_iter(
             pick = fast
             brain = "craft_fast"
 
+    jev_pick = (getattr(_JEV_TURN.pf, "picker", None) or {}) if getattr(_JEV_TURN, "pf", None) is not None else {}
+    if pick is None and JEVR is not None and getattr(_JEV_TURN, "pf", None) is not None:
+        _JEV_TURN.advice = JEVR.advise(_JEV_TURN.pf, follow_up=is_conversational_follow_up(spoken_in) or bool(prior_turns and len(spoken_in.split()) <= 2 and not jev_pick.get("rule") in {"filler", "empty"}))
+        if (_JEV_TURN.advice or {}).get("action") == "clarify" and os.environ.get("JARVIS_JEV_CLARIFY", "1") != "0":
+            line = JEVR.CLARIFY_LINE
+            pick = {"tool": "converse", "args": {}, "speak": line}
+            brain = "jev_clarify"
+            ran = {"ok": True, "tool": "converse", "spoken": line, "wires": ["jev"], "cites": [], "sent": False,
+                   "from_store": False, "unknown": False, "model_available": False, "outcome": STORE_DIRECT}
+
     if pick is None and (talk_fn is not None or cursor_fn is None):
         brief = pack_text or sitting_brief(prior_turns, bus_now, retrieve_roots, spoken_in)
         if pack_text:
@@ -5835,10 +6041,58 @@ def apply_pipeline_iter(
             if extra and extra not in pack_text:
                 brief = f"{pack_text}\n\n{extra}"
         provider_brief = brief
-        talked = online_talk(
-            spoken_in, brief, talk_fn=talk_fn, images=_vision_urls(hive),
-            **({"hands": False} if shared_memory_answers(spoken_in) else {}),
+        no_hands = (
+            shared_memory_answers(spoken_in)
+            or plain_question(spoken_in)
+            # Deterministic skill picker ahead of the LLM tool pick: a confident 'converse' needs no hand.
+            or (
+                jev_pick.get("handler") == "converse"
+                and float(jev_pick.get("confidence") or 0) >= 0.85
+                and not HAND_ASK_RE.search(spoken_in)
+                and os.environ.get("JARVIS_JEV_PICKER", "1") != "0"
+            )
         )
+        talked = None
+        if talk_fn is None and no_hands and os.environ.get("JARVIS_TALK_STREAM", "1") != "0":
+            # Stream honest sentences to the Orb while the raced talk call runs (first words ~2 s).
+            box: dict = {}
+            deltas: "queue.Queue" = queue.Queue()
+
+            def _talk_worker() -> None:
+                try:
+                    try:
+                        ONLINE.set_stream_sink(deltas.put, turn_start=_turn_t0)
+                    except TypeError:
+                        ONLINE.set_stream_sink(deltas.put)
+                    box["got"] = online_talk(spoken_in, brief, talk_fn=None, images=_vision_urls(hive), hands=False)
+                except Exception as exc:  # noqa: BLE001
+                    box["err"] = exc
+                finally:
+                    ONLINE.set_stream_sink(None)
+                    deltas.put(None)
+
+            threading.Thread(target=_talk_worker, daemon=True, name="talk-stream").start()
+            said = ""
+            while True:
+                piece = deltas.get()
+                if piece is None:
+                    break
+                if token and turn_cancelled(hive, token):
+                    continue
+                said = f"{said} {piece}".strip()
+                yield _pipeline_event(
+                    ok=True, tool="converse", spoken=said, spoken_delta=piece, wires=["converse"], cites=[],
+                    pack=None, done=False, partial=True, brain="openrouter", model_available=True, gen=token,
+                )
+            if "err" in box:
+                raise box["err"]
+            talked = box.get("got")
+            _resume_after_talk(hive, talked, ask=spoken_in)
+        else:
+            talked = online_talk(
+                spoken_in, brief, talk_fn=talk_fn, images=_vision_urls(hive),
+                **({"hands": False} if no_hands else {}),
+            )
         if token and turn_cancelled(hive, token):
             return
         if isinstance(talked, dict):
