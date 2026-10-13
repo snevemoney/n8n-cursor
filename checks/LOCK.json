@@ -1,0 +1,17 @@
+{
+ "files": {
+  "checks/locked/workspace_read/01-reads-file.sh": "e4da43eb009fbeace65d43c6b761de1035ae6e8af2d05ff0103c15b697dead93",
+  "checks/locked/workspace_read/02-refuses-secrets.sh": "91136cd4a619005ba0ac15b42dfb50119d21b67b1961d04150e6c6e0c04b3f3d",
+  "checks/locked/workspace_read/03-caps-size.sh": "b96fbf6ce3e171c36d6d5928a4ad022d0a261a4fc533ec5bc782f1396f244002",
+  "checks/locked/workspace_read/04-git-truth.sh": "4b6958753d1739cdbba6016cdf61d1ca93f55c2b58ed7eb9119ac98f943d4c34",
+  "checks/locked/workspace_read/05-ls-names-only.sh": "a432f760f27dd24f284b77228080aa6e986f7f0e19d59248e247c8e3d3fe6398",
+  "checks/locked/workspace_read/06-read-only.sh": "ff7a1117aac3f42e65f10d078496a1538270e539634c0ba1f05445dbafe71f24",
+  "checks/locked/workspace_read/07-routes-asks.sh": "e34500fbadfc2953a17ff4a322da9c0d132c122be48ea847cd518af7435400e0",
+  "checks/locked/workspace_read/08-no-paths-in-log.sh": "64f29bbf18714bb2effde1478e8c7e6c6b6d1e264097146fafe7d13b1003c655",
+  "checks/locked/workspace_read/90-wired.sh": "8e34fe7b8eea90d1df2e5dd8229a9b11533f9f063a064694de44e4f41073994e",
+  "checks/locked/workspace_read/91-every-place.sh": "54916e0d85c6182131af64022074d318b9cf51ef2e1ae3f7a546263572e63751",
+  "checks/locked/workspace_read/92-existing-tests.sh": "05eeb6872f5a5d0a7cc546215f32d1c49e4a63c4b3fb4db9974c91ba139a339c"
+ },
+ "fixed_rules": "8ca237ccdfb6b62ef7d9e9c4fc90de0161caf7eab3d8da7b00b9496f9f3ef16f",
+ "loop_env": "2c64c68c2c9f50522cff92f84a93b99543edfd79bd1606cc74f292f0c2499a42"
+}
