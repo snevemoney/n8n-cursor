@@ -258,7 +258,7 @@ def op_repo(repo: str, action: str, **kw) -> dict:
         exe = "/usr/bin/python3" if cmd[0] == "python3" else (shutil.which(cmd[0]) or cmd[0])
         try:
             p = subprocess.run([sb, "-p", _sandbox_profile(root), exe, *cmd[1:]], cwd=str(root), capture_output=True,
-                               text=True, timeout=TEST_DEADLINE_S, env={"PATH": "/usr/bin:/bin:/opt/homebrew/bin", "HOME": str(root)})
+                               text=True, timeout=TEST_DEADLINE_S, env={"PATH": "/usr/bin:/bin:/opt/homebrew/bin", "HOME": "/private/tmp", "PYTHONDONTWRITEBYTECODE": "1"})
         except subprocess.TimeoutExpired:
             return {"ok": False, "verified": False, "spoken": "tests timed out"}
         text = _cap((p.stdout or "") + (p.stderr or ""))
@@ -643,6 +643,13 @@ def op_code(repo: str, goal: str, branch: str = "jarvis/code") -> dict:
     root = Path(os.path.expanduser(repo)) if os.path.isabs(os.path.expanduser(repo)) else PERM().scratch_roots()[0] / repo
     history = [{"role": "system", "content": CODE_SYS}]
     last_test, model_used, passed, plan = "", "", False, []
+    gi = root / ".gitignore"
+    if not gi.exists():
+        gi.write_text("__pycache__/\n*.pyc\nLibrary/\n.pytest_cache/\n", encoding="utf-8")
+    if any(p.suffix in {".py", ".js", ".ts"} for p in root.iterdir() if p.is_file()):
+        got0 = op_repo(str(root), "test")  # read the current failures before the model edits anything
+        last_test = "(baseline before edits) " + str(got0.get("output") or got0.get("spoken"))[-2500:]
+        step("baseline test", {"verified": True, "spoken": got0.get("spoken")})
     for it in range(1, MAX_ITERS + 1):
         history.append({"role": "user", "content": f"Goal: {goal}\n\nRelevant skills:\n{guide or '(none)'}\n\nRepo now:\n{_tree(root)}\n\n"
                         f"Last test output (iteration {it - 1}):\n{last_test or '(none yet)'}"})
