@@ -16,6 +16,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 CACHE = Path.home() / "Library" / "Caches" / "jarvis" / "or-prices.json"
+LAST_RE = re.compile(r"\b(?:what\s+(?:did|was)|how\s+much\s+(?:did|was))\s+(?:the\s+|that\s+|this\s+|your\s+)?(?:last|previous|that|this)?\s*"
+                     r"(?:answer|reply|response|turn|one|it)?\s*(?:cost|costs?)\b|\bcost\s+of\s+(?:that|the\s+last|your\s+last)\s+(?:answer|reply|turn)\b", re.I)
 WANT_RE = re.compile(r"\b(?:cost\s+card|what\s+(?:did|does|do)\s+(?:that|this|it|you|replies?)\s+cost|how\s+much\s+(?:have\s+you|did\s+you|"
                      r"do\s+you)\s+(?:spend|spent|cost)|(?:today'?s|my)\s+(?:spend|costs?|bill)|cost\s+(?:so\s+far|today)|cost\s+guide|the\s+meter|"
                      r"what\s+(?:does|do|did)\s+(?:each|every|all)\s+(?:\w+\s+){0,4}?cost|how\s+much\s+(?:does|do)\s+(?:each|every|you|jarvis)\b[^?]{0,40}cost|"
@@ -27,7 +29,35 @@ CLASS_OF = {"web_search": "web", "code_run": "code", "workbench": "code", "draft
 
 
 def wants_cost(u: str) -> bool:
-    return bool(WANT_RE.search(u or ""))
+    return bool(WANT_RE.search(u or "") or LAST_RE.search(u or ""))
+
+
+def last_turn(rows: list[dict]) -> dict:
+    """The answer he is asking about: the newest turn that is not itself a cost question."""
+    for r in reversed(rows):
+        if r.get("verb") != "cost_card" and "cost_card" not in (r.get("tools") or []):
+            return r
+    return {}
+
+
+def last_turn_spoken(r: dict) -> dict:
+    """Only real numbers: OpenRouter's metered usage for that turn, or 'no model call'. Never an estimate."""
+    model = str(r.get("model") or "")
+    ts = str(r.get("ts") or "")
+    if not r:
+        return {"ok": False, "spoken": "I have no previous turn in the log to price."}
+    if not model or model == "none":
+        tools = ", ".join(r.get("tools") or []) or str(r.get("verb") or "a hand")
+        return {"ok": True, "metered": True, "usd": 0.0, "row_ts": ts,
+                "spoken": f"That last answer cost nothing: no model was called; {tools} answered on this Mac (turn log {ts})."}
+    usd = r.get("usage_cost_usd")
+    if usd is None:
+        return {"ok": True, "metered": False, "usd": None, "row_ts": ts,
+                "spoken": f"That last answer used {model}, but OpenRouter sent no usage report for it, so I don't have its real cost "
+                          "and I won't guess a number."}
+    return {"ok": True, "metered": True, "usd": float(usd), "row_ts": ts, "gen_id": r.get("usage_gen_id"),
+            "spoken": f"That last answer cost ${float(usd):.6f} on {model}: {r.get('usage_tokens_in')} tokens in, "
+                      f"{r.get('usage_tokens_out')} out, per OpenRouter's usage report for that turn (turn log {ts})."}
 
 
 def prices(fetch=None) -> dict:
@@ -53,7 +83,9 @@ def row_cost(r: dict, p: dict) -> tuple[str, float]:
     cls = CLASS_OF.get(verb) or ("reply" if r.get("model") and r.get("model") != "none" else "tool")
     usd = 0.0
     m = p.get(str(r.get("model") or ""))
-    if m:
+    if r.get("usage_cost_usd") is not None:
+        usd += float(r["usage_cost_usd"])  # OpenRouter's metered cost beats any estimate
+    elif m:
         usd += (r.get("est_tokens_in") or 0) * m["in"] + (r.get("est_tokens_out") or 0) * m["out"]
     if cls == "web":
         s = p.get("perplexity/sonar", {"in": 1e-6, "out": 1e-6})
@@ -130,6 +162,11 @@ def run(utterance: str = "", *, log: Path | None = None, now: datetime | None = 
     rows = _rows(log or ROOT / "logs" / "jarvis-turns.jsonl")
     if not rows:
         return {"ok": False, "spoken": "I have no turn log to price yet."}
+    if LAST_RE.search(utterance or "") and not WANT_RE.search(re.sub(LAST_RE, "", utterance or "")):
+        r = last_turn(rows)
+        got = last_turn_spoken(r)
+        got["row"] = {k: r.get(k) for k in ("ts", "gen", "model", "usage_tokens_in", "usage_tokens_out", "usage_cost_usd", "usage_gen_id")}
+        return got
     p = prices(fetch)
     last = rows[-1]
     last_cls, last_usd = row_cost(last, p)

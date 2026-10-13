@@ -65,6 +65,11 @@ def build_row(*, started: float, ended: float, events: list[dict], talk: dict | 
         "tool_ms": next((int(ev["tool_ms"]) for ev in reversed(events) if isinstance(ev.get("tool_ms"), (int, float))), None),
         "est_tokens_in": talk.get("est_tokens_in"),
         "est_tokens_out": talk.get("est_tokens_out"),
+        # OpenRouter's own usage report for this turn (tokens + billed USD); None = not metered, never estimated.
+        "usage_tokens_in": (talk.get("usage") or {}).get("tokens_in"),
+        "usage_tokens_out": (talk.get("usage") or {}).get("tokens_out"),
+        "usage_cost_usd": (talk.get("usage") or {}).get("cost_usd"),
+        "usage_gen_id": (talk.get("usage") or {}).get("gen_id") or None,
         "injected_context": list(talk.get("injected") or inject.get("files") or []),
         "retrieved": [
             {"file": str(r.get("file") or ""), "heading": str(r.get("heading") or "")[:120]}

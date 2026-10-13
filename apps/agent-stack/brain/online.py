@@ -1368,6 +1368,28 @@ def _read_openrouter_stream(res, timeout: float | None = None) -> tuple[str, str
     return box["result"]
 
 
+STREAM_USAGE: dict = {}  # model -> OpenRouter usage block for the current talk call (tokens + billed cost)
+
+
+def _note_usage(chunk: dict) -> None:
+    u = chunk.get("usage") or {}
+    try:
+        STREAM_USAGE[str(chunk.get("model") or "")] = {
+            "tokens_in": int(u.get("prompt_tokens") or 0), "tokens_out": int(u.get("completion_tokens") or 0),
+            "cost_usd": (float(u["cost"]) if u.get("cost") is not None else None), "gen_id": str(chunk.get("id") or "")[:80]}
+    except (TypeError, ValueError):
+        pass
+
+
+def _usage_for(model: str) -> dict | None:
+    if model in STREAM_USAGE:
+        return dict(STREAM_USAGE[model])
+    hits = [v for k, v in STREAM_USAGE.items() if k and model and (k.startswith(model.split(":")[0]) or model.startswith(k))]
+    if len(hits) == 1:
+        return dict(hits[0])
+    return dict(next(iter(STREAM_USAGE.values()))) if len(STREAM_USAGE) == 1 else None
+
+
 def _consume_openrouter_stream(res) -> tuple[str, str]:
     acc = ""
     reason = ""
@@ -1388,6 +1410,8 @@ def _consume_openrouter_stream(res) -> tuple[str, str]:
             chunk = json.loads(payload)
         except json.JSONDecodeError:
             continue
+        if isinstance(chunk, dict) and isinstance(chunk.get("usage"), dict):
+            _note_usage(chunk)
         choices = chunk.get("choices") if isinstance(chunk, dict) else None
         if not isinstance(choices, list) or not choices:
             continue
@@ -1523,6 +1547,8 @@ def _openrouter_payload(
         "temperature": 0.2,
         "max_tokens": int(max_tokens or OPENROUTER_MAX_TOKENS),
         "stream": stream,
+        # Real metering: OpenRouter appends a usage block (tokens + billed cost) to the stream; the cost card reads it.
+        "usage": {"include": True},
         "messages": [
             {"role": "system", "content": system_for(model, primary, query=_ask_only(user))},
             {"role": "user", "content": content},
@@ -1667,6 +1693,7 @@ def call_openrouter(
     Not ChatGPT, Claude, or Gemini as the product mouth. Records LAST_TALK.
     """
     began = time.monotonic()
+    STREAM_USAGE.clear()
     got = _call_openrouter_inner(prompt, context, images=images, extra_tools=extra_tools, hands=hands)
     primary = str(LAST_INJECT.get("primary") or "") or (openrouter_vision_model() if images else "") or openrouter_model()
     model = str(got.get("model") or "") if isinstance(got, dict) else ""
@@ -1682,6 +1709,8 @@ def call_openrouter(
         # Rough estimate: ~4 chars per token. The stream path carries no usage block.
         "est_tokens_in": (len(SYS) + int(LAST_INJECT.get("chars") or 0) + len(prompt or "") + len(context or "")) // 4,
         "est_tokens_out": len(reply) // 4,
+        # Metered by OpenRouter for this call (None when the provider sent no usage block): the only $ Jarvis may quote.
+        "usage": _usage_for(model) if model else None,
         "injected": list(LAST_INJECT.get("files") or []),
         "retrieved": [dict(r) for r in (LAST_INJECT.get("snippets") or [])],
         "finish_reason": (str(got.get("finish_reason") or "") or None) if isinstance(got, dict) else None,
