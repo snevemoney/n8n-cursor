@@ -570,6 +570,31 @@ def explicit_craft_pick(spoken: str) -> dict | None:
     return {"tool": "craft", "args": {"app": m.group(1).lower(), "task": text}, "speak": ""}
 ONLINE = _load("agent_stack_online", HERE / "online.py")
 JEV = _load("agent_stack_jev_preflight", HERE / "jev_preflight.py")
+JEVR = _load("agent_stack_jev_router", HERE / "jev_router.py")
+# Per-turn advisory context for the Jev router shadow row (turn start, preflight, advice).
+_JEV_TURN = threading.local()
+
+
+def _jev_reset() -> None:
+    _JEV_TURN.t0 = time.monotonic()
+    _JEV_TURN.pf = None
+    _JEV_TURN.advice = None
+
+
+def _jev_log(hive: Path, spoken_in: str, tool: str, wire: dict | None) -> None:
+    if JEVR is None:
+        return
+    try:
+        t0 = getattr(_JEV_TURN, "t0", None)
+        w = wire if isinstance(wire, dict) else {}
+        JEVR.log_turn(
+            hive, getattr(_JEV_TURN, "pf", None), advice=getattr(_JEV_TURN, "advice", None),
+            latency_ms=int((time.monotonic() - t0) * 1000) if t0 else None,
+            path=str(w.get("path") or tool or "") or None, outcome=str(w.get("outcome") or "") or None,
+            tool=tool, hard_step=is_hard_step(spoken_in),
+        )
+    except Exception:  # noqa: BLE001 -- shadow log never breaks a turn
+        pass
 
 
 # --- Ported from main (#09-27 Face commits): greeting, recall, local read,
@@ -5386,6 +5411,7 @@ def _commit_spoken(
     next_turns = append_turn(prior_turns, spoken_in, text)
     if JEV is not None:
         JEV.record(hive, spoken_in, tool=tool, hard_step=is_hard_step(spoken_in))
+    _jev_log(hive, spoken_in, tool, wire)
     try:
         receipt = write_receipt(hive, turn_input=spoken_in, turn_output=text)
     except OSError:
@@ -5455,6 +5481,7 @@ def apply_pipeline_iter(
 ):
     """Yield first speakable sentence, then the finished turn. Do not wait for done to speak."""
     spoken_in = (utterance or "").strip()
+    _jev_reset()
     begin_turn_evidence()
     token = int(gen) if gen is not None else begin_turn(hive)
     if token and turn_cancelled(hive, token):
@@ -5607,6 +5634,10 @@ def apply_pipeline_iter(
         )
         return
 
+    # Jev preflight (ADVISORY): starts here, after the hard-step gate, before any slow call.
+    # Test doors (talk_fn/cursor_fn injected) never go to the network.
+    if JEVR is not None:
+        _JEV_TURN.pf = JEVR.start(spoken_in, **({"live": False} if (talk_fn is not None or cursor_fn is not None) else {}))
     write_bus(
         hive,
         phase="think",
@@ -5882,6 +5913,16 @@ def apply_pipeline_iter(
             pick = fast
             brain = "craft_fast"
 
+    jev_pick = (getattr(_JEV_TURN.pf, "picker", None) or {}) if getattr(_JEV_TURN, "pf", None) is not None else {}
+    if pick is None and JEVR is not None and getattr(_JEV_TURN, "pf", None) is not None:
+        _JEV_TURN.advice = JEVR.advise(_JEV_TURN.pf, follow_up=is_conversational_follow_up(spoken_in) or bool(prior_turns and len(spoken_in.split()) <= 2 and not jev_pick.get("rule") in {"filler", "empty"}))
+        if (_JEV_TURN.advice or {}).get("action") == "clarify" and os.environ.get("JARVIS_JEV_CLARIFY", "1") != "0":
+            line = JEVR.CLARIFY_LINE
+            pick = {"tool": "converse", "args": {}, "speak": line}
+            brain = "jev_clarify"
+            ran = {"ok": True, "tool": "converse", "spoken": line, "wires": ["jev"], "cites": [], "sent": False,
+                   "from_store": False, "unknown": False, "model_available": False, "outcome": STORE_DIRECT}
+
     if pick is None and (talk_fn is not None or cursor_fn is None):
         brief = pack_text or sitting_brief(prior_turns, bus_now, retrieve_roots, spoken_in)
         if pack_text:
@@ -5889,7 +5930,17 @@ def apply_pipeline_iter(
             if extra and extra not in pack_text:
                 brief = f"{pack_text}\n\n{extra}"
         provider_brief = brief
-        no_hands = shared_memory_answers(spoken_in) or plain_question(spoken_in)
+        no_hands = (
+            shared_memory_answers(spoken_in)
+            or plain_question(spoken_in)
+            # Deterministic skill picker ahead of the LLM tool pick: a confident 'converse' needs no hand.
+            or (
+                jev_pick.get("handler") == "converse"
+                and float(jev_pick.get("confidence") or 0) >= 0.85
+                and not HAND_ASK_RE.search(spoken_in)
+                and os.environ.get("JARVIS_JEV_PICKER", "1") != "0"
+            )
+        )
         talked = None
         if talk_fn is None and no_hands and os.environ.get("JARVIS_TALK_STREAM", "1") != "0":
             # Stream honest sentences to the Orb while the raced talk call runs (first words ~2 s).
