@@ -1214,7 +1214,17 @@ def _cal_today():
 
 def prebrief_tick(hive: Path) -> str | None:
     """Z09: one pre-brief check. The face process runs it every PREBRIEF_PUMP_SEC."""
-    return _prebrief_hand().tick(hive, cal_fn=_cal_today, mutate_fn=mutate_bus)
+    def notes(title: str) -> int:
+        try:
+            import importlib.util as _u
+            sp = _u.spec_from_file_location("pb_reflex5", Path(__file__).resolve().parent / "reflex5.py")
+            m = _u.module_from_spec(sp); sp.loader.exec_module(m)
+            m._vault_index(); import time as _t; _t.sleep(0)
+            want = {w.lower().rstrip("s") for w in re.findall(r"[A-Za-z0-9]+", title) if len(w) > 2}
+            return sum(1 for stem, toks, *_ in m._IDX["notes"] if want and len(want & {t.rstrip("s") for t in toks}) >= max(1, len(want) - 1))
+        except Exception:  # noqa: BLE001
+            return 0
+    return _prebrief_hand().tick(hive, cal_fn=_cal_today, mutate_fn=mutate_bus, notes_fn=notes)
 
 
 def _start_prebrief_pump() -> None:

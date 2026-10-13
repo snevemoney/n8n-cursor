@@ -49,7 +49,35 @@ def _state(hive: Path) -> Path:
     return Path(hive) / "bus" / "prebrief-offered.json"
 
 
-def tick(hive: Path, *, cal_fn, mutate_fn, now: datetime | None = None) -> str | None:
+_ONES = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen".split()
+_TENS = "_ _ twenty thirty forty fifty sixty".split()
+
+
+def words(n: int) -> str:
+    if n < 20:
+        return _ONES[max(0, n)]
+    t, o = divmod(n, 10)
+    return _TENS[t] + ("-" + _ONES[o] if o else "") if t < 7 else str(n)
+
+
+def offer_line(at: datetime, title: str, mins: int, *, notes_fn=None) -> str:
+    """Demo U-LXFzu6sGU 6:46-7:00 (storyboards/Z09): header line, then the butler line with the minutes in words,
+    an honest notes check, and a two-option offer."""
+    found = 0
+    try:
+        found = int(notes_fn(title)) if notes_fn else 0
+    except Exception:  # noqa: BLE001
+        found = 0
+    head = f"\U0001F4CB Prep \u2014 {title} at {at.strftime('%a %b %-d, %-I:%M %p')}"
+    when = "today" if at.date() == datetime.now().date() else at.strftime("%A")
+    on_file = (f"I found {found} note{'s' if found != 1 else ''} on it in your vault."
+               if found else "Nothing on file about agenda items or attendees for this one, I'm afraid.")
+    return (f"{head}\nRight, sir. You've got the {title} at {at.strftime('%-I:%M')} {when} \u2014 that's in {words(mins)} minutes. "
+            f"{on_file} Shall I pull your last three notes on it so we can spot what's likely on the table, "
+            "or would you prefer I draft a standing brief template for it? Say \u201cprep me\u201d.")
+
+
+def tick(hive: Path, *, cal_fn, mutate_fn, now: datetime | None = None, notes_fn=None) -> str | None:
     now = now or datetime.now()
     got = cal_fn() or {}
     if not got.get("ok"):
@@ -65,7 +93,7 @@ def tick(hive: Path, *, cal_fn, mutate_fn, now: datetime | None = None) -> str |
         offered = {}
     if key in offered:
         return None
-    line = f"Your {at.strftime('%-I:%M %p')} \u201c{title}\u201d starts in {mins} minutes. Want me to pull your notes on it? Say \u201cprep me\u201d."
+    line = offer_line(at, title, mins, notes_fn=notes_fn)
 
     def put(bus: dict) -> dict:
         pb = bus.get("prebrief") if isinstance(bus.get("prebrief"), dict) else {}

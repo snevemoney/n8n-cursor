@@ -19,7 +19,7 @@ class PrebriefTest(unittest.TestCase):
         hive = Path(tempfile.mkdtemp()); (hive / "bus").mkdir()
         (hive / "bus" / "state.json").write_text("{}")
         line = PB.tick(hive, cal_fn=CAL, mutate_fn=P.mutate_bus, now=NOW)
-        self.assertIn("Sync with Zubair", line); self.assertIn("20 minutes", line)
+        self.assertIn("Sync with Zubair", line); self.assertIn("twenty minutes", line); self.assertIn("Prep \u2014", line)
         bus = json.loads((hive / "bus" / "state.json").read_text())
         self.assertEqual(bus["prebrief"]["gen"], 1)
         self.assertIsNone(PB.tick(hive, cal_fn=CAL, mutate_fn=P.mutate_bus, now=NOW))  # once per event
