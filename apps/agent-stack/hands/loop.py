@@ -75,10 +75,14 @@ def run(args: dict | None = None) -> dict:
         key = _norm(args.get("id"))
         key = re.sub(r"^(?:loop\s+)?(?:that\s+)?", "", key)
         # Exact only: the loop id, or the loop's whole "what". A substring like "disk" cancels nothing.
-        hit = [r for r in rows if r.get("status") == "active" and key and (str(r.get("id")) == key or _norm(r.get("what")) == key)]
+        # Also the whole subject without its leading verb ("checks disk space" -> "disk space"); never a fragment.
+        subj = lambda w: re.sub(r"^(?:checks?|watch(?:es)?|monitors?|pings?|polls?)\s+", "", _norm(w))
+        hit = [r for r in rows if r.get("status") == "active" and key and (str(r.get("id")) == key or _norm(r.get("what")) == key
+                                                                           or subj(r.get("what")) == key)]
         if not hit:
             return {"ok": False, "op": op, "spoken": "I couldn't find an active loop like that. Nothing changed."}
-        for r in hit[:1]:
+        same = _norm(hit[0].get("what"))
+        for r in [x for x in hit if _norm(x.get("what")) == same]:
             r["status"] = "cancelled"; r["cancelled"] = datetime.now().isoformat(timespec="seconds")
         _save(rows)
         return {"ok": True, "op": op, "loop": hit[0], "spoken": f"Cancelled the loop: {hit[0]['what']}."}

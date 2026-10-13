@@ -12,6 +12,7 @@ fi
 export HOME="${HOME:-$HOME}"
 export PATH="${HOME}/.local/bin:${PATH}"
 unset AGENT_STACK_DRY_TTS || true
+export PYTHONDONTWRITEBYTECODE=1  # no __pycache__ in the tree (locked grep checks scan it)
 cd "$ROOT"
 
 PORT="${AGENT_STACK_FACE_PORT:-4018}"

@@ -41,7 +41,9 @@ HARD_STEP_RE = re.compile(
     r"pay (this|that|the|an?|him|her|them|it)\b|"
     r"deploy (this|that|it|to|now|prod)|"
     r"book (a|the|this|me)\b|"
-    r"publish (this|that|the|it|now)"
+    r"publish (this|that|the|it|now)|"
+    r"(?:restart|reboot|shut\s*down|power\s+off|stop)\s+(?:\w+\s+){0,2}?(?:on\s+)?(?:the\s+|my\s+)?(?:vps|server|droplet|instance|box)\b|"
+    r"(?:restart|reboot)\s+(?:nginx|docker|n8n|postgres|redis|caddy|openclaw)\b"
     r")",
     re.I,
 )
@@ -708,7 +710,9 @@ WORKSPACE_READ_RE = re.compile(
     r"\b(read|open|show|cat)\b.{0,40}\b[\w.\-/]+\.(?:md|txt|py|json|toml|ya?ml|sh|js|ts|cfg|ini)\b|"
     r"\b(?:what|which)\s+(?:repo|branch|git\s+branch|commit\s+head)\b|"
     r"\b(?:what|which)\s+repos\b|\brepos?\b.{0,30}\b(?:installed|locally|on\s+(?:this|my)\s+(?:mac|machine))\b|"
-    r"\b(?:list|show)\b.{0,30}\b(?:files|folder|contents)\b.{0,30}\b(?:downloads|desktop|documents)\b",
+    r"\b(?:list|show)\b.{0,30}\b(?:files|folder|contents)\b.{0,30}\b(?:downloads|desktop|documents)\b|"
+    r"\bgit\s+status\b|\buncommitted\s+changes\b|\b(?:working\s+)?tree\s+(?:is\s+)?clean\b|"
+    r"\b(?:read|open|show|cat)\b.{0,30}(?:\.env\b|\bid_(?:rsa|dsa|ecdsa|ed25519)\b|\.ssh/|\.grok-private/)",
     re.I,
 )
 
@@ -835,7 +839,7 @@ def fit_budget(text: str, budget: int | None = None) -> str:
 
 
 MCP_CALL_RE = re.compile(
-    r"\b(?:list|show|what)\b.{0,15}\btools?\s+(?:on|from|of|in)\s+(?:the\s+)?[\w.\-]+(?:\s+mcp)?\s+server\b",
+    r"\b(?:list|show|what)\b.{0,15}\btools?\s+(?:are\s+)?(?:on|from|of|in)\s+(?:the\s+|your\s+|my\s+)?(?:[\w.\-]+\s+)?(?:mcp\s+)?server\b",
     re.I,
 )
 

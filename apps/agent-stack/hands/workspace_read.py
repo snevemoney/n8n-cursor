@@ -137,14 +137,42 @@ def run(args: dict, roots=None) -> dict[str, Any]:
         where = "detached at" if branch == "detached" else f"on branch {branch} at"
         return {"ok": True, "op": op, "repo": repo, "branch": branch, "head": head,
                 "spoken": f"I'm in {repo}, {where} {head}."}
+    if op == "status":
+        d = path if path.is_dir() else path.parent
+        rc, top = _git(d, "rev-parse", "--show-toplevel")
+        if rc != 0:
+            return _deny("not a git repo", op)
+        rc, out = _git(Path(top), "status", "--porcelain")
+        if rc != 0:
+            return _deny("git status failed", op)
+        lines = [ln for ln in out.splitlines() if ln.strip()]
+        untracked = sum(1 for ln in lines if ln.startswith("??"))
+        changed = len(lines) - untracked
+        repo = Path(top).name
+        if not lines:
+            sp = f"git status in {repo}: working tree clean, no uncommitted changes."
+        else:
+            sp = (f"git status in {repo}: {changed} modified or staged file{'s' if changed != 1 else ''} and "
+                  f"{untracked} untracked entr{'ies' if untracked != 1 else 'y'}: there are uncommitted changes.")
+        return {"ok": True, "op": op, "repo": repo, "changed": changed, "untracked": untracked, "spoken": sp}
     return _deny("unknown op", op)
 
 
 _FILE = re.compile(r"\b([\w.\-/~]+\.(?:md|txt|py|json|toml|ya?ml|sh|js|ts|cfg|ini))\b", re.I)
+# Secret-looking file asks still go through _resolve, which refuses them (SECRET_NAME / SECRET_DIR).
+_SECRET_ASK = re.compile(r"(?<![\w/])(~?/?(?:[\w.\-]+/)*(?:\.env(?:\.[\w-]+)?|id_(?:rsa|dsa|ecdsa|ed25519)(?:\.pub)?|\.netrc|\.npmrc|\.pypirc)"
+                         r"|~?/?(?:[\w.\-]+/)*\.(?:ssh|grok-private|gnupg|aws)(?:/[\w.\-]+)*)", re.I)
+_STATUS = re.compile(r"\bgit\s+status\b|\buncommitted\b|\b(?:working\s+)?tree\s+(?:is\s+)?clean\b|\blocal\s+changes\b", re.I)
+_FOLDER = re.compile(r"\b(?:in|from|inside)\s+(?:my\s+|the\s+)?(downloads|desktop|documents)\b", re.I)
 
 
 def args_from_utterance(u: str) -> dict:
     s = u or ""
+    if _STATUS.search(s) and not _FILE.search(s):
+        return {"op": "status", "path": ""}
+    sec = _SECRET_ASK.search(s)
+    if sec and re.search(r"\b(read|open|show|cat|print|display|what'?s in)\b", s, re.I):
+        return {"op": "read", "path": sec.group(1)}
     if re.search(r"\b(repo|branch|head)\b", s, re.I) and not _FILE.search(s) and not re.search(r"\brepos\b", s, re.I):
         return {"op": "git", "path": ""}
     if re.search(r"\brepos\b|\brepositories\b", s, re.I):
@@ -154,6 +182,9 @@ def args_from_utterance(u: str) -> dict:
         return {"op": "ls", "path": str(Path.home() / m.group(1).capitalize())}
     f = _FILE.search(s)
     if f:
+        fold = _FOLDER.search(s)
+        if fold and "/" not in f.group(1):
+            return {"op": "read", "path": str(Path.home() / fold.group(1).capitalize() / f.group(1))}
         return {"op": "read", "path": f.group(1)}
     return {"op": "ls", "path": ""}
 
