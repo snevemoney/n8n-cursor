@@ -29,8 +29,20 @@ ROOT = STACK.parents[1]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 BUS_PATH = HIVE / "bus" / "state.json"
 VOICE_LOCAL = HIVE / "bus" / "voice-local.json"
-CACHE = Path(os.environ.get("AGENT_STACK_KOKORO_DIR") or (STACK / ".kokoro"))
-VENV_PY = Path(os.environ.get("AGENT_STACK_VOICE_PYTHON") or (STACK / ".venv-voice" / "bin" / "python"))
+SHARED_VOICE = Path.home() / ".jarvis-voice"  # one Kokoro install shared by every checkout of the Face
+
+
+def _voice_path(env: str, intree: Path, shared: Path) -> Path:
+    """Env wins; then the in-tree cache; then the shared ~/.jarvis-voice install."""
+    if os.environ.get(env):
+        return Path(os.environ[env])
+    if intree.exists() and not os.environ.get("JARVIS_VOICE_NO_INTREE"):
+        return intree
+    return shared if shared.exists() else intree
+
+
+CACHE = _voice_path("AGENT_STACK_KOKORO_DIR", STACK / ".kokoro", SHARED_VOICE / "kokoro")
+VENV_PY = _voice_path("AGENT_STACK_VOICE_PYTHON", STACK / ".venv-voice" / "bin" / "python", SHARED_VOICE / "venv" / "bin" / "python")
 KOKORO_MODEL = CACHE / "kokoro-v1.0.int8.onnx"
 KOKORO_VOICES = CACHE / "voices-v1.0.bin"
 KOKORO_VOICE = "bm_lewis"
