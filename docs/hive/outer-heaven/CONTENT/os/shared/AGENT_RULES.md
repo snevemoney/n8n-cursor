@@ -82,6 +82,8 @@ If a rule here conflicts with a newer explicit decision from Evens, Evens wins. 
   2. Recover the goal, locks and prior handoffs.
   3. Label knowledge freshness.
   4. State the success evidence up front.
+  5. One deliverable per session; on task change, auto-compact, or 2 wrong turns → HANDOFF.md + fresh session.
+  6. Every loop, trial or sprint starts with KILL.md (kill-criteria skill). Extending a timebox needs the owner's yes.
 - **End:** write a structured handoff with these fields:
   - capability, platform, changes (paths, commit/ref)
   - tests run, real-surface test (yes/no)
