@@ -81,6 +81,13 @@ class StatusClaimTests(unittest.TestCase):
         self.assertIn("not run a live status check", out)
         self.assertEqual(online.unbacked_status_claim(t, backed=True), t)
 
+    def test_status_ask_detected_and_capped(self):
+        for q in ("Status check: are all your tools ready?", "Are all your tools ready right now?", "Is everything working?"):
+            self.assertTrue(online.STATUS_ASK_RE.search(q), q)
+        for q in ("What model are you running on right now?", "Good evening Jarvis, how are you doing tonight?", "Who is allowed to issue a PASS?"):
+            self.assertFalse(online.STATUS_ASK_RE.search(q), q)
+        self.assertLessEqual(online.OPENROUTER_STATUS_ASK_TOKENS, 160)
+
     def test_rule_ask_detected(self):
         for q in ("Who is allowed to issue a PASS?", "Who can merge PRs?", "What are the rules for client sends?"):
             self.assertTrue(online.RULE_ASK_RE.search(q), q)

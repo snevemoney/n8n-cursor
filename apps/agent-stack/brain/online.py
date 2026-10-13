@@ -61,6 +61,13 @@ OPENROUTER_WALL_SEC = _sec_env("JARVIS_TALK_WALL_SEC", 22.0)
 TALK_DARK = "The talk wire is dark this turn."
 OPENROUTER_MAX_TOKENS = 512
 OPENROUTER_RULE_TOKENS = int(os.environ.get("JARVIS_RULE_MAX_TOKENS") or 160)
+OPENROUTER_STATUS_ASK_TOKENS = int(os.environ.get("JARVIS_STATUS_ASK_MAX_TOKENS") or 120)
+# "Status check: are all your tools ready?" with no status hand: live non-stream 320-token
+# calls returned 0 bytes in 20 s (hedge too). Honest answer is short: no live check this turn.
+STATUS_ASK_RE = re.compile(
+    r"\b(?:status\s+check|(?:are|is)\s+(?:all\s+)?(?:your|the|my)\s+(?:tools|systems|doors|hands|adapters)\s+(?:ready|up|online|working|ok)|tool\s+readiness|(?:are|is)\s+everything\s+(?:ready|up|working|online))",
+    re.I,
+)
 RULE_ASK_RE = re.compile(
     r"\b(?:who\s+(?:is\s+)?(?:allowed|can|may|gets\s+to)|(?:am\s+I|are\s+(?:you|we))\s+allowed|is\s+it\s+allowed"
     r"|what(?:'s|\s+is|\s+are)\s+the\s+(?:rule|rules|policy|lock)s?\b|\bwho\s+(?:issues|grades|approves|merges))",
@@ -1433,6 +1440,8 @@ def _call_openrouter_inner(
     if not (hands or extra_tools) and RULE_ASK_RE.search(prompt or ""):
         # Rule/permission asks ("who may issue a PASS?") need one quoted rule, not an essay: 20 s tails seen live.
         max_tokens = min(max_tokens, OPENROUTER_RULE_TOKENS)
+    if not (hands or extra_tools) and STATUS_ASK_RE.search(prompt or ""):
+        max_tokens = min(max_tokens, OPENROUTER_STATUS_ASK_TOKENS)
     with_tools = bool(hands or extra_tools)
     models: list[str] = []
     vision = openrouter_vision_model() if stills else ""
