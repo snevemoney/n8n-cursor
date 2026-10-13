@@ -175,6 +175,21 @@ OPENROUTER_HANDS = (
     {
         "type": "function",
         "function": {
+            "name": "memory",
+            "description": "Remember personal facts durably, recall stored facts, or forget facts matching a substring. Use only for explicit memory requests.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "op": {"type": "string", "enum": ["remember", "recall", "forget"]},
+                    "text": {"type": "string"},
+                },
+                "required": ["op"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "workspace_read",
             "description": "Read-only: read a file's text (capped), list a folder's names, report git repo/branch/HEAD, or list local repos, inside allowed folders. Use it before claiming anything about files, repos or branches. Secrets are refused.",
             "parameters": {
