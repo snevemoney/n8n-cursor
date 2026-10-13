@@ -562,3 +562,7 @@ Related: [factory-not-feature](sand-workflow:factory-not-feature), [agent-harnes
 - **Isolation honesty.** Git worktrees isolate branches but share host files, network and credentials, so they're for trusted work only; use a disposable sandbox VM/container (Docker Sandboxes) when running on a shared box. Label/triage access on the repo is the trust boundary; don't point it at repos where strangers can label.
 - Grant trust gradually: ticket → PR → (personal projects only) merge. The newer repo version adds a control plane with leases, retries and Codex or Claude Code workers.
 - PROVE: `recreations/20261011/run1230/factory_labels.py` in signals-2mo-backlog-20261010 → PASS (only the labeled issue runs, idle polls spend nothing, no auto-merge).
+
+## Enrich 2026-10-12: box-proven trials (yt12, /workspace/trials/yt12-20261012)
+- **PR body shape** (Pocock /pr, yt:Q3uuE2adUT8 @5:19): Summary as the smallest visual, Evidence before/after, and Merge Danger (one-way or two-way door plus blast radius). PROVE: `/workspace/trials/yt12-20261012/m11-pr-merge-danger`. A validator accepts the generated body and rejects a plain one.
+- **Retro from the session log, suggest only** (yt:Q3uuE2adUT8 @5:40). PROVE: `/workspace/trials/yt12-20261012/m12-retro-from-session-log`. A deterministic scan of Codex thread 01a121e1 surfaced 20 nonzero exits and 6 'approval policy is never' rejections as candidates. A human picks; nothing auto-applies.

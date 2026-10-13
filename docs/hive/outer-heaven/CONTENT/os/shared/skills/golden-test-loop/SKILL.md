@@ -340,3 +340,9 @@ New features, bug fixes, behavior changes — before implementation.
 
 ## Don't
 Skip the fail. Install hooks/scripts from Superpowers. Ship live `/` to "prove" green.
+
+## Enrich 2026-10-12: box-proven trials (yt12, /workspace/trials/yt12-20261012)
+- **Correction ladder** (pstack /correct, yt:6puKyBbZEGY): fix a repeated mistake in this order: architecture, then a lint whose error names the fix, then a test, then docs. Keep a rule→enforcer table in AGENTS.md and check that every enforcer file exists. PROVE: `/workspace/trials/yt12-20261012/m13-correction-ladder`. The lint fails on the past workaround commit and passes at HEAD, the test passes, and the table check passes.
+- **A new check must fail on a real past mistake** (yt:6puKyBbZEGY @7:27). PROVE: `/workspace/trials/yt12-20261012/m14-check-fails-on-past-mistake`. A path check fails on the pre-fix youtube digest SKILL.md (non-existent whisper bin) and passes on the current one.
+- **Failure library replay** (yt:-126yfiC2Mg @3:37). Keep real failures as JSONL and replay them on every prompt or model change. PROVE: `/workspace/trials/yt12-20261012/m02-failure-library-replay` (v1 exits 0, the regressed v2 exits 1).
+- **Blind validation set** (yt:3iDiWTt8lok @5:06). Run the classifier without labels, count matches and write misses.json. PROVE: `/workspace/trials/yt12-20261012/m45-validation-set`.

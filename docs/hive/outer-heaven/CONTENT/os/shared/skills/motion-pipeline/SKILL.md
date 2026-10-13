@@ -792,3 +792,6 @@ FACT (post text only): Anthropic shipped **Claude Motion** (ideas → animated e
 
 ## 2026-10-11 — EffectCraft is the footage-bound AE sidecar (yt:5mi_tYSdkWQ)
 When a job needs real After-Effects ops that Remotion can't do in code — point/face tracking, stabilize, keying, LUT/Lumetri on footage — use [effectcraft-headless-motion](sand-workflow:effectcraft-headless-motion) (ArtCraft's AE clone, pure Rust, runs headless on the box via CLI + MCP; PROVE v0.8.0). Remotion stays the assembler of record: EffectCraft tracks/keys/renders, Remotion composes (or import its Lottie export via `@remotion/lottie`, UNVERIFIED on box). Do NOT reimplement tracking in CSS because Remotion exists.
+
+## Enrich 2026-10-12: box-proven trials (yt12, /workspace/trials/yt12-20261012)
+- **Word timestamps → moment → overlay** (yt:_SVU3oC4JX8 @11:39). YouTube json3 captions carry per-word offsets (tOffsetMs). Find the keyword and burn a drawtext overlay at that time. PROVE: `/workspace/trials/yt12-20261012/m40-transcript-to-motion/moment.mp4`.

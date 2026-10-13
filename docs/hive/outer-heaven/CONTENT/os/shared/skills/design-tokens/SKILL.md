@@ -119,3 +119,6 @@ Run packet scripts. Install cli/. Invent unbounded palettes. Paste full token JS
 
 ## Repass 20260909 wave AC — Anti-slop literacy
 - Treat "AI default" tells as defects; literacy includes recognizing 60+ slop patterns (RVeCbPg0liw).
+
+## Enrich 2026-10-12: box-proven trials (yt12, /workspace/trials/yt12-20261012)
+- **One-style icon pack as editable SVG** (yt:_SVU3oC4JX8 @8:21). Pull a set from the Iconify public API (free, no key; e.g. lucide), parse it, and recolor currentColor to a token. PROVE: `/workspace/trials/yt12-20261012/m39-icon-pack-svg`.

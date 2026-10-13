@@ -82,3 +82,6 @@ Render mp4 from EffectCraft, or exportLottie → `@remotion/lottie` in a Remotio
 | GUI `--control 9877` | needs a display — **WORKAROUND** (headless CLI/MCP first) |
 | Lottie → Remotion render | **UNVERIFIED** — Forge/Cursor repo |
 | LLM-driven agent (Claude/Opus) | Cursor cloud agent (OpenRouter in Cursor) — **BLOCKED on box** |
+
+## Enrich 2026-10-12: box-proven trials (yt12, /workspace/trials/yt12-20261012)
+- Re-PROVE (yt:Fuo1i_-9Frc): SHA256SUMS verified; `effectcraft-cli info` reports 669 commands and 306 effects; render-frame produced 320x180 in 96 ms. `/workspace/trials/yt12-20261012/m27-artcraft-cli`.

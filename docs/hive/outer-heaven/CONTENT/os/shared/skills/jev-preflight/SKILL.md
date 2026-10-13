@@ -156,3 +156,10 @@ Label: LOCALLY_SUPPORTED = backed by a local receipt/test; CANDIDATE = documente
 
 ## Next step after preflight (2026-10-11)
 Pick the chain in `request-routing-chains/SKILL.md`. jev-route v3.1 also logs role/perm/rate (see the script header; JEV_ROLE, JEV_RATE_PER_MIN, ~/.config/jev/permissions.json).
+
+## Enrich 2026-10-12: box-proven trials (yt12, /workspace/trials/yt12-20261012)
+- **Deterministic stand-ins proven for cheap steps** (yt:3iDiWTt8lok, -126yfiC2Mg):
+  - lane router: `/workspace/trials/yt12-20261012/m04-cheap-lane-yes-no`. 10/10 on the second run; run 1 scored 8/10 because of a keyword stem bug ('exists' vs 'exist').
+  - confidence threshold below 0.6 goes to a human: `/workspace/trials/yt12-20261012/m44-triage-confidence-threshold`.
+  - skill picker over 251 real SKILL.md descriptions: `/workspace/trials/yt12-20261012/m46-skill-picker`, 10/10.
+  Try these before any Jev call.

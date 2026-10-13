@@ -77,3 +77,6 @@ After a plan is accepted, drop the exploration (file reads / dead ends) from the
 - Front-load research in plan mode, then build; web/API reads during the build stage are what fill the window.
 - Write-back to a real account (labels, sends) still needs the operator's yes; this is about how the read/classify step runs.
 - PROVE: `recreations/20261011/run1630/bulk_api_vs_tools.py` in signals-2mo-backlog-20261010 (toy token model + 10-way fan-out/merge, labels identical to serial) → PASS. The token numbers are a model, not a measurement; the course's speed-up figures are UNVERIFIED.
+
+## Enrich 2026-10-12: box-proven trials (yt12, /workspace/trials/yt12-20261012)
+- **CLAUDE.md/AGENTS.md ≤200 lines as a router** (yt:gvESqM6s0kM @12:07). PROVE: `/workspace/trials/yt12-20261012/m32-claudemd-200-lines/report.txt`. Four box CLAUDE.md files are 359 lines (bus300 repo/main, jarvis-honesty, nc), so trim them to pointers.
