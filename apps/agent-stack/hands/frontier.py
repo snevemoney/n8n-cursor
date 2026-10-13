@@ -178,3 +178,23 @@ def review_do(u: str, *, drafts: Path, chat=None) -> dict:
             f"Tools check: drafts folder and the writing model, both answering. Reviewed {src.name} and saved the revision as {dst.name}. "
             + (f"Locked {'field' if len(locked) == 1 else 'fields'} kept verbatim: {', '.join(locked)}." if locked else "No locked fields were named.")
             + (" I had to restore one the model dropped." if fixed else "") + " Not sent."}
+
+
+# ---- Z83 ----
+GROUND_RE = re.compile(r"\b(?:write|draft|make|create)\b.*\b(?:from|based on|using)\s+my\s+notes?\s+(?:on|about)\s+(.+?)[.?!]?$", re.I)
+
+
+def grounded(u: str, *, reflex, chat=None) -> dict:
+    topic = GROUND_RE.search(u).group(1)
+    p, name = reflex.vault_note(topic)
+    if p < 0.5:
+        pm = reflex.path_matches(topic)
+        name = pm[0]["stem"] if pm and pm[0]["covers"] else ""
+    nb = reflex.note_brief(name, max_chars=1500) if name else {"ok": False}
+    if not nb.get("ok"):
+        return {"ok": True, "tool": "grounded", "sent": False,
+                "spoken": f"I found no note on {topic}, sir, so I won't write it from memory. Name the note, or say 'write it general'."}
+    ask = re.sub(r"\b(?:from|based on|using)\s+my\s+notes?\s+(?:on|about)\s+.+$", "", u, flags=re.I).strip()
+    body = ((chat or _chat())(f"{ask}. Use ONLY these notes as facts; if a needed fact is missing write X.\nNOTES ({nb['name']}):\n{nb['gist']}") or "").strip()
+    return {"ok": bool(body), "tool": "grounded", "sent": False, "cites": [nb["path"]],
+            "spoken": f"Working from your {nb['name']} note in {Path(nb['path']).parent.name}. " + (body or "The writing model returned nothing this turn.")}

@@ -23,6 +23,28 @@ STOP_RE = re.compile(
     r"^(?:hey\s+)?(?:jarvis[,.\s]+)?(stop|cancel|never mind|forget it|shut up)\s*[.!]?\s*$",
     re.I,
 )
+_STOP_RAW = STOP_RE
+
+
+class _StopGate:
+    """Z40: a simulated call waiting at CONFIRM consumes a bare 'cancel' before the generic stop (face/serve.py uses STOP_RE)."""
+    pattern = _STOP_RAW.pattern
+
+    def match(self, text, *a):
+        m = _STOP_RAW.match(text, *a)
+        if m and m.group(1).lower() == "cancel":
+            try:
+                if json.loads((Path.home() / ".jarvis" / "phone_sim.json").read_text()).get("state") == "CONFIRM":
+                    return None
+            except Exception:  # noqa: BLE001
+                pass
+        return m
+
+    def search(self, text, *a):
+        return self.match(text, *a)
+
+
+STOP_RE = _StopGate()
 ASK_LEAK = re.compile(
     r"say yes to (approve|send)|send this to the grok desk|"
     r"hand this to the \w+ desk|do you want me to send this",
@@ -543,6 +565,37 @@ def _apply_turn_iter_inner(
             gen=token,
         )
         return
+    # Z82 (dCK 4:39): "find my note about X" -> name the title, ask, then fetch on "open it/yes". Z83 grounded writing.
+    try:
+        _fp = Path.home() / ".jarvis" / "find_pending.json"
+        _fm = re.search(r"\bfind\s+(?:me\s+)?my\s+notes?\s+(?:about|on)\s+(.+?)[.?!]?$", spoken or "", re.I)
+        if _fm and _REFLEX is not None:
+            p_, nm = _REFLEX.vault_note(_fm.group(1))
+            if p_ < 0.5:
+                pm = _REFLEX.path_matches(_fm.group(1)); nm = pm[0]["stem"] if pm else ""
+            if nm:
+                _fp.parent.mkdir(parents=True, exist_ok=True); _fp.write_text(json.dumps({"name": nm, "ts": time.time()}))
+                _line = f"I found {nm}, sir. Is that the one? Say 'open it' and I'll read it."
+            else:
+                _line = f"I found no note about {_fm.group(1)}, sir."
+            yield _door_speak(hive, spoken, _line, "vault_find", retrieve_roots, gen=token,
+                              execution={"ok": True, "tool": "vault_find", "spoken": _line, "wires": ["reflex"], "sent": False})
+            return
+        if _fp.exists() and re.match(r"^\W*(?:yes|yeah|open it|that one|read it)\W*$", spoken or "", re.I):
+            _pend = json.loads(_fp.read_text()); _fp.unlink()
+            if time.time() - float(_pend.get("ts") or 0) < 600:
+                nb = _REFLEX.note_brief(_pend["name"])
+                _line = f"Your {nb['name']} note is up. {nb['gist']}" if nb.get("ok") else "That note has moved, sir; I can't open it."
+                yield _door_speak(hive, spoken, _line, "vault_read", retrieve_roots, gen=token,
+                                  execution={"ok": True, "tool": "vault_read", "spoken": _line, "cites": [nb.get("path", "")], "sent": False})
+                return
+        _fr0 = PIPELINE._load("agent_stack_frontier", PIPELINE.STACK / "hands" / "frontier.py")
+        if _REFLEX is not None and _fr0.GROUND_RE.search(spoken or ""):
+            got = _fr0.grounded(spoken, reflex=_REFLEX)
+            yield _door_speak(hive, spoken, got["spoken"], "grounded", retrieve_roots, gen=token, execution=got)
+            return
+    except Exception:  # noqa: BLE001
+        pass
     # Z12 (demo D5v4UuvtUXc 0:09-0:30): "pull up my X" where the reflex names a vault note -> read that note, no model detour.
     try:
         _rx = _reflex(spoken) or {}
@@ -870,6 +923,8 @@ def _placeholders(text: str, utterance: str) -> str:
 
     def sub(m):
         tok = m.group(0)
+        if (m.start() and text[m.start() - 1] in "-_/") or re.match(r"[-_./]\w", text[m.end():m.end() + 2]):
+            return tok  # part of a filename, path or id (20261013-153027-email.md)
         if tok.rstrip(".,") in {g.rstrip(".,") for g in given}:
             return tok
         if re.match(r"^\d{1,2}\.$", tok) and (m.start() == 0 or text[m.start() - 1] in "\n "):

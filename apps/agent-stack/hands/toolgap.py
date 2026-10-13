@@ -13,8 +13,8 @@ ACT_RE = re.compile(r"\b(?:check|open|get|pull|post|update|create|add|send|read|
 
 def gap(utterance: str, inventory_names: list[str]) -> str | None:
     low = (utterance or "").lower()
-    if not ACT_RE.search(low):
-        return None
+    if not ACT_RE.search(low) or re.match(r"^\W*(?:hey\s+)?(?:jarvis\W*)?(?:please\s+)?(?:write|draft|compose|critique|rewrite)\b", low):
+        return None  # Z83: 'write a LinkedIn post' is a writing ask, not a LinkedIn action
     have = " ".join(n.lower() for n in inventory_names or [])
     for key, name in APPS.items():
         if re.search(rf"\b{key}\b", low) and key not in have:
