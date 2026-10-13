@@ -5537,8 +5537,12 @@ def _resume_turn_iter(hive: Path, entry: dict, *, spoken_in: str, prior_turns: l
     raw = str((got or {}).get("spoken") or "").strip() if isinstance(got, dict) else ""
     ok = bool(raw) and bool((got or {}).get("ok", True)) and not talk_is_miss(raw)
     if ok:
-        _resume_note(entry=entry, used=True)
-        _resume_after_talk(hive, got, ask=entry["ask"], prior=entry)
+        # Keep the chain (ask + everything said so far) so another 'continue' goes on from here too.
+        # Live :4029: the model ended a continuation after one sentence; a second 'continue' then repeated it.
+        wrap = getattr(ONLINE, "SOFT_WRAP", "") if ONLINE is not None else ""
+        chained = RESUME.store(_resume_key(hive), ask=entry["ask"], said=RESUME.joined(entry, RESUME.strip_wrap(raw, wrap)),
+                               model=str((got or {}).get("model") or ""), parts=int(entry.get("parts") or 1) + 1)
+        _resume_note(entry=chained, used=True, stored=bool(chained))
     else:
         # Keep the stop point so a second 'continue' can still pick it up.
         RESUME.store(_resume_key(hive), ask=entry["ask"], said=entry["said"], model=entry.get("model") or "",

@@ -67,7 +67,7 @@ class ResumeModuleTests(unittest.TestCase):
 
 
 class ResumePipelineTests(unittest.TestCase):
-    def test_soft_cut_then_continue_picks_up_and_clears(self):
+    def test_soft_cut_then_continue_picks_up_and_chains(self):
         seen = []
 
         def talk(prompt, pack="", images=None):
@@ -87,7 +87,12 @@ class ResumePipelineTests(unittest.TestCase):
             final = events[-1]
             self.assertIn("storm came", final.get("spoken") or "")
             self.assertIn("resume", final.get("wires") or [])
-            self.assertIsNone(resume.pending(key))
+            chained = resume.pending(key)  # the chain stays, so a second 'continue' goes on from here
+            self.assertEqual(chained["said"], f"{SAID} Then one winter the storm came.")
+            self.assertEqual(chained["parts"], 2)
+            list(pipeline.apply_pipeline_iter("continue", hive=hive, retrieve_roots=[hive / "vault"], talk_fn=talk))
+            self.assertIn("Then one winter the storm came.", seen[1])
+            self.assertEqual(resume.pending(key)["parts"], 3)
 
     def test_second_cut_accumulates_said_words(self):
         def talk(prompt, pack="", images=None):

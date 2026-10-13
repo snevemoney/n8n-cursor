@@ -83,8 +83,9 @@ def continue_prompt(entry: dict) -> str:
         f"The question was: {entry.get('ask') or ''}\n"
         "What you already said, word for word:\n"
         f"<<<\n{said}\n>>>\n"
-        "Go on from exactly where that stops, with the next sentence. Do not repeat, summarize or "
-        "restate anything already said. No greeting, no apology, no preamble."
+        "Go on from exactly where that stops, with the next sentence, and keep going to the natural end "
+        "of the answer at the same level of detail. Do not repeat, summarize or restate anything already "
+        "said. No greeting, no apology, no preamble."
     )
 
 
