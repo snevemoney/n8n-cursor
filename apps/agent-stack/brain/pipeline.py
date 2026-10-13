@@ -5227,6 +5227,23 @@ def generation_ask(u: str) -> bool:
     return bool(GEN_ASK_RE.search(u or "")) and not re.search(r"\b(?:my|the)\s+(?:file|note|doc|document|vault)\b|\.(?:md|txt|pdf|docx)\b", u or "", re.I)
 
 
+CRITIQUE_RE = re.compile(r"\b(?:critique|review|roast|feedback on|what do you think of)\b", re.I)
+HIGH_STAKES_DOMAIN_RE = re.compile(r"\b(?:lawsuit|legal|lawyer|contract dispute|diagnos\w*|symptoms?|medication|dosage|tax(?:es)?|"
+                                   r"invest(?:ing|ment)?|stocks?|mortgage|visa|immigration)\b", re.I)
+
+
+def gen_rules(u: str) -> str:
+    """Z92 critique shape and Z96 high-stakes scope line, added to the talk brief."""
+    rules = []
+    if CRITIQUE_RE.search(u or ""):
+        rules.append("CRITIQUE FORMAT (Z92): 1) a concrete inventory of what is there (quote it); 2) ONE honest note, the most important "
+                     "problem, plainly; 3) a reusable rule of thumb in one line. No praise padding, no list of ten tweaks.")
+    if HIGH_STAKES_DOMAIN_RE.search(u or ""):
+        rules.append("SCOPE (Z96): open with one short line that this is general information, not professional advice, and that "
+                     "nothing will be filed, bought or sent; then answer.")
+    return "\n".join(rules)
+
+
 def run_tool(pick: dict, utterance: str, **kw) -> dict:
     """Tool entry point: pre_tool gate, then the hand, then post_tool + stop_check."""
     tool = str((pick or {}).get("tool") or "")
@@ -7155,6 +7172,10 @@ def apply_pipeline_iter(
                 and os.environ.get("JARVIS_JEV_PICKER", "1") != "0"
             )
         )
+        _rule = gen_rules(spoken_in)
+        if _rule:
+            brief = f"{brief}\n\n{_rule}" if brief else _rule
+            provider_brief = brief
         talked = None
         if talk_fn is None and no_hands and os.environ.get("JARVIS_TALK_STREAM", "1") != "0":
             # Stream honest sentences to the Orb while the raced talk call runs (first words ~2 s).

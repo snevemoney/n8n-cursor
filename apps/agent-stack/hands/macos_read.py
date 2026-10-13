@@ -40,11 +40,10 @@ def _run(argv: list[str], timeout: float = 12.0) -> subprocess.CompletedProcess[
 
 
 def _deny(app: str, err: str) -> dict:
-    line = f"Allow Terminal to control {app}."
-    extra = (err or "").strip()[:120]
-    if extra:
-        line = f"{line} {extra}"
-    return {"ok": False, "state": "denied", "wire": app.lower(), "spoken": line}
+    # Z72 (Acw 0:00, 4:37): facts first, then one quip; the raw AppleScript error ("Can't get start date of {}") stays in the log.
+    line = (f"I can't read {app} yet, sir: macOS hasn't given me permission. Allow Terminal to control {app} in System Settings, "
+            f"Privacy and Security, Automation, and ask again. A diary I'm not allowed to open; how very Victorian.")
+    return {"ok": False, "state": "denied", "wire": app.lower(), "spoken": line, "error": (err or "").strip()[:300]}
 
 
 WEEKDAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")

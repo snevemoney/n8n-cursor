@@ -594,6 +594,37 @@ def _apply_turn_iter_inner(
             return
     except Exception:  # noqa: BLE001
         pass
+    # Z06/Z07/Z40 simulated phone desk (telephony on HOLD): confirm card -> 'do it' -> ringing -> ended; nothing dials.
+    try:
+        _ph = PIPELINE._load("agent_stack_phone_sim", PIPELINE.STACK / "hands" / "phone_sim.py")
+        if _ph.wants(spoken):
+            got = _ph.run(spoken)
+
+            def _pcard(bus: dict, c=got["card"]) -> dict:
+                ib = bus.get("inbox") if isinstance(bus.get("inbox"), dict) else {}
+                bus["inbox"] = {"gen": int(ib.get("gen") or 0) + 1, "items": [x for x in (ib.get("items") or []) if isinstance(x, dict)][-4:] + [c]}
+                return bus
+            PIPELINE.mutate_bus(Path(hive), _pcard)
+            yield _door_speak(hive, spoken, got["spoken"], "phone_sim", retrieve_roots, gen=token, execution=got)
+            return
+    except Exception:  # noqa: BLE001
+        pass
+    # Z78 (dCK 14:30): "add a custom tool called X at <MCP URL>" -> registry entry, pending until approved; nothing connects by itself.
+    _ct = re.search(r"\badd (?:a )?(?:custom )?(?:tool|mcp(?: server)?)\s+(?:called|named)\s+([\w .-]{2,40}?)\s+(?:at|with url|url)\s+(https?://\S+)", spoken or "", re.I)
+    if _ct:
+        _reg = Path.home() / ".jarvis" / "custom_tools.json"
+        try:
+            _cur = json.loads(_reg.read_text()) if _reg.exists() else []
+        except Exception:  # noqa: BLE001
+            _cur = []
+        _cur = [x for x in _cur if x.get("name") != _ct.group(1).strip()] + [{"name": _ct.group(1).strip(), "url": _ct.group(2).rstrip(".,"), "state": "pending", "ts": time.time()}]
+        _reg.parent.mkdir(parents=True, exist_ok=True)
+        _reg.write_text(json.dumps(_cur, indent=1))
+        _line = (f"{_ct.group(1).strip()} is on your tool list as a custom MCP at {_ct.group(2).rstrip('.,')}, sir, marked pending. "
+                 "It isn't connected yet: approve it in settings and I'll check its tools before using them.")
+        yield _door_speak(hive, spoken, _line, "custom_tool", retrieve_roots, gen=token,
+                          execution={"ok": True, "tool": "custom_tool", "spoken": _line, "wires": ["custom_tools.json"], "sent": False})
+        return
     # Z60 (zdnijkAbknA 3:31-3:42, 4:26): a spoken conditional approval -> read-back + written approval record + inbox card.
     try:
         _ap = PIPELINE._load("agent_stack_approval", PIPELINE.STACK / "hands" / "approval.py")
