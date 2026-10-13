@@ -15,6 +15,7 @@ def test_project_commands_use_real_door_without_network_or_live_state(tmp_path, 
     spec.loader.exec_module(mod)
     hive = tmp_path / "hive"
     (hive / "bus").mkdir(parents=True)
+    monkeypatch.setenv("JARVIS_PROJECT_ROOT", str(hive / "project-artifacts"))
     with patch.object(mod.PIPELINE, "apply_pipeline_iter", side_effect=AssertionError("project command called a model")):
         created = mod.apply_turn("project launch create: goal: review the brief; done: one reviewed draft", hive=hive)
         assert created["verb"] == "project_methods"

@@ -604,7 +604,7 @@ def _apply_turn_iter_inner(
                           execution={"ok": True, "tool": "clock", "spoken": _line, "wires": ["local_clock"], "sent": False})
         return
     if _project_want:
-        got = _project_hand.run(spoken, root=Path(hive) / "project-artifacts")
+        got = _project_hand.run(spoken, root=Path(os.environ.get("JARVIS_PROJECT_ROOT") or Path.home() / ".jarvis" / "projects"))
         yield _door_speak(hive, spoken, got["spoken"], "project_methods", retrieve_roots, gen=token, execution=got)
         return
     # Z82 (dCK 4:39): "find my note about X" -> name the title, ask, then fetch on "open it/yes". Z83 grounded writing.
