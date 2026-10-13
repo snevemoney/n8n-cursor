@@ -20,6 +20,10 @@ PROBES = HERE / "probes17.json"
 BASELINE = HERE / "baseline.json"
 
 
+# Hand -> FINISH-LIST verb label the probes use. Labels only; no routing rules here.
+VERB = {"skills": "skills_list", "memory": "remember"}
+
+
 def _router():
     from brain import pipeline
     return pipeline.model_free_route
@@ -32,6 +36,7 @@ def run(router=None) -> dict:
     for p in probes:
         pick = router(p["ask"])
         got = (pick or {}).get("tool") or "model"
+        got = VERB.get(got, got)
         results.append({"cap": p["cap"], "expect": p["expect"], "got": got, "pass": got == p["expect"]})
     return {"total": len(results), "passed": sum(r["pass"] for r in results), "results": results}
 

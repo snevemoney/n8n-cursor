@@ -733,7 +733,7 @@ def wants_workspace_read(utterance: str) -> bool:
 
 
 SKILLS_RE = re.compile(
-    r"\b(?:which|what)\s+skills\b|\b(?:list|show)\b.{0,20}\bskills\b|\b(?:read|open|show)\s+(?:me\s+)?(?:the\s+)?[\w.\-]+\s+skill\b",
+    r"\b(?:which|what)\s+skills\b|\b(?:list|show)\b.{0,20}\bskills\b|\b(?:read|open|show)\s+(?:me\s+)?(?:the\s+)?[\w.\-]+\s+skill\b|\b(?:run|show|check)\s+(?:me\s+)?(?:the\s+)?[\w.\-]+\s+workflow\b",
     re.I,
 )
 

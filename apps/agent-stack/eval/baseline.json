@@ -4,12 +4,16 @@
     "computer",
     "context",
     "files",
+    "mcp",
+    "memory",
     "repos",
+    "skills",
     "tools",
     "voice",
     "vps",
-    "web"
+    "web",
+    "workflows"
   ],
-  "passed": 9,
+  "passed": 13,
   "total": 17
 }

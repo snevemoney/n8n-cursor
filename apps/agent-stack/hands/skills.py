@@ -84,12 +84,13 @@ def run(args: dict, roots=None) -> dict[str, Any]:
     return {"ok": False, "op": op, "error": "unknown op", "spoken": "I can't read that: unknown skills op."}
 
 
-_READ = re.compile(r"\b(?:read|open|show)\s+(?:me\s+)?(?:the\s+)?([\w.\-]+)\s+skill\b", re.I)
+_READ = re.compile(r"\b(?:read|open|show)\s+(?:me\s+)?(?:the\s+)?([\w.\-]+)\s+skill\b"
+                   r"|\b(?:run|show|check)\s+(?:me\s+)?(?:the\s+)?([\w.\-]+)\s+workflow\b", re.I)
 
 
 def args_from_utterance(u: str) -> dict:
     m = _READ.search(u or "")
-    return {"op": "read", "name": m.group(1)} if m else {"op": "list"}
+    return {"op": "read", "name": m.group(1) or m.group(2)} if m else {"op": "list"}
 
 
 def log_meta(result: dict) -> dict:
