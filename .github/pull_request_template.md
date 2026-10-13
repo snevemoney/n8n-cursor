@@ -8,6 +8,18 @@
 - **AFFECTED PATHS**: List all changed file patterns (e.g., `apps/lightningflow/**`, `docs/**`)
 - **Non-Goals**: List what this PR does NOT change (prevents scope creep)
 
+## Merge Danger
+**REQUIRED.** Say how risky this merge is before anyone reviews it. Write "none" plus a reason; don't delete the section.
+
+- **Door**: one-way (hard to undo: data migration, public push, deleted history, live service restart) | two-way (revert is clean)
+- **Blast radius**: what breaks if this is wrong (services, users, data, other desks' work)
+- **Undo in one command**: e.g. `git revert <sha>`, or the exact rollback step
+- **Live impact**: does merging restart or change anything live (e.g. Jarvis :4018)? yes/no
+- **Who approved Tier-3 actions**: name and time of Evens's explicit yes (merge to main, public push, rule edits), or "n/a"
+
+## Evidence
+<!-- The smallest proof that it works: before/after, a test receipt, a screenshot. "Tests pass" alone is not evidence. -->
+
 ## What Changed
 - [ ] New/updated routes documented in `docs/ROUTES.md`
 - [ ] Environment files updated (`.env.int`/`.env.staging`/`.env.production`)
@@ -57,3 +69,5 @@
 - [ ] Tests pass
 - [ ] Security checklist verified
 - [ ] Rollback plan acceptable
+- [ ] Merge Danger filled in (door, blast radius, undo)
+- [ ] Reviewed by two fresh reviewers (spec, then standards), neither the author
