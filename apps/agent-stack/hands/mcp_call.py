@@ -123,6 +123,16 @@ _SRV = re.compile(r"\b(?:tools?\s+(?:are\s+)?(?:on|from|of|in)\s+(?:the\s+|your\
 _GENERIC = {"your", "my", "the", "read-only", "readonly", "mcp", "server", "allowlisted", "local", "one"}
 
 
+def warm() -> None:
+    """Fill the tools/list cache for allowlisted servers (read-only). Called in the background after an
+    inventory ask, so the follow-up call answers inside the deadline on a busy Mac."""
+    for name in sorted(allowlist()):
+        try:
+            run({"server": name})
+        except Exception:
+            pass
+
+
 def args_from_utterance(u: str) -> dict:
     m = _SRV.search(u or "")
     if not m:
