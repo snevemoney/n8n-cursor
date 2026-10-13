@@ -1780,6 +1780,7 @@
           $("spoken").textContent = line;
           state.renderedBusGen = Number(bus.turn_gen || 0);
           if ($("heard")) $("heard").textContent = bus.utterance ? "› " + String(bus.utterance).slice(0, 160) : "";
+          if ($("heard") && bus.watch && bus.watch.armed && bus.watch.narration) $("heard").textContent = "▶ " + String(bus.watch.narration).slice(0, 160);
         }
         if (bus.tool === "browser_mission" && bus.browser_mission_id &&
             Array.from($("browserResults").children).some(el => el.dataset.missionId === bus.browser_mission_id) &&

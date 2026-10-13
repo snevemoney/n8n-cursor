@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -1016,6 +1016,8 @@ def model_free_route(spoken_in: str) -> dict | None:
         return {"tool": "memory", "args": _memory_hand().args_from_utterance(spoken_in), "speak": ""}
     if wants_continuity_status(spoken_in):
         return None
+    if wants_handback(spoken_in):
+        return {"tool": "handback", "args": {}, "speak": ""}
     if len(split_steps(spoken_in)) >= 2 and not is_hard_step(spoken_in):
         return {"tool": "multistep", "args": {}, "speak": ""}
     early = fixed_route(spoken_in)
@@ -5219,6 +5221,8 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["screen_see"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "screen_see_meta": hd.log_meta(got)}
+    if tool == "handback":
+        return handback(hive, gen)
     if tool == "multistep":
         lines, all_ok = [], True
         kw = dict(hive=hive, retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn,
@@ -5618,6 +5622,72 @@ def _run_tool_inner(
     }
 
 
+HANDBACK_RE = re.compile(
+    r"^\W*(?:(?:ok(?:ay)?|stop|wait|hold on|jarvis)[,.!]?\s+)*(?:i'?ll\s+take\s+(?:it\s+)?(?:over|from\s+here|the\s+wheel)|"
+    r"hands\s+off|let\s+me\s+(?:take\s+over|drive|do\s+it)|give\s+me\s+(?:the\s+wheel|control)|my\s+wheel)\b",
+    re.I,
+)
+
+
+def wants_handback(utterance: str) -> bool:
+    """Z01: 'stop, I'll take over' hands the wheel back (narrated takeover)."""
+    return bool(HANDBACK_RE.search(utterance or ""))
+
+
+def _step_line(n: int, args: dict, app: str = "") -> str:
+    op = str((args or {}).get("op") or "click")
+    label = str((args or {}).get("label") or (args or {}).get("text") or "").strip()[:60]
+    verb = {"click": "Clicking", "double-click": "Double-clicking", "right-click": "Right-clicking",
+            "type": "Typing", "scroll": "Scrolling"}.get(op, op.capitalize())
+    what = f" \"{label}\"" if label and op == "type" else (f" {label}" if label else "")
+    return f"Step {n}: {verb}{what}" + (f" in {app}" if app else "") + "."
+
+
+def _narrate_step(hive: Path, gen: int | None, n: int, args: dict, app: str = "") -> None:
+    """Z01 narrated takeover: each Watch step is written to the bus before it runs, so the Orb shows it."""
+    line = _step_line(n, args, app)
+
+    def put(bus: dict) -> dict:
+        watch = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}
+        steps = [x for x in (watch.get("steps") or []) if isinstance(x, str)][-9:] if n > 1 else []
+        watch["narration"] = line
+        watch["steps"] = steps + [line]
+        bus["watch"] = watch
+        return bus
+
+    try:
+        act_if_current(hive, gen, put)
+    except Exception:
+        pass
+
+
+def handback(hive: Path, gen: int | None = None) -> dict:
+    """Disarm Watch (even a held one) and say where it stopped. The new turn already stops the old loop."""
+    watch = _watch_bus(hive)
+    last = str(watch.get("narration") or "").strip()
+    if SENSES is not None and hasattr(SENSES, "set_watch_arm"):
+        try:
+            SENSES.set_watch_arm(False, hive=hive, gen=gen)
+        except Exception:
+            pass
+
+    def note(bus: dict) -> dict:
+        w = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}
+        w["armed"] = False
+        w.pop("pending", None)
+        w["narration"] = "Handed back."
+        bus["watch"] = w
+        return bus
+
+    try:
+        act_if_current(hive, gen, note)
+    except Exception:
+        pass
+    where = f" I stopped after {last[0].lower() + last[1:]}" if last.startswith("Step") else " Nothing was mid-step."
+    return {"ok": True, "tool": "handback", "spoken": "The wheel is yours." + where + " I won't click or type until you ask again.",
+            "wires": ["watch"], "cites": [], "sent": False, "task_verified": True, "outcome": TOOL_LOOP}
+
+
 def _watch_stopped(cycles: int = 0) -> dict:
     return {
         "ok": True,
@@ -5869,6 +5939,7 @@ def run_watch_loop(
                     "wires": ["watch"], "cycles": idx + 1, "reason": "unsupported_watch_tool"}
         if act_if_current(hive, token or None, lambda bus: bus) is None:
             return _watch_stopped(idx)
+        _narrate_step(hive, token or None, idx + 1, args, work_app)
         ran = FRAME.commit_watch_stroke(
             hive,
             token or None,
@@ -5948,7 +6019,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
