@@ -60,7 +60,34 @@ def write_back(hand: str, ask: str, got: dict) -> bool:
                 dest.write_text("\n".join(lines) + "\n", encoding="utf-8")
     except OSError:
         return False
+    note_for(row)
     return True
+
+
+VAULT_INBOX = Path.home() / "Documents" / "My_Billion_Dollar_Vault" / "00_Outer_Heaven" / "JARVIS-INBOX"
+TITLE = {"code_run": "Code run", "web_search": "Research", "drafts": "Draft", "workbench": "Build", "mcp_call": "Tool run",
+         "pickup": "Picked up", "multistep": "Task", "skills": "Skill run", "craft": "Made", "desk_dispatch": "Desk handoff"}
+
+
+def card_title(row: dict) -> str:
+    return f"{TITLE.get(row['hand'], row['hand'].replace('_', ' ').title())} \u2014 {row['ask'][:60]}"
+
+
+def note_for(row: dict) -> str:
+    """Demo whIp1SOahOM 20:04: each finished result also lands in the second brain as its own note."""
+    if os.environ.get("PYTEST_CURRENT_TEST") or os.environ.get("JARVIS_RESULTS_LOG") or not VAULT_INBOX.parent.is_dir():
+        return ""
+    try:
+        VAULT_INBOX.mkdir(exist_ok=True)
+        slug = re.sub(r"[^\w -]+", "", row["ask"])[:48].strip() or row["hand"]
+        dest = VAULT_INBOX / f"{row['ts'][:10]} {row['ts'][11:16].replace(':', '')} {row['hand']} - {slug}.md"
+        refs = "".join(f"\n- {r}" for r in row.get("refs") or [])
+        dest.write_text(f"---\ntype: jarvis-result\nhand: {row['hand']}\nts: {row['ts']}\ntags: [jarvis-inbox]\n---\n"
+                        f"# {card_title(row)}\n\n**Asked:** {row['ask']}\n\n{row['result']}\n" + (f"\n**Refs:**{refs}\n" if refs else ""),
+                        encoding="utf-8")
+        return str(dest)
+    except OSError:
+        return ""
 
 
 def recent(limit: int = 6, *, today_only: bool = True) -> list[dict]:

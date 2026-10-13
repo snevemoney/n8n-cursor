@@ -314,6 +314,14 @@
     #reflexcard .chip { border: 1px solid #3a6; border-radius: 8px; text-align: center; font-size: 8px; color: #8fd; }
     #reflexcard .foot { color: #3ddc84; letter-spacing: 0.1em; margin-top: 3px; font-size: 9px; }
     #reflexcard.on { display: block; }
+    #inboxcard {
+      display: none; position: fixed; z-index: 42; right: 6px; left: 6px; bottom: 96px; pointer-events: auto;
+      font: 10px/1.4 -apple-system, system-ui, sans-serif; color: #dde; background: rgba(10, 14, 22, 0.94);
+      border: 1px solid rgba(120, 160, 255, 0.35); border-radius: 8px; padding: 6px 8px; max-height: 40vh; overflow: auto;
+    }
+    #inboxcard.on { display: block; }
+    #inboxcard .h { font: 9px "Share Tech Mono", monospace; color: #8ab; letter-spacing: 0.12em; margin-bottom: 3px; }
+    #inboxcard .t { font-weight: 700; color: #fff; } #inboxcard button { margin-top: 4px; font-size: 9px; }
     html.widget #focusline {
       top: auto; left: 50%; right: auto; bottom: 70px;
       transform: translateX(-50%); z-index: 40; text-align: center;
@@ -384,6 +392,7 @@
   </div>
   <div id="focusline" role="status"></div>
   <div id="reflexcard" role="status" aria-label="reflex decisions"></div>
+  <div id="inboxcard" role="status" aria-label="jarvis inbox"></div>
   <div class="hud tr">
     <div>
       <div class="phase" id="phase">IDLE</div>
@@ -1744,6 +1753,24 @@
       }
       if (reflexHideAt && Date.now() > reflexHideAt) { el.classList.remove("on"); reflexHideAt = 0; }
     }
+    let lastInboxGen = null;
+    function paintInbox(bus) {
+      const el = $("inboxcard");
+      if (!el || el === $("spoken")) return;
+      const ib = bus && bus.inbox;
+      const gen = ib ? Number(ib.gen || 0) : 0;
+      if (lastInboxGen === null) { lastInboxGen = gen; return; }
+      if (gen <= lastInboxGen) return;
+      lastInboxGen = gen;
+      const c = (ib.items || [])[ib.items.length - 1];
+      if (!c) return;
+      const esc = (x) => String(x || "").replace(/[&<>]/g, (k) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[k]));
+      el.innerHTML = `<div class="h">JARVIS \u00b7 INBOX</div><div class="t">\u2022 ${esc(c.title)}</div><div>${esc(c.body)}</div>`
+        + `<div class="h" style="margin-top:3px">SAVED TO YOUR VAULT \u00b7 JARVIS-INBOX</div><button type="button">Got it</button>`;
+      el.classList.add("on");
+      const b = el.querySelector("button");
+      if (b) b.onclick = () => el.classList.remove("on");
+    }
     function paintPrebrief(bus) {
       const pb = (bus && bus.prebrief) || null;
       const gen = pb ? Number(pb.gen || 0) : 0;
@@ -1951,6 +1978,7 @@
         paintFocus(bus);
         paintPrebrief(bus);
         paintReflex(bus);
+        paintInbox(bus);
         paintLights({ health, bus, wires });
       } catch (e) {
         $("link").textContent = "NEURAL LINK - LOCAL FACE ONLY";

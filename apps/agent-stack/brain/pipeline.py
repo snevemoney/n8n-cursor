@@ -5154,7 +5154,17 @@ def run_tool(pick: dict, utterance: str, **kw) -> dict:
     got = hooked_result(_run_tool_inner(pick, utterance, **kw))
     try:  # Z11: every finished result is written back to the long-term results ledger
         if got.get("ok"):
-            _results_mem().write_back(str(got.get("tool") or tool), utterance, got)
+            _rm = _results_mem()
+            if _rm.write_back(str(got.get("tool") or tool), utterance, got) and kw.get("hive") is not None:
+                row = (_rm.recent(1, today_only=False) or [{}])[-1]
+                card = {"title": _rm.card_title(row), "body": row.get("result", "")[:220], "ts": row.get("ts")}
+
+                def _inbox(bus: dict) -> dict:  # Z11 demo: a JARVIS INBOX card per finished result, "Got it" clears it
+                    ib = bus.get("inbox") if isinstance(bus.get("inbox"), dict) else {}
+                    items = [c for c in (ib.get("items") or []) if isinstance(c, dict)][-4:] + [card]
+                    bus["inbox"] = {"gen": int(ib.get("gen") or 0) + 1, "items": items}
+                    return bus
+                mutate_bus(Path(kw["hive"]), _inbox)
     except Exception:  # noqa: BLE001
         pass
     return got
