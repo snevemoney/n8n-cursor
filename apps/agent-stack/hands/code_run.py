@@ -1,12 +1,14 @@
 """code_run (FINISH-LIST rank 11): run a small Python snippet + its test in a throwaway sandbox.
 
-macOS sandbox-exec profile: no network, writes only inside a fresh temp dir. 10 s wall cap.
-Isolated interpreter (-I), minimal env (no keys). Returns pass/fail + capped stdout/stderr.
+macOS sandbox-exec profile: no network, no reads of $HOME (or any /Users, /Volumes) except the fresh scratch
+dir, writes only inside that scratch dir. No sandbox-exec -> refused, never run bare. 10 s wall cap; on
+timeout the whole process group is killed. System interpreter (-I, never the venv under $HOME), minimal env.
 """
 from __future__ import annotations
 
 import os
 import re
+import signal
 import shutil
 import subprocess
 import sys
@@ -19,11 +21,30 @@ OUT_CAP = 4000
 SANDBOX = shutil.which("sandbox-exec")
 
 
+def _interpreter() -> str:
+    # The sandbox denies $HOME, so the venv python under it cannot even start. Use a system interpreter.
+    home = os.path.realpath(os.path.expanduser("~"))
+    for cand in (os.environ.get("JARVIS_CODE_RUN_PYTHON") or "", "/usr/bin/python3", "/opt/homebrew/bin/python3",
+                 "/usr/local/bin/python3", sys.executable):
+        if cand and os.path.exists(cand) and not os.path.realpath(cand).startswith(home + os.sep):
+            return cand
+    return ""
+
+
+def _q(path: str) -> str:
+    return path.replace("\\", "\\\\").replace('"', '\\"')
+
+
 def _profile(tmp: str) -> str:
+    home = os.path.realpath(os.path.expanduser("~"))
+    deny_read = "".join(f'(subpath "{_q(p)}")' for p in sorted({home, "/Users", "/Volumes"}))
+    scratch = f'(subpath "{_q(tmp)}") (subpath "/private{_q(tmp)}")'
     return (
         "(version 1)(allow default)(deny network*)"
+        f"(deny file-read* {deny_read})"
+        f"(allow file-read* {scratch})"
         "(deny file-write*)"
-        f'(allow file-write* (subpath "{tmp}") (subpath "/private{tmp}") (literal "/dev/null") (literal "/dev/tty"))'
+        f'(allow file-write* {scratch} (literal "/dev/null") (literal "/dev/tty"))'
     )
 
 
@@ -39,19 +60,29 @@ def run(args: dict | None = None) -> dict:
     if not code.strip():
         return {"ok": True, "ran": False, "passed": False, "timed_out": False, "stdout": "", "stderr": "",
                 "spoken": "I can run Python in a sandbox, but this ask has no code in it. Paste the code (and a test) and I'll run it."}
+    py = _interpreter()
+    if not SANDBOX or not py:
+        why = "sandbox-exec is missing" if not SANDBOX else "no system Python outside your home folder"
+        return {"ok": False, "ran": False, "passed": False, "timed_out": False, "stdout": "", "stderr": "",
+                "sandboxed": False, "spoken": f"I won't run code here: {why}, so I can't sandbox it. Nothing ran."}
     tmp = os.path.realpath(tempfile.mkdtemp(prefix="jarvis-code-"))
     try:
         (Path(tmp) / "main.py").write_text(code + ("\n\n" + test if test else "") + "\n", encoding="utf-8")
-        cmd = [sys.executable, "-I", "main.py"]
-        if SANDBOX:
-            cmd = [SANDBOX, "-p", _profile(tmp)] + cmd
+        cmd = [SANDBOX, "-p", _profile(tmp), py, "-I", "main.py"]
         env = {"PATH": "/usr/bin:/bin", "HOME": tmp, "TMPDIR": tmp, "PYTHONDONTWRITEBYTECODE": "1"}
         t0 = time.monotonic()
+        proc = subprocess.Popen(cmd, cwd=tmp, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                text=True, start_new_session=True)
         try:
-            r = subprocess.run(cmd, cwd=tmp, env=env, capture_output=True, text=True, timeout=TIME_CAP)
-            rc, out, err, timed = r.returncode, r.stdout, r.stderr, False
-        except subprocess.TimeoutExpired as exc:
-            rc, out, err, timed = -9, (exc.stdout or b"").decode("utf-8", "replace") if isinstance(exc.stdout, bytes) else (exc.stdout or ""), "", True
+            out, err = proc.communicate(timeout=TIME_CAP)
+            rc, timed = proc.returncode, False
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)  # the whole group: a forked child must not outlive the cap
+            except ProcessLookupError:
+                pass
+            out, err = proc.communicate()
+            rc, timed, err = -9, True, ""
         ms = int((time.monotonic() - t0) * 1000)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
@@ -64,7 +95,7 @@ def run(args: dict | None = None) -> dict:
         last = (err.strip().splitlines() or ["no error text"])[-1][:200]
         sp = f"It ran in the sandbox and failed: {last}"
     return {"ok": True, "ran": True, "passed": passed, "timed_out": timed, "rc": rc, "ms": ms,
-            "stdout": _cap(out), "stderr": _cap(err), "sandboxed": bool(SANDBOX), "spoken": sp}
+            "stdout": _cap(out), "stderr": _cap(err), "sandboxed": True, "spoken": sp}
 
 
 _FENCE = re.compile(r"```(?:python|py)?\s*\n(.*?)```", re.S | re.I)

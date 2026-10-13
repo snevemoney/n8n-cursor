@@ -888,6 +888,76 @@ ACK_LINE = "On it."
 ACK_SKIP = frozenset({"say"})
 
 
+
+# Confirm-before-act (verify round): screen_see sends the screen off the Mac, desk_dispatch acts as a send, and a
+# model-chosen code_run runs code Evens never typed. Each arms a one-shot pending row on the hive bus; only a short
+# explicit "yes/confirm" on the very next turn runs it. Anything else drops it.
+CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run")
+CONFIRM_TTL_SEC = 120
+CONFIRM_YES_RE = re.compile(
+    r"^\s*(?:yes|yep|yeah|confirm(?:ed)?|go\s+ahead|do\s+it|send\s+it|ok(?:ay)?)\b(?:[\s,]*(?:please|jarvis|sir|do\s+it|go\s+ahead))*[\s.!]*$",
+    re.I,
+)
+CONFIRM_LINES = {
+    "screen_see": "That would send a screenshot of your whole screen to the vision model, off this Mac. Say \"confirm\" to go ahead; I delete the screenshot afterwards.",
+    "desk_dispatch": "That would put a job card for the {desk} desk on the hive bus, which acts as a send. Say \"confirm\" to send it.",
+    "code_run": "I picked code to run that you didn't type. Say \"confirm\" and I'll run it in the sandbox; anything else drops it.",
+}
+
+
+def _confirm_path(hive: Path) -> Path:
+    return Path(hive) / "bus" / "pending_confirm.json"
+
+
+def confirm_arm(hive: Path, tool: str, args: dict, utterance: str) -> None:
+    path = _confirm_path(hive)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps({"tool": tool, "args": args, "utterance": utterance, "at": time.time()}), encoding="utf-8")
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, path)
+
+
+def confirm_take(hive: Path | None, utterance: str) -> dict | None:
+    """One-shot: returns the pending pick (marked confirmed) on an explicit yes; any turn clears the row."""
+    if hive is None:
+        return None
+    path = _confirm_path(hive)
+    try:
+        row = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    try:
+        path.unlink()
+    except OSError:
+        pass
+    if not isinstance(row, dict) or row.get("tool") not in CONFIRM_TOOLS:
+        return None
+    if time.time() - float(row.get("at") or 0) > CONFIRM_TTL_SEC or not CONFIRM_YES_RE.match(utterance or ""):
+        return None
+    args = dict(row.get("args") or {}) if isinstance(row.get("args"), dict) else {}
+    args["_confirmed"] = True
+    return {"tool": row["tool"], "args": args, "speak": "", "utterance": str(row.get("utterance") or "")}
+
+
+def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
+    """The effective args to arm, or None when the call may run now."""
+    if tool not in CONFIRM_TOOLS or args.get("_confirmed"):
+        return None
+    if tool == "code_run":
+        hd = _code_run_hand()
+        typed = hd.args_from_utterance(utterance).get("code")
+        eff = dict(args) if args.get("code") else hd.args_from_utterance(utterance)
+        if not str(eff.get("code") or "").strip():
+            return None  # nothing to run: the hand says so, no confirm needed
+        if typed and str(eff.get("code")).strip() == typed.strip():
+            return None  # Evens typed this exact code: his ask is the confirmation
+        return eff
+    if tool == "desk_dispatch":
+        return dict(args) if args else _desk_dispatch_hand().args_from_utterance(utterance)
+    return {}
+
+
 def model_free_route(spoken_in: str) -> dict | None:
     """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
     if wants_memory(spoken_in):
@@ -4904,6 +4974,16 @@ def _run_tool_inner(
     speak = str(pick.get("speak") or "")
     if tool == "safari_see" and str(args.get("act") or "") in {"grab", "screenshot", "share"} and ROUTE_SCREEN_RE.search(utterance or ""):
         tool = "screen_see"  # rank 16: the model's tab grab for a my-screen ask becomes the whole screen
+    if tool in CONFIRM_TOOLS and not is_hard_step(utterance):
+        arm = _needs_confirm(tool, args, utterance)
+        if arm is not None:
+            confirm_arm(hive, tool, arm, utterance)
+            line = CONFIRM_LINES[tool].format(desk=str(arm.get("desk") or "named").capitalize())
+            return {"ok": True, "tool": tool, "spoken": line, "wires": [tool], "cites": [], "sent": False,
+                    "task_verified": False, "awaiting_confirm": True, f"{tool}_meta": {"ok": True, "awaiting_confirm": True}}
+        if args.get("_confirmed"):
+            args = {k: v for k, v in args.items() if k != "_confirmed"}
+            utterance = str(pick.get("utterance") or utterance)
     # A model-picked hand is not authority. Safari runs only on an explicit
     # look. The proposal script runs only on a real send/pay/deploy/book/publish.
     if is_hard_step(utterance):
@@ -6272,7 +6352,7 @@ def apply_pipeline_iter(
     if token and turn_cancelled(hive, token):
         return
     # Loop on_it: decide the model-free route now so the very first chunk can be the ack line.
-    early = model_free_route(spoken_in)
+    early = confirm_take(hive, spoken_in) or model_free_route(spoken_in)
     ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""
     yield _pipeline_event(
         ok=True,

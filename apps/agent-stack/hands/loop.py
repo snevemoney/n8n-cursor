@@ -17,7 +17,29 @@ from pathlib import Path
 DAILY_CAP = 6
 MIN_EVERY = 5
 DEFAULT_MAX_RUNS = 36
-ACT_RE = re.compile(r"\b(send|email|text|pay|delete|remove|rm|deploy|post|tweet|publish|write|edit|merge|push|buy|book|book|order|install|kill|restart)\b", re.I)
+MAX_RUNS_CAP = 96
+MAX_EVERY = 24 * 60
+# Allowlist, not just a denylist: a loop must open with a read verb and name a known read-only subject.
+ALLOW_RE = re.compile(
+    r"^(?:checks?|watch(?:es)?|monitors?|reports?|looks?\s+at|tells?\s+me)\s+(?:on\s+|the\s+|my\s+|if\s+|whether\s+)*"
+    r"(?:free\s+)?(?:disk\s+space|disk|storage|memory|ram|cpu|load|battery|uptime|healthz?|"
+    r"(?:the\s+)?(?:face|jarvis|service|server|site|vps|ci|build|tests?|pr\s*#?\d+|pull\s+request\s*#?\d+|port\s+\d+)"
+    r"(?:\s+(?:status|health|is\s+up|is\s+down|passing|green))?)\b[\w\s,.%#-]{0,120}$",
+    re.I,
+)
+
+
+def _int(value, default: int, lo: int, hi: int) -> int:
+    try:
+        n = int(float(str(value).strip())) if value not in (None, "") else default
+    except (TypeError, ValueError, OverflowError):
+        n = default
+    return max(lo, min(hi, n))
+
+
+def _norm(text: str) -> str:
+    return " ".join(re.sub(r"[^\w\s-]", " ", str(text or "").lower()).split())
+ACT_RE = re.compile(r"\b(send|email|text|pay|delete|remove|rm|deploy|post|tweet|publish|write|edit|merge|push|buy|book|book|order|install|kill|restart|open|run|move|copy|upload|download|reply|submit|sign|transfer|commit|reboot|shutdown)(?:s|es|ed|ing)?\b", re.I)
 
 
 def _path() -> Path:
@@ -50,8 +72,10 @@ def run(args: dict | None = None) -> dict:
         sp = (f"{len(active)} active loop{'s' if len(active) != 1 else ''}: " + "; ".join(f"{r['what']} every {r['every_min']} min" for r in active[:6])) if active else "No active loops."
         return {"ok": True, "op": op, "loops": active, "spoken": sp}
     if op == "cancel":
-        key = str(args.get("id") or "").strip().lower()
-        hit = [r for r in rows if r.get("status") == "active" and key and (r["id"] == key or key in r["what"].lower())]
+        key = _norm(args.get("id"))
+        key = re.sub(r"^(?:loop\s+)?(?:that\s+)?", "", key)
+        # Exact only: the loop id, or the loop's whole "what". A substring like "disk" cancels nothing.
+        hit = [r for r in rows if r.get("status") == "active" and key and (str(r.get("id")) == key or _norm(r.get("what")) == key)]
         if not hit:
             return {"ok": False, "op": op, "spoken": "I couldn't find an active loop like that. Nothing changed."}
         for r in hit[:1]:
@@ -62,16 +86,17 @@ def run(args: dict | None = None) -> dict:
         what = " ".join(str(args.get("what") or "").split())[:200]
         if not what:
             return {"ok": False, "op": op, "spoken": "Tell me what the loop should check."}
-        if ACT_RE.search(what):
-            return {"ok": False, "op": op, "spoken": "Loops can only check things (read-only). I won't loop an action like that."}
+        if ACT_RE.search(what) or not ALLOW_RE.match(what) or re.search(r"\bthen\b|;|&&", what, re.I):
+            return {"ok": False, "op": op, "spoken": "Loops can only check things (read-only), like disk space, battery, "
+                    "a service's health or a PR's CI. I won't loop that."}
         today = datetime.now().date().isoformat()
         if sum(1 for r in rows if str(r.get("created", "")).startswith(today)) >= DAILY_CAP:
             return {"ok": False, "op": op, "spoken": f"That would pass today's cap of {DAILY_CAP} loops. Cancel one or wait until tomorrow."}
-        every = max(MIN_EVERY, int(args.get("every_min") or 15))
+        every = _int(args.get("every_min"), 15, MIN_EVERY, MAX_EVERY)
         now = datetime.now()
         loop = {"id": uuid.uuid4().hex[:8], "what": what, "every_min": every, "read_only": True,
                 "stop_when": str(args.get("stop_when") or "Evens cancels it, max_runs reached, or it expires"),
-                "max_runs": int(args.get("max_runs") or DEFAULT_MAX_RUNS),
+                "max_runs": _int(args.get("max_runs"), DEFAULT_MAX_RUNS, 1, MAX_RUNS_CAP),
                 "expires": (now + timedelta(hours=24)).isoformat(timespec="seconds"),
                 "created": now.isoformat(timespec="seconds"), "runs": 0, "status": "active"}
         rows.append(loop); _save(rows)
@@ -91,9 +116,9 @@ def args_from_utterance(u: str) -> dict:
         return {"op": "cancel", "id": m.group(1)}
     m = _START.search(s)
     if m:
-        every = int(m.group(2) or 15)
+        every = _int(m.group(2), 15, 1, MAX_EVERY)
         if m.group(3) and m.group(3).lower().startswith("h"):
-            every *= 60
+            every = min(MAX_EVERY, every * 60)
         return {"op": "start", "what": m.group(1), "every_min": every}
     return {"op": "list"}
 

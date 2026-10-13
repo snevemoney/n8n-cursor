@@ -2,6 +2,7 @@
 
 Grab: hands/see.grab_screen(hive) with no bounds (full desktop). Describe: an injected vision_fn
 (prompt, images=[data_url]) -> text. No click, no typing: acting stays mac_act, Watch-gated.
+The pipeline asks Evens to confirm before the grab leaves the Mac; the screenshot file is deleted after.
 """
 from __future__ import annotations
 
@@ -45,7 +46,16 @@ def run(args: dict | None = None, *, hive: Path | None = None, grab_fn=None, vis
     got = grab(Path(hive), None) if grab_fn is None else grab_fn(Path(hive), bounds=None)
     if not got or not got.get("ok"):
         return {**base, "ok": False, "spoken": str((got or {}).get("spoken") or "I couldn't grab the screen. Allow Screen Recording for Terminal.")}
-    url = _data_url(Path(str(got.get("path") or "")))
+    shot = Path(str(got.get("path") or ""))
+    try:
+        url = _data_url(shot)
+    finally:
+        # The pixels leave only as this one data URL; the file on disk is deleted right away (verify round).
+        if str(got.get("path") or "") and shot.is_file():
+            try:
+                shot.unlink()
+            except OSError:
+                pass
     if not url:
         return {**base, "ok": False, "spoken": "I grabbed the screen, but the image was too large or empty to describe."}
     text = None
