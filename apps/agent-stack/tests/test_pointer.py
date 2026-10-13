@@ -40,7 +40,20 @@ class PointerTest(unittest.TestCase):
     def test_not_found_is_honest(self):
         got = PT.run("where do I click to zzz", locate_fn=lambda k: {"found": False, "why": "no on-screen match"},
                      draw_fn=lambda *a: self.fail("no draw"), hover_fn=lambda *a: self.fail("no hover"))
-        self.assertFalse(got["found"]); self.assertIn("can't find", got["spoken"])
+        self.assertFalse(got["found"]); self.assertIn("couldn't find", got["spoken"])
+
+
+    def test_vision_box_maps_to_cursor_display(self):  # r3: icon "+" on the second display, global points
+        disp = {"index": 2, "x": 1920.0, "y": 0.0, "w": 1512.0, "h": 982.0}
+        got = PT.locate_vision("create a new Instagram reel", disp=disp, call_fn=lambda u, p: '{"found": true, "box_2d": [600, 10, 640, 30], '
+                               '"label": "Create button", "where": "left sidebar", "app_visible": true, "confidence": 0.9}')
+        self.assertTrue(got["found"]); self.assertAlmostEqual(got["x"], 1920 + 0.02 * 1512); self.assertAlmostEqual(got["y"], 0.62 * 982)
+        self.assertEqual(got["label"], "Create button")
+
+    def test_vision_not_visible_never_points(self):
+        got = PT.locate_vision("create a new Instagram reel", disp={"index": 1, "x": 0, "y": 0, "w": 100, "h": 100},
+                               call_fn=lambda u, p: '{"found": true, "box_2d": [1,1,2,2], "label": "October calendar", "app_visible": false, "confidence": 0.8}')
+        self.assertFalse(got["found"])
 
 
 if __name__ == "__main__":
