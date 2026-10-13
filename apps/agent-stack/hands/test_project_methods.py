@@ -159,3 +159,68 @@ def test_command_review_has_no_execution_side_effect(project):
     result = pm.run(f"project launch review {row['id']} approve revision 0", root=project)
     assert result["ok"] and "Nothing was sent" in result["spoken"]
     assert not pm.queue(project, "launch")[0]["execution_authorized"]
+
+
+def test_complete_capture_review_compile_and_draft_workflow(project):
+    captured = pm.run("project launch capture: brief; meeting:12; Launch date is Friday", root=project)
+    raw = Path(captured["cites"][0])
+    original = raw.read_bytes()
+    ident = raw.stem
+    assert not pm.run(f"project launch compile: brief: {ident}", root=project)["ok"]
+    assessed = pm.run(f"project launch source review {ident} source-backed: meeting:12 confirms the stated date", root=project)
+    assert assessed["ok"] and raw.read_bytes() == original
+    compiled = pm.run(f"project launch compile: brief: {ident}", root=project)
+    assert compiled["ok"] and "meeting:12" in Path(compiled["cites"][0]).read_text()
+    draft = pm.run("project launch draft: Announcement => Friday is proposed", root=project)
+    assert draft["ok"]
+    queue = pm.queue(project, "launch")
+    result = pm.run(f"project launch review {queue[0]['id']} approve revision 0", root=project)
+    assert result["ok"] and not pm.queue(project, "launch")[0]["execution_authorized"]
+
+
+def test_source_review_detects_tampering_and_conflict(project):
+    row = pm.intake(project, "launch", "Original source", "record:1", topic="brief")
+    raw = Path(row["path"])
+    pm.source_review(project, "launch", row["id"], "conflicting", "record:2 disagrees")
+    with pytest.raises(ValueError, match="conflicting"):
+        pm.compile_topic(project, "launch", "brief", [row["id"]])
+    data = json.loads(raw.read_text())
+    data["text"] = "Replaced statement"
+    raw.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="contents"):
+        pm.source_review(project, "launch", row["id"], "source-backed", "record:1")
+
+
+def test_graph_refuses_symlink_root(tmp_path):
+    real = tmp_path / "real"
+    real.mkdir()
+    link = tmp_path / "link"
+    link.symlink_to(real, target_is_directory=True)
+    with pytest.raises(ValueError, match="symlinks"):
+        pm.graph(link)
+
+
+def test_stage_board_preserves_history_and_proposes_without_booking(project):
+    first = pm.run("project launch stage video generating revision 0: job:1 started", root=project)
+    assert first["ok"] and "In the kitchen" in first["spoken"]
+    stale = pm.run("project launch stage video complete revision 0: export:1", root=project)
+    assert not stale["ok"]
+    scheduled = pm.run("project launch stage video scheduled revision 1 at 2026-10-15T09:00:00-04:00: export:1 reviewed", root=project)
+    assert scheduled["ok"] and "not booked" in scheduled["spoken"]
+    row = pm.board(project, "launch")[0]
+    assert row["history"][-1]["state"] == "generating" and not row["booked"]
+    assert "Schedule proposed" in pm.run("project launch board", root=project)["spoken"]
+
+
+def test_scheduling_requires_explicit_time_zone(project):
+    out = pm.run("project launch stage video scheduled revision 0 at 2026-10-15T09:00:00: export:1", root=project)
+    assert not out["ok"] and not pm.board(project, "launch")
+
+
+def test_quote_command_changes_with_model_and_does_not_spend(project):
+    one = pm.run("project launch quote: engine-a; 0.10; 3; catalog:1; 0.29", root=project)
+    two = pm.run("project launch quote: engine-b; 0.04; 3; catalog:2; 0.29", root=project)
+    assert one["ok"] and not one["quote"]["within_ceiling"]
+    assert two["ok"] and two["quote"]["within_ceiling"]
+    bad = pm.run("project launch quote: engine-b; nonsense; 3; catalog:2; 0.29", root=project)
+    assert not bad["ok"] and not two["quote"]["executed"]

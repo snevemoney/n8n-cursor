@@ -135,6 +135,23 @@ def checkpoint(root, project, question, answer):
     return row
 
 
+def source_review(root, project, ident, quality, evidence):
+    """Record an explicit source assessment separately from immutable raw input."""
+    p = existing(root, project)
+    if not re.fullmatch(r"[a-f0-9]{64}", ident):
+        raise ValueError("Invalid source ID")
+    if quality not in {"source-backed", "conflicting"}:
+        raise ValueError("Review must identify support or conflict")
+    raw = child(p, "Inputs", ident + ".json")
+    row = json.loads(raw.read_text())
+    if hashlib.sha256(row["text"].encode()).hexdigest() != ident:
+        raise ValueError("Source contents no longer match their captured ID")
+    assessment = {"id": ident, "quality": quality, "evidence": clean_text(evidence),
+                  "at": stamp(), "raw_sha256": hashlib.sha256(raw.read_bytes()).hexdigest()}
+    atomic_json(child(p, "Process", "source-review-" + ident + ".json"), assessment)
+    return assessment
+
+
 def compile_topic(root, project, topic, ids):
     """Compile only supplied source-backed inputs; evidence is quoted, never promoted."""
     p = existing(root, project)
@@ -147,7 +164,16 @@ def compile_topic(root, project, topic, ids):
             raise ValueError("Invalid source ID")
         f = child(p, "Inputs", ident + ".json")
         row = json.loads(f.read_text())
-        if row["quality"] != "source-backed":
+        if hashlib.sha256(row["text"].encode()).hexdigest() != ident:
+            raise ValueError("Source contents no longer match their captured ID")
+        quality = row["quality"]
+        assessment_file = child(p, "Process", "source-review-" + ident + ".json")
+        if assessment_file.exists():
+            assessment = json.loads(assessment_file.read_text())
+            if assessment["raw_sha256"] != hashlib.sha256(f.read_bytes()).hexdigest():
+                raise ValueError("Source changed since its review")
+            quality = assessment["quality"]
+        if quality != "source-backed":
             raise ValueError("Unverified or conflicting sources cannot be compiled as facts")
         if row["topic"] != topic:
             raise ValueError("Source topic does not match")
@@ -213,7 +239,7 @@ def queue(root, project):
 
 def graph(root):
     """Read-only markdown link graph: no CLI install, no vault modification."""
-    root = Path(root)
+    root = child(root)
     files = [f for f in sorted(root.rglob("*.md")) if not f.is_symlink()
              and not any(part.startswith(".") for part in f.relative_to(root).parts)
              and f.stat().st_size <= MAX_TEXT][:1000]
@@ -247,6 +273,48 @@ def graph(root):
             "dead_ends": [n for n in edges if not edges[n]], "capped": len(files) == 1000}
 
 
+STAGES = {"planned": "Planned", "generating": "In the kitchen", "review": "Ready for review",
+          "scheduled": "Schedule proposed", "complete": "Complete"}
+
+
+def stage(root, project, ident, state, *, evidence, revision, when=None):
+    """Z102 local stage board. A proposed date is never a Calendar booking."""
+    import fcntl
+    p = existing(root, project)
+    ident = slug(ident)
+    if state not in STAGES:
+        raise ValueError("Choose planned, generating, review, scheduled or complete")
+    evidence = clean_text(evidence)
+    if state == "scheduled":
+        try:
+            date = datetime.fromisoformat(when or "")
+        except ValueError:
+            raise ValueError("A proposed schedule needs an ISO date with a time zone") from None
+        if date.tzinfo is None:
+            raise ValueError("A proposed schedule needs a time zone")
+        when = date.isoformat()
+    elif when:
+        raise ValueError("Dates belong to the scheduled stage")
+    path = child(p, "Process", "stage-" + ident + ".json")
+    with child(p, "Process", "stage-" + ident + ".lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        old = json.loads(path.read_text()) if path.exists() else {"id": ident, "revision": 0, "history": []}
+        if old["revision"] != revision:
+            raise ValueError("Stage changed; read the board before updating it")
+        row = {"id": ident, "state": state, "label": STAGES[state], "at": stamp(),
+               "evidence": evidence, "proposed_at": when, "booked": False,
+               "revision": revision + 1, "history": old["history"] +
+               [{k: v for k, v in old.items() if k != "history"}]}
+        atomic_json(path, row)
+    return row
+
+
+def board(root, project):
+    p = existing(root, project)
+    return [json.loads(child(p, "Process", f.name).read_text())
+            for f in sorted(child(p, "Process").glob("stage-*.json"))]
+
+
 def quote(unit_price, count, *, model, source, ceiling):
     from decimal import Decimal, InvalidOperation
     if not isinstance(count, int) or isinstance(count, bool) or count < 1:
@@ -276,7 +344,7 @@ def anchored_audit(evidence):
     return {"at": stamp(), "criteria": out, "next_one": next_one, "verified": False}
 
 
-COMMAND = re.compile(r"^(?:hey\s+)?(?:jarvis[, .]+)?project\s+([a-z0-9-]+)\s+(create|context|review queue|review|capture|compile|checkpoint)\b(?:\s*:\s*|\s+)?(.*)$", re.I | re.S)
+COMMAND = re.compile(r"^(?:hey\s+)?(?:jarvis[, .]+)?project\s+([a-z0-9-]+)\s+(create|context|draft|board|stage|quote|review queue|review|source review|capture|compile|checkpoint)\b(?:\s*:\s*|\s+)?(.*)$", re.I | re.S)
 
 
 def wants(text):
@@ -318,6 +386,41 @@ def run(text, *, root):
                 latest = max(checkpoints, key=lambda r: r["at"])
                 out["spoken"] += f" Latest saved answer: {latest['answer']}."
             out["cites"] = [str(child(p, "PROJECT.md"))]
+        elif action == "board":
+            items = board(root, name)
+            out["spoken"] = "No stage items." if not items else "; ".join(
+                f"{r['id']}: {r['label']} (revision {r['revision']})" +
+                (f", proposed for {r['proposed_at']}; not booked" if r["proposed_at"] else "") for r in items)
+        elif action == "stage":
+            m = re.fullmatch(r"([a-z0-9-]+)\s+(planned|generating|review|scheduled|complete)\s+revision\s+(\d+)(?:\s+at\s+(\S+))?\s*:\s*(.+)", body, re.I | re.S)
+            if not m:
+                raise ValueError("Name the item, stage, revision and evidence; scheduling also needs a date")
+            ident, state, revision, when, evidence = m.groups()
+            row = stage(root, name, ident, state.lower(), evidence=evidence, revision=int(revision), when=when)
+            out["spoken"] = f"{row['id']}: {row['label']}. Revision {row['revision']}."
+            if row["proposed_at"]:
+                out["spoken"] += f" Proposed for {row['proposed_at']}; not booked."
+            out["cites"] = [str(child(root, name, "Process", "stage-" + row["id"] + ".json"))]
+        elif action == "quote":
+            existing(root, name)
+            parts = [s.strip() for s in body.split(";")]
+            if len(parts) != 5:
+                raise ValueError("Give model, unit price, count, price source and ceiling, separated by semicolons")
+            model, price, count, source, ceiling = parts
+            try:
+                result = quote(price, int(count), model=model, source=source, ceiling=ceiling)
+            except ArithmeticError:
+                raise ValueError("The supplied price or ceiling is not a valid number") from None
+            out["spoken"] = f"{model}: {count} × ${result['unit_price']} = ${result['total']}, using your supplied price from {source}. " + (
+                "Within your stated ceiling." if result["within_ceiling"] else "Over your stated ceiling.") + " Nothing generated or spent."
+            out["quote"] = result
+        elif action == "draft":
+            title, sep, content = body.partition(" => ")
+            if not sep:
+                raise ValueError("Give the draft title and content, separated by =>")
+            row = enqueue(root, name, title, content)
+            out["spoken"] = f"Draft {row['id']} is awaiting review at revision {row['revision']}. Nothing was sent or published."
+            out["cites"] = [str(child(root, name, "Feedback", row['id'] + ".json"))]
         elif action == "review queue":
             items = queue(root, name)
             out["spoken"] = "No review items." if not items else "; ".join(f"{r['id']}: {r['title']} — {r['state']} (revision {r['revision']})" for r in items)
@@ -343,6 +446,13 @@ def run(text, *, root):
             row = intake(root, name, content, source, topic=topic)
             out["spoken"] = f"{'Already captured' if row['duplicate'] else 'Captured'} source {row['id']}. Evidence remains unverified until reviewed."
             out["cites"] = [row["path"]]
+        elif action == "source review":
+            m = re.fullmatch(r"([a-f0-9]{64})\s+(source-backed|conflicting)\s*:\s*(.+)", body, re.I | re.S)
+            if not m:
+                raise ValueError("Name the source ID, support or conflict label and cited evidence")
+            ident, quality, evidence = m.groups()
+            source_review(root, name, ident, quality.lower(), evidence)
+            out["spoken"] = f"Source assessment saved as {quality.lower()}. The captured input is unchanged; this records your assessment, not independent verification."
         elif action == "compile":
             topic, sep, ids = body.partition(":")
             if not sep:
