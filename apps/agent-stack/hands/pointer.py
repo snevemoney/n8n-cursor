@@ -58,6 +58,33 @@ def _bin(name: str) -> Path | None:
     return b if cp.returncode == 0 and b.is_file() else None
 
 
+class _Grab:
+    def __init__(self, rc: int, err: str = "") -> None:
+        self.returncode, self.stderr = rc, err
+
+
+def _grab(shot: str, wall: float = 6.0) -> _Grab:
+    """Local screenshot for on-device OCR. Under launchd, screencapture can write the file and then hang;
+    take the file as soon as it is complete and stop the process."""
+    import time as _t
+    pr = subprocess.Popen(["screencapture", "-x", "-m", "-t", "png", shot], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    end, last = _t.time() + wall, -1
+    while _t.time() < end:
+        if pr.poll() is not None:
+            return _Grab(pr.returncode)
+        size = os.path.getsize(shot) if os.path.exists(shot) else 0
+        if size > 0 and size == last:
+            with open(shot, "rb") as fh:
+                fh.seek(-12, 2)
+                if b"IEND" in fh.read():
+                    pr.kill()
+                    return _Grab(0, "taken before exit")
+        last = size
+        _t.sleep(0.08)
+    pr.kill()
+    return _Grab(-9, "screencapture wall")
+
+
 def locate(kws: list[str]) -> dict:
     loc = _bin("jarvis_locate")
     if loc is None or not kws:
@@ -65,12 +92,15 @@ def locate(kws: list[str]) -> dict:
     fd, shot = tempfile.mkstemp(prefix="jarvis-pt-", suffix=".png")
     os.close(fd)
     try:
-        sc = subprocess.run(["screencapture", "-x", "-m", shot], capture_output=True, text=True, timeout=8)
+        import time as _t
+        t0 = _t.time()
+        sc = _grab(shot)
+        t1 = _t.time()
         cp = subprocess.run([str(loc), ",".join(kws), shot], capture_output=True, text=True, timeout=30)
         try:
             with open(Path.home() / "jarvis-main" / "logs" / "pointer-debug.log", "a") as fh:
                 fh.write(json.dumps({"kws": kws, "sc_rc": sc.returncode, "sc_err": sc.stderr[-200:],
-                                     "shot_bytes": os.path.getsize(shot), "loc_rc": cp.returncode,
+                                     "shot_bytes": os.path.getsize(shot), "t_shot": round(t1 - t0, 2), "t_loc": round(_t.time() - t1, 2), "ts": _t.time(), "loc_rc": cp.returncode,
                                      "out": cp.stdout[-300:], "err": cp.stderr[-300:]}) + "\n")
         except OSError:
             pass
