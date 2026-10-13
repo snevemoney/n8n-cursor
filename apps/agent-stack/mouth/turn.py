@@ -514,7 +514,7 @@ def _apply_turn_iter_inner(
         yield _door_speak(
             hive,
             spoken,
-            "The screen was not shared, sir. Watch is off. Tap Watch on the face to share it."  # Z54 (U-LX 7:57),
+            "The screen was not shared, sir. Watch is off. Tap Watch on the face to share it.",  # Z54 (U-LX 7:57)
             "watch",
             retrieve_roots,
             gen=token,

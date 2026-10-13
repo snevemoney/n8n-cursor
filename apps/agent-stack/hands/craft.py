@@ -326,6 +326,24 @@ def _timed_out(got: dict) -> bool:
     return "timeout" in str(got.get("spoken") or got.get("error") or "").lower()
 
 
+BARE_OPEN_RE = re.compile(r"^\s*(?:please\s+)?(?:open|launch|start|bring\s+up|pull\s+up)\s+(?:the\s+|my\s+)?[\w\s-]{0,24}?craft\b[\s.!?]*$", re.I)
+FILE_NAMED_RE = re.compile(r"[\w~/.-]+\.(?:pdf|docx?|pptx?|xlsx?|png|jpe?g|md|txt|csv)\b", re.I)
+
+
+def _guessed_path(tool: str, params: dict, task: str) -> str:
+    """A doc_open/file path the model made up: not in the ask and not on disk."""
+    if not re.search(r"open|load|read", tool or "", re.I):
+        return ""
+    for key in ("path", "file", "filename", "doc"):
+        val = str((params or {}).get(key) or "").strip()
+        if not val:
+            continue
+        if Path(val).expanduser().name.lower() in (task or "").lower() or Path(val).expanduser().exists():
+            return ""
+        return Path(val).name
+    return ""
+
+
 def run(args: dict, utterance: str, *, model_fn, session_fn=session, budget_sec: float | None = None) -> dict:
     """Observe → act → observe again, at most MAX_STEPS acts and budget_sec. Returns a hand result.
 
@@ -351,6 +369,10 @@ def run(args: dict, utterance: str, *, model_fn, session_fn=session, budget_sec:
             "spoken": f"That ask includes {verb}, and {verb} stays yours. I did not touch {app}. Say the part without it and I will do that.",
             "steps": [],
         }
+    if BARE_OPEN_RE.match(task) and not FILE_NAMED_RE.search(task):
+        # Live 2026-10-13: "open the PDF craft" made the model invent doc_open craft.pdf (ENOENT).
+        # Opening the app is not opening a file: ask which file instead of guessing one.
+        return {"ok": True, "wire": "craft", "spoken": f"{app} is ready. Which file should I open? Say its name or drop it on the Orb.", "steps": []}
     try:
         live = session_fn(app)
     except (CraftError, OSError) as exc:
@@ -407,6 +429,10 @@ def run(args: dict, utterance: str, *, model_fn, session_fn=session, budget_sec:
             params = call.get("args") if isinstance(call.get("args"), dict) else {}
             if name not in allowed:
                 stopped = f"The model picked {name}, which {app} does not offer. I stopped."
+                break
+            guessed = _guessed_path(name, params, task)
+            if guessed:
+                stopped = f"I won't open {guessed}: you didn't name that file and it isn't on disk. Which file do you mean?"
                 break
             refusal = hard_step(app, name, params)
             if refusal:

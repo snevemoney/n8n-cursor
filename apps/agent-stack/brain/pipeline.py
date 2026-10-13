@@ -1012,6 +1012,7 @@ def _simple_step(step: str) -> str | None:
 
 # Live-chat fixes (2026-10-13): short asks the talk model answered with made-up claims or the wrong hand.
 BARE_CONSENT_RE = re.compile(r"^\s*(?:allow\s+it|go\s+for\s+it|go\s+ahead|do\s+it|confirm(?:ed)?)[\s.!]*$", re.I)
+BARE_DECIDE_RE = re.compile(r"^\s*(?:jarvis[\s,]*)?(?:you\s+)?(?:decide|choose|pick(?:\s+one)?|your\s+call)[\s.!?]*$", re.I)
 NO_PENDING_LINE = "Nothing is waiting for your OK right now, so I did nothing. Tell me what you want done."
 STOP_WATCH_RE = re.compile(r"^\s*(?:jarvis[\s,]*)?(?:please\s+)?stop\s+(?:watching|looking\s+at|seeing)\s+(?:my\s+|the\s+)?screen\b", re.I)
 CLICK_ASK_RE = re.compile(r"\b(?:can|could|would|will)\s+you\s+(?:please\s+)?(?:click|tap|press|close)\b|^\s*(?:please\s+)?click\s+(?:on\s+)?(?:the\s+)?x\b", re.I)
@@ -1043,6 +1044,9 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
     u = spoken_in or ""
     if not had_pending and BARE_CONSENT_RE.match(u):
         return {"tool": "say", "args": {}, "speak": NO_PENDING_LINE}
+    if BARE_DECIDE_RE.match(u):
+        # Live: a bare "Decide" got the previous reply repeated. Nothing names the choice, so ask once.
+        return {"tool": "say", "args": {}, "speak": "Decide what? Name the two options and I'll pick one and say why."}
     if STOP_WATCH_RE.search(u):
         return {"tool": "handback", "args": {}, "speak": ""}  # really disarms Watch; no invented deletion
     if COST_FOLLOW_RE.search(u):

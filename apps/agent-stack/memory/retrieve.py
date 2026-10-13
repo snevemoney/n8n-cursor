@@ -187,6 +187,9 @@ STOP = {
     "said",
     "ask",
     "asked",
+    # Request filler ("Jarvis, can you pull up my X"): matching on these returned unrelated notes.
+    "jarvis", "can", "could", "would", "will", "pull", "bring", "show", "find", "open", "get",
+    "up", "let", "see", "look", "sir", "hey",
 }
 TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9'-]{2,}|\d{1,4}", re.I)
 VAULT_SUMMARY_RE = re.compile(

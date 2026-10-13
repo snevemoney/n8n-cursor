@@ -96,3 +96,8 @@ def test_model_invented_file_read_asks_instead_of_guessing(tmp_path):
     got = P._run_tool_inner({"tool": "workspace_read", "args": {"op": "read", "path": "~/.ssh/config"}, "speak": ""},
                             "choose", hive=tmp_path, retrieve_roots=[])
     assert got["tool"] == "say" and "which file" in got["spoken"].lower()
+
+
+def test_bare_decide_asks_for_the_options_instead_of_repeating():
+    got = _pick("you decide")
+    assert got["tool"] == "say" and "options" in got["speak"]
