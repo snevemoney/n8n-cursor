@@ -593,10 +593,12 @@ def _apply_turn_iter_inner(
                 nb = _REFLEX.note_brief(nm)  # dCK 4:38-4:44: "Found it, sir. <title>. Let me pull the actual content for you." same turn
                 _line = (f"Found it, sir: {nm}. Let me pull the actual content for you. {nb['gist']}" if nb.get("ok")
                          else f"Found {nm}, sir, but I can't open it from here.")
+                _why = nb.get("why", "")
             else:
                 _line = f"I found no note about {_fm.group(1)}, sir."
             yield _door_speak(hive, spoken, _line, "vault_find", retrieve_roots, gen=token,
-                              execution={"ok": True, "tool": "vault_find", "spoken": _line, "wires": ["reflex"], "sent": False})
+                              execution={"ok": True, "tool": "vault_find", "spoken": _line, "wires": ["reflex"], "sent": False,
+                                         "why": locals().get("_why", "")})
             return
         if _fp.exists() and re.match(r"^\W*(?:yes|yeah|open it|that one|read it)\W*$", spoken or "", re.I):
             _pend = json.loads(_fp.read_text()); _fp.unlink()
@@ -956,6 +958,32 @@ def _placeholders(text: str, utterance: str) -> str:
     return re.sub(r"\$?\d[\d,.]*%?", sub, text)
 
 
+def _turn_crash_log(utterance: str, exc: BaseException) -> None:
+    import traceback
+    try:
+        p = Path(PIPELINE.ROOT) / "logs" / "turn-errors.jsonl"
+        p.parent.mkdir(exist_ok=True)
+        with p.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"ts": time.time(), "utterance": str(utterance or "")[:120], "error": f"{type(exc).__name__}: {exc}"[:300],
+                                 "trace": "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))[-2500:]}) + "\n")
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _crash_fallback(utterance: str) -> dict | None:
+    if os.environ.get("PYTEST_CURRENT_TEST") and not os.environ.get("JARVIS_TEST_CRASH_FALLBACK"):
+        return None
+    try:
+        got = PIPELINE.online_talk(utterance, "Answer in one to three sentences. No tools, no files, no browser. "
+                                   "If the request needs a tool you don't have, say so plainly.", talk_fn=None, hands=False)
+        line = PIPELINE._speakable_line(PIPELINE._talk_speak(got))
+    except Exception:  # noqa: BLE001
+        return None
+    if not line or line == getattr(PIPELINE, "TALK_DARK", ""):
+        return None
+    return _turn_event(spoken=line, verb="converse", host="pipeline", wires=["converse", "crash_fallback"], spoken_delta=line)
+
+
 def apply_turn_iter(utterance: str, **kw):
     """The turn, then one JSONL log line when it finishes. Logging never breaks a turn."""
     import time as _time
@@ -982,12 +1010,24 @@ def apply_turn_iter(utterance: str, **kw):
                 val = dict(val, spoken=_placeholders(str(val.get("spoken") or ""), utterance))
             yield val
     try:
-        for ev in _inner():
-            if first_ms is None and isinstance(ev, dict) and str(ev.get("spoken_delta") or "").strip():
-                first_ms = int((_time.time() - started) * 1000)
-            if isinstance(ev, dict) and not ev.get("partial"):
-                events.append(ev)
-            yield ev
+        try:
+            for ev in _inner():
+                if first_ms is None and isinstance(ev, dict) and str(ev.get("spoken_delta") or "").strip():
+                    first_ms = int((_time.time() - started) * 1000)
+                if isinstance(ev, dict) and not ev.get("partial"):
+                    events.append(ev)
+                yield ev
+        except Exception as exc:  # noqa: BLE001
+            # A crashed turn used to surface as "The talk wire is dark this turn." Log the real cause, then answer
+            # through the plain talk wire (no tools; online_talk walks the primary + paid fallback models).
+            _turn_crash_log(utterance, exc)
+            if any(str(e.get("spoken") or "").strip() for e in events):
+                raise
+            fb = _crash_fallback(utterance)
+            if not fb:
+                raise
+            events.append(fb)
+            yield fb
     finally:
         try:
             log = _turn_log()

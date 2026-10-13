@@ -193,11 +193,11 @@ def note_brief(name: str, max_chars: int = 320) -> dict:
     """Read the named note on device: title plus its first meaningful lines. No model."""
     path = note_path(name)
     if not path:
-        return {"ok": False}
+        return {"ok": False, "why": f"not in index ({len(_IDX['notes'])} notes, building={_IDX.get('building')})"}
     try:
         text = open(path, encoding="utf-8", errors="replace").read(20000)
-    except OSError:
-        return {"ok": False}
+    except OSError as e:
+        return {"ok": False, "why": f"{type(e).__name__}: {e}"[:200], "path": path}
     body = re.sub(r"^---\n.*?\n---\n", "", text, flags=re.S)
     lines = [re.sub(r"^[#>*\-\s]+", "", l).strip() for l in body.splitlines()]
     lines = [l for l in lines if len(l) > 3 and not l.startswith(("|", "```"))]
