@@ -455,7 +455,8 @@ def _apply_turn_iter_inner(
         _ph0 = PIPELINE._load("agent_stack_phone_sim", PIPELINE.STACK / "hands" / "phone_sim.py")
         if _ph0.CANCEL_RE.search(spoken or "") and _ph0._load().get("state") == "CONFIRM":
             got = _ph0.run(spoken)
-            yield _door_speak(hive, spoken, got["spoken"], "phone_sim", retrieve_roots, gen=token, execution=got)
+            _tok0 = PIPELINE.begin_turn(hive) if hasattr(PIPELINE, "begin_turn") else None
+            yield _door_speak(hive, spoken, got["spoken"], "phone_sim", retrieve_roots, gen=_tok0, execution=got)
             return
     except Exception:  # noqa: BLE001
         pass
