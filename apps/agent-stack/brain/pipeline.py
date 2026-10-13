@@ -921,7 +921,7 @@ ACK_SKIP = frozenset({"say"})
 CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run")
 CONFIRM_TTL_SEC = 120
 CONFIRM_YES_RE = re.compile(
-    r"^\s*(?:yes|yep|yeah|confirm(?:ed)?|go\s+ahead|do\s+it|send\s+it|ok(?:ay)?)\b(?:[\s,]*(?:please|jarvis|sir|do\s+it|go\s+ahead))*[\s.!]*$",
+    r"^\s*(?:yes|yep|yeah|sure|confirm(?:ed)?|go\s+ahead|go\s+for\s+it|allow\s+it|proceed|do\s+it|send\s+it|ok(?:ay)?)\b(?:[\s,]*(?:please|jarvis|sir|do\s+it|go\s+ahead))*[\s.!]*$",
     re.I,
 )
 CONFIRM_LINES = {
@@ -1007,6 +1007,34 @@ def _simple_step(step: str) -> str | None:
     if re.search(r"\bdisk\s+(?:space|usage|free)|free\s+space\b", step, re.I):
         u = shutil.disk_usage(str(Path.home()))
         return f"Disk: {u.free / 1e9:.0f} GB free of {u.total / 1e9:.0f} GB."
+    return None
+
+
+# Live-chat fixes (2026-10-13): short asks the talk model answered with made-up claims or the wrong hand.
+BARE_CONSENT_RE = re.compile(r"^\s*(?:allow\s+it|go\s+for\s+it|go\s+ahead|do\s+it|confirm(?:ed)?)[\s.!]*$", re.I)
+NO_PENDING_LINE = "Nothing is waiting for your OK right now, so I did nothing. Tell me what you want done."
+STOP_WATCH_RE = re.compile(r"^\s*(?:jarvis[\s,]*)?(?:please\s+)?stop\s+(?:watching|looking\s+at|seeing)\s+(?:my\s+|the\s+)?screen\b", re.I)
+CLICK_ASK_RE = re.compile(r"\b(?:can|could|would|will)\s+you\s+(?:please\s+)?(?:click|tap|press|close)\b|^\s*(?:please\s+)?click\s+(?:on\s+)?(?:the\s+)?x\b", re.I)
+COST_FOLLOW_RE = re.compile(r"\bhow\s+much\s+(?:did|does|was)\s+(?:that|this|it)(?:\s+one)?\s+cost\b", re.I)
+RESEARCH_RE = re.compile(r"\b(?:do|make|run)\s+(?:an?\s+)?online\s+research\s+(?:about|on|for)\s+\S|\bresearch\s+online\s+(?:about|on|for)\s+\S", re.I)
+RESEARCH_LEAD_RE = re.compile(r"^.*?\bonline\s+research\s+(?:about|on|for)\s+|^.*?\bresearch\s+online\s+(?:about|on|for)\s+", re.I)
+SCREEN_WORD_RE = re.compile(r"\b(?:screen|display|monitor|see|look|watch|showing|pop-?up|window)\b", re.I)
+
+
+def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
+    """Deterministic honest picks for the asks that went wrong in live chat. None = keep the normal route."""
+    u = spoken_in or ""
+    if not had_pending and BARE_CONSENT_RE.match(u):
+        return {"tool": "say", "args": {}, "speak": NO_PENDING_LINE}
+    if STOP_WATCH_RE.search(u):
+        return {"tool": "handback", "args": {}, "speak": ""}  # really disarms Watch; no invented deletion
+    if COST_FOLLOW_RE.search(u):
+        return {"tool": "cost_card", "args": {}, "speak": ""}
+    if CLICK_ASK_RE.search(u) and not is_hard_step(u):
+        return {"tool": "pointer", "args": {}, "speak": ""}
+    if RESEARCH_RE.search(u):
+        q = RESEARCH_LEAD_RE.sub("", u).strip(" ?.!") or u
+        return {"tool": "web_search", "args": {"query": q}, "speak": ""}
     return None
 
 
@@ -5188,6 +5216,10 @@ def _run_tool_inner(
     speak = str(pick.get("speak") or "")
     if tool == "safari_see" and str(args.get("act") or "") in {"grab", "screenshot", "share"} and ROUTE_SCREEN_RE.search(utterance or ""):
         tool = "screen_see"  # rank 16: the model's tab grab for a my-screen ask becomes the whole screen
+    if tool == "screen_see" and not args.get("_confirmed") and not SCREEN_WORD_RE.search(utterance or ""):
+        # A model pick of screen_see for an ask that never mentions the screen (live chat: "Decide").
+        return {"ok": True, "tool": "say", "spoken": "I won't look at your screen for that. What would you like me to do?",
+                "wires": ["voice"], "cites": [], "sent": False, "task_verified": False, "outcome": TOOL_LOOP}
     if tool in CONFIRM_TOOLS and not is_hard_step(utterance):
         arm = _needs_confirm(tool, args, utterance)
         if arm is not None:
@@ -5437,6 +5469,11 @@ def _run_tool_inner(
     if tool == "workspace_read":
         wr = _workspace_read_hand()
         wargs = dict(args) if args.get("op") else wr.args_from_utterance(utterance)
+        if wargs.get("op") == "ls" and not str(wargs.get("path") or "") and re.search(r"\b(?:pull\s+up|find|show)\s+(?:me\s+)?my\b", utterance or "", re.I):
+            # "pull up my social bios": a named thing, not a folder. Look in his notes instead of refusing.
+            return _run_tool_inner({"tool": "vault_read", "args": {"query": utterance}, "speak": ""}, utterance, hive=hive,
+                                   retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn,
+                                   cursor_ask_fn=cursor_ask_fn, craft_model_fn=craft_model_fn, sent=sent, gen=gen)
         got = wr.run(wargs)
         return {
             "ok": bool(got.get("ok")),
@@ -6721,7 +6758,8 @@ def apply_pipeline_iter(
     if token and turn_cancelled(hive, token):
         return
     # Loop on_it: decide the model-free route now so the very first chunk can be the ack line.
-    early = confirm_take(hive, spoken_in) or model_free_route(spoken_in)
+    had_pending = hive is not None and _confirm_path(hive).exists()
+    early = confirm_take(hive, spoken_in) or live_chat_route(spoken_in, had_pending) or model_free_route(spoken_in)
     ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""
     yield _pipeline_event(
         ok=True,
