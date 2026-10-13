@@ -68,6 +68,18 @@ STATUS_ASK_RE = re.compile(
     r"\b(?:status\s+check|(?:are|is)\s+(?:all\s+)?(?:your|the|my)\s+(?:tools|systems|doors|hands|adapters)\s+(?:ready|up|online|working|ok)|tool\s+readiness|(?:are|is)\s+everything\s+(?:ready|up|working|online))",
     re.I,
 )
+STATUS_ASK_REPLY = (
+    "I have not run a live status check this turn, so I won't claim the tools are ready. "
+    "Say 'run status' and I'll read the real Orb door and hive health."
+)
+
+
+def is_status_ask(prompt: str) -> bool:
+    """Readiness ask with no live check: answer honestly without a model call (live calls hung 20 s, then parroted errors)."""
+    p = (prompt or "").strip()
+    return bool(p) and bool(STATUS_ASK_RE.search(p if len(p) <= 600 else p[-300:]))
+
+
 RULE_ASK_RE = re.compile(
     r"\b(?:who\s+(?:is\s+)?(?:allowed|can|may|gets\s+to)|(?:am\s+I|are\s+(?:you|we))\s+allowed|is\s+it\s+allowed"
     r"|what(?:'s|\s+is|\s+are)\s+the\s+(?:rule|rules|policy|lock)s?\b|\bwho\s+(?:issues|grades|approves|merges))",
@@ -1418,6 +1430,8 @@ def _call_openrouter_inner(
 
     Not ChatGPT, Claude, or Gemini as the product mouth.
     """
+    if not (hands or extra_tools or images) and is_status_ask(prompt):
+        return {"ok": True, "unknown": False, "wire": "local", "engine": "status-ask", "spoken": STATUS_ASK_REPLY, "model": "none"}
     key = openrouter_api_key()
     if not key:
         return {

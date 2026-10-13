@@ -88,6 +88,15 @@ class StatusClaimTests(unittest.TestCase):
             self.assertFalse(online.STATUS_ASK_RE.search(q), q)
         self.assertLessEqual(online.OPENROUTER_STATUS_ASK_TOKENS, 160)
 
+    def test_status_ask_answers_without_model(self):
+        from unittest import mock
+        with mock.patch.object(online, "openrouter_api_key", side_effect=AssertionError("no model call")):
+            got = online._call_openrouter_inner("Status check: are all your tools ready?", hands=False)
+        self.assertTrue(got["ok"])
+        self.assertIn("not run a live status check", got["spoken"])
+        self.assertNotRegex(got["spoken"].lower(), r"returned no text|timeout|operational")
+        self.assertFalse(online.is_status_ask("What model are you running on right now?"))
+
     def test_rule_ask_detected(self):
         for q in ("Who is allowed to issue a PASS?", "Who can merge PRs?", "What are the rules for client sends?"):
             self.assertTrue(online.RULE_ASK_RE.search(q), q)
