@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "rules", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -41,7 +41,9 @@ HARD_STEP_RE = re.compile(
     r"pay (this|that|the|an?|him|her|them|it)\b|"
     r"deploy (this|that|it|to|now|prod)|"
     r"book (a|the|this|me)\b|"
-    r"publish (this|that|the|it|now)"
+    r"publish (this|that|the|it|now)|"
+    r"(?:restart|reboot|shut\s*down|power\s+off|stop)\s+(?:\w+\s+){0,2}?(?:on\s+)?(?:the\s+|my\s+)?(?:vps|server|droplet|instance|box)\b|"
+    r"(?:restart|reboot)\s+(?:nginx|docker|n8n|postgres|redis|caddy|openclaw)\b"
     r")",
     re.I,
 )
@@ -180,7 +182,7 @@ ORB_CAPABILITY_CARD = (
     "(computer use; live click unproven), Eyes stills, file drop (evidence only), "
     "voice mic+TTS, Focus, Cursor ask, Face graph (Orb tape visualizer, not facial recognition). "
     "Hive desks live in Slack, not Face spawn. "
-    "Hard steps stay Evens. Not on this Orb: web search, plugin store, image generation, "
+    "Hard steps stay Evens. Web search is read-only with cited sources. Not on this Orb: plugin store, image generation, "
     "Chrome/browser extension, slash-command palette, phone push, overnight jobs unless "
     "Evens names an interval."
 )
@@ -493,6 +495,7 @@ def _load(name: str, path: Path):
     return mod
 
 
+hooks = _load("agent_stack_hooks", STACK / "brain" / "hooks.py")
 STORE = _load("agent_stack_store", STACK / "memory" / "store.py")
 RETRIEVE = _load("agent_stack_retrieve", STACK / "memory" / "retrieve.py")
 CHATS = _load("agent_stack_chats", STACK / "memory" / "chats.py")
@@ -701,6 +704,469 @@ def local_greeting_reply() -> dict:
         "unknown": True,
         "model_available": False,
     }
+
+
+WORKSPACE_READ_RE = re.compile(
+    r"\b(read|open|show|cat)\b.{0,40}\b[\w.\-/]+\.(?:md|txt|py|json|toml|ya?ml|sh|js|ts|cfg|ini)\b|"
+    r"\b(?:what|which)\s+(?:repo|branch|git\s+branch|commit\s+head)\b|"
+    r"\b(?:what|which)\s+repos\b|\brepos?\b.{0,30}\b(?:installed|locally|on\s+(?:this|my)\s+(?:mac|machine))\b|"
+    r"\b(?:list|show)\b.{0,30}\b(?:files|folder|contents)\b.{0,30}\b(?:downloads|desktop|documents)\b|"
+    r"\bgit\s+status\b|\buncommitted\s+changes\b|\b(?:working\s+)?tree\s+(?:is\s+)?clean\b|"
+    r"\b(?:read|open|show|cat)\b.{0,30}(?:\.env\b|\bid_(?:rsa|dsa|ecdsa|ed25519)\b|\.ssh/|\.grok-private/)",
+    re.I,
+)
+
+
+def _memory_hand():
+    name = "agent_stack_memory"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "remember.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def wants_memory(utterance: str) -> bool:
+    return bool(_memory_hand().INTENT_RE.search(utterance or ""))
+
+
+def wants_workspace_read(utterance: str) -> bool:
+    """Explicit read-only file / folder / git ask. Goes to hands/workspace_read, never a guess."""
+    return bool(WORKSPACE_READ_RE.search(utterance or ""))
+
+
+SKILLS_RE = re.compile(
+    r"\b(?:which|what)\s+skills\b|\b(?:list|show)\b.{0,20}\bskills\b|\b(?:read|open|show)\s+(?:me\s+)?(?:the\s+)?[\w.\-]+\s+skill\b|\b(?:run|show|check)\s+(?:me\s+)?(?:the\s+)?[\w.\-]+\s+workflow\b",
+    re.I,
+)
+
+
+def wants_skills(utterance: str) -> bool:
+    """Explicit ask about the skills Jarvis has or one skill's text. Goes to hands/skills (read-only)."""
+    return bool(SKILLS_RE.search(utterance or ""))
+
+
+MCP_INV_RE = re.compile(
+    r"\b(?:which|what|list|show)\b.{0,25}\bmcp\b|\bmcp\s+(?:servers?|tools?)\b.{0,20}\b(?:have|connected|installed|configured)\b",
+    re.I,
+)
+
+
+def wants_mcp_inventory(utterance: str) -> bool:
+    """Explicit ask about configured MCP servers. Names only (hands/mcp_inventory)."""
+    return bool(MCP_INV_RE.search(utterance or ""))
+
+
+CODE_RUN_RE = re.compile(
+    r"\b(?:write|run)\b.{0,40}\bpython\b.{0,60}\b(?:run|test|tests)\b|\brun\s+this\s+python\b|\brun\s+the\s+tests?\s+for\s+this\s+python\b",
+    re.I,
+)
+
+
+def wants_code_run(utterance: str) -> bool:
+    """Explicit ask for the code_run hand (FINISH-LIST)."""
+    return bool(CODE_RUN_RE.search(utterance or ""))
+
+
+DESK_DISPATCH_RE = re.compile(
+    r"\b(?:ask|dispatch\s+(?:this\s+)?to|hand\s+(?:this\s+)?to)\s+(?:the\s+)?(?:jev|watchdog|forge|librarian|consultant|claude|codex|capex|scout)\b",
+    re.I,
+)
+
+
+def wants_desk_dispatch(utterance: str) -> bool:
+    """Explicit ask for the desk_dispatch hand (FINISH-LIST)."""
+    return bool(DESK_DISPATCH_RE.search(utterance or ""))
+
+
+LOOP_RE = re.compile(
+    r"\b(?:start|set\s+up|create|run)\s+(?:a\s+)?loop\b|\b(?:list|show)\s+(?:my\s+|the\s+)?loops\b|\b(?:cancel|stop|kill)\s+(?:the\s+)?[\w\s-]{0,30}\bloop\b",
+    re.I,
+)
+
+
+def wants_loop(utterance: str) -> bool:
+    """Explicit ask for the loop hand (FINISH-LIST)."""
+    return bool(LOOP_RE.search(utterance or ""))
+
+
+VOICE_ENGINE_RE = re.compile(
+    r"\b(?:what|which)\s+(?:voice|tts|speech)(?:\s+engine)?\b.{0,30}\b(?:using|speaking|is|are|on)\b|\b(?:what|which)\s+(?:tts|speech|voice)\s+engine\b",
+    re.I,
+)
+
+
+def wants_voice_engine(utterance: str) -> bool:
+    """Explicit ask for the voice_engine hand (FINISH-LIST)."""
+    return bool(VOICE_ENGINE_RE.search(utterance or ""))
+
+
+SCREEN_SEE_RE = re.compile(
+    r"\b(?:describe|grab|look\s+at)\s+my\s+screen\b|\bwhat(?:\x27s|s|\s+is)\s+on\s+my\s+screen\b|\bscreenshot\s+of\s+my\s+screen\b",
+    re.I,
+)
+
+
+def wants_screen_see(utterance: str) -> bool:
+    """Explicit ask for the screen_see hand (FINISH-LIST)."""
+    return bool(SCREEN_SEE_RE.search(utterance or ""))
+
+
+PLAN_RE = re.compile(
+    r"\bplan\s+(?:how\s+to|out)\b|\b(?:make|draft|write)\s+(?:me\s+)?a\s+plan\s+(?:for|to)\b",
+    re.I,
+)
+
+
+def wants_plan(utterance: str) -> bool:
+    """Explicit ask for the plan hand (FINISH-LIST)."""
+    return bool(PLAN_RE.search(utterance or ""))
+
+
+CONTEXT_BUDGET_BYTES = int(os.environ.get("JARVIS_CONTEXT_BUDGET_BYTES") or 24000)
+
+
+def fit_budget(text: str, budget: int | None = None) -> str:
+    """Rank 17 context budget: cap the model brief in bytes (keeps the head, marks the cut)."""
+    cap = int(budget or CONTEXT_BUDGET_BYTES)
+    raw = (text or "").encode("utf-8")
+    if len(raw) <= cap:
+        return text
+    mark = "\n[context trimmed to budget]"
+    keep = raw[: max(0, cap - len(mark.encode()))].decode("utf-8", "ignore")
+    return keep + mark
+
+
+MCP_CALL_RE = re.compile(
+    r"\b(?:list|show|what)\b.{0,15}\btools?\s+(?:are\s+)?(?:on|from|of|in)\s+(?:the\s+|your\s+|my\s+)?(?:[\w.\-]+\s+)?(?:mcp\s+)?server\b",
+    re.I,
+)
+
+
+def wants_mcp_call(utterance: str) -> bool:
+    """Explicit ask for the mcp_call hand (FINISH-LIST)."""
+    return bool(MCP_CALL_RE.search(utterance or ""))
+
+
+RULES_RE = re.compile(
+    r"\b(?:what|which)\s+(?:are\s+)?(?:your\s+)?(?:operating\s+|house\s+|own\s+)?rules\s+(?:do\s+you\s+(?:follow|have|obey)|are\s+yours)\b|"
+    r"\b(?:what|which)\s+are\s+your\s+(?:operating\s+|house\s+|own\s+)?rules\b|"
+    r"\b(?:remind\s+me\s+of|list|tell\s+me)\s+your\s+(?:operating\s+|house\s+|own\s+)?rules\b|"
+    r"\bwhat\s+rules\s+do\s+you\s+(?:follow|have|obey)\b",
+    re.I,
+)
+
+
+def wants_rules(utterance: str) -> bool:
+    """Ask about Jarvis's own operating rules (JARVIS.md). Other rule asks (client sends, merge, PASS) are not this."""
+    return bool(RULES_RE.search(utterance or ""))
+
+
+def rules_spoken() -> str:
+    lines = [ln[2:].strip() for ln in jarvis_rules().splitlines() if ln.startswith("- ")]
+    if not lines:
+        return "My rules file (JARVIS.md) is missing, so I can't quote my rules right now."
+    return "From JARVIS.md, my operating rules: " + " ".join(f"{i}. {t}" for i, t in enumerate(lines, 1))
+
+
+def jarvis_rules() -> str:
+    """Short operating rules (JARVIS.md) loaded into the turn prompt. Empty string if the file is missing."""
+    try:
+        return (STACK / "JARVIS.md").read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
+
+
+WEB_SEARCH_RE = re.compile(
+    r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b|\blook\s+(?:it\s+|this\s+|that\s+)?up\s+online\b|"
+    r"\bweb\s+search\b|\bgoogle\s+(?:the|for|it|what|who|how|when|where|a|an)\b",
+    re.I,
+)
+
+
+def wants_web_search(utterance: str) -> bool:
+    """Explicit web search ask. Goes to hands/web_search (read-only, cited), never the browser mission."""
+    return bool(WEB_SEARCH_RE.search(utterance or ""))
+
+
+# --- Fixed phrase routing (frontier loop 4): deterministic picker before any model pick. ---
+ROUTE_HARD_RE = re.compile(
+    r"\b(pay|buy|purchase|order|send|email|e-mail|text|post|publish|deploy|restart|reboot|delete|remove|"
+    r"shut\s*down|kill|install|upgrade|book|sign\s*up|log\s*in|submit|transfer|wire)\b", re.I)
+ROUTE_OPEN_RE = re.compile(
+    r"^\s*(?:please\s+)?(?:open|go\s+to|navigate\s+to|visit)\s+(?:up\s+)?(?:the\s+(?:site|page|website)\s+)?"
+    r"((?:https?://)?(?:[a-z0-9-]+\.)+[a-z]{2,}(?:/\S*)?)\b", re.I)
+ROUTE_VPS_RE = re.compile(
+    r"\b(?:vps|hostinger)\b.{0,25}\b(?:status|up|doing|health|ok)\b|\b(?:status|health)\b.{0,15}\b(?:vps|hostinger)\b|"
+    r"\b(?:is|how\s+is)\s+(?:my\s+|the\s+)?(?:vps|server)\s+(?:up|doing|ok)\b", re.I)
+ROUTE_SAY_RE = re.compile(r"^\s*(?:please\s+)?say\b\s*:?\s*(.+?)\s*$", re.I)
+ROUTE_SCREEN_RE = re.compile(
+    r"\b(?:screenshot|screen\s*grab|screen\s*shot)\b|\b(?:describe|grab|look\s+at)\s+my\s+screen\b|"
+    r"\b(?:what(?:'s|s|\s+is)|what\s+do\s+you\s+see)\s+on\s+my\s+screen\b", re.I)
+ROUTE_SEARCH_LEAD_RE = re.compile(
+    r"^\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?(?:search\s+(?:the\s+)?(?:web|internet|online)|look\s+up\s+online|"
+    r"check\s+online|web\s+search|google)\s*(?:for\s+)?[:,-]?\s*", re.I)
+
+
+ACK_LINE = "On it."
+ACK_SKIP = frozenset({"say"})
+
+
+
+# Confirm-before-act (verify round): screen_see sends the screen off the Mac, desk_dispatch acts as a send, and a
+# model-chosen code_run runs code Evens never typed. Each arms a one-shot pending row on the hive bus; only a short
+# explicit "yes/confirm" on the very next turn runs it. Anything else drops it.
+CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run")
+CONFIRM_TTL_SEC = 120
+CONFIRM_YES_RE = re.compile(
+    r"^\s*(?:yes|yep|yeah|confirm(?:ed)?|go\s+ahead|do\s+it|send\s+it|ok(?:ay)?)\b(?:[\s,]*(?:please|jarvis|sir|do\s+it|go\s+ahead))*[\s.!]*$",
+    re.I,
+)
+CONFIRM_LINES = {
+    "screen_see": "That would send a screenshot of your whole screen to the vision model, off this Mac. Say \"confirm\" to go ahead; I delete the screenshot afterwards.",
+    "desk_dispatch": "That would put a job card for the {desk} desk on the hive bus, which acts as a send. Say \"confirm\" to send it.",
+    "code_run": "I picked code to run that you didn't type. Say \"confirm\" and I'll run it in the sandbox; anything else drops it.",
+}
+
+
+def _confirm_path(hive: Path) -> Path:
+    return Path(hive) / "bus" / "pending_confirm.json"
+
+
+def confirm_arm(hive: Path, tool: str, args: dict, utterance: str) -> None:
+    path = _confirm_path(hive)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps({"tool": tool, "args": args, "utterance": utterance, "at": time.time()}), encoding="utf-8")
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, path)
+
+
+def confirm_take(hive: Path | None, utterance: str) -> dict | None:
+    """One-shot: returns the pending pick (marked confirmed) on an explicit yes; any turn clears the row."""
+    if hive is None:
+        return None
+    path = _confirm_path(hive)
+    try:
+        row = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    try:
+        path.unlink()
+    except OSError:
+        pass
+    if not isinstance(row, dict) or row.get("tool") not in CONFIRM_TOOLS:
+        return None
+    if time.time() - float(row.get("at") or 0) > CONFIRM_TTL_SEC or not CONFIRM_YES_RE.match(utterance or ""):
+        return None
+    args = dict(row.get("args") or {}) if isinstance(row.get("args"), dict) else {}
+    args["_confirmed"] = True
+    return {"tool": row["tool"], "args": args, "speak": "", "utterance": str(row.get("utterance") or "")}
+
+
+def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
+    """The effective args to arm, or None when the call may run now."""
+    if tool not in CONFIRM_TOOLS or args.get("_confirmed"):
+        return None
+    if tool == "code_run":
+        hd = _code_run_hand()
+        typed = hd.args_from_utterance(utterance).get("code")
+        eff = dict(args) if args.get("code") else hd.args_from_utterance(utterance)
+        if not str(eff.get("code") or "").strip():
+            return None  # nothing to run: the hand says so, no confirm needed
+        if typed and str(eff.get("code")).strip() == typed.strip():
+            return None  # Evens typed this exact code: his ask is the confirmation
+        return eff
+    if tool == "desk_dispatch":
+        return dict(args) if args else _desk_dispatch_hand().args_from_utterance(utterance)
+    return {}
+
+
+def model_free_route(spoken_in: str) -> dict | None:
+    """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
+    if wants_memory(spoken_in):
+        return {"tool": "memory", "args": _memory_hand().args_from_utterance(spoken_in), "speak": ""}
+    if wants_continuity_status(spoken_in):
+        return None
+    early = fixed_route(spoken_in)
+    if early is not None and early.get("tool") == "safari_see" and (early.get("args") or {}).get("act") == "grab":
+        # Rank 16: a screen ask is the whole display (screen_see), not the Safari tab.
+        early = {"tool": "screen_see", "args": {}, "speak": ""}
+    if early is None and not is_hard_step(spoken_in):
+        if wants_rules(spoken_in):
+            early = {"tool": "rules", "args": {}, "speak": ""}
+        elif wants_mcp_call(spoken_in):
+            early = {"tool": "mcp_call", "args": {}, "speak": ""}
+        elif wants_plan(spoken_in):
+            early = {"tool": "plan", "args": {}, "speak": ""}
+        elif wants_screen_see(spoken_in):
+            early = {"tool": "screen_see", "args": {}, "speak": ""}
+        elif wants_voice_engine(spoken_in):
+            early = {"tool": "voice_engine", "args": {}, "speak": ""}
+        elif wants_loop(spoken_in):
+            early = {"tool": "loop", "args": {}, "speak": ""}
+        elif wants_desk_dispatch(spoken_in):
+            early = {"tool": "desk_dispatch", "args": {}, "speak": ""}
+        elif wants_code_run(spoken_in):
+            early = {"tool": "code_run", "args": {}, "speak": ""}
+        elif wants_mcp_inventory(spoken_in):
+            early = {"tool": "mcp_inventory", "args": {}, "speak": ""}
+        elif wants_skills(spoken_in):
+            early = {"tool": "skills", "args": {}, "speak": ""}
+        elif wants_workspace_read(spoken_in):
+            early = {"tool": "workspace_read", "args": {}, "speak": ""}
+        elif wants_web_search(spoken_in):
+            early = {"tool": "web_search", "args": {}, "speak": ""}
+    return early
+
+
+def fixed_route(utterance: str) -> dict | None:
+    """Phrase -> hand, no model. None means: keep today's path (model pick)."""
+    u = (utterance or "").strip()
+    if not u or is_hard_step(u) or ROUTE_HARD_RE.search(u):
+        return None
+    m = ROUTE_OPEN_RE.match(u)
+    if m and not re.search(r";|\bclick\b|\bthen\b|\bdownload\b", u, re.I):
+        url = m.group(1).rstrip(".,!?")
+        url = url if url.lower().startswith(("http://", "https://")) else "https://" + url
+        return {"tool": "safari_see", "args": {"act": "open", "url": url}, "speak": ""}
+    if wants_web_search(u):
+        q = ROUTE_SEARCH_LEAD_RE.sub("", u).strip(" ?.!") or u
+        return {"tool": "web_search", "args": {"query": q}, "speak": ""}
+    if ROUTE_VPS_RE.search(u):
+        return {"tool": "status", "args": {"which": "vps"}, "speak": ""}
+    if ROUTE_SCREEN_RE.search(u):
+        return {"tool": "safari_see", "args": {"act": "grab"}, "speak": ""}
+    m = ROUTE_SAY_RE.match(u)
+    if m:
+        said = re.sub(r"\s+out\s+loud\s*[.!]?$", "", m.group(1), flags=re.I).strip().strip('"\u201c\u201d').rstrip(".!").strip()
+        if said and not re.match(r"^(?:about|that|so|what|it|something|the\s+line|again)\b", said, re.I) \
+                and not re.search(r"\b(?:in\s+your\s+own\s+words|back|I\s+just|you\s+just|earlier|again)\b", said, re.I):
+            return {"tool": "say", "args": {}, "speak": said}
+    return None
+
+
+def _code_author_hand():
+    if "hands.code_author" in sys.modules:  # same instance as a package import (tests swap CHAT on it)
+        return sys.modules["hands.code_author"]
+    name = "agent_stack_code_author"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "code_author.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _web_search_hand():
+    name = "agent_stack_web_search"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "web_search.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _mcp_inventory_hand():
+    name = "agent_stack_mcp_inventory"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "mcp_inventory.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _code_run_hand():
+    name = "agent_stack_code_run"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "code_run.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _desk_dispatch_hand():
+    name = "agent_stack_desk_dispatch"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "desk_dispatch.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _loop_hand():
+    name = "agent_stack_loop"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "loop.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _voice_engine_hand():
+    name = "agent_stack_voice_engine"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "voice_engine.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _screen_see_hand():
+    name = "agent_stack_screen_see"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "screen_see.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _plan_hand():
+    name = "agent_stack_plan"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "plan.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _mcp_call_hand():
+    name = "agent_stack_mcp_call"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "mcp_call.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _skills_hand():
+    name = "agent_stack_skills"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "skills.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _workspace_read_hand():
+    name = "agent_stack_workspace_read"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "workspace_read.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
 
 
 def wants_local_read(utterance: str) -> bool:
@@ -2498,9 +2964,9 @@ def assemble_pack(
         lines.append("")
     lines.append(
         "Put the answer in speak after the hand runs. "
-        "Hands: vault_read, safari_see, cursor_ask, craft, status, refuse_hard_step. mac_act only while Watch is armed. "
+        "Hands: vault_read, workspace_read, skills, web_search, safari_see, cursor_ask, craft, status, refuse_hard_step. mac_act only while Watch is armed. "
         "craft drives a Craft app: args {app, task}. "
-        'JSON: {"tool":"converse"|"vault_read"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
+        'JSON: {"tool":"converse"|"vault_read"|"workspace_read"|"memory"|"skills"|"mcp_inventory"|"code_run"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
     )
     return "\n".join(lines).rstrip() + "\n"
 
@@ -2724,10 +3190,11 @@ def pick_prompt(pack_path: Path, utterance: str) -> str:
         "Use that pack, not a truncated prompt. Store is optional context. "
         "Private claims need evidence. General talk may reason without a cite.\n"
         f"Utterance: {(utterance or '').strip()}\n"
+        f"{jarvis_rules()}\n"
         "Answer what he said. Follow-ups use the sitting turns in the pack.\n"
         "Store loads this turn. Last Cursor chat is the last Cursor sitting. Do not keyword-search the vault for chats.\n"
         "JSON preferred, prose speak is also fine:\n"
-        '{"tool":"converse"|"vault_read"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}\n'
+        '{"tool":"converse"|"vault_read"|"workspace_read"|"memory"|"skills"|"mcp_inventory"|"code_run"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}\n'
     )
 
 
@@ -3312,11 +3779,18 @@ def cursor_prompt_payload(utterance: str) -> str:
 
 
 def voice_status_line() -> str:
-    """Mouth/status only. Do not open a new talk essay."""
-    return (
-        "Voice is on this Mac. If you hear nothing, raise system volume "
-        "or tap Stop, then speak again."
-    )
+    """Mouth/status only. Honest: names the engine voice_report picks (voice_engine hand)."""
+    try:
+        got = _voice_engine_hand().run({})
+    except Exception:
+        return "I can't read my voice engine right now, so I'm text only."
+    if got.get("engine") in ("dark", "kokoro-dark-python"):
+        # Honest no-engine line, plus the volume answer the ask wanted: volume can't fix a dark engine (R14).
+        line = str(got.get("spoken") or "I have no voice engine working right now, so I'm text only.")
+        if "volume" not in line.lower():
+            line += " Your volume is not the problem; raising it won't help until a voice engine is running."
+        return line
+    return str(got.get("spoken") or "") + " If you hear nothing, raise system volume or tap Stop, then speak again."
 
 
 def _mouth_evidence(text: str) -> str:
@@ -4499,7 +4973,29 @@ def browser_runtime():
     return sys.modules[name]
 
 
-def run_tool(
+def hooked_result(result):
+    """Every tool result passes the in-process post_tool (redact) and stop_check (evidence) hooks."""
+    return hooks.stop_check(hooks.post_tool(result))
+
+
+def run_tool(pick: dict, utterance: str, **kw) -> dict:
+    """Tool entry point: pre_tool gate, then the hand, then post_tool + stop_check."""
+    tool = str((pick or {}).get("tool") or "")
+    gate = hooks.pre_tool(tool, utterance)
+    if not gate["allow"]:
+        return hooked_result({
+            "ok": True,
+            "tool": "refuse_hard_step",
+            "spoken": PROPOSAL,
+            "wires": ["refuse_hard_step"],
+            "cites": [],
+            "sent": False,
+            "hook": "pre_tool",
+        })
+    return hooked_result(_run_tool_inner(pick, utterance, **kw))
+
+
+def _run_tool_inner(
     pick: dict,
     utterance: str,
     *,
@@ -4515,9 +5011,21 @@ def run_tool(
     tool = str(pick.get("tool") or "")
     args = pick.get("args") if isinstance(pick.get("args"), dict) else {}
     speak = str(pick.get("speak") or "")
+    if tool == "safari_see" and str(args.get("act") or "") in {"grab", "screenshot", "share"} and ROUTE_SCREEN_RE.search(utterance or ""):
+        tool = "screen_see"  # rank 16: the model's tab grab for a my-screen ask becomes the whole screen
+    if tool in CONFIRM_TOOLS and not is_hard_step(utterance):
+        arm = _needs_confirm(tool, args, utterance)
+        if arm is not None:
+            confirm_arm(hive, tool, arm, utterance)
+            line = CONFIRM_LINES[tool].format(desk=str(arm.get("desk") or "named").capitalize())
+            return {"ok": True, "tool": tool, "spoken": line, "wires": [tool], "cites": [], "sent": False,
+                    "task_verified": False, "awaiting_confirm": True, f"{tool}_meta": {"ok": True, "awaiting_confirm": True}}
+        if args.get("_confirmed"):
+            args = {k: v for k, v in args.items() if k != "_confirmed"}
+            utterance = str(pick.get("utterance") or utterance)
     # A model-picked hand is not authority. Safari runs only on an explicit
     # look. The proposal script runs only on a real send/pay/deploy/book/publish.
-    if is_hard_step(utterance) or tool in {"send", "pay", "deploy", "book", "publish"}:
+    if is_hard_step(utterance):
         return {
             "ok": True,
             "tool": "refuse_hard_step",
@@ -4528,7 +5036,7 @@ def run_tool(
         }
     unauthorized = (
         tool == "refuse_hard_step"
-        or (tool == "safari_see" and not wants_safari(utterance))
+        or (tool == "safari_see" and not wants_safari(utterance) and fixed_route(utterance) is None)
         or (tool == "vault_read" and ACTION_STATUS_RE.search(utterance or ""))
     )
     if unauthorized:
@@ -4571,6 +5079,127 @@ def run_tool(
             return {"ok": False, "tool": tool, "spoken": "No browser steering was requested.",
                     "task_verified": False, "wires": [tool], "cites": [], "sent": False}
         return browser_runtime().pipeline_tool(args, utterance, hive)
+    if tool == "say":
+        said = str(pick.get("speak") or "").strip()
+        return {"ok": bool(said), "tool": "say", "spoken": said, "wires": ["voice"], "cites": [],
+                "sent": False, "task_verified": bool(said), "outcome": TOOL_LOOP}
+    if tool == "web_search":
+        ws = _web_search_hand()
+        q = str(args.get("query") or "") or ws.query_from_utterance(utterance)
+        got = ws.run({"query": q})
+        return {
+            "ok": bool(got.get("ok")),
+            "tool": tool,
+            "spoken": str(got.get("spoken") or ""),
+            "wires": ["web_search"],
+            "cites": list(got.get("cites") or []),
+            "sent": False,
+            "task_verified": bool(got.get("ok")),
+            "web_search_meta": ws.log_meta(got),
+            "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN,
+        }
+    if tool == "code_run":
+        hd = _code_run_hand()
+        eff = dict(args) if args else hd.args_from_utterance(utterance)
+        if not str(eff.get("code") or "").strip() and _code_author_hand().wants_author(utterance):
+            au = _code_author_hand().author(utterance)
+            if au.get("ok"):
+                confirm_arm(hive, "code_run", {"code": au["code"], "test": au["test"], "critic_model": au["critic_model"]}, utterance)
+            return {"ok": bool(au.get("ok")), "tool": tool, "spoken": str(au.get("spoken") or ""),
+                    "wires": ["code_run"], "cites": [], "sent": False, "task_verified": False,
+                    "code_run_meta": {"ok": bool(au.get("ok")), "ran": False, "authored": bool(au.get("ok")),
+                                      "builder_model": au.get("builder_model"), "critic_model": au.get("critic_model")}}
+        got = hd.run({k: v for k, v in eff.items() if k in ("code", "test")})
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["code_run"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "code_run_meta": hd.log_meta(got)}
+    if tool == "desk_dispatch":
+        hd = _desk_dispatch_hand()
+        got = _desk_dispatch_hand().run(dict(args) if args else hd.args_from_utterance(utterance), hive=hive)
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["desk_dispatch"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "desk_dispatch_meta": hd.log_meta(got)}
+    if tool == "loop":
+        hd = _loop_hand()
+        got = hd.run(dict(args) if args else hd.args_from_utterance(utterance))
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["loop"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "loop_meta": hd.log_meta(got)}
+    if tool == "voice_engine":
+        hd = _voice_engine_hand()
+        got = hd.run(dict(args) if args else hd.args_from_utterance(utterance))
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["voice_engine"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "voice_engine_meta": hd.log_meta(got)}
+    if tool == "screen_see":
+        hd = _screen_see_hand()
+
+        def _vision(prompt, images):
+            seen = online_talk(prompt, "", images=images, hands=False) or {}
+            return None if seen.get("unknown") else (seen.get("spoken") or seen.get("text"))
+        got = _screen_see_hand().run({}, hive=hive, vision_fn=_vision)
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["screen_see"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "screen_see_meta": hd.log_meta(got)}
+    if tool == "rules":
+        return {"ok": True, "tool": tool, "spoken": rules_spoken(), "wires": ["rules"], "cites": [],
+                "sent": False, "task_verified": True}
+    if tool == "plan":
+        hd = _plan_hand()
+
+        def _plan_talk(prompt):
+            said = online_talk(prompt, "", hands=False) or {}
+            return None if said.get("unknown") else (said.get("spoken") or said.get("text"))
+        got = hd.run(dict(args) if args.get("goal") else hd.args_from_utterance(utterance), talk_fn=_plan_talk)
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["plan"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "plan_meta": hd.log_meta(got)}
+    if tool == "mcp_call":
+        hd = _mcp_call_hand()
+        got = hd.run(dict(args) if args else hd.args_from_utterance(utterance))
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["mcp_call"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "mcp_call_meta": hd.log_meta(got)}
+    if tool == "mcp_inventory":
+        mi = _mcp_inventory_hand()
+        got = mi.run({})
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["mcp_inventory"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "mcp_meta": mi.log_meta(got)}
+    if tool == "skills":
+        sk = _skills_hand()
+        sargs = dict(args) if args.get("op") else sk.args_from_utterance(utterance)
+        got = sk.run(sargs)
+        return {
+            "ok": bool(got.get("ok")),
+            "tool": tool,
+            "spoken": str(got.get("spoken") or ""),
+            "wires": ["skills"],
+            "cites": [],
+            "sent": False,
+            "task_verified": bool(got.get("ok")),
+            "skills_meta": sk.log_meta(got),
+        }
+    if tool == "memory":
+        mem = _memory_hand()
+        got = mem.run(dict(args) if args.get("op") else mem.args_from_utterance(utterance))
+        return {"ok": got["ok"], "tool": tool, "spoken": got["spoken"],
+                "wires": ["memory"], "cites": [], "sent": False,
+                "task_verified": got["ok"], "memory_meta": got["log"]}
+    if tool == "workspace_read":
+        wr = _workspace_read_hand()
+        wargs = dict(args) if args.get("op") else wr.args_from_utterance(utterance)
+        got = wr.run(wargs)
+        return {
+            "ok": bool(got.get("ok")),
+            "tool": tool,
+            "spoken": str(got.get("spoken") or ""),
+            "wires": ["workspace_read"],
+            "cites": [],
+            "sent": False,
+            "task_verified": bool(got.get("ok")),
+            "workspace_meta": wr.log_meta(got),
+        }
     if tool == "converse":
         return {
             "ok": True,
@@ -5198,6 +5827,16 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see")
+
+
+def _turn_ok(ran: dict | None, brain, tool) -> bool:
+    """A deterministic hand has no brain, but its own ok is the truth (honesty loop: ok=false bug)."""
+    if brain or str(tool or "") in DETERMINISTIC_HANDS:
+        return bool((ran or {}).get("ok"))
+    return False
+
+
 def _named_wire_line(text: str) -> bool:
     body = (text or "").strip()
     if not body:
@@ -5320,6 +5959,7 @@ def _pipeline_event(
     source: str | None = None,
     gen: int | None = None,
     mission: dict | None = None,
+    tool_ms: int | None = None,
 ) -> dict:
     available = bool(brain) if model_available is None else bool(model_available)
     ev = {
@@ -5355,6 +5995,8 @@ def _pipeline_event(
     if gen is not None:
         ev["gen"] = int(gen)
         ev["turn_gen"] = int(gen)
+    if tool_ms is not None:
+        ev["tool_ms"] = int(tool_ms)
     return ev
 
 
@@ -5760,11 +6402,14 @@ def apply_pipeline_iter(
     )
     if token and turn_cancelled(hive, token):
         return
+    # Loop on_it: decide the model-free route now so the very first chunk can be the ack line.
+    early = confirm_take(hive, spoken_in) or model_free_route(spoken_in)
+    ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""
     yield _pipeline_event(
         ok=True,
-        tool="converse",
-        spoken="",
-        spoken_delta="",
+        tool=early["tool"] if ack else "converse",
+        spoken=ack,
+        spoken_delta=ack,
         wires=["store"],
         cites=[],
         pack=None,
@@ -5793,6 +6438,12 @@ def apply_pipeline_iter(
             brain = "store"
         except RuntimeError:
             ran = None
+    if early is not None and pick is None and ran is None:
+        pick = early
+        t_tool = time.monotonic()
+        ran = run_tool(pick, spoken_in, hive=hive, retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn, gen=gen)
+        ran["tool_ms"] = int((time.monotonic() - t_tool) * 1000)
+        brain = None
     if pick is None and wants_local_read(spoken_in):
         pick = {"tool": "vault_read", "args": {"query": spoken_in}, "speak": ""}
         brain = "store"
@@ -6034,13 +6685,22 @@ def apply_pipeline_iter(
             ran = {"ok": True, "tool": "converse", "spoken": line, "wires": ["jev"], "cites": [], "sent": False,
                    "from_store": False, "unknown": False, "model_available": False, "outcome": STORE_DIRECT}
 
+    if pick is None and ran is None and JEVR is not None and hasattr(JEVR, "assist"):
+        # Jev ASSIST (router only, calibrated, fail-open 800 ms): may suggest a safe hand on the model path.
+        _assist = JEVR.assist(spoken_in)
+        if _assist:
+            pick = {"tool": _assist["tool"], "args": {}, "speak": ""}
+            brain = "jev_assist"
+            JEVR.log_assist(hive, spoken_in, _assist, used=True, ms=_assist.get("ms"))
+
     if pick is None and (talk_fn is not None or cursor_fn is None):
         brief = pack_text or sitting_brief(prior_turns, bus_now, retrieve_roots, spoken_in)
         if pack_text:
             extra = sitting_brief(prior_turns, bus_now, retrieve_roots, spoken_in)
             if extra and extra not in pack_text:
                 brief = f"{pack_text}\n\n{extra}"
-        provider_brief = brief
+        brief = fit_budget(brief)
+        provider_brief = fit_budget(brief)
         no_hands = (
             shared_memory_answers(spoken_in)
             or plain_question(spoken_in)
@@ -6533,6 +7193,7 @@ def apply_pipeline_iter(
         outcome = HONEST_UNKNOWN if talk_is_miss(raw_spoken) else (MODEL_TALK if brain else HONEST_UNKNOWN)
     if outcome == WIRE_FAILURE:
         ran["ok"] = False
+    raw_spoken = PERSONA.promise_guard(raw_spoken, ran_tool=str(tool or "") in HANDS and tool != "refuse_hard_step")
     text, first, rest = _commit_spoken(
         hive,
         spoken_in=spoken_in,
@@ -6542,7 +7203,7 @@ def apply_pipeline_iter(
         raw=raw_spoken,
         wires=wires,
         cites=cites,
-        ok=False if cursor_fail else (bool(ran.get("ok")) if brain else False),
+        ok=False if cursor_fail else _turn_ok(ran, brain, tool),
         pack=pack_ref,
         args=(pick or {}).get("args"),
         login_said=login_said,
@@ -6576,7 +7237,8 @@ def apply_pipeline_iter(
         extra = text[len(early) :].strip() if text.startswith(early) else rest
     elif first and rest:
         yield _pipeline_event(
-            ok=bool(ran.get("ok")) if brain else False,
+            ok=_turn_ok(ran, brain, tool),
+            tool_ms=(ran or {}).get("tool_ms"),
             tool=tool,
             spoken=first,
             spoken_delta=first,
@@ -6597,7 +7259,8 @@ def apply_pipeline_iter(
     else:
         extra = text
     yield _pipeline_event(
-        ok=bool(ran.get("ok")) if brain else False,
+        ok=_turn_ok(ran, brain, tool),
+            tool_ms=(ran or {}).get("tool_ms"),
         tool=tool,
         see=ran.get("see"),
         mission=ran if tool == "browser_mission" else None,

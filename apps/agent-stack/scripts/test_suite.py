@@ -3,9 +3,12 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
-ENV = {**os.environ, "AGENT_STACK_DRY_TTS": "1", "AGENT_STACK_CURSOR_DRY": "1", "JARVIS_TURN_LOG": "0", "JARVIS_JEV_LIVE": "0"}
+ENV = {**os.environ, "AGENT_STACK_DRY_TTS": "1", "AGENT_STACK_CURSOR_DRY": "1", "JARVIS_TURN_LOG": "0", "JARVIS_JEV_LIVE": "0",
+       # never the real ~/.grok-private memory
+       "JARVIS_MEMORY_FILE": str(Path(tempfile.mkdtemp(prefix="jarvis-suite-mem-")) / "memory.json")}
 COMMANDS = [
     [sys.executable, "mouth/turn.py", "--self-test"],
     [sys.executable, "mouth/voice.py", "--self-test"],

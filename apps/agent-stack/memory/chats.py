@@ -495,10 +495,14 @@ def append_jarvis_turn(
     for root in dest_oh_roots(roots):
         dest = root / SESSIONS_REL / "jarvis" / f"{day}.md"
         dest.parent.mkdir(parents=True, exist_ok=True)
-        existing = dest.read_text(encoding="utf-8") if dest.is_file() else header
-        tmp = dest.with_name(dest.name + ".tmp")
-        tmp.write_text(existing + block, encoding="utf-8")
-        os.replace(tmp, dest)
+        # Latency loop: append, never re-read + rewrite the whole day's log (cost grew with the file).
+        if dest.is_file():
+            with dest.open("a", encoding="utf-8") as fh:
+                fh.write(block)
+        else:
+            tmp = dest.with_name(dest.name + ".tmp")
+            tmp.write_text(header + block, encoding="utf-8")
+            os.replace(tmp, dest)
         written.append(dest)
     return written
 

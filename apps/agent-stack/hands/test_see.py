@@ -357,11 +357,11 @@ class SafariNavigationProofTest(unittest.TestCase):
         self.assertEqual(observe.call_count, 2)
 
     def test_missing_target_stops_after_bounded_reads_without_reopening(self):
-        with mock.patch.object(MOD, '_run', return_value=subprocess.CompletedProcess([], 0, '', '')) as run, mock.patch.object(MOD, 'safari_front', return_value={'ok': True, 'open': True, 'url': 'https://old.example'}) as observe:
+        with mock.patch.object(MOD, '_run', return_value=subprocess.CompletedProcess([], 0, '', '')) as run, mock.patch.object(MOD, 'safari_front', return_value={'ok': True, 'open': True, 'url': 'https://old.example'}) as observe, mock.patch.object(MOD, 'POLL_SEC', 0):
             result = MOD.safari_open('https://target.example')
         self.assertFalse(result['ok'])
         self.assertEqual(run.call_count, 1)
-        self.assertEqual(observe.call_count, 3)
+        self.assertEqual(observe.call_count, MOD.MAX_READS)  # bounded reads while the page loads, never a re-open
 
 
 class SafariDownloadProofTest(unittest.TestCase):

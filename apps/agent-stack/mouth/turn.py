@@ -670,8 +670,11 @@ def apply_turn_iter(utterance: str, **kw):
 
     started = _time.time()
     events: list[dict] = []
+    first_ms = None
     try:
         for ev in _apply_turn_iter_inner(utterance, **kw):
+            if first_ms is None and isinstance(ev, dict) and str(ev.get("spoken_delta") or "").strip():
+                first_ms = int((_time.time() - started) * 1000)
             if isinstance(ev, dict) and not ev.get("partial"):
                 events.append(ev)
             yield ev
@@ -680,7 +683,7 @@ def apply_turn_iter(utterance: str, **kw):
             log = _turn_log()
             if log.log_path() is not None:
                 talk, inject = _talk_records()
-                log.append(log.build_row(started=started, ended=_time.time(), events=events, talk=talk, inject=inject))
+                log.append(log.build_row(started=started, ended=_time.time(), events=events, talk=talk, inject=inject, first_ms=first_ms))
         except Exception:  # noqa: BLE001
             pass
 

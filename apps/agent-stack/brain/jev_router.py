@@ -37,13 +37,36 @@ JEV_MODEL = "typesafe/jev-1.13"
 MAX_QUESTIONS = 12
 CLARIFY_LINE = "I only caught part of that. What would you like me to do?"
 
-HANDLERS = ("converse", "status", "recall", "local_read", "tool", "craft", "hard_step", "unclear", "other")
+HANDLERS = ("memory", "converse", "status", "recall", "local_read", "tool", "craft", "hard_step", "unclear", "other")
 
 # --- 1. deterministic skill picker (m46 pattern): ordered rules, first match wins -----------------
 _RULES: list[tuple[str, float, re.Pattern]] = [
     ("hard_step", 1.0, re.compile(r"\b(send|email|text|pay|purchase|buy|deploy|merge|publish|post|delete|wire\s+money|transfer)\b.{0,40}\b(it|this|that|the|to|now|invoice|pr|money|\$)", re.I)),
-    ("status", 0.9, re.compile(r"\b(run\s+status|status\s+(?:check|report)|are\s+(?:all\s+)?(?:your\s+)?tools\s+ready|system\s+status|are\s+you\s+(?:up|online|working))\b", re.I)),
+    ("memory", 0.9, re.compile(r"^\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?(?:remember|forget|recall)\b|^\s*what\s+do\s+you\s+remember\b", re.I)),
+    ("status", 0.9, re.compile(r"\b(run\s+status|status\s+(?:check|report)|are\s+(?:all\s+)?(?:your\s+)?tools\s+ready|system\s+status|are\s+you\s+(?:up|online|working))\b(?!\s+(?:from|on|in)\b)", re.I)),
     ("recall", 0.9, re.compile(r"\b(what\s+did\s+(?:I|you|we)\s+(?:just\s+)?(?:say|ask|tell)|remind\s+me\s+what|earlier\s+you\s+said|last\s+thing\s+(?:I|you)\s+said)\b", re.I)),
+    # web_search hand: explicit web lookups (advisory label only).
+    ("web_search", 0.9, re.compile(r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b|\blook\s+(?:it\s+)?up\s+online\b|\bweb\s+search\b|\bgoogle\s+(?:the|for|what|who|how)\b", re.I)),
+    # workspace_read hand: repo/branch/file/folder asks are a local read (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:what|which)\s+(?:repo|repos|branch)\b|\b(?:read|open)\b.{0,40}\.(?:md|txt|py|json)\b|\blist\b.{0,30}\b(?:downloads|desktop|documents)\b", re.I)),
+    # code_run hand (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:write|run)\b.{0,40}\bpython\b.{0,60}\b(?:run|test|tests)\b|\brun\s+this\s+python\b|\brun\s+the\s+tests?\s+for\s+this\s+python\b", re.I)),
+    # desk_dispatch hand (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:ask|dispatch\s+(?:this\s+)?to|hand\s+(?:this\s+)?to)\s+(?:the\s+)?(?:jev|watchdog|forge|librarian|consultant|claude|codex|capex|scout)\b", re.I)),
+    # loop hand (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:start|set\s+up|create|run)\s+(?:a\s+)?loop\b|\b(?:list|show)\s+(?:my\s+|the\s+)?loops\b|\b(?:cancel|stop|kill)\s+(?:the\s+)?[\w\s-]{0,30}\bloop\b", re.I)),
+    # voice_engine hand (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:what|which)\s+(?:voice|tts|speech)(?:\s+engine)?\b.{0,30}\b(?:using|speaking|is|are|on)\b|\b(?:what|which)\s+(?:tts|speech|voice)\s+engine\b", re.I)),
+    # screen_see hand (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:describe|grab|look\s+at)\s+my\s+screen\b|\bwhat(?:\x27s|s|\s+is)\s+on\s+my\s+screen\b|\bscreenshot\s+of\s+my\s+screen\b", re.I)),
+    # plan hand (advisory label only).
+    ("local_read", 0.9, re.compile(r"\bplan\s+(?:how\s+to|out)\b|\b(?:make|draft|write)\s+(?:me\s+)?a\s+plan\s+(?:for|to)\b", re.I)),
+    # mcp_call hand (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:list|show|what)\b.{0,15}\btools?\s+(?:on|from|of|in)\s+(?:the\s+)?[\w.\-]+(?:\s+mcp)?\s+server\b", re.I)),
+    # mcp_inventory hand: which MCP servers is a local config read, names only (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:which|what|list|show)\b.{0,25}\bmcp\b", re.I)),
+    # skills hand: which skills / read one skill is a local read (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:which|what)\s+skills\b|\b(?:list|show)\b.{0,20}\bskills\b|\b(?:read|open|show)\s+(?:the\s+)?[\w.\-]+\s+skill\b", re.I)),
     ("local_read", 0.9, re.compile(r"\b(read|open|show)\s+(?:me\s+)?(?:my|the)\s+(?:vault|note|notes|file|lane|doc)\b|\bin\s+(?:my|the)\s+vault\b", re.I)),
     ("tool", 0.85, re.compile(r"\b(open|click|type\s+into|look\s+at\s+(?:my|the)\s+screen|safari|watch\s+mode|cursor\s+agent|screenshot)\b", re.I)),
     ("craft", 0.85, re.compile(r"\b(gridcraft|photocraft|artcraft|\w+craft)\b.*\b(make|create|save|export|edit|build|write)\b|\b(make|create|save|export|edit|build|write)\b.*\b\w+craft\b", re.I)),
@@ -349,3 +372,64 @@ def replay(path: Path = REPLAY_SET, picker=pick_skill) -> dict[str, Any]:
 
 if __name__ == "__main__":
     print(json.dumps(replay(), indent=1))
+
+
+# --- 7. ASSIST for the router only (FINISH-LIST rank 15) -------------------------------------------
+# Jev may SUGGEST one safe routing hand on the model path, only after calibration passed, within
+# 800 ms (fail-open). Never a hard step, never an action, never authoritative.
+CALIBRATION = Path(__file__).resolve().parents[1] / "eval" / "jev_calibration.json"
+ASSIST_BUDGET_MS = 800
+ASSIST_TOOLS = {"status": "status"}
+
+
+def _calibration() -> dict[str, Any]:
+    try:
+        return json.loads(CALIBRATION.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {"assist_ok": False, "threshold": 1.01, "brier": None}
+
+
+def assist(utterance: str, budget_ms: int = ASSIST_BUDGET_MS) -> dict[str, Any] | None:
+    if not _flag("JARVIS_JEV_ASSIST", "1"):
+        return None
+    cal = _calibration()
+    if not cal.get("assist_ok"):
+        return None
+    import threading
+    import time as _t
+    box: dict[str, Any] = {}
+    t0 = _t.monotonic()
+
+    def _run() -> None:
+        try:
+            box["pick"] = pick_skill(utterance)
+        except Exception:  # noqa: BLE001
+            box["pick"] = None
+
+    th = threading.Thread(target=_run, daemon=True)
+    th.start()
+    th.join(max(0.0, budget_ms / 1000.0))
+    pick = box.get("pick")
+    if th.is_alive() or not pick:
+        return None
+    tool = ASSIST_TOOLS.get(str(pick.get("handler")))
+    if not tool or float(pick.get("confidence") or 0) < float(cal.get("threshold") or 1.01):
+        return None
+    return {"tool": tool, "handler": pick.get("handler"), "confidence": pick.get("confidence"),
+            "mode": "ASSIST", "authoritative": False, "ms": int((_t.monotonic() - t0) * 1000)}
+
+
+def log_assist(hive: Path, utterance: str, pick: dict | None, *, used: bool, ms: int | None) -> dict | None:
+    """Metadata only (no utterance text). Carries the calibration Brier score."""
+    cal = _calibration()
+    row = {"ts": datetime.now(timezone.utc).isoformat(), "mode": "ASSIST", "authoritative": False,
+           "handler": (pick or {}).get("handler"), "confidence": (pick or {}).get("confidence"),
+           "used": bool(used), "ms": ms, "brier": cal.get("brier"), "words": len((utterance or "").split())}
+    try:
+        out = Path(hive) / "bus" / LOG_NAME
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row, ensure_ascii=True) + "\n")
+    except OSError:
+        pass
+    return row
