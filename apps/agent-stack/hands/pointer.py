@@ -21,7 +21,7 @@ from pathlib import Path
 STACK = Path(__file__).resolve().parents[1]
 OVERLAY = STACK / "face" / "overlay"
 CACHE = Path.home() / "Library" / "Caches" / "jarvis"
-SHOW_SEC = 8
+SHOW_SEC = 10  # demo: tag visible 2:09.0-2:19.5
 LOOK_LINE = "Let me have a look, sir."
 WANT_RE = re.compile(r"\b(?:where\s+(?:do|should|can)\s+i\s+(?:click|tap|press|go)|where(?:'s|\s+is)\s+(?:the\s+)?(?:button|[\w\s'-]{1,40}?"
                      r"\s+(?:button|menu|link|icon|tab|setting|toggle|field))|point\s+(?:to|at|me\s+to)|show\s+me\s+where)\b", re.I)
@@ -162,7 +162,8 @@ def run(utterance: str, *, locate_fn=None, draw_fn=None, hover_fn=None, where_fn
         drawn = (draw_fn or draw)(x, y, label)
     except Exception:  # noqa: BLE001
         drawn = False
-    (hover_fn or hover)(x, y)
+    if hover_fn is not None:  # demo never moves the cursor (storyboards/Z02); hover only when a caller asks
+        hover_fn(x, y)
     where = (where_fn or _where)(x, y)
     said = f"There: {label}, {where} of your screen. The red arrow is on it; click it when you're ready."
     if not drawn:

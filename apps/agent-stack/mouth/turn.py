@@ -531,6 +531,9 @@ def _apply_turn_iter_inner(
         return
     # Z02: "where do I click to X" is tutor mode: on-device locate + native arrow, never a Watch click, never a screenshot.
     if hasattr(PIPELINE, "_pointer_hand") and PIPELINE._pointer_hand().wants_pointer(spoken) and not PIPELINE.is_hard_step(spoken):
+        # demo 2:04.1: the ack is spoken at once, before the look (storyboards/Z02)
+        yield _turn_event(spoken="Let me have a look, sir.", verb="pointer", host="local", wires=["pointer"],
+                          spoken_delta="Let me have a look, sir.", done=False, partial=True, gen=token)
         got = PIPELINE.run_tool({"tool": "pointer", "args": {}}, spoken, hive=hive, retrieve_roots=retrieve_roots, gen=token)
         yield _door_speak(hive, spoken, str(got.get("spoken") or ""), "pointer", retrieve_roots, gen=token, execution=got)
         return
@@ -692,6 +695,16 @@ def apply_turn_iter(utterance: str, **kw):
     started = _time.time()
     events: list[dict] = []
     first_ms = None
+    reflex = None
+    try:  # Z12: the five quick decisions are made BEFORE the answer and shown on the Orb with their ms (demo D5v4UuvtUXc 0:09)
+        t0 = _time.perf_counter()
+        reflex = _reflex(utterance)
+        if isinstance(reflex, dict):
+            reflex = dict(reflex, ms=round((_time.perf_counter() - t0) * 1000, 1))
+            card = dict(reflex, ts=_time.time(), ask=str(utterance or "")[:80])
+            PIPELINE.mutate_bus(kw.get("hive") or HIVE, lambda bus: dict(bus, reflex=card))
+    except Exception:  # noqa: BLE001
+        pass
     try:
         for ev in _apply_turn_iter_inner(utterance, **kw):
             if first_ms is None and isinstance(ev, dict) and str(ev.get("spoken_delta") or "").strip():
@@ -705,7 +718,7 @@ def apply_turn_iter(utterance: str, **kw):
             if log.log_path() is not None:
                 talk, inject = _talk_records()
                 row = log.build_row(started=started, ended=_time.time(), events=events, talk=talk, inject=inject, first_ms=first_ms)
-                row["reflex"] = _reflex(utterance)
+                row["reflex"] = reflex if reflex is not None else _reflex(utterance)
                 log.append(row)
         except Exception:  # noqa: BLE001
             pass
