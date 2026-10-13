@@ -211,6 +211,26 @@ def op_cli(argv: list[str], cwd: str | None = None) -> dict:
             "spoken": (f"{argv[0]} ok: " if ok else f"{argv[0]} exited {p.returncode}: ") + text[:600]}
 
 
+# ---------------------------------------------------------------- Google reads by name, sent-mail duplicate guard
+def op_gws_read(kind: str, name: str, rng: str | None = None) -> dict:
+    PERM().log_action("cli", f"gws read {kind}", "allow")
+    got = _load("gws_reads", "gws_reads.py").read_named(str(kind), str(name), rng if isinstance(rng, str) else None)
+    return {"ok": got["ok"], "verified": got["ok"], "auth_missing": got["auth_missing"], "untrusted": got["untrusted"],
+            "spoken": _scrub(got["spoken"])}
+
+
+def op_sent_check(to: str, subject: str, days: int = 3) -> dict:
+    PERM().log_action("cli", "gws sent-mail check", "allow")
+    try:
+        d = int(days)
+    except (TypeError, ValueError):
+        d = 3
+    got = _load("gws_reads", "gws_reads.py").check_sent_duplicate(str(to), str(subject), d)
+    ok = got["status"] == "clear"   # only a clean "clear" is a green light; duplicate/possible/unknown all stop the send
+    return {"ok": ok, "verified": ok, "status": got["status"], "count": got["count"], "auth_missing": got["auth_missing"],
+            "spoken": _scrub(got["spoken"])}
+
+
 # ---------------------------------------------------------------- repo (sandboxed coding)
 def _git(repo: Path, *a) -> subprocess.CompletedProcess:
     return subprocess.run(["git", "-C", str(repo), *a], capture_output=True, text=True, timeout=CLI_DEADLINE_S)
@@ -311,6 +331,10 @@ def _step(s: dict, approved: bool) -> dict:
         return op_repo(s.get("repo", ""), s.get("action", ""), **{k: v for k, v in s.items() if k not in {"op", "repo", "action"}})
     if op == "mcp_list":
         return op_mcp_list(s.get("server", ""))
+    if op == "gws_read":
+        return op_gws_read(s.get("kind", ""), s.get("name", ""), s.get("range"))
+    if op == "sent_check":
+        return op_sent_check(s.get("to", ""), s.get("subject", ""), s.get("days") or 3)
     if op == "code":
         return op_code(s.get("repo", ""), s.get("goal", ""), s.get("branch") or "jarvis/code")
     if op == "web":
@@ -329,7 +353,8 @@ def run(args: dict | None = None, approved: bool = False) -> dict:
     if len(steps) == 1 and steps[0].get("op") == "code":
         got = op_code(steps[0].get("repo", ""), steps[0].get("goal", ""), steps[0].get("branch") or "jarvis/code")
         return got
-    if len(steps) == 1 and steps[0].get("op") == "cli" and (steps[0].get("argv") or [""])[0] == "gws":
+    if len(steps) == 1 and (steps[0].get("op") in {"gws_read", "sent_check"}
+                            or (steps[0].get("op") == "cli" and (steps[0].get("argv") or [""])[0] == "gws")):
         return _step(steps[0], approved)  # one Google read: answer in a sentence, not a step report
     ranked = rank_skills(goal, 1) if args.get("goal") else []
     skill = ranked[0] if ranked else skill_first(goal)
@@ -375,9 +400,18 @@ def _gws_argv(u: str) -> list[str] | None:
         return None
 
 
+def _gws_reads_args(u: str) -> dict | None:
+    """Docs/Sheets by name and the sent-mail duplicate check; a broken helper never takes the turn down."""
+    try:
+        r = _load("gws_reads", "gws_reads.py")
+        return r.read_args_for(u) or r.sent_args_for(u)
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def wants(u: str) -> bool:
     return bool(_LIST.search(u or "") or _CODE.match(u or "") or _TASK.search(u or "") or _CLI.match(u or "") or _MCPC.search(u or "")
-                or _gws_argv(u))
+                or _gws_argv(u) or _gws_reads_args(u))
 
 
 def args_from_utterance(u: str) -> dict:
@@ -410,7 +444,7 @@ def args_from_utterance(u: str) -> dict:
     argv = _gws_argv(u)
     if argv:
         return {"op": "cli", "argv": argv}
-    return {}
+    return _gws_reads_args(u) or {}
 
 
 def log_meta(got: dict) -> dict:

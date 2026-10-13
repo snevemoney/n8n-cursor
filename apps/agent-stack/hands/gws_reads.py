@@ -169,3 +169,141 @@ def check_sent_duplicate(to: str, subject: str, days: int = 3, runner: Runner | 
 def safe_to_send(verdict: dict) -> bool:
     """The one rule a future sender must obey: only a clean `clear` lets the send proceed; the send itself still needs Evens."""
     return isinstance(verdict, dict) and verdict.get("status") == "clear"
+
+
+# ---------------------------------------------------------------- Docs / Sheets reads (found by name through Drive)
+MIME = {"doc": "application/vnd.google-apps.document", "sheet": "application/vnd.google-apps.spreadsheet"}
+LABEL = {"doc": "Google Doc", "sheet": "Google Sheet"}
+
+
+def drive_lookup_argv(name: str, kind: str) -> list:
+    nat = _natural()
+    term = nat.flat(name, 400).strip(" \"'“”‘’.,;:!?")[: nat.TERM_CAP].strip()
+    if not term or kind not in MIME:
+        raise ValueError("need a file name and a kind (doc or sheet)")
+    q = f"name contains '{nat._escape_q(term)}' and mimeType = '{MIME[kind]}' and trashed = false"
+    return ["gws", "drive", "files", "list", "--params",
+            _params({"q": q, "pageSize": 3, "orderBy": "modifiedTime desc", "fields": "files(id,name,mimeType,modifiedTime)"})]
+
+
+def doc_get_argv(doc_id: str) -> list:
+    if not GOOGLE_ID.match(doc_id or ""):
+        raise ValueError("not a Google file id")
+    return ["gws", "docs", "documents", "get", "--params", _params({"documentId": doc_id})]
+
+
+def sheet_read_argv(sheet_id: str, rng: str) -> list:
+    if not GOOGLE_ID.match(sheet_id or "") or not A1_RANGE.match(rng or ""):
+        raise ValueError("not a Google file id or A1 range")
+    return ["gws", "sheets", "+read", "--spreadsheet", sheet_id, "--range", rng]
+
+
+def doc_text(data) -> str:
+    """Plain text of a Docs `documents.get` body: paragraphs and table cells, in order."""
+    out: list = []
+
+    def walk(blocks):
+        for b in blocks or []:
+            if not isinstance(b, dict):
+                continue
+            para = b.get("paragraph")
+            if isinstance(para, dict):
+                out.append("".join(str((e.get("textRun") or {}).get("content") or "") for e in para.get("elements") or [] if isinstance(e, dict)))
+            for row in (b.get("table") or {}).get("tableRows") or []:
+                for cell in row.get("tableCells") or []:
+                    walk(cell.get("content"))
+    walk(((data or {}).get("body") or {}).get("content") if isinstance(data, dict) else None)
+    return " ".join(x.strip() for x in out if x and x.strip())
+
+
+def _first_file(data) -> dict | None:
+    files = data.get("files") if isinstance(data, dict) else None
+    for f in files or []:
+        if isinstance(f, dict) and GOOGLE_ID.match(str(f.get("id") or "")):
+            return f
+    return None
+
+
+def _say_sheet(title: str, data) -> str | None:
+    rows = data.get("values") if isinstance(data, dict) else None
+    if not isinstance(rows, list):
+        return None
+    nat = _natural()
+    shown = [", ".join(nat.flat(c, 24) for c in (row if isinstance(row, list) else [])[:SHEET_COLS]) for row in rows[:SHEET_ROWS]]
+    more = f"; and {len(rows) - SHEET_ROWS} more rows" if len(rows) > SHEET_ROWS else ""
+    rng = nat.flat(data.get("range", ""), 40)
+    n = len(rows)
+    return nat.flat(f"{title}{f' ({rng})' if rng else ''}: {n} row{'s' if n != 1 else ''}. " + "; ".join(shown) + more, 700)
+
+
+def read_named(kind: str, name: str, rng: str | None = None, runner: Runner | None = None) -> dict:
+    """Find a Google Doc/Sheet by name (Drive lookup), then read it. Returns {ok, spoken, auth_missing, untrusted}."""
+    nat = _natural()
+    fail = {"ok": False, "auth_missing": False, "untrusted": False}
+    rng = (rng or "A1:F10").strip()
+    if kind == "sheet" and not A1_RANGE.match(rng):
+        return {**fail, "spoken": "That doesn't look like a cell range I can read (like A1:C10). I read nothing."}
+    try:
+        argv = drive_lookup_argv(name, kind)
+    except ValueError:
+        return {**fail, "spoken": f"Which {LABEL.get(kind, 'file')}? I need its name."}
+    rc, out, err = _call(runner, argv)
+    data = nat._parse(out) if rc == 0 else None
+    if rc != 0 or data is None or (isinstance(data, dict) and isinstance(data.get("error"), (dict, str))):
+        return {**fail, **_failure("drive", rc, out, err)}
+    hit = _first_file(data)
+    if not hit:
+        return {**fail, "spoken": f"No {LABEL[kind]} named like \"{nat.flat(name, 40)}\" in Drive."}
+    title = nat.flat(hit.get("name", ""), 60)
+    argv2 = doc_get_argv(hit["id"]) if kind == "doc" else sheet_read_argv(hit["id"], rng)
+    rc, out, err = _call(runner, argv2)
+    body = nat._parse(out) if rc == 0 else None
+    if rc != 0 or body is None or (isinstance(body, dict) and isinstance(body.get("error"), (dict, str))):
+        return {**fail, **(_failure("generic", rc, out, err) if rc != 0 or body is not None
+                           else {"spoken": f"Found \"{title}\", but Google's answer wasn't readable, so I didn't read it out."})}
+    if kind == "sheet":
+        say = _say_sheet(title, body)
+    else:
+        text = doc_text(body)
+        say = nat.flat(f"{title}: {text}", DOC_SPEECH_CAP + len(title)) + ("…" if len(text) > DOC_SPEECH_CAP else "") if text else f"{title} is empty."
+    if not say:
+        return {**fail, "spoken": f"Found \"{title}\", but I couldn't read its contents."}
+    return {"ok": True, "auth_missing": False, "untrusted": True, "spoken": say, "title": title}
+
+
+# ---------------------------------------------------------------- natural asks -> exact op dicts (None when not a plain look)
+_KIND = {"doc": "doc", "document": "doc", "sheet": "sheet", "spreadsheet": "sheet"}
+_READ_ASK = re.compile(
+    r"\b(?:read|show|open|see|pull\s+up|what(?:['’]s|\s+is)?\s+in)\b[^.?!]{0,30}?\bgoogle\s+(doc(?:ument)?|sheet|spreadsheet)s?\s+"
+    r"(?:named|called|titled)\s+(?P<t>.+?)\s*$", re.I | re.S)
+_RANGE_TAIL = re.compile(r"\s+(?:range|cells?)\s+(?P<r>[A-Za-z]{1,3}\d{1,6}(?::[A-Za-z]{1,3}\d{1,6})?)\s*[?.!]*$", re.I)
+_SENT_ASK = re.compile(
+    r"\b(?:did|have)\s+i\s+(?:already\s+)?(?:send|sent|e-?mail(?:ed)?|mail(?:ed)?)\b[^@]{0,60}?(?P<to>[A-Za-z0-9._%+\-]{1,64}@[A-Za-z0-9.\-]+\.[A-Za-z]{2,24})"
+    r"\s+(?:about|titled|called|with\s+(?:the\s+)?subject|subject)\s+(?P<s>.+?)\s*$", re.I | re.S)
+
+
+def read_args_for(u: str) -> dict | None:
+    u = u or ""
+    if len(u) > 400:
+        return None
+    m = _READ_ASK.search(u)
+    if not m:
+        return None
+    nat = _natural()
+    term, rng = m.group("t"), ""
+    rm = _RANGE_TAIL.search(term)
+    if rm:
+        rng, term = rm.group("r").upper(), term[: rm.start()]
+    term = nat.flat(term, 400).strip(" \"'“”‘’.,;:!?")
+    if not term or nat._NOT_A_LOOK.search(u[: m.start("t")]):  # the search term is data; the request around it must be a plain look
+        return None
+    kind = _KIND[m.group(1).lower()]
+    return {"op": "gws_read", "kind": kind, "name": term, **({"range": rng} if rng and kind == "sheet" else {})}
+
+
+def sent_args_for(u: str) -> dict | None:
+    m = _SENT_ASK.search(u or "")
+    if not m:
+        return None
+    subject = _natural().flat(m.group("s"), 200).strip(" \"'“”‘’.,;:!?")
+    return {"op": "sent_check", "to": m.group("to").lower(), "subject": subject} if subject else None

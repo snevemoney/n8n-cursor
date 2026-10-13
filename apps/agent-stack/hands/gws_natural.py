@@ -32,6 +32,8 @@ _MAIL = re.compile(
     r"|^\W*(?:jarvis[,:]?\s*)?(?:any\s+)?(?:unread|new)\s+(?:e-?mails?|mail)\b", re.I)
 _AGENDA = re.compile(
     r"\b(?:what(?:['’]s|\s+is)?|show|check|read|list|see|any)\b[^.?!]{0,30}?\bmy\s+(?:calendar|agenda|schedule)\b", re.I)
+_SPAN = re.compile(r"\b(today|tomorrow|this\s+week)\b", re.I)
+_SPAN_FLAG = {"today": "--today", "tomorrow": "--tomorrow", "week": "--week"}
 _DRIVE_CTX = r"(?:(?:my\s+)?google\s+drive|(?:in|on)\s+(?:my\s+)?drive|my\s+drive)"
 _DRIVE = re.compile(rf"\b(?:find|search|look\s+for|list|show|get)\b[^?!]{{0,90}}?\b{_DRIVE_CTX}\b", re.I | re.S)
 _TERM_NAMED = re.compile(r"\b(?:named|called|titled|matching|containing|about)\s+(?P<t>.+?)\s*$", re.I | re.S)
@@ -88,7 +90,8 @@ def argv_for(u: str) -> list[str] | None:
     if _MAIL.search(u):
         return ["gws", "gmail", "+triage"]
     if _AGENDA.search(u):
-        return ["gws", "calendar", "+agenda"]
+        span = _SPAN.search(u)
+        return ["gws", "calendar", "+agenda", *([_SPAN_FLAG[span.group(1).lower().split()[-1]]] if span else [])]
     if _DRIVE.search(u):
         params = {"q": drive_query(_term(u)), "pageSize": 10, "orderBy": "modifiedTime desc",
                   "fields": "files(name,mimeType,modifiedTime)"}
@@ -100,10 +103,10 @@ def argv_for(u: str) -> list[str] | None:
 _SERVICES = {"gmail", "calendar", "drive", "docs", "sheets", "slides", "tasks", "people", "keep", "meet", "forms", "classroom", "chat"}
 _HELPERS = {"+triage", "+read", "+agenda"}
 _METHODS = {"list", "get", "query"}
-_BOOL_FLAGS = {"--page-all", "--dry-run"}
+_BOOL_FLAGS = {"--page-all", "--dry-run", "--today", "--tomorrow", "--week"}
 _DENIED_FLAGS = {"--json", "--upload", "--upload-content-type", "--output", "--sanitize"}
 _PATH_PART = re.compile(r"[\w.\-]+")
-_FLAG_VALUE = re.compile(r"[\w@.:+\-/=,]{1,200}")
+_FLAG_VALUE = re.compile(r"[\w@.:+\-/=,!$ ]{1,200}")  # space/!/$: sheet names and A1 ranges ("My Tab!A1:B2")
 
 
 def argv_is_read_only(argv: list[str]) -> bool:
