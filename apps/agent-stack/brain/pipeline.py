@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -918,7 +918,7 @@ ACK_SKIP = frozenset({"say"})
 # Confirm-before-act (verify round): screen_see sends the screen off the Mac, desk_dispatch acts as a send, and a
 # model-chosen code_run runs code Evens never typed. Each arms a one-shot pending row on the hive bus; only a short
 # explicit "yes/confirm" on the very next turn runs it. Anything else drops it.
-CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run")
+CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run", "pointer_click")
 CONFIRM_TTL_SEC = 120
 CONFIRM_YES_RE = re.compile(
     r"^\s*(?:yes|yep|yeah|sure|confirm(?:ed)?|go\s+ahead|go\s+for\s+it|allow\s+it|proceed|do\s+it|send\s+it|ok(?:ay)?)\b(?:[\s,]*(?:please|jarvis|sir|do\s+it|go\s+ahead))*[\s.!]*$",
@@ -928,6 +928,7 @@ CONFIRM_LINES = {
     "screen_see": "That would send a screenshot of your whole screen to the vision model, off this Mac. Say \"confirm\" to go ahead; I delete the screenshot afterwards.",
     "desk_dispatch": "That would put a job card for the {desk} desk on the hive bus, which acts as a send. Say \"confirm\" to send it.",
     "code_run": "I picked code to run that you didn't type. Say \"confirm\" to run it in the sandbox; anything else drops it.",
+    "pointer_click": "The arrow is on the {label}. Say \"confirm\" and I click it once; anything else drops it.",
 }
 
 
@@ -981,6 +982,9 @@ def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
         return eff
     if tool == "desk_dispatch":
         return dict(args) if args else _desk_dispatch_hand().args_from_utterance(utterance)
+    if tool == "pointer_click":  # Z02 click: resolve + draw the arrow now; a miss runs unarmed and just says why
+        got = _pointer_hand().click_arm(utterance)
+        return {k: got[k] for k in ("x", "y", "label")} if got.get("found") else None
     return {}
 
 
@@ -1051,6 +1055,8 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
         return {"tool": "handback", "args": {}, "speak": ""}  # really disarms Watch; no invented deletion
     if COST_FOLLOW_RE.search(u):
         return {"tool": "cost_card", "args": {}, "speak": ""}
+    if _pointer_hand().wants_click(u) and not is_hard_step(u):
+        return {"tool": "pointer_click", "args": {}, "speak": ""}  # Z02: arrow + one-shot confirm, then one click
     if CLICK_ASK_RE.search(u) and not is_hard_step(u):
         named = [w for w in _pointer_hand().keywords(u) if w not in {"close", "dismiss", "x", "that", "this", "it"}]
         if named:
@@ -5303,7 +5309,7 @@ def _run_tool_inner(
         arm = _needs_confirm(tool, args, utterance)
         if arm is not None:
             confirm_arm(hive, tool, arm, utterance)
-            line = CONFIRM_LINES[tool].format(desk=str(arm.get("desk") or "named").capitalize())
+            line = CONFIRM_LINES[tool].format(desk=str(arm.get("desk") or "named").capitalize(), label=str(arm.get("label") or "target"))
             return {"ok": True, "tool": tool, "spoken": line, "wires": [tool], "cites": [], "sent": False,
                     "task_verified": False, "awaiting_confirm": True, f"{tool}_meta": {"ok": True, "awaiting_confirm": True}}
         if args.get("_confirmed"):
@@ -5452,6 +5458,15 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["cost_card"],
                 "cites": got.get("cites") or [], "meter": got.get("meter") or [], "sent": False, "task_verified": bool(got.get("ok")),
                 "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
+    if tool == "pointer_click":
+        if "x" not in args:  # unconfirmed miss: nothing to click, say why
+            miss = _pointer_hand().click_target(utterance)
+            return {"ok": True, "tool": tool, "spoken": f"I won't click blind: {miss.get('why') or 'I lost the target'}. Say it again and I'll look once more.", "wires": ["pointer"], "cites": [],
+                    "sent": False, "task_verified": False, "outcome": HONEST_UNKNOWN}
+        got = _pointer_hand().click_do(float(args["x"]), float(args["y"]), str(args.get("label") or "target"))
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": got["spoken"], "wires": ["pointer"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("clicked")), "pointer_meta": {"clicked": bool(got.get("clicked")), "why": got.get("why")},
+                "outcome": TOOL_LOOP if got.get("clicked") else HONEST_UNKNOWN}
     if tool == "pointer":
         got = _pointer_hand().run(utterance)
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["pointer"],
@@ -6284,7 +6299,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "results_recall", "prebrief")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "cost_card", "results_recall", "prebrief")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:

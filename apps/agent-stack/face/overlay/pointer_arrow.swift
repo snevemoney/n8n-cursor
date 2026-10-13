@@ -11,12 +11,13 @@ let target = NSPoint(x: gx, y: top - gy)   // AppKit is bottom-left
 let font = NSFont.boldSystemFont(ofSize: 16)
 let ls = (label as NSString).size(withAttributes: [.font: font])
 let W = max(ls.width + 30, 120) + 70, H: CGFloat = 90
-// window sits up-right of the target; the arrow tip lands exactly on the target
-var frame = NSRect(x: target.x - 4, y: target.y - H + 4, width: W, height: H)
+// demo 2:09 (storyboards/Z02): the pill sits ABOVE-right of the target and the arrow points down-left onto it;
+// flip below only when there is no room above, left only when there is no room right.
+var frame = NSRect(x: target.x - 4, y: target.y - 4, width: W, height: H)
 let scr = NSScreen.screens.first(where: { $0.frame.contains(target) })?.frame ?? NSScreen.screens.first!.frame
 var flip = false
 if frame.maxX > scr.maxX { frame.origin.x = target.x - W + 4; flip = true }
-if frame.minY < scr.minY { frame.origin.y = target.y - 4 }
+if frame.maxY > scr.maxY - 24 { frame.origin.y = target.y - H + 4 }
 let up = frame.origin.y >= target.y - 5
 // Style matched to ud7wzdiM0gk 2:09-2:19 (storyboards/Z02): dark pill, white bold text, thin red outline;
 // thick red-orange arrow with a white border, tip on the control; gentle bob; no cursor movement.

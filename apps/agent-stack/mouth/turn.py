@@ -669,7 +669,8 @@ def _apply_turn_iter_inner(
     action_text = re.sub(r"^(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:please\s+)?", "", spoken, flags=re.I)
     screen_action = bool(PIPELINE.SCREEN_ACT_RE.match(action_text))
     explicit_browser = bool(re.search(r"\b(?:safari|https?://)", spoken, re.I))
-    if not watch_on and screen_action and not explicit_browser:
+    _z02_click = PIPELINE._pointer_hand().wants_click(spoken)  # Z02: arrow + confirm click, not the Watch desktop
+    if not watch_on and screen_action and not explicit_browser and not _z02_click:
         receipt = {"ok": False, "reason": "desktop_not_armed", "action_issued": False,
                    "spoken": "Desktop is off. Enable Desktop in Orb so I can perform this action."}
         yield _door_speak(hive, spoken, receipt["spoken"], "watch", retrieve_roots,
@@ -677,6 +678,7 @@ def _apply_turn_iter_inner(
         return
     owns_watch = bool(
         watch_on
+        and not _z02_click
         and hasattr(PIPELINE, "watch_owns_turn")
         and PIPELINE.watch_owns_turn(spoken, watch_row)
     )

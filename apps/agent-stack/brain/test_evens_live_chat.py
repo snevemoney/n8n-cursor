@@ -39,13 +39,13 @@ def test_hand_it_back_is_handback():
     assert _pick("hand it back now")["tool"] == "handback"
 
 
-def test_click_x_with_no_label_is_honest_and_offers_the_arrow():
+def test_click_x_goes_to_confirm_gated_click():  # Z02 click: arrow on the close dot, then "confirm" before one click
     got = _pick("can you click the X to dismiss this")
-    assert got["tool"] == "say" and "red arrow" in got["speak"]
+    assert got["tool"] == "pointer_click"
 
 
 def test_click_named_button_goes_to_pointer():
-    assert _pick("could you click the settings button")["tool"] == "pointer"
+    assert _pick("could you click the settings button")["tool"] == "pointer_click"
 
 
 def test_online_research_goes_to_cited_web_search():

@@ -570,6 +570,21 @@ def _file_score(path: Path, text: str, words: list[str], query: str) -> int:
             score += 80
         if path.name == "OPERATOR_MEMORY.md" or rel.replace("\\", "/").endswith("OPERATOR_MEMORY.md"):
             score -= 20
+    # Title/folder and phrase boosts (live: "pull up my social bios" lost to VAULT_MAP on the named-note bonus).
+    path_words = set(re.findall(r"[a-z0-9]+", path_blob))
+    head_words = set(re.findall(r"[a-z0-9]+", head_blob))
+    content_words = [w for w in words if len(w) >= 4]
+    path_hits = [w for w in content_words if w in path_words or w.rstrip("s") in path_words]
+    if content_words and len(path_hits) == len(content_words):
+        score += 40
+    elif len(path_hits) >= 2:
+        score += 20
+    for a_w, b_w in zip(words, words[1:]):
+        if re.search(rf"\b{re.escape(a_w)}[\s_-]+{re.escape(b_w)}", path_blob):
+            score += 30
+        elif re.search(rf"\b{re.escape(a_w)}[\s_-]+{re.escape(b_w)}", head_blob):
+            score += 20
+    named_bonus = 28 if not path_hits else 0
     if rel in NAMED_NOTE_RELS or path.name in {
         "OPERATOR_MEMORY.md",
         "NORTH_STAR.md",
@@ -577,7 +592,7 @@ def _file_score(path: Path, text: str, words: list[str], query: str) -> int:
         "WEEKLY_SCOREBOARD.md",
         "VAULT_MAP.md",
     }:
-        score += 28
+        score += named_bonus
     stem = re.sub(r"[-_]", " ", path.stem.lower())
     score += sum(16 for part in stem.split() if len(part) >= 4 and part in words)
     if path.stem.lower() in words:

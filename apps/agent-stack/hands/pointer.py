@@ -93,6 +93,8 @@ def locate(kws: list[str]) -> dict:
     os.close(fd)
     try:
         import time as _t
+        subprocess.run(["pkill", "-f", "Caches/jarvis/pointer_arrow"], capture_output=True)  # our own arrow hides the text from OCR
+        _t.sleep(0.12)
         t0 = _t.time()
         sc = _grab(shot)
         t1 = _t.time()
@@ -216,6 +218,9 @@ def run(utterance: str, *, locate_fn=None, draw_fn=None, hover_fn=None, where_fn
     except Exception as exc:  # noqa: BLE001 — a locator fault is an honest miss, never a dead turn
         got = {"found": False, "why": f"locator error {type(exc).__name__}"}
     if not got.get("found"):
+        dock = dock_hint(kws)
+        if dock:
+            return dock
         why = str(got.get("why") or "")
         return {"ok": True, "found": False, "source": None, "keywords": kws,
                 "spoken": f"I looked at your screen on this Mac and can't find {' '.join(kws[:3]) or 'that'}. "
@@ -230,8 +235,192 @@ def run(utterance: str, *, locate_fn=None, draw_fn=None, hover_fn=None, where_fn
     if hover_fn is not None:  # demo never moves the cursor (storyboards/Z02); hover only when a caller asks
         hover_fn(x, y)
     where = (where_fn or _where)(x, y)
-    said = f"The {label} {place(where)}, sir; {next_step(utterance, label)}. The red arrow is on it."
+    remember(x, y, label)
+    said = f"The {label} {place(where)}; {next_step(utterance, label)}. The red arrow is on it."
     if not drawn:
         said = f"It's {label}, {where} of your screen, sir. I couldn't draw the arrow this time."
     return {"ok": True, "found": True, "source": got.get("source"), "x": x, "y": y, "label": label, "raw_label": raw, "drawn": drawn,
             "keywords": kws, "spoken": said}
+
+
+# ---------------------------------------------------------------- Z02 part 2: Jarvis clicks it himself, after "confirm"
+# Evens 17:48/18:25 live: "Could you click X on that to close it" -> "I can't click". Now: "click it" / "click X" resolves a
+# target on device (last arrow, a named label, or the front window's close dot), draws the arrow on it, and arms a one-shot
+# confirm. Only an explicit "confirm" on the next turn posts ONE left click (face/overlay/jarvis_click.swift). Never keys.
+LAST = CACHE / "pointer_last.json"
+LAST_TTL = 120
+SKIP_OWNERS = "jarvis,jarvis orb,window server,dock,control center,notification center"
+CLICK_RE = re.compile(r"^\s*(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:(?:can|could|would|will)\s+you\s+)?(?:please\s+)?(?:go\s+ahead\s+and\s+)?"
+                      r"(?:click|tap|press)\b(?:\s+(?:on|it|that|this|the|for\s+me|x|[\w'+%-]+)){0,10}[\s?.!]*$", re.I)
+CLOSE_X_RE = re.compile(r"\b(?:click|tap|press|hit)\s+(?:on\s+)?(?:the\s+)?x\b|\bclose\s+(?:it|that|this|the\s+window)\b", re.I)
+IT_RE = re.compile(r"^\s*(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:(?:can|could|would|will)\s+you\s+)?(?:please\s+)?(?:click|tap|press)\s+(?:on\s+)?(?:it|that|this|there)(?:\s+for\s+me)?[\s?.!]*$", re.I)
+
+
+def wants_click(u: str) -> bool:
+    return bool(CLICK_RE.search(u or "")) or bool(CLOSE_X_RE.search(u or "") and re.search(r"\b(?:click|tap|press|close)\b", u or "", re.I))
+
+
+def remember(x: float, y: float, label: str) -> None:
+    import time as _t
+    try:
+        CACHE.mkdir(parents=True, exist_ok=True)
+        LAST.write_text(json.dumps({"x": x, "y": y, "label": label, "at": _t.time()}))
+    except OSError:
+        pass
+
+
+def last_target() -> dict | None:
+    import time as _t
+    try:
+        d = json.loads(LAST.read_text())
+        return d if _t.time() - float(d.get("at") or 0) <= LAST_TTL else None
+    except (OSError, ValueError):
+        return None
+
+
+def close_button() -> dict:
+    b = _bin("jarvis_winclose")
+    if b is None:
+        return {"found": False, "why": "window locator unavailable"}
+    fd, shot = tempfile.mkstemp(prefix="jarvis-pt-", suffix=".png")
+    os.close(fd)
+    try:
+        _grab(shot)
+        cp = subprocess.run([str(b), SKIP_OWNERS, shot], capture_output=True, text=True, timeout=15)
+        return json.loads((cp.stdout or "{}").strip().splitlines()[-1] or "{}")
+    except (subprocess.TimeoutExpired, ValueError, IndexError):
+        return {"found": False, "why": "window locator gave no answer"}
+    finally:
+        try:
+            os.unlink(shot)
+        except OSError:
+            pass
+
+
+def click_target(utterance: str, *, locate_fn=None, close_fn=None) -> dict:
+    """Where a click would land: {found, x, y, label, why}. Nothing is clicked here."""
+    if IT_RE.search(utterance or ""):
+        t = last_target()
+        return dict(t, found=True, source="last arrow") if t else {"found": False, "why": "no arrow is up; tell me what to click"}
+    if CLOSE_X_RE.search(utterance or ""):
+        got = (close_fn or close_button)()
+        if got.get("found"):
+            return {"found": True, "x": float(got["x"]), "y": float(got["y"]), "source": got.get("source"),
+                    "label": f"Close button on the {got.get('owner') or 'front'} window"}
+        return {"found": False, "why": str(got.get("why") or "no window")}
+    kws = [k for k in keywords(utterance) if k not in {"close", "dismiss", "x"}]
+    if not kws:
+        return {"found": False, "why": "tell me what to click"}
+    t = last_target()
+    if t and any(k in str(t.get("label") or "").lower() for k in kws):
+        return dict(t, found=True, source="last arrow")  # the arrow is already on it
+    got = (locate_fn or locate)(kws)
+    if not got.get("found"):
+        return {"found": False, "why": f"I can't find {' '.join(kws[:3])} on your screen"}
+    raw = " ".join(str(got.get("label") or kws[0]).split())[:40] or kws[0]
+    return {"found": True, "x": float(got["x"]), "y": float(got["y"]), "source": got.get("source"),
+            "label": function_name(raw, str(got.get("role") or ""), kws, str(got.get("source") or ""))}
+
+
+def click_arm(utterance: str, *, locate_fn=None, close_fn=None, draw_fn=None) -> dict:
+    t = click_target(utterance, locate_fn=locate_fn, close_fn=close_fn)
+    if not t.get("found"):
+        return {"found": False, "spoken": f"I won't click blind: {t.get('why')}."}
+    try:
+        (draw_fn or draw)(t["x"], t["y"], t["label"], 30)
+    except Exception:  # noqa: BLE001
+        pass
+    remember(t["x"], t["y"], t["label"])
+    return {"found": True, "x": t["x"], "y": t["y"], "label": t["label"], "source": t.get("source")}
+
+
+CLICK_APP = Path.home() / "Applications" / "Jarvis Click.app"  # Jarvis's own helper; holds the one Accessibility grant
+APP_BUILD = OVERLAY / "build_click_app.sh"
+
+
+def _click_app() -> Path | None:
+    exe = CLICK_APP / "Contents" / "MacOS" / "jarvis_click"
+    src = OVERLAY / "jarvis_click.swift"
+    if not exe.is_file() or (src.is_file() and src.stat().st_mtime > exe.stat().st_mtime):
+        subprocess.run(["bash", str(APP_BUILD)], capture_output=True, timeout=240)
+    return CLICK_APP if exe.is_file() else None
+
+
+def _via_app(args: list[str], wall: float = 12.0) -> dict:
+    """Launch the helper through LaunchServices so macOS checks Jarvis Click.app's own grant (not python's)."""
+    app = _click_app()
+    if app is None:
+        return {"ok": False, "why": "click helper isn't built"}
+    fd, res = tempfile.mkstemp(prefix="jarvis-click-", suffix=".json")
+    os.close(fd)
+    try:
+        os.unlink(res)
+        import time as _t
+        subprocess.run(["open", "-g", "-n", "-a", str(app), "--args", *args, "--out", res], capture_output=True, timeout=wall)
+        end = _t.time() + wall
+        while _t.time() < end:
+            if os.path.exists(res) and os.path.getsize(res) > 0:
+                _t.sleep(0.05)
+                return json.loads(Path(res).read_text())
+            _t.sleep(0.05)
+        return {"ok": False, "why": "click helper gave no answer"}
+    except (subprocess.TimeoutExpired, ValueError, OSError):
+        return {"ok": False, "why": "click helper gave no answer"}
+    finally:
+        try:
+            os.unlink(res)
+        except OSError:
+            pass
+
+
+def click_preflight() -> dict:
+    return _via_app(["--check"])
+
+
+PERMISSION_LINE = ("I didn't click: macOS hasn't switched on Accessibility for Jarvis Click. In System Settings, Privacy & Security, "
+                   "Accessibility, turn on Jarvis Click ({app}), then ask me again. Nothing was clicked.")
+
+
+def click_do(x: float, y: float, label: str, *, run_fn=None) -> dict:
+    """Jarvis's floating cursor glides to (x, y), pulses, one left click, Evens's cursor restored. Only after confirm."""
+    got = (run_fn or _via_app)([f"{x:.1f}", f"{y:.1f}", label])
+    if got.get("ok"):
+        return {"ok": True, "clicked": True, "spoken": f"Clicked the {label}."}
+    if got.get("why") == "post_event_denied":
+        return {"ok": False, "clicked": False, "why": "post_event_denied", "binary": str(CLICK_APP),
+                "spoken": PERMISSION_LINE.format(app=str(CLICK_APP))}
+    return {"ok": False, "clicked": False, "spoken": f"I didn't click: {got.get('why') or 'the click failed'}."}
+
+
+def dock_hint(kws: list[str]) -> dict | None:
+    """An installed app named in the ask whose icon is in a hidden Dock: point at the Dock edge, say so, no guessing."""
+    for k in kws:
+        name = k.capitalize()
+        app = next((p for p in (f"/Applications/{name}.app", f"/System/Applications/{name}.app",
+                                f"/System/Cryptexes/App/System/Applications/{name}.app") if os.path.isdir(p)), None)
+        if not app:
+            continue
+        try:
+            hidden = subprocess.run(["defaults", "read", "com.apple.dock", "autohide"], capture_output=True, text=True, timeout=3).stdout.strip() == "1"
+        except (OSError, subprocess.TimeoutExpired):
+            hidden = False
+        if not hidden:
+            return None
+        import ctypes
+
+        class R(ctypes.Structure):
+            _fields_ = [("x", ctypes.c_double), ("y", ctypes.c_double), ("w", ctypes.c_double), ("h", ctypes.c_double)]
+        try:
+            cg = ctypes.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+            cg.CGMainDisplayID.restype = ctypes.c_uint32
+            cg.CGDisplayBounds.argtypes = [ctypes.c_uint32]
+            cg.CGDisplayBounds.restype = R
+            bd = cg.CGDisplayBounds(cg.CGMainDisplayID())
+            x, y = bd.x + bd.w / 2, bd.y + bd.h - 6
+        except Exception:  # noqa: BLE001
+            return None
+        drawn = draw(x, y, f"Dock: {name}")
+        return {"ok": True, "found": True, "source": "dock", "x": x, "y": y, "label": f"Dock: {name}", "drawn": drawn, "keywords": kws,
+                "spoken": f"{name} is in your Dock, which is hidden at the bottom of your screen. Push the pointer to the bottom edge "
+                          f"where the arrow is and click the {name} icon."}
+    return None
