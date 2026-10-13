@@ -25,6 +25,22 @@ def test_project_commands_use_real_door_without_network_or_live_state(tmp_path, 
         assert saved["verb"] == "project_methods"
         resumed = mod.apply_turn("project launch context", hive=hive)
         assert "Review the criteria" in resumed["spoken"]
+        for command in [
+            "project launch draft: Payment message => Draft only: do not send or pay",
+            "project launch board",
+            "project launch stage outline generating revision 0: job:1 started",
+            "project launch quote: engine; 0.10; 2; catalog:1; 0.30",
+            "project launch graph",
+            "project launch lint",
+            "project launch close day: Drafted the payment message; nothing sent",
+        ]:
+            result = mod.apply_turn(command, hive=hive)
+            assert result["verb"] == "project_methods", command
+            assert result["execution"]["ok"], result["spoken"]
+            assert not result["execution"]["sent"]
+        item = json.loads(next((hive / "project-artifacts" / "launch" / "Feedback").glob("*.json")).read_text())
+        reviewed = mod.apply_turn(f"project launch review {item['id']} approve revision 0", hive=hive)
+        assert reviewed["execution"]["ok"] and not reviewed["execution"]["sent"]
         malformed = mod.apply_turn("project other create: only a vague wish", hive=hive)
         assert malformed["verb"] == "project_methods" and not malformed["execution"]["ok"]
     state = json.loads((hive / "bus" / "state.json").read_text())

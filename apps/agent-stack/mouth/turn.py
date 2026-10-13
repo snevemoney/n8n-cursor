@@ -517,7 +517,16 @@ def _apply_turn_iter_inner(
         _ea_want = _ea_want or (_ap_m.wants(spoken) and not re.search(r"\b(?:wire|pay|transfer)\b", spoken or "", re.I))
     except Exception:  # noqa: BLE001
         pass
-    if PIPELINE.is_hard_step(spoken) and not _ea_want:
+    _project_hand, _project_want = None, False
+    if re.match(r"^(?:hey\s+)?(?:jarvis[, .]+)?project\s+[a-z0-9-]+\s+", spoken, re.I):
+        try:
+            _project_hand = PIPELINE._load("agent_stack_project_methods", PIPELINE.STACK / "hands" / "project_methods.py")
+            _project_want = _project_hand.wants(spoken)
+        except (ImportError, OSError, RuntimeError):
+            pass
+    # Explicit local-artifact commands never execute sends or bookings. Their body
+    # may quote those words; apply the external-action gate to actual actions.
+    if PIPELINE.is_hard_step(spoken) and not (_ea_want or _project_want):
         token = PIPELINE.begin_turn(hive) if hasattr(PIPELINE, "begin_turn") else None
         for out in PIPELINE.apply_pipeline_iter(
             spoken,
@@ -594,13 +603,10 @@ def _apply_turn_iter_inner(
         yield _door_speak(hive, spoken, _line, "clock", retrieve_roots, gen=token,
                           execution={"ok": True, "tool": "clock", "spoken": _line, "wires": ["local_clock"], "sent": False})
         return
-    # E–J project artifacts stay behind the existing hard-step gate and hush state.
-    if re.match(r"^(?:hey\s+)?(?:jarvis[, .]+)?project\s+[a-z0-9-]+\s+(?:create|context|review|capture|compile|checkpoint)\b", spoken, re.I):
-        _projects = PIPELINE._load("agent_stack_project_methods", PIPELINE.STACK / "hands" / "project_methods.py")
-        if _projects.wants(spoken):
-            got = _projects.run(spoken, root=Path(hive) / "project-artifacts")
-            yield _door_speak(hive, spoken, got["spoken"], "project_methods", retrieve_roots, gen=token, execution=got)
-            return
+    if _project_want:
+        got = _project_hand.run(spoken, root=Path(hive) / "project-artifacts")
+        yield _door_speak(hive, spoken, got["spoken"], "project_methods", retrieve_roots, gen=token, execution=got)
+        return
     # Z82 (dCK 4:39): "find my note about X" -> name the title, ask, then fetch on "open it/yes". Z83 grounded writing.
     try:
         _fp = Path.home() / ".jarvis" / "find_pending.json"
