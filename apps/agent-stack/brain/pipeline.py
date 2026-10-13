@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "workspace_read", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "workspace_read", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -180,7 +180,7 @@ ORB_CAPABILITY_CARD = (
     "(computer use; live click unproven), Eyes stills, file drop (evidence only), "
     "voice mic+TTS, Focus, Cursor ask, Face graph (Orb tape visualizer, not facial recognition). "
     "Hive desks live in Slack, not Face spawn. "
-    "Hard steps stay Evens. Not on this Orb: web search, plugin store, image generation, "
+    "Hard steps stay Evens. Web search is read-only with cited sources. Not on this Orb: plugin store, image generation, "
     "Chrome/browser extension, slash-command palette, phone push, overnight jobs unless "
     "Evens names an interval."
 )
@@ -715,6 +715,28 @@ WORKSPACE_READ_RE = re.compile(
 def wants_workspace_read(utterance: str) -> bool:
     """Explicit read-only file / folder / git ask. Goes to hands/workspace_read, never a guess."""
     return bool(WORKSPACE_READ_RE.search(utterance or ""))
+
+
+WEB_SEARCH_RE = re.compile(
+    r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b|\blook\s+(?:it\s+|this\s+|that\s+)?up\s+online\b|"
+    r"\bweb\s+search\b|\bgoogle\s+(?:the|for|it|what|who|how|when|where|a|an)\b",
+    re.I,
+)
+
+
+def wants_web_search(utterance: str) -> bool:
+    """Explicit web search ask. Goes to hands/web_search (read-only, cited), never the browser mission."""
+    return bool(WEB_SEARCH_RE.search(utterance or ""))
+
+
+def _web_search_hand():
+    name = "agent_stack_web_search"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "web_search.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
 
 
 def _workspace_read_hand():
@@ -2524,7 +2546,7 @@ def assemble_pack(
         "Put the answer in speak after the hand runs. "
         "Hands: vault_read, safari_see, cursor_ask, craft, status, refuse_hard_step. mac_act only while Watch is armed. "
         "craft drives a Craft app: args {app, task}. "
-        'JSON: {"tool":"converse"|"vault_read"|"workspace_read"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
+        'JSON: {"tool":"converse"|"vault_read"|"workspace_read"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
     )
     return "\n".join(lines).rstrip() + "\n"
 
@@ -2751,7 +2773,7 @@ def pick_prompt(pack_path: Path, utterance: str) -> str:
         "Answer what he said. Follow-ups use the sitting turns in the pack.\n"
         "Store loads this turn. Last Cursor chat is the last Cursor sitting. Do not keyword-search the vault for chats.\n"
         "JSON preferred, prose speak is also fine:\n"
-        '{"tool":"converse"|"vault_read"|"workspace_read"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}\n'
+        '{"tool":"converse"|"vault_read"|"workspace_read"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}\n'
     )
 
 
@@ -4595,6 +4617,21 @@ def run_tool(
             return {"ok": False, "tool": tool, "spoken": "No browser steering was requested.",
                     "task_verified": False, "wires": [tool], "cites": [], "sent": False}
         return browser_runtime().pipeline_tool(args, utterance, hive)
+    if tool == "web_search":
+        ws = _web_search_hand()
+        q = str(args.get("query") or "") or ws.query_from_utterance(utterance)
+        got = ws.run({"query": q})
+        return {
+            "ok": bool(got.get("ok")),
+            "tool": tool,
+            "spoken": str(got.get("spoken") or ""),
+            "wires": ["web_search"],
+            "cites": list(got.get("cites") or []),
+            "sent": False,
+            "task_verified": bool(got.get("ok")),
+            "web_search_meta": ws.log_meta(got),
+            "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN,
+        }
     if tool == "workspace_read":
         wr = _workspace_read_hand()
         wargs = dict(args) if args.get("op") else wr.args_from_utterance(utterance)
@@ -5833,6 +5870,10 @@ def apply_pipeline_iter(
             ran = None
     if pick is None and ran is None and wants_workspace_read(spoken_in) and not is_hard_step(spoken_in):
         pick = {"tool": "workspace_read", "args": {}, "speak": ""}
+        ran = run_tool(pick, spoken_in, hive=hive, retrieve_roots=retrieve_roots)
+        brain = None
+    if pick is None and ran is None and wants_web_search(spoken_in) and not is_hard_step(spoken_in):
+        pick = {"tool": "web_search", "args": {}, "speak": ""}
         ran = run_tool(pick, spoken_in, hive=hive, retrieve_roots=retrieve_roots)
         brain = None
     if pick is None and wants_local_read(spoken_in):
