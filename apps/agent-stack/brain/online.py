@@ -111,6 +111,7 @@ RULE_ASK_RE = re.compile(
     re.I,
 )
 OPENROUTER_RETRIEVE_TOKENS = int(os.environ.get("JARVIS_TALK_MAX_TOKENS") or 320)  # short spoken answers; cut ArtCraft latency
+OPENROUTER_PLAIN_TOKENS = int(os.environ.get("JARVIS_PLAIN_MAX_TOKENS") or 256)
 LENGTH_RETRY_TOKENS = 640
 LENGTH_MISS = "UNKNOWN. That answer ran out of room."
 OPENROUTER_HANDS = (
@@ -461,9 +462,47 @@ _STREAM = threading.local()
 STREAM_SENTENCE_RE = re.compile(r"(.+?[.!?])(?:\s+|$)", re.S)
 
 
-def set_stream_sink(fn) -> None:
+def set_stream_sink(fn, *, turn_start: float | None = None) -> None:
     """Per-thread callback for honest, sentence-buffered talk deltas (None turns it off)."""
     _STREAM.sink = fn
+    if turn_start is not None:
+        _STREAM.turn_start = turn_start
+
+
+# Turn budget. Face TURN_WALL_SEC is 25 s. A streaming reply still going at the soft mark is
+# ended on its last whole sentence plus an honest wrap-up; every provider wait is also capped at
+# the hard mark so no turn can reach the wall. Override with JARVIS_TURN_SOFT_SEC / _HARD_SEC.
+TURN_SOFT_SEC = _sec_env("JARVIS_TURN_SOFT_SEC", 18.0)
+TURN_HARD_SEC = _sec_env("JARVIS_TURN_HARD_SEC", 21.0)
+SOFT_WRAP = "I'm cutting this short for time, sir. Say continue and I'll pick up where I stopped."
+
+
+def set_turn_start(t: float | None = None) -> float:
+    """Mark the turn start (monotonic) on this thread. The talk worker inherits it via set_stream_sink."""
+    _STREAM.turn_start = time.monotonic() if t is None else float(t)
+    return _STREAM.turn_start
+
+
+def turn_start() -> float | None:
+    return getattr(_STREAM, "turn_start", None)
+
+
+def turn_left(mark: float, *, now: float | None = None, fallback_start: float | None = None) -> float:
+    """Seconds left before `mark` s after the turn start (inf when no start is known)."""
+    t0 = turn_start() or fallback_start
+    if t0 is None:
+        return float("inf")
+    return mark - ((time.monotonic() if now is None else now) - t0)
+
+
+def soft_wrap(text: str) -> str:
+    """Whole sentences already said, then the honest cut-short line. The clipped tail is dropped."""
+    body = (text or "").strip()
+    m = None
+    for m in re.finditer(r"[.!?](?:\s|$)", body):
+        pass
+    kept = body[: m.end()].strip() if m else ""
+    return f"{kept} {SOFT_WRAP}".strip()
 
 
 def stream_sink():
@@ -508,10 +547,13 @@ def raced_stream(
     hedge: float,
     sink=None,
     opener=None,
+    soft_at: float | None = None,
 ) -> tuple[str, str, str]:
     """Stream the primary; after `hedge` s with no first token, also stream the backup.
     The first model to send a content token wins and is streamed; the other is closed.
-    Returns (text, finish_reason, winning model). Raises TimeoutError if nobody answers."""
+    Returns (text, finish_reason, winning model). Raises TimeoutError if nobody answers.
+    `soft_at` (monotonic): if the winner is still streaming then, stop, keep whole sentences and
+    add SOFT_WRAP; finish_reason is "soft_deadline"."""
     opener = opener or (lambda body, budget: _http_open(OPENROUTER_URL, data=body, headers=headers, timeout=budget))
     began = time.monotonic()
     lock = threading.Lock()
@@ -563,6 +605,7 @@ def raced_stream(
     buf = ""
     finish = ""
     errs: list[str] = []
+    soft_cut = False
     first_by = min(timeout, first_token_sec())
     while True:
         left = timeout - (time.monotonic() - began)
@@ -571,7 +614,12 @@ def raced_stream(
             left = min(left, first_by - (time.monotonic() - began))
         if left <= 0:
             break
+        if soft_at is not None and st["winner"] is not None and parts and time.monotonic() >= soft_at:
+            soft_cut = True
+            break
         wait = left
+        if soft_at is not None and st["winner"] is not None:
+            wait = max(0.01, min(wait, soft_at - time.monotonic()))
         if st["winner"] is None and launched < len(payloads):
             wait = max(0.05, min(left, hedge - (time.monotonic() - began)))
         try:
@@ -619,6 +667,19 @@ def raced_stream(
                     pass
     if not win:
         raise TimeoutError(errs[-1] if errs else "no first token")
+    if soft_cut:
+        with lock:
+            for res in list(st["open"].values()):
+                try:
+                    res.close()
+                except Exception:  # noqa: BLE001
+                    pass
+        if sink is not None:
+            try:
+                sink(SOFT_WRAP)
+            except Exception:  # noqa: BLE001
+                pass
+        return soft_wrap("".join(parts)), "soft_deadline", win
     return "".join(parts).strip(), finish, win
 
 
@@ -1695,6 +1756,9 @@ def _call_openrouter_inner(
     if not (hands or extra_tools) and RULE_ASK_RE.search(prompt or ""):
         # Rule/permission asks ("who may issue a PASS?") need one quoted rule, not an essay: 20 s tails seen live.
         max_tokens = min(max_tokens, OPENROUTER_RULE_TOKENS)
+    if not (hands or extra_tools or stills):
+        # Plain spoken questions: a long essay is what ran 18-20 s live. Cap tighter than retrieve.
+        max_tokens = min(max_tokens, OPENROUTER_PLAIN_TOKENS)
     if not (hands or extra_tools) and STATUS_ASK_RE.search(prompt or ""):
         max_tokens = min(max_tokens, OPENROUTER_STATUS_ASK_TOKENS)
     with_tools = bool(hands or extra_tools)
@@ -1732,7 +1796,7 @@ def _call_openrouter_inner(
             last_err = "http 429"
             continue
         spent = time.monotonic() - wall_start
-        remain = OPENROUTER_WALL_SEC - spent
+        remain = min(OPENROUTER_WALL_SEC - spent, turn_left(TURN_HARD_SEC, fallback_start=wall_start))
         if remain < 1.0:
             last_err = "timeout"
             break
@@ -1803,8 +1867,10 @@ def _call_openrouter_inner(
                             racers.append((fast, _openrouter_payload(fast, user, stream=True, max_tokens=max_tokens, primary=fast)))
                         stream_began = time.monotonic()
                         try:
+                            soft_left = turn_left(TURN_SOFT_SEC, fallback_start=wall_start)
                             text, finish, won = raced_stream(
-                                racers, headers=headers, timeout=attempt, hedge=stream_hedge_sec(), sink=stream_sink()
+                                racers, headers=headers, timeout=attempt, hedge=stream_hedge_sec(), sink=stream_sink(),
+                                soft_at=time.monotonic() + soft_left if soft_left != float("inf") else None,
                             )
                             mid = won
                             data = {"choices": [{"message": {"content": text}, "finish_reason": finish or "stop"}]}
@@ -1856,7 +1922,7 @@ def _call_openrouter_inner(
             if int(exc.code) not in {400, 422}:
                 continue
             try:
-                remain = OPENROUTER_WALL_SEC - (time.monotonic() - wall_start)
+                remain = min(OPENROUTER_WALL_SEC - (time.monotonic() - wall_start), turn_left(TURN_HARD_SEC, fallback_start=wall_start))
                 if remain < 1.0:
                     last_err = "timeout"
                     break
@@ -1908,9 +1974,12 @@ def _call_openrouter_inner(
             kept = _usable_length_text(text)
             retry_finish = finish
             if not kept:
-                remain = OPENROUTER_WALL_SEC - (time.monotonic() - wall_start)
+                remain = min(
+                    OPENROUTER_WALL_SEC - (time.monotonic() - wall_start),
+                    turn_left(TURN_SOFT_SEC, fallback_start=wall_start),
+                )
                 more = ""
-                if remain >= 1.0:
+                if remain >= 3.0:
                     more, retry_finish = _openrouter_length_retry(
                         mid, user, stills, headers, timeout=min(10.0, remain)
                     )

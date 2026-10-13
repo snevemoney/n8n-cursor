@@ -186,7 +186,8 @@ class PersonaWrapTest(unittest.TestCase):
             verb="converse",
             utterance="What is the weather?",
         )
-        self.assertNotIn("PR 381", stripped)
+        # PR numbers are never stripped now (live: "I don't see any reference to in ...").
+        self.assertIn("PR 381", stripped)
 
     def test_cursor_selection_keeps_cursor_and_the_face_address(self) -> None:
         ask = "This is a code question for Cursor. Do not answer as if you drove Grok or Slack."
@@ -279,8 +280,9 @@ class PersonaWrapTest(unittest.TestCase):
         self.assertNotIn("asks.md", low)
         self.assertNotIn("cursor-auth-dark", low)
         self.assertNotIn("/tmp/see.jpg", low)
-        self.assertNotIn("pr #200", low)
-        self.assertNotIn("pid 4018", low)
+        # Literal ids are answer content now, not crumbs.
+        self.assertIn("PR #200", out)
+        self.assertIn("PID 4018", out)
 
     def test_factory_close_and_grade_are_not_spoken(self) -> None:
         raw = (

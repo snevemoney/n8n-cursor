@@ -5481,6 +5481,7 @@ def apply_pipeline_iter(
 ):
     """Yield first speakable sentence, then the finished turn. Do not wait for done to speak."""
     spoken_in = (utterance or "").strip()
+    _turn_t0 = ONLINE.set_turn_start() if ONLINE is not None and hasattr(ONLINE, "set_turn_start") else None
     _jev_reset()
     begin_turn_evidence()
     token = int(gen) if gen is not None else begin_turn(hive)
@@ -5949,7 +5950,10 @@ def apply_pipeline_iter(
 
             def _talk_worker() -> None:
                 try:
-                    ONLINE.set_stream_sink(deltas.put)
+                    try:
+                        ONLINE.set_stream_sink(deltas.put, turn_start=_turn_t0)
+                    except TypeError:
+                        ONLINE.set_stream_sink(deltas.put)
                     box["got"] = online_talk(spoken_in, brief, talk_fn=None, images=_vision_urls(hive), hands=False)
                 except Exception as exc:  # noqa: BLE001
                     box["err"] = exc
