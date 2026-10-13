@@ -37,11 +37,12 @@ JEV_MODEL = "typesafe/jev-1.13"
 MAX_QUESTIONS = 12
 CLARIFY_LINE = "I only caught part of that. What would you like me to do?"
 
-HANDLERS = ("converse", "status", "recall", "local_read", "tool", "craft", "hard_step", "unclear", "other")
+HANDLERS = ("memory", "converse", "status", "recall", "local_read", "tool", "craft", "hard_step", "unclear", "other")
 
 # --- 1. deterministic skill picker (m46 pattern): ordered rules, first match wins -----------------
 _RULES: list[tuple[str, float, re.Pattern]] = [
     ("hard_step", 1.0, re.compile(r"\b(send|email|text|pay|purchase|buy|deploy|merge|publish|post|delete|wire\s+money|transfer)\b.{0,40}\b(it|this|that|the|to|now|invoice|pr|money|\$)", re.I)),
+    ("memory", 0.9, re.compile(r"^\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?(?:remember|forget|recall)\b|^\s*what\s+do\s+you\s+remember\b", re.I)),
     ("status", 0.9, re.compile(r"\b(run\s+status|status\s+(?:check|report)|are\s+(?:all\s+)?(?:your\s+)?tools\s+ready|system\s+status|are\s+you\s+(?:up|online|working))\b", re.I)),
     ("recall", 0.9, re.compile(r"\b(what\s+did\s+(?:I|you|we)\s+(?:just\s+)?(?:say|ask|tell)|remind\s+me\s+what|earlier\s+you\s+said|last\s+thing\s+(?:I|you)\s+said)\b", re.I)),
     # web_search hand: explicit web lookups (advisory label only).
