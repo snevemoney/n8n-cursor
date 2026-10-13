@@ -493,6 +493,7 @@ def _load(name: str, path: Path):
     return mod
 
 
+hooks = _load("agent_stack_hooks", STACK / "brain" / "hooks.py")
 STORE = _load("agent_stack_store", STACK / "memory" / "store.py")
 RETRIEVE = _load("agent_stack_retrieve", STACK / "memory" / "retrieve.py")
 CHATS = _load("agent_stack_chats", STACK / "memory" / "chats.py")
@@ -4655,7 +4656,29 @@ def browser_runtime():
     return sys.modules[name]
 
 
-def run_tool(
+def hooked_result(result):
+    """Every tool result passes the in-process post_tool (redact) and stop_check (evidence) hooks."""
+    return hooks.stop_check(hooks.post_tool(result))
+
+
+def run_tool(pick: dict, utterance: str, **kw) -> dict:
+    """Tool entry point: pre_tool gate, then the hand, then post_tool + stop_check."""
+    tool = str((pick or {}).get("tool") or "")
+    gate = hooks.pre_tool(tool, utterance)
+    if not gate["allow"]:
+        return hooked_result({
+            "ok": True,
+            "tool": "refuse_hard_step",
+            "spoken": PROPOSAL,
+            "wires": ["refuse_hard_step"],
+            "cites": [],
+            "sent": False,
+            "hook": "pre_tool",
+        })
+    return hooked_result(_run_tool_inner(pick, utterance, **kw))
+
+
+def _run_tool_inner(
     pick: dict,
     utterance: str,
     *,
@@ -4673,7 +4696,7 @@ def run_tool(
     speak = str(pick.get("speak") or "")
     # A model-picked hand is not authority. Safari runs only on an explicit
     # look. The proposal script runs only on a real send/pay/deploy/book/publish.
-    if is_hard_step(utterance) or tool in {"send", "pay", "deploy", "book", "publish"}:
+    if is_hard_step(utterance):
         return {
             "ok": True,
             "tool": "refuse_hard_step",
