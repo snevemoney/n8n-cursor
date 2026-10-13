@@ -103,5 +103,13 @@ class SoftDeadlineTests(unittest.TestCase):
         self.assertLessEqual(online.OPENROUTER_PLAIN_TOKENS, 256)
 
 
+    def test_length_cap_keeps_whole_sentences_instead_of_second_call(self):
+        text = ("The keeper climbed the stairs every night for forty years. He wound the lens. "
+                "Then one winter the storm came and he")
+        self.assertEqual(online._usable_length_text(text),
+                         "The keeper climbed the stairs every night for forty years. He wound the lens.")
+        self.assertEqual(online._usable_length_text("Short. and then the keeper went up to the"), "")
+
+
 if __name__ == "__main__":
     unittest.main()

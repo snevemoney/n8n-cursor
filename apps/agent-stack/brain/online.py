@@ -474,7 +474,7 @@ def set_stream_sink(fn, *, turn_start: float | None = None) -> None:
 # the hard mark so no turn can reach the wall. Override with JARVIS_TURN_SOFT_SEC / _HARD_SEC.
 TURN_SOFT_SEC = _sec_env("JARVIS_TURN_SOFT_SEC", 18.0)
 TURN_HARD_SEC = _sec_env("JARVIS_TURN_HARD_SEC", 21.0)
-SOFT_WRAP = "I'm cutting this short for time, sir. Say continue and I'll pick up where I stopped."
+SOFT_WRAP = "I'm cutting this short for time. Say continue and I'll pick up where I stopped."
 
 
 def set_turn_start(t: float | None = None) -> float:
@@ -1204,7 +1204,17 @@ def unfinished_clause(text: str) -> bool:
 def _usable_length_text(text: str) -> str:
     """Keep a finished sentence after a length cap. Drop mid-clause leftovers."""
     body = complete_spoken(text)
-    if not body or _looks_like_scratchpad(body) or unfinished_clause(body):
+    if not body or _looks_like_scratchpad(body):
+        return ""
+    if unfinished_clause(body):
+        # Keep the whole sentences already spoken (streamed to the Orb) instead of a second full
+        # call: a length re-ask cost a second answer and up to 10 s live. Needs real prose left.
+        m = None
+        for m in re.finditer(r"[.!?](?=\s)", body):
+            pass
+        kept = body[: m.end()].strip() if m else ""
+        if len(kept) >= 60 and not re.search(r"https?://\S*$", kept):
+            return kept
         return ""
     return body
 
