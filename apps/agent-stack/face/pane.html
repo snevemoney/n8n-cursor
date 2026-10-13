@@ -1111,8 +1111,12 @@
         pendingHeard = "";
         finishTimer = 0;
         if (said) handleHeard(said);
-      }, FINISH_MS);
+      }, midSentence(pendingHeard) ? FINISH_MS + MID_SENTENCE_EXTRA_MS : FINISH_MS);
     }
+    // Z12 reflex 'finished talking': a trailing and/so/um/comma means he is mid-sentence; wait one more beat.
+    const MID_SENTENCE_EXTRA_MS = 1100;
+    const MID_RE = /(?:\b(?:and|so|but|or|because|then|um+|uh+|er+|like|with|to|the|a|my|of)|,|\.\.\.|-)\s*$/i;
+    function midSentence(t) { return MID_RE.test(String(t || "").trim()); }
 
     function scheduleRestart(ms) {
       clearTimeout(state.restartTimer);

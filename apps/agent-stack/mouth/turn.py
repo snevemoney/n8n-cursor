@@ -664,6 +664,22 @@ def _talk_records() -> tuple[dict, dict]:
     return dict(talk), dict(inject)
 
 
+_REFLEX = None
+
+
+def _reflex(utterance: str) -> dict | None:
+    """Z12: the five quick decisions for this utterance (numbers + lane name only, never text)."""
+    global _REFLEX
+    try:
+        if _REFLEX is None:
+            _REFLEX = _load_mod("agent_stack_reflex5", Path(__file__).resolve().parent.parent / "brain" / "reflex5.py")
+        jevr = getattr(PIPELINE, "JEVR", None)
+        return _REFLEX.decide(utterance, route=getattr(PIPELINE, "model_free_route", None),
+                              lane_fn=getattr(jevr, "pick_skill", None))
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def apply_turn_iter(utterance: str, **kw):
     """The turn, then one JSONL log line when it finishes. Logging never breaks a turn."""
     import time as _time
@@ -683,7 +699,9 @@ def apply_turn_iter(utterance: str, **kw):
             log = _turn_log()
             if log.log_path() is not None:
                 talk, inject = _talk_records()
-                log.append(log.build_row(started=started, ended=_time.time(), events=events, talk=talk, inject=inject, first_ms=first_ms))
+                row = log.build_row(started=started, ended=_time.time(), events=events, talk=talk, inject=inject, first_ms=first_ms)
+                row["reflex"] = _reflex(utterance)
+                log.append(row)
         except Exception:  # noqa: BLE001
             pass
 

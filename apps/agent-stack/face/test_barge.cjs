@@ -10,3 +10,10 @@ assert.ok(!bargeHit(0.02, 0.0, 900), "room noise under floor -> no barge");
 assert.ok(/applyConstraints\(\{ echoCancellation: true/.test(html), "mic asks for echo cancellation");
 assert.ok(/startBargeWatch\(\);/.test(html) && /pressStop\(\);\s*\n\s*\$\("spoken"\)\.textContent = "Go ahead, I'm listening\."/.test(html), "barge stops speech and listens");
 console.log("barge-in rule + wiring ok", BARGE);
+// Z12 reflex 'finished' rule in the pane matches brain/reflex5.TRAIL_RE.
+const mid = html.match(/const MID_RE = (\/.*\/i);/)[1];
+const MID = eval(mid);
+for (const t of ["so I was thinking and", "open the, ", "um", "check my"]) assert.ok(MID.test(t.trim()), t);
+for (const t of ["open my notes", "what time is it?", "stop"]) assert.ok(!MID.test(t), t);
+assert.ok(/midSentence\(pendingHeard\) \? FINISH_MS \+ MID_SENTENCE_EXTRA_MS : FINISH_MS/.test(html));
+console.log("reflex finished rule ok");
