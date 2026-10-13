@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "results_recall", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -1017,6 +1017,8 @@ def model_free_route(spoken_in: str) -> dict | None:
         return {"tool": "memory", "args": _memory_hand().args_from_utterance(spoken_in), "speak": ""}
     if wants_continuity_status(spoken_in):
         return None
+    if _prebrief_hand().wants_prep(spoken_in):
+        return {"tool": "prebrief", "args": {}, "speak": ""}
     if _results_mem().wants_results(spoken_in):
         return {"tool": "results_recall", "args": {}, "speak": ""}
     if _cost_hand().wants_cost(spoken_in):
@@ -1192,6 +1194,46 @@ def _results_mem():
         sys.modules[key] = mod
         spec.loader.exec_module(mod)
     return sys.modules[key]
+
+
+def _prebrief_hand():
+    key = "agent_stack_prebrief"
+    if key not in sys.modules:
+        spec = importlib.util.spec_from_file_location(key, STACK / "hands" / "prebrief.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[key] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[key]
+
+
+PREBRIEF_PUMP_SEC = 120
+
+
+def _cal_today():
+    return MACOS.calendar_today(8, "today") if MACOS is not None else {"ok": False}
+
+
+def prebrief_tick(hive: Path) -> str | None:
+    """Z09: one pre-brief check. The face process runs it every PREBRIEF_PUMP_SEC."""
+    return _prebrief_hand().tick(hive, cal_fn=_cal_today, mutate_fn=mutate_bus)
+
+
+def _start_prebrief_pump() -> None:
+    import sys as _sys
+    if "_pytest" in _sys.modules or "unittest" in _sys.modules or not str(_sys.argv[0] if _sys.argv else "").endswith("serve.py"):
+        return
+    if os.environ.get("JARVIS_PREBRIEF", "1") == "0":
+        return
+
+    def pump():
+        while True:
+            time.sleep(PREBRIEF_PUMP_SEC)
+            try:
+                prebrief_tick(HIVE)
+            except Exception:  # noqa: BLE001 — the pump must survive a bad tick
+                continue
+
+    threading.Thread(target=pump, daemon=True, name="prebrief-pump").start()
 
 
 def _cost_hand():
@@ -5264,6 +5306,11 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["screen_see"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "screen_see_meta": hd.log_meta(got)}
+    if tool == "prebrief":
+        got = _prebrief_hand().prep(utterance, cal_fn=_cal_today, search_fn=lambda q: RETRIEVE.search(q) if RETRIEVE else {})
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["calendar", "vault"],
+                "cites": list(got.get("cites") or []), "sent": False, "task_verified": bool(got.get("ok")),
+                "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "results_recall":
         return {"ok": True, "tool": tool, "spoken": _results_mem().spoken_recent(), "wires": ["results"], "cites": [],
                 "sent": False, "task_verified": True, "outcome": TOOL_LOOP}
@@ -6080,7 +6127,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "results_recall")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "results_recall", "prebrief")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
@@ -7608,3 +7655,6 @@ def deliver_browser_missions(hive: Path) -> dict | None:
         if committed is not None:
             return committed
     return None
+
+
+_start_prebrief_pump()

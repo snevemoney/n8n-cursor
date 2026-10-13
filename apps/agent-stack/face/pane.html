@@ -1702,6 +1702,19 @@
         $("spoken").textContent = "Focus failed to reach the face.";
       }
     }
+    // Z09: a meeting pre-brief offer rides the bus like a focus callout; shown and spoken once, when idle.
+    let lastPrebriefGen = null;
+    function paintPrebrief(bus) {
+      const pb = (bus && bus.prebrief) || null;
+      const gen = pb ? Number(pb.gen || 0) : 0;
+      if (lastPrebriefGen === null) { lastPrebriefGen = gen; return; }
+      if (gen > lastPrebriefGen) {
+        lastPrebriefGen = gen;
+        const line = String((pb && pb.line) || "").trim();
+        if (line) pendingNudge = line;
+      }
+      deliverNudge();
+    }
     function paintFocus(bus) {
       const focus = bus && bus.focus && typeof bus.focus === "object" ? bus.focus : null;
       const armed = !!(focus && focus.armed);
@@ -1895,6 +1908,7 @@
         watchArmed = !!watch.armed;
         if ($("watchBtn") && !watchBusy) $("watchBtn").classList.toggle("on", watchArmed);
         paintFocus(bus);
+        paintPrebrief(bus);
         paintLights({ health, bus, wires });
       } catch (e) {
         $("link").textContent = "NEURAL LINK - LOCAL FACE ONLY";
