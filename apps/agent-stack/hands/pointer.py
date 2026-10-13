@@ -47,6 +47,8 @@ def keywords(u: str) -> list[str]:
 
 def _bin(name: str) -> Path | None:
     src, b = OVERLAY / f"{name}.swift", CACHE / name
+    if not src.is_file():
+        return b if b.is_file() else None
     if b.is_file() and b.stat().st_mtime >= src.stat().st_mtime:
         return b
     if not shutil.which("swiftc"):
@@ -121,7 +123,10 @@ def _where(x: float, y: float) -> str:
 
 def run(utterance: str, *, locate_fn=None, draw_fn=None, hover_fn=None, where_fn=None) -> dict:
     kws = keywords(utterance)
-    got = (locate_fn or locate)(kws)
+    try:
+        got = (locate_fn or locate)(kws)
+    except Exception as exc:  # noqa: BLE001 — a locator fault is an honest miss, never a dead turn
+        got = {"found": False, "why": f"locator error {type(exc).__name__}"}
     if not got.get("found"):
         why = str(got.get("why") or "")
         return {"ok": True, "found": False, "source": None, "keywords": kws,
@@ -129,7 +134,10 @@ def run(utterance: str, *, locate_fn=None, draw_fn=None, hover_fn=None, where_fn
                           + ("Is it on the screen right now?" if "match" in why else f"({why}.)")}
     x, y = float(got["x"]), float(got["y"])
     label = " ".join(str(got.get("label") or kws[0]).split())[:40] or kws[0]
-    drawn = (draw_fn or draw)(x, y, label)
+    try:
+        drawn = (draw_fn or draw)(x, y, label)
+    except Exception:  # noqa: BLE001
+        drawn = False
     (hover_fn or hover)(x, y)
     where = (where_fn or _where)(x, y)
     said = f"There, sir: {label}, {where} of your screen. The red arrow is on it; click it when you're ready."
