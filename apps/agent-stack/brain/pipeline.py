@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "workspace_read", "memory", "skills", "mcp_inventory", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "workspace_read", "memory", "skills", "mcp_inventory", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -798,6 +798,17 @@ def wants_voice_engine(utterance: str) -> bool:
     return bool(VOICE_ENGINE_RE.search(utterance or ""))
 
 
+SCREEN_SEE_RE = re.compile(
+    r"\b(?:describe|grab|look\s+at)\s+my\s+screen\b|\bwhat(?:\x27s|s|\s+is)\s+on\s+my\s+screen\b|\bscreenshot\s+of\s+my\s+screen\b",
+    re.I,
+)
+
+
+def wants_screen_see(utterance: str) -> bool:
+    """Explicit ask for the screen_see hand (FINISH-LIST)."""
+    return bool(SCREEN_SEE_RE.search(utterance or ""))
+
+
 def jarvis_rules() -> str:
     """Short operating rules (JARVIS.md) loaded into the turn prompt. Empty string if the file is missing."""
     try:
@@ -848,8 +859,13 @@ def model_free_route(spoken_in: str) -> dict | None:
     if wants_continuity_status(spoken_in):
         return None
     early = fixed_route(spoken_in)
+    if early is not None and early.get("tool") == "safari_see" and (early.get("args") or {}).get("act") == "grab":
+        # Rank 16: a screen ask is the whole display (screen_see), not the Safari tab.
+        early = {"tool": "screen_see", "args": {}, "speak": ""}
     if early is None and not is_hard_step(spoken_in):
-        if wants_voice_engine(spoken_in):
+        if wants_screen_see(spoken_in):
+            early = {"tool": "screen_see", "args": {}, "speak": ""}
+        elif wants_voice_engine(spoken_in):
             early = {"tool": "voice_engine", "args": {}, "speak": ""}
         elif wants_loop(spoken_in):
             early = {"tool": "loop", "args": {}, "speak": ""}
@@ -948,6 +964,16 @@ def _voice_engine_hand():
     name = "agent_stack_voice_engine"
     if name not in sys.modules:
         spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "voice_engine.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _screen_see_hand():
+    name = "agent_stack_screen_see"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "screen_see.py")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
@@ -4812,6 +4838,8 @@ def _run_tool_inner(
     tool = str(pick.get("tool") or "")
     args = pick.get("args") if isinstance(pick.get("args"), dict) else {}
     speak = str(pick.get("speak") or "")
+    if tool == "safari_see" and str(args.get("act") or "") in {"grab", "screenshot", "share"} and ROUTE_SCREEN_RE.search(utterance or ""):
+        tool = "screen_see"  # rank 16: the model's tab grab for a my-screen ask becomes the whole screen
     # A model-picked hand is not authority. Safari runs only on an explicit
     # look. The proposal script runs only on a real send/pay/deploy/book/publish.
     if is_hard_step(utterance):
@@ -4911,6 +4939,16 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["voice_engine"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "voice_engine_meta": hd.log_meta(got)}
+    if tool == "screen_see":
+        hd = _screen_see_hand()
+
+        def _vision(prompt, images):
+            seen = online_talk(prompt, "", images=images, hands=False) or {}
+            return None if seen.get("unknown") else (seen.get("spoken") or seen.get("text"))
+        got = _screen_see_hand().run({}, hive=hive, vision_fn=_vision)
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["screen_see"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "screen_see_meta": hd.log_meta(got)}
     if tool == "mcp_inventory":
         mi = _mcp_inventory_hand()
         got = mi.run({})
@@ -5578,7 +5616,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:

@@ -1,23 +1,92 @@
 {
-  "source": "~/jarvis-proof/frontier-20261013/probe.sh (17 test asks, no user text)",
-  "note": "expect = the hand the ask should reach. 'model' = no model-free hand exists yet (gap); those probes fail until a hand ships.",
-  "probes": [
-    {"cap": "mcp", "ask": "What MCP servers or tools can you call right now? List them.", "expect": "mcp_inventory"},
-    {"cap": "tools", "ask": "Use a tool: list the files in my Downloads folder.", "expect": "workspace_read"},
-    {"cap": "skills", "ask": "Which skills do you have installed? Name three.", "expect": "skills_list"},
-    {"cap": "workflows", "ask": "Run the feature-loop workflow status for me.", "expect": "skills_list"},
-    {"cap": "memory", "ask": "Remember that my favourite test color is teal.", "expect": "remember"},
-    {"cap": "memory2", "ask": "What is my favourite test color?", "expect": "remember"},
-    {"cap": "context", "ask": "What repo and branch are you working from right now?", "expect": "workspace_read"},
-    {"cap": "loops", "ask": "Start a loop that checks disk space every 10 minutes.", "expect": "loop"},
-    {"cap": "web", "ask": "Search the web: what is the latest stable Python release?", "expect": "web_search"},
-    {"cap": "browser", "ask": "Open example.com in the browser and tell me the page title.", "expect": "safari_see"},
-    {"cap": "computer", "ask": "Take a screenshot of my screen and describe it.", "expect": "safari_see"},
-    {"cap": "jev", "ask": "Ask Jev whether I should merge PR 619.", "expect": "desk_dispatch"},
-    {"cap": "repos", "ask": "Which repos do you have installed locally?", "expect": "workspace_read"},
-    {"cap": "coding", "ask": "Write a python function that reverses a string and run its test.", "expect": "code_run"},
-    {"cap": "files", "ask": "Read the first line of README.md in your repo.", "expect": "workspace_read"},
-    {"cap": "vps", "ask": "What is the status of my Hostinger VPS?", "expect": "status"},
-    {"cap": "voice", "ask": "Say hello out loud.", "expect": "say"}
-  ]
+ "source": "~/jarvis-proof/frontier-20261013/probe.sh (17 test asks, no user text)",
+ "note": "expect = the hand the ask should reach. 'model' = no model-free hand exists yet (gap); those probes fail until a hand ships.",
+ "probes": [
+  {
+   "cap": "mcp",
+   "ask": "What MCP servers or tools can you call right now? List them.",
+   "expect": "mcp_inventory"
+  },
+  {
+   "cap": "tools",
+   "ask": "Use a tool: list the files in my Downloads folder.",
+   "expect": "workspace_read"
+  },
+  {
+   "cap": "skills",
+   "ask": "Which skills do you have installed? Name three.",
+   "expect": "skills_list"
+  },
+  {
+   "cap": "workflows",
+   "ask": "Run the feature-loop workflow status for me.",
+   "expect": "skills_list"
+  },
+  {
+   "cap": "memory",
+   "ask": "Remember that my favourite test color is teal.",
+   "expect": "remember"
+  },
+  {
+   "cap": "memory2",
+   "ask": "What is my favourite test color?",
+   "expect": "remember"
+  },
+  {
+   "cap": "context",
+   "ask": "What repo and branch are you working from right now?",
+   "expect": "workspace_read"
+  },
+  {
+   "cap": "loops",
+   "ask": "Start a loop that checks disk space every 10 minutes.",
+   "expect": "loop"
+  },
+  {
+   "cap": "web",
+   "ask": "Search the web: what is the latest stable Python release?",
+   "expect": "web_search"
+  },
+  {
+   "cap": "browser",
+   "ask": "Open example.com in the browser and tell me the page title.",
+   "expect": "safari_see"
+  },
+  {
+   "cap": "computer",
+   "ask": "Take a screenshot of my screen and describe it.",
+   "expect": "screen_see",
+   "note": "FINISH-LIST rank 16: the screen, not the tab (was safari_see)"
+  },
+  {
+   "cap": "jev",
+   "ask": "Ask Jev whether I should merge PR 619.",
+   "expect": "desk_dispatch"
+  },
+  {
+   "cap": "repos",
+   "ask": "Which repos do you have installed locally?",
+   "expect": "workspace_read"
+  },
+  {
+   "cap": "coding",
+   "ask": "Write a python function that reverses a string and run its test.",
+   "expect": "code_run"
+  },
+  {
+   "cap": "files",
+   "ask": "Read the first line of README.md in your repo.",
+   "expect": "workspace_read"
+  },
+  {
+   "cap": "vps",
+   "ask": "What is the status of my Hostinger VPS?",
+   "expect": "status"
+  },
+  {
+   "cap": "voice",
+   "ask": "Say hello out loud.",
+   "expect": "say"
+  }
+ ]
 }

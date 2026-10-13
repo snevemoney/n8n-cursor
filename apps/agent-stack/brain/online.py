@@ -206,6 +206,7 @@ OPENROUTER_HANDS = (
     {"type": "function", "function": {"name": "desk_dispatch", "description": "Write an ADVISORY job card for a desk (Jev, Watchdog, Forge, Librarian...) on the hive bus. Never sends anything; quotes the desk's ACTIVE_TASKS lock.", "parameters": {"type": "object", "properties": {"desk": {"type": "string"}, "ask": {"type": "string"}}}}},
     {"type": "function", "function": {"name": "loop", "description": "Register, list or cancel a READ-ONLY recurring check (cap 6/day, stop_when/max_runs/expires). Never loops an action.", "parameters": {"type": "object", "properties": {"op": {"type": "string", "enum": ["start", "list", "cancel"]}, "what": {"type": "string"}, "every_min": {"type": "integer"}, "id": {"type": "string"}}}}},
     {"type": "function", "function": {"name": "voice_engine", "description": "Say which text-to-speech engine really speaks right now (from the voice report). Read-only.", "parameters": {"type": "object", "properties": {}}}},
+    {"type": "function", "function": {"name": "screen_see", "description": "Describe what is on the whole Mac screen (not the Safari tab) using a screen grab and the vision model. Read-only; never clicks.", "parameters": {"type": "object", "properties": {}}}},
     {
         "type": "function",
         "function": {
