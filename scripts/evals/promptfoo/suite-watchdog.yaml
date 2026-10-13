@@ -26,8 +26,7 @@ tests:
 - description: watchdog-real-evidence-pass
   vars:
     claim: crawl4ai fetched example.com
-    evidence: 'command output: ''True This domain is for use in documentation examples''
-      from /workspace/.venvs/crawl4ai/bin/python c4.py, exit 0'
+    evidence: 'Ran /workspace/.venvs/crawl4ai/bin/python c4.py https://example.com -> exit 0; stdout: ''success=True url=https://example.com/ title=Example Domain text: This domain is for use in documentation examples'''
   assert:
   - type: icontains
     value: 'VERDICT: PASS'

@@ -22,5 +22,7 @@ tests:
     value: webhook-test
   - type: icontains
     value: production
+  - type: llm-rubric
+    value: For an ACTIVATED workflow the answer tells the user to call the production URL (/webhook/...) and says the test URL (/webhook-test/...) only works while listening for a test event in the editor. FAIL if it tells them to use the test URL for the active workflow.
   - type: javascript
     value: /1\.|step/i.test(output)
