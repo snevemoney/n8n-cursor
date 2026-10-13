@@ -86,14 +86,16 @@ def skill_first(goal: str) -> str:
 
 
 # ---------------------------------------------------------------- mcp
-def _mcp_call(spec: dict, tool: str, arguments: dict, deadline: float) -> tuple[bool, str]:
+def _mcp_session(spec: dict, calls: list, deadline: float) -> list:
+    """One stdio server, one handshake, several tools/call in order. Returns [(ok, text)] for the calls that ran; a failure
+    ends the list with (False, reason) so a later call never runs on a broken state."""
     env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin") + ":/opt/homebrew/bin:/usr/local/bin", "HOME": os.environ.get("HOME", "")}
     env.update(spec.get("env") or {})
     try:
         proc = subprocess.Popen([spec["command"], *spec.get("args", [])], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                 stderr=subprocess.DEVNULL, text=True, env=env)
     except OSError as e:
-        return False, f"could not start server ({type(e).__name__})"
+        return [(False, f"could not start server ({type(e).__name__})")]
     out: queue.Queue = queue.Queue()
     threading.Thread(target=lambda: [out.put(l) for l in proc.stdout], daemon=True).start()  # type: ignore[union-attr]
     end = time.monotonic() + deadline
@@ -114,28 +116,37 @@ def _mcp_call(spec: dict, tool: str, arguments: dict, deadline: float) -> tuple[
             if m.get("id") == rid:
                 return m
         return None
+    results: list = []
     try:
         send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {},
               "clientInfo": {"name": "jarvis", "version": "1"}}})
         if wait(1) is None:
-            return False, "server did not finish the handshake in time"
+            return [(False, "server did not finish the handshake in time")]
         send({"jsonrpc": "2.0", "method": "notifications/initialized"})
-        send({"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": tool, "arguments": arguments or {}}})
-        m = wait(2)
-        if m is None:
-            return False, "tool did not answer in time"
-        if m.get("error"):
-            return False, "tool error: " + str((m["error"] or {}).get("message"))[:300]
-        res = m.get("result") or {}
-        text = "\n".join(str(c.get("text")) for c in (res.get("content") or []) if isinstance(c, dict) and c.get("type") == "text")
-        return (not res.get("isError")), _cap(_scrub(text or json.dumps(res)[:OUT_CAP]))
+        for rid, (tool, arguments) in enumerate(calls, start=2):
+            send({"jsonrpc": "2.0", "id": rid, "method": "tools/call", "params": {"name": tool, "arguments": arguments or {}}})
+            m = wait(rid)
+            if m is None:
+                return results + [(False, "tool did not answer in time")]
+            if m.get("error"):
+                return results + [(False, "tool error: " + str((m["error"] or {}).get("message"))[:300])]
+            res = m.get("result") or {}
+            text = "\n".join(str(c.get("text")) for c in (res.get("content") or []) if isinstance(c, dict) and c.get("type") == "text")
+            results.append(((not res.get("isError")), _cap(_scrub(text or json.dumps(res)[:OUT_CAP]))))
+            if res.get("isError"):
+                break
+        return results
     except (OSError, ValueError) as e:
-        return False, f"pipe error ({type(e).__name__})"
+        return results + [(False, f"pipe error ({type(e).__name__})")]
     finally:
         try:
             proc.kill()
         except OSError:
             pass
+
+
+def _mcp_call(spec: dict, tool: str, arguments: dict, deadline: float) -> tuple[bool, str]:
+    return _mcp_session(spec, [(tool, arguments)], deadline)[-1]
 
 
 def op_mcp(server: str, tool: str, arguments: dict | None = None, approved: bool = False) -> dict:
@@ -209,6 +220,80 @@ def op_cli(argv: list[str], cwd: str | None = None) -> dict:
     ok = p.returncode == 0
     return {"ok": ok, "verified": ok and bool(text), "output": text, "exit": p.returncode,
             "spoken": (f"{argv[0]} ok: " if ok else f"{argv[0]} exited {p.returncode}: ") + text[:600]}
+
+
+# ---------------------------------------------------------------- ArtCraft: open a file and inspect it, read-only
+# app -> (open tool, inspect tool, extensions). Fixed table: the model never picks the tool, so no save/export/edit can run.
+# Verified live (local headless server, no network): pdfcraft, gridcraft. The rest are names from tools/list: UNVERIFIED.
+CRAFT_INSPECT = {
+    "pdfcraft": ("doc_open", "doc_inspect", {".pdf"}),
+    "wordcraft": ("open_document", "inspect_document", {".docx", ".doc", ".odt", ".txt"}),
+    "deckcraft": ("open_presentation", "inspect_document", {".pptx", ".deckcraft"}),
+    "gridcraft": ("open_workbook", "inspect_workbook", {".xlsx", ".csv", ".gridcraft"}),
+    "designcraft": ("open_document", "inspect_document", {".designcraft", ".idml"}),
+    "photocraft": ("doc_open", "doc_inspect", {".pcraft", ".png", ".jpg", ".jpeg"}),
+    "vectorcraft": ("open_file", "inspect_document", {".svg", ".ai", ".vcraft"}),
+    "effectcraft": ("open_project", "doc_inspect", {".ecraft", ".effectcraft"}),
+    "cadcraft": ("open", "inspect_drawing", {".dxf", ".dwg", ".cadcraft"}),
+    "soundcraft": ("open_session", "inspect_session", {".scraft", ".soundcraft", ".wav"}),
+}
+CRAFT_DEADLINE_S = 45
+
+
+_CRAFT_NOISE = {"path", "undo", "redo", "warnings", "activeCell", "activeSheet", "calcMode", "mode", "selection", "theme", "doc",
+                "index", "editable", "dirty", "version"}
+
+
+def craft_summary(app: str, text: str) -> str:
+    """Counts and names from an inspect result, never a dump. Unknown shapes degrade to a length note."""
+    try:
+        d = json.loads(text)
+    except ValueError:
+        return ""
+    if isinstance(d, dict) and isinstance(d.get("documents"), list) and d["documents"]:
+        d = {**(d["documents"][0].get("document") or {}), "documents": len(d["documents"])}
+    if not isinstance(d, dict):
+        return ""
+    bits = []
+    first = ("title", "name", "pages", "sheets", "slides", "layers", "artboards", "tracks", "entities", "documents")
+    for k, v in sorted(list(d.items())[:60], key=lambda kv: first.index(kv[0]) if kv[0] in first else len(first)):
+        if k in _CRAFT_NOISE or v in (None, "", [], {}, False):
+            continue
+        if isinstance(v, (str, int, float, bool)):
+            bits.append(f"{k}: {str(v)[:60]}")
+        elif isinstance(v, list):
+            noun = k if len(v) != 1 else k.rstrip("s")
+            bits.append(f"{len(v)} {noun}")
+        if len(bits) >= 8:
+            break
+    return ", ".join(bits)[:380]
+
+
+def op_craft_inspect(app: str, path: str) -> dict:
+    app = str(app or "").strip().lower()
+    row = CRAFT_INSPECT.get(app)
+    if not row:
+        return {"ok": False, "verified": False,
+                "spoken": f"I can't open a file in {app or 'that app'} to inspect it; that one has no read-only file open."}
+    open_tool, inspect_tool, exts = row
+    wr = _load("workspace_read", "workspace_read.py")
+    real, why = wr._resolve(str(path or ""), wr._roots(None)) if str(path or "").strip() else (None, "no file named")
+    if real is None or not real.is_file():
+        return {"ok": False, "verified": False, "spoken": f"I won't open that: {why or 'not a file'}."}
+    if real.suffix.lower() not in exts:
+        return {"ok": False, "verified": False, "spoken": f"{app} opens {', '.join(sorted(exts))} files; this is {real.suffix or 'a file with no extension'}."}
+    spec = _load("mcp_inventory", "mcp_inventory.py").server_spec(app)
+    if not spec:
+        return {"ok": False, "verified": False, "spoken": f"No {app} server in the Claude, Cursor or Codex config."}
+    PERM().log_action("mcp_read", f"{app}.{open_tool}+{inspect_tool}", "allow")
+    got = _mcp_session(spec, [(open_tool, {"path": str(real)}), (inspect_tool, {})], CRAFT_DEADLINE_S)
+    if len(got) < 2 or not all(ok for ok, _ in got):
+        return {"ok": False, "verified": False,
+                "spoken": f"{app} couldn't inspect {real.name}: {(got[-1][1] if got else 'no answer')[:160]}"}
+    summary = craft_summary(app, got[1][1])
+    if not summary:
+        return {"ok": True, "verified": False, "spoken": f"{app} opened {real.name}, but I couldn't summarize what it reported."}
+    return {"ok": True, "verified": True, "spoken": _scrub(f"{real.name} in {app}: {summary}.")}
 
 
 # ---------------------------------------------------------------- Google reads by name, sent-mail duplicate guard
@@ -331,6 +416,8 @@ def _step(s: dict, approved: bool) -> dict:
         return op_repo(s.get("repo", ""), s.get("action", ""), **{k: v for k, v in s.items() if k not in {"op", "repo", "action"}})
     if op == "mcp_list":
         return op_mcp_list(s.get("server", ""))
+    if op == "craft_inspect":
+        return op_craft_inspect(s.get("app", ""), s.get("path", ""))
     if op == "gws_read":
         return op_gws_read(s.get("kind", ""), s.get("name", ""), s.get("range"))
     if op == "sent_check":
@@ -353,7 +440,7 @@ def run(args: dict | None = None, approved: bool = False) -> dict:
     if len(steps) == 1 and steps[0].get("op") == "code":
         got = op_code(steps[0].get("repo", ""), steps[0].get("goal", ""), steps[0].get("branch") or "jarvis/code")
         return got
-    if len(steps) == 1 and (steps[0].get("op") in {"gws_read", "sent_check"}
+    if len(steps) == 1 and (steps[0].get("op") in {"gws_read", "sent_check", "craft_inspect"}
                             or (steps[0].get("op") == "cli" and (steps[0].get("argv") or [""])[0] == "gws")):
         return _step(steps[0], approved)  # one Google read: answer in a sentence, not a step report
     ranked = rank_skills(goal, 1) if args.get("goal") else []
