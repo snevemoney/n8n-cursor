@@ -816,34 +816,8 @@ def apply_turn_iter(utterance: str, **kw):
     except Exception:  # noqa: BLE001
         pass
     gen_doc = bool(re.search(r"\b(?:write|draft|create|make|generate|rewrite)\b.{0,40}\b(?:bullets?|resume|summary|bio|post|doc(?:ument)?|proposal|landing page|copy|headline|email)\b", utterance or "", re.I))
-    import queue as _q
-    import threading as _th2
-    box: _q.Queue = _q.Queue()
-
-    def _pump():
-        try:
-            for _ev in _apply_turn_iter_inner(utterance, **kw):
-                box.put(("ev", _ev))
-        except BaseException as _e:  # noqa: BLE001
-            box.put(("err", _e))
-        box.put(("end", None))
-    _th2.Thread(target=_pump, daemon=True).start()
-
     def _inner():
-        beat = False
-        while True:
-            try:
-                kind, val = box.get(timeout=0.25 if beat else max(0.1, HEARTBEAT_SEC - (_time.time() - started)))
-            except _q.Empty:
-                if not beat and _time.time() - started >= HEARTBEAT_SEC:
-                    beat = True  # Z81 (dCK 4:34): ONE in-persona heartbeat on a slow turn, never a stream of fillers (Z53)
-                    yield _turn_event(spoken=HEARTBEAT, verb="think", host="local", wires=["heartbeat"],
-                                      spoken_delta=HEARTBEAT, done=False, partial=True, gen=None)
-                continue
-            if kind == "end":
-                return
-            if kind == "err":
-                raise val
+        for val in _apply_turn_iter_inner(utterance, **kw):
             if gen_doc and isinstance(val, dict) and not val.get("partial") and val.get("verb") in ("converse", "drafts", "think", None):
                 val = dict(val, spoken=_placeholders(str(val.get("spoken") or ""), utterance))
             yield val

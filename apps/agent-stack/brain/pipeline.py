@@ -7145,8 +7145,19 @@ def apply_pipeline_iter(
 
             threading.Thread(target=_talk_worker, daemon=True, name="talk-stream").start()
             said = ""
+            _hb_at = time.monotonic() + float(os.environ.get("JARVIS_HEARTBEAT_SEC") or 8)
+            _hb_done = False
             while True:
-                piece = deltas.get()
+                try:
+                    piece = deltas.get(timeout=max(0.05, _hb_at - time.monotonic()) if not _hb_done else None)
+                except queue.Empty:
+                    _hb_done = True
+                    if not said and not (token and turn_cancelled(hive, token)):
+                        # Z81 (dCK 4:34): ONE in-persona heartbeat when the model is slow; never a stream of fillers (Z53).
+                        _hb = "Still checking, sir; the wires are being fashionably slow."
+                        yield _pipeline_event(ok=True, tool="converse", spoken=_hb, spoken_delta=_hb, wires=["converse", "heartbeat"],
+                                              cites=[], pack=None, done=False, partial=True, brain="openrouter", model_available=True, gen=token)
+                    continue
                 if piece is None:
                     break
                 if token and turn_cancelled(hive, token):
