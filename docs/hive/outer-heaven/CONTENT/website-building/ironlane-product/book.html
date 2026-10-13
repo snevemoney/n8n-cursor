@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Book a session — Ironlane Studio · SAMPLE</title>
+  <meta name="description" content="SAMPLE booking calendar. Pick a slot, confirm, it lands on the calendar. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%23d97b00%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EIS%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/ironlane.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Ironlane Studio home">
+      <span class="mark" aria-hidden="true">IS</span>
+      <span class="name">Ironlane Studio<small>Fitness · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#floor">Floor</a></li>
+        <li><a href="check.html">Proof</a></li>
+        <li><a href="book.html" aria-current="page">Times</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="check.html">Check book path</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="book-title">
+    <p class="eyebrow">Book a session</p>
+    <h2 id="book-title">Get them on the <span class="hi">calendar.</span></h2>
+    <p class="sub">
+      Pick an open slot, confirm, done. Nothing here sends a message, charges a card, or leaves this page.
+      Sample week, sample members.
+    </p>
+
+    <div class="book-layout">
+      <section class="calendar" id="calendar" data-state="empty" aria-labelledby="cal-label">
+        <div class="calendar-head">
+          <span class="label" id="cal-label">Calendar · <span id="week-label"></span></span>
+          <span class="state" id="cal-state" aria-live="polite">empty</span>
+        </div>
+        <div class="grid" id="grid" role="group" aria-label="Week grid of bookable slots"></div>
+      </section>
+
+      <aside class="panel">
+        <form class="card" id="book-form" novalidate>
+          <p class="eyebrow" id="intro">Your slot</p>
+          <p class="selection empty" id="selection" aria-live="polite">Pick a slot on the calendar.</p>
+          <div>
+            <label for="member">Name (sample)</label>
+            <input class="input" id="member" name="member" type="text" autocomplete="off" placeholder="Sample member" />
+          </div>
+          <div class="actions">
+            <button class="btn btn-green" type="submit" id="confirm-btn" disabled>Confirm booking</button>
+            <button class="btn btn-ghost btn-small" type="button" id="clear-btn">Clear</button>
+          </div>
+        </form>
+
+        <div class="card inbox" id="inbox" data-muted="false" aria-labelledby="inbox-label">
+          <p class="eyebrow" id="inbox-label">Inbox</p>
+          <div class="msg" id="inbox-msg">can I book Tue?</div>
+          <p class="muted-line" id="inbox-line">Interest in the DMs. Empty on the calendar.</p>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-example">Load example week</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reset to empty</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Confirmed · on the calendar</span>
+  </div>
+
+  <footer class="foot">
+    <span>Ironlane Studio · SAMPLE · CapEx / preview</span>
+    <span>No send · No pay · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/booking-ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+# click-live-site — Ironlane product preview (:4842)
+# Product must match the v4 launch video: Book tap → calendar (not 404) → confirmed. Door check pass/fail.
+# CapEx / preview. Live / HOLD. book is a SAMPLE verb here (no member, no money, no send) — the flow may click it.
+id: ironlane-4842
+name: Ironlane :4842 — amber shell → See schedule lands on calendar (no 404) → slot → Confirm → green + toast → door check wall / works → mobile
+hard_step: publish
+host: cursor-ide-browser
+status: pass
+run: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ironlane-4842/RUN.md
+app:
+  url: http://127.0.0.1:4842/
+steps:
+  - id: launch-shell
+    action: navigate
+    url: http://127.0.0.1:4842/
+    expected: SAMPLE strip "Launch candidate · Example · CapEx only" + amber hero "See the floor. Then claim an intro." + CTAs "See schedule →" and "Request intro" before scroll.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ironlane-4842/cards/01-launch-shell.md
+  - id: tap-see-schedule
+    action: tapOn
+    target: See schedule →
+    expected: URL http://127.0.0.1:4842/book.html · NOT 404 · H2 "Get them on the calendar." · calendar pill reads "empty" · Confirm booking disabled.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ironlane-4842/cards/02-tap-see-schedule.md
+  - id: tap-slot
+    action: tapOn
+    target: Book Tue 18:30 · Intro
+    expected: Slot highlighted amber (aria-pressed=true) · "Your slot" reads "Tue 18:30 · Intro" · Confirm booking enabled · focus on Name input.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ironlane-4842/cards/03-tap-slot.md
+  - id: tap-confirm
+    action: tapOn
+    target: Confirm booking
+    expected: Toast "Confirmed · on the calendar · Tue 18:30 · Intro" · slot green "✓ Sample member" · pill "on the calendar · 1 confirmed" · Tue header green · Inbox card muted "Quiet. Bookings land on the calendar — not in your DMs."
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ironlane-4842/cards/04-tap-confirm.md
+  - id: tap-load-example
+    action: tapOn
+    target: Load example week
+    expected: Mon 06:00 · Tue 18:30 · Thu 07:30 · Fri 12:00 · Sat 19:30 green · pill "on the calendar · 5 confirmed" (the ui-cta-full-calendar picture).
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ironlane-4842/cards/05-tap-load-example.md
+  - id: tap-check-path
+    action: tapOn
+    target: Check book path
+    expected: URL http://127.0.0.1:4842/check.html · H2 "Or your site books them." · Site address input · example chips · no result yet.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ironlane-4842/cards/06-tap-check-path.md
+  - id: check-wall
+    action: tapOn
+    target: dm-only-gym.example
+    expected: Result "Hit a wall." red · "/book → 404. Members text the owner instead." · 404 / Page not found / Dead end card · NO "Open the calendar" button.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ironlane-4842/cards/07-check-wall.md
+  - id: check-works
+    action: tapOn
+    target: ironlane.example
+    expected: Result "Path works." green · "Book lands on the calendar." · "Open the calendar" button · 404 card gone.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ironlane-4842/cards/08-check-works.md
+  - id: tap-open-calendar
+    action: tapOn
+    target: Open the calendar
+    expected: URL http://127.0.0.1:4842/book.html · empty calendar again (no persistence by design).
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ironlane-4842/cards/09-tap-open-calendar.md
+  - id: mobile-confirmed
+    action: navigate
+    url: http://127.0.0.1:4842/book.html?state=confirmed
+    expected: At 390px — single column · days stacked · slots as chips with time · 5 green · pill "on the calendar · 5 confirmed" · header wraps, no horizontal overflow · shell hero CTAs unclipped at 390px.
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ironlane-4842/cards/10-mobile-confirmed.md
+  - id: assert-hold
+    action: assertVisible
+    target: No send · No pay · No outbound · invent_kpi=0
+    expected: Footer lock line visible. Nothing deployed. Live / HOLD. Publish not executed.
+    hard: true
+    verify_card: docs/hive/outer-heaven/CONTENT/knowledge/workflows/click-live/flows/ironlane-4842/cards/11-assert-hold.md

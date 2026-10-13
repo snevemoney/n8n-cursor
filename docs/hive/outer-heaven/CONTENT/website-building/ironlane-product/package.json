@@ -1,0 +1,11 @@
+{
+  "name": "ironlane-product-preview",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Ironlane Studio SAMPLE — booking calendar + door check behind the amber shell. CapEx / preview only. Not a pnpm workspace member.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "serve": "bash serve.sh"
+  }
+}
