@@ -1,5 +1,14 @@
 {
  "files": {
+  "checks/locked/code_author/01-inline-code-runs.sh": "2852939df12e2fe26d257df61634b189c6e86ddb09d0653cdfd8db6980163c35",
+  "checks/locked/code_author/02-author-then-confirm.sh": "20b1a7ad1188ede7883cb754b2f4d913f11d227aa739a55a8154751f11f6a82a",
+  "checks/locked/code_author/03-critic-other-family.sh": "a35b52bb73ba1fb9e3d24a560f8d7f751e3a6fe7618a6b5987ea5a4d1a0cf88c",
+  "checks/locked/code_author/04-dark-is-honest.sh": "ddeb2346e1435a459a2b95673f39569566d7af7896bc768df6513387267ff97f",
+  "checks/locked/code_author/90-wired.sh": "f37d1de5ab8cb9b5e357fb23da48a7646a7c7428b9403838c0f4af1596e48fa6",
+  "checks/locked/code_author/91-every-place.sh": "9528404294483f89b05d354f223c74689cdfd34b5bc400bd03c8fa7592de93ee",
+  "checks/locked/code_author/92-existing-tests.sh": "05eeb6872f5a5d0a7cc546215f32d1c49e4a63c4b3fb4db9974c91ba139a339c",
+  "checks/locked/code_author/93-eval-no-regression.sh": "888863729f28d309029646f014c1fc4bbe1fc6699219bd16c0e053bd4dbd9a21",
+  "checks/locked/code_author/94-other-features.sh": "8744b30e8e7128f1a17e1c987e73ffb7896c65f08c76a6b966ca039aca371b9d",
   "checks/locked/code_run/01-runs-tests.sh": "30aa4a2f230cb30326dbc4965e5a0f9855d2b283bda7c5a6c80a86547d0fa150",
   "checks/locked/code_run/02-no-network.sh": "af3af4bf3b00a8ea9b33f314c87e11f2d2b9b1a14da06190f3c72a9598ba8d68",
   "checks/locked/code_run/03-time-cap.sh": "4dd07aa38f33812b1b566910bd3a54412ea1f0756b4321f66b715d8cfff70ab1",
