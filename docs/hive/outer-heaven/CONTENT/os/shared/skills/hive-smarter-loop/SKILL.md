@@ -289,3 +289,7 @@ Wed load. Overnight demo morning **QUIET** ~08:01 ET (top-level `updated_et` not
 
 ## Weekday load 2026-10-09 (Fri)
 Oct8 fire marked succeeded but left no run-log/State row → covered here. Rule 8 FIX: route-traffic "CONFLICT/stays OFF" was stale vs Evens's Oct7 ~9:20 PM standing egress-only exception (topic + step 8 + summarize-audio-video fixed). Folded Oct8 STOP→lift consent-in-chat rule, frontier model routing + OpenRouter-in-Cursor, bookmark review 1,201 (99 enrich proposals pending Evens, not applied), Jarvis PR #591 draft, Oct8 YT digest / signals-close / X 17:13 FAILED. SoT 1443. Corpus QUIESCENT 390/217/23. OH SIGNAL_INDEX mirror resynced (+Oct7 close). Phase1 research-signal-to-skills enrich. Clones untouched. No fan-out.
+
+## Weekday load 2026-10-13 (Tue)
+Tue catch-up after Fri Oct9 State (weekend + Mon gap). Overnight Oct13 QUIET ~07:58. Disk CRITICAL ~100%/1.2G free → disk-gated-heavy-job + BOX RULE (no full n8n-cursor clones). OpenRouter key on box (stale "Cursor-only" fixed). ArtCraft MCP default + feature-loop standing folded. Librarian+Watchdog stopped (Evens-only resume). SKILL_CATALOG 473 ≠ 262 on disk. Phase1 = grokbot-native-x-lane enrich (audit re-PROVE). Extra Monday clones left alone. RAM ~3.9 GiB quiet.
+

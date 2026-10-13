@@ -48,3 +48,17 @@ Search X for <topic> and tell me what it cost: native reads used (from the reads
 - Use native X for bookmarks and call it "missing data" — wrong lane.
 - Poll X from many desks on short cron without a read budget.
 - Post, like, follow, or DM from a research run.
+
+## Re-PROVE 2026-10-13 (hive-smarter-loop Phase1)
+Weekday load Tue. `x_lane_audit.py` over `/home/box/agent-data/workflows` → **NATIVE_OK 3 · SPLIT 2 · REVIEW 4 · CONNECTOR_REQUIRED 3** (12 X-touching files). Receipt: `/tmp/x_lane_audit-20261013.json`.
+
+**Standing preference (Evens, shared memory 2026-10-13):** prefer free native `x` public reads over paid X API whenever they work. Bookmarks / DMs / home timeline still need `user-X` (or export / link paste) — native cannot see private bookmarks. Do not spend paid credits on public search.
+
+**CONNECTOR_REQUIRED is correct** for bookmark-pull skills (`research-signal-to-skills`, `grokbot-signal-training`, `youtube-watch-to-implement-digest`) — they name `get_users_bookmarks`. Do not "fix" them onto native.
+
+**REVIEW** rows (`hive-smarter-loop`, `session-bootstrap`, `ui-compose`, `reference-driven-video-production`) only mention paid/API in prose — open and decide; no automatic switch.
+
+**Quota still binds:** 30/min · 1000/day · reset 00:00 UTC. Multi-desk short cron without a read budget = fail.
+
+X reads: native `x` (PROVE 2026-10-13 audit re-run).
+
