@@ -4419,6 +4419,26 @@ def browser_runtime():
     return sys.modules[name]
 
 
+def one_mind_route(pick: dict, utterance: str, hive: Path, gen: int | None):
+    """JARVIS_ONE_MIND=1 only: mission-type turns -> generic MissionController. None = legacy path."""
+    name = "agent_stack_one_mind.pipeline_hook"
+    if name not in sys.modules:
+        base = HERE / "one_mind"
+        pkg_spec = importlib.util.spec_from_file_location("agent_stack_one_mind", base / "__init__.py",
+                                                          submodule_search_locations=[str(base)])
+        pkg = importlib.util.module_from_spec(pkg_spec)
+        sys.modules["agent_stack_one_mind"] = pkg
+        pkg_spec.loader.exec_module(pkg)
+        spec = importlib.util.spec_from_file_location(name, base / "pipeline_hook.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    try:
+        return sys.modules[name].handle(pick, utterance, hive, gen=gen)
+    except Exception:
+        return None
+
+
 def run_tool(
     pick: dict,
     utterance: str,
@@ -4481,6 +4501,10 @@ def run_tool(
             "needs_talk": True,
             "dropped_tool": tool,
         }
+    if os.environ.get("JARVIS_ONE_MIND", "") == "1":
+        routed = one_mind_route(pick, utterance, hive, gen)
+        if routed is not None:
+            return routed
     if tool == "browser_mission":
         action = str(args.get("action") or "start")
         intent = re.search(r"\b(research|compare|find|check|look up|browse|browser|pricing|prices)\b", utterance, re.I)
