@@ -488,6 +488,13 @@ def http_spec(name: str) -> dict | None:
             on.load_existing_env()
     except Exception:
         pass
+    # Jarvis-owned OAuth refresh for URL MCP servers (hostinger/n8n) before building headers.
+    try:
+        if (name or "").strip().lower() in {"hostinger", "n8n"}:
+            oauth = _load("mcp_oauth", "mcp_oauth.py")
+            oauth.ensure_access((name or "").strip().lower())
+    except Exception:
+        pass
     inv = _load("mcp_inventory", "mcp_inventory.py")
     for _src, path in inv.DEFAULT_PATHS:
         path = Path(path)
