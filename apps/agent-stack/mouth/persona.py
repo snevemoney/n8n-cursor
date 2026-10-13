@@ -154,7 +154,7 @@ FACTORY_PHRASE = (
     (re.compile(r"forge\s+typecheck[^.]*\.?", re.I), ""),
     (re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", re.I), ""),
     (re.compile(r"On disk:\s*[^.]+\.?", re.I), ""),
-    (re.compile(r"ASKS\.md", re.I), ""),
+    (re.compile(r"(?<![\w-])ASKS\.md", re.I), ""),
     (re.compile(r"SKILL\.md", re.I), ""),
     (re.compile(r"ask-log\.py", re.I), ""),
     (re.compile(r"scars?\.jsonl", re.I), ""),
@@ -628,6 +628,23 @@ def named_absence(utterance: str) -> str:
     return f"{thing} was left uncreated. I will not invent it."
 
 
+def _luhn(digits: str) -> bool:
+    total = 0
+    for i, ch in enumerate(reversed(digits)):
+        d = int(ch) * (2 if i % 2 else 1)
+        total += d - 9 if d > 9 else d
+    return total % 10 == 0
+
+
+def _card_like(m: "re.Match") -> str:
+    """Redact a long digit run only when it could be a card: Luhn-valid and not a 20YYMMDD-HHMMSS stamp."""
+    raw = m.group(0)
+    digits = re.sub(r"\D", "", raw)
+    if re.fullmatch(r"20\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[ -]?\d{4,6}", raw.strip()):
+        return raw
+    return "number redacted" if _luhn(digits) else raw
+
+
 def redact_private_ids(text: str) -> str:
     """Card fragments and national-id shapes are not spoken."""
     body = text or ""
@@ -639,7 +656,7 @@ def redact_private_ids(text: str) -> str:
     )
     body = re.sub(r"\blast-?4\s*\d{4}\b", "card last-4 redacted", body, flags=re.I)
     body = re.sub(r"\b\d{3}-\d{2}-\d{4}\b", "id redacted", body)
-    body = re.sub(r"\b(?:\d[ -]?){13,19}\b", "number redacted", body)
+    body = re.sub(r"\b(?:\d[ -]?){13,19}\b", _card_like, body)
     return body
 
 
