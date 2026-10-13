@@ -57,3 +57,5 @@ __pycache__/
 **/.env*
 !.env.example
 !**/.env.example
+results.tsv
+loop/

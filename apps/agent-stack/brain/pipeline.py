@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "workspace_read", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -701,6 +701,30 @@ def local_greeting_reply() -> dict:
         "unknown": True,
         "model_available": False,
     }
+
+
+WORKSPACE_READ_RE = re.compile(
+    r"\b(read|open|show|cat)\b.{0,40}\b[\w.\-/]+\.(?:md|txt|py|json|toml|ya?ml|sh|js|ts|cfg|ini)\b|"
+    r"\b(?:what|which)\s+(?:repo|branch|git\s+branch|commit\s+head)\b|"
+    r"\b(?:what|which)\s+repos\b|\brepos?\b.{0,30}\b(?:installed|locally|on\s+(?:this|my)\s+(?:mac|machine))\b|"
+    r"\b(?:list|show)\b.{0,30}\b(?:files|folder|contents)\b.{0,30}\b(?:downloads|desktop|documents)\b",
+    re.I,
+)
+
+
+def wants_workspace_read(utterance: str) -> bool:
+    """Explicit read-only file / folder / git ask. Goes to hands/workspace_read, never a guess."""
+    return bool(WORKSPACE_READ_RE.search(utterance or ""))
+
+
+def _workspace_read_hand():
+    name = "agent_stack_workspace_read"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "workspace_read.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
 
 
 def wants_local_read(utterance: str) -> bool:
@@ -2500,7 +2524,7 @@ def assemble_pack(
         "Put the answer in speak after the hand runs. "
         "Hands: vault_read, safari_see, cursor_ask, craft, status, refuse_hard_step. mac_act only while Watch is armed. "
         "craft drives a Craft app: args {app, task}. "
-        'JSON: {"tool":"converse"|"vault_read"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
+        'JSON: {"tool":"converse"|"vault_read"|"workspace_read"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
     )
     return "\n".join(lines).rstrip() + "\n"
 
@@ -2727,7 +2751,7 @@ def pick_prompt(pack_path: Path, utterance: str) -> str:
         "Answer what he said. Follow-ups use the sitting turns in the pack.\n"
         "Store loads this turn. Last Cursor chat is the last Cursor sitting. Do not keyword-search the vault for chats.\n"
         "JSON preferred, prose speak is also fine:\n"
-        '{"tool":"converse"|"vault_read"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}\n'
+        '{"tool":"converse"|"vault_read"|"workspace_read"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}\n'
     )
 
 
@@ -4571,6 +4595,20 @@ def run_tool(
             return {"ok": False, "tool": tool, "spoken": "No browser steering was requested.",
                     "task_verified": False, "wires": [tool], "cites": [], "sent": False}
         return browser_runtime().pipeline_tool(args, utterance, hive)
+    if tool == "workspace_read":
+        wr = _workspace_read_hand()
+        wargs = dict(args) if args.get("op") else wr.args_from_utterance(utterance)
+        got = wr.run(wargs)
+        return {
+            "ok": bool(got.get("ok")),
+            "tool": tool,
+            "spoken": str(got.get("spoken") or ""),
+            "wires": ["workspace_read"],
+            "cites": [],
+            "sent": False,
+            "task_verified": bool(got.get("ok")),
+            "workspace_meta": wr.log_meta(got),
+        }
     if tool == "converse":
         return {
             "ok": True,
@@ -5793,6 +5831,10 @@ def apply_pipeline_iter(
             brain = "store"
         except RuntimeError:
             ran = None
+    if pick is None and ran is None and wants_workspace_read(spoken_in) and not is_hard_step(spoken_in):
+        pick = {"tool": "workspace_read", "args": {}, "speak": ""}
+        ran = run_tool(pick, spoken_in, hive=hive, retrieve_roots=retrieve_roots)
+        brain = None
     if pick is None and wants_local_read(spoken_in):
         pick = {"tool": "vault_read", "args": {"query": spoken_in}, "speak": ""}
         brain = "store"
