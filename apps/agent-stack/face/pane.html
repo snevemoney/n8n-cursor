@@ -1801,9 +1801,10 @@
       $("spoken").textContent = next ? "Watch…" : "Watch off.";
       try {
         const out = await api("/api/watch", { grab: next, arm: next, gen: busGen, evens: true });
-        $("spoken").textContent = out.spoken || (next
-          ? "Watch is on. Switch to the app you want me to use, then tell me."
-          : "Watch off.");
+        // Z03, demo ud7wzdiM0gk 1:51: the moment sharing starts he says the invite line aloud; barge-in stays armed while he talks.
+        const invite = "I can see your screen and I'm listening, sir. Just talk, and feel free to cut me off.";
+        $("spoken").textContent = next ? invite : (out.spoken || "Watch off.");
+        if (next) { try { enqueueSpeak(invite); } catch (e) { /* voice off */ } }
       } catch (e) {
         $("spoken").textContent = "Watch failed. Screen Recording may be dark.";
         watchArmed = false;

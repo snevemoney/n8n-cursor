@@ -523,7 +523,7 @@ def _apply_turn_iter_inner(
         yield _door_speak(
             hive,
             spoken,
-            "Watch is on. Switch to the app you want me to use, then tell me.",
+            "I can see your screen and I'm listening, sir. Just talk, and feel free to cut me off.",
             "watch",
             retrieve_roots,
             gen=token,
