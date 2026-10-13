@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Request a showing — Quay Team · SAMPLE</title>
+  <meta name="description" content="SAMPLE showing request. Pick a listing, offer two windows, agent approves, it lands on the calendar. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%2314708a%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EQT%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/product.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept · DEMO</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Quay Team home">
+      <span class="mark" aria-hidden="true">QT</span>
+      <span class="name">Quay Team<small>Real estate · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#listings">Listings</a></li>
+        <li><a href="showing.html" aria-current="page">Showings</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#listings">Back to listings</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="showing-title">
+    <p class="eyebrow">Request a showing</p>
+    <h2 id="showing-title">Request. Approve. <span class="hi">On the calendar.</span></h2>
+    <p class="sub">
+      Pick a listing, offer up to two windows, request. The agent approves one and it turns green.
+      Nothing here dials, texts, or leaves this page. Sample week, sample buyer.
+    </p>
+
+    <div class="layout">
+      <section class="frame" id="showing-frame" data-state="empty" aria-labelledby="showing-label">
+        <div class="frame-head">
+          <span class="label" id="showing-label">Showings · <span id="week-label"></span></span>
+          <span class="state-pill" id="showing-state" aria-live="polite">no showing requested</span>
+        </div>
+
+        <p class="eyebrow">1 · Listing</p>
+        <div class="three-up" id="listings" role="group" aria-label="Sample listings"></div>
+
+        <p class="eyebrow" style="margin-top:16px">2 · Offer windows</p>
+        <div class="grid" id="grid" role="group" aria-label="Week grid of showing windows"></div>
+      </section>
+
+      <aside class="panel">
+        <form class="card panel" id="request-form" novalidate>
+          <p class="eyebrow">Your request</p>
+          <p class="selection empty" id="selection" aria-live="polite">Pick a listing.</p>
+          <div class="field">
+            <label for="buyer">Name (sample)</label>
+            <input class="input" id="buyer" name="buyer" type="text" autocomplete="off" placeholder="Sample buyer" />
+          </div>
+          <div class="actions">
+            <button class="btn btn-brand" type="submit" id="request-btn" disabled>Request showing</button>
+            <button class="btn btn-green" type="button" id="approve-btn" hidden>Approve (agent side)</button>
+          </div>
+          <div class="chips" id="approve-picker" role="group" aria-label="Approve a specific window" hidden></div>
+        </form>
+
+        <section class="outcome" id="outcome" hidden aria-live="polite" aria-atomic="true">
+          <p class="eyebrow">Approved</p>
+          <h3 class="headline" id="outcome-headline"></h3>
+          <p class="detail" id="outcome-detail"></p>
+        </section>
+
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Phone tag (the old door)</p>
+          <div class="msg">Missed call · agent → buyer · 09:12</div>
+          <div class="msg">Voicemail · buyer → agent · “call me back re: Quay St”</div>
+          <div class="msg">Missed call · agent → buyer · 16:40</div>
+          <p class="muted-line" id="friction-line">Phone tag: three missed calls to book one showing.</p>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-requested">Load example request</button>
+            <button class="btn btn-ghost btn-small" type="button" id="load-approved">Load approved showing</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reset to empty</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Approved · on the calendar</span>
+  </div>
+
+  <footer class="foot">
+    <span>Quay Team · SAMPLE · CapEx / preview</span>
+    <span>No call · No send · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/showing-ui.js"></script>
+</body>
+</html>

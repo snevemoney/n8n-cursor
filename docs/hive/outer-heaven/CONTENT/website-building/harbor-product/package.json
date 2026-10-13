@@ -1,0 +1,11 @@
+{
+  "name": "harbor-product-preview",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Harbor & Co. SAMPLE — job request → calendar visit behind the rope-orange shell. CapEx / preview only. Not a pnpm workspace member.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "serve": "bash serve.sh"
+  }
+}

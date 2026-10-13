@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Apply privately — Ashford &amp; Vale · SAMPLE</title>
+  <meta name="description" content="SAMPLE private application. Three steps, qualified on the page, nothing sent. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%238f6a1e%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EAV%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/product.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept · HOLD</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Ashford and Vale home">
+      <span class="mark" aria-hidden="true">AV</span>
+      <span class="name">Ashford &amp; Vale<small>Private members · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#rooms">Rooms</a></li>
+        <li><a href="apply.html" aria-current="page">Apply</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html">Back to the house</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="apply-title">
+    <p class="eyebrow">Private apply</p>
+    <h2 id="apply-title">Apply. A person <span class="hi">reads it.</span></h2>
+    <p class="sub">
+      Three steps. The answers pick the lane before anyone talks. Nothing here sends a message,
+      opens a public calendar, or leaves this page. Sample house, sample applicant.
+    </p>
+
+    <div class="layout">
+      <section class="frame" id="apply-frame" data-state="empty" aria-labelledby="apply-label">
+        <div class="frame-head">
+          <span class="label" id="apply-label">Application · SAMPLE</span>
+          <span class="state-pill" id="apply-state" aria-live="polite">empty</span>
+        </div>
+
+        <ol class="stepper" id="stepper" aria-label="Application steps"></ol>
+
+        <form class="panel" id="apply-form" novalidate>
+          <fieldset class="step panel" data-step="0">
+            <legend class="eyebrow">1 · About you</legend>
+            <div class="field">
+              <label for="name">Name (sample)</label>
+              <input class="input" id="name" data-answer="name" type="text" autocomplete="off" placeholder="Sample applicant" />
+            </div>
+            <div class="field">
+              <label for="looking-for">What you are looking for</label>
+              <select class="select" id="looking-for" data-answer="lookingFor"></select>
+            </div>
+          </fieldset>
+
+          <fieldset class="step panel" data-step="1" hidden>
+            <legend class="eyebrow">2 · Fit</legend>
+            <div class="field">
+              <label for="referral">How you found Ashford</label>
+              <select class="select" id="referral" data-answer="referral"></select>
+            </div>
+            <div class="field">
+              <label for="timeline">Timeline</label>
+              <select class="select" id="timeline" data-answer="timeline"></select>
+            </div>
+            <div class="field">
+              <label for="note">Anything else (optional)</label>
+              <textarea class="textarea" id="note" data-answer="note" placeholder="Sample note. Nothing here is sent."></textarea>
+            </div>
+          </fieldset>
+
+          <fieldset class="step panel" data-step="2" hidden>
+            <legend class="eyebrow">3 · Review</legend>
+            <dl class="review-list" id="review-list"></dl>
+            <p class="selection">Submitting keeps this on the page. Sample only — no email, no CRM, no calendar.</p>
+          </fieldset>
+
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="back-btn" hidden>Back</button>
+            <button class="btn btn-brand" type="button" id="next-btn" disabled>Continue</button>
+            <button class="btn btn-green" type="submit" id="submit-btn" hidden disabled>Submit privately</button>
+          </div>
+        </form>
+
+        <section class="outcome" id="outcome" data-tone="go" hidden tabindex="-1" aria-live="polite" aria-atomic="true">
+          <p class="eyebrow">Received · private review</p>
+          <h3 class="headline" id="outcome-headline"></h3>
+          <p class="detail" id="outcome-detail"></p>
+          <p class="ref" id="outcome-ref"></p>
+        </section>
+      </section>
+
+      <aside class="panel">
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Loud Book (the old door)</p>
+          <div class="msg">Public slot booked · Tue 09:00 · “just curious”</div>
+          <div class="msg">Public slot booked · Tue 09:30 · no-show</div>
+          <div class="msg">Widget: “Book a call now!!”</div>
+          <p class="muted-line" id="friction-line">Loud Book widget: public slots, wrong-fit intros, no-shows.</p>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-example">Load example application</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reset to empty</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Received · private review</span>
+  </div>
+
+  <footer class="foot">
+    <span>Ashford &amp; Vale · SAMPLE · CapEx / preview</span>
+    <span>No send · No public Book · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/apply-ui.js"></script>
+</body>
+</html>

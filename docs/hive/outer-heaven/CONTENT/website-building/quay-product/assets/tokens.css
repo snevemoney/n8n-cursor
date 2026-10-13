@@ -1,0 +1,32 @@
+/* Quay Team — brand tokens. SAMPLE / CapEx.
+   Swap point: VERTICALS.quay in launch-samples/project/src/lib/tokens.ts (not in this repo;
+   values below are placeholders chosen for the preview, not the SSOT). */
+:root {
+  --brand: #2aa7c9;
+  --brand-deep: #14708a;
+  --brand-glow: #7fd6ec;
+  --brand-tint: rgba(42, 167, 201, 0.18);
+  --brand-shadow: rgba(42, 167, 201, 0.35);
+  --brand-shadow-strong: rgba(42, 167, 201, 0.5);
+  --brand-shadow-soft: rgba(42, 167, 201, 0.12);
+  --on-brand: #041219;
+  --hero-a: #9fe6f7;
+  --hero-b: #14708a;
+  --hero-c: #0b2b4a;
+  --hero-d: #123a5c;
+  --hero-e: #071a2b;
+  --hero-text: #f2fbfe;
+  --ink: #070c11;
+  --ink-2: #0c141c;
+  --ink-3: #121c26;
+  --line: rgba(42, 167, 201, 0.18);
+  --text: #eef6fa;
+  --muted: #94a7b5;
+  --green: #35c26b;
+  --green-deep: #1f8a49;
+  --red: #ff5d5d;
+  --red-deep: #8f2b2b;
+  --radius: 14px;
+  --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}

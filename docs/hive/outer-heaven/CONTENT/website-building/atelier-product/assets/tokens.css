@@ -1,0 +1,32 @@
+/* Atelier Cohort — brand tokens. SAMPLE / CapEx.
+   Swap point: VERTICALS.atelier in launch-samples/project/src/lib/tokens.ts (not in this repo;
+   values below are placeholders chosen for the preview, not the SSOT). */
+:root {
+  --brand: #b37fd1;
+  --brand-deep: #6f3f8f;
+  --brand-glow: #dcb8ee;
+  --brand-tint: rgba(179, 127, 209, 0.18);
+  --brand-shadow: rgba(179, 127, 209, 0.35);
+  --brand-shadow-strong: rgba(179, 127, 209, 0.5);
+  --brand-shadow-soft: rgba(179, 127, 209, 0.12);
+  --on-brand: #160a1f;
+  --hero-a: #f0d9fb;
+  --hero-b: #6f3f8f;
+  --hero-c: #2a1638;
+  --hero-d: #3b1f4f;
+  --hero-e: #170b21;
+  --hero-text: #faf3ff;
+  --ink: #0b080e;
+  --ink-2: #120d17;
+  --ink-3: #1a1320;
+  --line: rgba(179, 127, 209, 0.18);
+  --text: #f4edf8;
+  --muted: #a798b2;
+  --green: #35c26b;
+  --green-deep: #1f8a49;
+  --red: #ff5d5d;
+  --red-deep: #8f2b2b;
+  --radius: 14px;
+  --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}

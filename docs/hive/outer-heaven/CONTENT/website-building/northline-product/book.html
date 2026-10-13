@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Book privately — Northline Clinic · SAMPLE</title>
+  <meta name="description" content="SAMPLE private booking with a form SLA track. Pick a slot, submit the form, the clinic advances received → review → confirmed. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%23178274%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3ENC%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/tokens.css" />
+  <link rel="stylesheet" href="assets/product.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept · HOLD</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Northline Clinic home">
+      <span class="mark" aria-hidden="true">NC</span>
+      <span class="name">Northline Clinic<small>Private clinic · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#sla">The SLA</a></li>
+        <li><a href="book.html" aria-current="page">Book</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#sla">Read the SLA</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="book-title">
+    <p class="eyebrow">Book privately</p>
+    <h2 id="book-title">One form. One window. <span class="hi">One slot.</span></h2>
+    <p class="sub">
+      Pick a private slot, fill the form, submit. The SLA track moves received → in review → confirmed on the clinic side.
+      Nothing here sends, stores, or leaves this page. Sample clinic, sample patient.
+    </p>
+
+    <div class="layout">
+      <section class="frame" id="book-frame" data-state="empty" aria-labelledby="book-label">
+        <div class="frame-head">
+          <span class="label" id="book-label">Private slots · <span id="week-label"></span></span>
+          <span class="state-pill" id="book-state" aria-live="polite">empty · private</span>
+        </div>
+        <div class="grid" id="grid" role="group" aria-label="Business-week grid of private slots"></div>
+
+        <div class="card" style="margin-top:14px" aria-labelledby="sla-heading">
+          <p class="eyebrow" id="sla-heading">Form SLA · <span id="sla-label"></span></p>
+          <ol class="stepper" id="sla-track" aria-label="SLA stages"></ol>
+          <p class="selection" id="sla-line" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <form class="card panel" id="book-form" novalidate>
+          <p class="eyebrow">Private form</p>
+          <p class="selection empty" id="selection" aria-live="polite">Pick a private slot on the calendar.</p>
+          <div class="field">
+            <label for="visit-type">Visit type</label>
+            <select class="select" id="visit-type" name="visit-type"></select>
+          </div>
+          <div class="field">
+            <label for="patient">Name (sample)</label>
+            <input class="input" id="patient" data-form="name" type="text" autocomplete="off" placeholder="Sample patient" />
+          </div>
+          <div class="field">
+            <label for="reason">A line about why (optional)</label>
+            <textarea class="textarea" id="reason" data-form="reason" placeholder="Sample reason. Nothing here is sent."></textarea>
+          </div>
+          <label class="check" for="consent">
+            <input id="consent" data-form="consent" type="checkbox" />
+            <span>I understand this is a SAMPLE form. Nothing is sent or stored. (Required)</span>
+          </label>
+          <div class="actions">
+            <button class="btn btn-brand" type="submit" id="submit-btn" disabled>Submit privately</button>
+            <button class="btn btn-green" type="button" id="advance-btn" hidden>Start clinical review (clinic side)</button>
+          </div>
+        </form>
+
+        <section class="outcome" id="outcome" hidden aria-live="polite" aria-atomic="true">
+          <p class="eyebrow">Confirmed · private</p>
+          <h3 class="headline" id="outcome-headline"></h3>
+          <p class="detail" id="outcome-detail"></p>
+        </section>
+
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Waitlist chaos (the old door)</p>
+          <div class="msg">“You are number 47 in the queue.”</div>
+          <div class="msg">“Call back at 8am for cancellations.”</div>
+          <div class="msg">Voicemail box full.</div>
+          <p class="muted-line" id="friction-line">Waitlist chaos: “you are number 47, call back at 8am”.</p>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-received">Load received form</button>
+            <button class="btn btn-ghost btn-small" type="button" id="load-confirmed">Load confirmed slot</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reset to empty</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Form received</span>
+  </div>
+
+  <footer class="foot">
+    <span>Northline Clinic · SAMPLE · CapEx / preview</span>
+    <span>No patient data · No send · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/private-book-ui.js"></script>
+</body>
+</html>
