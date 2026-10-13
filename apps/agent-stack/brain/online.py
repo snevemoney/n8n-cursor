@@ -93,7 +93,7 @@ def pass_rule_reply(prompt: str) -> str:
         return ""
     for line in text.splitlines():
         if PASS_RULE_RE.search(line):
-            quote = re.sub(r"^[\s>*#\-\d.]+", "", line).strip().strip("*")
+            quote = re.sub(r"\s{2,}", " ", re.sub(r"^[\s>#\-\d.]+", "", line).replace("**", "")).strip()
             return f"Per AGENT_RULES.md: \"{quote[:300]}\""
     return ""
 

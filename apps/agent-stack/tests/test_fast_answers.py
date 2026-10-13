@@ -25,12 +25,13 @@ class FastAnswerTests(unittest.TestCase):
 
     def test_pass_rule_from_agent_rules(self):
         with tempfile.TemporaryDirectory() as d:
-            Path(d, "AGENT_RULES.md").write_text("# Rules\n- 2.8 Critic != builder; no self-PASS. Watchdog (or Evens) issues verdicts.\n")
+            Path(d, "AGENT_RULES.md").write_text("# Rules\n- 2.8 **Critic != builder; no self-PASS.** Watchdog (or Evens) issues verdicts.\n")
             with mock.patch.dict(os.environ, {"JARVIS_SHARED_DIR": d}), \
                  mock.patch.object(online, "openrouter_api_key", side_effect=AssertionError("no model call")):
                 got = online._call_openrouter_inner("Who is allowed to issue a PASS?", hands=False)
         self.assertEqual(got["engine"], "rule-cache")
         self.assertIn("Watchdog (or Evens) issues verdicts", got["spoken"])
+        self.assertNotIn("**", got["spoken"])
         self.assertEqual(online.pass_rule_reply("What model are you running on right now?"), "")
 
     def test_slow_primary_hedges_to_fast_model_and_names_it(self):
