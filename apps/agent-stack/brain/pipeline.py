@@ -4630,6 +4630,7 @@ def run_tool(
             "sent": False,
             "task_verified": bool(got.get("ok")),
             "web_search_meta": ws.log_meta(got),
+            "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN,
         }
     if tool == "workspace_read":
         wr = _workspace_read_hand()
