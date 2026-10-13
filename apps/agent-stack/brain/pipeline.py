@@ -5143,7 +5143,7 @@ def _run_tool_inner(
                 "task_verified": bool(got.get("ok")), "screen_see_meta": hd.log_meta(got)}
     if tool == "rules":
         return {"ok": True, "tool": tool, "spoken": rules_spoken(), "wires": ["rules"], "cites": [],
-                "sent": False, "task_verified": True}
+                "sent": False, "task_verified": True, "outcome": TOOL_LOOP}
     if tool == "plan":
         hd = _plan_hand()
 
@@ -5832,7 +5832,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
