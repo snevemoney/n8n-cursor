@@ -77,6 +77,17 @@ class StreamRaceTests(unittest.TestCase):
         self.assertLess(time.monotonic() - t, 1.5)
 
 
+class FirstTokenCapTests(unittest.TestCase):
+    def test_no_first_token_gives_up_at_cap(self):
+        from unittest import mock
+        stall = FakeRes(["late."], first_delay=5)
+        with mock.patch.dict("os.environ", {"JARVIS_TALK_FIRST_TOKEN_SEC": "1"}):
+            t = time.monotonic()
+            with self.assertRaises(TimeoutError):
+                online.raced_stream([("A", {"model": "A"})], headers={}, timeout=20, hedge=9, opener=lambda b, x: stall)
+        self.assertLess(time.monotonic() - t, 1.6)
+
+
 class TrimTests(unittest.TestCase):
     def test_history_and_shared_block_caps(self):
         from brain import pipeline

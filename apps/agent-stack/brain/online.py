@@ -563,8 +563,12 @@ def raced_stream(
     buf = ""
     finish = ""
     errs: list[str] = []
+    first_by = min(timeout, first_token_sec())
     while True:
         left = timeout - (time.monotonic() - began)
+        if st["winner"] is None:
+            # No first token yet: give up early so the plain race still fits the 25 s Face wall.
+            left = min(left, first_by - (time.monotonic() - began))
         if left <= 0:
             break
         wait = left
@@ -616,6 +620,14 @@ def raced_stream(
     if not win:
         raise TimeoutError(errs[-1] if errs else "no first token")
     return "".join(parts).strip(), finish, win
+
+
+def first_token_sec() -> float:
+    """Max wait for any streamed first token before falling back (live :4019: a stalled pair cost 35 s)."""
+    try:
+        return max(1.0, float(os.environ.get("JARVIS_TALK_FIRST_TOKEN_SEC") or 8.0))
+    except ValueError:
+        return 8.0
 
 
 def stream_hedge_sec() -> float:
