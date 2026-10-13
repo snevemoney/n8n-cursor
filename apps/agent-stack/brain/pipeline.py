@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "workspace_read", "memory", "skills", "mcp_inventory", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "workspace_read", "memory", "skills", "mcp_inventory", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -787,6 +787,17 @@ def wants_loop(utterance: str) -> bool:
     return bool(LOOP_RE.search(utterance or ""))
 
 
+VOICE_ENGINE_RE = re.compile(
+    r"\b(?:what|which)\s+(?:voice|tts|speech)(?:\s+engine)?\b.{0,30}\b(?:using|speaking|is|are|on)\b|\b(?:what|which)\s+(?:tts|speech|voice)\s+engine\b",
+    re.I,
+)
+
+
+def wants_voice_engine(utterance: str) -> bool:
+    """Explicit ask for the voice_engine hand (FINISH-LIST)."""
+    return bool(VOICE_ENGINE_RE.search(utterance or ""))
+
+
 def jarvis_rules() -> str:
     """Short operating rules (JARVIS.md) loaded into the turn prompt. Empty string if the file is missing."""
     try:
@@ -838,7 +849,9 @@ def model_free_route(spoken_in: str) -> dict | None:
         return None
     early = fixed_route(spoken_in)
     if early is None and not is_hard_step(spoken_in):
-        if wants_loop(spoken_in):
+        if wants_voice_engine(spoken_in):
+            early = {"tool": "voice_engine", "args": {}, "speak": ""}
+        elif wants_loop(spoken_in):
             early = {"tool": "loop", "args": {}, "speak": ""}
         elif wants_desk_dispatch(spoken_in):
             early = {"tool": "desk_dispatch", "args": {}, "speak": ""}
@@ -925,6 +938,16 @@ def _loop_hand():
     name = "agent_stack_loop"
     if name not in sys.modules:
         spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "loop.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _voice_engine_hand():
+    name = "agent_stack_voice_engine"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "voice_engine.py")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
@@ -3561,11 +3584,14 @@ def cursor_prompt_payload(utterance: str) -> str:
 
 
 def voice_status_line() -> str:
-    """Mouth/status only. Do not open a new talk essay."""
-    return (
-        "Voice is on this Mac. If you hear nothing, raise system volume "
-        "or tap Stop, then speak again."
-    )
+    """Mouth/status only. Honest: names the engine voice_report picks (voice_engine hand)."""
+    try:
+        got = _voice_engine_hand().run({})
+    except Exception:
+        return "I can't read my voice engine right now, so I'm text only."
+    if got.get("engine") in ("dark", "kokoro-dark-python"):
+        return str(got.get("spoken") or "I have no voice engine working right now, so I'm text only.")
+    return str(got.get("spoken") or "") + " If you hear nothing, raise system volume or tap Stop, then speak again."
 
 
 def _mouth_evidence(text: str) -> str:
@@ -4879,6 +4905,12 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["loop"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "loop_meta": hd.log_meta(got)}
+    if tool == "voice_engine":
+        hd = _voice_engine_hand()
+        got = hd.run(dict(args) if args else hd.args_from_utterance(utterance))
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["voice_engine"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "voice_engine_meta": hd.log_meta(got)}
     if tool == "mcp_inventory":
         mi = _mcp_inventory_hand()
         got = mi.run({})
@@ -5546,7 +5578,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
