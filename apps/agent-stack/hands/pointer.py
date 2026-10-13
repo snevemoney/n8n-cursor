@@ -26,7 +26,7 @@ LOOK_LINE = "Let me have a look, sir."
 WANT_RE = re.compile(r"\b(?:where\s+(?:do|should|can)\s+i\s+(?:click|tap|press|go)|where(?:'s|\s+is)\s+(?:the\s+)?(?:button|[\w\s'-]{1,40}?"
                      r"\s+(?:button|menu|link|icon|tab|setting|toggle|field))|point\s+(?:to|at|me\s+to)|show\s+me\s+where)\b", re.I)
 STOP = set("a an the to on in of for my me i do can you could would should show where is are click tap press button "
-           "find point at this that it please hey jarvis new go how which there here sir".split())
+           "find point at this that it please hey jarvis new go how which there here sir open turn get make use".split())
 SYN = {"create": ["create", "new", "plus", "+"], "reel": ["reel", "reels"], "settings": ["settings", "preferences"],
        "notifications": ["notifications"], "share": ["share"], "post": ["post", "create"]}
 
@@ -65,11 +65,26 @@ def locate(kws: list[str]) -> dict:
     fd, shot = tempfile.mkstemp(prefix="jarvis-pt-", suffix=".png")
     os.close(fd)
     try:
-        subprocess.run(["screencapture", "-x", "-m", shot], capture_output=True, timeout=8)
-        cp = subprocess.run([str(loc), ",".join(kws), shot], capture_output=True, text=True, timeout=20)
+        sc = subprocess.run(["screencapture", "-x", "-m", shot], capture_output=True, text=True, timeout=8)
+        cp = subprocess.run([str(loc), ",".join(kws), shot], capture_output=True, text=True, timeout=30)
+        try:
+            with open(Path.home() / "jarvis-main" / "logs" / "pointer-debug.log", "a") as fh:
+                fh.write(json.dumps({"kws": kws, "sc_rc": sc.returncode, "sc_err": sc.stderr[-200:],
+                                     "shot_bytes": os.path.getsize(shot), "loc_rc": cp.returncode,
+                                     "out": cp.stdout[-300:], "err": cp.stderr[-300:]}) + "\n")
+        except OSError:
+            pass
         return json.loads((cp.stdout or "{}").strip().splitlines()[-1] or "{}")
-    except (subprocess.TimeoutExpired, ValueError, IndexError):
+    except subprocess.TimeoutExpired as exc:
+        try:
+            with open(Path.home() / "jarvis-main" / "logs" / "pointer-debug.log", "a") as fh:
+                fh.write(json.dumps({"timeout": str(exc.cmd)[:120], "err": str(exc.stderr or "")[-300:],
+                                     "shot_bytes": os.path.getsize(shot)}) + "\n")
+        except OSError:
+            pass
         return {"found": False, "why": "locator timed out"}
+    except (ValueError, IndexError):
+        return {"found": False, "why": "locator gave no answer"}
     finally:
         try:
             os.unlink(shot)  # the local screenshot never leaves the Mac and is deleted at once
@@ -111,9 +126,18 @@ def hover(x: float, y: float) -> bool:
 
 
 def _where(x: float, y: float) -> str:
+    """Rough screen region from CoreGraphics display bounds (no AppleScript, no permission prompts)."""
+    import ctypes
+
+    class R(ctypes.Structure):
+        _fields_ = [("x", ctypes.c_double), ("y", ctypes.c_double), ("w", ctypes.c_double), ("h", ctypes.c_double)]
     try:
-        w, h = (float(v) for v in subprocess.run(["osascript", "-e", "tell application \"Finder\" to get bounds of window of desktop"],
-                                                capture_output=True, text=True, timeout=3).stdout.split(",")[2:4])
+        cg = ctypes.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+        cg.CGMainDisplayID.restype = ctypes.c_uint32
+        cg.CGDisplayBounds.argtypes = [ctypes.c_uint32]
+        cg.CGDisplayBounds.restype = R
+        b = cg.CGDisplayBounds(cg.CGMainDisplayID())
+        w, h = b.w or 1920.0, b.h or 1080.0
     except Exception:  # noqa: BLE001
         w, h = 1920.0, 1080.0
     col = "left" if x < w / 3 else "right" if x > 2 * w / 3 else "middle"

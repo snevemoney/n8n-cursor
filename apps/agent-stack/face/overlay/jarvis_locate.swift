@@ -52,7 +52,7 @@ guard !shot.isEmpty, let src = CGImageSourceCreateWithURL(URL(fileURLWithPath: s
       let img = CGImageSourceCreateImageAtIndex(src, 0, nil) else {
   out(["found": false, "why": "no local screen image (Screen Recording)", "ax_trusted": AXIsProcessTrusted()]) }
 let main = NSScreen.screens.first!.frame
-let req = VNRecognizeTextRequest(); req.recognitionLevel = .accurate; req.usesLanguageCorrection = false
+let req = VNRecognizeTextRequest(); req.recognitionLevel = .fast; req.usesLanguageCorrection = false
 try? VNImageRequestHandler(cgImage: img, options: [:]).perform([req])
 var ob: (Int, CGRect, String)? = nil
 for r in req.results ?? [] {
