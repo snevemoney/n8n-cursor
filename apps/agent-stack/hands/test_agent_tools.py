@@ -26,3 +26,27 @@ class AgentToolsGates(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Round2(unittest.TestCase):
+    def test_new_routes(self):
+        self.assertEqual(a.args_from_utterance("list the n8n mcp tools"), {"op": "mcp_list", "server": "n8n"})
+        got = a.args_from_utterance("in scratch repo demo: write a slugify function with tests")
+        self.assertEqual(got["steps"][0]["op"], "code")
+
+    def test_code_loop_without_model_is_honest(self):
+        a.llm = lambda *x, **k: ("", "")
+        a.rank_skills = lambda *x, **k: []
+        os.environ["JARVIS_SCRATCH_ROOTS"] = tempfile.mkdtemp()
+        got = a.op_code("r", "anything")
+        self.assertFalse(got["ok"]); self.assertIn("NOT done", got["spoken"])
+
+
+class ReadOnlyByName(unittest.TestCase):
+    def test_gui_and_exec_tools_gated(self):
+        for t in ("click", "drag", "js", "command_run", "execute", "batch", "browser_click", "add_slide"):
+            self.assertTrue(a.op_mcp("x", t, {}).get("gated"), t)
+
+    def test_lookups_pass_gate(self):
+        for t in ("resolve-library-id", "convert_to_markdown", "query-docs", "list_items_in_registries", "get_item_examples_from_registries"):
+            self.assertTrue(a.READ_TOOL.match(t) and not a.WRITE_TOOL.search(t), t)

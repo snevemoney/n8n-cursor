@@ -35,6 +35,10 @@ TEST_DEADLINE_S = 60
 WRITE_TOOL = re.compile(r"(send|create|delete|remove|trash|update|write|post|publish|deploy|merge|push|pay|purchase|"
                         r"charge|share|invite|upload|insert|drop|execute|exec|run_python|apply|transfer|tiktok)", re.I)
 NAME_OK = re.compile(r"^[\w.\-]{1,64}$")
+# Allow-by-name: only tools whose name reads as a lookup run without Evens. Anything else (GUI clicks, scripts,
+# app commands, writes) is gated, so no MCP tool can drive his Mac or change data on auto-accept.
+READ_TOOL = re.compile(r"^(?:[a-z0-9]+[_\-])?(list|get|read|search|find|query|resolve|inspect|check|convert|view|describe|"
+                       r"status|analyze|lookup|fetch|show|count|info|overview|explore|compare|trace|xrefs|retrieve)", re.I)
 
 
 def _load(name: str, file: str):
@@ -137,15 +141,19 @@ def _mcp_call(spec: dict, tool: str, arguments: dict, deadline: float) -> tuple[
 def op_mcp(server: str, tool: str, arguments: dict | None = None, approved: bool = False) -> dict:
     if not (NAME_OK.match(server or "") and NAME_OK.match(tool or "")):
         return {"ok": False, "verified": False, "spoken": "I need a server name and a tool name."}
-    if WRITE_TOOL.search(tool) and not approved:
+    if (WRITE_TOOL.search(tool) or not READ_TOOL.match(tool)) and not approved:
         PERM().log_action("mcp_write", f"{server}.{tool}", "confirm")
         return {"ok": False, "verified": False, "gated": True,
-                "spoken": f"{server}.{tool} looks like a write (send, create, delete, deploy...). That needs Evens first; I didn't call it."}
+                "spoken": f"{server}.{tool} is not a read-only lookup (it could write, send, run code or drive an app). That needs Evens first; I didn't call it."}
     spec = _load("mcp_inventory", "mcp_inventory.py").server_spec(server)
-    if not spec:
-        return {"ok": False, "verified": False, "spoken": f"No stdio config for {server} in Claude, Cursor or Codex."}
     PERM().log_action("mcp_read", f"{server}.{tool}", "allow")
-    ok, text = _mcp_call(spec, tool, arguments or {}, MCP_DEADLINE_S)
+    if spec:
+        ok, text = _mcp_call(spec, tool, arguments or {}, MCP_DEADLINE_S)
+    else:
+        got = op_mcp_http_call(server, tool, arguments or {}, MCP_DEADLINE_S)
+        if got is None:
+            return {"ok": False, "verified": False, "spoken": f"No config for {server} in Claude, Cursor or Codex."}
+        ok, text = got
     return {"ok": ok, "verified": ok and bool(text.strip()), "output": text,
             "spoken": (f"{server}.{tool} answered: " if ok else f"{server}.{tool} failed: ") + text[:600]}
 
@@ -283,6 +291,10 @@ def _step(s: dict, approved: bool) -> dict:
         return op_cli(argv, s.get("cwd"))
     if op == "repo":
         return op_repo(s.get("repo", ""), s.get("action", ""), **{k: v for k, v in s.items() if k not in {"op", "repo", "action"}})
+    if op == "mcp_list":
+        return op_mcp_list(s.get("server", ""))
+    if op == "code":
+        return op_code(s.get("repo", ""), s.get("goal", ""), s.get("branch") or "jarvis/code")
     if op == "web":
         ws = _load("web_search", "web_search.py")
         got = ws.run({"query": s.get("query", "")})
@@ -296,7 +308,11 @@ def run(args: dict | None = None, approved: bool = False) -> dict:
     args = args or {}
     steps = args.get("steps") or ([args] if args.get("op") else [])
     goal = str(args.get("goal") or " ".join(str(s.get("tool") or s.get("action") or s.get("cmd") or " ".join(s.get("argv") or []) or s.get("query") or "") for s in steps))
-    skill = skill_first(goal)
+    if len(steps) == 1 and steps[0].get("op") == "code":
+        got = op_code(steps[0].get("repo", ""), steps[0].get("goal", ""), steps[0].get("branch") or "jarvis/code")
+        return got
+    ranked = rank_skills(goal, 1) if args.get("goal") else []
+    skill = ranked[0] if ranked else skill_first(goal)
     if not steps:
         return {"ok": False, "verified": False, "steps": [], "skill": skill,
                 "spoken": "I need at least one step (mcp, cli, repo or web). Nothing was run."}
@@ -328,11 +344,21 @@ _CLI = re.compile(r"^\s*(?:jarvis[,:]?\s*)?(?:run\s+)?((?:gh|git|yt-dlp|ffprobe|
 _MCPC = re.compile(r"\bcall\s+(?:the\s+)?([\w.\-]+)\s+mcp\s+tool\s+([\w.\-]+)(?:\s+with\s+(\{.*\}))?", re.I | re.S)
 
 
+_LIST = re.compile(r"\blist\s+(?:the\s+)?([\w.\-]+)\s+mcp\s+tools\b", re.I)
+_CODE = re.compile(r"^\s*(?:jarvis[,:]?\s*)?in\s+(?:the\s+)?scratch\s+repo\s+([\w.\-]+)\s*[,:]\s*(.+?)\s*$", re.I | re.S)
+
+
 def wants(u: str) -> bool:
-    return bool(_TASK.search(u or "") or _CLI.match(u or "") or _MCPC.search(u or ""))
+    return bool(_LIST.search(u or "") or _CODE.match(u or "") or _TASK.search(u or "") or _CLI.match(u or "") or _MCPC.search(u or ""))
 
 
 def args_from_utterance(u: str) -> dict:
+    m = _LIST.search(u or "")
+    if m:
+        return {"op": "mcp_list", "server": m.group(1)}
+    m = _CODE.match(u or "")
+    if m:
+        return {"steps": [{"op": "code", "repo": m.group(1), "goal": m.group(2)}]}
     m = _TASK.search(u or "")
     if m:
         try:
@@ -360,3 +386,294 @@ def log_meta(got: dict) -> dict:
     g = got or {}
     return {"ok": bool(g.get("ok")), "steps": len(g.get("steps") or []),
             "verified": sum(1 for s in g.get("steps") or [] if s.get("status") == "verified"), "skill": bool(g.get("skill"))}
+
+
+# ================================================================ round 2
+# ---------------------------------------------------------------- model access (key read from env at runtime)
+CODE_MODEL = (os.environ.get("JARVIS_CODE_MODEL") or "anthropic/claude-opus-5.5").strip()
+CODE_MODEL_BACKUP = (os.environ.get("JARVIS_CODE_MODEL_BACKUP") or "anthropic/claude-sonnet-5.5").strip()
+RANK_MODEL = (os.environ.get("JARVIS_SKILL_RANK_MODEL") or "x-ai/grok-4.7").strip()
+
+
+def _or_key() -> str:
+    k = (os.environ.get("OPENROUTER_API_KEY") or "").strip()
+    if k:
+        return k
+    try:  # same .env files the face loads; value stays in memory, never logged
+        on = _load_brain_online()
+        for f in on.default_env_files() + [STACK.parents[1] / ".env.local"]:
+            v = on.parse_dotenv(f).get("OPENROUTER_API_KEY") if f.exists() else None
+            if v:
+                return v.strip()
+    except Exception:
+        pass
+    return ""
+
+
+def _load_brain_online():
+    key = "agent_stack_online_for_tools"
+    if key not in sys.modules:
+        spec = importlib.util.spec_from_file_location(key, STACK / "brain" / "online.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[key] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[key]
+
+
+def llm(messages: list[dict], model: str, timeout: float = 120, max_tokens: int = 6000) -> tuple[str, str]:
+    """(text, model_used). Tries model then the backup. Returns ('', '') if both fail."""
+    import urllib.request
+    key = _or_key()
+    if not key:
+        return "", ""
+    chain = [model] + ([CODE_MODEL_BACKUP] if model == CODE_MODEL else []) + \
+        ([CODE_MODEL_BACKUP] if model == RANK_MODEL else [])
+    for m in chain:
+        body = json.dumps({"model": m, "messages": messages, "max_tokens": max_tokens, "temperature": 0}).encode()
+        req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", data=body, headers={
+            "Authorization": f"Bearer {key}", "Content-Type": "application/json", "X-Title": "Jarvis agent_tools"})
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                d = json.loads(r.read().decode())
+            text = str(((d.get("choices") or [{}])[0].get("message") or {}).get("content") or "")
+            if text.strip():
+                return text, m
+        except Exception:
+            continue
+    return "", ""
+
+
+# ---------------------------------------------------------------- skills ranked by the model
+def rank_skills(goal: str, k: int = 3) -> list[str]:
+    try:
+        sk = _load("skills", "skills.py")
+        table = sk._scan(sk.default_roots())
+    except Exception:
+        return []
+    words = set(re.findall(r"[a-z0-9]{3,}", (goal or "").lower()))
+    scored = []
+    for name, val in table.items():
+        desc = str(val[1] if isinstance(val, tuple) and len(val) > 1 else "")
+        toks = set(re.findall(r"[a-z0-9]{3,}", (name + " " + desc).lower()))
+        scored.append((len(words & toks), name, desc[:140]))
+    scored.sort(key=lambda x: -x[0])
+    short = [s for s in scored if s[0] > 0][:60] or scored[:60]
+    listing = "\n".join(f"- {n}: {d}" for _, n, d in short)
+    text, _ = llm([{"role": "user", "content": f"Task: {goal}\nPick the {k} skills most useful for this task from the list. "
+                    f"Answer with names only, one per line, best first. If none fit, answer NONE.\n{listing}"}],
+                  RANK_MODEL, timeout=20, max_tokens=200)
+    low = {n.lower(): n for n in table}
+    names = [low[c] for c in (re.sub(r"^\s*(?:\d+[.)]|[-*])?\s*", "", l).strip(" `*:").split(":")[0].strip().lower()
+                              for l in text.splitlines()) if c in low]
+    if names:
+        return names[:k]
+    return [s[1] for s in short[:k] if s[0] > 0] if not text.strip().upper().startswith("NONE") else []
+
+
+def skill_text(name: str, cap: int = 3000) -> str:
+    try:
+        sk = _load("skills", "skills.py")
+        path = sk._scan(sk.default_roots())[name][0]
+        return Path(path).read_text(encoding="utf-8", errors="replace")[:cap]
+    except Exception:
+        return ""
+
+
+# ---------------------------------------------------------------- HTTP / URL MCP servers
+def http_spec(name: str) -> dict | None:
+    """Internal only: url + header values from the same configs. Never returned or logged."""
+    inv = _load("mcp_inventory", "mcp_inventory.py")
+    for _src, path in inv.DEFAULT_PATHS:
+        path = Path(path)
+        try:
+            text = path.read_text(encoding="utf-8")
+            if path.suffix == ".toml":
+                import tomllib
+                servers = tomllib.loads(text).get("mcp_servers") or {}
+            else:
+                data = json.loads(text)
+                servers = dict(data.get("mcpServers") or {})
+                for p in (data.get("projects") or {}).values():
+                    if isinstance(p, dict):
+                        servers.update(p.get("mcpServers") or {})
+        except Exception:
+            continue
+        s = servers.get(name)
+        if isinstance(s, dict) and s.get("url"):
+            hdr = {str(k): os.path.expandvars(str(v)) for k, v in (s.get("headers") or s.get("http_headers") or {}).items()}
+            env_tok = s.get("bearer_token_env_var")
+            if env_tok and os.environ.get(env_tok):
+                hdr["Authorization"] = "Bearer " + os.environ[env_tok]
+            return {"url": str(s["url"]), "headers": hdr}
+    return None
+
+
+def _http_rpc(spec: dict, calls: list[dict], deadline: float) -> list[dict | None]:
+    import urllib.request
+    import urllib.error
+    sess: dict = {}
+    end = time.monotonic() + deadline
+
+    def post(msg: dict) -> dict | None:
+        h = {"Content-Type": "application/json", "Accept": "application/json, text/event-stream",
+             "MCP-Protocol-Version": "2025-03-26", **spec.get("headers", {})}
+        if sess.get("id"):
+            h["Mcp-Session-Id"] = sess["id"]
+        req = urllib.request.Request(spec["url"], data=json.dumps(msg).encode(), headers=h, method="POST")
+        with urllib.request.urlopen(req, timeout=max(1.0, end - time.monotonic())) as r:
+            sid = r.headers.get("Mcp-Session-Id")
+            if sid:
+                sess["id"] = sid
+            body = r.read().decode("utf-8", errors="replace")
+            if "text/event-stream" in (r.headers.get("Content-Type") or ""):
+                for line in body.splitlines():
+                    if line.startswith("data:"):
+                        try:
+                            m = json.loads(line[5:])
+                        except ValueError:
+                            continue
+                        if m.get("id") == msg.get("id"):
+                            return m
+                return None
+            return json.loads(body) if body.strip() and "id" in msg else None
+    out: list = []
+    post({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-03-26", "capabilities": {},
+          "clientInfo": {"name": "jarvis", "version": "1"}}})
+    try:
+        post({"jsonrpc": "2.0", "method": "notifications/initialized"})
+    except Exception:
+        pass
+    for i, c in enumerate(calls, start=2):
+        out.append(post({"jsonrpc": "2.0", "id": i, **c}))
+    return out
+
+
+def _stdio_list(spec: dict, deadline: float) -> tuple[bool, list[str], str]:
+    mc = _load("mcp_call", "mcp_call.py")
+    tools = mc._list_tools(spec, deadline)
+    return (tools is not None), (tools or []), ("" if tools is not None else "no answer in time")
+
+
+def op_mcp_list(server: str, deadline: float = 30) -> dict:
+    """Live handshake + tools/list on one configured server (stdio or URL). Names only."""
+    if not NAME_OK.match(server or ""):
+        return {"ok": False, "verified": False, "spoken": "which server?"}
+    PERM().log_action("mcp_read", f"{server}.tools/list", "allow")
+    spec = _load("mcp_inventory", "mcp_inventory.py").server_spec(server)
+    try:
+        if spec:
+            ok, tools, why = _stdio_list(spec, deadline)
+            kind = "stdio"
+        else:
+            hs = http_spec(server)
+            if not hs:
+                return {"ok": False, "verified": False, "spoken": f"no config for {server}"}
+            kind = "http"
+            res = _http_rpc(hs, [{"method": "tools/list", "params": {}}], deadline)[0] or {}
+            tools = sorted(str(t.get("name")) for t in ((res.get("result") or {}).get("tools") or []) if isinstance(t, dict))
+            ok, why = bool(res.get("result")), str((res.get("error") or {}).get("message") or "")[:200]
+    except Exception as e:  # noqa: BLE001
+        code = getattr(e, "code", "")
+        return {"ok": False, "verified": False, "server": server,
+                "spoken": f"{server} failed: {type(e).__name__} {code}".strip()}
+    return {"ok": ok, "verified": ok and bool(tools), "server": server, "kind": kind, "tools": tools,
+            "spoken": (f"{server} ({kind}) offers {len(tools)} tools: " + ", ".join(tools[:12]) + ("…" if len(tools) > 12 else ""))
+            if ok else f"{server} ({kind}) failed: {why}"}
+
+
+def op_mcp_http_call(server: str, tool: str, arguments: dict, deadline: float = 40) -> tuple[bool, str] | None:
+    hs = http_spec(server)
+    if not hs:
+        return None
+    try:
+        res = _http_rpc(hs, [{"method": "tools/call", "params": {"name": tool, "arguments": arguments or {}}}], deadline)[0] or {}
+    except Exception as e:  # noqa: BLE001
+        return False, f"{type(e).__name__} {getattr(e, 'code', '')}".strip()
+    if res.get("error"):
+        return False, "tool error: " + str(res["error"].get("message"))[:300]
+    r = res.get("result") or {}
+    text = "\n".join(str(c.get("text")) for c in (r.get("content") or []) if isinstance(c, dict) and c.get("type") == "text")
+    return (not r.get("isError")), _cap(_scrub(text or json.dumps(r)[:OUT_CAP]))
+
+
+# ---------------------------------------------------------------- agentic coding loop (model writes the code)
+CODE_SYS = ("You are Jarvis's coding agent working in a git repo. Reply with ONE JSON object only, no prose, no fences:\n"
+            '{"plan":["short steps"],"files":{"relative/path.py":"full new file content"},"test_cmd":"python3 -m unittest discover -v",'
+            '"commit_message":"...","done":false}\n'
+            "Rules: write full file contents; always include or update tests; test_cmd must start with python3, pytest, node, npm or make; "
+            "no network, no secrets, never touch .env or credentials; set done=true only when the last test run passed and nothing "
+            "else is needed. Keep it small.")
+MAX_ITERS = int(os.environ.get("JARVIS_CODE_ITERS") or 4)
+
+
+def _json_obj(text: str) -> dict:
+    t = re.sub(r"^```(?:json)?|```$", "", (text or "").strip(), flags=re.M).strip()
+    i, j = t.find("{"), t.rfind("}")
+    try:
+        return json.loads(t[i:j + 1]) if i >= 0 else {}
+    except ValueError:
+        return {}
+
+
+def _tree(root: Path, cap: int = 6000) -> str:
+    out = []
+    for p in sorted(root.rglob("*")):
+        if ".git" in p.parts or not p.is_file() or p.stat().st_size > 20000:
+            continue
+        rel = p.relative_to(root)
+        if PERM().is_secret_path(rel):
+            continue
+        out.append(f"--- {rel}\n{p.read_text(encoding='utf-8', errors='replace')}")
+    s = "\n".join(out)
+    return s[:cap]
+
+
+def op_code(repo: str, goal: str, branch: str = "jarvis/code") -> dict:
+    """Plan -> edit -> test -> read failures -> fix -> commit, driven by the strongest coding model."""
+    todo: list[dict] = []
+    skills = rank_skills(goal)
+    guide = "\n\n".join(f"# skill {n}\n{skill_text(n, 1500)}" for n in skills[:2])
+
+    def step(what, got):
+        todo.append({"n": len(todo) + 1, "what": what, "status": "verified" if got.get("verified") else
+                     ("needs Evens" if got.get("gated") else "failed"), "result": str(got.get("spoken") or "")[:300]})
+        return got.get("verified")
+    if not step("init", op_repo(repo, "init")) or not step(f"branch {branch}", op_repo(repo, "branch", name=branch)):
+        return _code_report(todo, skills, "", False)
+    root = Path(os.path.expanduser(repo)) if os.path.isabs(os.path.expanduser(repo)) else PERM().scratch_roots()[0] / repo
+    history = [{"role": "system", "content": CODE_SYS}]
+    last_test, model_used, passed, plan = "", "", False, []
+    for it in range(1, MAX_ITERS + 1):
+        history.append({"role": "user", "content": f"Goal: {goal}\n\nRelevant skills:\n{guide or '(none)'}\n\nRepo now:\n{_tree(root)}\n\n"
+                        f"Last test output (iteration {it - 1}):\n{last_test or '(none yet)'}"})
+        text, model_used = llm(history, CODE_MODEL)
+        if not text:
+            step(f"iter {it} model", {"verified": False, "spoken": "no model answer (key missing or both models failed)"})
+            break
+        history.append({"role": "assistant", "content": text[:8000]})
+        d = _json_obj(text)
+        plan = plan or [str(x)[:120] for x in (d.get("plan") or [])][:7]
+        files = d.get("files") or {}
+        if not isinstance(files, dict):
+            files = {}
+        for path, content in list(files.items())[:10]:
+            if not step(f"iter {it} write {path}", op_repo(str(root), "write", path=str(path), content=str(content))):
+                return _code_report(todo, skills, model_used, False, plan)
+        got = op_repo(str(root), "test", cmd=str(d.get("test_cmd") or "python3 -m unittest discover -v"))
+        last_test = str(got.get("output") or got.get("spoken"))[-2500:]
+        passed = bool(got.get("verified"))
+        step(f"iter {it} test", got)
+        if passed:
+            step("commit", op_repo(str(root), "commit", message=str(d.get("commit_message") or goal)[:100]))
+            break
+    return _code_report(todo, skills, model_used, passed and todo[-1]["status"] == "verified", plan)
+
+
+def _code_report(todo, skills, model, ok, plan=None) -> dict:
+    done = sum(1 for t in todo if t["status"] == "verified")
+    lines = " ".join(f"{t['n']}. [{t['status']}] {t['what']}: {t['result']}" for t in todo)
+    head = (f"Skills read first: {', '.join(skills)}. " if skills else "") + (f"Model: {model}. " if model else "")
+    head += ("Plan: " + "; ".join(plan) + ". ") if plan else ""
+    head += ("Done and verified: tests pass and committed. " if ok else
+             f"NOT done: {done}/{len(todo)} steps verified; tests did not pass or the commit didn't land. ")
+    return {"ok": ok, "verified": ok, "steps": todo, "skill": ", ".join(skills), "model": model, "spoken": head + lines}
