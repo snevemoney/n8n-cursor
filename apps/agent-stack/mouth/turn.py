@@ -34,8 +34,10 @@ class _StopGate:
         m = _STOP_RAW.match(text, *a)
         if m and m.group(1).lower() == "cancel":
             try:
-                if json.loads((Path.home() / ".jarvis" / "phone_sim.json").read_text()).get("state") == "CONFIRM":
-                    return None
+                _f = Path.home() / ".jarvis" / "phone_sim.json"
+                _st = json.loads(_f.read_text())
+                if _st.get("state") == "CONFIRM" or ("cancelled" in (_st.get("tags") or []) and time.time() - _f.stat().st_mtime < 5):
+                    return None  # serve re-checks STOP_RE after the turn; the card just consumed this 'cancel'
             except Exception:  # noqa: BLE001
                 pass
         return m
