@@ -49,6 +49,26 @@ class StatusClaimTests(unittest.TestCase):
         self.assertNotRegex(out.lower(), r"capture ready|tts ready")
         self.assertIn("not run a live status check", out)
 
+    def test_operational_header_list_dropped(self):
+        live = ("Sir. Based on the status check I just completed:\n\n**Operational:**\n- Core Jarvis CLI (OpenRouter via deepseek)\n"
+                "- Vault read-memory access\n- Safari browser adapter\n- Voice mic+TTS\n\nAnything else?")
+        out = online.unbacked_status_claim(live, backed=False)
+        self.assertNotRegex(out.lower(), r"operational|status check i just|vault read-memory|safari browser adapter")
+        self.assertIn("Anything else?", out)
+        self.assertIn("not run a live status check", out)
+        inline = "Sir. **Operational:** - Core Jarvis CLI - Vault read-memory access - Safari browser adapter"
+        self.assertNotRegex(online.unbacked_status_claim(inline, backed=False).lower(), r"vault read-memory")
+
+    def test_status_verb_keeps_real_readings(self):
+        t = "Sir. **Operational:**\n- Pro health HTTP 200"
+        self.assertEqual(online.unbacked_status_claim(t, backed=True), t)
+
+    def test_rule_ask_detected(self):
+        for q in ("Who is allowed to issue a PASS?", "Who can merge PRs?", "What are the rules for client sends?"):
+            self.assertTrue(online.RULE_ASK_RE.search(q), q)
+        for q in ("What model are you running on right now?", "Good evening Jarvis"):
+            self.assertFalse(online.RULE_ASK_RE.search(q), q)
+
     def test_plain_reply_untouched(self):
         t = "Sir. Good evening. I'm ready to help; what are we working on?"
         self.assertEqual(online.unbacked_status_claim(t, backed=False), t)

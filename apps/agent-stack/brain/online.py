@@ -60,6 +60,12 @@ OPENROUTER_ATTEMPT_SEC = _sec_env("JARVIS_TALK_ATTEMPT_SEC", 20.0)
 OPENROUTER_WALL_SEC = _sec_env("JARVIS_TALK_WALL_SEC", 22.0)
 TALK_DARK = "The talk wire is dark this turn."
 OPENROUTER_MAX_TOKENS = 512
+OPENROUTER_RULE_TOKENS = int(os.environ.get("JARVIS_RULE_MAX_TOKENS") or 160)
+RULE_ASK_RE = re.compile(
+    r"\b(?:who\s+(?:is\s+)?(?:allowed|can|may|gets\s+to)|(?:am\s+I|are\s+(?:you|we))\s+allowed|is\s+it\s+allowed"
+    r"|what(?:'s|\s+is|\s+are)\s+the\s+(?:rule|rules|policy|lock)s?\b|\bwho\s+(?:issues|grades|approves|merges))",
+    re.I,
+)
 OPENROUTER_RETRIEVE_TOKENS = int(os.environ.get("JARVIS_TALK_MAX_TOKENS") or 320)  # short spoken answers; cut ArtCraft latency
 LENGTH_RETRY_TOKENS = 640
 LENGTH_MISS = "UNKNOWN. That answer ran out of room."
@@ -1334,18 +1340,38 @@ STATUS_CLAIM_RE = re.compile(
     r"\b(?:is|are)\s+(?:\w+\s+)?(?:stable|ready|operational|functional|responsive|active|accessible|available|working|reliable|healthy|online)\b"
     r"|^\s*[-*\u2022]\s+[^\n]{0,40}?\b(?:orb|vault|safari|talk|watch|desktop|tools?|adapter|connection|openrouter|memory|browser)\b[^\n]{0,60}?\b(?:active|accessible|available|functional|operational|responsive|ready|online|working|stable)\b"
     r"|(?:^|\s)[-*\u2022]\s+\*\*[^*\n]{1,40}\*\*\s*:[^\n*]{0,60}?\b(?:ready|available|active|online|operational|functional|working|stable)\b"
+    r"|\b(?:based\s+on\s+the\s+status\s+check|(?:the\s+)?status\s+check\s+I\s+(?:just\s+)?(?:completed|ran|did)|running\s+a\s+(?:live\s+)?status\s+check\s+now)\b"
     r"|\ball\s+systems\s+(?:are\s+)?(?:go|nominal|green)"
     r"|\bfunctioning\s+(?:well\s+)?within\s+(?:normal\s+)?operational\s+parameters",
     re.I | re.M,
 )
 
 
+# "**Operational:**", "Tools status:", "Ready:" headers over a tool list nobody checked.
+STATUS_HEADER_RE = re.compile(
+    r"(?:^|[\s:])\**\s*(?:operational|tools?\s+status|status|ready|online|working|available)\s*:?\s*\**\s*:?\s*$"
+    r"|\**\s*(?:operational|tools?\s+status)\s*:?\s*\**\s*:?\s*[-*\u2022]\s",
+    re.I,
+)
+
+
 def unbacked_status_claim(text: str, *, backed: bool) -> str:
     """Drop sentences that assert live Orb/tool health unless a live check backs them."""
-    if backed or not text or not STATUS_CLAIM_RE.search(text):
+    if backed or not text or not (STATUS_CLAIM_RE.search(text) or STATUS_HEADER_RE.search(text)):
         return text
     parts = re.split(r"(?<=[.!?])\s+|\n+", text.strip())
-    keep = [x for x in parts if x and not STATUS_CLAIM_RE.search(x)]
+    keep, under_header = [], False
+    for x in parts:
+        if not x:
+            continue
+        if STATUS_HEADER_RE.search(x):
+            under_header = True
+            continue
+        if under_header and re.match(r"\s*[-*\u2022]\s+", x):
+            continue
+        under_header = False
+        if not STATUS_CLAIM_RE.search(x):
+            keep.append(x)
     dropped = len([x for x in parts if x]) - len(keep)
     if dropped >= 1 or not any(re.search(r"[A-Za-z]{3,}", x) and x.strip(" .") not in ("Sir", "sir") for x in keep):
         keep.append("I'm online, but I have not run a live status check this turn; ask me to run status for real readings.")
@@ -1400,6 +1426,9 @@ def _call_openrouter_inner(
         pass
     # No-hands answers (memory/rules questions) get the short cap too: live PASS answer ran 18-20 s at 512.
     max_tokens = OPENROUTER_RETRIEVE_TOKENS if (brief or not (hands or extra_tools)) else OPENROUTER_MAX_TOKENS
+    if not (hands or extra_tools) and RULE_ASK_RE.search(prompt or ""):
+        # Rule/permission asks ("who may issue a PASS?") need one quoted rule, not an essay: 20 s tails seen live.
+        max_tokens = min(max_tokens, OPENROUTER_RULE_TOKENS)
     with_tools = bool(hands or extra_tools)
     models: list[str] = []
     vision = openrouter_vision_model() if stills else ""
