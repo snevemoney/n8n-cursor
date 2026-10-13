@@ -926,7 +926,7 @@ CONFIRM_YES_RE = re.compile(
 CONFIRM_LINES = {
     "screen_see": "That would send a screenshot of your whole screen to the vision model, off this Mac. Say \"confirm\" to go ahead; I delete the screenshot afterwards.",
     "desk_dispatch": "That would put a job card for the {desk} desk on the hive bus, which acts as a send. Say \"confirm\" to send it.",
-    "code_run": "I picked code to run that you didn't type. Say \"confirm\" and I'll run it in the sandbox; anything else drops it.",
+    "code_run": "I picked code to run that you didn't type. Say \"confirm\" to run it in the sandbox; anything else drops it.",
 }
 
 

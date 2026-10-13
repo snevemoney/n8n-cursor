@@ -51,9 +51,13 @@ def wants_author(utterance: str) -> bool:
 
 def author(ask: str) -> dict:
     builder = BUILDER
-    text = CHAT(builder, "Write Python for this request. Reply with exactly two fenced python blocks: first the code, "
-                         "then a short test using plain assert statements. No prose, no I/O, no network.\nRequest: " + ask)
+    brief = ("Write Python for this request. Reply with exactly two fenced python blocks: first the code, "
+             "then a short test using plain assert statements. No prose, no I/O, no network.\nRequest: " + ask)
+    text = CHAT(builder, brief)
     blocks = _FENCE.findall(text or "")
+    if not blocks:  # one retry on the other family; the critic is re-picked from whoever built it
+        builder = critic_for(builder)
+        blocks = _FENCE.findall(CHAT(builder, brief) or "")
     if not blocks:
         return {"ok": False, "builder_model": builder,
                 "spoken": "I couldn't write that code just now (the builder model gave no code), so nothing ran."}
@@ -64,7 +68,7 @@ def author(ask: str) -> dict:
     verdict = " ".join(str(verdict).split())
     verdict = (re.match(r"(.{1,140}?[.!?])(\s|$)", verdict) or re.match(r"(.{1,140})", verdict)).group(1)
     name = (re.search(r"^\s*def\s+(\w+)", code, re.M) or re.search(r"(\w+)", code)).group(1)
-    spoken = (f"I wrote {name} with a test; nothing has run. Say \"confirm\" and I'll run it in the sandbox. "
+    spoken = (f"I wrote {name} with a test; nothing has run. Say \"confirm\" to run it in the sandbox. "
               f"A critic from a different model family reviewed it ({critic.split('/')[-1]}; builder {builder.split('/')[-1]}): {verdict}")
     return {"ok": True, "code": code, "test": test, "builder_model": builder, "critic_model": critic,
             "verdict": verdict, "spoken": spoken}

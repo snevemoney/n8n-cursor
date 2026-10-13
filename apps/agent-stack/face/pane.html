@@ -383,6 +383,7 @@
   <div class="chip" id="chip" role="status">
     <canvas id="wave" width="640" height="46"></canvas>
     <div class="mark" id="mark">J.A.R.V.I.S.</div>
+    <div class="line" id="heard" style="opacity:.6;font-size:.8em"></div>
     <div class="line" id="spoken"></div>
       <div id="browserResults" aria-live="polite"></div>
   </div>
@@ -1778,6 +1779,7 @@
         if (line && !bus.mission_delivery_pending && !(bus.tool === "browser_mission" && bus.browser_mission_id && Array.from($("browserResults").children).some(el => el.dataset.missionId === bus.browser_mission_id)) && (newerReply || !now || isStatusLine(now) || isFallbackLine(now) || /^listening\.?$/i.test(now))) {
           $("spoken").textContent = line;
           state.renderedBusGen = Number(bus.turn_gen || 0);
+          if ($("heard")) $("heard").textContent = bus.utterance ? "› " + String(bus.utterance).slice(0, 160) : "";
         }
         if (bus.tool === "browser_mission" && bus.browser_mission_id &&
             Array.from($("browserResults").children).some(el => el.dataset.missionId === bus.browser_mission_id) &&

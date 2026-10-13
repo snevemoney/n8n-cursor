@@ -59,7 +59,7 @@ def run(args: dict | None = None) -> dict:
     test = str(args.get("test") or "")
     if not code.strip():
         return {"ok": True, "ran": False, "passed": False, "timed_out": False, "stdout": "", "stderr": "",
-                "spoken": "I can run Python in a sandbox, but this ask has no code in it. Paste the code (and a test) and I'll run it."}
+                "spoken": "I can run Python in a sandbox, but this ask has no code in it. Paste the code (and a test) to run it."}
     py = _interpreter()
     if not SANDBOX or not py:
         why = "sandbox-exec is missing" if not SANDBOX else "no system Python outside your home folder"
