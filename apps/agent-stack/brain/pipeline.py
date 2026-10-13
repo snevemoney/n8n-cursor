@@ -17,6 +17,7 @@ import threading
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import uuid
 import hashlib
@@ -851,6 +852,54 @@ def cancel_turn(hive: Path) -> int:
     return 0
 
 
+# --- PR 518: the request's published model line, kept in memory so a 25 s
+# wall can see it before the bus append lands (archive still in flight).
+_PUBLISHED_GUARD = threading.Lock()
+_PUBLISHED: dict[tuple[str, str], str] = {}
+
+
+def _published_key(hive: Path, utterance: str) -> tuple[str, str]:
+    return (str(Path(hive).resolve()), (utterance or "").strip())
+
+
+def _is_model_line(text: str) -> bool:
+    body = " ".join((text or "").split())
+    if not body or body == TALK_DARK:
+        return False
+    return body.lower() not in {"sir.", "sir", "sir,"}
+
+
+def remember_published_line(hive: Path, utterance: str, spoken: str) -> None:
+    """The sentence exists. Later bus IO must not be required for the wall to see it."""
+    asked = (utterance or "").strip()
+    line = " ".join((spoken or "").split())
+    if not asked or not _is_model_line(line):
+        return
+    with _PUBLISHED_GUARD:
+        _PUBLISHED[_published_key(hive, asked)] = line
+
+
+def forget_published_line(hive: Path, utterance: str) -> None:
+    with _PUBLISHED_GUARD:
+        _PUBLISHED.pop(_published_key(hive, utterance), None)
+
+
+def published_model_line(hive: Path, utterance: str) -> str:
+    """Model sentence for this request. Memory first, then the bus file."""
+    asked = (utterance or "").strip()
+    if not asked:
+        return ""
+    with _PUBLISHED_GUARD:
+        remembered = _PUBLISHED.get(_published_key(hive, asked), "")
+    if _is_model_line(remembered):
+        return remembered
+    bus = load_json(Path(hive) / "bus" / "state.json")
+    if str(bus.get("utterance") or "").strip() != asked:
+        return ""
+    spoken = str(bus.get("spoken") or "").strip()
+    return spoken if _is_model_line(spoken) else ""
+
+
 def cancel_turn_scoped(
     hive: Path,
     gen: int,
@@ -870,6 +919,12 @@ def cancel_turn_scoped(
     stays on that generation. The spoken line on the bus is the archived line.
     """
     line = (spoken or "").strip() or "Stopped. Standing by."
+    asked = (request or "").strip()
+    if line == TALK_DARK and asked:
+        with _PUBLISHED_GUARD:
+            remembered = _PUBLISHED.get(_published_key(hive, asked), "")
+        if _is_model_line(remembered):
+            return False
     if BUS_IO is not None and hasattr(BUS_IO, "cancel_turn_scoped"):
         cancelled = bool(BUS_IO.cancel_turn_scoped(hive, gen, spoken=line, request=request))
         if cancelled:
@@ -5417,6 +5472,7 @@ def _commit_spoken(
         receipt = write_receipt(hive, turn_input=spoken_in, turn_output=text)
     except OSError:
         receipt = None
+    remember_published_line(hive, spoken_in, text)
     prior_bus = load_json(hive / "bus" / "state.json")
     digest = roll_digest(str(prior_bus.get("sitting_digest") or ""), spoken_in, text)
     committed = write_bus(

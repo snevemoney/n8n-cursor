@@ -116,18 +116,28 @@ def wire_dark_event(utterance: str = "") -> dict:
 
 
 def committed_model_event(bus: dict, utterance: str, gen: int, wire: dict | None = None) -> dict | None:
-    """The line this generation already published. A later wall must not replace it."""
-    try:
-        if int((bus or {}).get("turn_gen") or 0) != int(gen):
-            return None
-    except (TypeError, ValueError):
-        return None
+    """The line this request already published. A later wall must not replace it.
+
+    PR 518: the plain turn path does not always bump ``turn_gen`` before the
+    wall, so the predicted generation (arrival + 1) can miss. The request
+    (utterance) match is the identity; a generation mismatch falls back to the
+    generation on the bus instead of hiding a sentence already stored.
+    """
     asked = (utterance or "").strip()
     if str((bus or {}).get("utterance") or "").strip() != asked:
         return None
     spoken = str((bus or {}).get("spoken") or "").strip()
     if not provider_sentence({"spoken": spoken, "verb": str((bus or {}).get("tool") or "converse")}):
         return None
+    try:
+        bus_gen = int((bus or {}).get("turn_gen") or 0)
+    except (TypeError, ValueError):
+        bus_gen = 0
+    try:
+        want = int(gen)
+    except (TypeError, ValueError):
+        want = 0
+    gen = want if want > 0 and bus_gen == want else bus_gen
     outcome = "MODEL_TALK"
     row = wire if isinstance(wire, dict) else {}
     nested = row.get("wire") if isinstance(row.get("wire"), dict) else {}
@@ -838,7 +848,15 @@ class Handler(BaseHTTPRequestHandler):
         self._json(200, self._scrub_turn(live_mouth, box.get("out") or wire_dark_event(utterance)))
 
     def _alive_wall_body(self, pipe, utterance: str, own_gen: int, current: int) -> dict:
-        """Worker still alive at the wall. A published model line is the client body."""
+        """Worker still alive at the wall. A published model line is the client body.
+
+        PR 518: read the stored line before any cancel. ``own_gen`` is a
+        prediction (arrival + 1); when this turn path never opened it, the
+        sentence already stored for this request is still the body.
+        """
+        kept = self._committed_model_event(utterance, own_gen if current == own_gen else current)
+        if kept:
+            return kept
         if pipe is not None and current == own_gen:
             closed = False
             if hasattr(pipe, "cancel_turn_scoped"):
@@ -872,6 +890,25 @@ class Handler(BaseHTTPRequestHandler):
                 wire = pipe.LAST_WIRE.read(HIVE) or {}
             except (OSError, TypeError):
                 wire = {}
+        # PR 518: the sentence can be remembered before the bus append lands.
+        published = ""
+        if pipe is not None and hasattr(pipe, "published_model_line"):
+            try:
+                published = str(pipe.published_model_line(HIVE, utterance) or "")
+            except (OSError, TypeError):
+                published = ""
+        if published:
+            bus = dict(bus) if isinstance(bus, dict) else {}
+            asked = (utterance or "").strip()
+            same = str(bus.get("utterance") or "").strip() == asked
+            current = str(bus.get("spoken") or "").strip()
+            current_ok = bool(
+                provider_sentence({"spoken": current, "verb": str(bus.get("tool") or "converse")})
+            )
+            if not (same and current_ok):
+                bus["spoken"] = published
+                bus["utterance"] = asked
+                bus.setdefault("tool", "converse")
         return committed_model_event(bus if isinstance(bus, dict) else {}, utterance, gen, wire)
 
     def _scrub_turn(self, live_mouth, out: dict) -> dict:
