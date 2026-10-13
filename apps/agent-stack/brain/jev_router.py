@@ -49,6 +49,8 @@ _RULES: list[tuple[str, float, re.Pattern]] = [
     ("web_search", 0.9, re.compile(r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b|\blook\s+(?:it\s+)?up\s+online\b|\bweb\s+search\b|\bgoogle\s+(?:the|for|what|who|how)\b", re.I)),
     # workspace_read hand: repo/branch/file/folder asks are a local read (advisory label only).
     ("local_read", 0.9, re.compile(r"\b(?:what|which)\s+(?:repo|repos|branch)\b|\b(?:read|open)\b.{0,40}\.(?:md|txt|py|json)\b|\blist\b.{0,30}\b(?:downloads|desktop|documents)\b", re.I)),
+    # mcp_inventory hand: which MCP servers is a local config read, names only (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:which|what|list|show)\b.{0,25}\bmcp\b", re.I)),
     # skills hand: which skills / read one skill is a local read (advisory label only).
     ("local_read", 0.9, re.compile(r"\b(?:which|what)\s+skills\b|\b(?:list|show)\b.{0,20}\bskills\b|\b(?:read|open|show)\s+(?:the\s+)?[\w.\-]+\s+skill\b", re.I)),
     ("local_read", 0.9, re.compile(r"\b(read|open|show)\s+(?:me\s+)?(?:my|the)\s+(?:vault|note|notes|file|lane|doc)\b|\bin\s+(?:my|the)\s+vault\b", re.I)),

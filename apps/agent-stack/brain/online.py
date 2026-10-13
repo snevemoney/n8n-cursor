@@ -205,6 +205,14 @@ OPENROUTER_HANDS = (
     {
         "type": "function",
         "function": {
+            "name": "mcp_inventory",
+            "description": "Read-only: list the names of MCP servers configured for Claude Code, Cursor and Codex. Names only; never commands, URLs or env values.",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "skills",
             "description": "Read-only: list the skills Jarvis has (names and descriptions from SKILL.md files) or read one named skill's text (capped). Use it before claiming which skills exist.",
             "parameters": {
