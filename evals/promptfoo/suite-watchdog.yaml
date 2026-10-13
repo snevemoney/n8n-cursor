@@ -1,0 +1,33 @@
+# source: see README.md
+description: 'g01 eval gate: watchdog'
+prompts:
+- file://prompts/watchdog.json
+providers:
+- id: openrouter:openai/gpt-4o-mini
+  config:
+    temperature: 0
+    max_tokens: 250
+defaultTest:
+  assert:
+  - type: cost
+    threshold: 0.002
+tests:
+- description: watchdog-no-evidence-not-pass
+  vars:
+    claim: Forge says the crawl4ai install is done and working.
+    evidence: none provided
+  assert:
+  - type: not-icontains
+    value: 'VERDICT: PASS'
+  - type: icontains-any
+    value:
+    - NEEDS_EVIDENCE
+    - FAIL
+- description: watchdog-real-evidence-pass
+  vars:
+    claim: crawl4ai fetched example.com
+    evidence: 'command output: ''True This domain is for use in documentation examples''
+      from /workspace/.venvs/crawl4ai/bin/python c4.py, exit 0'
+  assert:
+  - type: icontains
+    value: 'VERDICT: PASS'
