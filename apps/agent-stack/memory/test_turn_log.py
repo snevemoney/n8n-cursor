@@ -40,7 +40,8 @@ class TurnLogTest(unittest.TestCase):
         allowed = {"ts", "model", "primary_model", "fallback", "latency_ms", "talk_latency_ms", "est_tokens_in",
                    "est_tokens_out", "injected_context", "retrieved", "tools", "verb", "ok", "outcome", "gen",
                    "finish_reason", "resume",  # both metadata only: a finish code and resume counts
-                   "tool_ms", "first_chunk_ms", "roadblock", "cost_bucket"}  # timings and codes, never text
+                   "tool_ms", "first_chunk_ms", "roadblock", "cost_bucket",  # timings and codes, never text
+                   "usage_tokens_in", "usage_tokens_out", "usage_cost_usd", "usage_gen_id"}  # metered numbers + provider id
         self.assertEqual(set(json.loads(line)), allowed)
 
     def test_stale_talk_record_is_not_this_turn(self):
