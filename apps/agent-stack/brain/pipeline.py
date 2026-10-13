@@ -485,13 +485,33 @@ WORKER_FRONT = {
 DISPATCH_DEST = ROOT / "docs/hive/outer-heaven/CONTENT/os/sessions/jarvis/dispatch.md"
 
 
+_LAST_GOOD: dict = {}
+
+
 def _load(name: str, path: Path):
-    sys.modules.pop(name, None)
+    """Re-exec a hand from disk each call. The live Face shares its working tree with other workers, so a file
+    caught mid-edit (syntax/import error) must not darken the turn: keep serving the last good copy and log it."""
+    prev = sys.modules.pop(name, None)
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
-        return None
+        return _LAST_GOOD.get(name)
     mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    try:
+        spec.loader.exec_module(mod)
+    except Exception as exc:  # noqa: BLE001
+        good = _LAST_GOOD.get(name) or prev
+        try:
+            (ROOT / "logs").mkdir(exist_ok=True)
+            with (ROOT / "logs" / "load-errors.jsonl").open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps({"ts": time.time(), "module": name, "path": str(path), "error": f"{type(exc).__name__}: {exc}"[:300],
+                                     "served_last_good": good is not None}) + "\n")
+        except Exception:  # noqa: BLE001
+            pass
+        if good is None:
+            raise
+        sys.modules[name] = good
+        return good
+    _LAST_GOOD[name] = mod
     return mod
 
 

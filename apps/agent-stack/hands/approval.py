@@ -17,7 +17,8 @@ WHAT_RE = re.compile(r"\bbook\s+(?:the\s+|a\s+)?((?!it\b)[\w' -]{3,40}?)(?=\s+(?
 
 
 def wants(u: str) -> bool:
-    return bool(APPROVE_RE.search(u or "") and COND_RE.search(u or ""))
+    # A conditional imperative ("if there's no conflict, book X") is itself the approval; it is read back and recorded, never executed here.
+    return bool((APPROVE_RE.search(u or "") or re.search(r"\bbook\b", u or "", re.I)) and COND_RE.search(u or ""))
 
 
 def parse(u: str) -> dict:

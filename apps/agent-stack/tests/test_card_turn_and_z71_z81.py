@@ -42,3 +42,20 @@ def test_pane_binds_cards_to_turn():
 def test_z75_hush_gate_present():
     src = (STACK / "mouth" / "turn.py").read_text()
     assert 'verb="hush", host="local", wires=["hush", "listening"]' in src and "resumed_by" in src
+
+
+def test_z60_conditional_book_is_an_approval():
+    ap = _load("ap_t", "hands/approval.py")
+    assert ap.wants("Jarvis, check my schedule and if there's no conflict, book a kickoff call with Dana for Monday at 10, put it on my calendar and confirm it to me via Telegram.")
+    assert not ap.wants("Book a kickoff call with Dana for Monday.")
+
+
+def test_load_keeps_last_good_copy(tmp_path):
+    import sys as _s
+    _s.path.insert(0, str(STACK / "brain"))
+    pl = _load("pl_t", "brain/pipeline.py")
+    f = tmp_path / "h.py"
+    f.write_text("X = 1\n")
+    assert pl._load("t_hand", f).X == 1
+    f.write_text("X = (\n")  # mid-edit
+    assert pl._load("t_hand", f).X == 1

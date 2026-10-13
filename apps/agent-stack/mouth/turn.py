@@ -512,6 +512,11 @@ def _apply_turn_iter_inner(
         _ea_want = PIPELINE._load("agent_stack_entity_ack", PIPELINE.STACK / "hands" / "entity_ack.py").wants(spoken)
     except Exception:  # noqa: BLE001
         pass
+    try:  # Z60: a conditional approval is read back + recorded (nothing books/sends), so it passes the refusal too
+        _ap_m = PIPELINE._load("agent_stack_approval", PIPELINE.STACK / "hands" / "approval.py")
+        _ea_want = _ea_want or (_ap_m.wants(spoken) and not re.search(r"\b(?:wire|pay|transfer)\b", spoken or "", re.I))
+    except Exception:  # noqa: BLE001
+        pass
     if PIPELINE.is_hard_step(spoken) and not _ea_want:
         token = PIPELINE.begin_turn(hive) if hasattr(PIPELINE, "begin_turn") else None
         for out in PIPELINE.apply_pipeline_iter(
@@ -579,6 +584,15 @@ def _apply_turn_iter_inner(
             retrieve_roots,
             gen=token,
         )
+        return
+    # Clock: time/date asks are answered from the local clock in Evens's zone, never by the model (it guessed 10:07 PM at 15:58).
+    if re.search(r"\b(?:what(?:'s| is)? the time|what time is it|what(?:'s| is) (?:the |today'?s )?date|what day is (?:it|today))\b", spoken or "", re.I) \
+            and len((spoken or "").split()) <= 12:
+        from zoneinfo import ZoneInfo
+        _now = datetime.now(ZoneInfo(os.environ.get("JARVIS_TZ") or "America/Toronto"))
+        _line = f"It's {_now.strftime('%-I:%M %p')} Eastern, {_now.strftime('%A, %B %-d')}."
+        yield _door_speak(hive, spoken, _line, "clock", retrieve_roots, gen=token,
+                          execution={"ok": True, "tool": "clock", "spoken": _line, "wires": ["local_clock"], "sent": False})
         return
     # Z82 (dCK 4:39): "find my note about X" -> name the title, ask, then fetch on "open it/yes". Z83 grounded writing.
     try:
