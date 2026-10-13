@@ -159,6 +159,7 @@ def op_mcp(server: str, tool: str, arguments: dict | None = None, approved: bool
 
 
 # ---------------------------------------------------------------- cli
+GWS_SERVICES = "gmail|calendar|drive|docs|sheets|slides|tasks|people|keep|meet|forms|classroom|chat"
 CLI_ALLOW = {
     "gh": re.compile(r"^(pr|issue)\s+(view|list|diff|checks|status)\b|^repo\s+(view|list)\b|^run\s+(list|view)\b|^api\s+(?!-X)(?!--method)\S+$|^auth\s+status$"),
     "git": re.compile(r"^(log|status|diff|show|branch|rev-parse|remote\s+-v|ls-files)\b"),
@@ -167,6 +168,14 @@ CLI_ALLOW = {
     "ffmpeg": re.compile(r"^(-version|-hide_banner\s+-version)$"),
     "node": re.compile(r"^(--version|-v)$"),
     "python3": re.compile(r"^(--version|-V)$"),
+    # Google Workspace CLI: positive match only (read helpers, or `<service> <resource…> list|get|query`). Sign-in, request
+    # bodies, uploads, file output and any write-ish word fail closed to "needs Evens". A search term that happens to
+    # contain such a word is gated too; that is the safe side to err on.
+    "gws": re.compile(
+        r"^(?!.*(?:--json|--upload|--output|--sanitize)\b)"
+        r"(?!.*\b(?:send|reply|forward|insert|update|patch|delete|batch\w*|trash|untrash|modify|import|create|copy|move|"
+        r"watch|stop|clear|empty\w*|quickAdd|login|logout|export|auth)\b)"
+        rf"(?:{GWS_SERVICES})\s+(?:\+(?:triage|read|agenda)\b|(?:[\w.\-]+\s+){{1,3}}(?:list|get|query)(?:\s|$))"),
 }
 CLI_GATED = re.compile(r"\b(merge|push|close|delete|create|edit|comment|review|release|deploy|reset|rebase|--force|-X\s*(POST|PUT|PATCH|DELETE))\b", re.I)
 
@@ -340,7 +349,7 @@ def run(args: dict | None = None, approved: bool = False) -> dict:
 
 # ---------------------------------------------------------------- routing
 _TASK = re.compile(r"^\s*(?:jarvis[,:]?\s*)?agent\s+task\s*:?\s*(\{.*\})\s*$", re.I | re.S)
-_CLI = re.compile(r"^\s*(?:jarvis[,:]?\s*)?(?:run\s+)?((?:gh|git|yt-dlp|ffprobe|ffmpeg)\s+.+?)\s*$", re.I)
+_CLI = re.compile(r"^\s*(?:jarvis[,:]?\s*)?(?:run\s+)?((?:gh|git|yt-dlp|ffprobe|ffmpeg|gws)\s+.+?)\s*$", re.I)
 _MCPC = re.compile(r"\bcall\s+(?:the\s+)?([\w.\-]+)\s+mcp\s+tool\s+([\w.\-]+)(?:\s+with\s+(\{.*\}))?", re.I | re.S)
 
 
