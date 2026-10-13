@@ -14,17 +14,50 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [200, 400],
-      "webhookId": "hive-founder-signal"
+      "webhookId": "hive-founder-signal",
+      "notes": "Big Boss founder-loop glue. Grok owns day-plan/email/calendar. This webhook only ingests + registers."
     },
     {
       "parameters": {
-        "jsCode": "// Validate and normalize inbound founder signal\nconst body = $json.body || $json;\n\nconst signal = {\n  signalId: body.signalId || body.id || `sig_${Date.now()}`,\n  signalType: body.signalType || body.type || 'founder-signal',\n  source: body.source || 'ecosystem-router',\n  title: body.title || body.subject || 'Untitled Signal',\n  content: body.content || body.message || body.description || '',\n  priority: body.priority || 'normal',\n  metadata: body.metadata || {},\n  receivedAt: new Date().toISOString()\n};\n\nreturn [{ json: signal }];"
+        "jsCode": "// Founder signal ingest. Lane hive-os. Do not rebuild day-plan here. Notify is Grok.\nconst body = $json.body || $json;\n\nconst signal = {\n  signalId: body.signalId || body.id || body.correlationId || `sig_${Date.now()}`,\n  signalType: body.signalType || body.type || 'founder-signal',\n  source: body.source || 'ecosystem-router',\n  title: body.title || body.subject || 'Untitled Signal',\n  content: body.content || body.message || body.text || body.description || '',\n  priority: body.priority || 'normal',\n  metadata: body.metadata || {},\n  receivedAt: new Date().toISOString(),\n  lane: body.lane || 'hive-os'\n};\n\nreturn [{\n  json: {\n    ...signal,\n    registerPayload: {\n      correlationId: signal.signalId,\n      jobType: 'hive.founder_signal.ingested',\n      goal: signal.title,\n      source: signal.source,\n      status: 'done',\n      registerTo: 'scorpion',\n      summary: signal.content || signal.title,\n      metadata: {\n        lane: signal.lane,\n        signalType: signal.signalType,\n        telegramRequired: 'false'\n      }\n    }\n  }\n}];"
       },
       "id": "normalize-signal",
       "name": "Normalize Signal",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evenslouis.ca/scorpion/api/hive/register",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json.registerPayload) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "register-scorpion",
+      "name": "Register Scorpion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 400],
+      "continueOnFail": true,
+      "notes": "Legacy optional audit (Scorpion register-outcome). Daily notify is Grok Watchdog / Grok chat. Not required. Import HITL only."
     },
     {
       "parameters": {
@@ -38,7 +71,7 @@
       "name": "Acknowledge Signal",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [700, 400]
+      "position": [950, 400]
     }
   ],
   "connections": {
@@ -52,6 +85,13 @@
     "Normalize Signal": {
       "main": [
         [
+          { "node": "Register Scorpion", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Register Scorpion": {
+      "main": [
+        [
           { "node": "Acknowledge Signal", "type": "main", "index": 0 }
         ]
       ]
@@ -61,13 +101,15 @@
     "executionOrder": "v1"
   },
   "staticData": null,
+  "id": "Tut13ZH74cL1VYb8",
   "meta": {
     "instanceId": "hive-ops",
-    "notes": "This workflow must be ACTIVE in n8n for the Ecosystem Router to forward founder signals successfully. If inactive, the router will receive 404 and surface a soft error."
+    "notes": "Lane hive-os. Webhook gap-fill. Daily notify = Grok Watchdog / Grok chat. Scorpion = optional audit. Import HITL — do not activate from this PR."
   },
   "tags": [
     { "name": "hive" },
     { "name": "founder-signal" },
-    { "name": "priority-1" }
+    { "name": "hive-os" },
+    { "name": "legacy-fallback" }
   ]
 }

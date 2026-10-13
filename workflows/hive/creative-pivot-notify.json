@@ -1,12 +1,150 @@
 {
   "name": "Hive Creative Pivot Notify",
-  "meta": {
-    "status": "MISSING_FROM_REPO",
-    "note": "Live n8n may still have this workflow (id hint ZK6R6e0EqK9AX1qo). Repo has no export. Do not import or activate from this stub. Export from live n8n before treating as SSOT.",
-    "liveIdHint": "ZK6R6e0EqK9AX1qo"
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hive-creative-pivot",
+        "options": {
+          "responseMode": "onReceived"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Creative Pivot Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 400],
+      "webhookId": "hive-creative-pivot",
+      "notes": "Forge HITL containment. Heuristic only — not auto aesthetic deploy. No client send."
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || $json;\nconst correlationId = body.correlationId || `pivot-${Date.now()}`;\nconst fixAttempt = Number(body.fix_attempt || body.fixAttempt || 0);\nconst maxAttempts = 3;\nconst cost = Number(body.estimated_loop_cost_usd || body.cost || 0);\nconst maxCost = 15;\nconst costHalt = cost > maxCost;\nconst attemptTrigger = fixAttempt >= maxAttempts;\nconst error = body.error || '';\nconst toolMethod = body.tool_method || body.toolMethod || '';\nconst businessGoal = body.business_goal || body.businessGoal || '';\nconst jobType = costHalt ? 'ops.containment.halted' : 'ops.creative_pivot.proposed';\n\nconst text = [\n  `CREATIVE PIVOT (HITL)`,\n  `cid=${correlationId} attempt=${fixAttempt} cost=${cost}`,\n  `goal=${businessGoal}`,\n  `tool=${toolMethod}`,\n  `error=${error}`,\n  costHalt ? `HALT: loop cost > ${maxCost}` : '',\n  `Heuristic instructions only. Not auto-deploy. Building mode — no selling.`\n].filter(Boolean).join('\\n');\n\nreturn [{\n  json: {\n    text,\n    correlationId,\n    costHalt,\n    attemptTrigger,\n    registerPayload: {\n      correlationId,\n      jobType,\n      goal: businessGoal || 'contain loop',\n      source: 'hive-creative-pivot',\n      status: 'need_hitl',\n      registerTo: 'scorpion',\n      summary: text,\n      metadata: {\n        lane: 'hive-os',\n        fixAttempt: String(fixAttempt),\n        cost: String(cost),\n        telegramRequired: 'false'\n      }\n    }\n  }\n}];"
+      },
+      "id": "evaluate-pivot",
+      "name": "Evaluate Pivot",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evenslouis.ca/scorpion/api/hive/register",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Hive-Secret",
+              "value": "={{ $env.HIVE_WEBHOOK_SECRET }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json.registerPayload) }}",
+        "options": { "timeout": 10000 }
+      },
+      "id": "register-pivot",
+      "name": "Register Pivot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 400],
+      "continueOnFail": true,
+      "notes": "Legacy optional audit (Scorpion register-outcome). Daily notify is Grok Watchdog / Grok chat. Not required. continueOnFail."
+    },
+    {
+      "parameters": {
+        "jsCode": "const token = $env.TELEGRAM_BOT_TOKEN;\nconst chatId = $env.HIVE_TELEGRAM_CHAT_ID;\nif (!token || !chatId) {\n  return [{ json: { ...$json, telegramReady: false } }];\n}\nreturn [{ json: { ...$json, telegramReady: true, _telegram: { token, chatId } } }];"
+      },
+      "id": "telegram-preflight",
+      "name": "Telegram Preflight",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [950, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "tg",
+              "leftValue": "={{ $json.telegramReady }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ]
+        }
+      },
+      "id": "telegram-ready",
+      "name": "Telegram Ready?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $json._telegram.token }}/sendMessage",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={\n  \"chat_id\": \"{{ $json._telegram.chatId }}\",\n  \"text\": {{ JSON.stringify($json.text) }}\n}",
+        "options": { "timeout": 10000 }
+      },
+      "id": "alert-operator",
+      "name": "Alert Operator",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1450, 300],
+      "continueOnFail": true,
+      "notes": "Optional/legacy Telegram. Do not fail on missing Telegram."
+    }
+  ],
+  "connections": {
+    "Creative Pivot Webhook": {
+      "main": [[{ "node": "Evaluate Pivot", "type": "main", "index": 0 }]]
+    },
+    "Evaluate Pivot": {
+      "main": [[{ "node": "Register Pivot", "type": "main", "index": 0 }]]
+    },
+    "Register Pivot": {
+      "main": [[{ "node": "Telegram Preflight", "type": "main", "index": 0 }]]
+    },
+    "Telegram Preflight": {
+      "main": [[{ "node": "Telegram Ready?", "type": "main", "index": 0 }]]
+    },
+    "Telegram Ready?": {
+      "main": [
+        [{ "node": "Alert Operator", "type": "main", "index": 0 }],
+        []
+      ]
+    }
   },
-  "nodes": [],
-  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "id": "ZK6R6e0EqK9AX1qo",
   "active": false,
-  "_stub": true
+  "meta": {
+    "instanceId": "hive-ops",
+    "status": "REPO_JSON_FILLED_FROM_FACT_SHAPE",
+    "liveIdHint": "ZK6R6e0EqK9AX1qo",
+    "notes": "HITL webhook. Daily notify = Grok Watchdog / Grok chat. Scorpion = optional audit. Telegram = legacy. Do not activate from this PR."
+  },
+  "tags": [
+    { "name": "hive" },
+    { "name": "creative-pivot" },
+    { "name": "hive-os" },
+    { "name": "hitl" },
+    { "name": "legacy-fallback" }
+  ]
 }
