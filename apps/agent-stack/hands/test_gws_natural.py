@@ -35,7 +35,7 @@ def ask(u):
 class Routing(unittest.TestCase):
     MAIL = ["check my email", "Jarvis, check my unread mail", "do I have any unread emails", "show my inbox",
             "unread mail", "how many unread emails do I have", "what's in my gmail"]
-    AGENDA = ["what's on my calendar", "check my calendar", "show my agenda", "what is on my calendar today", "read my schedule"]
+    AGENDA = ["what's on my calendar", "check my calendar", "show my agenda", "what is on my calendar", "read my schedule"]
     DRIVE = ["find Google Drive files named budget", "search my drive for quarterly plan",
              "find the roadmap file in my Google Drive", "list my Google Drive files"]
     NOT = ["review the latest email draft", "send an email to Zubair", "reply to my last email", "write an email about the launch",

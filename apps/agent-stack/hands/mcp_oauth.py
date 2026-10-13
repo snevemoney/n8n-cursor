@@ -72,15 +72,42 @@ def _http_form(url: str, form: dict[str, str], headers: dict | None = None) -> d
         return json.loads(raw) if raw.strip() else {}
 
 
-def discover(mcp_url: str) -> dict[str, Any]:
-    """RFC 9728 protected resource + AS metadata."""
+def well_known_urls(resource_url: str, suffix: str) -> list[str]:
+    """RFC 9728/8414 well-known candidates: path-insert form first (host/.well-known/<suffix>/<path>), then path-append."""
+    u = urllib.parse.urlsplit(resource_url.rstrip("/"))
+    root = f"{u.scheme}://{u.netloc}"
+    path = u.path.rstrip("/")
+    first = f"{root}/.well-known/{suffix}{path}"
+    return [first] if not path else [first, f"{root}{path}/.well-known/{suffix}"]
+
+
+def resource_metadata_from_header(header: str) -> str:
+    """resource_metadata URL out of a 401 WWW-Authenticate header (https only), else ''."""
+    m = re.search(r'resource_metadata="(https://[^"\s]+)"', header or "")
+    return m.group(1) if m else ""
+
+
+def _first_json(urls: list[str], what: str) -> dict:
+    last = ""
+    for url in urls:
+        try:
+            return _http_json(url)
+        except urllib.error.HTTPError as e:
+            last = f"HTTP {e.code}"
+        except (urllib.error.URLError, ValueError, OSError) as e:
+            last = type(e).__name__
+    raise RuntimeError(f"no {what} metadata found ({last}); tried {len(urls)} well-known location(s)")
+
+
+def discover(mcp_url: str, metadata_url: str = "") -> dict[str, Any]:
+    """RFC 9728 protected resource + AS metadata. Tries the path-insert and path-append well-known forms."""
     base = mcp_url.rstrip("/")
-    pr = _http_json(base + "/.well-known/oauth-protected-resource")
+    pr = _first_json(([metadata_url] if metadata_url else []) + well_known_urls(base, "oauth-protected-resource"), "protected resource")
     auths = pr.get("authorization_servers") or []
     if not auths:
         raise RuntimeError("no authorization_servers in protected resource metadata")
     issuer = str(auths[0]).rstrip("/")
-    meta = _http_json(issuer + "/.well-known/oauth-authorization-server")
+    meta = _first_json(well_known_urls(issuer, "oauth-authorization-server"), "authorization server")
     scopes = pr.get("scopes_supported") or meta.get("scopes_supported") or []
     return {
         "resource": pr.get("resource") or base,
@@ -388,6 +415,45 @@ def login(server: str = "hostinger", *, open_browser: bool = True, wait_sec: int
             pass
 
 
+def reauth_status(server: str) -> dict:
+    """Offline diagnosis from the stored env. Booleans and names only, never a value."""
+    prof = SERVERS.get(server)
+    if not prof:
+        return {"server": server, "reason": "unknown server", "needs_login": False, "can_refresh": False,
+                "has_access": False, "has_refresh": False, "has_client_id": False}
+    t = load_tokens(server)
+    has_a, has_r, has_c = bool(t["access"]), bool(t["refresh"]), bool(t["client_id"])
+    can_refresh = has_r and has_c
+    if can_refresh:
+        reason = "refresh token and client id are present; ensure_access can refresh without a browser"
+    elif has_r:
+        reason = (f"refresh token present but {prof['client_env']} is missing: the token was issued to another client "
+                  "(a CLI login), so Jarvis cannot refresh it; Jarvis must register its own client and log in once")
+    else:
+        reason = "no refresh token stored; a Jarvis login is needed"
+    return {"server": server, "has_access": has_a, "has_refresh": has_r, "has_client_id": has_c,
+            "can_refresh": can_refresh, "needs_login": not can_refresh, "reason": reason, "url": prof["url"]}
+
+
+def reauth_plan(server: str) -> str:
+    st = reauth_status(server)
+    if st["reason"] == "unknown server":
+        return f"{server}: not a server Jarvis can sign in to."
+    prof = SERVERS[server]
+    if st["can_refresh"]:
+        return f"{server}: no login needed. `python3 -m hands.mcp_oauth refresh {server}` refreshes in place (no browser)."
+    return "\n".join([
+        f"{server} re-auth plan (nothing has been run): {st['reason']}.",
+        f"1. Evens approves one browser consent for {prof['url']} (the only human step; Jarvis never opens it unasked).",
+        "2. Preflight, unauthenticated GET only: discover() reads the well-known metadata (path-insert form first).",
+        "3. Dynamic client registration, PKCE S256, loopback callback on 127.0.0.1 (ephemeral port).",
+        f"4. Tokens are written to the gitignored .env.mcp (0600) as {prof['access_env']}, {prof['refresh_env']}, "
+        f"{prof['client_env']}, {prof['expires_env']}; the old CLI-issued access/refresh values are overwritten.",
+        f"5. Run: python3 apps/agent-stack/hands/mcp_oauth.py login {server}   then   probe: tools/list on {server}.",
+        "6. Write tools stay gated by the READ_TOOL name rule; this plan adds no write access.",
+    ])
+
+
 def probe_tools(server: str) -> dict:
     """Direct tools/list using stored token (status + count only)."""
     from . import agent_tools as at  # type: ignore
@@ -408,9 +474,12 @@ if __name__ == "__main__":
         # status only
         _log(json.dumps({k: result.get(k) for k in ("ok", "server", "expires_in", "has_refresh", "error")}))
         sys.exit(0 if result.get("ok") else 1)
+    if cmd == "plan":
+        _log(reauth_plan(srv))
+        sys.exit(0)
     if cmd == "refresh":
         got = refresh_access(srv)
         _log(json.dumps({"ok": bool(got), "server": srv, "access_len": len(got or "")}))
         sys.exit(0 if got else 1)
-    _log("usage: mcp_oauth.py login|refresh [server]")
+    _log("usage: mcp_oauth.py login|refresh|plan [server]")
     sys.exit(2)
