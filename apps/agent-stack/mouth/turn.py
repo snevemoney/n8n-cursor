@@ -580,8 +580,9 @@ def _apply_turn_iter_inner(
             if p_ < 0.5:
                 pm = _REFLEX.path_matches(_fm.group(1)); nm = pm[0]["stem"] if pm else ""
             if nm:
-                _fp.parent.mkdir(parents=True, exist_ok=True); _fp.write_text(json.dumps({"name": nm, "ts": time.time()}))
-                _line = f"I found {nm}, sir. Is that the one? Say 'open it' and I'll read it."
+                nb = _REFLEX.note_brief(nm)  # dCK 4:38-4:44: "Found it, sir. <title>. Let me pull the actual content for you." same turn
+                _line = (f"Found it, sir: {nm}. Let me pull the actual content for you. {nb['gist']}" if nb.get("ok")
+                         else f"Found {nm}, sir, but I can't open it from here.")
             else:
                 _line = f"I found no note about {_fm.group(1)}, sir."
             yield _door_speak(hive, spoken, _line, "vault_find", retrieve_roots, gen=token,
