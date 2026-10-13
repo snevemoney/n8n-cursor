@@ -23,7 +23,8 @@ def log_path() -> Path | None:
     return Path(raw).expanduser() if raw else DEFAULT_PATH
 
 
-def build_row(*, started: float, ended: float, events: list[dict], talk: dict | None, inject: dict | None) -> dict:
+def build_row(*, started: float, ended: float, events: list[dict], talk: dict | None, inject: dict | None,
+              first_ms: int | None = None) -> dict:
     tools: list[str] = []
     for ev in events:
         verb = str(ev.get("verb") or "")
@@ -39,6 +40,9 @@ def build_row(*, started: float, ended: float, events: list[dict], talk: dict | 
         "fallback": bool(talk.get("fallback")),
         "latency_ms": int((ended - started) * 1000),
         "talk_latency_ms": talk.get("latency_ms"),
+        # Loop on_it: time to the first spoken chunk, and the tool's own time (numbers only, never text).
+        "first_chunk_ms": int(first_ms) if first_ms is not None else None,
+        "tool_ms": next((int(ev["tool_ms"]) for ev in reversed(events) if isinstance(ev.get("tool_ms"), (int, float))), None),
         "est_tokens_in": talk.get("est_tokens_in"),
         "est_tokens_out": talk.get("est_tokens_out"),
         "injected_context": list(talk.get("injected") or inject.get("files") or []),

@@ -748,6 +748,10 @@ ROUTE_SEARCH_LEAD_RE = re.compile(
     r"check\s+online|web\s+search|google)\s*(?:for\s+)?[:,-]?\s*", re.I)
 
 
+ACK_LINE = "On it."
+ACK_SKIP = frozenset({"say"})
+
+
 def fixed_route(utterance: str) -> dict | None:
     """Phrase -> hand, no model. None means: keep today's path (model pick)."""
     u = (utterance or "").strip()
@@ -5454,6 +5458,7 @@ def _pipeline_event(
     source: str | None = None,
     gen: int | None = None,
     mission: dict | None = None,
+    tool_ms: int | None = None,
 ) -> dict:
     available = bool(brain) if model_available is None else bool(model_available)
     ev = {
@@ -5489,6 +5494,8 @@ def _pipeline_event(
     if gen is not None:
         ev["gen"] = int(gen)
         ev["turn_gen"] = int(gen)
+    if tool_ms is not None:
+        ev["tool_ms"] = int(tool_ms)
     return ev
 
 
@@ -5894,11 +5901,21 @@ def apply_pipeline_iter(
     )
     if token and turn_cancelled(hive, token):
         return
+    # Loop on_it: decide the model-free route now so the very first chunk can be the ack line.
+    early = None
+    if not wants_continuity_status(spoken_in):
+        early = fixed_route(spoken_in)
+        if early is None and not is_hard_step(spoken_in):
+            if wants_workspace_read(spoken_in):
+                early = {"tool": "workspace_read", "args": {}, "speak": ""}
+            elif wants_web_search(spoken_in):
+                early = {"tool": "web_search", "args": {}, "speak": ""}
+    ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""
     yield _pipeline_event(
         ok=True,
-        tool="converse",
-        spoken="",
-        spoken_delta="",
+        tool=early["tool"] if ack else "converse",
+        spoken=ack,
+        spoken_delta=ack,
         wires=["store"],
         cites=[],
         pack=None,
@@ -5927,19 +5944,11 @@ def apply_pipeline_iter(
             brain = "store"
         except RuntimeError:
             ran = None
-    if pick is None and ran is None:
-        fixed = fixed_route(spoken_in)
-        if fixed is not None:
-            pick = fixed
-            ran = run_tool(pick, spoken_in, hive=hive, retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn, gen=gen)
-            brain = None
-    if pick is None and ran is None and wants_workspace_read(spoken_in) and not is_hard_step(spoken_in):
-        pick = {"tool": "workspace_read", "args": {}, "speak": ""}
-        ran = run_tool(pick, spoken_in, hive=hive, retrieve_roots=retrieve_roots)
-        brain = None
-    if pick is None and ran is None and wants_web_search(spoken_in) and not is_hard_step(spoken_in):
-        pick = {"tool": "web_search", "args": {}, "speak": ""}
-        ran = run_tool(pick, spoken_in, hive=hive, retrieve_roots=retrieve_roots)
+    if early is not None and pick is None and ran is None:
+        pick = early
+        t_tool = time.monotonic()
+        ran = run_tool(pick, spoken_in, hive=hive, retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn, gen=gen)
+        ran["tool_ms"] = int((time.monotonic() - t_tool) * 1000)
         brain = None
     if pick is None and wants_local_read(spoken_in):
         pick = {"tool": "vault_read", "args": {"query": spoken_in}, "speak": ""}
@@ -6726,6 +6735,7 @@ def apply_pipeline_iter(
     elif first and rest:
         yield _pipeline_event(
             ok=_turn_ok(ran, brain, tool),
+            tool_ms=(ran or {}).get("tool_ms"),
             tool=tool,
             spoken=first,
             spoken_delta=first,
@@ -6747,6 +6757,7 @@ def apply_pipeline_iter(
         extra = text
     yield _pipeline_event(
         ok=_turn_ok(ran, brain, tool),
+            tool_ms=(ran or {}).get("tool_ms"),
         tool=tool,
         see=ran.get("see"),
         mission=ran if tool == "browser_mission" else None,
