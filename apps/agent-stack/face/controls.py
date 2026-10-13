@@ -73,9 +73,19 @@ def _now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def _pending_card() -> bool:
+    try:
+        import json as _j
+        return _j.loads((Path.home() / ".jarvis" / "phone_sim.json").read_text()).get("state") == "CONFIRM"
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def parse_stop(utterance: str) -> tuple[str, str, str] | None:
     """Return (verb, scope, target). Bare stop/cancel stays scope speak."""
     match = _STOP.match((utterance or "").strip())
+    if match and match.group("verb").lower() == "cancel" and not match.group("scope") and _pending_card():
+        return None  # Z40: a pending confirm card consumes 'cancel' before the generic stop
     if not match:
         return None
     verb = (match.group("verb") or "stop").lower()

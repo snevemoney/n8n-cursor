@@ -155,6 +155,33 @@ def _vault(u: str) -> dict:
     return {"vault_hit": p if p else 0.1, "vault_note": name}
 
 
+PULL_STOP = {"pull", "bring", "show", "open", "find", "note", "notes", "file", "doc", "my", "the", "up", "me", "can", "you", "jarvis", "please", "could"}
+
+
+def path_matches(u: str, k: int = 3) -> list[dict]:
+    """Z70: 'pull up my social media automations' -> score every note on the words in its folder path + name (no file reads)."""
+    want = {w.rstrip("s") for w in re.findall(r"[a-z0-9]+", (u or "").lower()) if w not in STOP and w not in PULL_STOP and len(w) > 2}
+    if not want:
+        return []
+    out = []
+    for stem, _t, path in _vault_index():
+        toks = {w.rstrip("s") for w in re.findall(r"[a-z0-9]+", path.lower().replace("_", " ").replace("-", " "))}
+        hit = want & toks
+        if not hit:
+            continue
+        name_hit = len(want & {w.rstrip("s") for w in re.findall(r"[a-z0-9]+", stem.lower().replace("_", " ").replace("-", " "))})
+        out.append({"score": len(hit) / len(want) + 0.1 * name_hit / len(want) - 0.002 * path.count("/"), "stem": stem, "path": path,
+                    "covers": len(hit) == len(want)})
+    out.sort(key=lambda d: -d["score"])
+    seen, best = set(), []
+    for d in out:
+        if d["stem"] not in seen:
+            seen.add(d["stem"]); best.append(d)
+        if len(best) >= k:
+            break
+    return best
+
+
 def note_path(name: str) -> str:
     for stem, _t, path in _IDX["notes"]:
         if stem == name:

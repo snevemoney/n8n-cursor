@@ -556,6 +556,48 @@ def _apply_turn_iter_inner(
                 return
     except Exception:  # noqa: BLE001
         pass
+    # Z70: a 'pull up my X' with no strong title hit -> match on folder path; read a full-cover hit, else name the closest three honestly.
+    try:
+        if _REFLEX is not None and re.search(r"\b(?:pull|bring)\s+up\b|\b(?:show|open|find)\s+(?:me\s+)?my\b", spoken or "", re.I) \
+                and not re.search(r"\b(?:screen|window|calendar|email|inbox|mail|cost|meter|results?)\b", spoken or "", re.I):
+            pm = _REFLEX.path_matches(spoken)
+            if pm:
+                if pm[0]["covers"]:
+                    nb = _REFLEX.note_brief(pm[0]["stem"])
+                    if nb.get("ok"):
+                        _fold = Path(nb["path"]).parent.name
+                        _line = f"Your {nb['name']} note is up, from {_fold}. {nb['gist']}"
+                        got = {"ok": True, "tool": "vault_read", "spoken": _line, "cites": [nb["path"]], "wires": ["vault_read", "path_match"], "sent": False}
+                        yield _door_speak(hive, spoken, _line, "vault_read", retrieve_roots, gen=token, execution=got)
+                        return
+                _names = "; ".join(f"{d['stem']} in {Path(d['path']).parent.name}" for d in pm)
+                _line = f"No note matches that exactly, sir. Closest: {_names}. Say which and I'll open it."
+                yield _door_speak(hive, spoken, _line, "vault_read", retrieve_roots, gen=token,
+                                  execution={"ok": True, "tool": "vault_read", "spoken": _line, "cites": [d["path"] for d in pm], "wires": ["path_match"], "sent": False})
+                return
+    except Exception:  # noqa: BLE001
+        pass
+    # Round-2 frontier: Z86/Z87 automation contract+proof, Z89-91 enrich, Z93 preflight, Z95/Z97 panel, Z66 review->do.
+    try:
+        _fr = PIPELINE._load("agent_stack_frontier", PIPELINE.STACK / "hands" / "frontier.py")
+        _tst = bool(os.environ.get("PYTEST_CURRENT_TEST"))
+        got = None
+        if _fr.AUTO_RE.search(spoken or ""):
+            got = _fr.automation(spoken, out=Path("/tmp/jarvis-test-inbox") if _tst else None)
+        elif _fr.ENRICH_RE.search(spoken or ""):
+            got = _fr.enrich(spoken)
+        elif _fr.REVIEW_DO_RE.search(spoken or ""):
+            got = _fr.review_do(spoken, drafts=PIPELINE._drafts_hand().drafts_dir())
+        elif _fr.PAID_RE.search(spoken or "") and not re.search(r"\b(?:write|draft|email)\b", spoken or "", re.I):
+            _inv = PIPELINE._load("agent_stack_mcp_inventory", PIPELINE.STACK / "hands" / "mcp_inventory.py").inventory()[0]
+            got = _fr.preflight(spoken, [str(x.get("name") or "") for x in _inv])
+        elif _fr.PANEL_RE.match(re.sub(r"^\s*(?:hey\s+)?jarvis[,.]?\s*(?:please\s+)?", "", spoken or "", flags=re.I)):
+            got = _fr.panel(spoken)
+        if got is not None:
+            yield _door_speak(hive, spoken, got["spoken"], got.get("tool") or "frontier", retrieve_roots, gen=token, execution=got)
+            return
+    except Exception:  # noqa: BLE001
+        pass
     # Z75 (wJ3 5:26): "hold on / be quiet, I'm talking to ..." -> "Off you go, sir." and Jarvis stays quiet (mic stays on).
     if re.search(r"\b(?:be quiet|hush|quiet down|stop talking|i'?m talking to (?:my|the|someone))\b", spoken or "", re.I) and len(spoken.split()) <= 16:
         PIPELINE.mutate_bus(Path(hive), lambda b: dict(b, hush={"on": True, "ts": time.time()}))

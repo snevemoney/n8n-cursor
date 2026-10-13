@@ -5242,8 +5242,9 @@ def gen_rules(u: str) -> str:
     """Z92 critique shape and Z96 high-stakes scope line, added to the talk brief."""
     rules = []
     if CRITIQUE_RE.search(u or ""):
-        rules.append("CRITIQUE FORMAT (Z92): 1) a concrete inventory of what is there (quote it); 2) ONE honest note, the most important "
-                     "problem, plainly; 3) a reusable rule of thumb in one line. No praise padding, no list of ten tweaks.")
+        rules.append("How to critique: write three short plain sentences and nothing else. First say concretely what is there, quoting it. "
+                     "Then give the single most important problem, plainly. Then give one reusable rule of thumb. Do not number them, "
+                     "do not use headings, bold or labels, and do not name these instructions.")
     if HIGH_STAKES_DOMAIN_RE.search(u or ""):
         rules.append("SCOPE (Z96): open with one short line that this is general information, not professional advice, and that "
                      "nothing will be filed, bought or sent; then answer.")
