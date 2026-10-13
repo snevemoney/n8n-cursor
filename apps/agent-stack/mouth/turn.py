@@ -589,6 +589,7 @@ def _apply_turn_iter_inner(
             if p_ < 0.5:
                 pm = _REFLEX.path_matches(_fm.group(1)); nm = pm[0]["stem"] if pm else ""
             if nm:
+                _REFLEX._vault_index()  # path lookup needs the warm index right after a restart
                 nb = _REFLEX.note_brief(nm)  # dCK 4:38-4:44: "Found it, sir. <title>. Let me pull the actual content for you." same turn
                 _line = (f"Found it, sir: {nm}. Let me pull the actual content for you. {nb['gist']}" if nb.get("ok")
                          else f"Found {nm}, sir, but I can't open it from here.")
