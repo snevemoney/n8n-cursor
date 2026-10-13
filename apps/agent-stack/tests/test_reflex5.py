@@ -10,7 +10,7 @@ from mouth import turn as T  # noqa: E402
 class Reflex5Test(unittest.TestCase):
     def test_five_fields(self):
         r = T._reflex("Read my ACTIVE_TASKS.md and tell me who owns it.")
-        self.assertEqual(set(r), {"lane", "lane_p", "finished", "addressed", "needs_tool", "vault_hit"})
+        self.assertEqual(set(r), {"lane", "lane_p", "finished", "addressed", "needs_tool", "stakes", "vault_hit", "vault_note"})
         self.assertEqual(r["lane"], "pickup")
         self.assertGreaterEqual(r["needs_tool"], 0.9)
 

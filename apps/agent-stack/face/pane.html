@@ -302,11 +302,17 @@
     }
     #focusline.on { display: block; }
     #reflexcard {
-      display: none; position: fixed; z-index: 41; left: 50%; transform: translateX(-50%); top: 8px;
-      font: 10px/1.5 "Share Tech Mono", ui-monospace, monospace; letter-spacing: 0.06em; white-space: nowrap;
-      color: #7fe3ff; background: rgba(0, 20, 30, 0.82); border: 1px solid rgba(127, 227, 255, 0.45);
-      border-radius: 6px; padding: 3px 8px; pointer-events: none;
+      display: none; position: fixed; z-index: 41; left: 6px; right: 6px; top: 6px;
+      font: 10px/1.35 "Share Tech Mono", ui-monospace, monospace; color: #cfe; pointer-events: none;
+      background: rgba(4, 12, 14, 0.9); border: 1px solid rgba(80, 220, 150, 0.35); border-radius: 6px; padding: 5px 7px;
     }
+    #reflexcard .r { display: grid; grid-template-columns: 74px 1fr 30px 44px; gap: 5px; align-items: center; margin: 2px 0; }
+    #reflexcard .k { color: #fff; } #reflexcard .q { color: #7a8; font-size: 8px; }
+    #reflexcard .bar { position: relative; height: 4px; background: #233; border-radius: 2px; }
+    #reflexcard .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #3ddc84; border-radius: 2px; }
+    #reflexcard .bar b { position: absolute; top: -2px; width: 1px; height: 8px; background: #9ab; }
+    #reflexcard .chip { border: 1px solid #3a6; border-radius: 8px; text-align: center; font-size: 8px; color: #8fd; }
+    #reflexcard .foot { color: #3ddc84; letter-spacing: 0.1em; margin-top: 3px; font-size: 9px; }
     #reflexcard.on { display: block; }
     html.widget #focusline {
       top: auto; left: 50%; right: auto; bottom: 70px;
@@ -1720,8 +1726,19 @@
       if (r && Number(r.ts || 0) > lastReflexTs) {
         lastReflexTs = Number(r.ts);
         const pc = (v) => Math.round(Number(v || 0) * 100) + "%";
-        el.textContent = `REFLEX ${r.ms}ms · lane ${r.lane} ${pc(r.lane_p)} · finished ${pc(r.finished)} · `
-          + `to Jarvis ${pc(r.addressed)} · tool ${pc(r.needs_tool)} · vault ${pc(r.vault_hit)}`;
+        const rows = [  // demo D5v4UuvtUXc 0:09: five rows, bar + threshold tick + verdict chip, footer with ms
+          ["Lane", "Which hand takes it?", r.lane_p, 0.5, String(r.lane || "").toUpperCase().slice(0, 7)],
+          ["Complete", "Has he finished the request?", r.finished, 0.6, r.finished >= 0.6 ? "ACT" : "WAIT"],
+          ["Addressed", "Talking to Jarvis, not narrating?", r.addressed, 0.6, r.addressed >= 0.6 ? "ACT" : "IGNORE"],
+          ["Stakes", "Would acting send, call, delete, or spend?", r.stakes, 0.5, r.stakes >= 0.5 ? "CONFIRM" : "CLEAR"],
+          ["Vault has it", "Does any note directly answer this?", r.vault_hit, 0.6, r.vault_hit >= 0.6 ? "NAMED" : "NONE"],
+        ];
+        const esc = (x) => String(x).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+        el.innerHTML = rows.map(([k, q, p, th, chip]) => `<div class="r"><div><div class="k">${esc(k)}</div><div class="q">${esc(q)}</div></div>`
+          + `<div class="bar"><i style="width:${Math.round(Number(p || 0) * 100)}%"></i><b style="left:${th * 100}%"></b></div>`
+          + `<div>${pc(p)}</div><div class="chip">${esc(chip)}</div></div>`).join("")
+          + `<div class="foot">● ${r.vault_hit >= 0.6 ? "VAULT HAS IT · NAMED" : "VAULT · NO NOTE"} · ${pc(r.vault_hit)}`
+          + `${r.vault_note ? " · " + esc(String(r.vault_note).toUpperCase().slice(0, 40)) : ""} · ${r.ms} MS</div>`;
         el.classList.add("on");
         reflexHideAt = Date.now() + 12000;
       }

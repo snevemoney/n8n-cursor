@@ -47,6 +47,75 @@ def addressed_p(u: str) -> float:
     return 0.6
 
 
+STAKES_RE = re.compile(r"\b(?:send|email|text|message|post|publish|tweet|call|phone|dial|delete|remove|erase|wipe|trash|"
+                       r"buy|purchase|pay|spend|order|charge|subscribe|transfer|wire|merge|deploy)\b", re.I)
+STOP = set("jarvis can you could would please pull up show me my our the a an of to for and or what is are on in "
+           "do did i about open find get tell give list read all".split())
+
+
+def stakes_p(u: str) -> float:
+    """Demo row 4 'Stakes: would acting send, call, delete, or spend?'"""
+    return 0.9 if STAKES_RE.search(u or "") else 0.08
+
+
+_IDX: dict = {"at": 0.0, "notes": []}
+
+
+def _vault_index(roots=None) -> list:
+    import os
+    import threading
+    import time
+    if _IDX["notes"] and time.time() - _IDX["at"] < 600:
+        return _IDX["notes"]
+    if _IDX.get("building"):
+        return _IDX["notes"]
+
+    def build():
+        _IDX["building"] = True
+        try:
+            rs = roots
+            if rs is None:
+                import importlib.util
+                from pathlib import Path
+                sp = importlib.util.spec_from_file_location("r5_retrieve", Path(__file__).resolve().parents[1] / "memory" / "retrieve.py")
+                m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m)
+                rs = m.resolve_roots()
+            notes = []
+            for root in rs:
+                for dp, dn, fn in os.walk(root):
+                    dn[:] = [d for d in dn if not d.startswith(".")]
+                    for f in fn:
+                        if f.endswith(".md"):
+                            stem = f[:-3]
+                            toks = set(re.findall(r"[a-z0-9]+", stem.lower().replace("_", " ").replace("-", " ")))
+                            notes.append((stem, toks))
+            _IDX.update(notes=notes, at=time.time())
+        finally:
+            _IDX["building"] = False
+    if not _IDX["notes"]:
+        threading.Thread(target=build, daemon=True).start()  # first call warms it; never blocks a turn
+        return []
+    threading.Thread(target=build, daemon=True).start()
+    return _IDX["notes"]
+
+
+def vault_note(u: str, roots=None) -> tuple[float, str]:
+    """Demo row 5 'Vault has it: does any note directly answer this?' -> (p, note name)."""
+    want = {w.rstrip("s") for w in re.findall(r"[a-z0-9]+", (u or "").lower()) if w not in STOP and len(w) > 2}
+    if not want:
+        return 0.05, ""
+    best, name = 0.0, ""
+    for stem, toks in _vault_index(roots):
+        base = {t.rstrip("s") for t in toks}
+        hit = len(want & base)
+        if not hit:
+            continue
+        sc = hit / len(want) * (0.6 + 0.4 * hit / max(1, len(base)))
+        if sc > best:
+            best, name = sc, stem
+    return round(min(0.97, best), 2), name
+
+
 def decide(u: str, *, route=None, lane_fn=None) -> dict:
     lane, lane_p = "converse", 0.5
     if lane_fn is not None:
@@ -65,4 +134,11 @@ def decide(u: str, *, route=None, lane_fn=None) -> dict:
         lane, lane_p = str(tool), max(lane_p, 0.9)
     return {"lane": lane, "lane_p": round(lane_p, 2), "finished": finished_p(u), "addressed": addressed_p(u),
             "needs_tool": 0.95 if tool else (0.6 if IMPERATIVE_RE.search(u or "") else 0.15),
-            "vault_hit": 0.85 if PERSONAL_RE.search(u or "") else 0.1}
+            "stakes": stakes_p(u), **_vault(u)}
+
+
+def _vault(u: str) -> dict:
+    p, name = vault_note(u)
+    if PERSONAL_RE.search(u or ""):
+        p = max(p, 0.85)
+    return {"vault_hit": p if p else 0.1, "vault_note": name}

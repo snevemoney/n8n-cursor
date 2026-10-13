@@ -863,3 +863,10 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+try:  # Z12: warm the vault note index at start so the first reflex can name a note
+    import threading as _th
+    _th.Thread(target=lambda: _reflex(""), daemon=True).start()
+except Exception:  # noqa: BLE001
+    pass
