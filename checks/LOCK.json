@@ -1,5 +1,14 @@
 {
  "files": {
+  "checks/locked/honesty/01-promise-becomes-cant-yet.sh": "61f0278237bdf83a45056219f02152d736491660ac4914626089ab3132d725de",
+  "checks/locked/honesty/02-replay-zero-promises.sh": "6b3fb2abb0a841790e30d31045a44a635d2eb2300b39a15c5f728ac2bab0e832",
+  "checks/locked/honesty/03-real-answers-untouched.sh": "43925e2e40f4fb20fa8b13a80b396580a7a23b075aadf21ef8984ba02b4b79f2",
+  "checks/locked/honesty/04-no-again-done-opener.sh": "80fda3be424719a4d4f1039513b371edf4864478a7b1fd03d1a17a7f06ea9dec",
+  "checks/locked/honesty/05-hand-turn-ok-true.sh": "3438ca81dc8acfa113565736ad8a75edf7bc503858bea4cc21e82ca3fa9ed1c9",
+  "checks/locked/honesty/06-failed-hand-ok-false.sh": "e1e655be8492600c25fc45bb7df1792c8dc2497b35e623e053badf202ed77bee",
+  "checks/locked/honesty/90-wired.sh": "9bd96a526505186b96f0dca5c26b753a448431a89c6d02cd65f3285dc26238f3",
+  "checks/locked/honesty/91-every-place.sh": "38bce355eaee3f3c3592fb44b49ededd62c4fcb3b829b4152e7e648fe95bcd8f",
+  "checks/locked/honesty/92-existing-tests.sh": "05eeb6872f5a5d0a7cc546215f32d1c49e4a63c4b3fb4db9974c91ba139a339c",
   "checks/locked/web_search/01-cites-two.sh": "d66bb5c317c8ebaa32286ad7078b8602a9d8e9cba9bbe8f96a8bbc1a9db15af2",
   "checks/locked/web_search/02-no-results-honest.sh": "25b4c30fe4a92d3dc8e9509b4b401ceca7a1933e7eabd0b67f2aa4ff8b1d746e",
   "checks/locked/web_search/03-time-cap.sh": "74a48101e593ba878dfccb180c9d4c864934b5247ecbd68055c765e62a0656ef",

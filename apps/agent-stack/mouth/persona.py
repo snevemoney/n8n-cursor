@@ -790,7 +790,10 @@ def witty_beat(verb: str, *, repeat: bool = False) -> str:
     if not key or key in CONVERSE_VERBS:
         return ""
     if repeat:
-        return REPEAT_WIT.get(key) or f"Again, sir. {WIT.get(key, DEFAULT_WIT)}"
+        if key in REPEAT_WIT:
+            return REPEAT_WIT[key]
+        # No own line for this hand: plain "Sir." + answer, never "Again, sir. Done." (honesty loop).
+        return f"Again, sir. {WIT[key]}" if WIT.get(key) and WIT[key] != DEFAULT_WIT else ""
     return WIT.get(key, "")
 
 
@@ -874,3 +877,25 @@ def stream_delta(
     if first:
         return wrap(payload, verb=verb, utterance=utterance, turns=turns, store_lines=store_lines, scars=scars)
     return strip_factory(strip_lead_sir(payload), utterance=utterance)
+
+
+# A promise is not a result. "I'll check…/Let me open…" with no tool behind it becomes "can't yet" (honesty loop).
+PROMISE_RE = re.compile(
+    r"\b(?:I['\u2019]ll|I will|I['\u2019]m going to|let me|allow me to)\s+(?:go\s+(?:and\s+)?|quickly\s+|now\s+)?"
+    r"(?:check|open|look|search|set\s+up|ask|find|get|fetch|run|start|read|list|pull|grab|take|see|review|monitor|"
+    r"verify|confirm|investigate|browse|scan|query|inspect|create|schedule)\b",
+    re.I,
+)
+CANT_YET_LINE = "I can't do that yet: no tool ran for it, so I won't pretend it's happening."
+
+
+def promise_guard(text: str, *, ran_tool: bool) -> str:
+    """Drop promise-only sentences. If nothing real is left, say so honestly."""
+    body = (text or "").strip()
+    if not body or not PROMISE_RE.search(body):
+        return text
+    parts = re.split(r"(?<=[.!?])\s+", body)
+    rest = " ".join(s for s in parts if not PROMISE_RE.search(s)).strip()
+    if rest and (ran_tool or len(rest) > 20):
+        return rest
+    return CANT_YET_LINE if not rest else f"{CANT_YET_LINE} {rest}"

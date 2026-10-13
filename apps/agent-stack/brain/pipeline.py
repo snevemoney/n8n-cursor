@@ -5273,6 +5273,16 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
+DETERMINISTIC_HANDS = ("workspace_read", "web_search")
+
+
+def _turn_ok(ran: dict | None, brain, tool) -> bool:
+    """A deterministic hand has no brain, but its own ok is the truth (honesty loop: ok=false bug)."""
+    if brain or str(tool or "") in DETERMINISTIC_HANDS:
+        return bool((ran or {}).get("ok"))
+    return False
+
+
 def _named_wire_line(text: str) -> bool:
     body = (text or "").strip()
     if not body:
@@ -6616,6 +6626,7 @@ def apply_pipeline_iter(
         outcome = HONEST_UNKNOWN if talk_is_miss(raw_spoken) else (MODEL_TALK if brain else HONEST_UNKNOWN)
     if outcome == WIRE_FAILURE:
         ran["ok"] = False
+    raw_spoken = PERSONA.promise_guard(raw_spoken, ran_tool=str(tool or "") in HANDS and tool != "refuse_hard_step")
     text, first, rest = _commit_spoken(
         hive,
         spoken_in=spoken_in,
@@ -6625,7 +6636,7 @@ def apply_pipeline_iter(
         raw=raw_spoken,
         wires=wires,
         cites=cites,
-        ok=False if cursor_fail else (bool(ran.get("ok")) if brain else False),
+        ok=False if cursor_fail else _turn_ok(ran, brain, tool),
         pack=pack_ref,
         args=(pick or {}).get("args"),
         login_said=login_said,
@@ -6659,7 +6670,7 @@ def apply_pipeline_iter(
         extra = text[len(early) :].strip() if text.startswith(early) else rest
     elif first and rest:
         yield _pipeline_event(
-            ok=bool(ran.get("ok")) if brain else False,
+            ok=_turn_ok(ran, brain, tool),
             tool=tool,
             spoken=first,
             spoken_delta=first,
@@ -6680,7 +6691,7 @@ def apply_pipeline_iter(
     else:
         extra = text
     yield _pipeline_event(
-        ok=bool(ran.get("ok")) if brain else False,
+        ok=_turn_ok(ran, brain, tool),
         tool=tool,
         see=ran.get("see"),
         mission=ran if tool == "browser_mission" else None,
