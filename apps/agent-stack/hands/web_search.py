@@ -26,7 +26,8 @@ INJECTION = re.compile(
 )
 
 
-def _default_fetch(query: str, timeout: float) -> list[dict[str, str]]:
+def _ddg(query: str, timeout: float) -> list[dict[str, str]]:
+    """DuckDuckGo HTML results (first engine)."""
     url = ENDPOINT + urllib.parse.quote_plus(query)
     body = ""
     if shutil.which("curl"):  # plain GET; curl's TLS profile is not bot-challenged like urllib's
@@ -48,6 +49,58 @@ def _default_fetch(query: str, timeout: float) -> list[dict[str, str]]:
         strip = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", s))).strip()
         out.append({"url": url, "title": strip(m.group(2)), "snippet": strip(m.group(3))})
     return out
+
+
+UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+
+
+def parse_bing(body: str) -> list[dict[str, str]]:
+    """Bing result blocks -> url/title/snippet. Ad/tracking links (bing.com) are skipped. Text is data."""
+    strip = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", s or ""))).strip()
+    out = []
+    for blk in re.findall(r'<li class="b_algo".*?</li>', body or "", re.S):
+        m = re.search(r'<h2[^>]*>\s*<a[^>]*href="([^"]+)"[^>]*>(.*?)</a>', blk, re.S)
+        if not m:
+            continue
+        url = html.unescape(m.group(1))
+        if not url.startswith(("http://", "https://")) or "bing.com" in urllib.parse.urlparse(url).netloc:
+            continue
+        p = re.search(r"<p[^>]*>(.*?)</p>", blk, re.S)
+        out.append({"url": url, "title": strip(m.group(2)), "snippet": strip(p.group(1)) if p else ""})
+    return out
+
+
+def _bing(query: str, timeout: float) -> list[dict[str, str]]:
+    """Bing HTML results (second engine), GET only."""
+    url = "https://www.bing.com/search?q=" + urllib.parse.quote_plus(query)
+    if shutil.which("curl"):
+        cp = subprocess.run(["curl", "-s", "-L", "--max-time", str(max(1, int(timeout))), "-A", UA, url],
+                            capture_output=True, timeout=timeout + 1)
+        return parse_bing(cp.stdout[:600_000].decode("utf-8", "replace"))
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return parse_bing(r.read(600_000).decode("utf-8", "replace"))
+
+
+ENGINES = [_ddg, _bing]
+
+
+def _default_fetch(query: str, timeout: float) -> list[dict[str, str]]:
+    """Walk ENGINES in order inside one time budget; the first engine with results wins."""
+    import time as _t
+    end = _t.time() + timeout
+    for i, eng in enumerate(ENGINES):
+        left = end - _t.time()
+        if left <= 0.3:
+            break
+        share = left if i == len(ENGINES) - 1 else max(1.0, left / 2)
+        try:
+            rows = eng(query, share)
+        except Exception:
+            rows = []
+        if rows:
+            return rows
+    return []
 
 
 def _clean(text: str) -> str:
