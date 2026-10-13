@@ -729,6 +729,51 @@ def wants_web_search(utterance: str) -> bool:
     return bool(WEB_SEARCH_RE.search(utterance or ""))
 
 
+# --- Fixed phrase routing (frontier loop 4): deterministic picker before any model pick. ---
+ROUTE_HARD_RE = re.compile(
+    r"\b(pay|buy|purchase|order|send|email|e-mail|text|post|publish|deploy|restart|reboot|delete|remove|"
+    r"shut\s*down|kill|install|upgrade|book|sign\s*up|log\s*in|submit|transfer|wire)\b", re.I)
+ROUTE_OPEN_RE = re.compile(
+    r"^\s*(?:please\s+)?(?:open|go\s+to|navigate\s+to|visit)\s+(?:up\s+)?(?:the\s+(?:site|page|website)\s+)?"
+    r"((?:https?://)?(?:[a-z0-9-]+\.)+[a-z]{2,}(?:/\S*)?)\b", re.I)
+ROUTE_VPS_RE = re.compile(
+    r"\b(?:vps|hostinger)\b.{0,25}\b(?:status|up|doing|health|ok)\b|\b(?:status|health)\b.{0,15}\b(?:vps|hostinger)\b|"
+    r"\b(?:is|how\s+is)\s+(?:my\s+|the\s+)?(?:vps|server)\s+(?:up|doing|ok)\b", re.I)
+ROUTE_SAY_RE = re.compile(r"^\s*(?:please\s+)?say\b\s*:?\s*(.+?)\s*$", re.I)
+ROUTE_SCREEN_RE = re.compile(
+    r"\b(?:screenshot|screen\s*grab|screen\s*shot)\b|\b(?:describe|grab|look\s+at)\s+my\s+screen\b|"
+    r"\b(?:what(?:'s|s|\s+is)|what\s+do\s+you\s+see)\s+on\s+my\s+screen\b", re.I)
+ROUTE_SEARCH_LEAD_RE = re.compile(
+    r"^\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?(?:search\s+(?:the\s+)?(?:web|internet|online)|look\s+up\s+online|"
+    r"check\s+online|web\s+search|google)\s*(?:for\s+)?[:,-]?\s*", re.I)
+
+
+def fixed_route(utterance: str) -> dict | None:
+    """Phrase -> hand, no model. None means: keep today's path (model pick)."""
+    u = (utterance or "").strip()
+    if not u or is_hard_step(u) or ROUTE_HARD_RE.search(u):
+        return None
+    m = ROUTE_OPEN_RE.match(u)
+    if m and not re.search(r";|\bclick\b|\bthen\b|\bdownload\b", u, re.I):
+        url = m.group(1).rstrip(".,!?")
+        url = url if url.lower().startswith(("http://", "https://")) else "https://" + url
+        return {"tool": "safari_see", "args": {"act": "open", "url": url}, "speak": ""}
+    if wants_web_search(u):
+        q = ROUTE_SEARCH_LEAD_RE.sub("", u).strip(" ?.!") or u
+        return {"tool": "web_search", "args": {"query": q}, "speak": ""}
+    if ROUTE_VPS_RE.search(u):
+        return {"tool": "status", "args": {"which": "vps"}, "speak": ""}
+    if ROUTE_SCREEN_RE.search(u):
+        return {"tool": "safari_see", "args": {"act": "grab"}, "speak": ""}
+    m = ROUTE_SAY_RE.match(u)
+    if m:
+        said = re.sub(r"\s+out\s+loud\s*[.!]?$", "", m.group(1), flags=re.I).strip().strip('"\u201c\u201d').rstrip(".!").strip()
+        if said and not re.match(r"^(?:about|that|so|what|it|something|the\s+line|again)\b", said, re.I) \
+                and not re.search(r"\b(?:in\s+your\s+own\s+words|back|I\s+just|you\s+just|earlier|again)\b", said, re.I):
+            return {"tool": "say", "args": {}, "speak": said}
+    return None
+
+
 def _web_search_hand():
     name = "agent_stack_web_search"
     if name not in sys.modules:
@@ -4574,7 +4619,7 @@ def run_tool(
         }
     unauthorized = (
         tool == "refuse_hard_step"
-        or (tool == "safari_see" and not wants_safari(utterance))
+        or (tool == "safari_see" and not wants_safari(utterance) and fixed_route(utterance) is None)
         or (tool == "vault_read" and ACTION_STATUS_RE.search(utterance or ""))
     )
     if unauthorized:
@@ -4617,6 +4662,10 @@ def run_tool(
             return {"ok": False, "tool": tool, "spoken": "No browser steering was requested.",
                     "task_verified": False, "wires": [tool], "cites": [], "sent": False}
         return browser_runtime().pipeline_tool(args, utterance, hive)
+    if tool == "say":
+        said = str(pick.get("speak") or "").strip()
+        return {"ok": bool(said), "tool": "say", "spoken": said, "wires": ["voice"], "cites": [],
+                "sent": False, "task_verified": bool(said), "outcome": TOOL_LOOP}
     if tool == "web_search":
         ws = _web_search_hand()
         q = str(args.get("query") or "") or ws.query_from_utterance(utterance)
@@ -5273,7 +5322,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "web_search")
+DETERMINISTIC_HANDS = ("workspace_read", "web_search", "say", "status", "safari_see")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
@@ -5878,6 +5927,12 @@ def apply_pipeline_iter(
             brain = "store"
         except RuntimeError:
             ran = None
+    if pick is None and ran is None:
+        fixed = fixed_route(spoken_in)
+        if fixed is not None:
+            pick = fixed
+            ran = run_tool(pick, spoken_in, hive=hive, retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn, gen=gen)
+            brain = None
     if pick is None and ran is None and wants_workspace_read(spoken_in) and not is_hard_step(spoken_in):
         pick = {"tool": "workspace_read", "args": {}, "speak": ""}
         ran = run_tool(pick, spoken_in, hive=hive, retrieve_roots=retrieve_roots)
