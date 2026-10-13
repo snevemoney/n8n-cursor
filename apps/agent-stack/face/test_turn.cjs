@@ -96,7 +96,7 @@ function inputRoutes() {
   const c = vm.createContext({$:()=>typed,turn:(...args)=>calls.push(args),
     unlockAudio:()=>assert.fail('Keyboard input must not unlock audio'),
     state:{pending:'Pending question'},isMouthEcho:()=>false,
-    WAKE_RE:/^jarvis[, ]*/i,YES_RE:/^yes$/i,greet:()=>{}});
+    WAKE_RE:/^jarvis[, ]*/i,YES_RE:/^yes$/i,greet:()=>{},lastTtsBusyAt:0,FOLLOW_UP_MS:12000});
   const typedSource=html.slice(html.indexOf('    $("typed").addEventListener("keydown"'),html.indexOf('    if (WIDGET)',html.indexOf('    $("typed").addEventListener("keydown"')));
   vm.runInContext(typedSource,c);
   keyHandler({key:'Enter'});
@@ -108,6 +108,8 @@ function inputRoutes() {
   assert.deepEqual(calls.shift(),['explain',false,true]);
   c.handleHeard('yes');
   assert.deepEqual(calls.shift(),['Pending question',true,true]);
+  c.handleHeard('The Routines section in the middle of your screen');  // no wake word, no live exchange: ignored
+  assert.equal(calls.length,0,'unaddressed speech must not start a turn (self-echo loop)');
 }
 async function terminalReceiptDoesNotWaitForEOF() {
   const element={textContent:"previous",className:""};
