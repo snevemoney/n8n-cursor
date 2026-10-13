@@ -7,6 +7,7 @@ under JARVIS_PICKUP_ROOTS. Secret-looking lines are dropped before the text reac
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import re
 import sys
@@ -15,6 +16,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 WANT_RE = re.compile(r"\b(?:active[_ ]tasks(?:\.md)?|cowork\s+board|cowork\b.{0,30}\bboard|(?:agent|desk)'?s?\s+board|"
                      r"pick\s+up\s+where|(?:progress|status)(?:-30)?\.md)\b", re.I)
+FINISH_RE = re.compile(r"\b(?:what(?:'s| is)?(?: still)? (?:left|remaining|unfinished)|what (?:still )?needs (?:finishing|to be (?:finished|done))|what remains)\b.{0,80}\bjarvis\b|\bjarvis\b.{0,50}\b(?:remaining work|unfinished work|finish list)\b", re.I)
 SECRET_LINE = re.compile(r"(?:api[_-]?key|token|secret|password|passwd|bearer|sk-[a-z0-9]{8,})", re.I)
 MAX_CHARS = 12000
 
@@ -30,7 +32,7 @@ def _mod(name: str):
 
 
 def wants_pickup(u: str) -> bool:
-    return bool(WANT_RE.search(u or ""))
+    return bool(WANT_RE.search(u or "") or FINISH_RE.search(u or ""))
 
 
 def private_dir() -> Path:
@@ -91,6 +93,21 @@ def row_answer(utterance: str, text: str) -> str:
 
 
 def run(utterance: str, *, chat=None) -> dict:
+    if FINISH_RE.search(utterance or ""):
+        ledger = Path(os.environ.get("JARVIS_FINISH_LEDGER") or Path.home() / "jarvis-proof" / "codex-review" / "METHODS-E-J.json")
+        if ledger.is_symlink() or not ledger.is_file():
+            return {"ok": False, "spoken": "The current Jarvis remaining-work ledger is unavailable. I cannot verify what is unfinished."}
+        try:
+            rows = json.loads(ledger.read_text())
+            if not isinstance(rows, list) or not all(isinstance(r, dict) for r in rows):
+                raise ValueError("Invalid ledger")
+            counts = {s: sum(r.get("status") == s for r in rows) for s in ("OPEN", "PARTIAL CANDIDATE", "HOLD / SKIP REASON")}
+            if sum(counts.values()) != len(rows):
+                raise ValueError("Unknown disposition")
+        except (OSError, ValueError, TypeError):
+            return {"ok": False, "spoken": "The Jarvis remaining-work ledger could not be validated. I cannot claim it is complete."}
+        return {"ok": True, "files": [ledger.name], "cites": [str(ledger)], "task_verified": False,
+                "spoken": f"Jarvis still has {counts['OPEN']} open E–J methods and {counts['PARTIAL CANDIDATE']} partial candidates; {counts['HOLD / SKIP REASON']} have documented holds. Earlier video methods, connector access and the original 30 capabilities also need full verification. The complete remaining-work list is in METHODS-E-J.md."}
     files = pick(utterance)
     if not files:
         return {"ok": False, "spoken": "I found no ACTIVE_TASKS.md or cowork board to read."}

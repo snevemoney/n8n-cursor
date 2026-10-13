@@ -10,6 +10,15 @@ PIPE = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(PIPE)
 
 class TerminalDeliveryTest(unittest.TestCase):
+    def test_new_turn_does_not_inherit_previous_tool_execution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hive = Path(tmp)
+            PIPE.BUS_IO.write_json(hive/'bus/state.json', {"turn_gen": 4, "execution": {"tool":"old"}, "execution_gen": 4})
+            self.assertEqual(PIPE.begin_turn(hive), 5)
+            state = PIPE.load_json(hive/'bus/state.json')
+            self.assertNotIn("execution", state)
+            self.assertNotIn("execution_gen", state)
+
     def test_model_terminal_cannot_be_overwritten_by_same_generation_wall(self):
         with tempfile.TemporaryDirectory() as tmp:
             hive=Path(tmp); gen=PIPE.begin_turn(hive)

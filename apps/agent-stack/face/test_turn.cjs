@@ -6,6 +6,7 @@ const source = html.slice(html.indexOf('    let turnAbort = null;'), html.indexO
 const tick = () => new Promise(resolve => setImmediate(resolve));
 async function scenario(voice, json = false, duplicates = false, failedWatch = false) {
   const element = {textContent:'previous',className:''};
+  const heard = {textContent:'previous prompt'};
   const audio = []; let unlocked = 0; let release;
   const paused = new Promise(resolve => release=resolve);
   let read = 0;
@@ -24,7 +25,7 @@ async function scenario(voice, json = false, duplicates = false, failedWatch = f
     STOP_RE:/^stop$/i, state:{turning:false,armed:false,phase:'idle'},
     eyesStream:null,lastSpoken:'',busGen:0,nextHandle:'',ttsGen:0,
     unlockAudio:()=>unlocked++,stopSpeech:()=>{},paintPhase:()=>{},
-    $:()=>element,enqueueSpeak:t=>audio.push(t),productLine:t=>t||'',
+    $:id=>id==='heard'?heard:element,enqueueSpeak:t=>audio.push(t),productLine:t=>t||'',
     ttsSpeaking:()=>false,scheduleRestart:()=>{},TTS_COOLDOWN:0,
     AbortController,TextDecoder,Date,
     fetch:async()=>({headers:{get:()=>json?'application/json':'text/event-stream'},
@@ -39,6 +40,7 @@ async function scenario(voice, json = false, duplicates = false, failedWatch = f
   vm.runInContext(source,c);
   const running = c.turn('explain',false,voice);
   await tick();
+  assert.equal(heard.textContent,'› explain','current prompt must replace the earlier prompt immediately');
   if(!json) {
     assert.equal(element.textContent,'First sentence.','partial text must appear before stream completes');
     assert.deepEqual(audio,voice?['First sentence.']:[]);

@@ -214,6 +214,9 @@ def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
     def apply(bus: dict) -> dict:
         gen = bus_gen(bus) + 1
         bus["turn_gen"] = gen
+        # An earlier tool's receipt is not evidence for the newly opened turn.
+        bus.pop("execution", None)
+        bus.pop("execution_gen", None)
         bus["updated_at"] = now_iso()
         if arm_watch:
             watch = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}

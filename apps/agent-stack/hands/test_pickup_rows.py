@@ -1,5 +1,6 @@
 """Real-work #31: owner/board asks read the ACTIVE_TASKS row directly (no model). Synthetic table only."""
 import sys
+import json
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -19,3 +20,18 @@ def test_owner_and_board_from_row():
 
 def test_no_row_match_returns_empty():
     assert pickup.row_answer("who owns the moon base", TABLE) == ""
+
+
+def test_jarvis_remaining_question_uses_current_ledger_without_model(tmp_path, monkeypatch):
+    path = tmp_path / "ledger.json"
+    path.write_text(json.dumps([{"status":"OPEN"}, {"status":"PARTIAL CANDIDATE"}, {"status":"HOLD / SKIP REASON"}]))
+    monkeypatch.setenv("JARVIS_FINISH_LEDGER", str(path))
+    def no_model(*args):
+        raise AssertionError("remaining-work lookup should not call a model")
+    question = "What still needs finishing on Jarvis?"
+    assert pickup.wants_pickup(question)
+    got = pickup.run(question, chat=no_model)
+    assert got["ok"] and "1 open" in got["spoken"] and "1 partial" in got["spoken"]
+    assert "original 30 capabilities" in got["spoken"] and not got["task_verified"]
+    path.write_text('{"status":"everything finished"}')
+    assert not pickup.run(question, chat=no_model)["ok"]

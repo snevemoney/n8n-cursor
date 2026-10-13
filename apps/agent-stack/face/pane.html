@@ -197,6 +197,10 @@
     }
     html.widget #browserResults p { margin: 0 0 8px; }
     html.widget #browserResults p:last-child { margin-bottom: 0; }
+    html.widget .chip #heard {
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-size: 10px; line-height: 1.2;
+    }
     html.widget #orb3d {
       width: 240px; height: 240px; top: 40%; transform: translate(-50%, -50%);
       background: radial-gradient(circle at 50% 48%, rgba(2, 8, 5, .62) 0%, rgba(2, 8, 5, 0) 72%);
@@ -972,6 +976,7 @@
     let spokenLock = "";
     async function turn(utterance, approved, voice = false) {
       if (!utterance) return;
+      if ($("heard") && $("heard") !== $("spoken")) $("heard").textContent = "› " + String(utterance).slice(0, 160);
       speakHeld = false;
       const isStop = STOP_RE.test(utterance || "");
       if (state.turning && turnAbort) {
