@@ -1862,7 +1862,14 @@ def _call_openrouter_inner(
 
     def _openrouter_payload(*args, **kw):  # noqa: F811 — same payload, primary named for the self-report
         kw.setdefault("primary", primary_mid)
-        return globals()["_openrouter_payload"](*args, **kw)
+        racer = kw.get("primary") != primary_mid
+        keep = {k: LAST_INJECT.get(k) for k in ("primary", "model")}
+        out = globals()["_openrouter_payload"](*args, **kw)
+        if racer and keep.get("primary"):
+            # A fast racer's payload must not relabel the turn: the log's primary stays the turn's model,
+            # so "fallback" means a real fallback, not "the racer's brief was built last".
+            LAST_INJECT.update(keep)
+        return out
 
     free_quota_dead = False
     if stills and not models:
