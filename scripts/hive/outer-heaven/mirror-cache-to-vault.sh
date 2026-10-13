@@ -26,7 +26,8 @@ fi
 DEST="$HIVE_OBSIDIAN_VAULT/00_Outer_Heaven"
 mkdir -p "$DEST"
 
-# Do not let a thin cache shard overwrite a fat vault chronicle (Aug 2026 wipe).
+# Do not let a thin/stale cache shard overwrite a richer vault chronicle (Aug 2026 wipe).
+# Keep vault when it is larger, or newer-and-not-smaller. Never truncate CHRONICLE via rsync.
 PROTECT=()
 if [[ -d "$DEST/CHRONICLE" ]]; then
   shopt -s nullglob
@@ -36,7 +37,17 @@ if [[ -d "$DEST/CHRONICLE" ]]; then
     [[ -f "$src" ]] || continue
     dest_bytes="$(stat -f%z "$shard" 2>/dev/null || stat -c%s "$shard")"
     src_bytes="$(stat -f%z "$src" 2>/dev/null || stat -c%s "$src")"
-    if (( dest_bytes > src_bytes * 2 && dest_bytes > 100000 )); then
+    dest_mtime="$(stat -f%m "$shard" 2>/dev/null || stat -c%Y "$shard")"
+    src_mtime="$(stat -f%m "$src" 2>/dev/null || stat -c%Y "$src")"
+    keep=0
+    if (( dest_bytes > src_bytes )); then
+      keep=1
+    elif (( dest_mtime > src_mtime && dest_bytes >= src_bytes )); then
+      keep=1
+    elif (( dest_bytes > src_bytes * 2 && dest_bytes > 100000 )); then
+      keep=1
+    fi
+    if (( keep )); then
       echo "mirror-cache-to-vault: protect CHRONICLE/$base (${dest_bytes}B vault vs ${src_bytes}B cache)"
       PROTECT+=(--exclude "CHRONICLE/$base")
     fi

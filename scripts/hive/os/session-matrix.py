@@ -799,13 +799,41 @@ def write_session_store(os_root: Path, by_surface: dict[str, list[dict[str, Any]
     write_text(store / SESSION_HEADS_FILENAME, render_four_index(by_surface, at=at))
     # Union with main: keep main's INDEX.md beside Evens's "Recent Conversations.md".
     write_text(store / "INDEX.md", render_four_index(by_surface, at=at))
+    # Union INDEX.json with prior rows so a partial host scan cannot drop other surfaces' ids.
+    prev = load_index_rows(store / "INDEX.json")
+    fresh = [
+        {**row, "surface": surface}
+        for surface in SURFACES
+        for row in (by_surface.get(surface) or [])
+    ]
+    by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in prev:
+        k = row_key(row)
+        if k[0] and k[1]:
+            by_key[k] = row
+    for row in fresh:
+        k = row_key(row)
+        if not (k[0] and k[1]):
+            continue
+        old = by_key.get(k)
+        if old is None:
+            by_key[k] = row
+            continue
+        # Prefer the fresher mtime / richer ask when both exist
+        old_m = str(old.get("mtime") or "")
+        new_m = str(row.get("mtime") or "")
+        if new_m >= old_m:
+            by_key[k] = {**old, **row}
+        else:
+            by_key[k] = {**row, **old}
+    merged_rows = sorted(by_key.values(), key=lambda r: (str(r.get("surface") or ""), str(r.get("mtime") or "")), reverse=True)
     write_text(
         store / "INDEX.json",
-        json.dumps({"at": at, "law": SLACK_ROOM, "four_x_four": FOUR_X_FOUR, "rows": [
-            {**row, "surface": surface}
-            for surface in SURFACES
-            for row in (by_surface.get(surface) or [])
-        ]}, indent=2) + "\n",
+        json.dumps(
+            {"at": at, "law": SLACK_ROOM, "four_x_four": FOUR_X_FOUR, "rows": merged_rows, "merge": "union-by-surface-id"},
+            indent=2,
+        )
+        + "\n",
     )
     persist_chatgpt_titles(
         chatgpt_titles_path(os_root),
