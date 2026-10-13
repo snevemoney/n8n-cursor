@@ -18,10 +18,9 @@ tests:
     platform: self-hosted n8n
     priority: high
   assert:
-  - type: icontains-any
-    value:
-    - production
-    - /webhook/
-    - active
+  - type: icontains
+    value: webhook-test
+  - type: icontains
+    value: production
   - type: javascript
     value: /1\.|step/i.test(output)
