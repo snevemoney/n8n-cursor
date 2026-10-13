@@ -1,6 +1,6 @@
 # Latency after "On it." — findings (2026-10-13, Consultant, CANDIDATE)
 
-**Symptom.** On :4019, "What branch are you working from right now?" streamed "On it." at 1.46 s and the final reply at 9.37 s. The tool itself (workspace_read, 3 git calls) took 0.18 s. Mac load average was 60–250 all night.
+**Symptom.** On :4019 (retired 2026-10-13; historical), "What branch are you working from right now?" streamed "On it." at 1.46 s and the final reply at 9.37 s. The tool itself (workspace_read, 3 git calls) took 0.18 s. Mac load average was 60–250 all night.
 
 **Profile** (offline `apply_turn_iter`, cProfile, same ask, total 4.35 s):
 | Stage | Time | Note |
