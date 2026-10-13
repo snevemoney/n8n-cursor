@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "workspace_read", "memory", "skills", "mcp_inventory", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "workspace_read", "memory", "skills", "mcp_inventory", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -809,6 +809,31 @@ def wants_screen_see(utterance: str) -> bool:
     return bool(SCREEN_SEE_RE.search(utterance or ""))
 
 
+PLAN_RE = re.compile(
+    r"\bplan\s+(?:how\s+to|out)\b|\b(?:make|draft|write)\s+(?:me\s+)?a\s+plan\s+(?:for|to)\b",
+    re.I,
+)
+
+
+def wants_plan(utterance: str) -> bool:
+    """Explicit ask for the plan hand (FINISH-LIST)."""
+    return bool(PLAN_RE.search(utterance or ""))
+
+
+CONTEXT_BUDGET_BYTES = int(os.environ.get("JARVIS_CONTEXT_BUDGET_BYTES") or 24000)
+
+
+def fit_budget(text: str, budget: int | None = None) -> str:
+    """Rank 17 context budget: cap the model brief in bytes (keeps the head, marks the cut)."""
+    cap = int(budget or CONTEXT_BUDGET_BYTES)
+    raw = (text or "").encode("utf-8")
+    if len(raw) <= cap:
+        return text
+    mark = "\n[context trimmed to budget]"
+    keep = raw[: max(0, cap - len(mark.encode()))].decode("utf-8", "ignore")
+    return keep + mark
+
+
 def jarvis_rules() -> str:
     """Short operating rules (JARVIS.md) loaded into the turn prompt. Empty string if the file is missing."""
     try:
@@ -863,7 +888,9 @@ def model_free_route(spoken_in: str) -> dict | None:
         # Rank 16: a screen ask is the whole display (screen_see), not the Safari tab.
         early = {"tool": "screen_see", "args": {}, "speak": ""}
     if early is None and not is_hard_step(spoken_in):
-        if wants_screen_see(spoken_in):
+        if wants_plan(spoken_in):
+            early = {"tool": "plan", "args": {}, "speak": ""}
+        elif wants_screen_see(spoken_in):
             early = {"tool": "screen_see", "args": {}, "speak": ""}
         elif wants_voice_engine(spoken_in):
             early = {"tool": "voice_engine", "args": {}, "speak": ""}
@@ -974,6 +1001,16 @@ def _screen_see_hand():
     name = "agent_stack_screen_see"
     if name not in sys.modules:
         spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "screen_see.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _plan_hand():
+    name = "agent_stack_plan"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "plan.py")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
@@ -4949,6 +4986,16 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["screen_see"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "screen_see_meta": hd.log_meta(got)}
+    if tool == "plan":
+        hd = _plan_hand()
+
+        def _plan_talk(prompt):
+            said = online_talk(prompt, "", hands=False) or {}
+            return None if said.get("unknown") else (said.get("spoken") or said.get("text"))
+        got = hd.run(dict(args) if args.get("goal") else hd.args_from_utterance(utterance), talk_fn=_plan_talk)
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["plan"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "plan_meta": hd.log_meta(got)}
     if tool == "mcp_inventory":
         mi = _mcp_inventory_hand()
         got = mi.run({})
@@ -5616,7 +5663,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
@@ -6488,7 +6535,8 @@ def apply_pipeline_iter(
             extra = sitting_brief(prior_turns, bus_now, retrieve_roots, spoken_in)
             if extra and extra not in pack_text:
                 brief = f"{pack_text}\n\n{extra}"
-        provider_brief = brief
+        brief = fit_budget(brief)
+        provider_brief = fit_budget(brief)
         no_hands = (
             shared_memory_answers(spoken_in)
             or plain_question(spoken_in)
