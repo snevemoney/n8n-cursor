@@ -1333,7 +1333,7 @@ STATUS_CLAIM_RE = re.compile(
     r"|\b(?:orb|vault|safari|talk|watch|desktop|tools?|adapters?|connection|connectivity|interface|memory\s+access|openrouter)\b[^.\n]{0,40}?"
     r"\b(?:is|are)\s+(?:\w+\s+)?(?:stable|ready|operational|functional|responsive|active|accessible|available|working|reliable|healthy|online)\b"
     r"|^\s*[-*\u2022]\s+[^\n]{0,40}?\b(?:orb|vault|safari|talk|watch|desktop|tools?|adapter|connection|openrouter|memory|browser)\b[^\n]{0,60}?\b(?:active|accessible|available|functional|operational|responsive|ready|online|working|stable)\b"
-    r"|(?:^|\s)[-*\u2022]\s+\*\*[^*\n]{1,40}\*\*\s*:\s*(?:ready|available|active|online|operational|functional|working|stable)\b"
+    r"|(?:^|\s)[-*\u2022]\s+\*\*[^*\n]{1,40}\*\*\s*:[^\n*]{0,60}?\b(?:ready|available|active|online|operational|functional|working|stable)\b"
     r"|\ball\s+systems\s+(?:are\s+)?(?:go|nominal|green)"
     r"|\bfunctioning\s+(?:well\s+)?within\s+(?:normal\s+)?operational\s+parameters",
     re.I | re.M,
@@ -1347,7 +1347,7 @@ def unbacked_status_claim(text: str, *, backed: bool) -> str:
     parts = re.split(r"(?<=[.!?])\s+|\n+", text.strip())
     keep = [x for x in parts if x and not STATUS_CLAIM_RE.search(x)]
     dropped = len([x for x in parts if x]) - len(keep)
-    if dropped >= 2 or not any(re.search(r"[A-Za-z]{3,}", x) and x.strip(" .") not in ("Sir", "sir") for x in keep):
+    if dropped >= 1 or not any(re.search(r"[A-Za-z]{3,}", x) and x.strip(" .") not in ("Sir", "sir") for x in keep):
         keep.append("I'm online, but I have not run a live status check this turn; ask me to run status for real readings.")
     return " ".join(keep).strip()
 

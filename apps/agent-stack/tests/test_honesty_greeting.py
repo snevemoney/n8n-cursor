@@ -42,6 +42,13 @@ class StatusClaimTests(unittest.TestCase):
         self.assertIn("not run a live status check", out)
         self.assertIn("specific capability", out)
 
+    def test_trailing_ready_list_dropped(self):
+        live = ("Sir. Good evening. - **Eyes**: Stills capture ready - **File drop**: Evidence reception ready "
+                "- **Voice**: Mic + TTS ready. Hard steps remain with you.")
+        out = online.unbacked_status_claim(live, backed=False)
+        self.assertNotRegex(out.lower(), r"capture ready|tts ready")
+        self.assertIn("not run a live status check", out)
+
     def test_plain_reply_untouched(self):
         t = "Sir. Good evening. I'm ready to help; what are we working on?"
         self.assertEqual(online.unbacked_status_claim(t, backed=False), t)
