@@ -54,6 +54,21 @@ def _ddg(query: str, timeout: float) -> list[dict[str, str]]:
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
 
 
+def _bing_target(url: str) -> str:
+    """Bing wraps results in /ck/a?...&u=a1<base64url>; unwrap to the real URL (ads stay on bing.com and are skipped)."""
+    import base64
+    pr = urllib.parse.urlparse(url)
+    if pr.netloc.endswith("bing.com") and pr.path.startswith("/ck/a"):
+        u = (urllib.parse.parse_qs(pr.query).get("u") or [""])[0]
+        if u.startswith("a1"):
+            try:
+                raw = u[2:]
+                return base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)).decode("utf-8", "replace")
+            except Exception:
+                return url
+    return url
+
+
 def parse_bing(body: str) -> list[dict[str, str]]:
     """Bing result blocks -> url/title/snippet. Ad/tracking links (bing.com) are skipped. Text is data."""
     strip = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", s or ""))).strip()
@@ -62,7 +77,7 @@ def parse_bing(body: str) -> list[dict[str, str]]:
         m = re.search(r'<h2[^>]*>\s*<a[^>]*href="([^"]+)"[^>]*>(.*?)</a>', blk, re.S)
         if not m:
             continue
-        url = html.unescape(m.group(1))
+        url = _bing_target(html.unescape(m.group(1)))
         if not url.startswith(("http://", "https://")) or "bing.com" in urllib.parse.urlparse(url).netloc:
             continue
         p = re.search(r"<p[^>]*>(.*?)</p>", blk, re.S)
@@ -72,7 +87,11 @@ def parse_bing(body: str) -> list[dict[str, str]]:
 
 def _bing(query: str, timeout: float) -> list[dict[str, str]]:
     """Bing HTML results (second engine), GET only."""
-    url = "https://www.bing.com/search?q=" + urllib.parse.quote_plus(query)
+    # Bing's plain-HTML page drifts on filler words ("current version of X" -> banking), so send keywords only.
+    stop = {"what", "whats", "what's", "is", "are", "the", "of", "a", "an", "who", "which", "right", "now", "please",
+            "tell", "me", "current", "currently", "today", "for", "on", "in", "my"}
+    kw = " ".join(w for w in re.findall(r"[\w.#+-]+", query) if w.lower() not in stop) or query
+    url = "https://www.bing.com/search?setlang=en-US&q=" + urllib.parse.quote_plus(kw)
     if shutil.which("curl"):
         cp = subprocess.run(["curl", "-s", "-L", "--max-time", str(max(1, int(timeout))), "-A", UA, url],
                             capture_output=True, timeout=timeout + 1)
