@@ -15,6 +15,7 @@ import shutil
 import socket
 import ssl
 import subprocess
+import queue
 import threading
 import time
 import urllib.error
@@ -454,6 +455,167 @@ def _read_http_body(res, timeout: float) -> bytes:
     _abort_response(res)
     worker.join(1.0)
     raise TimeoutError("response body stalled")
+
+
+_STREAM = threading.local()
+STREAM_SENTENCE_RE = re.compile(r"(.+?[.!?])(?:\s+|$)", re.S)
+
+
+def set_stream_sink(fn) -> None:
+    """Per-thread callback for honest, sentence-buffered talk deltas (None turns it off)."""
+    _STREAM.sink = fn
+
+
+def stream_sink():
+    return getattr(_STREAM, "sink", None)
+
+
+def stream_sentence_ok(sentence: str) -> bool:
+    """A streamed sentence goes out only if no honesty filter would touch it. The full
+    reply is still filtered again at the end; this only keeps the live pane honest."""
+    s = (sentence or "").strip()
+    if not s:
+        return False
+    for rx in (STATUS_CLAIM_RE, STATUS_HEADER_RE, MEMORY_CLAIM_RE, TALK_CLAIM_RE, GREETING_CLAIM_RE):
+        if rx.search(s):
+            return False
+    return not _looks_like_scratchpad(s)
+
+
+def _sse_deltas(res):
+    """Yield (content_delta, finish_reason) from an OpenRouter SSE body."""
+    for raw in res:
+        line = raw.decode("utf-8", "replace").strip() if isinstance(raw, bytes) else str(raw).strip()
+        if not line.startswith("data:"):
+            continue
+        body = line[5:].strip()
+        if body == "[DONE]":
+            return
+        try:
+            obj = json.loads(body)
+        except ValueError:
+            continue
+        ch = (obj.get("choices") or [{}])[0] if isinstance(obj, dict) else {}
+        delta = ((ch.get("delta") or {}).get("content") or "") if isinstance(ch, dict) else ""
+        yield delta, (ch.get("finish_reason") or "") if isinstance(ch, dict) else ""
+
+
+def raced_stream(
+    payloads: list[tuple[str, dict]],
+    *,
+    headers: dict,
+    timeout: float,
+    hedge: float,
+    sink=None,
+    opener=None,
+) -> tuple[str, str, str]:
+    """Stream the primary; after `hedge` s with no first token, also stream the backup.
+    The first model to send a content token wins and is streamed; the other is closed.
+    Returns (text, finish_reason, winning model). Raises TimeoutError if nobody answers."""
+    opener = opener or (lambda body, budget: _http_open(OPENROUTER_URL, data=body, headers=headers, timeout=budget))
+    began = time.monotonic()
+    lock = threading.Lock()
+    q: "queue.Queue" = queue.Queue()
+    st = {"winner": None, "open": {}, "live": 0}
+
+    def run(mid: str, body: dict, budget: float) -> None:
+        res = None
+        try:
+            res = opener(body, budget)
+            with lock:
+                if st["winner"] not in (None, mid):
+                    return
+                st["open"][mid] = res
+            for delta, finish in _sse_deltas(res):
+                with lock:
+                    if st["winner"] is None and delta:
+                        st["winner"] = mid
+                    mine = st["winner"] == mid
+                if not mine:
+                    if st["winner"] is not None:
+                        return
+                    continue
+                q.put(("d", mid, delta, finish))
+            with lock:
+                if st["winner"] == mid:
+                    q.put(("end", mid, "", ""))
+        except Exception as exc:  # noqa: BLE001
+            q.put(("err", mid, repr(exc), ""))
+        finally:
+            with lock:
+                st["live"] -= 1
+            q.put(("gone", mid, "", ""))
+            try:
+                if res is not None:
+                    res.close()
+            except Exception:  # noqa: BLE001
+                pass
+
+    def launch(i: int) -> None:
+        mid, body = payloads[i]
+        with lock:
+            st["live"] += 1
+        threading.Thread(target=run, args=(mid, body, max(1.0, timeout - (time.monotonic() - began))), daemon=True, name=f"talk-stream-{i}").start()
+
+    launch(0)
+    launched = 1
+    parts: list[str] = []
+    buf = ""
+    finish = ""
+    errs: list[str] = []
+    while True:
+        left = timeout - (time.monotonic() - began)
+        if left <= 0:
+            break
+        wait = left
+        if st["winner"] is None and launched < len(payloads):
+            wait = max(0.05, min(left, hedge - (time.monotonic() - began)))
+        try:
+            kind, mid, val, fin = q.get(timeout=wait)
+        except queue.Empty:
+            if st["winner"] is None and launched < len(payloads):
+                launch(launched)
+                launched += 1
+            continue
+        if kind == "d":
+            parts.append(val)
+            finish = fin or finish
+            if sink is not None:
+                buf += val
+                while True:
+                    m = STREAM_SENTENCE_RE.match(buf)
+                    if not m or not re.search(r"[.!?]\s", buf + " "):
+                        break
+                    sent, buf = m.group(1), buf[m.end():]
+                    if stream_sentence_ok(sent):
+                        try:
+                            sink(sent.strip())
+                        except Exception:  # noqa: BLE001
+                            pass
+        elif kind == "end":
+            break
+        elif kind == "err":
+            errs.append(val)
+            # The primary failed before any token: race the backup now rather than at the hedge mark.
+            if st["winner"] is None and launched < len(payloads):
+                launch(launched)
+                launched += 1
+        elif kind == "gone":
+            with lock:
+                none_left = st["live"] <= 0
+            if none_left and (st["winner"] is None or st["winner"] == mid) and launched >= len(payloads):
+                break
+    with lock:
+        win = st["winner"]
+        for mid, res in list(st["open"].items()):
+            if mid != win or not parts:
+                try:
+                    res.close()
+                except Exception:  # noqa: BLE001
+                    pass
+    if not win:
+        raise TimeoutError(errs[-1] if errs else "no first token")
+    return "".join(parts).strip(), finish, win
 
 
 def talk_hedge_sec() -> float:
@@ -1109,6 +1271,9 @@ def _shared_mod():
     return _SHARED_MOD
 
 
+SHARED_BLOCK_CHARS = int(os.environ.get("JARVIS_SHARED_BLOCK_CHARS") or 9000)
+
+
 def system_for(model: str = "", primary: str = "", provider: str = "OpenRouter", query: str = "") -> str:
     """SYS plus the shared fleet context. Records which files were injected."""
     parts = [SYS]
@@ -1117,6 +1282,10 @@ def system_for(model: str = "", primary: str = "", provider: str = "OpenRouter",
         block, files = _shared_mod().shared_system_block()
     except Exception:  # noqa: BLE001 — a missing shared dir never breaks talk
         block, files = "", []
+    if block and len(block) > SHARED_BLOCK_CHARS:
+        # Shorter system prompt: keep the head (identity, priorities, rules index); the
+        # retrieved snippets below carry the parts relevant to this ask.
+        block = block[:SHARED_BLOCK_CHARS].rsplit("\n", 1)[0] + "\n[shared context trimmed; relevant snippets follow]"
     if block:
         parts.append(block)
     snippets: list[dict] = []
@@ -1605,17 +1774,26 @@ def _call_openrouter_inner(
                     # Hedged plain request: the stream path had no backup, and live 20 s
                     # stream stalls hit 2 of 7 no-hands turns. The reply is used whole either way.
                     fast = OPENROUTER_FAST_MODEL if OPENROUTER_FAST_MODEL and OPENROUTER_FAST_MODEL != mid else ""
-                    data = _hedged_http_json(
-                        OPENROUTER_URL,
-                        data=_openrouter_payload(mid, user, stream=False, max_tokens=max_tokens, images=stills),
-                        headers=headers,
-                        timeout=attempt,
-                        backup_data=(
-                            _openrouter_payload(fast, user, stream=False, max_tokens=max_tokens, images=stills, primary=fast)
-                            if fast
-                            else None
-                        ),
-                    )
+                    if stream_sink() is not None and os.environ.get("JARVIS_TALK_STREAM", "1") != "0":
+                        racers = [(mid, _openrouter_payload(mid, user, stream=True, max_tokens=max_tokens))]
+                        if fast:
+                            racers.append((fast, _openrouter_payload(fast, user, stream=True, max_tokens=max_tokens, primary=fast)))
+                        text, finish, mid = raced_stream(
+                            racers, headers=headers, timeout=attempt, hedge=talk_hedge_sec(), sink=stream_sink()
+                        )
+                        data = {"choices": [{"message": {"content": text}, "finish_reason": finish or "stop"}]}
+                    else:
+                        data = _hedged_http_json(
+                            OPENROUTER_URL,
+                            data=_openrouter_payload(mid, user, stream=False, max_tokens=max_tokens, images=stills),
+                            headers=headers,
+                            timeout=attempt,
+                            backup_data=(
+                                _openrouter_payload(fast, user, stream=False, max_tokens=max_tokens, images=stills, primary=fast)
+                                if fast
+                                else None
+                            ),
+                        )
                     if isinstance(data, dict) and data.pop("_hedge_winner", "") == "b":
                         mid = fast
                     choices = data.get("choices") if isinstance(data, dict) else None

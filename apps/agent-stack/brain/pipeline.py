@@ -11,7 +11,9 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import queue
 import re
+import threading
 import subprocess
 import sys
 import tempfile
@@ -2485,6 +2487,19 @@ def wants_capability(utterance: str) -> bool:
     return bool(CAPABILITY_ASK_RE.search((utterance or "").strip()))
 
 
+# Per-turn trim: fewer, shorter history rows. Live prompts ran ~5.2k tokens; history is the cheapest cut.
+HISTORY_TURNS = int(os.environ.get("JARVIS_HISTORY_TURNS") or 6)
+HISTORY_USER_CHARS = int(os.environ.get("JARVIS_HISTORY_USER_CHARS") or 0)  # 0: user lines keep constraints; the char budget tail-trims them
+HISTORY_JARVIS_CHARS = int(os.environ.get("JARVIS_HISTORY_JARVIS_CHARS") or 320)
+
+
+def _clip_line(text: str, cap: int) -> str:
+    if cap <= 0:
+        return text
+    text = re.sub(r"\s+", " ", text or "").strip()
+    return text if len(text) <= cap else text[: cap - 1].rstrip() + "…"
+
+
 def sitting_brief(
     turns: list,
     bus: dict | None = None,
@@ -2500,7 +2515,7 @@ def sitting_brief(
         row
         for row in (turns or [])
         if isinstance(row, dict) and not is_door_turn(row)
-    ][-12:]
+    ][-HISTORY_TURNS:]
     follow = bool(utterance and is_conversational_follow_up(utterance))
     if follow and recent:
         recent = [
@@ -2512,8 +2527,8 @@ def sitting_brief(
         for index, row in enumerate(recent):
             if follow and index == len(recent) - 1:
                 recent_lines.append("Immediately prior turn (explain this answer, not older misses):")
-            user = str(row.get("user") or "").strip()
-            said = str(row.get("jarvis") or "").strip()
+            user = _clip_line(str(row.get("user") or "").strip(), HISTORY_USER_CHARS)
+            said = _clip_line(str(row.get("jarvis") or "").strip(), HISTORY_JARVIS_CHARS)
             if user:
                 recent_lines.append(f"Evens: {user}")
             if said:
@@ -5843,10 +5858,44 @@ def apply_pipeline_iter(
             if extra and extra not in pack_text:
                 brief = f"{pack_text}\n\n{extra}"
         provider_brief = brief
-        talked = online_talk(
-            spoken_in, brief, talk_fn=talk_fn, images=_vision_urls(hive),
-            **({"hands": False} if shared_memory_answers(spoken_in) else {}),
-        )
+        no_hands = shared_memory_answers(spoken_in)
+        talked = None
+        if talk_fn is None and no_hands and os.environ.get("JARVIS_TALK_STREAM", "1") != "0":
+            # Stream honest sentences to the Orb while the raced talk call runs (first words ~2 s).
+            box: dict = {}
+            deltas: "queue.Queue" = queue.Queue()
+
+            def _talk_worker() -> None:
+                try:
+                    ONLINE.set_stream_sink(deltas.put)
+                    box["got"] = online_talk(spoken_in, brief, talk_fn=None, images=_vision_urls(hive), hands=False)
+                except Exception as exc:  # noqa: BLE001
+                    box["err"] = exc
+                finally:
+                    ONLINE.set_stream_sink(None)
+                    deltas.put(None)
+
+            threading.Thread(target=_talk_worker, daemon=True, name="talk-stream").start()
+            said = ""
+            while True:
+                piece = deltas.get()
+                if piece is None:
+                    break
+                if token and turn_cancelled(hive, token):
+                    continue
+                said = f"{said} {piece}".strip()
+                yield _pipeline_event(
+                    ok=True, tool="converse", spoken=said, spoken_delta=piece, wires=["converse"], cites=[],
+                    pack=None, done=False, partial=True, brain="openrouter", model_available=True, gen=token,
+                )
+            if "err" in box:
+                raise box["err"]
+            talked = box.get("got")
+        else:
+            talked = online_talk(
+                spoken_in, brief, talk_fn=talk_fn, images=_vision_urls(hive),
+                **({"hands": False} if no_hands else {}),
+            )
         if token and turn_cancelled(hive, token):
             return
         if isinstance(talked, dict):
