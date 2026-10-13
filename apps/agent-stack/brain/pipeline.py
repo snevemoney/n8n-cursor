@@ -5286,6 +5286,29 @@ def gen_rules(u: str) -> str:
 TOOL_HEARTBEAT = "Still checking, sir; the wires are being fashionably slow."
 
 
+def _run_tool_heartbeat(pick: dict, utterance: str, *, hive, token, brain, **kw):
+    """Z81 (dCK 4:34): run a hand; if it is still working after JARVIS_TOOL_HEARTBEAT_SEC (6 s), yield ONE in-persona
+    heartbeat line, then return the real result. Never more than one (Z53). Use as: ran = yield from _run_tool_heartbeat(...)."""
+    box: dict = {}
+
+    def _worker() -> None:
+        try:
+            box["ran"] = run_tool(pick, utterance, hive=hive, **kw)
+        except BaseException as exc:  # noqa: BLE001
+            box["err"] = exc
+    th = threading.Thread(target=_worker, daemon=True, name="tool-heartbeat")
+    th.start()
+    th.join(float(os.environ.get("JARVIS_TOOL_HEARTBEAT_SEC") or 6))
+    if th.is_alive() and not (token and turn_cancelled(hive, token)):
+        tool = str((pick or {}).get("tool") or "converse")
+        yield _pipeline_event(ok=True, tool=tool, spoken=TOOL_HEARTBEAT, spoken_delta=TOOL_HEARTBEAT, wires=[tool, "heartbeat"], cites=[],
+                              pack=None, done=False, partial=True, brain=brain, model_available=bool(brain), gen=token)
+    th.join()
+    if "err" in box:
+        raise box["err"]
+    return box["ran"]
+
+
 def run_tool(pick: dict, utterance: str, **kw) -> dict:
     """Tool entry point: pre_tool gate, then the hand, then post_tool + stop_check."""
     tool = str((pick or {}).get("tool") or "")
@@ -6956,7 +6979,8 @@ def apply_pipeline_iter(
     if early is not None and pick is None and ran is None:
         pick = early
         t_tool = time.monotonic()
-        ran = run_tool(pick, spoken_in, hive=hive, retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn, gen=gen)
+        ran = yield from _run_tool_heartbeat(pick, spoken_in, hive=hive, token=gen, brain=None, retrieve_roots=retrieve_roots,
+                                             see_fn=see_fn, status_fn=status_fn, gen=gen)
         ran["tool_ms"] = int((time.monotonic() - t_tool) * 1000)
         brain = None
     if pick is None and wants_local_read(spoken_in):
@@ -7522,26 +7546,8 @@ def apply_pipeline_iter(
                 model_available=bool(brain),
                 gen=token,
             )
-        # Z81 (dCK 4:34): a slow hand gets ONE in-persona heartbeat, then the real result. Never more than one (Z53).
-        _tbox: dict = {}
-
-        def _tool_worker() -> None:
-            try:
-                _tbox["ran"] = run_tool(pick or {}, spoken_in, hive=hive, retrieve_roots=retrieve_roots, see_fn=see_fn,
-                                        status_fn=status_fn, cursor_ask_fn=cursor_ask_fn, gen=token)
-            except BaseException as exc:  # noqa: BLE001
-                _tbox["err"] = exc
-        _tw = threading.Thread(target=_tool_worker, daemon=True, name="tool-heartbeat")
-        _tw.start()
-        _tw.join(float(os.environ.get("JARVIS_TOOL_HEARTBEAT_SEC") or 6))
-        if _tw.is_alive() and not (token and turn_cancelled(hive, token)):
-            yield _pipeline_event(ok=True, tool=str((pick or {}).get("tool") or "converse"), spoken=TOOL_HEARTBEAT, spoken_delta=TOOL_HEARTBEAT,
-                                  wires=[str((pick or {}).get("tool") or "converse"), "heartbeat"], cites=[], pack=None, done=False,
-                                  partial=True, brain=brain, model_available=bool(brain), gen=token)
-        _tw.join()
-        if "err" in _tbox:
-            raise _tbox["err"]
-        ran = _tbox["ran"]
+        ran = yield from _run_tool_heartbeat(pick or {}, spoken_in, hive=hive, token=token, brain=brain, retrieve_roots=retrieve_roots,
+                                             see_fn=see_fn, status_fn=status_fn, cursor_ask_fn=cursor_ask_fn, gen=token)
         if ran.get("needs_talk") and not (token and turn_cancelled(hive, token)):
             retried = online_talk(
                 spoken_in,

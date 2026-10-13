@@ -709,7 +709,7 @@ def _apply_turn_iter_inner(
         _tg = PIPELINE._load("agent_stack_toolgap", PIPELINE.STACK / "hands" / "toolgap.py")
         _inv = PIPELINE._load("agent_stack_mcp_inventory", PIPELINE.STACK / "hands" / "mcp_inventory.py").inventory()[0]
         _pt = PIPELINE._pointer_hand()
-        _gap = None if (_pt.wants_pointer(spoken) or _pt.wants_click(spoken)) else _tg.gap(spoken, [str(x.get("name") or "") for x in _inv])
+        _gap = None if (_pt.wants_pointer(spoken) or _pt.wants_click(spoken) or _ea_want) else _tg.gap(spoken, [str(x.get("name") or "") for x in _inv])
         if _gap:
             yield _door_speak(hive, spoken, _gap, "toolgap", retrieve_roots, gen=token,
                               execution={"ok": True, "tool": "toolgap", "spoken": _gap, "wires": ["mcp_inventory"], "sent": False})
