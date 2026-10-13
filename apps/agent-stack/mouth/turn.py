@@ -471,7 +471,12 @@ def _apply_turn_iter_inner(
             gen=token,
         )
         return
-    if PIPELINE.is_hard_step(spoken):
+    _ea_want = False
+    try:  # Z76: a "create the invoice ... and send" ask is answered draft-only by entity_ack (it never sends)
+        _ea_want = PIPELINE._load("agent_stack_entity_ack", PIPELINE.STACK / "hands" / "entity_ack.py").wants(spoken)
+    except Exception:  # noqa: BLE001
+        pass
+    if PIPELINE.is_hard_step(spoken) and not _ea_want:
         token = PIPELINE.begin_turn(hive) if hasattr(PIPELINE, "begin_turn") else None
         for out in PIPELINE.apply_pipeline_iter(
             spoken,
