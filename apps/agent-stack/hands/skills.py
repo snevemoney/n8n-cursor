@@ -38,7 +38,14 @@ def _frontmatter(path: Path) -> dict[str, str]:
     if not lines or lines[0] != "---" or "---" not in lines[1:]:
         return {}
     block = "\n".join(lines[1:lines.index("---", 1)])
-    return {m.group(1): m.group(2).strip("\"'") for m in _FIELD.finditer(block)}
+    out = {}
+    for m in _FIELD.finditer(block):
+        val = m.group(2).strip("\"'")
+        if val in (">", ">-", "|", "|-", ">+", "|+"):  # YAML block scalar: join the indented lines that follow
+            rest = block[m.end():].splitlines()[1:]
+            val = " ".join(l.strip() for l in __import__("itertools").takewhile(lambda l: l.startswith((" ", "\t")), rest))
+        out[m.group(1)] = val
+    return out
 
 
 def _scan(roots) -> dict[str, tuple[Path, str]]:
@@ -70,6 +77,8 @@ def run(args: dict, roots=None) -> dict[str, Any]:
         return {"ok": True, "op": op, "skills": skills, "spoken": sp}
     if op == "read":
         name = str((args or {}).get("name") or "").strip()
+        if name == "#first" and found:
+            name = sorted(found)[0]
         hit = found.get(name) if "/" not in name and "\\" not in name and name not in (".", "..") else None
         if hit is None:
             return {"ok": False, "op": op, "error": "unknown skill", "spoken": "I can't read that: I have no skill by that name."}
@@ -79,8 +88,10 @@ def run(args: dict, roots=None) -> dict[str, Any]:
         except OSError:
             return {"ok": False, "op": op, "error": "unreadable", "spoken": "I can't read that: the skill file can't be opened."}
         text = data[:MAX_BYTES].decode("utf-8", "ignore")
-        return {"ok": True, "op": op, "name": name, "text": text, "truncated": len(data) > MAX_BYTES,
-                "spoken": f"The {name} skill: {hit[1] or 'no description'}."}
+        step = first_step(text)
+        return {"ok": True, "op": op, "name": name, "text": text, "truncated": len(data) > MAX_BYTES, "first_step": step,
+                "spoken": f"The {name} skill: {hit[1] or 'no description'}."
+                          + (f" Its first step: {step}" if step else " It lists no numbered steps.")}
     return {"ok": False, "op": op, "error": "unknown op", "spoken": "I can't read that: unknown skills op."}
 
 
@@ -88,7 +99,19 @@ _READ = re.compile(r"\b(?:read|open|show)\s+(?:me\s+)?(?:the\s+)?([\w.\-]+)\s+sk
                    r"|\b(?:run|show|check)\s+(?:me\s+)?(?:the\s+)?([\w.\-]+)\s+workflow\b", re.I)
 
 
+_FIRST = re.compile(r"\b(?:read|open|show)\b.{0,20}\b(?:the\s+)?first\s+(?:one|skill)\b", re.I)
+_STEP = re.compile(r"^\s*(?:1[.)]|step\s*1\b[:.)]?|-\s+\[?\s?\]?)\s*(.{4,240})$", re.I | re.M)
+
+
+def first_step(text: str) -> str:
+    body = re.sub(r"\A---.*?\n---\s*\n", "", text or "", flags=re.S)
+    m = _STEP.search(body)
+    return m.group(1).strip().rstrip(".") + "." if m else ""
+
+
 def args_from_utterance(u: str) -> dict:
+    if _FIRST.search(u or ""):
+        return {"op": "read", "name": "#first"}
     m = _READ.search(u or "")
     return {"op": "read", "name": m.group(1) or m.group(2)} if m else {"op": "list"}
 

@@ -152,8 +152,11 @@ def warm() -> None:
             pass
 
 
+_USE = re.compile(r"\buse\s+(?:the\s+|my\s+)?([\w.\-]+?)(?:\s+mcp)?\s+server\b", re.I)
+
+
 def args_from_utterance(u: str) -> dict:
-    m = _SRV.search(u or "")
+    m = _SRV.search(u or "") or _USE.search(u or "")
     if not m:
         return {}
     name = m.group(1).lower().removeprefix("read-only ").strip()
