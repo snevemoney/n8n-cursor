@@ -1,7 +1,7 @@
 {
  "n": 115,
- "brier": 0.0442,
- "accuracy": 0.9391,
+ "brier": 0.0647,
+ "accuracy": 0.913,
  "threshold": 0.8,
  "status_precision": 1.0,
  "assist_ok": true,

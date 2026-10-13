@@ -208,6 +208,7 @@ OPENROUTER_HANDS = (
     {"type": "function", "function": {"name": "voice_engine", "description": "Say which text-to-speech engine really speaks right now (from the voice report). Read-only.", "parameters": {"type": "object", "properties": {}}}},
     {"type": "function", "function": {"name": "screen_see", "description": "Describe what is on the whole Mac screen (not the Safari tab) using a screen grab and the vision model. Read-only; never clicks.", "parameters": {"type": "object", "properties": {}}}},
     {"type": "function", "function": {"name": "plan", "description": "Draft a short numbered plan for a goal. Text only: never runs any tool.", "parameters": {"type": "object", "properties": {"goal": {"type": "string"}}}}},
+    {"type": "function", "function": {"name": "mcp_call", "description": "List the tool names of ONE allowlisted read-only stdio MCP server (handshake + list of tools only; never calls a tool).", "parameters": {"type": "object", "properties": {"server": {"type": "string"}}}}},
     {
         "type": "function",
         "function": {

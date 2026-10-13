@@ -80,3 +80,25 @@ def run(args: dict | None = None, paths=None) -> dict:
 
 def log_meta(got: dict) -> dict:
     return {"op": "list", "ok": bool(got.get("ok")), "count": len(got.get("servers") or []), "skipped": int(got.get("skipped") or 0)}
+
+
+def server_spec(name: str, paths=None) -> dict | None:
+    """Internal only (Phase B client): command/args/env for one named stdio server. Never returned to the user."""
+    for _source, path in (paths or DEFAULT_PATHS):
+        path = Path(path)
+        try:
+            text = path.read_text(encoding="utf-8")
+            if path.suffix == ".toml":
+                if tomllib is None:
+                    continue
+                servers = (tomllib.loads(text).get("mcp_servers") or {})
+            else:
+                data = json.loads(text)
+                servers = dict(data.get("mcpServers") or {}) if isinstance(data, dict) else {}
+        except (OSError, ValueError, TypeError):
+            continue
+        spec = servers.get(name) if isinstance(servers, dict) else None
+        if isinstance(spec, dict) and spec.get("command"):
+            return {"command": str(spec["command"]), "args": [str(a) for a in (spec.get("args") or [])],
+                    "env": {str(k): str(v) for k, v in (spec.get("env") or {}).items()}}
+    return None

@@ -57,6 +57,9 @@ WORD_RE = re.compile(r"[a-z]{3,}")
 ECHO_RE = re.compile(r"\bStep \d+:|Inspect (before|after)|→ (ok|FAILED)\b", re.I)
 
 
+from hands.mcp_call import LIST_METHOD as _LIST_METHOD
+
+
 class CraftError(RuntimeError):
     pass
 
@@ -87,7 +90,7 @@ class _Session:
         )
         self.instructions = str((init or {}).get("instructions") or "")
         self._send({"jsonrpc": "2.0", "method": "notifications/initialized"})
-        listed = self._rpc("tools/list", {}, timeout=20.0)
+        listed = self._rpc(_LIST_METHOD, {}, timeout=20.0)
         self.tools = [t for t in (listed or {}).get("tools", []) if isinstance(t, dict) and t.get("name")]
         self.inspect_tool = _pick_inspect(self.tools)
 

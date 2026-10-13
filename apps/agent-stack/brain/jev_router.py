@@ -61,6 +61,8 @@ _RULES: list[tuple[str, float, re.Pattern]] = [
     ("local_read", 0.9, re.compile(r"\b(?:describe|grab|look\s+at)\s+my\s+screen\b|\bwhat(?:\x27s|s|\s+is)\s+on\s+my\s+screen\b|\bscreenshot\s+of\s+my\s+screen\b", re.I)),
     # plan hand (advisory label only).
     ("local_read", 0.9, re.compile(r"\bplan\s+(?:how\s+to|out)\b|\b(?:make|draft|write)\s+(?:me\s+)?a\s+plan\s+(?:for|to)\b", re.I)),
+    # mcp_call hand (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:list|show|what)\b.{0,15}\btools?\s+(?:on|from|of|in)\s+(?:the\s+)?[\w.\-]+(?:\s+mcp)?\s+server\b", re.I)),
     # mcp_inventory hand: which MCP servers is a local config read, names only (advisory label only).
     ("local_read", 0.9, re.compile(r"\b(?:which|what|list|show)\b.{0,25}\bmcp\b", re.I)),
     # skills hand: which skills / read one skill is a local read (advisory label only).
