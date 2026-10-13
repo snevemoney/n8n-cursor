@@ -446,6 +446,15 @@ def _apply_turn_iter_inner(
     if not spoken:
         yield _door_speak(hive, spoken, "Holding. Say Jarvis, or tap Space.", "idle", retrieve_roots)
         return
+    try:  # Z99: a pasted secret is moved to .env.local and never echoed or sent to a model
+        _mr = PIPELINE._load("agent_stack_methods_router", PIPELINE.STACK / "hands" / "methods_router.py")
+        if _mr.wants(spoken):
+            _got = _mr.run(spoken)
+            _tok_m = PIPELINE.begin_turn(hive) if hasattr(PIPELINE, "begin_turn") else None
+            yield _door_speak(hive, "[secret withheld]", _got["spoken"], "methods_router", retrieve_roots, gen=_tok_m, execution=_got)
+            return
+    except (ImportError, OSError, RuntimeError):
+        pass
     # Ported from main: "stop/cancel the watch" is a scoped Face Watch cancel.
     _scoped = CONTROLS.parse_stop(spoken) if CONTROLS is not None and hasattr(CONTROLS, "parse_stop") else None
     if _scoped and _scoped[1] == "watch":
