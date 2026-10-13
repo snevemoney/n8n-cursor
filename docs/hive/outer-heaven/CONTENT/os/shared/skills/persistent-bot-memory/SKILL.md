@@ -65,7 +65,7 @@ Packet: `/workspace/research/youtube-daily/l2-20260909/sZqa6b5UX-w/` · evidence
 **Do (extra):** Before ending a cross-tool sitting, ensure job `HANDOFF.md` + `CURRENT_STATE.md` exist (state replaces; events append). Prefer decisions/shipped/preferences only.
 
 **Platform:** Grok Bot + Cursor · **Install:** `none (process-only)`.
-**PROVE:** `python3 …/sZqa6b5UX-w/recreation/validate_memory_plane.py`
+**PROVE:** `python3 /home/box/agent-data/workflows/persistent-bot-memory/recreation/validate_memory_plane.py` (built 2026-10-13; original packet path is gone)
 
 ## Repass 20260909 wave AC — Auto Dream consolidate
 - Steal: periodic reflective consolidate of memory MD (session→auto→durable bullets), not raw dump flood.

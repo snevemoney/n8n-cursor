@@ -1,16 +1,7 @@
 ---
 name: ops-manager-transformation-checklists
-description: >
-  Frame an operations-management question using the standard undergraduate
-  OM intro school (Saylor BUS300 / Open University transformation model):
-  operations as the system that turns inputs into goods and services;
-  a process as the cross-functional chain (operational vs administrative);
-  then manager-level checklists for capacity, quality, inventory/JIT-lean,
-  and supply chain. Use when distinguishing process vs operations,
-  manufacturing vs service, sizing capacity or choosing a layout, applying
-  TQM/SPC, setting inventory/JIT policy, or diagnosing a supply chain
-  (bullwhip, supplier choice, distribution). Do not use for Heizer/Render
-  chapter dumps, APICS exam coaching, factory-floor SOPs, or exam-taking.
+description: >-
+  Use when distinguishing between operations and processes in the context of the transformation model, analyzing capacity sizing or layout choices, applying TQM/SPC principles, setting inventory or JIT policies, or diagnosing supply chain issues like the bullwhip effect or supplier selection.
 merged_from: [grad-oscm-process-forecast-chain-shock, prdv-scm-bullwhip-procurement-distribution]
 ---
 

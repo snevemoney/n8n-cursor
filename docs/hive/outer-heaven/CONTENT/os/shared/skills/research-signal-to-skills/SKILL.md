@@ -34,6 +34,7 @@ A STEAL_SHEET row alone is **not** done. A SKILL.md that assumes Claude desktop,
 ## Steps
 1. List steals (machines + don’ts). Label FACT / INFERENCE / UNVERIFIED.
 2. Map to workflow ids. Enrich or create.
+2a. Before editing an existing skill, stage the new version in /tmp/<slug> and run `/workspace/research/packets/methods-gap-20261012/close/g02-skill-scorer/skill_delta_gate.sh <slug> /tmp/<slug> [golden.yaml]`. REVERT ⇒ don't apply. KEEP ⇒ ready for critic/owner (not PASS). Verdict JSON goes in the packet.
 3. For each skill that depends on tooling: classify PROVE / WORKAROUND / BLOCKED.
 4. Check connectors with GetMcpServerStatus / SearchPlugins before claiming “we have MCP for X.”
 5. File operate-nevers + ping Librarian.

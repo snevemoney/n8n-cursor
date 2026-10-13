@@ -98,3 +98,9 @@ Packet: `/workspace/research/youtube-daily/repass-20260909/5CSXUsljJ_E/` (delta 
 FACT (tape): 4 single-job scouts (X, Reddit, Price, Review), each on its own model. A **Lead** orchestrates them from one brief, the agents keep memory, and when an integration is missing an agent writes itself a skill. A command center shows runs and cost, and an ESP32 board pings on NEW finds.
 PROVE on box: `lead_scouts_watch.py` (this folder) → `3/3 PASS`. It covers fan-out, merge/rank, and a memory file that pings only on new keys.
 Rules: one job per scout; the lead merges and ranks; the monitor emits only unseen keys; log cost per run. Live fetchers and model calls plug in where the fixtures are.
+
+
+## Wired 2026-10-13: safety tools + missed methods (Evens yes, Oct 13 1:14 AM ET)
+Tools live in `/workspace/builds` (installed in `~/.local/bin` by `install.sh`, which runs every test first). Packet: `/workspace/research/packets/missed-methods-20261013/`.
+- A desk routine goes live only through `routine-gate` (see approval-based-autopilot): escalation drill passed, first live run read by another desk, WIP ≤ 2 in flight.
+- Routine loops log with `--routine <name>`. Watchdog runs `retry-rate` weekly over the receipts and flags first-pass < 70%.

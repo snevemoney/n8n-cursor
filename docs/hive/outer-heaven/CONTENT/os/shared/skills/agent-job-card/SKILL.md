@@ -110,3 +110,6 @@ Wake / done-when / handoff:
 Chief desk:
 Specialists (one-job):
 ```
+
+## Wired 2026-10-13 (overnight)
+- Size every card before dispatch: `ticket-size CARD.md` (counts the card + each `- file: <path>` line at ~4 chars/token). Over 150k tokens → `SPLIT`: cut it into vertical slices (osmani-incremental-slice) so each fits one fresh session. Missed method #8.

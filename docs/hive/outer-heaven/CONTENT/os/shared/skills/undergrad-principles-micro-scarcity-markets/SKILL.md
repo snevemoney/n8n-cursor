@@ -1,18 +1,7 @@
 ---
 name: undergrad-principles-micro-scarcity-markets
-description: >
-  Frame an undergraduate principles-of-microeconomics question using the
-  Saylor ECON101 school: consumers, firms, and government choose under
-  scarcity; opportunity cost makes the trade-off visible; supply and
-  demand ration via price; elasticity says how much quantity responds;
-  households and firms maximize at the margin (utility / profit, short
-  run and long run, combining labor, capital, and natural resources);
-  market structure changes the price they face; government tools try to
-  repair market failure, including moving pollution toward an efficient
-  level. Use when an intro-micro prompt asks about scarcity, opportunity
-  cost, PPF, supply/demand, elasticity, surplus, costs, market
-  structures, or market failure. Do not use for ECON102 macro, ECON103/104
-  Austrian, ECON135 What Is Money, ACE-exam coaching, or exam reconstruction.
+description: >-
+  Use when an intro-micro prompt asks about scarcity, opportunity cost, PPF, supply/demand, elasticity, surplus, costs, market structures, or market failure. Do not use for ECON102 macro, ECON103/104 Austrian, ECON135 What Is Money, ACE-exam coaching, or exam reconstruction.
 merged_from: [undergrad-macro-gdp-fiscal-monetary-trade]
 ---
 

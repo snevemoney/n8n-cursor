@@ -1,18 +1,7 @@
 ---
 name: bizlaw-sources-forum-wrongs-assets-entity-checklists
-description: >
-  Frame a business-law question using the standard undergraduate school
-  (Saylor BUS205): the legal environment a manager must operate inside —
-  law protects one party from another, ethics fills voids until scandal
-  writes more law, then sources and courts, forum (litigate or ADR),
-  private wrongs (tort vs contract), assets (property and IP), people and
-  entity (employment, crime, organizational form), and the statutes that
-  regulate the firm. Use when naming the source of a rule, choosing a
-  dispute forum, testing whether facts are a tort or a contract problem,
-  sorting real from personal property or an IP right, or asking which
-  entity or employment statute applies. Do not use for BUS101 survey,
-  BUS200 ethics theory, BUS208 POLC, BUS651 founder-lifecycle law,
-  POLSC civics, or exam-taking.
+description: >-
+  Use when naming the source of a rule, choosing a dispute forum, testing whether facts are a tort or a contract problem, sorting real from personal property or an IP right, or asking which entity or employment statute applies. Never use for BUS101, BUS200, BUS208, BUS651, or POLSC civics.
 ---
 
 # Business law: sources, forum, wrongs, assets, entity (clustered)

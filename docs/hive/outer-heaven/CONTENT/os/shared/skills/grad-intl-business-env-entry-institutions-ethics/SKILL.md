@@ -1,23 +1,7 @@
 ---
 name: grad-intl-business-env-entry-institutions-ethics
-description: >
-  Frame a graduate international-business question using the Saylor
-  BUS613 school: read the interconnected global market so a firm can
-  name opportunities and risks, interpret global-economy trends, and
-  take the decision steps to enter — culture will change communication
-  and negotiation, institutions are the trade infrastructure, the
-  global financial system is the plumbing, emerging-market geopolitics
-  and development constrain the bet, entry modes (direct exporting,
-  M&A, partnering) carry their own opportunity/risk including
-  supply-chain interdependence, and the MNC still owes CSR plus the
-  ethical dilemmas of global operations. Use when an MBA-track prompt
-  asks whether to cross a border, which environment factors matter,
-  which institution, which entry mode, or which global-operations
-  dilemma. Do not use for BUS610/611/612 data-stack, BUS614
-  international finance-as-a-course, BUS615 international
-  marketing-as-a-course, undergrad intro, COMM311, ECON101/102,
-  MBA613 exam-taking, ACE-credit promises, Hill/Hofstede dumps, or
-  exam reconstruction.
+description: >-
+  Use when an MBA-track prompt asks whether to cross a border, focusing on environment factors, institutions, entry modes, or global-operations dilemmas. Never use for BUS610/611/612 data-stack, BUS614, BUS615, undergrad intro, COMM311, ECON101/102, MBA613 exam-taking, ACE-credit promises, or exam reconstruction.
 ---
 
 # Graduate advanced international business: read the environment, then enter (clustered)

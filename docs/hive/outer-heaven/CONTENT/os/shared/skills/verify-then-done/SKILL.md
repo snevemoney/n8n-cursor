@@ -168,3 +168,9 @@ About to claim done, fixed, green, or ready to PR/merge.
 
 ## Don't
 Self-PASS. Claim Stage 5 as license to ship live `/`. Skip evidence.
+
+
+## Wired 2026-10-13: safety tools + missed methods (Evens yes, Oct 13 1:14 AM ET)
+Tools live in `/workspace/builds` (installed in `~/.local/bin` by `install.sh`, which runs every test first). Packet: `/workspace/research/packets/missed-methods-20261013/`.
+- **Two fresh reviewers before "done" on code:** `two-review --builder <me> --spec-reviewer <desk2> --standards-reviewer <desk3> --diff <patch> --spec <spec> --spec-cmd '<done_when>' --standards-cmd '<lint/tests>'`. The two reviewers never see each other's verdict, and both must PASS. The receipt JSON goes in the work receipt.
+- **New routine "done"** = `routine-gate check <routine>` OK (drill passed + first live run read by a non-builder). Green tests alone are not enough.

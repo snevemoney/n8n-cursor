@@ -1,17 +1,7 @@
 ---
 name: firm-strategy-process-advantage-execute
-description: >
-  Frame a firm-strategy question using the Saylor BUS501 school:
-  strategy is a deliberate goal-oriented plan (not "win"); then
-  checklists for mission/values, internal/external diagnosis
-  (SWOT/PESTLE, five forces, VRIN), business-level generic
-  strategies plus sustainable advantage, corporate-level scope,
-  and execution under globalization. Use when choosing how a
-  firm will compete, diagnosing why it is stuck, or turning a
-  goal into a plan that can be implemented. Do not use for
-  BUS208 POLC manager-job checklists, BUS401 leadership
-  overlay, BUS608 graduate ethics+strategy, BUS502 marketing
-  strategy, ACE-credit promises, or exam-taking.
+description: >-
+  Use when choosing how a firm will compete, diagnosing why it is stuck, or turning a goal into a plan that can be implemented. Never use for BUS208 POLC manager-job checklists, BUS401 leadership overlay, BUS608 graduate ethics+strategy, BUS502 marketing strategy, ACE-credit promises, or exam-taking.
 merged_from: [grad-ethics-strategy-formulate-implement]
 ---
 

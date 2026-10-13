@@ -74,3 +74,15 @@ Autonomy is earned in four steps. Don't start at "go to bed and let it run".
 3. **One-shot on a fresh run.** Invoke the skill (`/skill-name`) in a fresh session with no extra coaching. It passes only if it completes correctly in one shot. If it doesn't, fix the skill and repeat step 3.
 4. **Schedule it as a routine.** Only then attach a trigger or schedule (e.g. new receipt email → file expense report). Send, spend, and other irreversible gates still apply.
 **Hard rule:** no routine gets created until step 3 has passed. Record the one-shot run (date, session/link, result) in the skill before scheduling.
+
+
+## Wired 2026-10-13: safety tools + missed methods (Evens yes, Oct 13 1:14 AM ET)
+Tools live in `/workspace/builds` (installed in `~/.local/bin` by `install.sh`, which runs every test first). Packet: `/workspace/research/packets/missed-methods-20261013/`.
+**Go-live gate. No routine runs unattended until `routine-gate check <routine>` exits 0.**
+1. `routine-gate register <routine> --builder <desk>`: refused when 2 routines are already in flight (WIP limit; see the proposal to Big Boss in the packet). `--force-wip` is logged.
+2. `escalation-drill <routine> '<step cmd>'`: runs the loop with the retry cap at 1 and must write a HITL card. The drill proves the route to a human fires.
+3. Run once live, then `routine-gate first-run <routine> --output <path>`.
+4. A desk that is **not the builder** reads that output: `routine-gate read <routine> --reader <desk> --verdict ok|bad --note …`.
+5. `routine-gate check <routine>` → OK = may be scheduled (still PAUSED until the owner confirms, per the steps above).
+6. After each run: `routine-gate green|red <routine>`. Three greens in a row = *producing*, and only then does the WIP slot free up.
+7. Real loop failures escalate through `escalate-hitl`. The 3rd strike in a row is marked TO-EVENS, and auto-retry stops.

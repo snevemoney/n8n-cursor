@@ -1,15 +1,7 @@
 ---
 name: bizethics-integrity-stakeholder-csr-dilemma
-description: >
-  Frame a business-ethics question using the standard undergraduate
-  business-ethics survey school (Saylor BUS200 / OpenStax Byars & Stanberry):
-  a professional of integrity holds one ethical standard inside a stakeholder
-  field, runs virtue / utilitarianism / deontology / justice as lenses, honors
-  mutual employer-employee obligations and CSR without greenwashing, then
-  commits. Use when legal≠ethical, ranking stakeholder claims, testing CSR,
-  wage/privacy/whistleblowing, or rights-of-all dilemmas. Do not use for
-  BUS205 law, PHIL103 philosophy, BUS208 POLC, BUS101 survey CSR, or
-  exam-taking.
+description: >-
+  Use when addressing scenarios where legal actions conflict with ethical standards, evaluating stakeholder claims, assessing CSR practices without greenwashing, or exploring dilemmas involving wages, privacy, whistleblowing, or rights of all parties. Never use for BUS205, PHIL103, BUS208, BUS101, or exam contexts.
 ---
 
 # Business-ethics integrity / stakeholder / CSR checklists (clustered)

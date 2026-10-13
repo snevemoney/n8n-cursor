@@ -17,6 +17,8 @@ merged_from: [software-factory-loop]
 4. **Keep or revert** — only keep if metric/check improves (Karpathy AutoResearch / “Karpathy Loop” framing — label secondary explainers UNVERIFIED as quotes).
 5. **Persist** — Outer Heaven / ACTION_LOG / topic files — not chat-only memory.
 
+**Runnable kit (2026-10-12):** for one-feature keep/revert loops use [feature-loop](sand-workflow:feature-loop) — locked checks (folder + hook + commit), all-features scorer (regression = 0), results.tsv, caps in code, coach proposals behind A/B + owner OK. This skill stays the design doctrine; feature-loop is the implementation.
+
 ## Cursor harness map (FACT — cursor.com/changelog/08-19-26)
 | Cursor | Hive |
 |---|---|
@@ -566,3 +568,22 @@ Related: [factory-not-feature](sand-workflow:factory-not-feature), [agent-harnes
 ## Enrich 2026-10-12: box-proven trials (yt12, /workspace/trials/yt12-20261012)
 - **PR body shape** (Pocock /pr, yt:Q3uuE2adUT8 @5:19): Summary as the smallest visual, Evidence before/after, and Merge Danger (one-way or two-way door plus blast radius). PROVE: `/workspace/trials/yt12-20261012/m11-pr-merge-danger`. A validator accepts the generated body and rejects a plain one.
 - **Retro from the session log, suggest only** (yt:Q3uuE2adUT8 @5:40). PROVE: `/workspace/trials/yt12-20261012/m12-retro-from-session-log`. A deterministic scan of Codex thread 01a121e1 surfaced 20 nonzero exits and 6 'approval policy is never' rejections as candidates. A human picks; nothing auto-applies.
+
+
+## Wired 2026-10-13: safety tools + missed methods (Evens yes, Oct 13 1:14 AM ET)
+Tools live in `/workspace/builds` (installed in `~/.local/bin` by `install.sh`, which runs every test first). Packet: `/workspace/research/packets/missed-methods-20261013/`.
+| Need | Call | Owner desk |
+|---|---|---|
+| Capped loop (max-iter, wall clock, cost, stall) + receipts | `done-when-loop … --routine R --log receipts.jsonl --escalate escalate-hitl` | Forge |
+| Escalation drill (cap=1, prove the human route fires) | `escalation-drill <routine>` → card in `/workspace/hitl/escalations/` | Watchdog |
+| Failure-library replay before accepting a change | `replay-gate --library failures.jsonl --cmd '<candidate>'` | Watchdog |
+| Two fresh reviewers (spec vs standards) | `two-review --builder A --spec-reviewer B --standards-reviewer C …` | Watchdog |
+| Retry / first-pass rate | `retry-rate receipts.jsonl` (weekly) | Watchdog |
+| Routine go-live gate (drill + first-run read + WIP ≤2) | `routine-gate check <routine>` | Watchdog / Big Boss |
+| Push guard (blocks main, public, delete without EVENS_OK=yes) | `cp /workspace/builds/blast-radius-guard/pre-push <repo>/.git/hooks/` | Forge |
+| PR body with Merge Danger | `.github/pull_request_template.md` (draft PR, see packet STATUS.md) | Forge |
+| Rule-file lint | `rules-lint` (run only; edits and `--bless` are Librarian's) | Librarian |
+
+## Wired 2026-10-13 (overnight)
+- Escalations now surface in a file a human reads: `escalate-hitl` refreshes `hitl-digest` → `/workspace/hitl/MORNING_DIGEST.md` (box) or `~/hitl/MORNING_DIGEST.md` (Mac), and the Mac DESK_KNOWLEDGE.md shows the "Needs a human" count. No sends.
+- Retry only transient failures (429, timeout, 503, ECONNRESET, exit 75/124): `retry-transient --max 3 -- CMD` (co-work build T6). Anything else fails at once and goes to the done-when loop / escalation, never a silent retry.

@@ -106,7 +106,7 @@ Routing:
 - Hosted generative plates: Higgsfield **WORKAROUND**, but prove generation in the current session.
 - “Comfy passed Higgsfield”: **UNVERIFIED** creator opinion, not a benchmark.
 
-Runnable transfer artifact: `recreation/OPERATOR_CHECKLIST.md` + `comfy-mcp-gate-map.json`; validate with `python3 recreation/validate_gate_map.py`. Another desk should need no remix guidance.
+Runnable transfer artifact: `recreation/OPERATOR_CHECKLIST.md` + `comfy-mcp-gate-map.json`; validate with `python3 /home/box/agent-data/workflows/motion-pipeline/recreation/validate_gate_map.py /home/box/agent-data/workflows/motion-pipeline/recreation/comfy-mcp-gate-map.json` (built 2026-10-13; OPERATOR_CHECKLIST.md not recovered). Another desk should need no remix guidance.
 
 ## Live enrich (wave-N-20260909-65-69)
 - `yt:5iZ4VpeIJSg` — motion bar: side-by-side source Studio clip vs transfer compose; template reuse without timing/composition change = PARTIAL not E PASS. Higgsfield rebuild **BLOCKED**.

@@ -1,18 +1,7 @@
 ---
 name: negotiations-conflict-adr-cross-cultural-checklists
-description: >
-  Frame a negotiations-and-conflict question using the Saylor BUS403 school:
-  negotiation is a five-phase conversation toward agreement (investigation,
-  BATNA, presentation, bargaining, closure) inside a ZOPA; pick distributive
-  vs integrative; diagnose workplace conflict as functional or dysfunctional;
-  resolve with Thomas-Kilmann styles then an ADR ladder (negotiation,
-  mediation, arbitration, litigation last); treat culture as a constraint
-  (Hofstede six / Trompenaars seven, face, nonverbal, political-legal, WTO).
-  Use when preparing a negotiation, naming the venue (sales, labor, M&A,
-  principal-agent, multiparty), diagnosing a workplace clash, choosing ADR,
-  or negotiating across cultures. Do not use for BUS402 intro project
-  management, BUS401 strategic leadership, BUS209 three-level OB specialty,
-  BUS641 graduate overlay, Getting to Yes/Lewicki dumps, or exam-taking.
+description: >-
+  Use when preparing a negotiation in sales, labor, M&A, principal-agent, or multiparty contexts; diagnosing a workplace clash; choosing ADR methods; or negotiating across cultures. Never use for BUS402, BUS401, BUS209, BUS641, or exam-related activities.
 merged_from: [grad-strategic-negotiations-conflict-mgmt]
 ---
 

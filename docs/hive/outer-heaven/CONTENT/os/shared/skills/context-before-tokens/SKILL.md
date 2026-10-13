@@ -80,3 +80,11 @@ After a plan is accepted, drop the exploration (file reads / dead ends) from the
 
 ## Enrich 2026-10-12: box-proven trials (yt12, /workspace/trials/yt12-20261012)
 - **CLAUDE.md/AGENTS.md ≤200 lines as a router** (yt:gvESqM6s0kM @12:07). PROVE: `/workspace/trials/yt12-20261012/m32-claudemd-200-lines/report.txt`. Four box CLAUDE.md files are 359 lines (bus300 repo/main, jarvis-honesty, nc), so trim them to pointers.
+
+## Enrich 2026-10-13: Claude Code session habits, measured headless (Mac, 2.1.296, haiku)
+- **Steered `/compact <what to keep>` works:** after "/compact Keep only the code word. Drop everything about colors." the model had the word and said the colour was UNKNOWN. Tell compact what to drop, not just what to keep.
+- **`/clear` = new session id + empty context.** Use it between topics; any recall afterwards answers UNKNOWN.
+- **Rewind instead of arguing:** scripted rewind is `claude -p --resume <id> --resume-session-at <assistant-msg-uuid> --fork-session "<new prompt>"`. It dropped a bad later turn and still **read 15k tokens from cache** (wrote 385), so rewinding keeps the cache warm. The interactive `/rewind` picker is TUI-only.
+- **`/usage` works headless** (session cost, per-model cache read/write, cache warm/cold + TTL); plan 5 h / 7 d bars are not shown headless. `/btw` is interactive-only ("isn't available in this environment").
+- **Measure the always-loaded floor with `/context`:** on the trial Mac, memory files were 11.3k of 15.7k tokens even with user settings off, and a one-word reply under the full user config wrote 92k cache tokens. Trim global memory/rules files and unused enabled plugins before tuning anything else.
+- `cleanupPeriodDays` (user settings) keeps session transcripts past the 30-day default; set 365 where session history is mined later.

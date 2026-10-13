@@ -1,15 +1,7 @@
 ---
 name: ma120-college-algebra-functions-exp-log-systems-conics
-description: >
-  Frame an applied-college-algebra question using the Saylor MA120
-  school: linear/rational/quadratic/absolute-value/exp/log equations
-  and inequalities; functions, inverses, and transformations; polynomials
-  and the fundamental theorem of algebra; rational functions; systems;
-  basic conic sections; arithmetic and geometric sequences and series.
-  Use when an adult-learner prompt asks intermediate algebra after
-  MA007. Do not use for MA006–008, MA121 stats, MA122 calculus, sitting
-  ACE exams, inventing SAYA-0026 as a live id, naming conic types as
-  live titles, sending, or exam reconstruction.
+description: >-
+  Use when an adult-learner prompt asks for intermediate algebra after MA007. Frame a question involving linear, rational, quadratic, or absolute-value equations; functions and their inverses; or polynomials. Do not use for MA006–008, MA121 stats, MA122 calculus, or exam reconstruction.
 merged_from: [ma006-real-world-ops-fractions-ratios-decimals, ma007-algebra-linear-systems-graphs-polynomials, ma008-geometry-lines-triangles-trig-circles-area-volume, ma121-stats-descriptive-probability-inference-regression, ma122-calculus-limits-derivatives-graphs-integrals]
 ---
 

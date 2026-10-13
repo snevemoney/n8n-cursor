@@ -1,16 +1,7 @@
 ---
 name: mis-intro-five-components
-description: >
-  Frame a management-information-systems question using the standard
-  undergraduate MIS intro school (Bourgeois / Saylor BUS206): five
-  components (hardware, software, data, people, process), computing
-  eras, CIA triad, and process as the competitive-advantage lever
-  (BPM / BPR / ERP, build-vs-buy). Use when defining what an information
-  system is, separating IS from computer science, choosing build vs buy
-  or ERP/SaaS, applying Porter/Carr/Brynjolfsson to "does IT matter?",
-  or treating ethics, privacy, IP, globalization, and the digital divide
-  as constraints on a proposed system. Do not use for exploit writing,
-  vendor implementation playbooks, coding instruction, or exam-taking.
+description: >-
+  Use when defining an information system, distinguishing it from computer science, evaluating build vs buy options, or discussing the impact of IT on competitive advantage. Consider constraints like ethics, privacy, IP, globalization, and the digital divide in your analysis.
 merged_from: [grad-mis-applications-strategy-security-decision, strategic-it-when-whether-then-strategy]
 ---
 

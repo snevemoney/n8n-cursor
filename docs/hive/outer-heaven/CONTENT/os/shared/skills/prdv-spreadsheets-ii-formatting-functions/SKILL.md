@@ -1,15 +1,7 @@
 ---
 name: prdv-spreadsheets-ii-formatting-functions
-description: >
-  Frame a Spreadsheets-II question using the Saylor PRDV006 school:
-  format text/cells/numbers and conditional formatting; formulas with
-  SUM, AVERAGE, COUNT, MAX, MIN, PMT, and FV; logical IF, OR, AND,
-  NOT, COUNTIF, AVERAGEIF(S), SUMIF(S); lookup VLOOKUP, HLOOKUP,
-  XLOOKUP; and multi-sheet 3-dimensional references. Builds on
-  PRDV004. Use when a prompt asks how to format, condition, look up,
-  or 3D-summarize a sheet after the beginner course. Do not use for
-  PRDV004 first-time sheets, PRDV003 Word/Docs, finance strategy as
-  FACT, vendor-cert dumps, moving money, spend, or exam reconstruction.
+description: >-
+  Use when a prompt asks how to format, condition, look up, or 3D-summarize a sheet after the beginner course. Never use for PRDV004 first-time sheets, PRDV003 Word/Docs, finance strategy as FACT, vendor-cert dumps, moving money, spend, or exam reconstruction.
 merged_from: [prdv-excel-genai-formulas-clean-vba-chatgpt-claude, prdv-spreadsheets-excel-sheets-budget, prdv-spreadsheets-present-charts-tables-collab, prdv-word-docs-business-documents]
 ---
 

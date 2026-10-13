@@ -1,14 +1,7 @@
 ---
 name: eslhub-student-resource-route
-description: >
-  Frame an ESL routing question using the Saylor ESLHub school: check
-  readiness (not graded), pick among ESL001–006 level cards, enroll in
-  one numbered course or a 5-course business vs healthcare
-  specialization, use extra practice resources, and connect with
-  learners. Use when a prompt asks which ESL course or spec to start.
-  Do not use for sitting ESL001–006 exams, ENGL* composition, CS120,
-  ACE promises, sending messages, HIPAA legal advice, or treating the
-  hub as a seventh exam course.
+description: >-
+  Frame an ESL routing question via the Saylor ESLHub: check readiness (not graded), pick an ESL001-006 level card, enroll in one course or a 5-course business or healthcare specialization, use practice resources, connect with learners. Use when a prompt asks which ESL course or spec to start. Do not use for sitting ESL exams, ENGL composition, CS120, ACE promises, sending messages or HIPAA advice.
 merged_from: [esl-advanced, esl-business-proficient, esl-elementary-a2, esl-healthcare, esl-intermediate, esl-upper-intermediate]
 ---
 

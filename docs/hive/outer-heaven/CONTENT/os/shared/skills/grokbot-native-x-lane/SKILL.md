@@ -1,12 +1,7 @@
 ---
 name: grokbot-native-x-lane
 description: >-
-  Use when a bot, routine, or skill reads X (search posts, read a profile, monitor a
-  topic) and you must pick Grok Bot's built-in X tools (free daily quota) vs the paid
-  / OAuth X connector, or audit which skills still say "X API BLOCKED". Triggers:
-  "switch off the paid X API", "native X search", "how many X reads left", "monitor X
-  for…", "X hourly pulse". Anti-triggers: X bookmarks, DMs, home timeline, posting,
-  likes/follows (connector-only, and writes need HITL); YouTube/web search; leisure.
+  Use when a bot, routine or skill reads X (search posts, read a profile, monitor a topic) and must pick Grok Bot's built-in X tools (free quota) over the paid/OAuth connector, or when auditing skills that still say "X API BLOCKED". Triggers: native X search, X reads left, monitor X. Anti-triggers: bookmarks, DMs, timeline, posting, likes/follows (connector only, writes need HITL); YouTube/web.
 ---
 # Grok Bot native X lane
 

@@ -285,3 +285,6 @@ Platform: **Grok Bot + Cursor**. Install: **none (process-only)**. No QUEUE (no 
 - **Gated candidate queue (static gate run 2026-10-10).** All 43 repos from the bookmark review went through shallow clone → licence / SKILL.md frontmatter / npm lifecycle hooks / risky-pattern grep → delete. Results are in packet `repos/*.json` and `REPOS_TESTED.md`. Nothing was installed. Sources: x:2092609257338200469, x:2094079187904610504.
 - **Skill finder.** A skill that maps a described task to catalogued skills (x:2046321772585504911). Our equivalent is a grep over the workflows folder; don't import the "Find Skills" package unless it passes the gate.
 - **gitingest one-shot repo digest** (x:2091773482543775962). Running `python3 -m venv /tmp/gi && /tmp/gi/bin/pip install gitingest && /tmp/gi/bin/gitingest <repo-url> -o digest.txt` produces a single tree-plus-files text an agent can read before deciding to import, without cloning into the workspace. PROVE: packet recreations/gitingest.proof.json (grokbot-field-notes digest). Delete the venv afterwards.
+
+## Wired 2026-10-13 (overnight)
+- Trigger test before import or bless: write 3 prompts that should trigger the skill and 3 that should not, then run `skill-trigger SKILL.md cases.json`; it must print `RESULT 6/6` (exit 0). Lexical check only; tune the description when it fails. Missed method #13.

@@ -41,3 +41,6 @@ owner:
 
 ## Wave Y 2026-09-09 (`yt:xOFkpf9KgKg`)
 - Pair wiki-ingest on rotting-brain audits; ledger for decided/rejected after scope changes
+
+## Wired 2026-10-13 (overnight)
+- CEO-decision packets: collect blind takes first. Write each desk name in `ROUND/EXPECTED`, then each desk runs `blind-takes submit ROUND DESK take.md` *before* reading anything. `blind-takes read`/`merge` stay refused until every desk is in; then `blind-takes merge ROUND` writes MERGED.md for the debate. Missed method #9 (Consultant owns).

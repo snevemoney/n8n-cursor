@@ -1,19 +1,7 @@
 ---
 name: ug-intro-political-science
-description: >
-  Frame an undergraduate intro-to-political-science question using the
-  Saylor POLSC101 school: keep power / legitimacy / authority distinct,
-  keep the nation-state as a developed form, keep electoral systems
-  distinct from party systems, keep presidential vs parliamentary and
-  authoritarian vs totalitarian in their own seats, keep four economic-
-  political origins (democratic capitalism, democratic socialism,
-  communism, fascism), and keep IR as law / IOs / conflict rather than
-  a world-history survey. Use when a prompt asks how politics is
-  studied, how people participate, how states and institutions are
-  typed, or how international order and conflict are named in this
-  survey. Do not use for POLSC201+ subfields as the whole map, GEOG101
-  regions, HIST103, PHIL103 justice-as-philosophy, ENGL, PSYCH, ACE
-  exam-taking, or exam reconstruction.
+description: >-
+  Frame an undergrad intro political-science question via Saylor POLSC101: power vs legitimacy vs authority, the nation-state, electoral vs party systems, presidential vs parliamentary, authoritarian vs totalitarian, four political-economic origins, IR as law, IOs and conflict. Use when a prompt asks how politics is studied or states are typed. Do not use for POLSC201+, GEOG101, HIST103, or exams.
 merged_from: [ug-american-government, ug-comparative-politics, ug-ethics-public-policy, ug-global-justice, ug-western-political-thought]
 ---
 

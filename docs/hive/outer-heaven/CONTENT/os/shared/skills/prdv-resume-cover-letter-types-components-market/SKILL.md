@@ -1,16 +1,7 @@
 ---
 name: prdv-resume-cover-letter-types-components-market
-description: >
-  Frame a résumé-and-cover-letter question using the Saylor PRDV102
-  school: describe the purpose and types of a professional résumé
-  (conventional, functional/skills-based, chronological, and when a
-  CV is the other document); identify key components of résumés and
-  cover letters; and use them as living marketing tools tailored to
-  a specific opening. Use when an adult-learner prompt asks how to
-  build or improve application materials. Do not use for PRDV103
-  interviews, PRDV002 document writing, PRDV011 career-as-money,
-  sending or applying, inventing accomplishment metrics, ACE-credit
-  promises, or exam reconstruction.
+description: >-
+  Use when an adult-learner prompt asks how to build or improve application materials. Describe the purpose and types of professional résumés (conventional, functional, chronological) and when to use a CV. Identify key components of résumés and cover letters as tailored marketing tools.
 merged_from: [prdv-interview-prepare-formats-followup-comp, prdv-time-stress-goal-productivity, sdv100-college-success-pathway-study-health-finance]
 ---
 

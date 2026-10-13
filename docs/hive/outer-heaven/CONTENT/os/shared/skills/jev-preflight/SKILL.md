@@ -163,3 +163,10 @@ Pick the chain in `request-routing-chains/SKILL.md`. jev-route v3.1 also logs ro
   - confidence threshold below 0.6 goes to a human: `/workspace/trials/yt12-20261012/m44-triage-confidence-threshold`.
   - skill picker over 251 real SKILL.md descriptions: `/workspace/trials/yt12-20261012/m46-skill-picker`, 10/10.
   Try these before any Jev call.
+
+
+## Wired 2026-10-13: safety tools + missed methods (Evens yes, Oct 13 1:14 AM ET)
+Tools live in `/workspace/builds` (installed in `~/.local/bin` by `install.sh`, which runs every test first). Packet: `/workspace/research/packets/missed-methods-20261013/`.
+- **Two-review (Watchdog):** `two-review --jev` asks Jev ONE question per axis (spec / standards). Jev is advisory: a Jev "no" blocks, and a Jev "yes" never overrides a failing command. Tested 2026-10-13: bad diff (hardcoded key + debug print) gave noul 0.45 / 0.03 = FAIL; good diff gave 0.90 / 0.68 = PASS.
+- **Router or question changes:** before changing a pack, threshold or router, run `replay-gate --library <pack-failures.jsonl> --cmd '<router cmd>'`. A regression on a past case blocks the change (m02/m46).
+- **Jev loops** run under `done-when-loop --max-cost <usd> --cost-file <f> --escalate escalate-hitl`, so spend has a hard cap.

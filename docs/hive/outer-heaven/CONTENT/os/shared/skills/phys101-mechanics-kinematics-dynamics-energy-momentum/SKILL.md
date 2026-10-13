@@ -1,15 +1,7 @@
 ---
 name: phys101-mechanics-kinematics-dynamics-energy-momentum
-description: >
-  Frame an intro-mechanics question using the Saylor PHYS101 school:
-  SI units and significant digits; 1D and 2D kinematics including
-  projectile motion; Newton's laws and universal gravity; centripetal
-  force and circular motion; rotational statics and dynamics; work-energy
-  theorem and conservation of energy; conservation of momentum with
-  elastic and inelastic collisions. Use when an adult-learner prompt
-  asks classical mechanics. Do not use for PHYS102, MA122 as the course,
-  CHEM101 sig-figs, ballistics/targeting how-to, sending, ACE-credit
-  promises, or exam reconstruction.
+description: >-
+  Use when an adult-learner prompt asks classical mechanics. Frame a question that incorporates SI units, significant digits, 1D and 2D kinematics, Newton's laws, centripetal force, rotational dynamics, work-energy theorem, and conservation of momentum, avoiding topics related to PHYS102, MA122, CHEM101, ballistics, sending, or exam reconstruction.
 merged_from: [bio101-mol-cell-macromolecules-metabolism-genetics, chem101-atom-bonding-stoich-gases-thermo-redox-nuclear, phys102-em-circuits-induction-waves-optics-relativity]
 ---
 

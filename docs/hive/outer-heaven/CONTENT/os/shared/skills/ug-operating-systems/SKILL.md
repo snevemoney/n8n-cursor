@@ -1,16 +1,7 @@
 ---
 name: ug-operating-systems
-description: >
-  Frame an undergraduate operating-systems question using the Saylor
-  CS401 school: start from OS functions/structures/evolution and
-  design trade-offs, keep processes distinct from threads, keep
-  synchronization distinct from CPU scheduling and from deadlock,
-  then seat memory management, file systems, OS security, and OS
-  networking. UNIX-based with Windows as an alternative. Use when a
-  prompt asks how an OS coordinates resources or which OS design fits
-  a situation. Do not use for CS301 computer architecture as a course,
-  CS402 networks as a course, CS406 info-sec as a course, CS201 ADTs,
-  CS120, ENGL, ACE exam-taking, or exam reconstruction.
+description: >-
+  Frame an undergrad operating-systems question via Saylor CS401: OS functions, structure and design trade-offs; processes vs threads; synchronization vs scheduling vs deadlock; then memory, file systems, security and networking, UNIX-first with Windows as alternative. Use when a prompt asks how an OS coordinates resources or which design fits. Do not use for CS301, CS402, CS406, CS201 or exams.
 merged_from: [ug-applied-cryptography, ug-computer-architecture, ug-computer-networks, ug-discrete-structures, ug-information-security, ug-modern-database-systems, ug-software-engineering]
 ---
 

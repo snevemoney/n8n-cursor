@@ -1,14 +1,7 @@
 ---
 name: screen-drive-cli
 description: >-
-  Use when a Shell-only agent (box executor, Cursor cloud agent, Claude Code, Codex)
-  must drive a real desktop window: list/focus windows, type, paste, press keys, click,
-  screenshot, or steer another coding-agent session in a terminal, without a
-  computer-use harness. Triggers: "drive the screen", "set up my screen", "test this
-  desktop app", "arrange these windows", "screenshot that window", "drive-screen",
-  "screenctl". Anti-triggers: browser/web tasks (Playwright, browser-use, computerUse);
-  pure terminal work (use tmux, no screen); Evens's Mac (box only unless he asks);
-  signed-in accounts, sends, purchases.
+  Use when a Shell-only agent (box executor, cloud agent, Claude Code, Codex) must drive a real desktop window without a computer-use harness: list/focus windows, type, paste, keys, click, screenshot, or steer another agent's terminal. Triggers: drive the screen, screenctl. Anti-triggers: browser tasks (Playwright, browser-use); pure terminal (tmux); Evens's Mac; logged-in accounts, sends, buys.
 ---
 # Screen drive via CLI (drive-screen pattern)
 

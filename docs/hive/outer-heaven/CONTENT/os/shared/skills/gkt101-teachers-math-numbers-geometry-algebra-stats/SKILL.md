@@ -1,13 +1,7 @@
 ---
 name: gkt101-teachers-math-numbers-geometry-algebra-stats
-description: >
-  Frame a teacher-general-knowledge math question using the Saylor
-  GKT101 school: numbers sense, concepts, and operations; geometry
-  and measurement; algebraic thinking and the coordinate plane;
-  probability, statistics, and data. Use when an adult-learner prompt
-  asks GK-for-teachers math. Do not use for GKT102–104, MA006–122 as
-  the course, reconstructing teacher-cert or course exams, sending,
-  or inventing PEMDAS/Pythagorean as live titles.
+description: >-
+  Use when an adult-learner prompt asks for general-knowledge math questions related to Saylor GKT101 topics, focusing on numbers sense, geometry, algebra, and statistics. Never use for GKT102–104 or MA006–122, and do not reconstruct teacher-cert exams or create live titles.
 merged_from: [gkt102-teachers-reading-ideas-craft-information, gkt103-teachers-essays-errors-revise-support-timed, gkt104-teachers-language-structures-tone-editing]
 ---
 

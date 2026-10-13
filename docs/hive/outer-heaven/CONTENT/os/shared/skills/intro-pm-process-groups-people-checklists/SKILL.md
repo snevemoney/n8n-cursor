@@ -1,17 +1,7 @@
 ---
 name: intro-pm-process-groups-people-checklists
-description: >
-  Frame an intro project-management question using the Saylor BUS402 school:
-  a project is temporary and unique, not ongoing operations; then run the
-  five process groups (initiating, planning, executing, monitoring and
-  controlling, closing) plus knowledge areas as the "what" and people
-  skills from the course's Talent Triangle (strategic thinking,
-  interpersonal communication, business insight). Use when distinguishing
-  a project from operations, chartering and planning work, executing and
-  controlling against a baseline, closing, or leading a temporary team.
-  Do not use for BUS208 POLC, BUS401 strategic leadership, BUS300
-  operations, BUS605 graduate strategic PM, PMBOK/PMP dumps, or
-  exam-taking.
+description: >-
+  Use when distinguishing a project from ongoing operations, chartering and planning work, executing and controlling against a baseline, closing a project, or leading a temporary team. Never use for BUS208 POLC, BUS401 strategic leadership, BUS300 operations, BUS605 graduate strategic PM, or exam-taking.
 merged_from: [grad-spm-org-tenka-lifecycle-value]
 ---
 

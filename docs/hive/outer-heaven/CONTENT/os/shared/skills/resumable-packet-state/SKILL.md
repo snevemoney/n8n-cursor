@@ -34,3 +34,6 @@ Derive state from files only: file count, newest file, final-looking artifacts, 
 - Don't mark DONE before the output exists.
 - Don't keep progress only in chat or in memory.
 - Don't infer progress you can't see on disk.
+
+## Wired 2026-10-13 (overnight)
+- Find lost work: `packet-search index /workspace/research/packets /workspace/hitl/packets-fts.sqlite` (read-only on packets; ~8.3k files on 2026-10-13), then `packet-search search /workspace/hitl/packets-fts.sqlite "query" -n 5`. Snippets are redacted and capped. Missed method #10 (Librarian owns).

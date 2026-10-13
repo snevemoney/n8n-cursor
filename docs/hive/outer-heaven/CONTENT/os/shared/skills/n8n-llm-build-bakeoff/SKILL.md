@@ -1,14 +1,7 @@
 ---
 name: n8n-llm-build-bakeoff
 description: >-
-  Use when choosing which LLM (or harness) should BUILD n8n workflows for us, or
-  when re-checking that choice after a new model ships: run the same two realistic
-  build prompts per model on an isolated n8n, grade the produced workflows on a
-  production-break rubric (not on chat output), log real $ / time, pick the
-  cheapest model that passes. Triggers: "which model builds n8n best", "cheapest
-  model for n8n", "model bakeoff", "compare models on n8n", new frontier/open model
-  release. Anti-triggers: picking a model for runtime agent calls inside a workflow
-  (use match-model-to-task / match-model-to-task), production n8n edits.
+  Use when choosing which LLM or harness should BUILD our n8n workflows, or re-checking after a model ships: same two build prompts per model on an isolated n8n, grade workflows on a production-break rubric, log real cost and time, pick the cheapest that passes. Triggers: model bakeoff. Anti-triggers: runtime model choice in a workflow (match-model-to-task), production edits.
 ---
 # n8n LLM build bakeoff (cheapest model that passes)
 

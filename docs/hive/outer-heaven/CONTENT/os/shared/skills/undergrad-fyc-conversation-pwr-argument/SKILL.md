@@ -1,15 +1,7 @@
 ---
 name: undergrad-fyc-conversation-pwr-argument
-description: >
-  Frame an undergraduate first-year-composition question using the Saylor
-  ENGL101 school: writing as a conversation with an audience (not a solitary
-  dump), writing as a process (PWR: prewrite, write, revise), rhetorical
-  situation and appeals, academic essay as an argument with a thesis
-  supported by evidence, sources without plagiarism, then style/citation.
-  Use when a prompt needs Composition I / FYC. Do not use for ENGL095
-  pre-college, ENGL102 research-paper, ENGL210 technical writing, ENGL405
-  literature, ESL*, ESLHub, CS120, ACE exam-taking, exam reconstruction,
-  or sending. Do not encode the syllabus CLO block (ENGL210 paste).
+description: >-
+  Use when a prompt needs Composition I / FYC. Frame a question that requires students to engage in writing as a conversation with an audience, emphasizing the writing process (prewrite, write, revise), rhetorical situation, thesis development, evidence use, and proper citation without plagiarism.
 merged_from: [engl-american-renaissance, engl-pre-college, engl-technical-writing, prdv-info-literacy-research-search-eval-cite, prdv-professional-writing-purpose-audience-channel, prdv-writing-ii-evaluate-sources-cite-ethically, undergrad-comp2-research-paper-discovery]
 ---
 

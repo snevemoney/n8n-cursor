@@ -61,3 +61,11 @@ No Claude desktop dual-stack.
 
 ## Enrich 2026-10-10: 8 lock-ins before agent-maxxing (`yt:PrS_IyC9Jss` Syntax)
 Before fleet agents touch a repo, the rules file must state: schema · validation · routing · auth · CSS method · UI library · client↔server comms · folder structure. PROVE: `lockin_check.py <AGENTS.md>` (this folder) flags the missing ones (2/2 PASS on fixtures). Switching later is OK; leaving a choice unstated is what's not OK.
+
+
+## Wired 2026-10-13: safety tools + missed methods (Evens yes, Oct 13 1:14 AM ET)
+Tools live in `/workspace/builds` (installed in `~/.local/bin` by `install.sh`, which runs every test first). Packet: `/workspace/research/packets/missed-methods-20261013/`.
+- **Lint, don't edit:** after any proposed rule change, run `rules-lint [FILES]` (exit 1 = missing OWNER header, non-owner edit since the last bless, or duplicated block). Only the Librarian desk edits global rule files or runs `--bless`. Other desks attach the lint output to their proposal.
+
+## Wired 2026-10-13 (overnight)
+- `rules-lint` now also flags files over 200 lines (`RULES_MAX_LINES`) and WARNs on Never/Always/Don't bullets without a reason (`--strict-reasons` makes it a flag). Lint only; Librarian edits.

@@ -7,6 +7,8 @@ merged_from: [binary-self-eval-skills, osmani-tdd, superpowers-tdd]
 ---
 # Golden test loop
 
+> Implementation for check-first feature loops: [feature-loop](sand-workflow:feature-loop) (`scripts/lock_checks.py`, `score.py`, `round.py`, `watchdog.sh`). Its standing checks `90-wired` and `91-every-place` cover "green tests ≠ done".
+
 Sources: Simon Scrapes `yt:icM0ewXGvAw`; Caleb `yt:4biXYSNkn9Y`; DeepSeek harness `yt:f51ICIoHcjY`; Nate `/goal`+`/rewind` `yt:vfWTyEreOEc`; Chase concepts `yt:eF20iepBQCU`; Cole AI-native `yt:Tliio-33w4g` `yt:eecUhBpTz_g` (CAPTION_GAP — PIV from dossier).
 
 ## Tools
@@ -346,3 +348,13 @@ Skip the fail. Install hooks/scripts from Superpowers. Ship live `/` to "prove" 
 - **A new check must fail on a real past mistake** (yt:6puKyBbZEGY @7:27). PROVE: `/workspace/trials/yt12-20261012/m14-check-fails-on-past-mistake`. A path check fails on the pre-fix youtube digest SKILL.md (non-existent whisper bin) and passes on the current one.
 - **Failure library replay** (yt:-126yfiC2Mg @3:37). Keep real failures as JSONL and replay them on every prompt or model change. PROVE: `/workspace/trials/yt12-20261012/m02-failure-library-replay` (v1 exits 0, the regressed v2 exits 1).
 - **Blind validation set** (yt:3iDiWTt8lok @5:06). Run the classifier without labels, count matches and write misses.json. PROVE: `/workspace/trials/yt12-20261012/m45-validation-set`.
+
+
+## Wired 2026-10-13: safety tools + missed methods (Evens yes, Oct 13 1:14 AM ET)
+Tools live in `/workspace/builds` (installed in `~/.local/bin` by `install.sh`, which runs every test first). Packet: `/workspace/research/packets/missed-methods-20261013/`.
+- **Tool for the failure-library rung:** `replay-gate --library <failures.jsonl> --cmd '<candidate>'` (exit 0 pass, 1 regression, 2 empty library = fail closed). Every new check must fail on a real past case first: add it with `--add`, run it on the old (bad) version, confirm exit 1, then on the fix, confirm exit 0.
+- **Segment tag (proposal):** put the doc type or field in the case id (e.g. `invoice/total-03`) so failures read per segment.
+- Long loops run under `done-when-loop` (capped, escalates). Never use an open `while` loop.
+
+## Wired 2026-10-13 (overnight)
+- Segmented eval before automating: tag every failure-library / replay case (`tag` = document type or field), write results as JSONL `{id, tag, pass}`, then `seg-eval results.jsonl --min 0.8` (or `--by field`). Any segment under 80% → FLAG, exit 1: fix that segment before going live, even when the overall score looks fine. Missed method #7.

@@ -1,14 +1,7 @@
 ---
 name: Claude Code mods
 description: >-
-  Use when building, reviewing, or porting a Claude Code mod (plugin whose
-  hooks/hooks.json names a JS/TS module exporting register(on, options)):
-  guards on Bash, context/cost bands, flight recorders, model routers,
-  receipts, bookmarks, auto-handoff. Triggers: "Claude Code mod", "hooks
-  module", "($, e, next)", "plugin.json + modules", "guard rm -rf",
-  "auto handoff at token limit". Anti-triggers: classic settings.json shell
-  hooks only; Cursor rules/skills; Grok Bot skills; MCP server work;
-  installing third-party mods without review.
+  Use when building, reviewing or porting a Claude Code mod (plugin whose hooks.json names a JS/TS module exporting register(on, options)): Bash guards, cost bands, flight recorders, model routers, receipts, auto-handoff. Triggers: "Claude Code mod", "hooks module", "guard rm -rf". Anti-triggers: plain settings.json shell hooks; Cursor or Grok Bot skills; MCP servers; unreviewed third-party mods.
 ---
 # Claude Code mods
 
@@ -134,3 +127,11 @@ Handlers get (ctx, event, next). Return without calling next to own the event. R
 
 ## Enrich 2026-10-12: box-proven trials (yt12, /workspace/trials/yt12-20261012)
 - **Blast-radius guard without a mod** (yt:lDrAZ1wAyVs @8:13). Box Claude Code is 2.1.250 and mods need ≥2.1.287, so use a shell guard instead: it lists the files an rm -r would delete and exits 3 unless CONFIRM=yes. PROVE: `/workspace/trials/yt12-20261012/m23-blast-radius-guard`. The real mod is untested here.
+
+## Enrich 2026-10-13: real mods on a Mac (Claude Code 2.1.296, packet codex-yt12-20261012/MAC_TRIALS_20261013.md)
+- **Sources (pinned):** Blast Radius and Replay Theater are Anthropic samples in `anthropics/claude-code-playground` → `claude-code/mods/` (Apache-2.0, shared as-is). Cache Tax = `karanb192/cache-tax` (MIT). Reflect = `BayramAnnakov/claude-reflect` → `mod/` (MIT). Fetch raw files at a commit SHA and compare SHA-256 rather than cloning.
+- **Vetted local marketplace:** put reviewed, pinned mod folders under one dir with `.claude-plugin/marketplace.json`, then `claude plugin marketplace add <dir>` and `claude plugin install <mod>@<marketplace> --scope user`. This adds `extraKnownMarketplaces` + `enabledPlugins` to user settings, so back them up first.
+- **Headless testing of mods and slash commands:** `claude -p --input-format stream-json --output-format stream-json --verbose`, sending one user message at a time and waiting for each `result` line (otherwise queued messages merge into one turn). Mod commands answer in the result text, and panes show as `ui_panes` system events. Keep it cheap with `--model haiku --setting-sources project --strict-mcp-config --mcp-config '{"mcpServers":{}}' --plugin-dir <mod>`. PROVE: Replay Theater `/replay` → "2 edits"; Cache Tax `/cache-tax` → live cold-cost estimate.
+- **`claude plugin test <dir>` works** for mods that ship tests (Cache Tax 56/56, Reflect 10/10) with no model calls.
+- **Gate rule for desks:** a mod that holds or refuses (Blast Radius waits up to 10 min for a button; Cache Tax refuses a cold send once) stalls or breaks `claude -p` automation, so don't enable it at user scope on a machine that runs headless desks. Observe-only mods (Replay Theater) are safe. Reflect checks only prompts a person types (`origin.kind` composer/bridge), so it is safe headless, but its Save writes `~/.claude/CLAUDE.md` (a global rule file, so it needs the owner's yes).
+- PROVE Blast Radius live: with the mod, `rm -rf ./junk` was held and the files stayed intact; the control run without the mod deleted them. The "full build BLOCKED" rows in Tools above are now PROVE on 2.1.296.

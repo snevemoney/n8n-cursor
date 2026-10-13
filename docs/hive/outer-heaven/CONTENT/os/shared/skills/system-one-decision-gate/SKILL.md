@@ -1,12 +1,7 @@
 ---
 name: System-One decision gate
 description: >-
-  Use when an app/agent step only needs a bounded label, score, or yes/no — not
-  free-text generation. Cheap local gate scores allowed answers; escalate to an
-  expensive model/HITL when labels are open-ended, confidence is low, or the job
-  is taste/money/architecture. Anti-triggers: installing TypeSafe Jev as hive
-  face, quoting vendor 193×/$ as FACT, replacing writing/code/math/reasoning
-  calls, live `/` product ship while building mode HOLD.
+  Use when an app/agent step requires a bounded label, score, or yes/no response. Escalate to a more complex model when labels are open-ended, confidence is low, or the task involves taste, money, or architecture. Avoid using for TypeSafe Jev installation, vendor quoting, or live product shipping.
 merged_from: [decision-model-patterns]
 ---
 

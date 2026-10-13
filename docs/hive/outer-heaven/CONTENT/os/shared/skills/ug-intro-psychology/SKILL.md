@@ -1,16 +1,7 @@
 ---
 name: ug-intro-psychology
-description: >
-  Frame an undergraduate intro-psychology question using the Saylor
-  PSYCH101 school: start from history and the scientific method, keep
-  nature/nurture as gene-environment interaction, keep biological
-  systems as their own seat, then compare live subfields (sensation/
-  perception, learning, cognitive, developmental, motivation/emotion/
-  personality, clinical, social, I/O, health/stress) instead of
-  collapsing them into disorders trivia. Use when a prompt asks how
-  psychology studies a behavior or which subfield owns a phenomenon.
-  Do not use for SOC101, POLSC*, PHIL102, ENGL, ACE exam-taking
-  (SAYA-0007 harvest only), or exam reconstruction.
+description: >-
+  Frame an undergrad intro-psychology question via Saylor PSYCH101: scientific method, nature/nurture as interaction, biological systems, then subfields (perception, learning, cognitive, developmental, motivation, clinical, social, I/O, health) not disorder trivia. Use when a prompt asks how psychology studies a behavior or which subfield owns it. Do not use for SOC101, POLSC, PHIL102 or exams.
 merged_from: [ug-intro-sociology]
 ---
 

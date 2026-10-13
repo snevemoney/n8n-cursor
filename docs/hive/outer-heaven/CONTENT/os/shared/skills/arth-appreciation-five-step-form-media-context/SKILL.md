@@ -1,19 +1,7 @@
 ---
 name: arth-appreciation-five-step-form-media-context
-description: >
-  Frame an undergraduate art-appreciation question using the Saylor
-  ARTH101 school: run the five-step system (description, analysis,
-  context, meaning, judgment), keep form distinct from content, medium
-  distinct from technique and from style, place a work on the
-  representational–abstract–nonrepresentational continuum and on four
-  levels of meaning, name the Gildow elements and principles, identify
-  2-D / camera / 3-D / architecture processes, tell worldly themes from
-  otherworldly ones, and only then date a Western-or-Near-Eastern
-  formal trend. Use when a prompt asks what a work is, how it is made,
-  what it means, or where it sits in time in this appreciation course.
-  Do not use for art-history survey-as-a-course, studio production,
-  HIST103, OERu ART100 module numbers, ACE/webcam exam-taking, or
-  exam reconstruction.
+description: >-
+  Use when a prompt asks what a work is, how it is made, what it means, or where it sits in time in the Saylor ARTH101 art appreciation course. Never use for art-history survey courses, studio production, HIST103, OERu ART100 modules, ACE/webcam exams, or exam reconstruction.
 ---
 
 # Art appreciation: five steps, then form, medium, theme, time (clustered)

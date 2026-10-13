@@ -5,13 +5,6 @@ description: >-
   verification with earliest primary source; also Path C ProofCheck clinical
   atomic-claim cards. Owner Researcher.
 ---
----
-name: Claim verifier
-description: >-
-  Use before publishing or repeating a wild claim — Demkinn #47 five-bucket
-  verification with earliest primary source; also Path C ProofCheck clinical
-  atomic-claim cards. Owner Researcher.
----
 # Claim verifier (Demkinn #47)
 
 Owner: Researcher. Aligns with FACT / INFERENCE / OPINION / UNVERIFIED.
@@ -95,3 +88,6 @@ Human review: pending|pass|fail
 
 ## Enrich 2026-10-10: quote-grounded insights (`yt:D0sTSFUSx-g` echohive "Branch")
 Every model-extracted insight must carry a verbatim quote. Drop it if the normalized quote is not a substring of the fetched source text. This proves the words exist, not that they're true; the five-bucket check above still applies. PROVE: `branch_quote_verify.py` (fabricated quote dropped).
+
+## Wired 2026-10-13 (overnight)
+- Before a brief or report ships, run `provenance-check FILE.md` (box `/workspace/builds/provenance-check`, Mac `~/.local/bin/provenance-check`). Every line with a number must name its source (path, URL, `Src:`, measured/evidence, or a command). Use `--strict` in gates; it exits 1 on any unsourced number. Owner: Watchdog.

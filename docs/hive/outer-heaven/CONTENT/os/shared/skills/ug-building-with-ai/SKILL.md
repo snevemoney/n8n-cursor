@@ -1,16 +1,7 @@
 ---
 name: ug-building-with-ai
-description: >
-  Frame an undergraduate building-with-AI question using the Saylor
-  CS205 school: start from what intelligence is (Turing test and four
-  orientations), keep agents distinct from ML, keep supervised library
-  application distinct from unsupervised/RL principles, then seat
-  problem-solving, heuristic search, iterative improvement, two-person
-  games, NLP libraries, and reasoning under uncertainty. Use when a
-  prompt asks how to build an AI business solution as this survey, not
-  how to run CS207 ML-as-a-course or CS250 pandas. Do not use for
-  CS105 intro Python, CS201/202, CS120, ENGL, ACE exam-taking, or
-  exam reconstruction.
+description: >-
+  Frame an undergrad building-with-AI question via Saylor CS205: what intelligence is, agents vs ML, supervised vs unsupervised/RL, then search, iterative improvement, games, NLP libraries and reasoning under uncertainty. Use when a prompt asks how to build an AI business solution as this survey. Do not use for CS207 ML, CS250 pandas, CS105/201/202/120, ENGL, ACE exam-taking or exam reconstruction.
 merged_from: [prdv-ai-business-genai-prompt-ethics-ops, ug-fundamentals-machine-learning]
 ---
 

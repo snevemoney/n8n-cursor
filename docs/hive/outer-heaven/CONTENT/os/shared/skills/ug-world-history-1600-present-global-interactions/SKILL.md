@@ -1,20 +1,7 @@
 ---
 name: ug-world-history-1600-present-global-interactions
-description: >
-  Frame an undergraduate world-history-since-1600 question using the
-  Saylor HIST103 school: read the last 400 years as comparative global
-  interactions, keep Indian Ocean trade distinct from the Atlantic
-  system, keep Reformation / Enlightenment / Scientific / Industrial /
-  political revolutions in their own seats, place 1648 / 1789 / 1914 /
-  1939 / 1945 / 1991 on the right jobs, treat high imperialism as a
-  19th-century industrial-age structure rather than "the war," treat
-  decolonization as 1950s–60s rather than Versailles, and finish at
-  21st-century markets and information networks. Use when a prompt
-  asks what connected the early-modern oceans, which revolution is
-  in play, or how 1914 / 1945 / 1991 reordered the world in this
-  survey. Do not use for HIST362 revolutions-as-a-course, HIST363
-  industrialization-as-a-course, GEOG101, ARTH101, Western Civ,
-  AP World dumps, ACE/webcam exam-taking, or exam reconstruction.
+description: >-
+  Use when a prompt asks about comparative global interactions since 1600, focusing on distinct trade systems, revolutions, and key historical dates. Do not use for specific courses on revolutions, industrialization, geography, art history, Western civilization, AP World, or exam-related tasks.
 merged_from: [ug-industrialization-global-perspectives, ug-modern-revolutions-comparative-political, ug-world-regional-geography]
 ---
 

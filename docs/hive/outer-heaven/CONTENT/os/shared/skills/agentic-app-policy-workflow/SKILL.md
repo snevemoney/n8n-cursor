@@ -1,15 +1,7 @@
 ---
 name: agentic-app-policy-workflow
 description: >-
-  Use when designing or building an "agentic app" (an AI feature that answers or acts
-  on rules: HR/leave, refunds, pricing, approvals, compliance, send/spend gates) and
-  correctness matters more than fluency: put the rules in tested deterministic
-  functions behind a classify→route spine, let the LLM only classify/extract and
-  phrase, refuse anything not covered, keep a human Send step for actions. Triggers:
-  "agentic app", "policy bot", "answer from the handbook", "RAG gives wrong numbers",
-  "Oracle AI Agent Studio", "deterministic agent workflow", "HITL approval agent".
-  Anti-triggers: open-ended research/chat with no rule source, creative writing,
-  one-off scripts.
+  Use when designing or building an "agentic app" where correctness is prioritized over fluency. Implement tested deterministic functions for rules, classify and route inputs, and maintain a human Send step for actions. Triggers include "agentic app" and "policy bot." Avoid open-ended tasks.
 ---
 # Agentic app: deterministic spine + policy-as-code
 

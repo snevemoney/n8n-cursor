@@ -14,6 +14,23 @@ Sources: Nate Herk session-handoff slash (`yt:vfWTyEreOEc`); Outer Heaven save-f
 
 End of a thread, desk, or jump. Before compact. Before switching Grok ↔ Cursor Cloud ↔ Claude Code Web ↔ Codex Cloud.
 
+## Start
+Paste at the top of every new agent session (Claude Code / Codex / Cursor / Grok desk):
+```
+ONE TASK: <single deliverable, done-when checkable>
+Read first (cold start, ≤3 files): <HANDOFF.md path> · <KILL.md path> · <spec/plan path>
+Not in scope: <everything else — park new ideas in PARKED.md, don't start them>
+Fresh-context triggers → write HANDOFF.md, end this session, start a new one:
+  - the task changes (new deliverable)  - context > ~60% / auto-compact fired  - 2 wrong turns in a row
+  - you are re-reading the same files to remember what you did
+End: run session-handoff (HANDOFF.md + ACTION_LOG card).
+```
+Rules of thumb: Claude Code `/clear` between tasks; Codex: new thread per task; Cursor: new chat per task; Grok: new desk sitting.
+
+Rule line (Evens): "One deliverable per session; on task change, auto-compact, or 2 wrong turns → HANDOFF.md + fresh session."
+
+Extra HANDOFF fields: **Status** · **Parked ideas** · **Context at end** (see /workspace/research/packets/methods-gap-20261012/close/g08-one-task/HANDOFF_TEMPLATE.md).
+
 ## Do
 
 1. Update the sitting's `HANDOFF.md` before you stop. If the job already has `CURRENT_STATE.md` / `ACTIVE_TASKS.md`, update those too.
