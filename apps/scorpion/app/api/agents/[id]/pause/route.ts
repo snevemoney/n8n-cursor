@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode } from '@/lib/api-error-handler';
 import { updateAgentStatus, getAgentById } from '@/lib/agent-storage';
+import { requireAuth } from '@/lib/security/auth';
 import { councilMembers } from '@scorpion/core';
 
 // In-memory status cache for council members (static agents)
@@ -19,7 +20,7 @@ function generateAgentId(name: string, index: number): string {
 /**
  * POST /api/agents/[id]/pause - Pause an agent (set to standby)
  */
-export const POST = withErrorHandling(async (
+export const POST = withErrorHandling(requireAuth(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
@@ -69,5 +70,5 @@ export const POST = withErrorHandling(async (
     status: 'standby',
     message: `Agent "${councilMembers[memberIndex].name}" paused successfully`
   });
-});
+}));
 

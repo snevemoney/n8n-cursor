@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSystemAutomation } from '@/lib/system-automation';
 import { getNotificationManager } from '@/lib/notification-manager';
 import { withErrorHandling, createSuccessResponse, createErrorResponse, ApiErrorCode, validateRequest } from '@/lib/api-error-handler';
+import { requireAuth } from '@/lib/security/auth';
 import { z } from 'zod';
 
 interface SystemControl {
@@ -20,7 +21,7 @@ let systemControl: SystemControl = {
 /**
  * GET /api/operations/control - Get current system control state
  */
-export const GET = withErrorHandling(async () => {
+export const GET = withErrorHandling(requireAuth(async () => {
   // Calculate runtime if system is running
   let runtime = null;
   if (systemControl.status === 'running' && systemControl.startedAt) {
@@ -36,7 +37,7 @@ export const GET = withErrorHandling(async () => {
     ...systemControl,
     runtime
   });
-});
+}));
 
 const controlActionSchema = z.object({
   action: z.enum(['run', 'pause', 'stop', 'toggle_new'])
@@ -45,7 +46,7 @@ const controlActionSchema = z.object({
 /**
  * POST /api/operations/control - Control system operations
  */
-export const POST = withErrorHandling(async (request: NextRequest) => {
+export const POST = withErrorHandling(requireAuth(async (request: NextRequest) => {
   const validation = await validateRequest(request, controlActionSchema);
   if (!validation.success) {
     return validation.error;
@@ -140,5 +141,5 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       runtime
     }
   });
-});
+}));
 

@@ -2,10 +2,20 @@
  * JWT Tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect } from 'vitest';
 import { signToken, verifyToken, decodeToken, isTokenExpired } from '../jwt';
+import { MissingEnvError } from '../../env';
 
 describe('JWT', () => {
+  beforeEach(() => {
+    process.env.JWT_SECRET = 'test-jwt-secret-16ch';
+  });
+
+  it('refuses to sign without JWT_SECRET', () => {
+    delete process.env.JWT_SECRET;
+    expect(() => signToken({ userId: 'user-123' })).toThrow(MissingEnvError);
+  });
+
   it('should sign and verify token', () => {
     const payload = {
       userId: 'user-123',

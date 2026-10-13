@@ -1,10 +1,11 @@
 /**
  * JWT Utilities
- * JSON Web Token creation and validation
+ * JSON Web Token creation and validation — fail closed if JWT_SECRET is missing.
  */
 
 import { sign, verify, decode } from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
+import { requireEnv } from '../env';
 
 export interface JWTPayload {
   userId?: string;
@@ -17,12 +18,21 @@ export interface JWTPayload {
   jti?: string;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || randomBytes(32).toString('base64');
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
-/**
- * Sign a JWT token
- */
+function getJwtSecret(): string {
+  return requireEnv('JWT_SECRET');
+}
+
+export function isJwtConfigured(): boolean {
+  try {
+    getJwtSecret();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function signToken(payload: Omit<JWTPayload, 'exp' | 'iat' | 'jti'>): string {
   const tokenPayload: JWTPayload = {
     ...payload,
@@ -30,22 +40,22 @@ export function signToken(payload: Omit<JWTPayload, 'exp' | 'iat' | 'jti'>): str
     jti: randomBytes(16).toString('hex'),
   };
 
-  return sign(tokenPayload, JWT_SECRET, {
+  return sign(tokenPayload, getJwtSecret(), {
     expiresIn: JWT_EXPIRES_IN,
     algorithm: 'HS256',
   });
 }
 
-/**
- * Verify and decode a JWT token
- */
 export function verifyToken(token: string): JWTPayload {
   try {
-    const decoded = verify(token, JWT_SECRET, {
+    const decoded = verify(token, getJwtSecret(), {
       algorithms: ['HS256'],
     }) as JWTPayload;
     return decoded;
   } catch (error: any) {
+    if (error?.name === 'MissingEnvError') {
+      throw error;
+    }
     if (error.name === 'TokenExpiredError') {
       throw new Error('Token has expired');
     }
@@ -56,20 +66,15 @@ export function verifyToken(token: string): JWTPayload {
   }
 }
 
-/**
- * Decode token without verification (for inspection)
- */
 export function decodeToken(token: string): JWTPayload | null {
   try {
     return decode(token) as JWTPayload;
-  } catch {
+  } catch (error) {
+    console.warn('[jwt] decode failed', error instanceof Error ? error.message : 'unknown');
     return null;
   }
 }
 
-/**
- * Check if token is expired
- */
 export function isTokenExpired(token: string): boolean {
   const decoded = decodeToken(token);
   if (!decoded || !decoded.exp) {
@@ -77,4 +82,3 @@ export function isTokenExpired(token: string): boolean {
   }
   return decoded.exp < Math.floor(Date.now() / 1000);
 }
-

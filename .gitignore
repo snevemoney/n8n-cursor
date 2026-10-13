@@ -23,10 +23,24 @@ logs/
 
 # Environment files (keep examples in env-templates/)
 .env
+.env.*
 .env.local
 .env.*.local
 .env.backup
 .env.monitoring
+.env.monitoring.backup
+.env.dev
+**/.env
+**/.env.*
+**/.env.local
+**/.env.*.local
+**/.env.backup
+**/.env.local.backup
+**/.env*.backup
+!.env.example
+!**/.env.example
+!env-templates/**
+!env-templates/**/*
 
 # Deployment artifacts
 *.zip
