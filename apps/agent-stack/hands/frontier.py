@@ -67,7 +67,7 @@ def automation(u: str, out: Path | None = None) -> dict:
           + f"\n\nRow check: wrote {p['rows']}, expected {p['expected']} -> {'PASS' if p['pass'] else 'FAIL'}\n\nNot published.\n")
     f = _out("automation-contracts", time.strftime("%Y%m%d-%H%M%S") + ".md", md, out)
     return {"ok": True, "tool": "automation", "sent": False, "cites": [str(f)], "proof": p, "spoken":
-            f"Contract written, sir: when {c['trigger']}, {c['action']}" + (f", only over {c['threshold']:g}" if c["threshold"] else "")
+            f"Contract written, sir: when {c['trigger']}, {c['action']}" + (f", only over {c['threshold']:g}" if c["threshold"] and not re.search(r"\b(?:over|above|more than)\b", c["trigger"], re.I) else "")
             + (f", only {c['filter']}" if c["filter"] else "") + f". I tested it on three synthetic events: {len(p['rows'])} row{'s' * (len(p['rows']) != 1)} written, "
             + ("exactly as expected" if p["pass"] else f"expected {len(p['expected'])}, so it is NOT ready") + ". Nothing is published; say publish when you want it live. Contract: " + f.name}
 
@@ -138,7 +138,9 @@ def panel(u: str, *, chat=None, out: Path | None = None) -> dict:
     def one(d):
         txt = chat(f"You are the {d[0]} specialist. Judge only {d[0]} of: {subject}\nReply exactly: SCORE: <0-10>\nNOTE: <one sentence>") or ""
         sc = re.search(r"SCORE:\s*(\d+(?:\.\d+)?)", txt); nt = re.search(r"NOTE:\s*(.+)", txt)
-        return {"dim": d[0], "w": d[1], "score": min(10.0, float(sc.group(1))) if sc else None, "note": (nt.group(1).strip() if nt else txt.strip()[:160])}
+        note = (nt.group(1).strip() if nt else txt.strip()[:160])
+        note = re.sub(r"^\s*SCORE:\s*\d+(?:\.\d+)?(?:\s*/\s*10)?\s*[-:.,]?\s*", "", re.sub(r"\s*NOTE:\s*", " ", note)).strip()
+        return {"dim": d[0], "w": d[1], "score": min(10.0, float(sc.group(1))) if sc else None, "note": note}
     with ThreadPoolExecutor(len(dims)) as ex:
         res = list(ex.map(one, dims))
     ok = [r for r in res if r["score"] is not None]
@@ -163,7 +165,10 @@ def review_do(u: str, *, drafts: Path, chat=None) -> dict:
     files = sorted(drafts.glob("*.md"), key=lambda p: p.stat().st_mtime) if drafts.is_dir() else []
     if not files:
         return {"ok": True, "tool": "review_do", "sent": False, "spoken": "There is no saved draft to review, sir. Nothing changed."}
-    src = files[-1]; text = src.read_text(encoding="utf-8")
+    files = [f for f in files if not f.stem.endswith("-rev")] or files
+    kind = "email" if re.search(r"\b(?:subject|email|e-mail)\b", u, re.I) else ("invoice" if re.search(r"\binvoice\b", u, re.I) else "")
+    pick = [f for f in files if kind and kind in f.stem] or files
+    src = pick[-1]; text = src.read_text(encoding="utf-8")
     locked = re.findall(r"(?:keep|lock|leave)\s+(?:the\s+)?(?:\w+\s+){0,2}['\"\u201c]([^'\"\u201d]+)['\"\u201d]", u, re.I)
     chat = chat or _chat()
     new = (chat("Revise this draft: tighter, same intent. These strings must appear EXACTLY as written: "
