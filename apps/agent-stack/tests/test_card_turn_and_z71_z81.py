@@ -37,3 +37,8 @@ def test_lapse_card_is_background():
 def test_pane_binds_cards_to_turn():
     html = (STACK / "face" / "pane.html").read_text()
     assert "Number(c.turn_gen) !== cur" in html and "el.dataset.turnGen" in html
+
+
+def test_z75_hush_gate_present():
+    src = (STACK / "mouth" / "turn.py").read_text()
+    assert 'verb="hush", host="local", wires=["hush", "listening"]' in src and "resumed_by" in src

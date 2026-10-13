@@ -551,6 +551,15 @@ def _apply_turn_iter_inner(
     fresh = load_json(hive / "bus" / "state.json")
     watch_row = fresh.get("watch") if isinstance(fresh.get("watch"), dict) else {}
     watch_on = bool(watch_row.get("armed"))
+    # Z75 (wJ3 5:26-5:29): after "be quiet, I'm talking to ...", speech not addressed to Jarvis gets no reply at all;
+    # the next line that names Jarvis lifts the hush and is answered normally. Hush lapses after JARVIS_HUSH_SEC (600 s).
+    _hush = fresh.get("hush") if isinstance(fresh.get("hush"), dict) else {}
+    if _hush.get("on") and time.time() - float(_hush.get("ts") or 0) < float(os.environ.get("JARVIS_HUSH_SEC") or 600):
+        if not re.search(r"\bjarvis\b", spoken or "", re.I):
+            PIPELINE.mutate_bus(Path(hive), lambda b: dict(b, hush=dict(_hush, heard=int(_hush.get("heard") or 0) + 1)))
+            yield _turn_event(spoken="", verb="hush", host="local", wires=["hush", "listening"], spoken_delta="", gen=token)
+            return
+        PIPELINE.mutate_bus(Path(hive), lambda b: dict(b, hush={"on": False, "ts": time.time(), "resumed_by": "addressed"}))
     if verbal_watch and not watch_on:
         yield _door_speak(
             hive,
