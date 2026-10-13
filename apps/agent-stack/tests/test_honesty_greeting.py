@@ -63,6 +63,17 @@ class StatusClaimTests(unittest.TestCase):
         t = "Sir. **Operational:**\n- Pro health HTTP 200"
         self.assertEqual(online.unbacked_status_claim(t, backed=True), t)
 
+    def test_orb_doors_ready_to_serve_dropped(self):
+        for t in ("Sir. Status check: All Orb doors operational. No known blockages reported in current fleet status. Ready to serve, sir.",
+                  "Sir. **Orb doors readiness:** The main constraint is fleet verification capacity. Ready to serve."):
+            out = online.unbacked_status_claim(t, backed=False).lower()
+            self.assertNotRegex(out, r"doors operational|ready to serve|no known blockages|doors readiness", t)
+            self.assertIn("not run a live status check", out)
+
+    def test_orb_doors_real_reading_kept(self):
+        t = "Sir. All Orb doors operational: 5/5 healthz 200. Ready to serve."
+        self.assertEqual(online.unbacked_status_claim(t, backed=True), t)
+
     def test_rule_ask_detected(self):
         for q in ("Who is allowed to issue a PASS?", "Who can merge PRs?", "What are the rules for client sends?"):
             self.assertTrue(online.RULE_ASK_RE.search(q), q)

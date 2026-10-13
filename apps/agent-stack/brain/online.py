@@ -1341,6 +1341,9 @@ STATUS_CLAIM_RE = re.compile(
     r"|^\s*[-*\u2022]\s+[^\n]{0,40}?\b(?:orb|vault|safari|talk|watch|desktop|tools?|adapter|connection|openrouter|memory|browser)\b[^\n]{0,60}?\b(?:active|accessible|available|functional|operational|responsive|ready|online|working|stable)\b"
     r"|(?:^|\s)[-*\u2022]\s+\*\*[^*\n]{1,40}\*\*\s*:[^\n*]{0,60}?\b(?:ready|available|active|online|operational|functional|working|stable)\b"
     r"|\b(?:based\s+on\s+the\s+status\s+check|(?:the\s+)?status\s+check\s+I\s+(?:just\s+)?(?:completed|ran|did)|running\s+a\s+(?:live\s+)?status\s+check\s+now)\b"
+    r"|\b(?:orb\s+)?doors?\b[^.\n]{0,30}?\b(?:operational|ready|readiness|online|green)\b"
+    r"|\*\*[^*\n]{0,30}\breadiness\s*:?\s*\*\*"
+    r"|\bready\s+to\s+serve\b|\bno\s+known\s+(?:blockages|issues|blockers)\b"
     r"|\ball\s+systems\s+(?:are\s+)?(?:go|nominal|green)"
     r"|\bfunctioning\s+(?:well\s+)?within\s+(?:normal\s+)?operational\s+parameters",
     re.I | re.M,
