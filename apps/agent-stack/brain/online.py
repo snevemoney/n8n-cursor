@@ -548,6 +548,7 @@ def raced_stream(
     sink=None,
     opener=None,
     soft_at: float | None = None,
+    first_by: float | None = None,
 ) -> tuple[str, str, str]:
     """Stream the primary; after `hedge` s with no first token, also stream the backup.
     The first model to send a content token wins and is streamed; the other is closed.
@@ -606,7 +607,7 @@ def raced_stream(
     finish = ""
     errs: list[str] = []
     soft_cut = False
-    first_by = min(timeout, first_token_sec())
+    first_by = min(timeout, first_token_sec() if first_by is None else max(0.5, float(first_by)))
     while True:
         left = timeout - (time.monotonic() - began)
         if st["winner"] is None:
@@ -681,6 +682,11 @@ def raced_stream(
                 pass
         return soft_wrap("".join(parts)), "soft_deadline", win
     return "".join(parts).strip(), finish, win
+
+
+def backup_stream_on() -> bool:
+    """The backup request after the first-token mark streams (JARVIS_TALK_BACKUP_STREAM=0: old plain race)."""
+    return os.environ.get("JARVIS_TALK_BACKUP_STREAM", "1").strip().lower() not in {"0", "off", "false", "no"}
 
 
 def first_token_sec() -> float:
@@ -1596,6 +1602,7 @@ def call_openrouter(
         "est_tokens_out": len(reply) // 4,
         "injected": list(LAST_INJECT.get("files") or []),
         "retrieved": [dict(r) for r in (LAST_INJECT.get("snippets") or [])],
+        "finish_reason": (str(got.get("finish_reason") or "") or None) if isinstance(got, dict) else None,
     })
     if isinstance(got, dict) and got.get("ok"):
         got.setdefault("primary_model", primary)
@@ -1885,10 +1892,28 @@ def _call_openrouter_inner(
                             mid = won
                             data = {"choices": [{"message": {"content": text}, "finish_reason": finish or "stop"}]}
                         except TimeoutError:
-                            # Streams failed to open or never sent a token: spend what is left on the plain race.
+                            # Streams failed to open or never sent a token by the first-token mark.
                             attempt = max(0.0, attempt - (time.monotonic() - stream_began))
                             if attempt < 2.0:
                                 raise
+                            if backup_stream_on():
+                                # Backup request, streamed: both models restart at once (backup first), so
+                                # the soft deadline can still end it on a whole sentence mid-reply.
+                                again = list(reversed(racers)) if len(racers) > 1 else racers
+                                again_began = time.monotonic()
+                                try:
+                                    soft_left = turn_left(TURN_SOFT_SEC, fallback_start=wall_start)
+                                    text, finish, won = raced_stream(
+                                        again, headers=headers, timeout=attempt, hedge=0.0, sink=stream_sink(),
+                                        soft_at=time.monotonic() + soft_left if soft_left != float("inf") else None,
+                                        first_by=attempt,
+                                    )
+                                    mid = won
+                                    data = {"choices": [{"message": {"content": text}, "finish_reason": finish or "stop"}]}
+                                except TimeoutError:
+                                    attempt = max(0.0, attempt - (time.monotonic() - again_began))
+                                    if attempt < 2.0:
+                                        raise
                     if data is None:
                         data = _hedged_http_json(
                             OPENROUTER_URL,

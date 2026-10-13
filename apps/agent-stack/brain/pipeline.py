@@ -571,6 +571,7 @@ def explicit_craft_pick(spoken: str) -> dict | None:
 ONLINE = _load("agent_stack_online", HERE / "online.py")
 JEV = _load("agent_stack_jev_preflight", HERE / "jev_preflight.py")
 JEVR = _load("agent_stack_jev_router", HERE / "jev_router.py")
+RESUME = _load("agent_stack_resume", HERE / "resume.py")
 # Per-turn advisory context for the Jev router shadow row (turn start, preflight, advice).
 _JEV_TURN = threading.local()
 
@@ -5465,6 +5466,99 @@ def _commit_spoken(
     return text, first, rest
 
 
+
+def _resume_key(hive: Path) -> str:
+    return str(Path(hive).resolve()) if hive else ""
+
+
+def _resume_note(*, entry=None, used=False, stored=False) -> None:
+    """Resume metadata (counts only) onto LAST_TALK for the per-turn log."""
+    if RESUME is None or ONLINE is None or not hasattr(ONLINE, "LAST_TALK"):
+        return
+    try:
+        ONLINE.LAST_TALK["resume"] = RESUME.meta(entry, used=used, stored=stored)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _resume_after_talk(hive: Path, talked, *, ask: str, prior: dict | None = None) -> None:
+    """A reply cut at the soft deadline leaves its ask and said words for a later 'continue'."""
+    if RESUME is None or not isinstance(talked, dict):
+        return
+    if str(talked.get("finish_reason") or "") != "soft_deadline":
+        return
+    wrap = getattr(ONLINE, "SOFT_WRAP", "") if ONLINE is not None else ""
+    said = RESUME.strip_wrap(str(talked.get("spoken") or ""), wrap)
+    if prior:
+        entry = RESUME.store(_resume_key(hive), ask=prior["ask"], said=RESUME.joined(prior, said),
+                             model=str(talked.get("model") or ""), parts=int(prior.get("parts") or 1) + 1)
+    else:
+        entry = RESUME.store(_resume_key(hive), ask=ask, said=said, model=str(talked.get("model") or ""))
+    _resume_note(entry=entry, used=bool(prior), stored=bool(entry))
+
+
+def _resume_turn_iter(hive: Path, entry: dict, *, spoken_in: str, prior_turns: list, talk_fn, retrieve_roots, token):
+    """Dedicated 'continue' path: one no-hands talk call that goes on from the stored stop point."""
+    prompt = RESUME.continue_prompt(entry)
+    box: dict = {}
+    deltas: "queue.Queue" = queue.Queue()
+
+    def _worker() -> None:
+        try:
+            if talk_fn is None and ONLINE is not None:
+                try:
+                    ONLINE.set_stream_sink(deltas.put, turn_start=ONLINE.turn_start())
+                except TypeError:
+                    ONLINE.set_stream_sink(deltas.put)
+            box["got"] = online_talk(prompt, "", talk_fn=talk_fn, hands=False)
+        except Exception as exc:  # noqa: BLE001
+            box["err"] = exc
+        finally:
+            if talk_fn is None and ONLINE is not None:
+                ONLINE.set_stream_sink(None)
+            deltas.put(None)
+
+    threading.Thread(target=_worker, daemon=True, name="talk-resume").start()
+    said = ""
+    while True:
+        piece = deltas.get()
+        if piece is None:
+            break
+        if token and turn_cancelled(hive, token):
+            continue
+        said = f"{said} {piece}".strip()
+        yield _pipeline_event(
+            ok=True, tool="converse", spoken=said, spoken_delta=piece, wires=["converse", "resume"], cites=[],
+            pack=None, done=False, partial=True, brain="openrouter", model_available=True, gen=token,
+        )
+    got = box.get("got") if "err" not in box else None
+    if token and turn_cancelled(hive, token):
+        return
+    raw = str((got or {}).get("spoken") or "").strip() if isinstance(got, dict) else ""
+    ok = bool(raw) and bool((got or {}).get("ok", True)) and not talk_is_miss(raw)
+    if ok:
+        _resume_note(entry=entry, used=True)
+        _resume_after_talk(hive, got, ask=entry["ask"], prior=entry)
+    else:
+        # Keep the stop point so a second 'continue' can still pick it up.
+        RESUME.store(_resume_key(hive), ask=entry["ask"], said=entry["said"], model=entry.get("model") or "",
+                     parts=int(entry.get("parts") or 1))
+        raw = raw or TALK_DARK
+    outcome = MODEL_TALK if ok else WIRE_FAILURE
+    text, first, rest = _commit_spoken(
+        hive, spoken_in=spoken_in, prior_turns=prior_turns, tool="converse", raw=raw, wires=["converse", "resume"],
+        cites=[], ok=ok, pack=None, brain="openrouter", retrieve_roots=retrieve_roots, gen=token,
+        wire={"path": "resume", "tool": "converse", "outcome": outcome, "provider": "openrouter",
+              "model": (got or {}).get("model") if isinstance(got, dict) else None,
+              "finish_reason": (got or {}).get("finish_reason") if isinstance(got, dict) else None,
+              "error": None if ok else "resume_talk_miss"},
+    )
+    yield _pipeline_event(
+        ok=ok, tool="converse", spoken=text, spoken_delta=text if not said else "", wires=["converse", "resume"],
+        cites=[], pack=None, brain="openrouter", model_available=True, outcome=outcome, gen=token,
+    )
+
+
 def apply_pipeline_iter(
     utterance: str,
     *,
@@ -5532,6 +5626,18 @@ def apply_pipeline_iter(
             gen=token,
         )
         return
+    if RESUME is not None and RESUME.enabled():
+        _rkey = _resume_key(hive)
+        if RESUME.is_continue(spoken_in):
+            _entry = RESUME.take(_rkey)
+            if _entry:
+                yield from _resume_turn_iter(
+                    hive, _entry, spoken_in=spoken_in, prior_turns=prior_turns, talk_fn=talk_fn,
+                    retrieve_roots=retrieve_roots, token=token,
+                )
+                return
+        else:
+            RESUME.clear(_rkey)
     if is_reask_declined(spoken_in):
         text, first, rest = _commit_spoken(
             hive,
@@ -5977,6 +6083,7 @@ def apply_pipeline_iter(
             if "err" in box:
                 raise box["err"]
             talked = box.get("got")
+            _resume_after_talk(hive, talked, ask=spoken_in)
         else:
             talked = online_talk(
                 spoken_in, brief, talk_fn=talk_fn, images=_vision_urls(hive),
