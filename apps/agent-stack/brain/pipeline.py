@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "workspace_read", "memory", "skills", "mcp_inventory", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "workspace_read", "memory", "skills", "mcp_inventory", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -776,6 +776,17 @@ def wants_desk_dispatch(utterance: str) -> bool:
     return bool(DESK_DISPATCH_RE.search(utterance or ""))
 
 
+LOOP_RE = re.compile(
+    r"\b(?:start|set\s+up|create|run)\s+(?:a\s+)?loop\b|\b(?:list|show)\s+(?:my\s+|the\s+)?loops\b|\b(?:cancel|stop|kill)\s+(?:the\s+)?[\w\s-]{0,30}\bloop\b",
+    re.I,
+)
+
+
+def wants_loop(utterance: str) -> bool:
+    """Explicit ask for the loop hand (FINISH-LIST)."""
+    return bool(LOOP_RE.search(utterance or ""))
+
+
 def jarvis_rules() -> str:
     """Short operating rules (JARVIS.md) loaded into the turn prompt. Empty string if the file is missing."""
     try:
@@ -827,7 +838,9 @@ def model_free_route(spoken_in: str) -> dict | None:
         return None
     early = fixed_route(spoken_in)
     if early is None and not is_hard_step(spoken_in):
-        if wants_desk_dispatch(spoken_in):
+        if wants_loop(spoken_in):
+            early = {"tool": "loop", "args": {}, "speak": ""}
+        elif wants_desk_dispatch(spoken_in):
             early = {"tool": "desk_dispatch", "args": {}, "speak": ""}
         elif wants_code_run(spoken_in):
             early = {"tool": "code_run", "args": {}, "speak": ""}
@@ -902,6 +915,16 @@ def _desk_dispatch_hand():
     name = "agent_stack_desk_dispatch"
     if name not in sys.modules:
         spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "desk_dispatch.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _loop_hand():
+    name = "agent_stack_loop"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "loop.py")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
@@ -4850,6 +4873,12 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["desk_dispatch"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "desk_dispatch_meta": hd.log_meta(got)}
+    if tool == "loop":
+        hd = _loop_hand()
+        got = hd.run(dict(args) if args else hd.args_from_utterance(utterance))
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["loop"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("ok")), "loop_meta": hd.log_meta(got)}
     if tool == "mcp_inventory":
         mi = _mcp_inventory_hand()
         got = mi.run({})
@@ -5517,7 +5546,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:

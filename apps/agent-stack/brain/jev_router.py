@@ -53,6 +53,8 @@ _RULES: list[tuple[str, float, re.Pattern]] = [
     ("local_read", 0.9, re.compile(r"\b(?:write|run)\b.{0,40}\bpython\b.{0,60}\b(?:run|test|tests)\b|\brun\s+this\s+python\b|\brun\s+the\s+tests?\s+for\s+this\s+python\b", re.I)),
     # desk_dispatch hand (advisory label only).
     ("local_read", 0.9, re.compile(r"\b(?:ask|dispatch\s+(?:this\s+)?to|hand\s+(?:this\s+)?to)\s+(?:the\s+)?(?:jev|watchdog|forge|librarian|consultant|claude|codex|capex|scout)\b", re.I)),
+    # loop hand (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:start|set\s+up|create|run)\s+(?:a\s+)?loop\b|\b(?:list|show)\s+(?:my\s+|the\s+)?loops\b|\b(?:cancel|stop|kill)\s+(?:the\s+)?[\w\s-]{0,30}\bloop\b", re.I)),
     # mcp_inventory hand: which MCP servers is a local config read, names only (advisory label only).
     ("local_read", 0.9, re.compile(r"\b(?:which|what|list|show)\b.{0,25}\bmcp\b", re.I)),
     # skills hand: which skills / read one skill is a local read (advisory label only).
