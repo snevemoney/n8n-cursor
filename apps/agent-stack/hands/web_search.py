@@ -124,8 +124,34 @@ def _brave(query: str, timeout: float) -> list[dict[str, str]]:
     return parse_brave(cp.stdout[:900_000].decode("utf-8", "replace"))
 
 
-# DuckDuckGo first, then Brave. Bing's plain page from curl returned off-topic results live, so it is not used.
-ENGINES = [_ddg, _brave]
+def _openrouter_web(query: str, timeout: float) -> list[dict[str, str]]:
+    """Third engine: OpenRouter's web plugin (Exa) returns real cited URLs when the HTML engines bot-check
+    this Mac. Read-only lookup through the key already loaded for the brain; the key is never printed."""
+    import json as _json
+    import os as _os
+    key = (_os.environ.get("OPENROUTER_API_KEY") or "").strip()
+    if not key or timeout < 1.0:
+        return []
+    body = {"model": _os.environ.get("JARVIS_WEB_MODEL") or "mistralai/mistral-small-3.2-24b-instruct",
+            "plugins": [{"id": "web", "max_results": MAX_CITES}], "max_tokens": 120,
+            "messages": [{"role": "user", "content": "Answer in one sentence from the web: " + query}]}
+    req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", data=_json.dumps(body).encode(),
+                                 headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        msg = (_json.loads(r.read(400_000)).get("choices") or [{}])[0].get("message") or {}
+    answer = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", str(msg.get("content") or ""))
+    out = []
+    for a in msg.get("annotations") or []:
+        c = a.get("url_citation") or {}
+        if str(c.get("url") or "").startswith(("http://", "https://")):
+            out.append({"url": c["url"], "title": str(c.get("title") or ""),
+                        "snippet": answer if not out else str(c.get("content") or "")[:220]})
+    return out
+
+
+# DuckDuckGo first, then Brave, then OpenRouter's web plugin when both HTML engines bot-check or rate-limit.
+# Bing's plain page from curl returned off-topic results live, so it is not used.
+ENGINES = [_ddg, _brave, _openrouter_web]
 
 
 def _default_fetch(query: str, timeout: float) -> list[dict[str, str]]:
@@ -136,7 +162,7 @@ def _default_fetch(query: str, timeout: float) -> list[dict[str, str]]:
         left = end - _t.time()
         if left <= 0.3:
             break
-        share = left if i == len(ENGINES) - 1 else max(1.0, left / 2)
+        share = left if i == len(ENGINES) - 1 else max(1.0, left / (len(ENGINES) - i))
         try:
             rows = eng(query, share)
         except Exception:
