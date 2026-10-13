@@ -36,7 +36,10 @@ class _StopGate:
             try:
                 _f = Path.home() / ".jarvis" / "phone_sim.json"
                 _st = json.loads(_f.read_text())
-                if _st.get("state") == "CONFIRM" or ("cancelled" in (_st.get("tags") or []) and time.time() - _f.stat().st_mtime < 5):
+                if _st.get("state") == "CONFIRM":
+                    return None
+                if _st.pop("consumed", None) and time.time() - _f.stat().st_mtime < 5:
+                    _f.write_text(json.dumps(_st, indent=1))  # one-shot: only the serve re-check of this same request is spared
                     return None  # serve re-checks STOP_RE after the turn; the card just consumed this 'cancel'
             except Exception:  # noqa: BLE001
                 pass

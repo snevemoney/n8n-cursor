@@ -55,7 +55,7 @@ def run(u: str) -> dict:
         return {"ok": True, "tool": "phone_sim", "spoken": spoken, "card": card(st), "sent": False, "simulated": True}
     st = _load()
     if st.get("state") == "CONFIRM" and CANCEL_RE.search(u or ""):
-        st.update(state="ENDED", tags=["cancelled", "not-dialled"], line="Cancelled before dialling."); _save(st)
+        st.update(state="ENDED", tags=["cancelled", "not-dialled"], line="Cancelled before dialling.", consumed=True); _save(st)
         return {"ok": True, "tool": "phone_sim", "spoken": "Cancelled, sir. Nobody was rung.", "card": card(st), "sent": False, "simulated": True}
     if st.get("state") == "CONFIRM" and GO_RE.search(u or ""):  # Z40 phase 2 + Z07 cold-open line
         st.update(state="ENDED", tags=["inquiry-only", "simulated", "quote-not-real"],
