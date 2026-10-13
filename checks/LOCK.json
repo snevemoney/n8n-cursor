@@ -1,5 +1,15 @@
 {
  "files": {
+  "checks/locked/web_search/01-cites-two.sh": "d66bb5c317c8ebaa32286ad7078b8602a9d8e9cba9bbe8f96a8bbc1a9db15af2",
+  "checks/locked/web_search/02-no-results-honest.sh": "25b4c30fe4a92d3dc8e9509b4b401ceca7a1933e7eabd0b67f2aa4ff8b1d746e",
+  "checks/locked/web_search/03-time-cap.sh": "74a48101e593ba878dfccb180c9d4c864934b5247ecbd68055c765e62a0656ef",
+  "checks/locked/web_search/04-page-is-data.sh": "3cde50377f05e798c1adfb3613d0c77dba75fa1ed4292b7cf1d02220002a76f3",
+  "checks/locked/web_search/05-read-only.sh": "2e9886d7384d3f3e558b593d19b71d55fa6260b9ec8dd4bb26f616c769797bf4",
+  "checks/locked/web_search/06-routes-asks.sh": "a39ffc9ecdd3fc2067659b155c8e2b1a53b7934abe16a31d4bddba7fc7ea34ae",
+  "checks/locked/web_search/07-no-query-in-log.sh": "b4bcf84a2074116e7dd0dc50a4a9295165c9e9e3e95fcc1481c75fb6a62ec1ae",
+  "checks/locked/web_search/90-wired.sh": "aa648bd0a509dc3f52d00674c080e927e613e721b9f630569b213ad9c2c7cd77",
+  "checks/locked/web_search/91-every-place.sh": "79f3adfd9af7d9267efdd5742a2d25aefb0d2c65aff225daf30f0b9b6cef4765",
+  "checks/locked/web_search/92-existing-tests.sh": "05eeb6872f5a5d0a7cc546215f32d1c49e4a63c4b3fb4db9974c91ba139a339c",
   "checks/locked/workspace_read/01-reads-file.sh": "e4da43eb009fbeace65d43c6b761de1035ae6e8af2d05ff0103c15b697dead93",
   "checks/locked/workspace_read/02-refuses-secrets.sh": "91136cd4a619005ba0ac15b42dfb50119d21b67b1961d04150e6c6e0c04b3f3d",
   "checks/locked/workspace_read/03-caps-size.sh": "b96fbf6ce3e171c36d6d5928a4ad022d0a261a4fc533ec5bc782f1396f244002",
