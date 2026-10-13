@@ -980,10 +980,18 @@ def confirm_take(hive: Path | None, utterance: str) -> dict | None:
         pass
     if not isinstance(row, dict) or row.get("tool") not in CONFIRM_TOOLS:
         return None
-    if time.time() - float(row.get("at") or 0) > CONFIRM_TTL_SEC or not CONFIRM_YES_RE.match(utterance or ""):
+    rargs = row.get("args") if isinstance(row.get("args"), dict) else {}
+    strict = bool(rargs.get("destructive"))  # Close/Delete/Send/...: only the word "confirm", never "yes"/"ok"
+    pointer = row.get("tool") == "pointer_click"
+    ok_word = _pointer_hand().G.strict_confirm(utterance) if strict else bool(CONFIRM_YES_RE.match(utterance or ""))
+    if time.time() - float(row.get("at") or 0) > CONFIRM_TTL_SEC or not ok_word:
+        if pointer:
+            _pointer_hand().dismiss()  # the armed click was dropped: take the arrow and Jarvis's cursor off the screen
         return None
-    args = dict(row.get("args") or {}) if isinstance(row.get("args"), dict) else {}
+    args = dict(rargs)
     args["_confirmed"] = True
+    if strict:
+        args["strict_ok"] = True
     return {"tool": row["tool"], "args": args, "speak": "", "utterance": str(row.get("utterance") or "")}
 
 
@@ -1004,7 +1012,7 @@ def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
         return dict(args) if args else _desk_dispatch_hand().args_from_utterance(utterance)
     if tool == "pointer_click":  # Z02 click: resolve + draw the arrow now; a miss runs unarmed and just says why
         got = _pointer_hand().click_arm(utterance)
-        return {k: got[k] for k in ("x", "y", "label")} if got.get("found") else None
+        return {k: got[k] for k in ("x", "y", "label", "destructive")} if got.get("found") else None
     return {}
 
 
@@ -5369,7 +5377,7 @@ def _run_tool_inner(
         arm = _needs_confirm(tool, args, utterance)
         if arm is not None:
             confirm_arm(hive, tool, arm, utterance)
-            line = CONFIRM_LINES[tool].format(desk=str(arm.get("desk") or "named").capitalize(), label=str(arm.get("label") or "target"))
+            line = _pointer_hand().G.confirm_line(str(arm.get("label") or "target")) if tool == "pointer_click" else CONFIRM_LINES[tool].format(desk=str(arm.get("desk") or "named").capitalize(), label=str(arm.get("label") or "target"))
             return {"ok": True, "tool": tool, "spoken": line, "wires": [tool], "cites": [], "sent": False,
                     "task_verified": False, "awaiting_confirm": True, f"{tool}_meta": {"ok": True, "awaiting_confirm": True}}
         if args.get("_confirmed"):
@@ -5527,7 +5535,8 @@ def _run_tool_inner(
             miss = _pointer_hand().click_target(utterance)
             return {"ok": True, "tool": tool, "spoken": f"I won't click blind: {miss.get('why') or 'I lost the target'}. Say it again and I'll look once more.", "wires": ["pointer"], "cites": [],
                     "sent": False, "task_verified": False, "outcome": HONEST_UNKNOWN}
-        got = _pointer_hand().click_do(float(args["x"]), float(args["y"]), str(args.get("label") or "target"))
+        got = _pointer_hand().click_do(float(args["x"]), float(args["y"]), str(args.get("label") or "target"),
+                                         strict_ok=bool(args.get("strict_ok")))
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": got["spoken"], "wires": ["pointer"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("clicked")), "pointer_meta": {"clicked": bool(got.get("clicked")), "why": got.get("why")},
                 "outcome": TOOL_LOOP if got.get("clicked") else HONEST_UNKNOWN}
