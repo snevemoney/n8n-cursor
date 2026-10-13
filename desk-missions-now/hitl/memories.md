@@ -30,7 +30,7 @@ HOST = git. A Cloud run is a cold checkout of origin/main + GitHub persist. It d
 
 Context = committed briefs + memories. Cloud will never see sitting JSONL (01a6b95f or any other). Read desk-missions-now/hitl/briefs/INDEX.md, then the one brief for this job. Grow that store. Do not dump transcripts.
 
-Pick is a real packet id already on main (full.txt + LEARNED ACTION TRACE) or TRIAGE with no invented slug. Current TRAIN id: X80ljdCPM_U. Never mint / reuse factory-os-train-plane (PR 47 invent, retired).
+Pick is a real packet id already on main (full.txt + LEARNED ACTION TRACE) or TRIAGE with no invented slug. Current TRAIN id: 2J3uX8iRNng (hold-outs filed 2026-08-28). Never mint / reuse factory-os-train-plane (PR 47 invent, retired).
 
 Tools match the host. GitHub = persist. Slack never. browser-use = Mac stdio (uvx) only — never the Cloud web plan. Do not attach tools that only exist on Evens’s laptop. cursor-ide-browser is Cursor-chat only, not Automations-eligible.
 
@@ -48,7 +48,7 @@ Train desks, not weights. One signal / one stage / run. Until-satisfied and perf
 
 Retrieve default-off. Theme match → python3 scripts/hive/os/signal-retrieve.py → ≤3 local refs. File missing or no match → NONE. Never dump SIGNAL_INDEX / STEAL_SHEET / 325 skills.
 
-Hold-outs Watchdog-first. TRAIN-1 leftover: Forge wrote the exam. Next exam (X80ljdCPM_U) is Watchdog, then STOP. No Forge in that sitting. Builder never fills GRADE. No paper-PROVEN.
+Hold-outs Watchdog-first. TRAIN-1 leftover: Forge wrote the exam. Next exam (2J3uX8iRNng) is filed. Next sitting = Forge OBSERVED only. Builder never fills GRADE. No paper-PROVEN.
 
 Skip already-PASS TRAIN-1 kwSVtQ7dziU. TRIAGE decoy: karpathy-wiki-nate-herk (no ACTION TRACE heading). Cloud invent leftover: PR 47 factory-os-train-plane — closed, do not merge, do not hold-out.
 
