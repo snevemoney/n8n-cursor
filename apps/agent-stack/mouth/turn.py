@@ -543,6 +543,22 @@ def _apply_turn_iter_inner(
                 return
     except Exception:  # noqa: BLE001
         pass
+    # Z75 (wJ3 5:26): "hold on / be quiet, I'm talking to ..." -> "Off you go, sir." and Jarvis stays quiet (mic stays on).
+    if re.search(r"\b(?:be quiet|hush|quiet down|stop talking|i'?m talking to (?:my|the|someone))\b", spoken or "", re.I) and len(spoken.split()) <= 16:
+        PIPELINE.mutate_bus(Path(hive), lambda b: dict(b, hush={"on": True, "ts": time.time()}))
+        yield _door_speak(hive, spoken, "Off you go, sir.", "hush", retrieve_roots, gen=token,
+                          execution={"ok": True, "tool": "hush", "spoken": "Off you go, sir.", "wires": ["hush"], "sent": False})
+        return
+    # Z76/Z71: create an invoice for a named lead -> name the matched record, request values win, local draft only.
+    try:
+        _ea = PIPELINE._load("agent_stack_entity_ack", PIPELINE.STACK / "hands" / "entity_ack.py")
+        if _ea.wants(spoken):
+            _notes = _REFLEX._vault_index() if _REFLEX is not None else []
+            got = _ea.run(spoken, notes=_notes, drafts=None if os.environ.get("PYTEST_CURRENT_TEST") else PIPELINE._drafts_hand().drafts_dir())
+            yield _door_speak(hive, spoken, got["spoken"], "entity_ack", retrieve_roots, gen=token, execution=got)
+            return
+    except Exception:  # noqa: BLE001
+        pass
     # Z52 (D5v4UuvtUXc 9:20): high stakes + vault miss + missing slots -> one compact question, nothing improvised.
     try:
         _sl = PIPELINE._load("agent_stack_slots", PIPELINE.STACK / "hands" / "slots.py").ask_for(spoken)
