@@ -160,7 +160,7 @@ def safari_open(url: str) -> dict:
         actual = str(observed.get("url") or "").strip()
         title = str(observed.get("title") or "").strip()
         passed = observed.get("ok") is True and observed.get("open") is True and same_page(target, actual)
-        if passed and title and not _PLACEHOLDER_TITLE.match(title):
+        if passed and ("title" not in observed or (title and not _PLACEHOLDER_TITLE.match(title))):
             break
         if observed.get("ok") is not True:
             break
