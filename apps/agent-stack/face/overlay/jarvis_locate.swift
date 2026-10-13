@@ -43,7 +43,7 @@ if AXIsProcessTrusted(), let app = NSWorkspace.shared.frontmostApplication {
   AXUIElementSetAttributeValue(ax, "AXEnhancedUserInterface" as CFString, kCFBooleanTrue)  // Chrome/Electron expose web content
   if let wins = attr(ax, kAXWindowsAttribute) as? [AXUIElement], let w = wins.first { walk(w, 0) }
 }
-if let b = best, b.0 >= 3 { out(["found": true, "x": b.1.midX, "y": b.1.midY, "w": b.1.width, "h": b.1.height, "label": b.2, "role": b.3, "source": "ax", "ax_trusted": AXIsProcessTrusted()]) }
+if let b = best, b.0 >= 3 { out(["found": true, "x": b.1.midX, "y": b.1.midY, "w": b.1.width, "h": b.1.height, "label": b.2, "role": b.3, "score": b.0, "source": "ax", "ax_trusted": AXIsProcessTrusted()]) }
 
 // Vision OCR fallback, on-device.
 // The caller grabs the MAIN display with `screencapture -x -m` to a local temp file (argv[2]) and deletes it after.
@@ -51,7 +51,9 @@ let shot = CommandLine.arguments.count > 2 ? CommandLine.arguments[2] : ""
 guard !shot.isEmpty, let src = CGImageSourceCreateWithURL(URL(fileURLWithPath: shot) as CFURL, nil),
       let img = CGImageSourceCreateImageAtIndex(src, 0, nil) else {
   out(["found": false, "why": "no local screen image (Screen Recording)", "ax_trusted": AXIsProcessTrusted()]) }
-let main = NSScreen.screens.first!.frame
+// optional display rect (argv[3..6] = x y w h, global top-left points): the display Evens is on. Default: the main display.
+let argsD = CommandLine.arguments.dropFirst(3).compactMap { Double($0) }
+let main = argsD.count == 4 ? CGRect(x: argsD[0], y: argsD[1], width: argsD[2], height: argsD[3]) : NSScreen.screens.first!.frame
 let req = VNRecognizeTextRequest(); req.recognitionLevel = .fast; req.usesLanguageCorrection = false
 try? VNImageRequestHandler(cgImage: img, options: [:]).perform([req])
 var ob: (Int, CGRect, String)? = nil
@@ -60,7 +62,7 @@ for r in req.results ?? [] {
   let sc = score(c.string)
   if sc > 0, (ob == nil || sc > ob!.0 || (sc == ob!.0 && c.string.count < ob!.2.count)) {
     let bb = r.boundingBox  // normalized, bottom-left origin, over the whole captured desktop
-    let rect = CGRect(x: bb.minX * main.width, y: (1 - bb.maxY) * main.height, width: bb.width * main.width, height: bb.height * main.height)
+    let rect = CGRect(x: main.minX + bb.minX * main.width, y: main.minY + (1 - bb.maxY) * main.height, width: bb.width * main.width, height: bb.height * main.height)
     ob = (sc, rect, c.string)
   }
 }
