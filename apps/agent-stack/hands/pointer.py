@@ -211,6 +211,7 @@ def draw(x: float, y: float, label: str, seconds: int = SHOW_SEC) -> bool:
     b = _bin("pointer_arrow")
     if b is None:
         return False
+    _sig("TERM", OVERLAY_PATTERNS[0])  # one arrow at a time (a re-armed click used to stack a second one on the first)
     subprocess.Popen([str(b), f"{x:.1f}", f"{y:.1f}", label, str(seconds)], stdout=subprocess.DEVNULL,
                      stderr=subprocess.DEVNULL, start_new_session=True)
     return True

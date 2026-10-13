@@ -191,6 +191,40 @@ class LiveGuardTest(unittest.TestCase):
             self.assertFalse(PT.click_arm("click Routines")["found"])
 
 
+class DrawCursorLiveTest(unittest.TestCase):
+    """With live() forced on and the OS calls mocked: what would be launched, and in what order."""
+
+    def _live(self):
+        return mock.patch.object(PT, "live", lambda: True), mock.patch.object(PT, "_bin", lambda n: Path("/x/" + n)), \
+            mock.patch.object(PT, "displays", lambda: [MAIN])
+
+    def test_draw_replaces_the_previous_arrow_and_skips_off_screen_targets(self):
+        a, b, c = self._live()
+        with a, b, c, mock.patch.object(subprocess, "run") as run, mock.patch.object(subprocess, "Popen") as pop:
+            self.assertTrue(PT.draw(100.0, 200.0, "Create button", 120))
+            self.assertEqual(run.call_args_list[0].args[0][:3], ["pkill", "-TERM", "-f"])
+            self.assertEqual(pop.call_args.args[0][:2], ["/x/pointer_arrow", "100.0"])
+            self.assertEqual(pop.call_args.args[0][-1], "120")
+            pop.reset_mock()
+            self.assertFalse(PT.draw(5000.0, 200.0, "Create button"))  # off every display
+            pop.assert_not_called()
+
+    def test_cursor_start_passes_hold_and_replaces_the_previous_cursor(self):
+        a, b, c = self._live()
+        with a, b, c, mock.patch.object(subprocess, "run") as run, mock.patch.object(subprocess, "Popen") as pop:
+            self.assertTrue(PT.cursor_start((10, 20), (300, 400), 120))
+            self.assertEqual(run.call_args.args[0], ["pkill", "-TERM", "-f", "Caches/jarvis/pointer_cursor"])
+            self.assertEqual(pop.call_args.args[0], ["/x/pointer_cursor", "10.0", "20.0", "300.0", "400.0", "--hold", "120", "--label", "Jarvis"])
+
+    def test_signals_go_only_to_the_cursor_process(self):
+        a, b, c = self._live()
+        with a, b, c, mock.patch.object(subprocess, "run") as run:
+            PT.cursor_signal("USR1")
+            self.assertEqual(run.call_args.args[0], ["pkill", "-USR1", "-f", "Caches/jarvis/pointer_cursor"])
+            PT.dismiss()
+            self.assertEqual([c.args[0][-1] for c in run.call_args_list[1:]], ["Caches/jarvis/pointer_arrow", "Caches/jarvis/pointer_cursor"])
+
+
 class RememberTest(unittest.TestCase):
     def test_remember_is_inert_outside_the_live_face(self):
         import tempfile
