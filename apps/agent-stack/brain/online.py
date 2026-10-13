@@ -163,6 +163,21 @@ OPENROUTER_HANDS = (
     {
         "type": "function",
         "function": {
+            "name": "workspace_read",
+            "description": "Read-only: read a file's text (capped), list a folder's names, report git repo/branch/HEAD, or list local repos, inside allowed folders. Use it before claiming anything about files, repos or branches. Secrets are refused.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "op": {"type": "string", "enum": ["read", "ls", "git", "repos"]},
+                    "path": {"type": "string"},
+                },
+                "required": ["op"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "cursor_ask",
             "description": "Ask Cursor CLI about this repo's code. Not for last sittings or what he is talking about with Cursor.",
             "parameters": {
