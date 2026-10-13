@@ -1291,6 +1291,10 @@ def call_openrouter(
         if cleaned != got.get("spoken"):
             got["spoken"] = cleaned
             got["claim_fixed"] = True
+        stat = unbacked_status_claim(str(got.get("spoken") or ""), backed=bool(got.get("status_checked")))
+        if stat != got.get("spoken"):
+            got["spoken"] = stat
+            got["claim_fixed"] = True
         if not any(got.get(k) for k in ("tool", "tool_calls", "hand", "action", "verb", "args")):
             fixed = unverified_claim(str(got.get("spoken") or ""))
             if fixed != got.get("spoken"):
@@ -1313,9 +1317,33 @@ MEMORY_CLAIM_RE = re.compile(
     r"[,;]?\s*\b(?:as|like)\s+(?:you|we)\s+(?:already\s+|just\s+)?"
     r"(?:confirmed|said|mentioned|told\s+me|noted|agreed|discussed|established)"
     r"(?:\s+(?:earlier|before|previously|last\s+time))?\b[,;]?"
-    r"|[,;]?\s*\b(?:you|we)\s+(?:already\s+)?(?:confirmed|agreed|told\s+me)\s+(?:that\s+)?(?:earlier|before|previously)\b[,;]?",
+    r"|[,;]?\s*\b(?:you|we)\s+(?:already\s+)?(?:confirmed|agreed|told\s+me)\s+(?:that\s+)?(?:earlier|before|previously)\b[,;]?"
+    # "as before", "same as before", "as I said earlier", "as last time"
+    r"|[,;]?\s*\b(?:(?:just|same)\s+)?as\s+(?:before|previously|last\s+time|earlier)\b[,;]?"
+    r"|[,;]?\s*\bas\s+I\s+(?:already\s+)?(?:said|mentioned|noted|told\s+you)(?:\s+(?:earlier|before|previously|last\s+time))?\b[,;]?",
     re.I,
 )
+
+# Live-status boasts a talk reply cannot back: "the Orb is stable", "all tools are ready".
+STATUS_CLAIM_RE = re.compile(
+    r"\b(?:the\s+)?orb\s+(?:is\s+)?(?:stable|running\s+smoothly|healthy|online)"
+    r"|\ball\s+(?:my\s+|the\s+)?(?:tools|systems)\s+(?:are\s+)?(?:ready|online|operational|nominal|green|working)"
+    r"|\b(?:openrouter|api|network)\s+(?:connectivity|connection)\s+is\s+(?:reliable|stable|solid|good)"
+    r"|\ball\s+systems\s+(?:are\s+)?(?:go|nominal|green)"
+    r"|\bfunctioning\s+(?:well\s+)?within\s+(?:normal\s+)?operational\s+parameters",
+    re.I,
+)
+
+
+def unbacked_status_claim(text: str, *, backed: bool) -> str:
+    """Drop sentences that assert live Orb/tool health unless a live check backs them."""
+    if backed or not text or not STATUS_CLAIM_RE.search(text):
+        return text
+    parts = re.split(r"(?<=[.!?])\s+|\n+", text.strip())
+    keep = [x for x in parts if x and not STATUS_CLAIM_RE.search(x)]
+    if not any(re.search(r"[A-Za-z]{3,}", x) and x.strip(" .") not in ("Sir", "sir") for x in keep):
+        keep.append("I'm online; I have not run a live status check.")
+    return " ".join(keep).strip()
 
 
 def unbacked_memory_claim(text: str, *, backed: bool) -> str:
