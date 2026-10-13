@@ -52,7 +52,8 @@ class AsBeforeTests(unittest.TestCase):
         for t in ("I'm running on deepseek via OpenRouter, as before.",
                   "Same as before, I'm on deepseek.",
                   "As I said earlier, saves go to ~/Documents.",
-                  "I'm on deepseek, just as last time."):
+                  "I'm on deepseek, just as last time.",
+                  "The deepseek status remains unchanged from earlier."):
             out = online.unbacked_memory_claim(t, backed=False)
             self.assertNotRegex(out.lower(), r"as before|as i said|as last time", t)
             self.assertRegex(out.lower(), r"deepseek|documents")

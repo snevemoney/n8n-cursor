@@ -1320,6 +1320,7 @@ MEMORY_CLAIM_RE = re.compile(
     r"|[,;]?\s*\b(?:you|we)\s+(?:already\s+)?(?:confirmed|agreed|told\s+me)\s+(?:that\s+)?(?:earlier|before|previously)\b[,;]?"
     # "as before", "same as before", "as I said earlier", "as last time"
     r"|[,;]?\s*\b(?:(?:just|same)\s+)?as\s+(?:before|previously|last\s+time|earlier)\b[,;]?"
+    r"|\s+(?:remains?\s+|is\s+)?(?:unchanged|the\s+same)\s+(?:from|as|since)\s+(?:earlier|before|last\s+time)\b"
     r"|[,;]?\s*\bas\s+I\s+(?:already\s+)?(?:said|mentioned|noted|told\s+you)(?:\s+(?:earlier|before|previously|last\s+time))?\b[,;]?",
     re.I,
 )
