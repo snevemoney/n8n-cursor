@@ -164,7 +164,7 @@
       background: #020805; border: 0; box-shadow: none !important; animation: none !important;
       top: auto; bottom: 104px; min-height: 0; min-width: 0;
       left: 0; right: 0;
-      width: min(220px, 78vw); max-height: 64px;
+      width: min(220px, 78vw); max-height: min(34vh, 220px);
       margin: 0 auto;
       padding: 6px 8px; border-radius: 8px;
       transform: none;
@@ -198,7 +198,8 @@
     html.widget #browserResults p { margin: 0 0 8px; }
     html.widget #browserResults p:last-child { margin-bottom: 0; }
     html.widget .chip #heard {
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+      overflow: hidden; overflow-wrap: anywhere;
       font-size: 10px; line-height: 1.2;
     }
     html.widget #orb3d {
