@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Idea editor — Autoflow · SAMPLE</title>
+  <meta name="description" content="SAMPLE visual idea editor. Nodes, connections, one source per node. Cite-only. Not a finance product. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%235b3fd6%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EAF%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/autoflow.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Autoflow home">
+      <span class="mark" aria-hidden="true">AF</span>
+      <span class="name">Autoflow<small>Tools · Idea editor · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#door">Canvas</a></li>
+        <li><a href="editor.html" aria-current="page">Editor</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#door">Back to the shell</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="editor-title">
+    <p class="eyebrow">Visual editor</p>
+    <h2 id="editor-title">Ideas as nodes. <span class="hi">Sources on every one.</span></h2>
+    <p class="sub">
+      Add an idea, connect two, cite each. The screen is ready when nothing is uncited — the editor
+      never fills a source in for you. Not a finance tool. Sample screen, sample sources.
+    </p>
+
+    <div class="product-layout">
+      <section class="stage" id="canvas" data-state="empty" aria-labelledby="canvas-label">
+        <div class="stage-head">
+          <span class="label" id="canvas-label">Screen · SAMPLE</span>
+          <span class="state" id="canvas-state" aria-live="polite">blank canvas</span>
+        </div>
+
+        <div class="board-wrap">
+          <div class="board" id="board">
+            <svg id="edges" class="edges" aria-hidden="true" focusable="false"></svg>
+            <div class="nodes" id="nodes" role="group" aria-label="Ideas on the canvas"></div>
+          </div>
+        </div>
+
+        <div class="board-foot">
+          <span class="count" id="cite-count" aria-live="polite">cited 0/0</span>
+          <span class="selection empty" id="pick" aria-live="polite">Select an idea to cite it, two to connect them.</span>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <form class="card panel" id="idea-form" novalidate>
+          <div>
+            <label for="idea-text">New idea</label>
+            <input class="input" id="idea-text" name="idea" type="text" autocomplete="off" placeholder="One thought, one node" />
+          </div>
+          <div class="actions">
+            <button class="btn btn-brand btn-small" type="submit" id="add-btn">Add idea</button>
+            <button class="btn btn-ghost btn-small" type="button" id="connect-btn" disabled>Connect</button>
+            <button class="btn btn-ghost btn-small" type="button" id="clear-btn">Clear selection</button>
+          </div>
+        </form>
+
+        <form class="card panel" id="cite-form" novalidate>
+          <div>
+            <label for="cite-ref">Source for the selected idea</label>
+            <input class="input" id="cite-ref" name="cite" type="text" autocomplete="off" placeholder="interview · note · page" />
+          </div>
+          <div class="actions">
+            <button class="btn btn-green btn-small" type="submit" id="cite-btn" disabled>Cite</button>
+          </div>
+        </form>
+
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Name collision</p>
+          <div class="msg" data-contrast>autoflow-finance · a different hive project</div>
+          <p class="muted-line" id="friction-line">A different project with a similar name. Not this canvas.</p>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-example">Load example screen</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reset to blank</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Screen ready</span>
+  </div>
+
+  <footer class="foot">
+    <span>Autoflow · SAMPLE · CapEx / preview</span>
+    <span>Not finance · No sync · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/canvas-ui.js"></script>
+</body>
+</html>

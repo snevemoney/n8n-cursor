@@ -1,0 +1,11 @@
+{
+  "name": "autoflow-product-preview",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Autoflow SAMPLE \u2014 visual-editor idea screens (cite-only) behind the brand shell. CapEx / preview only. Not a pnpm workspace member.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "serve": "bash serve.sh"
+  }
+}

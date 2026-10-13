@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Casefile workbench — Clearfield · SAMPLE</title>
+  <meta name="description" content="SAMPLE claims/evidence workbench. Attach evidence to claims with a relation. No truth adjudication. Local, deterministic. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%232a5fd1%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3ECF%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/clearfield.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Clearfield home">
+      <span class="mark" aria-hidden="true">CF</span>
+      <span class="name">Clearfield<small>Tools · Evidence · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#door">Casefile</a></li>
+        <li><a href="workbench.html" aria-current="page">Workbench</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#door">Back to the shell</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="bench-title">
+    <p class="eyebrow">Workbench</p>
+    <h2 id="bench-title">Attach what you found. <span class="hi">Rule on nothing.</span></h2>
+    <p class="sub">
+      Add a claim, pick it, attach evidence with a relation. Contested surfaces itself when supports and
+      contradicts both land. There is no verdict control on this page, and there will not be one.
+      Sample casefile, sample evidence.
+    </p>
+
+    <div class="product-layout">
+      <section class="stage" id="casefile" data-state="empty" aria-labelledby="case-label">
+        <div class="stage-head">
+          <span class="label" id="case-label">Casefile · SAMPLE-01</span>
+          <span class="state" id="case-state" aria-live="polite">empty</span>
+        </div>
+
+        <div class="bench">
+          <div class="bench-col">
+            <form class="panel" id="claim-form" novalidate>
+              <div>
+                <label for="claim-text">New claim</label>
+                <input class="input" id="claim-text" name="claim" type="text" autocomplete="off"
+                  placeholder="What is being asserted?" />
+              </div>
+              <div class="actions">
+                <button class="btn btn-brand btn-small" type="submit" id="add-claim">Add claim</button>
+              </div>
+            </form>
+            <div class="claims" id="claims" aria-live="polite" aria-label="Claims in this casefile"></div>
+          </div>
+
+          <div class="bench-col">
+            <span class="field-label" id="evidence-label">Evidence pool</span>
+            <div class="evidence-pool" id="evidence" role="group" aria-labelledby="evidence-label"></div>
+            <div class="attach-row">
+              <div>
+                <label for="relation">Relation</label>
+                <select class="input" id="relation" name="relation"></select>
+              </div>
+              <button class="btn btn-brand" type="button" id="attach-btn" disabled>Attach</button>
+            </div>
+            <p class="selection empty" id="pick" aria-live="polite">Pick a claim on the left.</p>
+          </div>
+        </div>
+
+        <p class="summary" id="summary" aria-live="polite">0 claims · 0 attachments · 0 contested · 0 verdicts</p>
+      </section>
+
+      <aside class="panel">
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Noise flood</p>
+          <div class="msg">412 unread links · no claim · no relation · scroll forever</div>
+          <p class="muted-line" id="friction-line">The feed with nothing to hang on. Not what the workbench shows.</p>
+        </div>
+
+        <div class="card">
+          <p class="eyebrow">What this bench will not do</p>
+          <p class="no-verdict">It does not adjudicate. <strong>0 verdicts</strong>, always. <em>contested</em> means both relations are attached — it is a shape, not a ruling.</p>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-example">Load example casefile</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reset to empty</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">Attached</span>
+  </div>
+
+  <footer class="foot">
+    <span>Clearfield · SAMPLE · CapEx / preview</span>
+    <span>No verdicts · No crawl · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/casefile-ui.js"></script>
+</body>
+</html>

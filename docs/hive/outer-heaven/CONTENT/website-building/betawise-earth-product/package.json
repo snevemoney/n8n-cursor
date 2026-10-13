@@ -1,0 +1,11 @@
+{
+  "name": "betawise-earth-product-preview",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Betawise Earth SAMPLE \u2014 owned motion stage (procedural canvas globe) behind the brand shell. CapEx / preview only. Not a pnpm workspace member.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "serve": "bash serve.sh"
+  }
+}

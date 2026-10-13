@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Open a manual — Field Manuals · SAMPLE</title>
+  <meta name="description" content="SAMPLE held-docs manual. Pick, lift, open, thumb-tab, tick steps. Not a PDF. Reduced motion safe. CapEx / preview only." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%23c2481b%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-family=%27monospace%27 font-size=%2714%27 font-weight=%27700%27 fill=%27%23fff%27 text-anchor=%27middle%27%3EFM%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/field-manuals.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="sample-strip" role="note" aria-label="Sample status">
+    <span>Launch candidate · Example · CapEx only</span>
+    <span class="pill">Proof / concept</span>
+  </div>
+
+  <header class="nav">
+    <a class="brand" href="index.html" aria-label="Field Manuals home">
+      <span class="mark" aria-hidden="true">FM</span>
+      <span class="name">Field Manuals<small>Craft · Held docs · Sample</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#door">Held docs</a></li>
+        <li><a href="manual.html" aria-current="page">The manual</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost btn-small" href="index.html#door">Back to the shell</a>
+  </header>
+
+  <main id="main" class="section" aria-labelledby="desk-title">
+    <p class="eyebrow">Held docs</p>
+    <h2 id="desk-title">Three on the desk. <span class="hi">One in hand.</span></h2>
+    <p class="sub">
+      Tap a manual and it lifts into the hand. Open it for contents and thumb-tabs. Tick the steps as you
+      go. Put it back when you are done. No PDF, no download, no new tab. Sample manuals.
+    </p>
+
+    <div class="product-layout">
+      <section class="stage" id="desk" data-state="empty" aria-labelledby="desk-label">
+        <div class="stage-head">
+          <span class="label" id="desk-label">Desk · SAMPLE</span>
+          <span class="state" id="desk-state" aria-live="polite">empty · nothing in hand</span>
+        </div>
+
+        <div class="desk-layout">
+          <div class="shelf-col">
+            <span class="field-label" id="shelf-label">On the desk</span>
+            <div class="shelf" id="shelf" role="group" aria-labelledby="shelf-label"></div>
+            <div class="actions">
+              <button class="btn btn-brand" type="button" id="open-btn" disabled>Open</button>
+              <button class="btn btn-ghost" type="button" id="putback-btn" disabled>Put back</button>
+            </div>
+          </div>
+
+          <div class="hand" id="hand" data-state="empty" aria-label="In hand" aria-live="polite">
+            <p class="hand-empty empty-note">Nothing in hand. Tap a manual on the desk.</p>
+
+            <button class="hand-cover" id="hand-cover" type="button" aria-label="Open the manual in hand" hidden>
+              <span class="code">FM-00</span>
+              <span class="title">Manual</span>
+              <span class="hint">tap to open</span>
+            </button>
+
+            <div class="hand-open" id="hand-open" hidden>
+              <p class="hand-title eyebrow">FM-00 · Manual</p>
+              <div class="tabs" id="tabs" role="tablist" aria-label="Sections"></div>
+              <ol class="steps" id="steps" aria-label="Steps in this section"></ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="card friction" id="friction" data-muted="false" aria-labelledby="friction-label">
+          <p class="eyebrow" id="friction-label">Flat PDF dump</p>
+          <div class="msg">manual_v3_final_FINAL(2) · 48 MB · opens in a new tab · nobody reads it</div>
+          <p class="muted-line" id="friction-line">The download nobody opens. Not what the desk does.</p>
+        </div>
+
+        <div class="card">
+          <p class="eyebrow">How it is held</p>
+          <ul class="legend">
+            <li>One manual in hand at a time</li>
+            <li>Thumb-tabs: ← → move between sections</li>
+            <li>Ticks stay with the manual until you reset</li>
+          </ul>
+        </div>
+
+        <div class="card dim">
+          <p class="eyebrow">Demo controls</p>
+          <div class="actions">
+            <button class="btn btn-ghost btn-small" type="button" id="load-example">FM-02 open · operate</button>
+            <button class="btn btn-ghost btn-small" type="button" id="reset-empty">Reset to empty</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" data-show="false">
+    <span class="dot" aria-hidden="true">✓</span>
+    <span id="toast-text">In hand</span>
+  </div>
+
+  <footer class="foot">
+    <span>Field Manuals · SAMPLE · CapEx / preview</span>
+    <span>No PDF · No download · No outbound · invent_kpi=0</span>
+  </footer>
+
+  <script type="module" src="assets/manual-ui.js"></script>
+</body>
+</html>
