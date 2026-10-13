@@ -1,7 +1,9 @@
 name: Agent PR Review
 # Advisory AI review (COMMENT only; never approves or blocks). Approved by Evens 2026-10-13 (P11).
+# pull_request_target: the workflow file AND the reviewer script both come from the default branch, so a PR cannot
+# change what runs while the secret is present. PR head code is NEVER checked out or executed; the diff is read via the API.
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, ready_for_review]
 permissions:
   contents: read
