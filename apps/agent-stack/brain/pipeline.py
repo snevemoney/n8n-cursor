@@ -5215,6 +5215,18 @@ def hooked_result(result):
     return hooks.stop_check(hooks.post_tool(result))
 
 
+GEN_ASK_RE = re.compile(
+    r"^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:please\s+)?(?:(?:write|compose|come up with|give me|suggest|brainstorm|generate)\b.{0,60}?"
+    r"\b(?:bullets?|bullet points|summary|bio|headlines?|tagline|slogan|copy|caption|tweet|post|intro|outline|names?|ideas?|lines?)\b"
+    r"|(?:critique|review|roast|rewrite|improve|edit|proofread|tighten)\s+this\b.*[:'\"\u201c])", re.I | re.S)
+
+
+def generation_ask(u: str) -> bool:
+    """Self-contained writing asks go straight to the talk model with no tools: a tool detour (vault_read, a guessed
+    file read) answered 'Write three resume bullets…' with vault dumps and 'Critique this: …' with 'which file?'."""
+    return bool(GEN_ASK_RE.search(u or "")) and not re.search(r"\b(?:my|the)\s+(?:file|note|doc|document|vault)\b|\.(?:md|txt|pdf|docx)\b", u or "", re.I)
+
+
 def run_tool(pick: dict, utterance: str, **kw) -> dict:
     """Tool entry point: pre_tool gate, then the hand, then post_tool + stop_check."""
     tool = str((pick or {}).get("tool") or "")
@@ -7132,7 +7144,8 @@ def apply_pipeline_iter(
         brief = fit_budget(brief)
         provider_brief = fit_budget(brief)
         no_hands = (
-            shared_memory_answers(spoken_in)
+            generation_ask(spoken_in)
+            or shared_memory_answers(spoken_in)
             or plain_question(spoken_in)
             # Deterministic skill picker ahead of the LLM tool pick: a confident 'converse' needs no hand.
             or (
