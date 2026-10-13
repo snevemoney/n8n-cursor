@@ -34,6 +34,11 @@ def run(args: dict | None = None, talk_fn=None) -> dict:
         steps.append(step[:200])
         if len(steps) >= MAX_STEPS:
             break
+    if len(steps) < 2:  # the spoken path can flatten lines: "1. a 2. b 3. c"
+        parts = [x.strip() for x in re.split(r"(?:^|\s)\d+[.)]\s+", text) if x.strip()]
+        inline = [("(a tool call was suggested here; skipped — plans never run tools)" if _TOOLISH.search(x) else x)[:200]
+                  for x in parts[1:] if re.search(r"\d+[.)]\s", text)] if len(parts) > 2 else []
+        steps = inline[:MAX_STEPS] or steps
     if not steps:
         return {**base, "ok": False, "steps": [], "spoken": "I couldn't get a usable plan from the model. Nothing was run."}
     spoken = "Plan: " + " ".join(f"{i}. {s}" for i, s in enumerate(steps, 1)) + " Nothing has been run."

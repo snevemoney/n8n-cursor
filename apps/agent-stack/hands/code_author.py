@@ -61,10 +61,10 @@ def author(ask: str) -> dict:
     critic = critic_for(builder)
     verdict = CHAT(critic, "Review this Python and its test for bugs in two short sentences. Start with LGTM or ISSUE.\n\n"
                            f"```python\n{code}\n```\n```python\n{test}\n```") or "critic unavailable"
-    verdict = " ".join(str(verdict).split())[:240]
+    verdict = " ".join(str(verdict).split())
+    verdict = (re.match(r"(.{1,140}?[.!?])(\s|$)", verdict) or re.match(r"(.{1,140})", verdict)).group(1)
     name = (re.search(r"^\s*def\s+(\w+)", code, re.M) or re.search(r"(\w+)", code)).group(1)
-    spoken = (f"I had {builder} write {name} with a test; nothing has run. "
-              f"Critic {critic} (a different model family from the builder) says: {verdict} "
-              "Say \"confirm\" and I'll run it in the sandbox.")
+    spoken = (f"I wrote {name} with a test; nothing has run. Say \"confirm\" and I'll run it in the sandbox. "
+              f"A critic from a different model family reviewed it ({critic.split('/')[-1]}; builder {builder.split('/')[-1]}): {verdict}")
     return {"ok": True, "code": code, "test": test, "builder_model": builder, "critic_model": critic,
             "verdict": verdict, "spoken": spoken}

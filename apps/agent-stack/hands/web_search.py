@@ -124,8 +124,8 @@ def _brave(query: str, timeout: float) -> list[dict[str, str]]:
     return parse_brave(cp.stdout[:900_000].decode("utf-8", "replace"))
 
 
-# DuckDuckGo first, then Brave; Bing (keyword-only) is the last resort.
-ENGINES = [_ddg, _brave, _bing]
+# DuckDuckGo first, then Brave. Bing's plain page from curl returned off-topic results live, so it is not used.
+ENGINES = [_ddg, _brave]
 
 
 def _default_fetch(query: str, timeout: float) -> list[dict[str, str]]:
@@ -141,9 +141,19 @@ def _default_fetch(query: str, timeout: float) -> list[dict[str, str]]:
             rows = eng(query, share)
         except Exception:
             rows = []
-        if rows:
+        if rows and _relevant(query, rows):
             return rows
     return []
+
+
+def _relevant(query: str, rows: list[dict[str, str]]) -> bool:
+    """At least one top result mentions a real query word (drops engines that answered a different question)."""
+    stop = {"what", "is", "the", "of", "a", "an", "who", "which", "current", "latest", "now", "for", "in", "on", "and", "my"}
+    words = {w.lower() for w in re.findall(r"[\w.#+-]{3,}", query)} - stop
+    if not words:
+        return True
+    text = " ".join((r.get("title", "") + " " + r.get("snippet", "") + " " + r.get("url", "")).lower() for r in rows[:3])
+    return any(w in text for w in words)
 
 
 def _clean(text: str) -> str:

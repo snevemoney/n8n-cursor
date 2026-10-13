@@ -110,12 +110,19 @@ def run(args: dict | None = None, *, servers: dict | None = None, allow: set | N
     return {"ok": True, "server": name, "tools": tools, "spoken": sp}
 
 
-_SRV = re.compile(r"\b(?:tools?\s+(?:on|from|of|in)\s+(?:the\s+)?)([\w.\-]+)(?:\s+mcp)?(?:\s+server)?\b", re.I)
+_SRV = re.compile(r"\b(?:tools?\s+(?:are\s+)?(?:on|from|of|in)\s+(?:the\s+|your\s+|my\s+)?)((?:read-only\s+)?[\w.\-]+)(?:\s+mcp)?(?:\s+server)?\b", re.I)
+_GENERIC = {"your", "my", "the", "read-only", "readonly", "mcp", "server", "allowlisted", "local", "one"}
 
 
 def args_from_utterance(u: str) -> dict:
     m = _SRV.search(u or "")
-    return {"server": m.group(1)} if m else {}
+    if not m:
+        return {}
+    name = m.group(1).lower().removeprefix("read-only ").strip()
+    if name in _GENERIC:
+        allowed = sorted(allowlist())
+        return {"server": allowed[0]} if len(allowed) == 1 else {}
+    return {"server": m.group(1)}
 
 
 def log_meta(got: dict) -> dict:

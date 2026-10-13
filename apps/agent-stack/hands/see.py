@@ -115,6 +115,7 @@ def safari_activate() -> dict:
 
 
 POLL_SEC = 0.5
+_PLACEHOLDER_TITLE = re.compile(r"^(untitled|sans titre|loading|chargement|sin t[ií]tulo|ohne titel)\W*$|^https?://", re.I)
 MAX_READS = 8  # bounded tab reads after one open (never re-opens)
 
 
@@ -159,7 +160,9 @@ def safari_open(url: str) -> dict:
         actual = str(observed.get("url") or "").strip()
         title = str(observed.get("title") or "").strip()
         passed = observed.get("ok") is True and observed.get("open") is True and same_page(target, actual)
-        if passed or observed.get("ok") is not True:
+        if passed and title and not _PLACEHOLDER_TITLE.match(title):
+            break
+        if observed.get("ok") is not True:
             break
         time.sleep(POLL_SEC)
     return {
