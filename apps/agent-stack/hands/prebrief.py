@@ -14,7 +14,7 @@ from pathlib import Path
 
 WINDOW_MIN = (10, 30)
 TIME_RE = re.compile(r"^\s*(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp][Mm])?\s+(.+)$")
-WANT_RE = re.compile(r"\b(?:prep|prepare|brief)\s+me\b|\bpre-?brief\b|\b(?:prep|notes)\s+for\s+(?:my\s+)?(?:next\s+)?(?:meeting|call|sync)\b|"
+WANT_RE = re.compile(r"\b(?:prep|prepare|brief)\s+me(?:\s+for\s+(?:my\s+|the\s+)?(?:next\s+)?(?:meeting|call|sync|event)\b|\s*[.!?]*$)|\bpre-?brief\b|\b(?:prep|notes)\s+for\s+(?:my\s+)?(?:next\s+)?(?:meeting|call|sync)\b|"
                      r"^\s*(?:yes|yeah|sure)[,.]?\s+(?:prep|pull|brief)\b", re.I)
 
 
