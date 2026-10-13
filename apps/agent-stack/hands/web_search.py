@@ -132,18 +132,23 @@ def _openrouter_web(query: str, timeout: float) -> list[dict[str, str]]:
     key = (_os.environ.get("OPENROUTER_API_KEY") or "").strip()
     if not key or timeout < 1.0:
         return []
-    body = {"model": _os.environ.get("JARVIS_WEB_MODEL") or "mistralai/mistral-small-3.2-24b-instruct",
-            "plugins": [{"id": "web", "max_results": MAX_CITES}], "max_tokens": 120,
+    # perplexity/sonar searches natively (~1.5 s live) and returns url_citation annotations; the generic web
+    # plugin on other models took 4-10 s and missed the 6 s cap under load.
+    model = _os.environ.get("JARVIS_WEB_MODEL") or "perplexity/sonar"
+    body = {"model": model, "max_tokens": 120,
             "messages": [{"role": "user", "content": "Answer in one sentence from the web: " + query}]}
+    if not model.startswith("perplexity/"):
+        body["plugins"] = [{"id": "web", "max_results": MAX_CITES}]
     req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", data=_json.dumps(body).encode(),
                                  headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         msg = (_json.loads(r.read(400_000)).get("choices") or [{}])[0].get("message") or {}
-    answer = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", str(msg.get("content") or ""))
-    out = []
+    answer = re.sub(r"\[([^\]]*)\]\([^)]*\)|\[\d+\]|\*\*", lambda m: m.group(1) or "", str(msg.get("content") or "")).strip()
+    out, seen = [], set()
     for a in msg.get("annotations") or []:
         c = a.get("url_citation") or {}
-        if str(c.get("url") or "").startswith(("http://", "https://")):
+        if str(c.get("url") or "").startswith(("http://", "https://")) and c["url"] not in seen and len(out) < MAX_CITES:
+            seen.add(c["url"])
             out.append({"url": c["url"], "title": str(c.get("title") or ""),
                         "snippet": answer if not out else str(c.get("content") or "")[:220]})
     return out
@@ -173,12 +178,10 @@ def _default_fetch(query: str, timeout: float) -> list[dict[str, str]]:
     for i, eng in enumerate(ENGINES):
         threading.Thread(target=one, args=(i, eng), daemon=True).start()
     while _t.time() < end:
-        for i in range(len(ENGINES)):
-            if i not in box:
-                break  # an earlier engine is still working; wait for it
+        for i in sorted(box):  # first relevant answer to land wins (lowest engine index on a tie)
             if box[i]:
                 return box[i]
-        else:
+        if len(box) == len(ENGINES):
             return []
         done.wait(max(0.0, min(0.1, end - _t.time()))); done.clear()
     for i in range(len(ENGINES)):
