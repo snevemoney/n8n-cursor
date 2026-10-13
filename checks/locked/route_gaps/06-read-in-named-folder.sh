@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# plain: "Read the file X.txt in my Downloads" reads Downloads/X.txt (not the repo), and the text it returns is marked as data.
+# plain: "Read the file X.txt in my Downloads" reads Downloads/X.txt (not the repo).
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)/apps/agent-stack"
 export PYTHONPATH="$PWD" PYTHONDONTWRITEBYTECODE=1
