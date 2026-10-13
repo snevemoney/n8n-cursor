@@ -13,6 +13,7 @@ import json
 import os
 import re
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -513,7 +514,7 @@ def _apply_turn_iter_inner(
         yield _door_speak(
             hive,
             spoken,
-            "Watch is off. Tap Watch on the face.",
+            "The screen was not shared, sir. Watch is off. Tap Watch on the face to share it."  # Z54 (U-LX 7:57),
             "watch",
             retrieve_roots,
             gen=token,
@@ -540,6 +541,25 @@ def _apply_turn_iter_inner(
                        "cites": [nb["path"]], "wires": ["vault_read", "reflex"], "sent": False, "task_verified": True}
                 yield _door_speak(hive, spoken, got["spoken"], "vault_read", retrieve_roots, gen=token, execution=got)
                 return
+    except Exception:  # noqa: BLE001
+        pass
+    # Z60 (zdnijkAbknA 3:31-3:42, 4:26): a spoken conditional approval -> read-back + written approval record + inbox card.
+    try:
+        _ap = PIPELINE._load("agent_stack_approval", PIPELINE.STACK / "hands" / "approval.py")
+        if _ap.wants(spoken) and not re.search(r"\b(?:send|wire|pay|transfer)\b(?!\s+me\s+a\s+confirmation)", spoken, re.I):
+            _rm = PIPELINE._results_mem()
+            got = _ap.run(spoken, inbox=Path(_rm.VAULT_INBOX) if not os.environ.get("PYTEST_CURRENT_TEST") else None)
+            card = {"title": "📝 Approval granted (pending check)", "fields": got["fields"] + [f"File: {c}" for c in got["cites"]][:1],
+                    "body": got["spoken"][:220], "ts": time.time()}
+
+            def _inbox(bus: dict) -> dict:
+                ib = bus.get("inbox") if isinstance(bus.get("inbox"), dict) else {}
+                items = [c for c in (ib.get("items") or []) if isinstance(c, dict)][-4:] + [card]
+                bus["inbox"] = {"gen": int(ib.get("gen") or 0) + 1, "items": items}
+                return bus
+            PIPELINE.mutate_bus(Path(hive), _inbox)
+            yield _door_speak(hive, spoken, got["spoken"], "approval", retrieve_roots, gen=token, execution=got)
+            return
     except Exception:  # noqa: BLE001
         pass
     # Z02: "where do I click to X" is tutor mode: on-device locate + native arrow, never a Watch click, never a screenshot.
