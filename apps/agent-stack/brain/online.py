@@ -190,6 +190,21 @@ OPENROUTER_HANDS = (
     {
         "type": "function",
         "function": {
+            "name": "skills",
+            "description": "Read-only: list the skills Jarvis has (names and descriptions from SKILL.md files) or read one named skill's text (capped). Use it before claiming which skills exist.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "op": {"type": "string", "enum": ["list", "read"]},
+                    "name": {"type": "string"},
+                },
+                "required": ["op"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "cursor_ask",
             "description": "Ask Cursor CLI about this repo's code. Not for last sittings or what he is talking about with Cursor.",
             "parameters": {

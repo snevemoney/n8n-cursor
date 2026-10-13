@@ -48,6 +48,8 @@ _RULES: list[tuple[str, float, re.Pattern]] = [
     ("web_search", 0.9, re.compile(r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b|\blook\s+(?:it\s+)?up\s+online\b|\bweb\s+search\b|\bgoogle\s+(?:the|for|what|who|how)\b", re.I)),
     # workspace_read hand: repo/branch/file/folder asks are a local read (advisory label only).
     ("local_read", 0.9, re.compile(r"\b(?:what|which)\s+(?:repo|repos|branch)\b|\b(?:read|open)\b.{0,40}\.(?:md|txt|py|json)\b|\blist\b.{0,30}\b(?:downloads|desktop|documents)\b", re.I)),
+    # skills hand: which skills / read one skill is a local read (advisory label only).
+    ("local_read", 0.9, re.compile(r"\b(?:which|what)\s+skills\b|\b(?:list|show)\b.{0,20}\bskills\b|\b(?:read|open|show)\s+(?:the\s+)?[\w.\-]+\s+skill\b", re.I)),
     ("local_read", 0.9, re.compile(r"\b(read|open|show)\s+(?:me\s+)?(?:my|the)\s+(?:vault|note|notes|file|lane|doc)\b|\bin\s+(?:my|the)\s+vault\b", re.I)),
     ("tool", 0.85, re.compile(r"\b(open|click|type\s+into|look\s+at\s+(?:my|the)\s+screen|safari|watch\s+mode|cursor\s+agent|screenshot)\b", re.I)),
     ("craft", 0.85, re.compile(r"\b(gridcraft|photocraft|artcraft|\w+craft)\b.*\b(make|create|save|export|edit|build|write)\b|\b(make|create|save|export|edit|build|write)\b.*\b\w+craft\b", re.I)),
