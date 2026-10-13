@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "rules", "workbench", "drafts", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -839,7 +839,8 @@ def fit_budget(text: str, budget: int | None = None) -> str:
 
 
 MCP_CALL_RE = re.compile(
-    r"\b(?:list|show|what)\b.{0,15}\btools?\s+(?:are\s+)?(?:on|from|of|in)\s+(?:the\s+|your\s+|my\s+)?(?:[\w.\-]+\s+)?(?:mcp\s+)?server\b",
+    r"\b(?:list|show|what)\b.{0,15}\btools?\s+(?:are\s+)?(?:on|from|of|in)\s+(?:the\s+|your\s+|my\s+)?(?:[\w.\-]+\s+)?(?:mcp\s+)?server\b"
+    r"|\buse\s+(?:the\s+|my\s+)?[\w.\-]+\s+(?:mcp\s+)?server\b.{0,40}\b(?:list|show)\b.{0,10}\btools\b",
     re.I,
 )
 
@@ -983,12 +984,40 @@ def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
     return {}
 
 
+_STEP_SPLIT = re.compile(r"(?:^|[\s,;:])\(?([1-5])[.)]\s+")
+
+
+def split_steps(utterance: str) -> list[str]:
+    """'Do X: 1) a, 2) b, 3) c' -> ['a', 'b', 'c'] when numbered 1..n in order; else []."""
+    parts = _STEP_SPLIT.split(utterance or "")
+    nums, texts = parts[1::2], [t.strip(" ,;.") for t in parts[2::2]]
+    if len(nums) < 2 or nums != [str(i) for i in range(1, len(nums) + 1)] or not all(texts):
+        return []
+    return texts
+
+
+def _simple_step(step: str) -> str | None:
+    """Tiny model-free answers for common sub-steps (date, time, disk)."""
+    import shutil
+    from datetime import datetime as _dt
+    if re.search(r"\b(?:today'?s?\s+date|what\s+day|the\s+date)\b", step, re.I):
+        return "Today is " + _dt.now().strftime("%A, %B %-d, %Y") + "."
+    if re.search(r"\b(?:time\s+is\s+it|current\s+time|the\s+time)\b", step, re.I):
+        return "It's " + _dt.now().strftime("%-I:%M %p") + "."
+    if re.search(r"\bdisk\s+(?:space|usage|free)|free\s+space\b", step, re.I):
+        u = shutil.disk_usage(str(Path.home()))
+        return f"Disk: {u.free / 1e9:.0f} GB free of {u.total / 1e9:.0f} GB."
+    return None
+
+
 def model_free_route(spoken_in: str) -> dict | None:
     """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
     if wants_memory(spoken_in):
         return {"tool": "memory", "args": _memory_hand().args_from_utterance(spoken_in), "speak": ""}
     if wants_continuity_status(spoken_in):
         return None
+    if len(split_steps(spoken_in)) >= 2 and not is_hard_step(spoken_in):
+        return {"tool": "multistep", "args": {}, "speak": ""}
     early = fixed_route(spoken_in)
     if early is not None and early.get("tool") == "safari_see" and (early.get("args") or {}).get("act") == "grab":
         # Rank 16: a screen ask is the whole display (screen_see), not the Safari tab.
@@ -996,6 +1025,8 @@ def model_free_route(spoken_in: str) -> dict | None:
     if early is None and not is_hard_step(spoken_in):
         if _workbench_hand().wants_mode(spoken_in) or _workbench_hand().wants_workbench(spoken_in):
             early = {"tool": "workbench", "args": {}, "speak": ""}
+        elif _pickup_hand().wants_pickup(spoken_in):
+            early = {"tool": "pickup", "args": {}, "speak": ""}
         elif _drafts_hand().wants_draft(spoken_in):
             early = {"tool": "drafts", "args": {}, "speak": ""}
         elif wants_rules(spoken_in):
@@ -1012,7 +1043,8 @@ def model_free_route(spoken_in: str) -> dict | None:
             early = {"tool": "loop", "args": {}, "speak": ""}
         elif wants_desk_dispatch(spoken_in):
             early = {"tool": "desk_dispatch", "args": {}, "speak": ""}
-        elif wants_code_run(spoken_in):
+        elif wants_code_run(spoken_in) or (_code_author_hand().wants_author(spoken_in)
+                                            and re.search(r"\b(?:test|run)\b", spoken_in, re.I)):
             early = {"tool": "code_run", "args": {}, "speak": ""}
         elif wants_mcp_inventory(spoken_in):
             early = {"tool": "mcp_inventory", "args": {}, "speak": ""}
@@ -1141,6 +1173,16 @@ def _plan_hand():
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
     return sys.modules[name]
+
+
+def _pickup_hand():
+    key = "agent_stack_pickup"
+    if key not in sys.modules:
+        spec = importlib.util.spec_from_file_location(key, STACK / "hands" / "pickup.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[key] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[key]
 
 
 def _drafts_hand():
@@ -3238,6 +3280,9 @@ def finish_spoken(text: str) -> str:
     tail = body[match.end() :].strip()
     if not tail or re.match(r"https?://", tail, re.I) or re.search(r"[/:]", tail):
         return body
+    # A closed code span / quote (`open "<file>"`) is a whole item, not a clipped word.
+    if "`" in tail or tail[-1] in "`\")]*":
+        return body
     if len(tail.split()) <= 3 and len(tail) <= 24:
         return body[: match.end()].strip()
     return body
@@ -5174,6 +5219,33 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["screen_see"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "screen_see_meta": hd.log_meta(got)}
+    if tool == "multistep":
+        lines, all_ok = [], True
+        kw = dict(hive=hive, retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn,
+                  cursor_ask_fn=cursor_ask_fn, craft_model_fn=craft_model_fn, sent=sent, gen=gen)
+        for i, step in enumerate(split_steps(utterance), 1):
+            said = _simple_step(step)
+            if said is None:
+                pick2 = model_free_route(step)
+                if pick2 is None or pick2.get("tool") == "multistep":
+                    said, ok = "I need you to ask this one on its own.", False
+                else:
+                    got = run_tool(pick2, step, **kw)
+                    said, ok = str(got.get("spoken") or "no answer"), bool(got.get("ok"))
+                all_ok = all_ok and ok
+            lines.append(f"Step {i} ({step}): {said}")
+            try:
+                bus_note = hive / "multistep-progress.txt"
+                bus_note.write_text("\n".join(lines), encoding="utf-8")
+            except OSError:
+                pass
+        return {"ok": all_ok, "tool": tool, "spoken": " ".join(lines), "wires": ["multistep"], "cites": [],
+                "sent": False, "task_verified": all_ok, "outcome": TOOL_LOOP if all_ok else HONEST_UNKNOWN}
+    if tool == "pickup":
+        got = _pickup_hand().run(utterance)
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["pickup"], "cites": [], "sent": False, "task_verified": bool(got.get("ok")),
+                "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "drafts":
         got = _drafts_hand().run(utterance)
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
@@ -5876,7 +5948,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
