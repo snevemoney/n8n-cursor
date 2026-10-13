@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "workspace_read", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "workspace_read", "skills", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -717,6 +717,25 @@ def wants_workspace_read(utterance: str) -> bool:
     return bool(WORKSPACE_READ_RE.search(utterance or ""))
 
 
+SKILLS_RE = re.compile(
+    r"\b(?:which|what)\s+skills\b|\b(?:list|show)\b.{0,20}\bskills\b|\b(?:read|open|show)\s+(?:me\s+)?(?:the\s+)?[\w.\-]+\s+skill\b",
+    re.I,
+)
+
+
+def wants_skills(utterance: str) -> bool:
+    """Explicit ask about the skills Jarvis has or one skill's text. Goes to hands/skills (read-only)."""
+    return bool(SKILLS_RE.search(utterance or ""))
+
+
+def jarvis_rules() -> str:
+    """Short operating rules (JARVIS.md) loaded into the turn prompt. Empty string if the file is missing."""
+    try:
+        return (STACK / "JARVIS.md").read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
+
+
 WEB_SEARCH_RE = re.compile(
     r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b|\blook\s+(?:it\s+|this\s+|that\s+)?up\s+online\b|"
     r"\bweb\s+search\b|\bgoogle\s+(?:the|for|it|what|who|how|when|where|a|an)\b",
@@ -758,7 +777,9 @@ def model_free_route(spoken_in: str) -> dict | None:
         return None
     early = fixed_route(spoken_in)
     if early is None and not is_hard_step(spoken_in):
-        if wants_workspace_read(spoken_in):
+        if wants_skills(spoken_in):
+            early = {"tool": "skills", "args": {}, "speak": ""}
+        elif wants_workspace_read(spoken_in):
             early = {"tool": "workspace_read", "args": {}, "speak": ""}
         elif wants_web_search(spoken_in):
             early = {"tool": "web_search", "args": {}, "speak": ""}
@@ -795,6 +816,16 @@ def _web_search_hand():
     name = "agent_stack_web_search"
     if name not in sys.modules:
         spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "web_search.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _skills_hand():
+    name = "agent_stack_skills"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "skills.py")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
@@ -2606,9 +2637,9 @@ def assemble_pack(
         lines.append("")
     lines.append(
         "Put the answer in speak after the hand runs. "
-        "Hands: vault_read, safari_see, cursor_ask, craft, status, refuse_hard_step. mac_act only while Watch is armed. "
+        "Hands: vault_read, workspace_read, skills, web_search, safari_see, cursor_ask, craft, status, refuse_hard_step. mac_act only while Watch is armed. "
         "craft drives a Craft app: args {app, task}. "
-        'JSON: {"tool":"converse"|"vault_read"|"workspace_read"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
+        'JSON: {"tool":"converse"|"vault_read"|"workspace_read"|"skills"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
     )
     return "\n".join(lines).rstrip() + "\n"
 
@@ -2832,10 +2863,11 @@ def pick_prompt(pack_path: Path, utterance: str) -> str:
         "Use that pack, not a truncated prompt. Store is optional context. "
         "Private claims need evidence. General talk may reason without a cite.\n"
         f"Utterance: {(utterance or '').strip()}\n"
+        f"{jarvis_rules()}\n"
         "Answer what he said. Follow-ups use the sitting turns in the pack.\n"
         "Store loads this turn. Last Cursor chat is the last Cursor sitting. Do not keyword-search the vault for chats.\n"
         "JSON preferred, prose speak is also fine:\n"
-        '{"tool":"converse"|"vault_read"|"workspace_read"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}\n'
+        '{"tool":"converse"|"vault_read"|"workspace_read"|"skills"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}\n'
     )
 
 
@@ -4698,6 +4730,20 @@ def run_tool(
             "web_search_meta": ws.log_meta(got),
             "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN,
         }
+    if tool == "skills":
+        sk = _skills_hand()
+        sargs = dict(args) if args.get("op") else sk.args_from_utterance(utterance)
+        got = sk.run(sargs)
+        return {
+            "ok": bool(got.get("ok")),
+            "tool": tool,
+            "spoken": str(got.get("spoken") or ""),
+            "wires": ["skills"],
+            "cites": [],
+            "sent": False,
+            "task_verified": bool(got.get("ok")),
+            "skills_meta": sk.log_meta(got),
+        }
     if tool == "workspace_read":
         wr = _workspace_read_hand()
         wargs = dict(args) if args.get("op") else wr.args_from_utterance(utterance)
@@ -5339,7 +5385,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "web_search", "say", "status", "safari_see")
+DETERMINISTIC_HANDS = ("workspace_read", "skills", "web_search", "say", "status", "safari_see")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
