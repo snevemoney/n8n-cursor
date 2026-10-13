@@ -19,6 +19,8 @@ from pathlib import Path
 
 STACK = Path(__file__).resolve().parents[1]
 DEADLINE_S = 5.0
+CACHE_S = 600.0  # reuse a good tools/list for 10 minutes (read-only list, same spec)
+_TOOLS_CACHE: dict = {}
 NAME_OK = re.compile(r"^[\w.\-]{1,64}$")
 
 
@@ -103,7 +105,14 @@ def run(args: dict | None = None, *, servers: dict | None = None, allow: set | N
     spec = (servers or {}).get(name) if servers is not None else _inventory().server_spec(name)
     if not spec:
         return {"ok": False, "server": name, "tools": [], "spoken": f"I can't find a stdio config for {name}."}
-    tools = _list_tools(spec)
+    key = json.dumps(spec, sort_keys=True, default=str)
+    hit = _TOOLS_CACHE.get(key)
+    if servers is None and hit and time.monotonic() - hit[0] < CACHE_S:
+        tools = hit[1]  # same server spec answered recently; a busy Mac can't push it past the deadline
+    else:
+        tools = _list_tools(spec)
+        if tools is not None and servers is None:
+            _TOOLS_CACHE[key] = (time.monotonic(), tools)
     if tools is None:
         return {"ok": False, "server": name, "tools": [], "spoken": f"{name} did not answer within {int(DEADLINE_S)} seconds. I stopped it."}
     sp = f"{name} offers {len(tools)} tools: " + ", ".join(tools[:15]) + ("…" if len(tools) > 15 else ".") + " Read-only listing; nothing was called."
