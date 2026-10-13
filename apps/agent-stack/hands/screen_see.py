@@ -41,11 +41,11 @@ def _data_url(path: Path) -> str | None:
 def run(args: dict | None = None, *, hive: Path | None = None, grab_fn=None, vision_fn=None) -> dict:
     base = {"tool": "screen_see", "source": "screen", "wires": ["screen"], "cites": [], "sent": False}
     if hive is None:
-        return {**base, "ok": False, "spoken": "I can't grab the screen without the hive folder."}
+        return {**base, "ok": False, "spoken": "The screen was not shared, sir. I can't grab it without the hive folder."}
     grab = grab_fn or (lambda h, bounds=None: _see().grab_screen(h, bounds))
     got = grab(Path(hive), None) if grab_fn is None else grab_fn(Path(hive), bounds=None)
     if not got or not got.get("ok"):
-        return {**base, "ok": False, "spoken": str((got or {}).get("spoken") or "I couldn't grab the screen. Allow Screen Recording for Terminal.")}
+        return {**base, "ok": False, "spoken": str((got or {}).get("spoken") or "The screen was not shared, sir. Allow Screen Recording for Terminal.")}  # Z54
     shot = Path(str(got.get("path") or ""))
     try:
         url = _data_url(shot)
@@ -57,7 +57,7 @@ def run(args: dict | None = None, *, hive: Path | None = None, grab_fn=None, vis
             except OSError:
                 pass
     if not url:
-        return {**base, "ok": False, "spoken": "I grabbed the screen, but the image was too large or empty to describe."}
+        return {**base, "ok": False, "spoken": "The screen was not shared, sir: the capture came back empty, so I won't guess."}
     text = None
     if vision_fn is not None:
         try:
