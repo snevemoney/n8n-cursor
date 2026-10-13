@@ -77,3 +77,10 @@ def test_pull_up_my_named_thing_does_not_refuse_as_outside_folders(tmp_path):
     got = _run("workspace_read", "can you pull up my posting automations", tmp_path)
     assert "outside the allowed folders" not in str(got.get("spoken") or "")
     assert got.get("tool") == "vault_read"
+
+
+def test_leading_no_before_a_verb_is_a_correction_not_a_negation():
+    assert P.correction_text("no use the server for the drawing app") == "Use the server for the drawing app"
+    assert P.correction_text("no, open the notes app") == "Open the notes app"
+    assert P.correction_text("no thanks") == "no thanks"
+    assert P.correction_text("no I don't want that") == "no I don't want that"

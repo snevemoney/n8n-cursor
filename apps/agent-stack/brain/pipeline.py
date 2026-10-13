@@ -1023,6 +1023,18 @@ RESEARCH_LEAD_RE = re.compile(r"^.*?\bonline\s+research\s+(?:about|on|for)\s+|^.
 SCREEN_WORD_RE = re.compile(r"\b(?:screen|display|monitor|see|look|watch|showing|pop-?up|window)\b", re.I)
 
 
+CORRECTION_LEAD_RE = re.compile(r"^\s*no[,.!]?\s+(?=(?:use|do|open|try|run|go|make|put|pick|take)\b)", re.I)
+
+
+def correction_text(spoken_in: str) -> str:
+    """'No use the MCP for X' is a correction ("no, use X"), not "don't use X". Drop the lead "No" so it reads as the ask."""
+    u = spoken_in or ""
+    if not CORRECTION_LEAD_RE.match(u):
+        return u
+    rest = CORRECTION_LEAD_RE.sub("", u, count=1)
+    return rest[:1].upper() + rest[1:]
+
+
 def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
     """Deterministic honest picks for the asks that went wrong in live chat. None = keep the normal route."""
     u = spoken_in or ""
@@ -6763,6 +6775,7 @@ def apply_pipeline_iter(
     if token and turn_cancelled(hive, token):
         return
     # Loop on_it: decide the model-free route now so the very first chunk can be the ack line.
+    spoken_in = correction_text(spoken_in)
     had_pending = hive is not None and _confirm_path(hive).exists()
     early = confirm_take(hive, spoken_in) or live_chat_route(spoken_in, had_pending) or model_free_route(spoken_in)
     ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""
