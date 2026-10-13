@@ -2324,17 +2324,22 @@ def call_grok(prompt: str, context: str = "") -> dict:
 
 def call_hive() -> dict:
     facts: list[str] = []
+    from concurrent.futures import ThreadPoolExecutor
+    pool = ThreadPoolExecutor(max_workers=2)
+    sc_f = pool.submit(_http_code, SCORPION_HEALTH, 5.0)
+    pro_f = pool.submit(_http_code, PRO_HEALTH, 5.0)
+    pool.shutdown(wait=False)
     try:
-        golden = _http_json(GOLDEN, timeout=12.0)
+        golden = _http_json(GOLDEN, timeout=6.0)
         if golden.get("ok") or golden.get("http") == 200:
             facts.append(f"Golden paths {golden.get('passCount', '?')}/{golden.get('total', '?')}.")
         else:
             facts.append("UNKNOWN. Hive golden-paths did not return ok.")
     except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError) as exc:
         facts.append(f"UNKNOWN. Hive golden-paths failed: {exc}.")
-    sc = _http_code(SCORPION_HEALTH)
+    sc = sc_f.result()
     facts.append(f"Scorpion healthz HTTP {sc or 'down'}.")
-    pro = _http_code(PRO_HEALTH)
+    pro = pro_f.result()
     facts.append(f"Pro health HTTP {pro or 'down'}.")
     state_py = ROOT / "scripts/hive/hive-state.py"
     if state_py.is_file():
@@ -2889,22 +2894,42 @@ def _macos_mod():
     return mod
 
 
+_CAL_CACHE: dict = {}
+
+
+def _calendar_cached(mac, ttl: float = 300.0) -> dict:
+    """Calendar AppleScript takes ~8 s; reuse a good or denied answer for 5 minutes."""
+    hit = _CAL_CACHE.get("v")
+    if hit and time.monotonic() - hit[0] < ttl:
+        return hit[1]
+    got = mac.calendar_today()
+    if isinstance(got, dict) and (got.get("ok") or got.get("state") == "denied"):
+        _CAL_CACHE["v"] = (time.monotonic(), got)
+    return got
+
+
 def status(which: str = "all") -> dict:
     want = (which or "all").lower()
     parts: list[dict] = []
+    # Speed: run the slow network wires at once, not one after another.
+    from concurrent.futures import ThreadPoolExecutor
+    jobs = []
     if want in ("all", "hive", "server", "servers", "cloud"):
-        parts.append(call_hive())
+        jobs.append(call_hive)
     if want in ("all", "vps", "server", "servers", "hostinger", "cloud"):
-        parts.append(call_vps())
+        jobs.append(call_vps)
     if want in ("all", "cursor"):
-        parts.append(call_cursor())
+        jobs.append(call_cursor)
     mac = None
     if want in ("all", "calendar", "mail", "files"):
         mac = _macos_mod()
     if want in ("all", "calendar") and mac is not None:
-        parts.append(mac.calendar_today())
+        jobs.append(lambda: _calendar_cached(mac))
     if want in ("all", "mail") and mac is not None:
-        parts.append(mac.mail_unread())
+        jobs.append(mac.mail_unread)
+    if jobs:
+        with ThreadPoolExecutor(max_workers=len(jobs)) as pool:
+            parts.extend(f.result() for f in [pool.submit(j) for j in jobs])
     if not parts:
         parts = [call_hive(), call_vps(), call_cursor()]
     spoken = " ".join(str(p.get("spoken") or "").replace("UNKNOWN. ", "") for p in parts).strip()
