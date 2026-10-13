@@ -713,7 +713,7 @@ def _apply_turn_iter_inner(
 
             def _pcard(bus: dict, c=got["card"]) -> dict:
                 ib = bus.get("inbox") if isinstance(bus.get("inbox"), dict) else {}
-                bus["inbox"] = {"gen": int(ib.get("gen") or 0) + 1, "items": [x for x in (ib.get("items") or []) if isinstance(x, dict)][-4:] + [c]}
+                bus["inbox"] = {"gen": int(ib.get("gen") or 0) + 1, "items": [x for x in (ib.get("items") or []) if isinstance(x, dict)][-4:] + [dict(c, turn_gen=token)]}
                 return bus
             PIPELINE.mutate_bus(Path(hive), _pcard)
             yield _door_speak(hive, spoken, got["spoken"], "phone_sim", retrieve_roots, gen=token, execution=got)
@@ -743,7 +743,7 @@ def _apply_turn_iter_inner(
             _rm = PIPELINE._results_mem()
             got = _ap.run(spoken, inbox=Path(_rm.VAULT_INBOX) if not os.environ.get("PYTEST_CURRENT_TEST") else None)
             card = {"title": "📝 Approval granted (pending check)", "fields": got["fields"] + [f"File: {c}" for c in got["cites"]][:1],
-                    "body": got["spoken"][:220], "ts": time.time()}
+                    "body": got["spoken"][:220], "ts": time.time(), "turn_gen": token}
 
             def _inbox(bus: dict) -> dict:
                 ib = bus.get("inbox") if isinstance(bus.get("inbox"), dict) else {}

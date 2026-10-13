@@ -1801,11 +1801,21 @@
       if (!el || el === $("spoken")) return;
       const ib = bus && bus.inbox;
       const gen = ib ? Number(ib.gen || 0) : 0;
+      if (el.classList.contains("on") && Number(bus && bus.turn_gen || 0) > Number(el.dataset.turnGen || 0)) {
+        el.classList.remove("on");  // a new turn started: the previous turn's card steps aside
+      }
       if (lastInboxGen === null) { lastInboxGen = gen; return; }
       if (gen <= lastInboxGen) return;
       lastInboxGen = gen;
       const c = (ib.items || [])[ib.items.length - 1];
       if (!c) return;
+      // Cards are bound to the turn that produced them (turn_gen). A card from an older turn,
+      // or a background card while a turn is running, never covers the current reply.
+      const cur = Number(bus.turn_gen || 0);
+      if (c.turn_gen !== undefined && c.turn_gen !== null) {
+        if (Number(c.turn_gen) !== cur) return;
+      } else if (!c.background || bus.job_status === "working") return;
+      el.dataset.turnGen = String(c.turn_gen === undefined || c.turn_gen === null ? cur : c.turn_gen);
       const esc = (x) => String(x || "").replace(/[&<>]/g, (k) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[k]));
       el.innerHTML = `<div class="h">JARVIS \u00b7 INBOX</div><div class="t">${esc(c.title)}</div>`
         + ((c.fields || []).length ? `<div class="f">${(c.fields || []).map(esc).join(" \u00b7 ")}</div>` : "")

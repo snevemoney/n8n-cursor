@@ -45,7 +45,7 @@ def tick(hive: Path, *, mutate_fn, inbox: Path | None = None, now: float | None 
         said["text"] = text
         ib = bus.get("inbox") if isinstance(bus.get("inbox"), dict) else {}
         card = {"title": "\u23f3 Question lapsed", "fields": [f"Asked: {q.get('ask', '')[:90]}", f"Still undone: {q.get('pending', '')[:120]}"],
-                "body": text, "ts": now}
+                "body": text, "ts": now, "turn_gen": None, "background": True}
         bus["inbox"] = {"gen": int(ib.get("gen") or 0) + 1, "items": [c for c in (ib.get("items") or []) if isinstance(c, dict)][-4:] + [card]}
         bus["open_q"] = dict(q, state="lapsed", lapsed_at=now)
         bus["say"] = {"text": text, "ts": now}
