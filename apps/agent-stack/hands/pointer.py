@@ -164,7 +164,7 @@ def run(utterance: str, *, locate_fn=None, draw_fn=None, hover_fn=None, where_fn
         drawn = False
     (hover_fn or hover)(x, y)
     where = (where_fn or _where)(x, y)
-    said = f"There, sir: {label}, {where} of your screen. The red arrow is on it; click it when you're ready."
+    said = f"There: {label}, {where} of your screen. The red arrow is on it; click it when you're ready."
     if not drawn:
         said = f"It's {label}, {where} of your screen, sir. I couldn't draw the arrow this time."
     return {"ok": True, "found": True, "source": got.get("source"), "x": x, "y": y, "label": label, "drawn": drawn,
