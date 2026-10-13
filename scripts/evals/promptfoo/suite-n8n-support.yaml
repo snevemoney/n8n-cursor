@@ -1,0 +1,28 @@
+# source: see README.md
+description: 'g01 eval gate: n8n-support'
+prompts:
+- file://prompts/n8n-support.json
+providers:
+- id: openrouter:openai/gpt-4o-mini
+  config:
+    temperature: 0
+    max_tokens: 250
+defaultTest:
+  assert:
+  - type: cost
+    threshold: 0.002
+tests:
+- description: n8n-support-steps
+  vars:
+    query: n8n webhook returns 404 after I activated the workflow
+    platform: self-hosted n8n
+    priority: high
+  assert:
+  - type: icontains
+    value: webhook-test
+  - type: icontains
+    value: production
+  - type: llm-rubric
+    value: For an ACTIVATED workflow the answer tells the user to call the production URL (/webhook/...) and says the test URL (/webhook-test/...) only works while listening for a test event in the editor. FAIL if it tells them to use the test URL for the active workflow.
+  - type: javascript
+    value: /1\.|step/i.test(output)

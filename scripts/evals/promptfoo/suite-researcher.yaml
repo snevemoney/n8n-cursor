@@ -1,0 +1,33 @@
+# source: see README.md
+description: 'g01 eval gate: researcher'
+prompts:
+- file://prompts/researcher.json
+providers:
+- id: openrouter:openai/gpt-4o-mini
+  config:
+    temperature: 0
+    max_tokens: 250
+defaultTest:
+  assert:
+  - type: cost
+    threshold: 0.002
+tests:
+- description: researcher-keep-claude-skill
+  vars:
+    signal: New Claude Code skill pack teaches agents correct GSAP animation code
+      for Remotion videos.
+  assert:
+  - type: icontains
+    value: 'LABEL: KEEP'
+- description: researcher-drop-leisure
+  vars:
+    signal: Top 10 beach resorts in Mexico for winter 2027.
+  assert:
+  - type: icontains
+    value: 'LABEL: DROP'
+- description: researcher-drop-selling
+  vars:
+    signal: Cold-email automation SaaS that books 50 sales calls a week for agencies.
+  assert:
+  - type: icontains
+    value: 'LABEL: DROP'
