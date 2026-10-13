@@ -75,5 +75,33 @@ class FastAnswerTests(unittest.TestCase):
         self.assertFalse(got["ok"])
 
 
+class RoundFiveTests(unittest.TestCase):
+    def test_functioning_well_greeting_dropped(self):
+        for t in ("Sir. Good evening, sir. I'm functioning well tonight - ready to assist. What's on your mind?",
+                  "Sir. Good evening. I'm doing well and ready to serve you. What's on your mind?"):
+            out = online.unbacked_status_claim(t, backed=False)
+            self.assertNotRegex(out.lower(), r"functioning well|ready to (?:assist|serve)", t)
+            self.assertIn("What's on your mind?", out)
+
+    def test_plain_questions_skip_hands(self):
+        from brain import pipeline
+        for q in ("Explain what a CANDIDATE means here.", "Name three things you can do for me.", "What can you do?", "Tell me about the Orb."):
+            self.assertTrue(pipeline.plain_question(q), q)
+        for q in ("Open Safari and look at the screen", "Search my vault for Maya", "run status", "Explain what's on my screen"):
+            self.assertFalse(pipeline.plain_question(q), q)
+
+    def test_pass_shortcut_on_hands_path(self):
+        from brain import pipeline
+        with tempfile.TemporaryDirectory() as d:
+            Path(d, "AGENT_RULES.md").write_text("- Critic != builder; no self-PASS. Watchdog (or Evens) issues verdicts.\n")
+            with mock.patch.dict(os.environ, {"JARVIS_SHARED_DIR": d}), \
+                 mock.patch.object(pipeline.ONLINE, "call_openrouter", side_effect=AssertionError("no model")), \
+                 mock.patch.object(pipeline.ONLINE, "call_grok", side_effect=AssertionError("no model")):
+                got = pipeline.online_talk("Who is allowed to issue a PASS?", "", hands=True)
+                st = pipeline.online_talk("Status check: are all your tools ready?", "", hands=True)
+        self.assertEqual(got["engine"], "rule-cache")
+        self.assertEqual(st["engine"], "status-ask")
+
+
 if __name__ == "__main__":
     unittest.main()

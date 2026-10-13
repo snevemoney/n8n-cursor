@@ -1583,7 +1583,9 @@ STATUS_HEADER_RE = re.compile(
 
 GREETING_CLAIM_RE = re.compile(
     r"\bI(?:'m|\s+am)\s+(?:here\s+and\s+)?(?:fully\s+)?(?:operational|online)(?:\s*(?:,|and)\s*ready\s+to\s+(?:assist|serve|help)(?:\s+you)?(?:\s+this\s+evening)?)?"
-    r"|\bI(?:'m|\s+am)\s+ready\s+to\s+assist(?:\s+you)?(?:\s+this\s+evening)?",
+    r"|\bI(?:'m|\s+am)\s+ready\s+to\s+assist(?:\s+you)?(?:\s+this\s+evening)?"
+    r"|\bI(?:'m|\s+am)\s+(?:functioning|running|working|doing)\s+(?:well|fine|smoothly|perfectly|normally)(?:\s+(?:tonight|today|this\s+evening))?(?:\s*[-–—,]\s*|\s+and\s+)?(?:ready\s+to\s+(?:assist|serve|help)(?:\s+you)?)?"
+    r"|\b(?:and\s+)?ready\s+to\s+(?:assist|serve)(?:\s+you)?(?:\s+(?:tonight|today|this\s+evening))?",
     re.I,
 )
 
@@ -1774,15 +1776,24 @@ def _call_openrouter_inner(
                     # Hedged plain request: the stream path had no backup, and live 20 s
                     # stream stalls hit 2 of 7 no-hands turns. The reply is used whole either way.
                     fast = OPENROUTER_FAST_MODEL if OPENROUTER_FAST_MODEL and OPENROUTER_FAST_MODEL != mid else ""
+                    data = None
                     if stream_sink() is not None and os.environ.get("JARVIS_TALK_STREAM", "1") != "0":
                         racers = [(mid, _openrouter_payload(mid, user, stream=True, max_tokens=max_tokens))]
                         if fast:
                             racers.append((fast, _openrouter_payload(fast, user, stream=True, max_tokens=max_tokens, primary=fast)))
-                        text, finish, mid = raced_stream(
-                            racers, headers=headers, timeout=attempt, hedge=talk_hedge_sec(), sink=stream_sink()
-                        )
-                        data = {"choices": [{"message": {"content": text}, "finish_reason": finish or "stop"}]}
-                    else:
+                        stream_began = time.monotonic()
+                        try:
+                            text, finish, won = raced_stream(
+                                racers, headers=headers, timeout=attempt, hedge=talk_hedge_sec(), sink=stream_sink()
+                            )
+                            mid = won
+                            data = {"choices": [{"message": {"content": text}, "finish_reason": finish or "stop"}]}
+                        except TimeoutError:
+                            # Streams failed to open or never sent a token: spend what is left on the plain race.
+                            attempt = max(0.0, attempt - (time.monotonic() - stream_began))
+                            if attempt < 2.0:
+                                raise
+                    if data is None:
                         data = _hedged_http_json(
                             OPENROUTER_URL,
                             data=_openrouter_payload(mid, user, stream=False, max_tokens=max_tokens, images=stills),

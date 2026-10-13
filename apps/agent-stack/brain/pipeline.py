@@ -517,6 +517,25 @@ _CRAFT_ACT_RE = re.compile(
 _SC_PL = None
 
 
+PLAIN_ASK_RE = re.compile(
+    r"^\s*(?:(?:can|could)\s+you\s+)?(?:explain|describe|define|summari[sz]e|tell\s+me\s+(?:about|what|a|how|why)|what\s+(?:is|are|does|do|can)\b|"
+    r"why\s+(?:is|are|do|does)\b|how\s+(?:does|do|is)\b|name\s+(?:\w+\s+)?things|give\s+me\s+(?:a|an|one)\b)",
+    re.I,
+)
+HAND_ASK_RE = re.compile(
+    r"\b(?:open|look\s+at|read\s+(?:my|the)\s+(?:vault|file|screen)|safari|screen|search\s+(?:my|the)|in\s+(?:my|the)\s+vault|run\s+status|status\s+report|craft|cursor|watch\s+mode|click|type\s+into)\b",
+    re.I,
+)
+
+
+def plain_question(spoken: str) -> bool:
+    """'Explain X' / 'what can you do' needs words, not a hand. Live: these took the tool path at 16-17 s, unstreamed."""
+    text = (spoken or "").strip()
+    if not text or os.environ.get("JARVIS_PLAIN_NO_HANDS", "1") == "0":
+        return False
+    return bool(PLAIN_ASK_RE.match(text)) and not HAND_ASK_RE.search(text)
+
+
 def shared_memory_answers(spoken: str) -> bool:
     """A question the shared memory already answers needs no hand.
 
@@ -3883,6 +3902,17 @@ def online_talk(prompt: str, pack_text: str, talk_fn=None, *, images=None, extra
     as talk. Tests that set AGENT_STACK_CURSOR_DRY skip live HTTP unless talk_fn
     is injected.
     """
+    if talk_fn is None and not images and not extra_tools:
+        # Deterministic answers ride every talk path, hands or not (live :4018 PASS asks took the hands path).
+        local = None
+        if hasattr(ONLINE, "is_status_ask") and ONLINE.is_status_ask(prompt):
+            local = (ONLINE.STATUS_ASK_REPLY, "status-ask")
+        elif hasattr(ONLINE, "pass_rule_reply"):
+            rule = ONLINE.pass_rule_reply(prompt)
+            if rule:
+                local = (rule, "rule-cache")
+        if local:
+            return {"ok": True, "unknown": False, "wire": "local", "engine": local[1], "spoken": local[0], "model": "none"}
     if talk_fn is not None:
         try:
             got = talk_fn(prompt, pack_text, images=images)
@@ -5858,7 +5888,7 @@ def apply_pipeline_iter(
             if extra and extra not in pack_text:
                 brief = f"{pack_text}\n\n{extra}"
         provider_brief = brief
-        no_hands = shared_memory_answers(spoken_in)
+        no_hands = shared_memory_answers(spoken_in) or plain_question(spoken_in)
         talked = None
         if talk_fn is None and no_hands and os.environ.get("JARVIS_TALK_STREAM", "1") != "0":
             # Stream honest sentences to the Orb while the raced talk call runs (first words ~2 s).
