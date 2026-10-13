@@ -88,7 +88,7 @@ def _vault_index(roots=None) -> list:
                         if f.endswith(".md"):
                             stem = f[:-3]
                             toks = set(re.findall(r"[a-z0-9]+", stem.lower().replace("_", " ").replace("-", " ")))
-                            notes.append((stem, toks))
+                            notes.append((stem, toks, os.path.join(dp, f)))
             _IDX.update(notes=notes, at=time.time())
         finally:
             _IDX["building"] = False
@@ -105,7 +105,7 @@ def vault_note(u: str, roots=None) -> tuple[float, str]:
     if not want:
         return 0.05, ""
     best, name = 0.0, ""
-    for stem, toks in _vault_index(roots):
+    for stem, toks, *_ in _vault_index(roots):
         base = {t.rstrip("s") for t in toks}
         hit = len(want & base)
         if not hit:
@@ -142,3 +142,26 @@ def _vault(u: str) -> dict:
     if PERSONAL_RE.search(u or ""):
         p = max(p, 0.85)
     return {"vault_hit": p if p else 0.1, "vault_note": name}
+
+
+def note_path(name: str) -> str:
+    for stem, _t, path in _IDX["notes"]:
+        if stem == name:
+            return path
+    return ""
+
+
+def note_brief(name: str, max_chars: int = 320) -> dict:
+    """Read the named note on device: title plus its first meaningful lines. No model."""
+    path = note_path(name)
+    if not path:
+        return {"ok": False}
+    try:
+        text = open(path, encoding="utf-8", errors="replace").read(20000)
+    except OSError:
+        return {"ok": False}
+    body = re.sub(r"^---\n.*?\n---\n", "", text, flags=re.S)
+    lines = [re.sub(r"^[#>*\-\s]+", "", l).strip() for l in body.splitlines()]
+    lines = [l for l in lines if len(l) > 3 and not l.startswith(("|", "```"))]
+    gist = " ".join(lines)[:max_chars].rsplit(" ", 1)[0]
+    return {"ok": True, "path": path, "name": name, "gist": gist}

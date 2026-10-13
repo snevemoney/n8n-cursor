@@ -529,6 +529,19 @@ def _apply_turn_iter_inner(
             gen=token,
         )
         return
+    # Z12 (demo D5v4UuvtUXc 0:09-0:30): "pull up my X" where the reflex names a vault note -> read that note, no model detour.
+    try:
+        _rx = _reflex(spoken) or {}
+        if (_rx.get("vault_note") and float(_rx.get("vault_hit") or 0) >= 0.6 and _rx.get("lane") in ("converse", "other")
+                and re.search(r"\b(?:pull|bring)\s+up\b|\b(?:show|open|find)\s+(?:me\s+)?my\b", spoken or "", re.I)):
+            nb = _REFLEX.note_brief(_rx["vault_note"]) if _REFLEX is not None else {"ok": False}
+            if nb.get("ok"):
+                got = {"ok": True, "tool": "vault_read", "spoken": f"Your {nb['name']} note is up, sir. {nb['gist']}",
+                       "cites": [nb["path"]], "wires": ["vault_read", "reflex"], "sent": False, "task_verified": True}
+                yield _door_speak(hive, spoken, got["spoken"], "vault_read", retrieve_roots, gen=token, execution=got)
+                return
+    except Exception:  # noqa: BLE001
+        pass
     # Z02: "where do I click to X" is tutor mode: on-device locate + native arrow, never a Watch click, never a screenshot.
     if hasattr(PIPELINE, "_pointer_hand") and PIPELINE._pointer_hand().wants_pointer(spoken) and not PIPELINE.is_hard_step(spoken):
         # demo 2:04.1: the ack is spoken at once, before the look (storyboards/Z02)
@@ -867,6 +880,6 @@ if __name__ == "__main__":
 
 try:  # Z12: warm the vault note index at start so the first reflex can name a note
     import threading as _th
-    _th.Thread(target=lambda: _reflex(""), daemon=True).start()
+    _th.Thread(target=lambda: (_reflex("warm"), _REFLEX and _REFLEX._vault_index()), daemon=True).start()
 except Exception:  # noqa: BLE001
     pass
