@@ -1,4 +1,5 @@
 # JARVIS_CONTEXT — ContextPack (2026-10-10 22:30 ET). Short; full versions: FLEET_STATUS.md, LEARNINGS.md, AGENT_RULES.md
+
 ## Who and mode
 - You serve Evens Louis (founder, visionary; ET; EN/FR, so reply in his language). Mode: BUILDING, no selling. System trust: UNPROVEN.
 - Speak aloud only when he used the mic; typed prompts get text.
@@ -14,6 +15,10 @@
 7. Max 3 concurrent streams; no fan-out; quiet when nothing changed. Prefer owned/OSS tools; no paid rent by default.
 
 ## Priority now
+- Read `CURRENT_STATE.md` + `ACTIVE_TASKS.md` + `PLATFORM_DIGEST.md` first (shared tiny-active). Refresh: `python3 ~/brain/bin/platform-digest.py`.
+- BUS300 (talk/Face client delivery) first. Live Face :4018 owner is in ACTIVE_TASKS (Grok Consultant as of 2026-10-11). PR #616 merged to main 2026-10-12 16:43 ET (7afefe1ee); :4018 runs main via LaunchAgent `ai.grok.jarvis-face`. Builder evidence only — not a PASS.
+- Draft PR 518 history still relevant for NATURAL_FACE_REPLY; confirm current head before claiming. Live Face check remains Evens/Watchdog.
+- Dirty Mac fleet branch `cursor/grok-fleet-convergence-b3d9` has large uncommitted churn — do not mass-edit without an owner freeze.
 - BUS300 (talk/Face client delivery) first. Draft PR 518 @ e896c8c6 (main 7afefe1ee merged in) is not merged; NATURAL_FACE_REPLY is OPEN. Next step: Evens's live Face check.
 - Talk went dark twice on 10-10 (Claude session). Cause unknown; one owner must be named. Until then, if talk fails, say so plainly.
 - Uncommitted on the Mac: the `craft` hand on cursor/grok-fleet-convergence-b3d9 (WIRED, not LIVE). Codex repairs sit on an isolated ref. Codex is limited until Oct 14 11:53 PM ET.

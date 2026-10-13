@@ -1,6 +1,21 @@
-# SHARED_MEMORY — durable facts for any agent (no secrets). Updated 2026-10-10 22:30 ET (rev 2).
-Companions: `FLEET_STATUS.md` (desks now), `LEARNINGS.md` (signal lessons), `JARVIS_CONTEXT.md` (short pack).
-Sources: standing locks, operating/federation mandates, Trust Rebuild, packets through 2026-10-10. Volatile status lives in CURRENT_STATE.md, not here.
+# SHARED_MEMORY — durable facts for any agent (no secrets). Updated 2026-10-12 17:20 ET (rev 4).
+Companions: `FLEET_STATUS.md` (desks now), `LEARNINGS.md` (signal lessons), `JARVIS_CONTEXT.md` (short pack), `PLATFORM_DIGEST.md` (recent chats, distilled), `MAC_SHARED_MEMORY.md` (Mac paths).
+Sources: standing locks, operating/federation mandates, Trust Rebuild, packets through 2026-10-10; shared-memory fix 2026-10-12; timeline no-overwrite 2026-10-12. Volatile status lives in CURRENT_STATE.md, not here.
+
+## Shared-memory contract (2026-10-12)
+- **Tiny active (replace):** `CURRENT_STATE.md`, `ACTIVE_TASKS.md`, `PLATFORM_DIGEST.md` under `~/.grok-shared` (private-backed).
+- **Refresh chats without burning usage:** `python3 ~/brain/bin/platform-digest.py` reads local Claude/Codex/Cursor/Grok/Jarvis session files (+ gh PR list) and rewrites `PLATFORM_DIGEST.md` only. Zero Claude/Codex/Grok API calls. Never spawn three frontier auditors for the same recovery. Default does **not** clobber CURRENT_STATE.
+- **Raw chats stay per platform** (unique paths; append-only). Distilled truth goes in the digest. Do not paste full transcripts into the public repo.
+
+## One shared timeline — no-overwrite (2026-10-12)
+| Layer | What | Write rule |
+|---|---|---|
+| Raw | Cursor agent-transcripts; Claude `~/.claude/projects`; Codex `~/.codex/sessions`; Grok job-cards + ACTION_LOG.jsonl; Jarvis turns jsonl; PR metadata on GitHub | Append or unique path per session/desk. Never truncate another platform. |
+| Distilled | PLATFORM_DIGEST; SESSION-INDEX / sessions/INDEX.json; TRANSCRIPT_INDEX; CHRONICLE months | Digest REPLACE; INDEX **union-by-(surface,id)**; CHRONICLE keep-larger/newer on vault mirror. |
+| Tiny-active | CURRENT_STATE; ACTIVE_TASKS; PLATFORM_DIGEST | Replace whole file. One owner row per live surface in ACTIVE_TASKS. |
+| Obsidian | Projection of tiny-active + Outer Heaven cache | One-way. `BRAIN_PUSH_INBOX=0`. CHRONICLE size protect in mirror-cache + brain-sync. |
+
+**Grok 17 desks:** do **not** share one `HANDOFF.md`. Use per-desk `CONTENT/job-cards/<desk>.md`, `FLEET_STATUS` table rows, and append-only `ACTION_LOG.jsonl`. Digest has a Grok section.
 
 ## Evens (operator)
 - Evens Louis is the founder and **visionary**. He owns goals, taste and consequential approvals; the system owns decomposition, routing, retries and verification. Reduce "Evens Tax": don't make him chase agents or repeat corrections.
