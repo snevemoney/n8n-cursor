@@ -63,8 +63,13 @@ def author(ask: str) -> dict:
                 "spoken": "I couldn't write that code just now (the builder model gave no code), so nothing ran."}
     code, test = blocks[0].strip(), (blocks[1].strip() if len(blocks) > 1 else "")
     critic = critic_for(builder)
-    verdict = CHAT(critic, "Review this Python and its test for bugs in two short sentences. Start with LGTM or ISSUE.\n\n"
-                           f"```python\n{code}\n```\n```python\n{test}\n```") or "critic unavailable"
+    import os as _os
+    import threading as _th
+    _box: dict = {}
+    _t = _th.Thread(target=lambda: _box.update(v=CHAT(critic, "Review this Python and its test for bugs in two short sentences. Start with LGTM or ISSUE.\n\n"
+                                                       f"```python\n{code}\n```\n```python\n{test}\n```")), daemon=True)
+    _t.start(); _t.join(float(_os.environ.get("JARVIS_CRITIC_SEC") or 15))  # the turn wall is 60 s; a slow critic must not sink it
+    verdict = _box.get("v") or ("critic did not finish in time; nothing runs until you confirm" if _t.is_alive() else "critic unavailable")
     verdict = " ".join(str(verdict).split())
     verdict = (re.match(r"(.{1,140}?[.!?])(\s|$)", verdict) or re.match(r"(.{1,140})", verdict)).group(1)
     name = (re.search(r"^\s*def\s+(\w+)", code, re.M) or re.search(r"(\w+)", code)).group(1)
