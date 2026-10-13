@@ -5960,7 +5960,9 @@ def run_watch_loop(
                     "wires": ["watch"], "cycles": idx + 1, "reason": "unsupported_watch_tool"}
         if act_if_current(hive, token or None, lambda bus: bus) is None:
             return _watch_stopped(idx)
-        _narrate_step(hive, token or None, idx + 1, args, work_app)
+        narrate = globals().get("_narrate_step")  # Z01; absent in isolated watch-loop fixtures
+        if narrate is not None:
+            narrate(hive, token or None, idx + 1, args, work_app)
         ran = FRAME.commit_watch_stroke(
             hive,
             token or None,
