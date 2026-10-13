@@ -69,8 +69,31 @@ TITLE = {"code_run": "Code run", "web_search": "Research", "drafts": "Draft", "w
          "pickup": "Picked up", "multistep": "Task", "skills": "Skill run", "craft": "Made", "desk_dispatch": "Desk handoff"}
 
 
+ICON = {"web_search": "\U0001F50E", "mcp_call": "\U0001F527", "drafts": "\U0001F4C4", "code_run": "\U0001F4BB", "workbench": "\U0001F4BB",
+        "cost_card": "\U0001F4B0", "pointer": "\U0001F449", "pickup": "\U0001F4CB", "multistep": "\u2705", "loop": "\u23F0"}
+_ID = re.compile(r"\b[A-Z]{2,6}-\d{2,4}(?:-\d{1,4})?\b")
+_MONEY = re.compile(r"(?:\$|CA\$|US\$)\s?\d[\d,]*(?:\.\d+)?|\b\d+(?:\.\d+)?\s?(?:cents|%)")
+_URL = re.compile(r"https?://[^\s)\]>\"']+")
+
+
+def card_fields(row: dict) -> list[str]:
+    """Demo whIp 20:09 card: 'Quote — X · $2,500 · Drive: link · Doc: link'. Pull the same kinds of fields out of the result."""
+    text = row.get("result", "")
+    out: list[str] = []
+    for rx in (_ID, _MONEY):
+        for m in rx.findall(text):
+            if m not in out:
+                out.append(m)
+    for u in _URL.findall(text) + [r for r in row.get("refs") or [] if str(r).startswith(("http", "/"))]:
+        tag = "Doc" if "docs.google" in u else "Drive" if "drive.google" in u else ("File" if u.startswith("/") else u.split("/")[2])
+        item = f"{tag}: {u}"
+        if item not in out:
+            out.append(item)
+    return out[:6]
+
+
 def card_title(row: dict) -> str:
-    return f"{TITLE.get(row['hand'], row['hand'].replace('_', ' ').title())} \u2014 {row['ask'][:60]}"
+    return f"{ICON.get(row['hand'], '\u2022')} {TITLE.get(row['hand'], row['hand'].replace('_', ' ').title())} \u2014 {row['ask'][:60]}"
 
 
 def note_for(row: dict) -> str:
@@ -84,7 +107,8 @@ def note_for(row: dict) -> str:
         dest = VAULT_INBOX / f"{local:%Y-%m-%d %H%M} {row['hand']} - {slug}.md"
         refs = "".join(f"\n- {r}" for r in row.get("refs") or [])
         dest.write_text(f"---\ntype: jarvis-result\nhand: {row['hand']}\nts: {row['ts']}\ntags: [jarvis-inbox]\n---\n"
-                        f"# {card_title(row)}\n\n**Asked:** {row['ask']}\n\n{row['result']}\n" + (f"\n**Refs:**{refs}\n" if refs else ""),
+                        f"# {card_title(row)}\n\n**Asked:** {row['ask']}\n\n" + "".join(f"- {f}\n" for f in card_fields(row))
+                        + f"\n{row['result']}\n" + (f"\n**Refs:**{refs}\n" if refs else ""),
                         encoding="utf-8")
         return str(dest)
     except OSError:

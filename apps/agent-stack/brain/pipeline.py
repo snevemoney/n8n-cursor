@@ -5157,7 +5157,7 @@ def run_tool(pick: dict, utterance: str, **kw) -> dict:
             _rm = _results_mem()
             if _rm.write_back(str(got.get("tool") or tool), utterance, got) and kw.get("hive") is not None:
                 row = (_rm.recent(1, today_only=False) or [{}])[-1]
-                card = {"title": _rm.card_title(row), "body": row.get("result", "")[:220], "ts": row.get("ts")}
+                card = {"title": _rm.card_title(row), "fields": (got.get("meter") or _rm.card_fields(row)) + ([f"File: {c}" for c in (got.get("cites") or [])][:1] if got.get("meter") else []), "body": row.get("result", "")[:220], "ts": row.get("ts")}
 
                 def _inbox(bus: dict) -> dict:  # Z11 demo: a JARVIS INBOX card per finished result, "Got it" clears it
                     ib = bus.get("inbox") if isinstance(bus.get("inbox"), dict) else {}
@@ -5336,7 +5336,7 @@ def _run_tool_inner(
     if tool == "cost_card":
         got = _cost_hand().run(utterance)
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["cost_card"],
-                "cites": [], "sent": False, "task_verified": bool(got.get("ok")),
+                "cites": got.get("cites") or [], "meter": got.get("meter") or [], "sent": False, "task_verified": bool(got.get("ok")),
                 "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "pointer":
         got = _pointer_hand().run(utterance)

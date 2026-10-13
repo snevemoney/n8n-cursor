@@ -95,6 +95,35 @@ def _rows(path: Path) -> list[dict]:
     return rows
 
 
+METER = Path.home() / "Documents" / "My_Billion_Dollar_Vault" / "00_Outer_Heaven" / "JARVIS-INBOX" / "THE-METER-EVERYDAY.md"
+ROWS = [("reply", "Answers you, by voice or text", "A spoken or typed reply from the talk model."),
+        ("tool", "Notes, tools, calendar, files", "A hand answers on this Mac; no model call."),
+        ("web", "Live web research", "One sourced search (sonar) plus its request fee."),
+        ("code", "Code, drafts and builds", "A builder model call that writes or reviews.")]
+
+
+def meter_page(day: dict, busy: float, src: str) -> str:
+    """Demo U-LX 9:37: a 'The meter, everyday' page with what Jarvis does -> typical cost. Built from real logs."""
+    import os
+    if os.environ.get("PYTEST_CURRENT_TEST") or not METER.parent.parent.is_dir():
+        return ""
+    lines = ["# THE METER \u00b7 EVERYDAY", "", f"_Typical cost per thing Jarvis does, from today's turn log and {src}. Estimates._", "",
+             "| What Jarvis does | | Typical cost | Today |", "|---|---|---|---|"]
+    for cls, name, note in ROWS:
+        v = day.get(cls) or {"n": 0, "usd": 0.0}
+        each = (v["usd"] / v["n"] * 100) if v["n"] else 0.0
+        cost = "FREE" if v["n"] and each < 0.005 else (f"~{each:.2f}\u00a2" if v["n"] else "n/a")
+        lines.append(f"| **{name}** | {note} | {cost} | {v['n']} \u00d7, ${v['usd']:.3f} |")
+    lines += ["| **Instant reflexes** | Five quick decisions per ask, no model. | FREE | every turn |", "",
+              f"**A busy day** (20 answers, 5 actions, 1 research) costs about **{busy * 100:.0f}\u00a2**. Pay-per-use on your own keys; no subscription.", ""]
+    try:
+        METER.parent.mkdir(exist_ok=True)
+        METER.write_text("\n".join(lines), encoding="utf-8")
+        return str(METER)
+    except OSError:
+        return ""
+
+
 def run(utterance: str = "", *, log: Path | None = None, now: datetime | None = None, fetch=None) -> dict:
     now = now or datetime.now(timezone.utc)
     local_midnight = datetime.now().astimezone().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -120,7 +149,8 @@ def run(utterance: str = "", *, log: Path | None = None, now: datetime | None = 
     meter = [x for x in (each(c) for c in ("reply", "web", "code", "tool")) if x]
     busy = 20 * (day["reply"]["usd"] / max(1, day["reply"]["n"])) + 5 * (day["tool"]["usd"] / max(1, day["tool"]["n"])) \
         + 1 * (day["web"]["usd"] / max(1, day["web"]["n"]))
-    return {"ok": True, "card": day, "total_usd": round(total, 4), "turns": n,
+    page = meter_page(day, busy, src)
+    return {"ok": True, "card": day, "cites": [page] if page else [], "total_usd": round(total, 4), "turns": n,
             "meter": meter, "busy_day_usd": round(busy, 3),
             "spoken": ("The meter, typical cost each: " + "; ".join(meter) + ". Instant reflexes are free; they use no model. "
                        f"A busy day (20 answers, 5 actions, 1 research) is about {busy * 100:.0f} cents. "

@@ -19,7 +19,7 @@ func score(_ text: String) -> Int {
 }
 func attr(_ e: AXUIElement, _ a: String) -> AnyObject? { var v: AnyObject?; AXUIElementCopyAttributeValue(e, a as CFString, &v); return v }
 
-var best: (Int, CGRect, String)? = nil
+var best: (Int, CGRect, String, String)? = nil
 let clickable: Set<String> = ["AXButton", "AXLink", "AXMenuItem", "AXMenuButton", "AXPopUpButton", "AXTab", "AXRadioButton", "AXCheckBox", "AXCell", "AXStaticText", "AXImage", "AXGroup"]
 var seen = 0
 func walk(_ e: AXUIElement, _ depth: Int) {
@@ -33,7 +33,7 @@ func walk(_ e: AXUIElement, _ depth: Int) {
     if sc > 0, let pv = attr(e, kAXPositionAttribute), let sv = attr(e, kAXSizeAttribute) {
       var p = CGPoint.zero, z = CGSize.zero
       AXValueGetValue(pv as! AXValue, .cgPoint, &p); AXValueGetValue(sv as! AXValue, .cgSize, &z)
-      if z.width > 2, z.height > 2, z.width < 1200, (best == nil || sc > best!.0) { best = (sc, CGRect(origin: p, size: z), String(txt.prefix(60))) }
+      if z.width > 2, z.height > 2, z.width < 1200, (best == nil || sc > best!.0) { best = (sc, CGRect(origin: p, size: z), String(txt.prefix(60)), role) }
     }
   }
   if let kids = attr(e, kAXChildrenAttribute) as? [AXUIElement] { for k in kids { walk(k, depth + 1) } }
@@ -43,7 +43,7 @@ if AXIsProcessTrusted(), let app = NSWorkspace.shared.frontmostApplication {
   AXUIElementSetAttributeValue(ax, "AXEnhancedUserInterface" as CFString, kCFBooleanTrue)  // Chrome/Electron expose web content
   if let wins = attr(ax, kAXWindowsAttribute) as? [AXUIElement], let w = wins.first { walk(w, 0) }
 }
-if let b = best, b.0 >= 3 { out(["found": true, "x": b.1.midX, "y": b.1.midY, "w": b.1.width, "h": b.1.height, "label": b.2, "source": "ax", "ax_trusted": AXIsProcessTrusted()]) }
+if let b = best, b.0 >= 3 { out(["found": true, "x": b.1.midX, "y": b.1.midY, "w": b.1.width, "h": b.1.height, "label": b.2, "role": b.3, "source": "ax", "ax_trusted": AXIsProcessTrusted()]) }
 
 // Vision OCR fallback, on-device.
 // The caller grabs the MAIN display with `screencapture -x -m` to a local temp file (argv[2]) and deletes it after.

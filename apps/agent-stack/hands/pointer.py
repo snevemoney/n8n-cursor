@@ -26,7 +26,7 @@ LOOK_LINE = "Let me have a look, sir."
 WANT_RE = re.compile(r"\b(?:where\s+(?:do|should|can)\s+i\s+(?:click|tap|press|go)|where(?:'s|\s+is)\s+(?:the\s+)?(?:button|[\w\s'-]{1,40}?"
                      r"\s+(?:button|menu|link|icon|tab|setting|toggle|field))|point\s+(?:to|at|me\s+to)|show\s+me\s+where)\b", re.I)
 STOP = set("a an the to on in of for my me i do can you could would should show where is are click tap press button "
-           "find point at this that it please hey jarvis new go how which there here sir open turn get make use".split())
+           "find point at this that it please hey jarvis new go how which there here sir open turn get make use and or on with button icon".split())
 SYN = {"create": ["create", "new", "plus", "+"], "reel": ["reel", "reels"], "settings": ["settings", "preferences"],
        "notifications": ["notifications"], "share": ["share"], "post": ["post", "create"]}
 
@@ -175,6 +175,40 @@ def _where(x: float, y: float) -> str:
     return row + col
 
 
+KIND = {"AXButton": "button", "AXMenuButton": "button", "AXPopUpButton": "menu", "AXLink": "link", "AXMenuItem": "menu item",
+        "AXTab": "tab", "AXRadioButton": "tab", "AXCheckBox": "toggle", "AXCell": "item", "AXImage": "icon"}
+GOAL_RE = re.compile(r"\b(?:to|for|and)\s+((?:open|create|make|add|start|turn|change|find|see|edit|share|post|upload|go|get|set|switch|"
+                     r"delete|remove|save|send|write|view|check)\b[^?.!]{0,60})", re.I)
+
+
+def function_name(label: str, role: str, kws: list[str], source: str) -> str:
+    """Demo 2:09: the tag names the control's function ("Create button"), not raw page text."""
+    words = [w for w in re.findall(r"[A-Za-z0-9+&'-]+", label or "") if w]
+    hit = next((k for k in kws if any(k == w.lower() or k + "s" == w.lower() for w in words)), None)
+    if not words or (len(words) == 1 and words[0] in "+"):
+        name = (kws[0] if kws else "this").capitalize()
+    else:
+        name = " ".join(words[:3])
+        name = name[0].upper() + name[1:]
+    if hit is None and kws and kws[0] in SYN and len(words) <= 1:
+        name = kws[0].capitalize()
+    kind = KIND.get(role or "", "")
+    if not kind:
+        kind = "button" if source == "ax" else ("section" if len(words) == 1 else "")
+    return f"{name} {kind}".strip()
+
+
+def next_step(utterance: str, func: str) -> str:
+    m = GOAL_RE.search(utterance or "")
+    goal = re.sub(r"\bmy\b", "your", m.group(1).strip(), flags=re.I) if m else ""
+    return f"click it to {goal}" if goal else f"click the {func} to carry on"
+
+
+def place(where: str) -> str:
+    return {"left": "on the left of your screen", "right": "on the right of your screen", "middle": "in the middle of your screen"}.get(
+        where, f"at the {where} of your screen")
+
+
 def run(utterance: str, *, locate_fn=None, draw_fn=None, hover_fn=None, where_fn=None) -> dict:
     kws = keywords(utterance)
     try:
@@ -187,7 +221,8 @@ def run(utterance: str, *, locate_fn=None, draw_fn=None, hover_fn=None, where_fn
                 "spoken": f"I looked at your screen on this Mac and can't find {' '.join(kws[:3]) or 'that'}. "
                           + ("Is it on the screen right now?" if "match" in why else f"({why}.)")}
     x, y = float(got["x"]), float(got["y"])
-    label = " ".join(str(got.get("label") or kws[0]).split())[:40] or kws[0]
+    raw = " ".join(str(got.get("label") or kws[0]).split())[:40] or kws[0]
+    label = function_name(raw, str(got.get("role") or ""), kws, str(got.get("source") or ""))
     try:
         drawn = (draw_fn or draw)(x, y, label)
     except Exception:  # noqa: BLE001
@@ -195,8 +230,8 @@ def run(utterance: str, *, locate_fn=None, draw_fn=None, hover_fn=None, where_fn
     if hover_fn is not None:  # demo never moves the cursor (storyboards/Z02); hover only when a caller asks
         hover_fn(x, y)
     where = (where_fn or _where)(x, y)
-    said = f"There: {label}, {where} of your screen. The red arrow is on it; click it when you're ready."
+    said = f"The {label} {place(where)}, sir; {next_step(utterance, label)}. The red arrow is on it."
     if not drawn:
         said = f"It's {label}, {where} of your screen, sir. I couldn't draw the arrow this time."
-    return {"ok": True, "found": True, "source": got.get("source"), "x": x, "y": y, "label": label, "drawn": drawn,
+    return {"ok": True, "found": True, "source": got.get("source"), "x": x, "y": y, "label": label, "raw_label": raw, "drawn": drawn,
             "keywords": kws, "spoken": said}

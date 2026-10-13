@@ -26,9 +26,16 @@ class PointerTest(unittest.TestCase):
         got = PT.run("where do I click to open Routines", locate_fn=lambda k: {"found": True, "x": 1200.5, "y": 365, "label": "Routines", "source": "ax"},
                      draw_fn=lambda x, y, l: drawn.append((x, y, l)) or True, hover_fn=lambda x, y: hovered.append((x, y)) or True,
                      where_fn=lambda x, y: "right")
-        self.assertEqual(drawn, [(1200.5, 365.0, "Routines")]); self.assertEqual(hovered, [(1200.5, 365.0)])
+        self.assertEqual(drawn, [(1200.5, 365.0, "Routines button")]); self.assertIn("click it to open Routines", got["spoken"]); self.assertEqual(hovered, [(1200.5, 365.0)])
         self.assertEqual(got["source"], "ax"); self.assertIn("red arrow", got["spoken"])
         self.assertNotIn("screenshot", got["spoken"].lower()); self.assertNotIn("confirm", got["spoken"].lower())
+
+    def test_demo_label_and_line(self):  # storyboards/Z02 2:09: "Create button" tag; place + next step spoken
+        ask = "Hey Jarvis, can you show me where is the button to click on and create a new Instagram reel?"
+        got = PT.run(ask, locate_fn=lambda k: {"found": True, "x": 20, "y": 600, "label": "+", "role": "AXButton", "source": "ax"},
+                     draw_fn=lambda *a: True, where_fn=lambda x, y: "left")
+        self.assertEqual(got["label"], "Create button")
+        self.assertIn("on the left of your screen", got["spoken"]); self.assertIn("click it to create a new Instagram reel", got["spoken"])
 
     def test_not_found_is_honest(self):
         got = PT.run("where do I click to zzz", locate_fn=lambda k: {"found": False, "why": "no on-screen match"},

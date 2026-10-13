@@ -134,7 +134,18 @@ def decide(u: str, *, route=None, lane_fn=None) -> dict:
         lane, lane_p = str(tool), max(lane_p, 0.9)
     return {"lane": lane, "lane_p": round(lane_p, 2), "finished": finished_p(u), "addressed": addressed_p(u),
             "needs_tool": 0.95 if tool else (0.6 if IMPERATIVE_RE.search(u or "") else 0.15),
-            "stakes": stakes_p(u), **_vault(u)}
+            "stakes": stakes_p(u), **_vault(u), "lane_class": lane_class(str(lane), tool)}
+
+
+def lane_class(lane: str, tool) -> str:
+    """Demo D5v4 9:08: the lane is a class ('agent task'), not a hand name."""
+    if lane in ("vault_read", "memory", "results_recall", "workspace_read", "pickup"):
+        return "vault lookup"
+    if lane in ("converse", "other", "say") and not tool:
+        return "chat"
+    if lane in ("refuse_hard_step",):
+        return "hard step"
+    return "agent task"
 
 
 def _vault(u: str) -> dict:

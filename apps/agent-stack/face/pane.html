@@ -321,7 +321,7 @@
     }
     #inboxcard.on { display: block; }
     #inboxcard .h { font: 9px "Share Tech Mono", monospace; color: #8ab; letter-spacing: 0.12em; margin-bottom: 3px; }
-    #inboxcard .t { font-weight: 700; color: #fff; } #inboxcard button { margin-top: 4px; font-size: 9px; }
+    #inboxcard .t { font-weight: 700; color: #fff; } #inboxcard .f { color: #9cf; word-break: break-all; margin: 2px 0; } #inboxcard button { margin-top: 4px; font-size: 9px; }
     html.widget #focusline {
       top: auto; left: 50%; right: auto; bottom: 70px;
       transform: translateX(-50%); z-index: 40; text-align: center;
@@ -1727,6 +1727,21 @@
     }
     // Z09: a meeting pre-brief offer rides the bus like a focus callout; shown and spoken once, when idle.
     let lastPrebriefGen = null;
+    // Z12 demo 0:10: the named note lights up in the vault graph while he answers.
+    function lightNote(name) {
+      try {
+        if (!vaultGraph || typeof vaultGraph.graphData !== "function") return;
+        const g = vaultGraph.graphData();
+        let n = g.nodes.find((x) => (x.name || "") === name || String(x.id || "").endsWith(name + ".md"));
+        if (!n) { n = { id: name + ".md", name, path: name + ".md" }; g.nodes.push(n); vaultGraph.graphData(g); }
+        g.nodes.forEach((x) => { x.__lit = x === n; });
+        vaultGraph.nodeColor((x) => (x.__lit ? "#ff3df0" : (x.color || "#3dff6a"))).nodeVal((x) => (x.__lit ? 8 : 1));
+        if (typeof vaultGraph.cameraPosition === "function" && n.x !== undefined) {
+          vaultGraph.cameraPosition({ x: n.x * 1.6 + 40, y: n.y * 1.6 + 40, z: n.z * 1.6 + 40 }, n, 1200);
+        }
+        setTimeout(() => { g.nodes.forEach((x) => { x.__lit = false; }); vaultGraph.nodeVal(() => 1); }, 12000);
+      } catch (e) { /* graph optional */ }
+    }
     let lastReflexTs = 0, reflexHideAt = 0;
     function paintReflex(bus) {
       const el = $("reflexcard");
@@ -1736,7 +1751,7 @@
         lastReflexTs = Number(r.ts);
         const pc = (v) => Math.round(Number(v || 0) * 100) + "%";
         const rows = [  // demo D5v4UuvtUXc 0:09: five rows, bar + threshold tick + verdict chip, footer with ms
-          ["Lane", "Which hand takes it?", r.lane_p, 0.5, String(r.lane || "").toUpperCase().slice(0, 7)],
+          ["Lane", "Which lane takes it?", r.lane_p, 0.5, String(r.lane_class || r.lane || "").toUpperCase().slice(0, 12)],
           ["Complete", "Has he finished the request?", r.finished, 0.6, r.finished >= 0.6 ? "ACT" : "WAIT"],
           ["Addressed", "Talking to Jarvis, not narrating?", r.addressed, 0.6, r.addressed >= 0.6 ? "ACT" : "IGNORE"],
           ["Stakes", "Would acting send, call, delete, or spend?", r.stakes, 0.5, r.stakes >= 0.5 ? "CONFIRM" : "CLEAR"],
@@ -1749,7 +1764,8 @@
           + `<div class="foot">● ${r.vault_hit >= 0.6 ? "VAULT HAS IT · NAMED" : "VAULT · NO NOTE"} · ${pc(r.vault_hit)}`
           + `${r.vault_note ? " · " + esc(String(r.vault_note).toUpperCase().slice(0, 40)) : ""} · ${r.ms} MS</div>`;
         el.classList.add("on");
-        reflexHideAt = Date.now() + 4000;  // shown before the answer, then out of its way
+        reflexHideAt = Date.now() + 4000;
+        if (r.vault_note && r.vault_hit >= 0.6) lightNote(String(r.vault_note));  // shown before the answer, then out of its way
       }
       if (reflexHideAt && Date.now() > reflexHideAt) { el.classList.remove("on"); reflexHideAt = 0; }
     }
@@ -1765,7 +1781,9 @@
       const c = (ib.items || [])[ib.items.length - 1];
       if (!c) return;
       const esc = (x) => String(x || "").replace(/[&<>]/g, (k) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[k]));
-      el.innerHTML = `<div class="h">JARVIS \u00b7 INBOX</div><div class="t">\u2022 ${esc(c.title)}</div><div>${esc(c.body)}</div>`
+      el.innerHTML = `<div class="h">JARVIS \u00b7 INBOX</div><div class="t">${esc(c.title)}</div>`
+        + ((c.fields || []).length ? `<div class="f">${(c.fields || []).map(esc).join(" \u00b7 ")}</div>` : "")
+        + `<div>${esc(c.body)}</div>`
         + `<div class="h" style="margin-top:3px">SAVED TO YOUR VAULT \u00b7 JARVIS-INBOX</div><button type="button">Got it</button>`;
       el.classList.add("on");
       const b = el.querySelector("button");
