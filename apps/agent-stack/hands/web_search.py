@@ -155,20 +155,35 @@ ENGINES = [_ddg, _brave, _openrouter_web]
 
 
 def _default_fetch(query: str, timeout: float) -> list[dict[str, str]]:
-    """Walk ENGINES in order inside one time budget; the first engine with results wins."""
+    """Ask every engine in ENGINES at once inside one time budget; the earliest engine in ENGINES order
+    with relevant results wins once it is in (a bot-checked HTML engine no longer eats the others' time)."""
     import time as _t
     end = _t.time() + timeout
-    for i, eng in enumerate(ENGINES):
-        left = end - _t.time()
-        if left <= 0.3:
-            break
-        share = left if i == len(ENGINES) - 1 else max(1.0, left / (len(ENGINES) - i))
+    box: dict[int, list] = {}
+    done = threading.Event()
+
+    def one(i, eng):
         try:
-            rows = eng(query, share)
+            rows = eng(query, max(0.5, end - _t.time() - 0.2)) or []
         except Exception:
             rows = []
-        if rows and _relevant(query, rows):
-            return rows
+        box[i] = rows if rows and _relevant(query, rows) else []
+        done.set()
+
+    for i, eng in enumerate(ENGINES):
+        threading.Thread(target=one, args=(i, eng), daemon=True).start()
+    while _t.time() < end:
+        for i in range(len(ENGINES)):
+            if i not in box:
+                break  # an earlier engine is still working; wait for it
+            if box[i]:
+                return box[i]
+        else:
+            return []
+        done.wait(max(0.0, min(0.1, end - _t.time()))); done.clear()
+    for i in range(len(ENGINES)):
+        if box.get(i):
+            return box[i]
     return []
 
 
