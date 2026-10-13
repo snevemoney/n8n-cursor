@@ -1,0 +1,3499 @@
+{
+  "meta": {
+    "phase": 2,
+    "title": "Routine inventory clustering",
+    "census_date": "2026-09-16 17:45 EDT",
+    "timezone": "America/Toronto (EDT/UTC-4)",
+    "source": "/workspace/research/packets/fleet-reentry-20260916-IMMUTABLE-SNAPSHOT/agents-raw.json",
+    "disk_scan": "READ-ONLY verify: 229 automation.json match snapshot; no writes to agent-data",
+    "total_routines": 229,
+    "enabled": 34,
+    "paused": 195,
+    "cluster_count": 48,
+    "uncategorized_count": 0,
+    "standing_lock": "Do not re-arm clone armies (*-N). Recommendations never re-arm clones.",
+    "mutations": "none"
+  },
+  "summary_by_recommendation_cluster": {
+    "ARCHIVE": 20,
+    "REPLACE": 2,
+    "MERGE": 3,
+    "KEEP": 21,
+    "MODERNIZE": 2
+  },
+  "summary_by_disposition_routine": {
+    "KEEP": 31,
+    "ARCHIVE": 192,
+    "MERGE": 4,
+    "MODERNIZE": 2
+  },
+  "summary_by_agent": {
+    "Big Boss": {
+      "total": 3,
+      "by_disposition": {
+        "ARCHIVE": 1,
+        "MERGE": 1,
+        "KEEP": 1
+      },
+      "enabled": 1,
+      "paused": 2
+    },
+    "Career Strategist": {
+      "total": 14,
+      "by_disposition": {
+        "KEEP": 1,
+        "ARCHIVE": 13
+      },
+      "enabled": 1,
+      "paused": 13
+    },
+    "Communications Manager": {
+      "total": 14,
+      "by_disposition": {
+        "KEEP": 1,
+        "ARCHIVE": 13
+      },
+      "enabled": 1,
+      "paused": 13
+    },
+    "Consultant": {
+      "total": 4,
+      "by_disposition": {
+        "KEEP": 4
+      },
+      "enabled": 4,
+      "paused": 0
+    },
+    "Creative Studio": {
+      "total": 21,
+      "by_disposition": {
+        "ARCHIVE": 21
+      },
+      "enabled": 0,
+      "paused": 21
+    },
+    "Day Planner": {
+      "total": 17,
+      "by_disposition": {
+        "ARCHIVE": 15,
+        "KEEP": 2
+      },
+      "enabled": 2,
+      "paused": 15
+    },
+    "Forge": {
+      "total": 4,
+      "by_disposition": {
+        "MERGE": 2,
+        "KEEP": 1,
+        "MODERNIZE": 1
+      },
+      "enabled": 4,
+      "paused": 0
+    },
+    "HITL Operator": {
+      "total": 25,
+      "by_disposition": {
+        "KEEP": 1,
+        "ARCHIVE": 24
+      },
+      "enabled": 1,
+      "paused": 24
+    },
+    "Lead Hunter": {
+      "total": 20,
+      "by_disposition": {
+        "ARCHIVE": 20
+      },
+      "enabled": 0,
+      "paused": 20
+    },
+    "Librarian": {
+      "total": 4,
+      "by_disposition": {
+        "ARCHIVE": 3,
+        "MODERNIZE": 1
+      },
+      "enabled": 0,
+      "paused": 4
+    },
+    "Money Desk": {
+      "total": 15,
+      "by_disposition": {
+        "ARCHIVE": 12,
+        "KEEP": 3
+      },
+      "enabled": 3,
+      "paused": 12
+    },
+    "Personal CFO": {
+      "total": 14,
+      "by_disposition": {
+        "KEEP": 1,
+        "ARCHIVE": 13
+      },
+      "enabled": 1,
+      "paused": 13
+    },
+    "Product GTM": {
+      "total": 19,
+      "by_disposition": {
+        "ARCHIVE": 16,
+        "MERGE": 1,
+        "KEEP": 2
+      },
+      "enabled": 2,
+      "paused": 17
+    },
+    "Publishing Engine": {
+      "total": 14,
+      "by_disposition": {
+        "KEEP": 1,
+        "ARCHIVE": 13
+      },
+      "enabled": 1,
+      "paused": 13
+    },
+    "Researcher": {
+      "total": 23,
+      "by_disposition": {
+        "KEEP": 7,
+        "ARCHIVE": 16
+      },
+      "enabled": 7,
+      "paused": 16
+    },
+    "Watchdog": {
+      "total": 15,
+      "by_disposition": {
+        "KEEP": 3,
+        "ARCHIVE": 12
+      },
+      "enabled": 3,
+      "paused": 12
+    },
+    "Wealth Manager": {
+      "total": 3,
+      "by_disposition": {
+        "KEEP": 3
+      },
+      "enabled": 3,
+      "paused": 0
+    }
+  },
+  "clone_patterns_do_not_rearm": [
+    {
+      "agent": "Career Strategist",
+      "base_id": "career-development-check",
+      "suffix_range": "2..14",
+      "clone_count": 13,
+      "canonical_id": "career-development-check",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "career-development-check-{2..14}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Communications Manager",
+      "base_id": "inbox-triage",
+      "suffix_range": "2..14",
+      "clone_count": 13,
+      "canonical_id": "inbox-triage",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "inbox-triage-{2..14}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "HITL Operator",
+      "base_id": "morning-hitl-digest",
+      "suffix_range": "2..25",
+      "clone_count": 24,
+      "canonical_id": "morning-hitl-digest",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "morning-hitl-digest-{2..25}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Personal CFO",
+      "base_id": "personal-finance-check",
+      "suffix_range": "2..14",
+      "clone_count": 13,
+      "canonical_id": "personal-finance-check",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "personal-finance-check-{2..14}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Publishing Engine",
+      "base_id": "publishing-pipeline-check",
+      "suffix_range": "2..14",
+      "clone_count": 13,
+      "canonical_id": "publishing-pipeline-check",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "publishing-pipeline-check-{2..14}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Researcher",
+      "base_id": "weekly-intel-dossier",
+      "suffix_range": "2..15",
+      "clone_count": 14,
+      "canonical_id": "weekly-intel-dossier",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "weekly-intel-dossier-{2..15}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Watchdog",
+      "base_id": "control-plane-heartbeat",
+      "suffix_range": "2..12",
+      "clone_count": 11,
+      "canonical_id": "control-plane-heartbeat",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "control-plane-heartbeat-{2..12}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Researcher",
+      "base_id": "web-intelligence-hunter-routine",
+      "suffix_range": "2",
+      "clone_count": 1,
+      "canonical_id": "web-intelligence-hunter-routine",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "web-intelligence-hunter-routine-2"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Day Planner",
+      "base_id": "morning-day-plan",
+      "suffix_range": "2..15",
+      "clone_count": 14,
+      "canonical_id": "weekday-ceo-day-card",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "morning-day-plan-{2..15}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Money Desk",
+      "base_id": "business-finance-snapshot",
+      "suffix_range": "2..12",
+      "clone_count": 11,
+      "canonical_id": "ce-read-snapshot",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "business-finance-snapshot-{2..12}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Product GTM",
+      "base_id": "gtm-phase-rotation",
+      "suffix_range": "2..14",
+      "clone_count": 13,
+      "canonical_id": "gtm-phase-rotation",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "gtm-phase-rotation-{2..14}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Product GTM",
+      "base_id": "proofcheck-gtm-routine",
+      "suffix_range": "2",
+      "clone_count": 1,
+      "canonical_id": "product-gtm-proofcheck-weekly",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "proofcheck-gtm-routine-2"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Lead Hunter",
+      "base_id": "lead-pipeline-check",
+      "suffix_range": "2..14",
+      "clone_count": 13,
+      "canonical_id": "lead-pipeline-check",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "lead-pipeline-check-{2..14}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Lead Hunter",
+      "base_id": "lead-surface-read",
+      "suffix_range": "2..4",
+      "clone_count": 3,
+      "canonical_id": "lead-surface-read",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "lead-surface-read-{2..4}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Lead Hunter",
+      "base_id": "warm-outreach-rep",
+      "suffix_range": "2",
+      "clone_count": 1,
+      "canonical_id": "warm-outreach-rep",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "warm-outreach-rep-2"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Creative Studio",
+      "base_id": "creative-lane-check",
+      "suffix_range": "2..14",
+      "clone_count": 13,
+      "canonical_id": "creative-lane-check",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "creative-lane-check-{2..14}"
+      ],
+      "never_rearm": true
+    },
+    {
+      "agent": "Creative Studio",
+      "base_id": "themes-lane-check",
+      "suffix_range": "2..6",
+      "clone_count": 5,
+      "canonical_id": "themes-lane-check",
+      "rule": "NEVER re-arm",
+      "suffix_globs": [
+        "themes-lane-check-{2..6}"
+      ],
+      "never_rearm": true
+    }
+  ],
+  "clusters": [
+    {
+      "cluster_id": "CLONE-001",
+      "title": "Career Strategist: career-development-check clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "Weekly career lane; ARCHIVE numbered clones; leave canonical enabled. NEVER re-arm *-N.",
+      "member_count": 14,
+      "enabled_count": 1,
+      "paused_count": 13,
+      "canonical_id": "career-development-check",
+      "members": [
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check",
+          "name": "Career development check",
+          "enabled": true,
+          "schedule": "0 9 * * 1",
+          "role": "canonical",
+          "disposition": "KEEP"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-10",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-11",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-12",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-13",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-14",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-2",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-3",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-4",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-5",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-6",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-7",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-8",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Career Strategist",
+          "agent_id": "fe2669ee-3d55-41f0-ad59-d3aaf54704df",
+          "id": "career-development-check-9",
+          "name": "Career development check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Career Strategist"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-002",
+      "title": "Communications Manager: inbox-triage clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "Daily inbox triage; ARCHIVE numbered clones; leave canonical enabled. NEVER re-arm *-N.",
+      "member_count": 14,
+      "enabled_count": 1,
+      "paused_count": 13,
+      "canonical_id": "inbox-triage",
+      "members": [
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage",
+          "name": "Inbox triage",
+          "enabled": true,
+          "schedule": "0 7 * * *",
+          "role": "canonical",
+          "disposition": "KEEP"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-10",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-11",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-12",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-13",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-14",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-2",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-3",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-4",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-5",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-6",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-7",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-8",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Communications Manager",
+          "agent_id": "b33e7134-3c30-4304-adf3-7eb7ad7e8514",
+          "id": "inbox-triage-9",
+          "name": "Inbox triage",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Communications Manager"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-003",
+      "title": "HITL Operator: morning-hitl-digest clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "Morning HITL digest; ARCHIVE *-2..*-25 clone army; leave canonical enabled. NEVER re-arm *-N.",
+      "member_count": 25,
+      "enabled_count": 1,
+      "paused_count": 24,
+      "canonical_id": "morning-hitl-digest",
+      "members": [
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest",
+          "name": "Morning HITL digest",
+          "enabled": true,
+          "schedule": "0 8 * * *",
+          "role": "canonical",
+          "disposition": "KEEP"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-10",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-11",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-12",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-13",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-14",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-15",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-16",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-17",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-18",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-19",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-2",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-20",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-21",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-22",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-23",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-24",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-25",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-3",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-4",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-5",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-6",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-7",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-8",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "HITL Operator",
+          "agent_id": "91144bc2-f1ed-47cb-b17e-cd115ac40ef0",
+          "id": "morning-hitl-digest-9",
+          "name": "Morning HITL digest",
+          "enabled": false,
+          "schedule": "0 8 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "HITL Operator"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-004",
+      "title": "Personal CFO: personal-finance-check clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "Weekly personal finance; ARCHIVE numbered clones; leave canonical enabled. NEVER re-arm *-N.",
+      "member_count": 14,
+      "enabled_count": 1,
+      "paused_count": 13,
+      "canonical_id": "personal-finance-check",
+      "members": [
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check",
+          "name": "Personal finance check",
+          "enabled": true,
+          "schedule": "0 9 * * 1",
+          "role": "canonical",
+          "disposition": "KEEP"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-10",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-11",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-12",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-13",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-14",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-2",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-3",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-4",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-5",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-6",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-7",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-8",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Personal CFO",
+          "agent_id": "2e8ab86d-35e4-4415-8143-71c51cfe960e",
+          "id": "personal-finance-check-9",
+          "name": "Personal finance check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Personal CFO"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-005",
+      "title": "Publishing Engine: publishing-pipeline-check clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "Weekly publishing check; ARCHIVE numbered clones; leave canonical enabled. NEVER re-arm *-N.",
+      "member_count": 14,
+      "enabled_count": 1,
+      "paused_count": 13,
+      "canonical_id": "publishing-pipeline-check",
+      "members": [
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check",
+          "name": "Publishing pipeline check",
+          "enabled": true,
+          "schedule": "0 9 * * 1",
+          "role": "canonical",
+          "disposition": "KEEP"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-10",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-11",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-12",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-13",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-14",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-2",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-3",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-4",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-5",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-6",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-7",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-8",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Publishing Engine",
+          "agent_id": "e9541d96-1c1a-4342-a22c-ee3d7a4d1f83",
+          "id": "publishing-pipeline-check-9",
+          "name": "Publishing pipeline check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Publishing Engine"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-006",
+      "title": "Researcher: weekly-intel-dossier clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "Weekly intel dossier; ARCHIVE *-2..*-15; leave canonical enabled (schedule already modernized vs clone 0 9). NEVER re-arm *-N.",
+      "member_count": 15,
+      "enabled_count": 1,
+      "paused_count": 14,
+      "canonical_id": "weekly-intel-dossier",
+      "members": [
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier",
+          "name": "Weekly intel dossier",
+          "enabled": true,
+          "schedule": "0 15 * * 1",
+          "role": "canonical",
+          "disposition": "KEEP"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-10",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-11",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-12",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-13",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-14",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-15",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-2",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-3",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-4",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-5",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-6",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-7",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-8",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-intel-dossier-9",
+          "name": "Weekly intel dossier",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Researcher"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-007",
+      "title": "Watchdog: control-plane-heartbeat clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "Control-plane heartbeat; ARCHIVE *-2..*-12 (stale */6 schedule); leave canonical enabled (8,14,20). NEVER re-arm *-N.",
+      "member_count": 12,
+      "enabled_count": 1,
+      "paused_count": 11,
+      "canonical_id": "control-plane-heartbeat",
+      "members": [
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "control-plane-heartbeat",
+          "name": "Control plane heartbeat",
+          "enabled": true,
+          "schedule": "0 8,14,20 * * 1-5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        },
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "control-plane-heartbeat-10",
+          "name": "Control plane heartbeat",
+          "enabled": false,
+          "schedule": "0 */6 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "control-plane-heartbeat-11",
+          "name": "Control plane heartbeat",
+          "enabled": false,
+          "schedule": "0 */6 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "control-plane-heartbeat-12",
+          "name": "Control plane heartbeat",
+          "enabled": false,
+          "schedule": "0 */6 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "control-plane-heartbeat-2",
+          "name": "Control plane heartbeat",
+          "enabled": false,
+          "schedule": "0 */6 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "control-plane-heartbeat-3",
+          "name": "Control plane heartbeat",
+          "enabled": false,
+          "schedule": "0 */6 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "control-plane-heartbeat-4",
+          "name": "Control plane heartbeat",
+          "enabled": false,
+          "schedule": "0 */6 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "control-plane-heartbeat-5",
+          "name": "Control plane heartbeat",
+          "enabled": false,
+          "schedule": "0 */6 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "control-plane-heartbeat-6",
+          "name": "Control plane heartbeat",
+          "enabled": false,
+          "schedule": "0 */6 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "control-plane-heartbeat-7",
+          "name": "Control plane heartbeat",
+          "enabled": false,
+          "schedule": "0 */6 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "control-plane-heartbeat-8",
+          "name": "Control plane heartbeat",
+          "enabled": false,
+          "schedule": "0 */6 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "control-plane-heartbeat-9",
+          "name": "Control plane heartbeat",
+          "enabled": false,
+          "schedule": "0 */6 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Watchdog"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-008",
+      "title": "Researcher: web-intelligence-hunter-routine clone pair",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE paused -2 sibling; KEEP canonical enabled (Mon 15:30). NEVER re-arm clone.",
+      "member_count": 2,
+      "enabled_count": 1,
+      "paused_count": 1,
+      "canonical_id": "web-intelligence-hunter-routine",
+      "members": [
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "web-intelligence-hunter-routine",
+          "name": "Web Intelligence Hunter routine",
+          "enabled": true,
+          "schedule": "30 15 * * 1",
+          "role": "canonical",
+          "disposition": "KEEP"
+        },
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "web-intelligence-hunter-routine-2",
+          "name": "Web Intelligence Hunter routine",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Researcher"
+      ]
+    },
+    {
+      "cluster_id": "SUPER-009",
+      "title": "Day Planner: morning-day-plan \u2192 weekday-ceo-day-card",
+      "kind": "supersession",
+      "recommendation": "REPLACE",
+      "rationale": "REPLACE morning-day-plan* (all paused) with live weekday-ceo-day-card; ARCHIVE all morning-day-plan clones; never re-arm.",
+      "member_count": 16,
+      "enabled_count": 1,
+      "paused_count": 15,
+      "canonical_id": "weekday-ceo-day-card",
+      "members": [
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-10",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-11",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-12",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-13",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-14",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-15",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-2",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-3",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-4",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-5",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-6",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-7",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-8",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "morning-day-plan-9",
+          "name": "Morning day plan",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "weekday-ceo-day-card",
+          "name": "Weekday CEO day card",
+          "enabled": true,
+          "schedule": "15 8 * * 1-5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": "weekly-focus-propose is separate KEEP (see singleton).",
+      "agents": [
+        "Day Planner"
+      ]
+    },
+    {
+      "cluster_id": "SUPER-010",
+      "title": "Money Desk: business-finance-snapshot \u2192 ce-read-snapshot",
+      "kind": "supersession",
+      "recommendation": "REPLACE",
+      "rationale": "REPLACE paused business-finance-snapshot* army with live ce-read-snapshot (same 18:00 observe lane); ARCHIVE all *-N; never re-arm.",
+      "member_count": 13,
+      "enabled_count": 1,
+      "paused_count": 12,
+      "canonical_id": "ce-read-snapshot",
+      "members": [
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "business-finance-snapshot",
+          "name": "Business finance snapshot",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "business-finance-snapshot-10",
+          "name": "Business finance snapshot",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "business-finance-snapshot-11",
+          "name": "Business finance snapshot",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "business-finance-snapshot-12",
+          "name": "Business finance snapshot",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "business-finance-snapshot-2",
+          "name": "Business finance snapshot",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "business-finance-snapshot-3",
+          "name": "Business finance snapshot",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "business-finance-snapshot-4",
+          "name": "Business finance snapshot",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "business-finance-snapshot-5",
+          "name": "Business finance snapshot",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "business-finance-snapshot-6",
+          "name": "Business finance snapshot",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "business-finance-snapshot-7",
+          "name": "Business finance snapshot",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "business-finance-snapshot-8",
+          "name": "Business finance snapshot",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "business-finance-snapshot-9",
+          "name": "Business finance snapshot",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "ce-read-snapshot",
+          "name": "CE read snapshot",
+          "enabled": true,
+          "schedule": "0 18 * * *",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Money Desk"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-011",
+      "title": "Product GTM: gtm-phase-rotation clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE all gtm-phase-rotation (base+*-2..*-14 paused); building-mode/no-sell; never re-arm clones.",
+      "member_count": 14,
+      "enabled_count": 0,
+      "paused_count": 14,
+      "canonical_id": "gtm-phase-rotation",
+      "members": [
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "canonical",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-10",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-11",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-12",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-13",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-14",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-2",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-3",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-4",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-5",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-6",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-7",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-8",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "gtm-phase-rotation-9",
+          "name": "GTM phase rotation",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Product GTM"
+      ]
+    },
+    {
+      "cluster_id": "SUPER-012",
+      "title": "Product GTM: ProofCheck GTM family",
+      "kind": "supersession",
+      "recommendation": "MERGE",
+      "rationale": "MERGE proofcheck-gtm-routine* + product-gtm-proofcheck-weekly into one paused ProofCheck design; ARCHIVE clones; do not re-arm until lifecycle leaves building mode.",
+      "member_count": 3,
+      "enabled_count": 0,
+      "paused_count": 3,
+      "canonical_id": "product-gtm-proofcheck-weekly",
+      "members": [
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "proofcheck-gtm-routine",
+          "name": "ProofCheck GTM routine",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "proofcheck-gtm-routine-2",
+          "name": "ProofCheck GTM routine",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "product-gtm-proofcheck-weekly",
+          "name": "product-gtm-proofcheck weekly",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "canonical",
+          "disposition": "MERGE"
+        }
+      ],
+      "notes": "Canonical pick is the clearer weekly id; all remain paused.",
+      "agents": [
+        "Product GTM"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-013",
+      "title": "Lead Hunter: lead-pipeline-check clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE lead-pipeline-check army (all paused); drafts-HITL/building-mode; never re-arm *-N.",
+      "member_count": 14,
+      "enabled_count": 0,
+      "paused_count": 14,
+      "canonical_id": "lead-pipeline-check",
+      "members": [
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "canonical",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-10",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-11",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-12",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-13",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-14",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-2",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-3",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-4",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-5",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-6",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-7",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-8",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-pipeline-check-9",
+          "name": "Lead pipeline check",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Lead Hunter"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-014",
+      "title": "Lead Hunter: lead-surface-read clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE lead-surface-read army (base+*-2..*-4 paused); never re-arm.",
+      "member_count": 4,
+      "enabled_count": 0,
+      "paused_count": 4,
+      "canonical_id": "lead-surface-read",
+      "members": [
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-surface-read",
+          "name": "Lead surface read",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "canonical",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-surface-read-2",
+          "name": "Lead surface read",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-surface-read-3",
+          "name": "Lead surface read",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "lead-surface-read-4",
+          "name": "Lead surface read",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Lead Hunter"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-015",
+      "title": "Lead Hunter: warm-outreach-rep clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE warm-outreach-rep pair (paused); no send in building mode; never re-arm.",
+      "member_count": 2,
+      "enabled_count": 0,
+      "paused_count": 2,
+      "canonical_id": "warm-outreach-rep",
+      "members": [
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "warm-outreach-rep",
+          "name": "Warm outreach rep",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "canonical",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Lead Hunter",
+          "agent_id": "9c99e066-d13a-4fa5-ac08-841e809eb774",
+          "id": "warm-outreach-rep-2",
+          "name": "Warm outreach rep",
+          "enabled": false,
+          "schedule": "0 18 * * *",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Lead Hunter"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-016",
+      "title": "Creative Studio: creative-lane-check clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE creative-lane-check army (all 14 paused); never re-arm clones; CapEx/public HOLD.",
+      "member_count": 14,
+      "enabled_count": 0,
+      "paused_count": 14,
+      "canonical_id": "creative-lane-check",
+      "members": [
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "canonical",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-10",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-11",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-12",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-13",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-14",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-2",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-3",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-4",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-5",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-6",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-7",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-8",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "creative-lane-check-9",
+          "name": "Creative lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Creative Studio"
+      ]
+    },
+    {
+      "cluster_id": "CLONE-017",
+      "title": "Creative Studio: themes-lane-check clone army",
+      "kind": "clone_army",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE themes-lane-check army (6 paused); never re-arm.",
+      "member_count": 6,
+      "enabled_count": 0,
+      "paused_count": 6,
+      "canonical_id": "themes-lane-check",
+      "members": [
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "themes-lane-check",
+          "name": "THEMES lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "canonical",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "themes-lane-check-2",
+          "name": "THEMES lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "themes-lane-check-3",
+          "name": "THEMES lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "themes-lane-check-4",
+          "name": "THEMES lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "themes-lane-check-5",
+          "name": "THEMES lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "themes-lane-check-6",
+          "name": "THEMES lane check",
+          "enabled": false,
+          "schedule": "0 9 * * 1",
+          "role": "clone",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Creative Studio"
+      ]
+    },
+    {
+      "cluster_id": "SUPER-018",
+      "title": "Big Boss: morning brief / operator digest",
+      "kind": "supersession",
+      "recommendation": "MERGE",
+      "rationale": "MERGE morning-brief + daily-operator-digest (both paused, same 07:00) into one operator digest design; keep paused until stagger policy clear; do not dual-arm.",
+      "member_count": 2,
+      "enabled_count": 0,
+      "paused_count": 2,
+      "canonical_id": "daily-operator-digest",
+      "members": [
+        {
+          "agent": "Big Boss",
+          "agent_id": "dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+          "id": "morning-brief",
+          "name": "Morning brief",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "member",
+          "disposition": "ARCHIVE"
+        },
+        {
+          "agent": "Big Boss",
+          "agent_id": "dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+          "id": "daily-operator-digest",
+          "name": "Daily operator digest",
+          "enabled": false,
+          "schedule": "0 7 * * *",
+          "role": "canonical",
+          "disposition": "MERGE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Big Boss"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-019",
+      "title": "Big Boss: box-ram-hygiene",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP enabled RAM hygiene (token/resource steward); unique control-plane duty.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "box-ram-hygiene",
+      "members": [
+        {
+          "agent": "Big Boss",
+          "agent_id": "dfdd58ba-7f17-45b3-83ce-3b522e0a6f10",
+          "id": "box-ram-hygiene",
+          "name": "Box RAM hygiene",
+          "enabled": true,
+          "schedule": "15 12,18 * * 1-5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Big Boss"
+      ]
+    },
+    {
+      "cluster_id": "DUP-020",
+      "title": "Forge: dual weekly smoke",
+      "kind": "duplicate_function",
+      "recommendation": "MERGE",
+      "rationale": "MERGE builder-smoke + engineering-smoke (both enabled Mon 09:00) into one engineering smoke to cut duplicate stream risk (token-meter).",
+      "member_count": 2,
+      "enabled_count": 2,
+      "paused_count": 0,
+      "canonical_id": "engineering-smoke",
+      "members": [
+        {
+          "agent": "Forge",
+          "agent_id": "298d4dd9-f402-4525-8fca-50e8c474dd85",
+          "id": "builder-smoke",
+          "name": "Builder smoke",
+          "enabled": true,
+          "schedule": "0 9 * * 1",
+          "role": "member",
+          "disposition": "MERGE"
+        },
+        {
+          "agent": "Forge",
+          "agent_id": "298d4dd9-f402-4525-8fca-50e8c474dd85",
+          "id": "engineering-smoke",
+          "name": "Engineering smoke",
+          "enabled": true,
+          "schedule": "0 9 * * 1",
+          "role": "canonical",
+          "disposition": "MERGE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Forge"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-021",
+      "title": "Forge: elevenlabs-release-watch",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP weekday ElevenLabs release watch; distinct from smoke.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "elevenlabs-release-watch",
+      "members": [
+        {
+          "agent": "Forge",
+          "agent_id": "298d4dd9-f402-4525-8fca-50e8c474dd85",
+          "id": "elevenlabs-release-watch",
+          "name": "ElevenLabs release watch",
+          "enabled": true,
+          "schedule": "15 9 * * 1-5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Forge"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-022",
+      "title": "Forge: pr-23-ci-babysit",
+      "kind": "singleton",
+      "recommendation": "MODERNIZE",
+      "rationale": "MODERNIZE or retire when PR 23 lands; github-trigger babysitter is ticket-scoped not evergreen.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "pr-23-ci-babysit",
+      "members": [
+        {
+          "agent": "Forge",
+          "agent_id": "298d4dd9-f402-4525-8fca-50e8c474dd85",
+          "id": "pr-23-ci-babysit",
+          "name": "PR 23 CI babysit",
+          "enabled": true,
+          "schedule": "github",
+          "role": "canonical",
+          "disposition": "MODERNIZE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Forge"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-023",
+      "title": "Consultant: harness-doorbell",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP weekday 9:15 harness doorbell; owned Consultant duty.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "harness-doorbell",
+      "members": [
+        {
+          "agent": "Consultant",
+          "agent_id": "2206818c-7588-4a21-966c-f6cea5c981d7",
+          "id": "harness-doorbell",
+          "name": "Harness doorbell",
+          "enabled": true,
+          "schedule": "15 9 * * 1-5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Consultant"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-024",
+      "title": "Consultant: harness-event-doorbell",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP webhook event doorbell; complements cron doorbell.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "harness-event-doorbell",
+      "members": [
+        {
+          "agent": "Consultant",
+          "agent_id": "2206818c-7588-4a21-966c-f6cea5c981d7",
+          "id": "harness-event-doorbell",
+          "name": "Harness event doorbell",
+          "enabled": true,
+          "schedule": "webhook",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Consultant"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-025",
+      "title": "Consultant: ai-audit-partner-routine",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP Monday AI Audit Partner lane.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "ai-audit-partner-routine",
+      "members": [
+        {
+          "agent": "Consultant",
+          "agent_id": "2206818c-7588-4a21-966c-f6cea5c981d7",
+          "id": "ai-audit-partner-routine",
+          "name": "AI Audit Partner routine",
+          "enabled": true,
+          "schedule": "15 11 * * 1",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Consultant"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-026",
+      "title": "Consultant: consulting-ladder-prep",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP Monday consulting ladder prep.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "consulting-ladder-prep",
+      "members": [
+        {
+          "agent": "Consultant",
+          "agent_id": "2206818c-7588-4a21-966c-f6cea5c981d7",
+          "id": "consulting-ladder-prep",
+          "name": "Consulting ladder prep",
+          "enabled": true,
+          "schedule": "0 14 * * 1",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Consultant"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-027",
+      "title": "Day Planner: weekly-focus-propose",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP Monday weekly focus propose; distinct from day-card.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "weekly-focus-propose",
+      "members": [
+        {
+          "agent": "Day Planner",
+          "agent_id": "d95578f0-443f-40c6-b63c-cd83c2f93606",
+          "id": "weekly-focus-propose",
+          "name": "Weekly focus propose",
+          "enabled": true,
+          "schedule": "0 11 * * 1",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Day Planner"
+      ]
+    },
+    {
+      "cluster_id": "LIB-028",
+      "title": "Librarian: capture-cycle-verify",
+      "kind": "singleton",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE paused capture-cycle-verify until memory pipeline SSOT refreshed.",
+      "member_count": 1,
+      "enabled_count": 0,
+      "paused_count": 1,
+      "canonical_id": "capture-cycle-verify",
+      "members": [
+        {
+          "agent": "Librarian",
+          "agent_id": "5ef2fff1-80fc-4923-8e32-e2914617475d",
+          "id": "capture-cycle-verify",
+          "name": "Capture cycle verify",
+          "enabled": false,
+          "schedule": "30 7 * * *",
+          "role": "canonical",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Librarian"
+      ]
+    },
+    {
+      "cluster_id": "LIB-029",
+      "title": "Librarian: memory-consolidation",
+      "kind": "singleton",
+      "recommendation": "MODERNIZE",
+      "rationale": "MODERNIZE memory-consolidation against Stage-5 harness/l5-replay SSOT before any re-enable.",
+      "member_count": 1,
+      "enabled_count": 0,
+      "paused_count": 1,
+      "canonical_id": "memory-consolidation",
+      "members": [
+        {
+          "agent": "Librarian",
+          "agent_id": "5ef2fff1-80fc-4923-8e32-e2914617475d",
+          "id": "memory-consolidation",
+          "name": "Memory consolidation",
+          "enabled": false,
+          "schedule": "30 7 * * *",
+          "role": "canonical",
+          "disposition": "MODERNIZE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Librarian"
+      ]
+    },
+    {
+      "cluster_id": "LIB-030",
+      "title": "Librarian: obsidian-vault-mirror",
+      "kind": "singleton",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE paused vault mirror; confirm path/credentials before any future single instance.",
+      "member_count": 1,
+      "enabled_count": 0,
+      "paused_count": 1,
+      "canonical_id": "obsidian-vault-mirror",
+      "members": [
+        {
+          "agent": "Librarian",
+          "agent_id": "5ef2fff1-80fc-4923-8e32-e2914617475d",
+          "id": "obsidian-vault-mirror",
+          "name": "Obsidian vault mirror",
+          "enabled": false,
+          "schedule": "28 8,12,17 * * 1-5",
+          "role": "canonical",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Librarian"
+      ]
+    },
+    {
+      "cluster_id": "LIB-031",
+      "title": "Librarian: stale-fact-detector",
+      "kind": "singleton",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE paused stale-fact-detector; reintroduce only with Librarian SSOT.",
+      "member_count": 1,
+      "enabled_count": 0,
+      "paused_count": 1,
+      "canonical_id": "stale-fact-detector",
+      "members": [
+        {
+          "agent": "Librarian",
+          "agent_id": "5ef2fff1-80fc-4923-8e32-e2914617475d",
+          "id": "stale-fact-detector",
+          "name": "Stale fact detector",
+          "enabled": false,
+          "schedule": "0 8 * * 1",
+          "role": "canonical",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Librarian"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-032",
+      "title": "Money Desk: daily-upgrade-money-loop",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP weekday upgrade money loop (observe/advise); distinct from CE snapshot.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "daily-upgrade-money-loop",
+      "members": [
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "daily-upgrade-money-loop",
+          "name": "Daily upgrade money loop",
+          "enabled": true,
+          "schedule": "17 8 * * 1-5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Money Desk"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-033",
+      "title": "Money Desk: stripe-cfo-weekly-scan",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP Monday Stripe CFO weekly scan; advise-only.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "stripe-cfo-weekly-scan",
+      "members": [
+        {
+          "agent": "Money Desk",
+          "agent_id": "25eb230a-9e90-4353-aae8-349eb82d4c15",
+          "id": "stripe-cfo-weekly-scan",
+          "name": "Stripe CFO weekly scan",
+          "enabled": true,
+          "schedule": "0 9 * * 1",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Money Desk"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-034",
+      "title": "Product GTM: competitor-door-watch",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP Tuesday competitor door watch; live and non-clone.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "competitor-door-watch",
+      "members": [
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "competitor-door-watch",
+          "name": "Competitor door watch",
+          "enabled": true,
+          "schedule": "0 9 * * 2",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Product GTM"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-035",
+      "title": "Product GTM: fleet-skill-gtm-observe",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP Wed fleet-skill GTM observe; skill-lane not clone army.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "fleet-skill-gtm-observe",
+      "members": [
+        {
+          "agent": "Product GTM",
+          "agent_id": "f379dc7f-3216-47bd-8778-005370331008",
+          "id": "fleet-skill-gtm-observe",
+          "name": "fleet-skill-gtm-observe",
+          "enabled": true,
+          "schedule": "0 13 * * 3",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Product GTM"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-036",
+      "title": "Creative Studio: fleet-skill-creative-forge",
+      "kind": "singleton",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE paused fleet-skill-creative-forge until creative lane policy clear; not a clone but stay off under CapEx/public HOLD.",
+      "member_count": 1,
+      "enabled_count": 0,
+      "paused_count": 1,
+      "canonical_id": "fleet-skill-creative-forge",
+      "members": [
+        {
+          "agent": "Creative Studio",
+          "agent_id": "ca873245-23a8-4368-9dec-bfaa4566c3de",
+          "id": "fleet-skill-creative-forge",
+          "name": "fleet-skill-creative-forge",
+          "enabled": false,
+          "schedule": "0 14 * * 2,4",
+          "role": "canonical",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Creative Studio"
+      ]
+    },
+    {
+      "cluster_id": "RES-037",
+      "title": "Researcher: daily-youtube-watch-digest",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP daily YouTube watch digest.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "daily-youtube-watch-digest",
+      "members": [
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "daily-youtube-watch-digest",
+          "name": "Daily YouTube watch digest",
+          "enabled": true,
+          "schedule": "6 9 * * *",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Researcher"
+      ]
+    },
+    {
+      "cluster_id": "RES-038",
+      "title": "Researcher: hive-smarter-loop-daily",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP weekday hive smarter loop.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "hive-smarter-loop-daily",
+      "members": [
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "hive-smarter-loop-daily",
+          "name": "Hive smarter loop daily",
+          "enabled": true,
+          "schedule": "43 8 * * 1-5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Researcher"
+      ]
+    },
+    {
+      "cluster_id": "RES-039",
+      "title": "Researcher: signals-daily-close",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP weekday signals daily close.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "signals-daily-close",
+      "members": [
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "signals-daily-close",
+          "name": "Signals daily close",
+          "enabled": true,
+          "schedule": "43 9 * * 1-5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Researcher"
+      ]
+    },
+    {
+      "cluster_id": "RES-040",
+      "title": "Researcher: weekly-ai-bookmark-theme-diff",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP Monday AI bookmark theme diff.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "weekly-ai-bookmark-theme-diff",
+      "members": [
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "weekly-ai-bookmark-theme-diff",
+          "name": "Weekly AI bookmark theme diff",
+          "enabled": true,
+          "schedule": "0 16 * * 1",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Researcher"
+      ]
+    },
+    {
+      "cluster_id": "RES-041",
+      "title": "Researcher: x-bookmarks-shared-memory-ingest",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP weekday X bookmarks ingest.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "x-bookmarks-shared-memory-ingest",
+      "members": [
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "x-bookmarks-shared-memory-ingest",
+          "name": "X bookmarks shared-memory ingest",
+          "enabled": true,
+          "schedule": "15 10,13,16 * * 1-5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Researcher"
+      ]
+    },
+    {
+      "cluster_id": "RES-042",
+      "title": "Researcher: video-repass-queue-continue",
+      "kind": "singleton",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE paused video-repass queue (high-frequency */30); do not re-arm without budget review.",
+      "member_count": 1,
+      "enabled_count": 0,
+      "paused_count": 1,
+      "canonical_id": "video-repass-queue-continue",
+      "members": [
+        {
+          "agent": "Researcher",
+          "agent_id": "34ae8e2e-4d02-4885-b88a-433d1e4f5f5b",
+          "id": "video-repass-queue-continue",
+          "name": "Video repass queue continue",
+          "enabled": false,
+          "schedule": "*/30 9-19 * * 1-5",
+          "role": "canonical",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Researcher"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-043",
+      "title": "Watchdog: bot-fleet-auditor",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP Monday bot fleet auditor.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "bot-fleet-auditor",
+      "members": [
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "bot-fleet-auditor",
+          "name": "Bot fleet auditor",
+          "enabled": true,
+          "schedule": "15 10 * * 1",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Watchdog"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-044",
+      "title": "Watchdog: hive-smoke-check-4",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP hive-smoke-check-4 (sole survivor name; no *-N siblings on disk \u2014 not a clone army).",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "hive-smoke-check-4",
+      "members": [
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "hive-smoke-check-4",
+          "name": "Hive smoke check",
+          "enabled": true,
+          "schedule": "15 8,14,20 * * 1-5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": "Standing lock forbids re-arming clone armies; this id suffix alone with zero siblings is treated as the live singleton.",
+      "agents": [
+        "Watchdog"
+      ]
+    },
+    {
+      "cluster_id": "ARCH-045",
+      "title": "Watchdog: hive-n8n-notify",
+      "kind": "singleton",
+      "recommendation": "ARCHIVE",
+      "rationale": "ARCHIVE paused hive-n8n-notify webhook; legacy notify path (elou+notify LEGACY).",
+      "member_count": 1,
+      "enabled_count": 0,
+      "paused_count": 1,
+      "canonical_id": "hive-n8n-notify",
+      "members": [
+        {
+          "agent": "Watchdog",
+          "agent_id": "b9c12f93-dda8-45db-983d-2cf129fea8e0",
+          "id": "hive-n8n-notify",
+          "name": "Hive n8n notify",
+          "enabled": false,
+          "schedule": "webhook",
+          "role": "canonical",
+          "disposition": "ARCHIVE"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Watchdog"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-046",
+      "title": "Wealth Manager: biweekly-wealthsimple-coach",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP biweekly Wealthsimple coach; advise-only.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "biweekly-wealthsimple-coach",
+      "members": [
+        {
+          "agent": "Wealth Manager",
+          "agent_id": "3939593d-65c8-4c55-b3a5-db07063221d1",
+          "id": "biweekly-wealthsimple-coach",
+          "name": "Biweekly Wealthsimple coach",
+          "enabled": true,
+          "schedule": "0 9 1,15 * 1-5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Wealth Manager"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-047",
+      "title": "Wealth Manager: daily-wealth-video",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP weekday daily wealth video.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "daily-wealth-video",
+      "members": [
+        {
+          "agent": "Wealth Manager",
+          "agent_id": "3939593d-65c8-4c55-b3a5-db07063221d1",
+          "id": "daily-wealth-video",
+          "name": "Daily wealth video",
+          "enabled": true,
+          "schedule": "0 9 * * 1-5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Wealth Manager"
+      ]
+    },
+    {
+      "cluster_id": "KEEP-048",
+      "title": "Wealth Manager: portfolio-review",
+      "kind": "singleton",
+      "recommendation": "KEEP",
+      "rationale": "KEEP Friday portfolio/weekly wealth video review.",
+      "member_count": 1,
+      "enabled_count": 1,
+      "paused_count": 0,
+      "canonical_id": "portfolio-review",
+      "members": [
+        {
+          "agent": "Wealth Manager",
+          "agent_id": "3939593d-65c8-4c55-b3a5-db07063221d1",
+          "id": "portfolio-review",
+          "name": "Weekly wealth video",
+          "enabled": true,
+          "schedule": "0 17 * * 5",
+          "role": "canonical",
+          "disposition": "KEEP"
+        }
+      ],
+      "notes": null,
+      "agents": [
+        "Wealth Manager"
+      ]
+    }
+  ],
+  "uncategorized": []
+}
