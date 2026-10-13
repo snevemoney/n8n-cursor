@@ -92,11 +92,23 @@ def dup_line(u: str, hits: list) -> str:
             "or was this already handled?")
 
 
+# Probe/eval dry run: "dry run: draft an email to …" writes the draft text but saves no file (so the duplicate-draft
+# guard never sees test drafts) and never touches a mailbox. Request-scoped, so Evens's real drafts are unaffected.
+DRY_RE = re.compile(r"^\s*\(?\s*dry[\s-]*run\s*\)?\s*[:,.-]?\s*", re.I)
+
+
+def is_dry(u: str) -> bool:
+    return bool(DRY_RE.match(u or ""))
+
+
 def run(utterance: str, *, chat=None) -> dict:
+    dry = is_dry(utterance)
+    if dry:
+        utterance = DRY_RE.sub("", utterance, count=1)
     ca = _mod("code_author")
     talk = chat or ca.CHAT
     ch = channel(utterance)
-    hits = [] if AGAIN_RE.search(utterance or "") else duplicates(utterance, ch)
+    hits = [] if dry or AGAIN_RE.search(utterance or "") else duplicates(utterance, ch)
     if hits:
         _mod("permissions").log_action("draft", f"{ch}:dup-flag", "ask", chars=0)
         return {"ok": True, "spoken": dup_line(utterance, hits), "dup": len(hits)}
@@ -106,6 +118,11 @@ def run(utterance: str, *, chat=None) -> dict:
     text = (text or "").strip()
     if not text:
         return {"ok": False, "spoken": "The writing model gave no draft this turn, so nothing was saved and nothing was sent."}
+    if dry:
+        _mod("permissions").log_action("draft", f"{ch}:dry-run", "allow", chars=len(text))
+        short = " ".join(text.split())[:400]
+        return {"ok": True, "file": None, "channel": ch, "sent": False, "dry_run": True,
+                "spoken": f"Draft {ch}, not sent (dry run, nothing saved): {short}"}
     d = drafts_dir(); d.mkdir(parents=True, exist_ok=True)
     f = d / f"{time.strftime('%Y%m%d-%H%M%S')}-{ch}.md"
     f.write_text(text + "\n", encoding="utf-8")
