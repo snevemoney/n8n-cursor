@@ -35,7 +35,7 @@ OPENROUTER_DECISIONS = "https://openrouter.ai/api/alpha/decisions"
 LITELLM_BASE = "https://llm.evenslouis.ca/v1/chat/completions"
 JEV_MODEL = "typesafe/jev-1.13"
 MAX_QUESTIONS = 12
-CLARIFY_LINE = "Sorry, sir, I only caught part of that. What would you like me to do?"
+CLARIFY_LINE = "I only caught part of that. What would you like me to do?"
 
 HANDLERS = ("converse", "status", "recall", "local_read", "tool", "craft", "hard_step", "unclear", "other")
 
@@ -215,6 +215,7 @@ class Preflight:
         self.source = "picker"
         self.cache_hit = False
         self.timed_out = False
+        self.not_waited = False
         self.error = None
         self.live_ms = None
         self._done = threading.Event()
@@ -252,7 +253,8 @@ class Preflight:
             if left > 0:
                 self._done.wait(left)
         if not self._done.is_set():
-            self.timed_out = True
+            self.timed_out = wait  # not waiting (confident picker) is not a timeout
+            self.not_waited = not wait
             return None
         return self.live
 
@@ -279,7 +281,7 @@ class Preflight:
     def summary(self) -> dict[str, Any]:
         live = self.live or {}
         return {"picker": self.picker.get("handler"), "picker_conf": self.picker.get("confidence"),
-                "source": self.source, "cache_hit": self.cache_hit, "timed_out": self.timed_out,
+                "source": self.source, "cache_hit": self.cache_hit, "timed_out": self.timed_out, "not_waited": self.not_waited,
                 "error": self.error, "live_ms": self.live_ms, "budget_ms": int(self.budget_s * 1000),
                 "jev_handler": live.get("handler"), "jev_conf": live.get("confidence"),
                 "needs_expensive": live.get("needs_expensive"), "hard_hint": live.get("hard_hint")}
