@@ -66,15 +66,7 @@
     },
     {
       "parameters": {
-        "mode": "combine",
-        "combinationMode": "multiplex",
-        "options": {
-          "clashHandling": {
-            "values": {
-              "resolveClash": "preferInput2"
-            }
-          }
-        }
+        "mode": "append"
       },
       "id": "merge-wait",
       "name": "Wait For Both Fetches",
@@ -84,13 +76,31 @@
     },
     {
       "parameters": {
-        "jsCode": "// Build Digest — defensively handles missing node outputs\n// Uses try/catch to prevent ExpressionError when upstream nodes fail or race\nlet missions = [];\nlet goldenPaths = [];\n\ntry {\n  const missionsOutput = $('Fetch 24h Missions').all();\n  if (missionsOutput && missionsOutput.length > 0) {\n    const raw = missionsOutput[0].json;\n    missions = Array.isArray(raw) ? raw : (raw.data || raw.missions || raw.items || []);\n  }\n} catch (e) {\n  missions = [];\n}\n\ntry {\n  const gpOutput = $('Fetch Golden Paths').all();\n  if (gpOutput && gpOutput.length > 0) {\n    const raw = gpOutput[0].json;\n    goldenPaths = Array.isArray(raw) ? raw : (raw.data || raw.goldenPaths || raw.paths || raw.items || []);\n  }\n} catch (e) {\n  goldenPaths = [];\n}\n\nconst now = new Date().toISOString();\nconst missionsCount = missions.length;\nconst gpCount = goldenPaths.length;\n\nconst missionsSection = missionsCount > 0\n  ? missions.map((m, i) => `${i + 1}. ${m.title || m.name || 'Untitled'} — ${m.status || 'unknown'}`).join('\\n')\n  : '(No missions in last 24h or fetch failed)';\n\nconst gpSection = gpCount > 0\n  ? goldenPaths.map((gp, i) => `${i + 1}. ${gp.name || gp.title || 'Untitled'} — ${gp.status || 'active'}`).join('\\n')\n  : '(No golden paths returned or fetch failed)';\n\nconst digest = [\n  `🐝 HIVE DAILY OPERATIONAL DIGEST`,\n  `Generated: ${now}`,\n  ``,\n  `📋 MISSIONS (last 24h): ${missionsCount}`,\n  missionsSection,\n  ``,\n  `🏆 GOLDEN PATHS: ${gpCount}`,\n  gpSection,\n  ``,\n  `---`,\n  `End of digest.`\n].join('\\n');\n\nreturn [{\n  json: {\n    digest,\n    missionsCount,\n    goldenPathsCount: gpCount,\n    generatedAt: now,\n    fetchErrors: {\n      missions: missions.length === 0 ? 'possible fetch failure or empty' : null,\n      goldenPaths: goldenPaths.length === 0 ? 'possible fetch failure or empty' : null\n    }\n  }\n}];"
+        "jsCode": "// Build Digest — defensively handles missing node outputs\n// Uses try/catch to prevent ExpressionError when upstream nodes fail or race\nlet missions = [];\nlet goldenPaths = [];\n\ntry {\n  const missionsOutput = $('Fetch 24h Missions').all();\n  if (missionsOutput && missionsOutput.length > 0) {\n    const raw = missionsOutput[0].json;\n    missions = Array.isArray(raw) ? raw : (raw.data || raw.missions || raw.items || []);\n  }\n} catch (e) {\n  missions = [];\n}\n\ntry {\n  const gpOutput = $('Fetch Golden Paths').all();\n  if (gpOutput && gpOutput.length > 0) {\n    const raw = gpOutput[0].json;\n    goldenPaths = Array.isArray(raw) ? raw : (raw.data || raw.goldenPaths || raw.paths || raw.items || []);\n  }\n} catch (e) {\n  goldenPaths = [];\n}\n\nconst now = new Date().toISOString();\nconst missionsCount = missions.length;\nconst gpCount = goldenPaths.length;\nconst correlationId = `digest-${now.slice(0, 10)}`;\n\nconst missionsSection = missionsCount > 0\n  ? missions.map((m, i) => `${i + 1}. ${m.title || m.name || 'Untitled'} — ${m.status || 'unknown'}`).join('\\n')\n  : '(No missions in last 24h or fetch failed)';\n\nconst gpSection = gpCount > 0\n  ? goldenPaths.map((gp, i) => `${i + 1}. ${gp.name || gp.title || 'Untitled'} — ${gp.status || 'active'}`).join('\\n')\n  : '(No golden paths returned or fetch failed)';\n\nconst digest = [\n  `HIVE DAILY OPERATIONAL DIGEST`,\n  `Generated: ${now}`,\n  ``,\n  `MISSIONS (last 24h): ${missionsCount}`,\n  missionsSection,\n  ``,\n  `GOLDEN PATHS: ${gpCount}`,\n  gpSection,\n  ``,\n  `---`,\n  `End of digest.`\n].join('\\n');\n\nconst fetchErrors = {\n  missions: missions.length === 0 ? 'possible fetch failure or empty' : null,\n  goldenPaths: goldenPaths.length === 0 ? 'possible fetch failure or empty' : null\n};\n\nreturn [{\n  json: {\n    digest,\n    missionsCount,\n    goldenPathsCount: gpCount,\n    generatedAt: now,\n    correlationId,\n    status: 'digest',\n    error: fetchErrors.missions || fetchErrors.goldenPaths || null,\n    fetchErrors\n  }\n}];"
       },
       "id": "build-digest",
       "name": "Build Digest",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [950, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.GROK_WATCHDOG_WEBHOOK_URL }}",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify({ workflow: $workflow.name, status: $json.status, error: $json.error, correlationId: $json.correlationId, executionId: $execution.id }) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "alert-grok-watchdog",
+      "name": "Alert Grok Watchdog",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 400],
+      "continueOnFail": true
     },
     {
       "parameters": {
@@ -106,18 +116,20 @@
       "name": "Send Digest Telegram",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1200, 400],
-      "continueOnFail": true
+      "position": [1200, 600],
+      "continueOnFail": true,
+      "disabled": true
     },
     {
       "parameters": {
-        "jsCode": "// Preflight: verify TELEGRAM_BOT_TOKEN is set before attempting send\nconst token = $env.TELEGRAM_BOT_TOKEN;\nif (!token || token === '' || token === 'undefined') {\n  return [{\n    json: {\n      error: true,\n      message: 'TELEGRAM_BOT_TOKEN env var is not set. Configure in n8n Settings > Variables.',\n      skipped: true\n    }\n  }];\n}\nreturn $input.all();"
+        "jsCode": "// Deactivated: Telegram is not the notify sink. Kept for optional HITL re-enable.\nreturn $input.all();"
       },
       "id": "telegram-preflight",
       "name": "Telegram Preflight",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1050, 250]
+      "position": [1050, 600],
+      "disabled": true
     }
   ],
   "connections": {
@@ -153,14 +165,7 @@
     "Build Digest": {
       "main": [
         [
-          { "node": "Telegram Preflight", "type": "main", "index": 0 }
-        ]
-      ]
-    },
-    "Telegram Preflight": {
-      "main": [
-        [
-          { "node": "Send Digest Telegram", "type": "main", "index": 0 }
+          { "node": "Alert Grok Watchdog", "type": "main", "index": 0 }
         ]
       ]
     }
@@ -170,8 +175,10 @@
   },
   "staticData": null,
   "id": "VOqRWrgrP2Wmoriq",
+  "active": false,
   "meta": {
-    "instanceId": "hive-ops"
+    "instanceId": "hive-ops",
+    "notes": "audits → Watchdog, not Scorpion, not Telegram. Audit sink = GROK_WATCHDOG_WEBHOOK_URL. Wait For Both Fetches mode=append. Telegram send deactivated (not a fallback). Register Scorpion leftover if present — NOT the audit sink. Do not import or activate from this PR."
   },
   "tags": [
     { "name": "hive" },

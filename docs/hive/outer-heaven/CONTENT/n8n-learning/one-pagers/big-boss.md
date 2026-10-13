@@ -19,7 +19,7 @@ Founder loop, digests, toolbox JSON-RPC, master orchestration (HITL). Morning br
 ## How they work (nodes — from JSON)
 
 ### daily-operational-digest.json
-**Shape FACT:** Schedule → parallel `Fetch 24h Missions` + `Fetch Golden Paths` → `Build Digest` → `Send Digest Telegram` → `Register Digest`.
+**Shape FACT:** Schedule → parallel `Fetch 24h Missions` + `Fetch Golden Paths` → `Wait For Both Fetches` (mode=append) → `Build Digest` → `Alert Grok Watchdog`. audits → Watchdog, not Scorpion, not Telegram. Telegram send deactivated (not a fallback).
 - **Code FACT:** cid `digest-${date}`; filters telemetry/tests/failures/pivots/heals; stability % from golden paths; financial section says N/A + Tier 3 /pro.
 - **Hosts:** `evenslouis.ca`, `api.telegram.org`
 

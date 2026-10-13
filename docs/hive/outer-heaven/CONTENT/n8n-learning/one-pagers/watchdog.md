@@ -18,7 +18,7 @@ Live status SSOT for the n8n bus: smoke, telemetry, ecosystem routing, catalog/n
 ## How they work (nodes — from JSON)
 
 ### golden-path-smoke-notify.json — *Hive Golden Path Smoke Notify*
-**Shape FACT:** `Webhook` → `Register Scorpion` (httpRequest POST `evenslouis.ca` `/scorpion/api/hive/register`, auth header present).
+**Shape FACT:** `Webhook` → `Build Register Payload` → `Alert Grok Watchdog` → `Evaluate Result` → `Respond`. Register Scorpion leftover (disabled/unconnected) — NOT the audit sink. audits → Watchdog, not Scorpion, not Telegram.
 - No code node. No respondToWebhook (responseMode `onReceived`).
 - **Hosts:** `evenslouis.ca`
 
