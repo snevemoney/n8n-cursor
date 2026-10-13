@@ -263,7 +263,7 @@ class FaceServeTest(unittest.TestCase):
         self.assertIn("html.widget body.speak .chip", html)
         self.assertIn("ui-monospace, SFMono-Regular, Menlo, Monaco, monospace", html)
         self.assertIn("overflow-y: auto", html)
-        self.assertIn("max-height: 64px", html)
+        self.assertIn("max-height: min(34vh, 220px)", html)  # was 64px; Evens 17:18 saw replies cut mid-line
         self.assertIn("transform: translateX(-50%)", html)
         self.assertIn("html.widget #dock #stopBtn", html)
         self.assertIn("html.widget #dock #stopBtn .btn-label", html)
