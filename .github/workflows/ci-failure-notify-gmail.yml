@@ -9,6 +9,7 @@
 #   SMTP_HOST / SMTP_PORT / SMTP_FROM — same as council-consolidated-reports.yml
 
 name: CI Failure Notify Gmail
+# 2026-10-11 Forge draft: fix 'A mapping was not expected' (Build alert body) and deliver via ntfy; Gmail step kept but disabled.
 
 on:
   workflow_run:
@@ -60,7 +61,7 @@ jobs:
       - name: Build alert body
         id: body
         env:
-          RUN: ${{ github.event.workflow_run }}
+          RUN: ${{ toJSON(github.event.workflow_run) }}
           DISPATCH_NAME: ${{ github.event.inputs.workflow_name }}
           DISPATCH_URL: ${{ github.event.inputs.run_url }}
         run: |
@@ -94,8 +95,18 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Send Gmail alert
-        if: steps.smtp.outputs.configured == 'true'
+      - name: Send ntfy alert
+        env:
+          NTFY_TOKEN: ${{ secrets.NTFY_ALERTS_TOKEN }}
+          BODY: ${{ steps.body.outputs.content }}
+          TITLE: "CI failed: ${{ github.event.inputs.workflow_name || github.event.workflow_run.name }}"
+        run: |
+          if [ -z "$NTFY_TOKEN" ]; then echo "::error::repo secret NTFY_ALERTS_TOKEN not set"; exit 1; fi
+          curl -fsS -m 20 --retry 3 -H "Authorization: Bearer $NTFY_TOKEN" -H "Title: $TITLE" \
+            -H "Priority: 4" -H "Tags: rotating_light" --data-binary "$BODY" https://ntfy.evenslouis.ca/evens-alerts
+
+      - name: Send Gmail alert (disabled; ntfy is primary)
+        if: false && steps.smtp.outputs.configured == 'true'
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_HOST || secrets.N8N_SMTP_HOST || 'smtp.gmail.com' }}
@@ -109,7 +120,7 @@ jobs:
           ignore_cert: true
 
       - name: SMTP not configured
-        if: steps.smtp.outputs.configured != 'true'
+        if: false && steps.smtp.outputs.configured != 'true'
         run: |
           echo "::warning::CI failure Gmail mirror skipped — set SMTP_USER + SMTP_PASSWORD (Gmail app password) in repo secrets."
           exit 1
