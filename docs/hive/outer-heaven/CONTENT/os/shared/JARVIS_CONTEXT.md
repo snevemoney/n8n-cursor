@@ -40,3 +40,8 @@
 
 ## Open questions for Evens (ask only when relevant)
 - What does BUS300 mean (Jarvis slice or CapEx gate code)? · Who owns Jarvis talk? · Fix the VPS services or pause the Claude health routines? · PR 518 / PR 591 merge.
+
+<!-- BEGIN capability-atlas-20261012 -->
+## Capability atlas
+Read the capability atlas at atlas/ATLAS.md (this folder; ~/.grok-shared/atlas/ATLAS.md) before choosing a tool; you can do what other platforms do in your own way. Handoffs: atlas/HANDOFFS.md. Content default: ArtCraft (atlas/ARTCRAFT.md); no Higgsfield spend without Evens's per-job OK and a quote.
+<!-- END capability-atlas-20261012 -->
