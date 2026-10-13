@@ -529,6 +529,11 @@ def _apply_turn_iter_inner(
             gen=token,
         )
         return
+    # Z02: "where do I click to X" is tutor mode: on-device locate + native arrow, never a Watch click, never a screenshot.
+    if hasattr(PIPELINE, "_pointer_hand") and PIPELINE._pointer_hand().wants_pointer(spoken) and not PIPELINE.is_hard_step(spoken):
+        got = PIPELINE.run_tool({"tool": "pointer", "args": {}}, spoken, hive=hive, retrieve_roots=retrieve_roots, gen=token)
+        yield _door_speak(hive, spoken, str(got.get("spoken") or ""), "pointer", retrieve_roots, gen=token, execution=got)
+        return
     # A disabled executor is a blocked action, not a conversational task.
     action_text = re.sub(r"^(?:hey\s+)?(?:jarvis[,.]?\s*)?(?:please\s+)?", "", spoken, flags=re.I)
     screen_action = bool(PIPELINE.SCREEN_ACT_RE.match(action_text))

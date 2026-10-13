@@ -1,6 +1,5 @@
-"""Z02 pointer pill: route, confirm-gated, parse, draw without clicking."""
+"""Z02 pointer: on-device locate -> native arrow; no confirm, no screenshot leaves the Mac."""
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -11,32 +10,30 @@ PT = P._pointer_hand()
 
 
 class PointerTest(unittest.TestCase):
-    def test_route_and_gate(self):
-        for u in ["Where do I click to turn on notifications?", "where is the share button", "point to the save icon"]:
+    def test_route_no_confirm(self):
+        for u in ["Where do I click to turn on notifications?", "Hey Jarvis, can you show me where is the button to click on and create a new Instagram reel?",
+                  "point to the save icon"]:
             self.assertEqual(P.model_free_route(u)["tool"], "pointer", u)
-        self.assertIn("pointer", P.CONFIRM_TOOLS)
-        self.assertIn("confirm", P.CONFIRM_LINES["pointer"])
-        self.assertNotEqual((P.model_free_route("what's the weather") or {}).get("tool"), "pointer")
+        self.assertNotIn("pointer", P.CONFIRM_TOOLS)
+        self.assertNotIn("pointer", P.CONFIRM_LINES)
 
-    def test_parse(self):
-        self.assertEqual(PT.parse('x {"found": true, "label": "Share", "x": 0.9, "y": 0.1}')["label"], "Share")
-        self.assertFalse(PT.parse('{"found": false, "why": "not visible"}')["found"])
-        self.assertIsNone(PT.parse('{"found": true, "x": 2, "y": 0.1}'))
-        self.assertIsNone(PT.parse("no json"))
+    def test_keywords(self):
+        k = PT.keywords("can you show me where is the button to click on and create a new Instagram reel?")
+        self.assertIn("create", k); self.assertIn("reel", k); self.assertNotIn("click", k)
 
-    def test_run_draws_and_never_clicks(self):
-        hive = Path(tempfile.mkdtemp())
-        shot = hive / "s.png"
-        shot.write_bytes(b"\x89PNG fake")
-        drawn = []
-        got = PT.run("where do I click to share", hive=hive,
-                     grab_fn=lambda h, bounds=None: {"ok": True, "path": str(shot)},
-                     vision_fn=lambda prompt, images: '{"found": true, "label": "Share", "x": 0.92, "y": 0.08}',
-                     spawn=drawn.append)
-        self.assertTrue(got["ok"]) ; self.assertTrue(got["found"])
-        self.assertIn("Share", got["spoken"]); self.assertIn("top right", got["spoken"])
-        self.assertEqual(drawn[0][1:4], ["0.9200", "0.0800", "Share"])
-        self.assertFalse(shot.exists())  # screenshot deleted
+    def test_run_draws_arrow_on_device(self):
+        drawn, hovered = [], []
+        got = PT.run("where do I click to open Routines", locate_fn=lambda k: {"found": True, "x": 1200.5, "y": 365, "label": "Routines", "source": "ax"},
+                     draw_fn=lambda x, y, l: drawn.append((x, y, l)) or True, hover_fn=lambda x, y: hovered.append((x, y)) or True,
+                     where_fn=lambda x, y: "right")
+        self.assertEqual(drawn, [(1200.5, 365.0, "Routines")]); self.assertEqual(hovered, [(1200.5, 365.0)])
+        self.assertEqual(got["source"], "ax"); self.assertIn("red arrow", got["spoken"])
+        self.assertNotIn("screenshot", got["spoken"].lower()); self.assertNotIn("confirm", got["spoken"].lower())
+
+    def test_not_found_is_honest(self):
+        got = PT.run("where do I click to zzz", locate_fn=lambda k: {"found": False, "why": "no on-screen match"},
+                     draw_fn=lambda *a: self.fail("no draw"), hover_fn=lambda *a: self.fail("no hover"))
+        self.assertFalse(got["found"]); self.assertIn("can't find", got["spoken"])
 
 
 if __name__ == "__main__":

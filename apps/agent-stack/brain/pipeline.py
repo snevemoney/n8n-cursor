@@ -918,7 +918,7 @@ ACK_SKIP = frozenset({"say"})
 # Confirm-before-act (verify round): screen_see sends the screen off the Mac, desk_dispatch acts as a send, and a
 # model-chosen code_run runs code Evens never typed. Each arms a one-shot pending row on the hive bus; only a short
 # explicit "yes/confirm" on the very next turn runs it. Anything else drops it.
-CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run", "pointer")
+CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run")
 CONFIRM_TTL_SEC = 120
 CONFIRM_YES_RE = re.compile(
     r"^\s*(?:yes|yep|yeah|confirm(?:ed)?|go\s+ahead|do\s+it|send\s+it|ok(?:ay)?)\b(?:[\s,]*(?:please|jarvis|sir|do\s+it|go\s+ahead))*[\s.!]*$",
@@ -927,7 +927,6 @@ CONFIRM_YES_RE = re.compile(
 CONFIRM_LINES = {
     "screen_see": "That would send a screenshot of your whole screen to the vision model, off this Mac. Say \"confirm\" to go ahead; I delete the screenshot afterwards.",
     "desk_dispatch": "That would put a job card for the {desk} desk on the hive bus, which acts as a send. Say \"confirm\" to send it.",
-    "pointer": "To point at it I'd send a screenshot of your whole screen to the vision model, off this Mac. Say \"confirm\" to go ahead; I delete the screenshot afterwards and I won't click anything.",
     "code_run": "I picked code to run that you didn't type. Say \"confirm\" to run it in the sandbox; anything else drops it.",
 }
 
@@ -5320,13 +5319,11 @@ def _run_tool_inner(
                 "cites": [], "sent": False, "task_verified": bool(got.get("ok")),
                 "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "pointer":
-        def _vision_pt(prompt, images):
-            seen = online_talk(prompt, "", images=images, hands=False) or {}
-            return None if seen.get("unknown") else (seen.get("spoken") or seen.get("text"))
-        got = _pointer_hand().run(utterance, hive=hive, vision_fn=_vision_pt)
-        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["screen", "pointer"],
+        got = _pointer_hand().run(utterance)
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["pointer"],
                 "cites": [], "sent": False, "task_verified": bool(got.get("found")),
-                "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
+                "pointer_meta": {k: got.get(k) for k in ("found", "source", "drawn")},
+                "outcome": TOOL_LOOP if got.get("found") else HONEST_UNKNOWN}
     if tool == "handback":
         return handback(hive, gen)
     if tool == "multistep":
