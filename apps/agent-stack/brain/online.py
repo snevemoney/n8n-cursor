@@ -1291,7 +1291,7 @@ def call_openrouter(
         if cleaned != got.get("spoken"):
             got["spoken"] = cleaned
             got["claim_fixed"] = True
-        stat = unbacked_status_claim(str(got.get("spoken") or ""), backed=bool(got.get("status_checked")))
+        stat = unbacked_status_claim(str(got.get("spoken") or ""), backed=bool(got.get("status_checked") or got.get("verb") == "status" or got.get("tool") == "status"))
         if stat != got.get("spoken"):
             got["spoken"] = stat
             got["claim_fixed"] = True
@@ -1327,11 +1327,14 @@ MEMORY_CLAIM_RE = re.compile(
 # Live-status boasts a talk reply cannot back: "the Orb is stable", "all tools are ready".
 STATUS_CLAIM_RE = re.compile(
     r"\b(?:the\s+)?orb\s+(?:is\s+)?(?:stable|running\s+smoothly|healthy|online)"
-    r"|\ball\s+(?:my\s+|the\s+)?(?:tools|systems)\s+(?:are\s+)?(?:ready|online|operational|nominal|green|working)"
-    r"|\b(?:openrouter|api|network)\s+(?:connectivity|connection)\s+is\s+(?:reliable|stable|solid|good)"
+    r"|\b(?:all|everything)\b(?:\s+(?:my|the|of|core|main|your))*\s+(?:tools|systems|functions|adapters|hands)\s+(?:are\s+)?(?:ready|online|operational|nominal|green|working|functional|available)"
+    r"|\beverything\s+(?:appears\s+to\s+be\s+|seems\s+(?:to\s+be\s+)?|is\s+)(?:working|running|fine|operational|ready)"
+    r"|\b(?:orb|vault|safari|talk|watch|desktop|tools?|adapters?|connection|connectivity|interface|memory\s+access|openrouter)\b[^.\n]{0,40}?"
+    r"\b(?:is|are)\s+(?:\w+\s+)?(?:stable|ready|operational|functional|responsive|active|accessible|available|working|reliable|healthy|online)\b"
+    r"|^\s*[-*\u2022]\s+[^\n]{0,40}?\b(?:orb|vault|safari|talk|watch|desktop|tools?|adapter|connection|openrouter|memory|browser)\b[^\n]{0,60}?\b(?:active|accessible|available|functional|operational|responsive|ready|online|working|stable)\b"
     r"|\ball\s+systems\s+(?:are\s+)?(?:go|nominal|green)"
     r"|\bfunctioning\s+(?:well\s+)?within\s+(?:normal\s+)?operational\s+parameters",
-    re.I,
+    re.I | re.M,
 )
 
 
@@ -1342,7 +1345,7 @@ def unbacked_status_claim(text: str, *, backed: bool) -> str:
     parts = re.split(r"(?<=[.!?])\s+|\n+", text.strip())
     keep = [x for x in parts if x and not STATUS_CLAIM_RE.search(x)]
     if not any(re.search(r"[A-Za-z]{3,}", x) and x.strip(" .") not in ("Sir", "sir") for x in keep):
-        keep.append("I'm online; I have not run a live status check.")
+        keep.append("I'm online, but I have not run a live status check this turn; ask me to run status for real readings.")
     return " ".join(keep).strip()
 
 

@@ -20,6 +20,19 @@ class StatusClaimTests(unittest.TestCase):
         out = online.unbacked_status_claim("Sir. All systems are go.", backed=False)
         self.assertIn("not run a live status check", out)
 
+    def test_status_question_boasts_dropped(self):
+        live = ("Sir. Yes, all my core tools are ready and operational:\n\n- **Talk**: OpenRouter connection active\n"
+                "- **Vault**: Obsidian vault accessible for read-memory operations\n- **Safari**: Browser adapter available")
+        out = online.unbacked_status_claim(live, backed=False)
+        self.assertNotRegex(out.lower(), r"ready and operational|accessible|adapter available")
+        self.assertIn("not run a live status check", out)
+        out2 = online.unbacked_status_claim("Sir. Yes, everything appears to be working normally on my end.", backed=False)
+        self.assertIn("not run a live status check", out2)
+
+    def test_non_status_bullets_kept(self):
+        t = "Sir. Options:\n- GridCraft is available for sheets\n- DeckCraft is ready for slides"
+        self.assertEqual(online.unbacked_status_claim(t, backed=False), t)
+
     def test_plain_reply_untouched(self):
         t = "Sir. Good evening. I'm ready to help; what are we working on?"
         self.assertEqual(online.unbacked_status_claim(t, backed=False), t)
