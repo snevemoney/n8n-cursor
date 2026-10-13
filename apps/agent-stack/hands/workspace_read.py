@@ -96,8 +96,13 @@ def run(args: dict, roots=None) -> dict[str, Any]:
     if op == "read":
         if not path.is_file():
             return _deny("not a file", op)
-        with open(path, "rb") as fh:
-            data = fh.read(MAX_BYTES + 1)
+        try:
+            with open(path, "rb") as fh:
+                data = fh.read(MAX_BYTES + 1)
+        except PermissionError:
+            return _deny(f"macOS has not given me access to {path.name} yet", op)
+        except OSError:
+            return _deny("that file can't be opened", op)
         truncated = len(data) > MAX_BYTES
         text = data[:MAX_BYTES].decode("utf-8", "replace")
         first = text.splitlines()[0] if text else ""
@@ -106,7 +111,12 @@ def run(args: dict, roots=None) -> dict[str, Any]:
     if op == "ls":
         if not path.is_dir():
             return _deny("not a folder", op)
-        allnames = sorted(n.name for n in path.iterdir() if not n.name.startswith(".") and not SECRET_NAME.search(n.name))
+        try:
+            allnames = sorted(n.name for n in path.iterdir() if not n.name.startswith(".") and not SECRET_NAME.search(n.name))
+        except PermissionError:
+            return _deny(f"macOS has not given me access to {path.name} yet (System Settings > Privacy & Security > Files and Folders)", op)
+        except OSError:
+            return _deny("that folder can't be listed", op)
         names = allnames[:MAX_NAMES]
         more = len(allnames) > MAX_NAMES
         sp = f"{path.name} has {len(allnames)} items" + (": " + ", ".join(names[:10]) if names else "") + ("…" if len(allnames) > 10 else ".")
