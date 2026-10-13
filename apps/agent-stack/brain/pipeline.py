@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "rules", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -849,6 +849,27 @@ def wants_mcp_call(utterance: str) -> bool:
     return bool(MCP_CALL_RE.search(utterance or ""))
 
 
+RULES_RE = re.compile(
+    r"\b(?:what|which)\s+(?:are\s+)?(?:your\s+)?(?:operating\s+|house\s+|own\s+)?rules\s+(?:do\s+you\s+(?:follow|have|obey)|are\s+yours)\b|"
+    r"\b(?:what|which)\s+are\s+your\s+(?:operating\s+|house\s+|own\s+)?rules\b|"
+    r"\b(?:remind\s+me\s+of|list|tell\s+me)\s+your\s+(?:operating\s+|house\s+|own\s+)?rules\b|"
+    r"\bwhat\s+rules\s+do\s+you\s+(?:follow|have|obey)\b",
+    re.I,
+)
+
+
+def wants_rules(utterance: str) -> bool:
+    """Ask about Jarvis's own operating rules (JARVIS.md). Other rule asks (client sends, merge, PASS) are not this."""
+    return bool(RULES_RE.search(utterance or ""))
+
+
+def rules_spoken() -> str:
+    lines = [ln[2:].strip() for ln in jarvis_rules().splitlines() if ln.startswith("- ")]
+    if not lines:
+        return "My rules file (JARVIS.md) is missing, so I can't quote my rules right now."
+    return "From JARVIS.md, my operating rules: " + " ".join(f"{i}. {t}" for i, t in enumerate(lines, 1))
+
+
 def jarvis_rules() -> str:
     """Short operating rules (JARVIS.md) loaded into the turn prompt. Empty string if the file is missing."""
     try:
@@ -973,7 +994,9 @@ def model_free_route(spoken_in: str) -> dict | None:
         # Rank 16: a screen ask is the whole display (screen_see), not the Safari tab.
         early = {"tool": "screen_see", "args": {}, "speak": ""}
     if early is None and not is_hard_step(spoken_in):
-        if wants_mcp_call(spoken_in):
+        if wants_rules(spoken_in):
+            early = {"tool": "rules", "args": {}, "speak": ""}
+        elif wants_mcp_call(spoken_in):
             early = {"tool": "mcp_call", "args": {}, "speak": ""}
         elif wants_plan(spoken_in):
             early = {"tool": "plan", "args": {}, "speak": ""}
@@ -5118,6 +5141,9 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["screen_see"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "screen_see_meta": hd.log_meta(got)}
+    if tool == "rules":
+        return {"ok": True, "tool": tool, "spoken": rules_spoken(), "wires": ["rules"], "cites": [],
+                "sent": False, "task_verified": True}
     if tool == "plan":
         hd = _plan_hand()
 
