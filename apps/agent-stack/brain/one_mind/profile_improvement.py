@@ -107,9 +107,18 @@ class Ledger:
         return [json.loads(l) for l in self.path.read_text().splitlines()] if self.path.exists() else []
 
 
-def improve(registry, profile_id, traces, *, runner, offline_cases, shadow_cases, ledger, proposer=default_proposer):
-    """Run the full loop once. Returns (registry_after, decision_row). registry is never mutated."""
+def improve(registry, profile_id, traces, *, runner, offline_cases, shadow_cases, ledger, proposer=default_proposer,
+            round_log=None, locked_scorer=None, coach_dir=None):
+    """Run the full loop once. Returns (registry_after, decision_row). registry is never mutated.
+
+    Feature-loop wiring (optional, all None = previous behaviour): locked_scorer (feature_loop.LockedCheckScorer,
+    approved once) must score the candidate full with no regression or the candidate is rejected; every decision is
+    appended to round_log (results.tsv format); coach_dir gets a PROPOSED How-to-work note when a failure pattern
+    repeats across profiles. The proposal is never applied here.
+    """
     require_enabled()
+    if round_log is not None or locked_scorer is not None or coach_dir is not None:
+        ledger = _LoopLedger(ledger, round_log, coach_dir, profile_id)
     baseline = registry.resolve(profile_id)
     stats = trace_stats(traces, profile_id)
     row = {'profile_id': profile_id, 'baseline_version': baseline.version, 'traces': stats}
@@ -125,11 +134,43 @@ def improve(registry, profile_id, traces, *, runner, offline_cases, shadow_cases
     row['offline'] = off
     if not better(off):
         row.update(decision='reject', reason='offline_not_better'); ledger.record(row); return registry, row
+    if locked_scorer is not None:
+        locked = locked_scorer.score(candidate, profile_id)
+        row['locked'] = {k: locked[k] for k in ('passed', 'total', 'failing', 'regressions', 'reason', 'score')}
+        ledger.locked = locked
+        if not locked_scorer.full(locked):
+            row.update(decision='reject', reason='locked_checks_failed'); ledger.record(row); return registry, row
     sh, _ = shadow(runner, baseline, candidate, shadow_cases)
     row['shadow'] = sh
     if not better(sh):
         row.update(decision='reject', reason='shadow_not_better'); ledger.record(row); return registry, row
     rows = [registry.resolve(pid, ver) for (pid, ver) in registry._profiles] + [candidate]
     row.update(decision='promote', reason='offline_and_shadow_better')
+    if locked_scorer is not None:
+        locked_scorer.keep(ledger.locked)
     ledger.record(row)
     return profiles().ProfileRegistry(rows), row
+
+
+class _LoopLedger:
+    """Wraps the JSONL ledger: also writes a results.tsv round row and, if asked, a coach proposal path."""
+
+    def __init__(self, inner, round_log, coach_dir, profile_id):
+        self.inner, self.round_log, self.coach_dir, self.profile_id, self.locked = inner, round_log, coach_dir, profile_id, None
+
+    def rows(self):
+        return self.inner.rows()
+
+    def record(self, row):
+        from . import feature_loop as FL
+        if self.round_log is not None:
+            res = self.locked or {'feature': self.profile_id, 'passed': 0, 'total': 0, 'failing': [], 'regressions': [], 'reason': 'ok'}
+            if row.get('reason') in ('offline_not_better', 'shadow_not_better') and not res.get('failing'):
+                res = dict(res, failing=[row['reason']])
+            res = dict(res, feature=self.profile_id)
+            FL.log_round(self.round_log, res, status='kept' if row.get('decision') == 'promote' else
+                         ('reverted' if row.get('decision') == 'reject' else 'no-change'),
+                         tried='candidate v%s: %s' % (row.get('candidate_version', '-'), row.get('rationale') or row.get('reason')))
+            if self.coach_dir is not None:
+                row['coach_proposal'] = FL.coach_proposal(self.round_log.rows(), self.coach_dir)
+        self.inner.record(row)

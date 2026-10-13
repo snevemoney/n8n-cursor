@@ -55,9 +55,38 @@ class BoxCodingBackend(Backend):
             patch = sb.diff(files)
             check = run_tests(sb.root, test_cmd)  # independent re-run, not the builder's own result
             passed = bool(out['status'] == 'COMPLETED' and patch and check['passed'])
+            loop = self._feature_loop(request, sb, passed, out) if request.get('locked_checks') is not None else {}
+            if loop:
+                passed = passed and loop['kept'] and loop['full']
             self.routed.record_outcome(passed)
-            return {'status': 'COMPLETED' if passed else 'FAILED', 'patch': patch, 'iterations': out['iterations'],
-                    'reason': out.get('reason', ''), 'verify': {k: check[k] for k in ('passed', 'exit_code', 'seconds')},
-                    'routes': list(self.routed.routes), 'spent_usd': round(getattr(self.client.meter, 'spent', 0.0), 6)}
+            result = {'status': 'COMPLETED' if passed else 'FAILED', 'patch': patch, 'iterations': out['iterations'],
+                      'reason': out.get('reason', '') or (loop.get('locked', {}).get('reason') if loop and not passed else ''),
+                      'verify': {k: check[k] for k in ('passed', 'exit_code', 'seconds')},
+                      'routes': list(self.routed.routes), 'spent_usd': round(getattr(self.client.meter, 'spent', 0.0), 6)}
+            if loop:
+                result['feature_loop'] = loop
+            return result
         finally:
             sb.cleanup()
+
+    @staticmethod
+    def _feature_loop(request, sb, passed, out):
+        """Locked-check scorer on the sandbox copy (all features; regression or tamper = 0), keep only if full,
+        one results.tsv row per run, optional coach proposal path. Opt-in via request['locked_checks']."""
+        from . import feature_loop as FL
+        scorer, feature = request['locked_checks'], request.get('feature', 'feature')
+        res = scorer.score(sb.root, feature)
+        best_before = scorer.best.get(feature, 0.0)
+        kept = bool(passed and scorer.improves(res))
+        if kept:
+            scorer.keep(res)
+        loop = {'feature': feature, 'kept': kept, 'full': scorer.full(res),
+                'locked': {k: res[k] for k in ('passed', 'total', 'failing', 'regressions', 'reason', 'score')}}
+        log = request.get('round_log')
+        if log is not None:
+            loop['round'] = FL.log_round(log, res, status='kept' if kept else 'reverted',
+                                         tried=(request.get('objective') or '')[:120],
+                                         best_before=best_before)['round']
+            if request.get('coach_dir'):
+                loop['coach_proposal'] = FL.coach_proposal(log.rows(), request['coach_dir'])
+        return loop
