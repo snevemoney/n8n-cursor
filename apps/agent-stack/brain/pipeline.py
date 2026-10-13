@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -1096,6 +1096,8 @@ def model_free_route(spoken_in: str) -> dict | None:
             early = {"tool": "drafts", "args": {}, "speak": ""}
         elif wants_rules(spoken_in):
             early = {"tool": "rules", "args": {}, "speak": ""}
+        elif _agent_tools_hand().wants(spoken_in):
+            early = {"tool": "agent_tools", "args": {}, "speak": ""}
         elif wants_mcp_call(spoken_in):
             early = {"tool": "mcp_call", "args": {}, "speak": ""}
         elif wants_plan(spoken_in):
@@ -1174,6 +1176,16 @@ def _mcp_inventory_hand():
     name = "agent_stack_mcp_inventory"
     if name not in sys.modules:
         spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "mcp_inventory.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _agent_tools_hand():
+    name = "agent_stack_agent_tools"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "agent_tools.py")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
@@ -5478,6 +5490,12 @@ def _run_tool_inner(
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["plan"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("ok")), "plan_meta": hd.log_meta(got)}
+    if tool == "agent_tools":
+        hd = _agent_tools_hand()
+        got = hd.run(dict(args) if args.get("op") or args.get("steps") else hd.args_from_utterance(utterance))
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
+                "wires": ["agent_tools"], "cites": list(got.get("cites") or []), "sent": False,
+                "task_verified": bool(got.get("verified")), "agent_tools_meta": hd.log_meta(got)}
     if tool == "mcp_call":
         hd = _mcp_call_hand()
         got = hd.run(dict(args) if args else hd.args_from_utterance(utterance))
@@ -6237,7 +6255,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "results_recall", "prebrief")
+DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "cost_card", "results_recall", "prebrief")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
