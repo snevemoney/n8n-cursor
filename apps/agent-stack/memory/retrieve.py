@@ -584,7 +584,10 @@ def _file_score(path: Path, text: str, words: list[str], query: str) -> int:
             score += 30
         elif re.search(rf"\b{re.escape(a_w)}[\s_-]+{re.escape(b_w)}", head_blob):
             score += 20
-    named_bonus = 28 if not path_hits else 0
+    covered = [w for w in content_words if _token_hit(w, blob)]
+    named_bonus = 28 if not path_hits and len(covered) * 2 >= len(content_words) else 0
+    if len(content_words) >= 2 and len(covered) < 2:
+        return min(score, 5)  # one shared word is not a match for a multi-word ask
     if rel in NAMED_NOTE_RELS or path.name in {
         "OPERATOR_MEMORY.md",
         "NORTH_STAR.md",

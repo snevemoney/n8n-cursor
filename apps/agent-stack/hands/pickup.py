@@ -65,10 +65,39 @@ def _clean(text: str) -> str:
     return "\n".join(l for l in text.splitlines() if not SECRET_LINE.search(l))[-MAX_CHARS:]
 
 
+OWNER_ASK = re.compile(r"\bwho\s+owns\b|\bowner\b|\bwhich\s+board\b|\bboard\s+file\b", re.I)
+_STOPW = set("read my the and tell me who owns which board file it uses what is of for a an to in on".split())
+
+
+def row_answer(utterance: str, text: str) -> str:
+    """Owner / board questions answered straight from the ACTIVE_TASKS table row, no model (real-work #31 was model-flaky)."""
+    words = [w for w in re.findall(r"[a-z0-9]+", (utterance or "").lower()) if w not in _STOPW and len(w) > 2 and w != "active_tasks"]
+    best, score = None, 0
+    for line in text.splitlines():
+        if not line.startswith("|") or set(line) <= set("|-: "):
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        hit = sum(1 for w in words if w in cells[0].lower())
+        if hit > score:
+            best, score = cells, hit
+    if not best or score < 2 or len(best) < 2:
+        return ""
+    board = re.search(r"`([^`]*COWORK-[^`]+\.md)`|(COWORK-[\w.-]+\.md)", best[0])
+    task = re.sub(r"\s*\(.*", "", best[0]).strip()
+    line = f"{task}: owned by {best[1]}."
+    if board:
+        line += f" Board file: {Path(board.group(1) or board.group(2)).name}."
+    return line
+
+
 def run(utterance: str, *, chat=None) -> dict:
     files = pick(utterance)
     if not files:
         return {"ok": False, "spoken": "I found no ACTIVE_TASKS.md or cowork board to read."}
+    if OWNER_ASK.search(utterance or "") and files[0].name == "ACTIVE_TASKS.md":
+        direct = row_answer(utterance, _clean(files[0].read_text(errors="replace")))
+        if direct:
+            return {"ok": True, "files": [files[0].name], "spoken": f"From {files[0].name}: {direct}"}
     ctx = "\n\n".join(f"=== {p.name} ===\n{_clean(p.read_text(errors='replace'))}" for p in files)
     ca = _mod("code_author")
     talk = chat or ca.CHAT
