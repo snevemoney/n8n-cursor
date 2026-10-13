@@ -11,6 +11,22 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from brain import pipeline as P  # noqa: E402
 
 PT = P._pointer_hand()
+_TMP = None
+_ORIG_LAST = PT.LAST
+
+
+def setUpModule():  # tests must never read or write the real ~/Library/Caches/jarvis/pointer_last.json (the live Face uses it)
+    global _TMP
+    import tempfile
+    _TMP = tempfile.TemporaryDirectory()
+    PT.LAST = Path(_TMP.name) / "pointer_last.json"
+
+
+def tearDownModule():
+    PT.LAST = _ORIG_LAST
+    _TMP.cleanup()
+
+
 MAIN = {"index": 1, "x": 0.0, "y": 0.0, "w": 1512.0, "h": 982.0, "main": True}
 
 
