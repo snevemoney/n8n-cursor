@@ -977,16 +977,25 @@ CODE_REPLY_RECOVERY = (
     'The previous coding reply was invalid or incomplete; no writes, tests, or commits from that reply ran. '
     'Return one complete JSON object only. Keep the response bounded: inspect with read_paths first, '
     'prefer compact exact edits for large existing files, and include only small necessary new files. '
-    'Include an explicit meaningful test_cmd. Complete only the work authorized by the current goal. '
+    'For partial work use one small file/exact edit with continue:true and no test_cmd, then a final explicit meaningful test_cmd. Complete only the work authorized by the current goal. '
     'Do not resend whole large files.')
 
-def _code_reply(text):
+def _code_reply(text,*,require_test_command=False):
     """A rejected response is feedback, never an empty default test action."""
     raw=re.sub(r'^```(?:json)?|```$', '', (text or '').strip(),flags=re.M).strip()
     try:data=json.loads(raw)
     except (ValueError,TypeError):return None,'malformed_or_truncated_json'
     if not isinstance(data,dict) or not data:return None,'nonempty_object_required'
+    if 'done' in data and type(data['done']) is not bool:return None,'done_must_be_boolean'
     if data.get('read_paths'):return data,None
+    if data.get('continue') is True:
+        if data.get('test_cmd'):return None,'continuing_batch_cannot_test_or_commit'
+        files=data.get('files') or {};edits=data.get('edits') or []
+        if not isinstance(files,dict) or not isinstance(edits,list) or len(files)+len(edits)!=1:return None,'continuing_batch_requires_one_file_or_edit'
+        if len(json.dumps(data,ensure_ascii=False))>3000:return None,'continuing_batch_exceeds_3000_characters'
+        return data,None
+    if 'continue' in data and data['continue'] is not False:return None,'continuation_must_be_boolean'
+    if (require_test_command or 'continue' in data) and not (isinstance(data.get('test_cmd'),str) and data['test_cmd'].strip()):return None,'final_batch_requires_explicit_test_command'
     if not (data.get('files') or data.get('edits')) and not (isinstance(data.get('test_cmd'),str) and data['test_cmd'].strip()):return None,'coding_action_or_test_command_required'
     return data,None
 
@@ -997,7 +1006,10 @@ CODE_INSPECTION_HINT = (
     'Actual bounded file contents and SHA256 will be returned. For an existing large file, '
     'use "edits":[{"path":"relative/file.py","old":"exact unique existing text","new":"replacement"}] '
     'instead of rewriting unseen contents. Existing files/test_cmd/commit_message still work. '
-    'A repository view is partial context, never proof of execution.')
+    'Keep replies below 3000 characters. Keep each batch focused on one requested behavior; do not expand scope. '
+    'For an unfinished batch return exactly one small new file or one exact edit with "continue":true and no test_cmd. '
+    'Those writes will be retained; no tests or commit run until the final batch has an explicit meaningful test_cmd. '
+    'When tests pass but requested work remains, return done:false to continue without commit; use done:true only for a final complete batch. Do not claim the full goal complete from a standalone batch. Describe intended test commands/coverage separately from actual run receipts; never invent pass results. A repository view is partial context, never proof of execution.')
 
 
 def _owned_code_bytes(root, name):
@@ -1517,7 +1529,7 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
             if not text:
                 done(f"iter {state['iteration']} model", {"verified":False,"spoken":"no model answer"})
                 return _code_report(state["todo"],state["skills"],model,False,state["plan"])
-            data,error = _code_reply(text)
+            data,error = _code_reply(text,require_test_command=bool(state.get("continuing_batches")))
             if error:
                 state.update(model=model,model_output=text,model_data={},model_request_pending=False,files=[],edit_preimages={},file_cursor=0)
                 state['history'].append({'role':'assistant','content':text[:8000]})
@@ -1539,6 +1551,9 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
             state["phase"] = "files";save()
         elif phase == "files":
             if state["file_cursor"] >= len(state["files"]):
+                if state['model_data'].get('continue') is True:
+                    state['history'].append({'role':'user','content':'Actual continuing batch write/readback completed: '+json.dumps([name for name,_ in state['files']])+'. No tests or commit ran. Continue the remaining authorized goal with one small file/exact edit; only the final batch supplies meaningful test_cmd. Partial work is not completed implementation.'})
+                    state['continuing_batches']=True;state['iteration']+=1;state['phase']='model';save();continue
                 state["phase"] = "test";save();continue
             name, content = state["files"][state["file_cursor"]]
             name, content = str(name),str(content)
@@ -1572,6 +1587,9 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
             done(f"iter {state['iteration']} test",got)
             if not got.get("verified"):
                 state["iteration"] += 1;state["phase"] = "model";save();continue
+            if state['model_data'].get('done') is False:
+                state['history'].append({'role':'user','content':'Actual tests passed for the current work; no commit ran because done:false. Actual test receipt: '+state['last_test']+'. Continue only the remaining authorized work, and use done:true with explicit test_cmd when complete.'})
+                state['continuing_batches']=True;state['iteration']+=1;state['phase']='model';save();continue
             message = str(state["model_data"].get("commit_message") or goal)[:100]
             names = _git(root,"ls-files","--cached","--others","--exclude-standard","-z").stdout.split("\0")
             snap = code_repo_snapshot(root)
@@ -1643,6 +1661,7 @@ def _op_code_owned(repo, goal, branch, *, todo, check, publish, operate) -> dict
         return _code_report(todo, skills, "", False)
     root = Path(os.path.expanduser(repo)) if os.path.isabs(os.path.expanduser(repo)) else PERM().scratch_roots()[0] / repo
     history = [{"role": "system", "content": CODE_SYS}]
+    continuing_batches=False
     last_test, model_used, passed, plan = "", "", False, []
     gi = root / ".gitignore"
     if not gi.exists():
@@ -1664,7 +1683,7 @@ def _op_code_owned(repo, goal, branch, *, todo, check, publish, operate) -> dict
             step(f"iter {it} model", {"verified": False, "spoken": "no model answer (key missing or both models failed)"})
             break
         history.append({"role": "assistant", "content": text[:8000]})
-        d,error = _code_reply(text)
+        d,error = _code_reply(text,require_test_command=continuing_batches)
         if error:
             history.append({'role':'user','content':CODE_REPLY_RECOVERY+' Rejection reason: '+error+'.'})
             step(f"iter {it} model response",{'verified':False,'spoken':'Coding response rejected: '+error+'; no operations from this reply ran.'})
@@ -1680,10 +1699,18 @@ def _op_code_owned(repo, goal, branch, *, todo, check, publish, operate) -> dict
             _check_edit_preimage(root,str(path),preimages.get(str(path)))
             if not step(f"iter {it} write {path}", operate(str(root), "write", path=str(path), content=str(content))):
                 return _code_report(todo, skills, model_used, False, plan)
+        if d.get('continue') is True:
+            continuing_batches=True
+            history.append({'role':'user','content':'Actual continuing batch write/readback completed: '+json.dumps([name for name,_ in files])+'. No tests or commit ran. Continue the remaining authorized goal with one small file/exact edit; only the final batch supplies meaningful test_cmd. Partial work is not completed implementation.'})
+            continue
         got = operate(str(root), "test", cmd=str(d.get('test_cmd') or 'python3 -m unittest discover -v'))
         last_test = str(got.get("output") or got.get("spoken"))[-2500:]
         passed = bool(got.get("verified"))
         step(f"iter {it} test", got)
+        if passed and d.get('done') is False:
+            history.append({'role':'user','content':'Actual tests passed for the current work; no commit ran because done:false. Actual test receipt: '+last_test+'. Continue only the remaining authorized work, and use done:true with explicit test_cmd when complete.'})
+            continuing_batches=True;passed=False
+            continue
         if passed:
             step("commit", operate(str(root), "commit", message=str(d.get("commit_message") or goal)[:100]))
             break
