@@ -100,6 +100,27 @@ class ExecutionTests(unittest.TestCase):
     baseline=E.capture_runtime_baseline(runtime,R._git(runtime))
     with self.assertRaisesRegex(ValueError,'tracked_source_missing'):E.make_receipt(hive,ID,runtime_baseline=baseline)
     self.assertFalse((root/'execution_contract.json').exists());self.assertEqual(list(scratch.iterdir()),[])
+ def test_runtime_only_and_different_selector_files_copy_exact_current_bytes_without_source_changes(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   hive,root,repo,runtime,scratch,hand=self.fixture(tmp);app=runtime/'apps/agent-stack'
+   extra=app/'hands/runtime_only_selector.py';extra.write_text('CODE_MODEL="current-runtime-only"\n')
+   (app/'feature.py').write_text('CODE_MODEL="current-runtime-feature"\n')
+   source_before=W._snapshot(repo,'apps/agent-stack',hand,{})
+   a,b=self.context(hand)
+   with a,b:
+    baseline,receipt,result=self.prepare(hive,repo,runtime,scratch);self.assertTrue(result['ok'],result);owned=Path(result['working_copy'])
+    for relative in ('hands/runtime_only_selector.py','feature.py'):
+     self.assertEqual((owned/'apps/agent-stack'/relative).read_bytes(),(app/relative).read_bytes());self.assertIn('apps/agent-stack/'+relative,baseline['files'])
+    self.assertFalse((repo/'apps/agent-stack/hands/runtime_only_selector.py').exists());self.assertEqual(W._snapshot(repo,'apps/agent-stack',hand,{}),source_before)
+    self.assertEqual(extra.read_text(),'CODE_MODEL="current-runtime-only"\n');self.assertEqual(set(baseline['dirty_preimages']),set(W.LOCKED))
+    self.assertTrue(self.guard(hive,result,{})['ok']);extra.write_text('CODE_MODEL="unauthorized-runtime-drift"\n');self.assertFalse(self.guard(hive,result,{})['ok'])
+ def test_missing_dynamic_selector_from_overlay_fails_before_copy(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   hive,root,repo,runtime,scratch,hand=self.fixture(tmp);extra=runtime/'apps/agent-stack/hands/runtime_only_selector.py';extra.write_text('CODE_MODEL="actual-current"\n');a,b=self.context(hand)
+   with a,b:
+    baseline=E.capture_runtime_baseline(runtime,R._git(runtime));receipt=E.make_receipt(hive,ID,runtime_baseline=baseline);baseline['files'].pop('apps/agent-stack/hands/runtime_only_selector.py')
+    got=W.prepare(ID,source_receipt=receipt,scratch_root=scratch,active_fn=lambda:True,runtime_baseline=baseline)
+    self.assertEqual(got['reason'],'incomplete_runtime_configuration_overlay');self.assertEqual(list(scratch.iterdir()),[])
  def test_contract_is_exclusive_before_second_mutation_and_guard_pins_both_digests(self):
   with tempfile.TemporaryDirectory() as tmp:
    hive,root,repo,runtime,scratch,hand=self.fixture(tmp);a,b=self.context(hand)

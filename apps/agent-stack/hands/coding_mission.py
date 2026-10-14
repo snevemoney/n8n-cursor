@@ -582,6 +582,28 @@ class WorkflowMissionHandle:
             state={**state,'status':'CANCELLED','spoken':'The workflow was stopped. Its full request, completed work and checkpoints are preserved; the outcome is unverified.', 'question':''}
         return self._reply(request,state)
 
+    def progress_status(self, mission_id):
+        """Read retained task receipts; never substitute conversation memory."""
+        root=mission_path(self.hive,mission_id);request=read_json(root/'request.json')
+        if request.get('worker_kind')!='research_build':
+            return {'ok':False,'tool':'agent_tools','spoken':'I have no retained workflow receipt for that mission ID.','verified':False,'task_verified':False,'actions':[],'wires':['workflow_intake'],'cites':[],'sent':False}
+        result=self.workflow_status(mission_id);status=str(result.get('status') or 'UNKNOWN')
+        child=read_json(root/'coding_child.json').get('mission_id')
+        child_request=read_json(mission_path(self.hive,child)/'request.json') if isinstance(child,str) and re.fullmatch(r'[a-f0-9]{32}',child) else {}
+        child_bound=(child_request.get('workflow_context') or {}).get('parent_mission_id')==mission_id
+        try:child_state=CodingMissionHandle(self.hive).status(child) if child_bound else {}
+        except ValueError:child_state={'status':'UNAVAILABLE'}
+        delivery=read_json(root/'delivery.json');completed=delivery.get('completed') or {}
+        pieces=['Workflow phase: '+status+'.']
+        if read_json(root/'source_exception_public.json').get('verification_method')=='independent_public_git_blob':pieces.append('The public source-file check is recorded.')
+        pieces.append('Coding phase: '+str(child_state.get('status') or 'UNKNOWN')+'.' if child_bound else 'The coding phase has not started.')
+        pieces.append('An ArtCraft artifact receipt is recorded; delivery acceptance is separate.' if any(k in completed for k in ('native','export','preview')) else 'No ArtCraft demonstration receipt is recorded.')
+        pieces.append('An Obsidian note readback receipt is recorded.' if completed.get('note',{}).get('readback_verified') is True else 'No Obsidian note readback receipt is recorded.')
+        reason=(result.get('preparation') or {}).get('reason') if status=='PREPARATION_BLOCKED' else result.get('execution_error') if status=='EXECUTION_BLOCKED' else None
+        if reason:pieces.append('Current blocker: '+str(reason)[:180]+'.')
+        if result.get('task_verified') is not True:pieces.append('The complete requested outcome is not verified.')
+        return {**result,'spoken':' '.join(pieces),'question':'','status_evidence':{'coding_child_bound':child_bound,'artcraft_receipt_present':any(k in completed for k in ('native','export','preview')),'note_readback_recorded':completed.get('note',{}).get('readback_verified') is True},'actions':[]}
+
     def bind_project(self, mission_id, repo, branch, answer, verified_contract=None):
         import fcntl
         pm=_load('workflow_project_methods', STACK/'hands'/'project_methods.py')

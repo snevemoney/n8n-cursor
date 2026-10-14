@@ -57,6 +57,10 @@ def capture_runtime_baseline(runtime_repo,expected_identity):
         _,row=W._regular_bytes(repo/'apps/agent-stack'/rel);files['apps/agent-stack/'+rel]=row
     dirty={rel:files['apps/agent-stack/'+rel]['sha256'] for rel in W.LOCKED}
     lock=C.capture_lock(repo/'apps/agent-stack',dirty)
+    for rel in W._runtime_configuration_paths(lock,C):
+        _,row=W._regular_bytes(repo/'apps/agent-stack'/rel);files['apps/agent-stack/'+rel]=row
+    if len(files)>W.MAX_FILES or sum(row['size'] for row in files.values())>W.MAX_BYTES:raise ValueError('runtime_configuration_overlay_budget')
+    if not C.validate_candidate(lock,repo/'apps/agent-stack',{},expected_digest=lock['digest'])['ok']:raise ValueError('runtime_configuration_changed')
     if R._git(repo)!=identity:raise ValueError('runtime_changed')
     for rel,row in files.items():
         if W._regular_bytes(repo/rel)[1]!=row:raise ValueError('runtime_changed')
@@ -225,6 +229,7 @@ def _source_exceptions(hive,mission_id,*,fetch_public=False,fetch_fn=None):
         public=base64.b64decode(body.get('content',''),validate=False)
         if public!=raw:raise ValueError('public_source_blob_mismatch')
         proof={'review_digest':signature,'endpoint':endpoint,'blob_sha':blob,'sha256':row['sha256'],'public_response_digest':_digest(body),'verification_method':'independent_public_git_blob'}
+        if _task(hive,mission_id)[3]!=task or R._git(Path(binding['repo']))!=review['source_identity']:raise ValueError('source_exception_task_changed')
         proof['digest']=_digest(proof);_new_json(proof_path,proof)
     else:raise ValueError('public_source_proof_required')
     unsigned=dict(proof);signature=unsigned.pop('digest',None)
@@ -250,6 +255,18 @@ def recover_preparation(hive,mission_id,*,active_fn):
         if not active_fn() or _task(hive,mission_id)[3]!=task:raise ValueError('preparation_recovery_cancelled')
         if any((root/name).exists() for name in ('execution_guard.json','execution_owner.json','coding_child.json','result.json')):
             raise ValueError('preparation_recovery_builder_or_guard_present')
+    # A failed owned copy may already contain the independently reviewed public
+    # test. Authorize only its exact current proof, never a generic secret path.
+    active()
+    _source_exceptions(hive,mission_id,fetch_public=True)
+    active()
+    def reviewed_snapshot(path):
+        expected=Path(path).resolve()
+        def allowed(actual,relative,sha):
+            if Path(actual).resolve()!=expected:return False
+            row=_source_exceptions(hive,mission_id).get(relative)
+            return bool(row and (sha is None or row['file']['sha256']==sha and row['public_proof']['sha256']==sha))
+        with hand.source_exception_scope(allowed):return hand.code_repo_snapshot(path)
     active();canonical=root/'execution_contract.json';history=root/'preparation-history';pending=[]
     if history.exists():
         if history.is_symlink():raise ValueError('unsafe_preparation_history')
@@ -269,11 +286,11 @@ def recover_preparation(hive,mission_id,*,active_fn):
         if archive.exists():raise ValueError('preparation_archive_already_completed')
         source=contract['source_receipt'];expected={**source['app_manifest'],**source.get('dependencies',{}),**contract['runtime_baseline']['files']}
         expected={rel:{'sha256':row['sha256'],'mode':row['mode']} for rel,row in expected.items()}
-        snapshot=hand.code_repo_snapshot(original)
+        snapshot=reviewed_snapshot(original)
         if snapshot['files']!=expected or snapshot['branch']!='jarvis/workflow-'+mission_id:raise ValueError('preparation_copy_changed')
         if (hand._git(original,'status','--porcelain').stdout.strip() or hand._git(original,'rev-list','--count','HEAD').stdout.strip()!='1'
             or hand._git(original,'log','-1','--format=%s').stdout.strip()!='jarvis: exact project source baseline '+mission_id):raise ValueError('unproved_preparation_baseline')
-        history.mkdir(exist_ok=True,mode=0o700);archive.mkdir(mode=0o700)
+        active();history.mkdir(exist_ok=True,mode=0o700);archive.mkdir(mode=0o700)
         plan={'version':1,'mission_id':mission_id,'task_provenance':task,'contract':contract,'contract_sha256':_sha(raw),
               'snapshot':snapshot,'original_copy':str(original),'archived_copy':str(original.with_name(original.name+'-preparation-'+signature[:16]))}
         plan['digest']=_digest(plan)
@@ -284,7 +301,7 @@ def recover_preparation(hive,mission_id,*,active_fn):
     original=Path(plan['original_copy']);moved=Path(plan['archived_copy'])
     if original.name!='workflow-'+mission_id or moved!=original.with_name(original.name+'-preparation-'+archive.name[:16]) or original.parent not in hand.PERM().scratch_roots():raise ValueError('unowned_preparation_copy')
     def relocated_snapshot(path):
-        row=hand.code_repo_snapshot(path);row['repo']=plan['snapshot']['repo'];return row
+        row=reviewed_snapshot(path);row['repo']=plan['snapshot']['repo'];return row
     candidate=original if original.exists() else moved
     if any(p.is_symlink() for p in (candidate,*candidate.parents,archive,*archive.parents)):raise ValueError('unsafe_preparation_archive')
     if relocated_snapshot(candidate)!=plan['snapshot'] or hand._git(candidate,'status','--porcelain').stdout.strip():raise ValueError('preparation_copy_changed')

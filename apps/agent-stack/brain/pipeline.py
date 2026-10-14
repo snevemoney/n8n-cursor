@@ -1357,10 +1357,17 @@ def _workflow_followup_route(utterance, hive):
     if hive is None:
         return None
     adapter = _coding_mission_hand()
-    ident = adapter.read_json(Path(hive) / "coding-missions" / "latest_workflow.json").get("mission_id", "")
+    text = str(utterance or "").strip()
+    named = re.findall(r"(?<![a-f0-9])[a-f0-9]{32}(?![a-f0-9])",text,re.I)
+    status_query = bool(re.search(r"\b(status|progress|blocker|completed actions)\b",text,re.I)
+                        and re.search(r"\b(workflow|assignment|mission|retained task)\b",text,re.I))
+    ident = named[0].lower() if status_query and len(named)==1 else adapter.read_json(Path(hive) / "coding-missions" / "latest_workflow.json").get("mission_id", "")
     if not re.fullmatch(r"[a-f0-9]{32}", str(ident)):
         return None
-    text = str(utterance or "").strip()
+    if _research_build_request(text):
+        return None
+    if status_query and len(named)<=1:
+        return {"tool":"agent_tools", "args":{"action":"research_build_status","mission_id":ident}, "speak":""}
     # A complete new assignment retains its own objective before contextual
     # clarifications of an older task; exact repeated objectives dedupe at intake.
     if _research_build_request(text):
@@ -5995,7 +6002,7 @@ def _run_tool_inner(
                 BUS_IO.commit_response(hive,gen,lambda bus:dict(bus,source_nomination_meta={'gen':gen,'reason':reason}),terminal=False)
                 return {'ok':False,'tool':tool,'spoken':explanation,'source_nomination_error':reason,
                         'task_verified':False,'wires':[tool],'cites':[],'sent':False}
-        if args.get("action") in {"research_build_bind", "research_build_continue", "research_build_sources", "research_build_approve", "research_build_read_access", "research_build_permission_info", "research_build_repo_context", "research_build_repo_sources"}:
+        if args.get("action") in {"research_build_bind", "research_build_continue", "research_build_sources", "research_build_approve", "research_build_read_access", "research_build_permission_info", "research_build_repo_context", "research_build_repo_sources", "research_build_status"}:
             owner_pick = _workflow_followup_route(utterance, hive)
             if not owner_pick or owner_pick["args"]["action"] != args.get("action"):
                 return {"ok":False,"tool":tool,"spoken":"No project binding or workflow continuation was requested.","task_verified":False,"wires":[tool],"cites":[],"sent":False}
@@ -6004,7 +6011,9 @@ def _run_tool_inner(
             owned = owner_pick["args"]
             handle = _coding_mission_hand().WorkflowMissionHandle(hive)
             try:
-                if owned["action"] in {"research_build_repo_context", "research_build_repo_sources"}:
+                if owned["action"] == "research_build_status":
+                    result = handle.progress_status(owned["mission_id"])
+                elif owned["action"] in {"research_build_repo_context", "research_build_repo_sources"}:
                     adapter = _coding_mission_hand()
                     repository = adapter._load("workflow_repo_context", STACK / "hands" / "workflow_repo_context.py")
                     task_root = adapter.mission_path(hive, owned["mission_id"])

@@ -81,6 +81,16 @@ def _git_identity(repo,receipt,perm):
     return {'head':head,'branch':branch}
 
 
+def _runtime_configuration_paths(lock,guard):
+    """Every selector-bearing current runtime file, not only fixed whole-file locks."""
+    if not isinstance(lock,dict) or not isinstance(lock.get('semantic_files'),dict) or not isinstance(lock.get('configuration_data_files'),dict):
+        raise WorkspaceBlocked('runtime_configuration_lock_required')
+    selected=set(guard.WHOLE_FILES+LOCKED)|set(lock['configuration_data_files'])
+    selected.update(rel for rel,row in lock['semantic_files'].items() if row.get('sensitive') or row.get('anchors'))
+    if any(Path(rel).is_absolute() or '..' in Path(rel).parts or not Path(rel).parts for rel in selected):raise WorkspaceBlocked('unsafe_runtime_overlay')
+    return selected
+
+
 def _snapshot(repo,subtree,hand,dependencies,source_exceptions=None):
     if source_exceptions is not None and not callable(source_exceptions):raise WorkspaceBlocked('host_source_exception_required')
     source_exceptions=source_exceptions() if source_exceptions is not None else {}
@@ -170,7 +180,7 @@ def prepare(mission_id,*,source_receipt,scratch_root,active_fn,runtime_baseline=
             overlay=runtime_baseline.get('files',{})
             if not isinstance(overlay,dict) or not overlay:raise WorkspaceBlocked('runtime_configuration_manifest_required')
             guard=_configuration_guard()
-            required={subtree+'/'+rel for rel in set(guard.WHOLE_FILES+LOCKED)}
+            required={subtree+'/'+rel for rel in _runtime_configuration_paths(runtime_baseline.get('configuration_lock'),guard)}
             if set(overlay)!=required:raise WorkspaceBlocked('incomplete_runtime_configuration_overlay')
             if not guard.validate_candidate(runtime_baseline.get('configuration_lock'),runtime_repo/subtree,{},
                     expected_digest=runtime_baseline.get('configuration_digest'))['ok']:
@@ -178,6 +188,9 @@ def prepare(mission_id,*,source_receipt,scratch_root,active_fn,runtime_baseline=
             for rel,row in overlay.items():
                 if not isinstance(rel,str) or not rel.startswith(subtree+'/') or '..' in Path(rel).parts:
                     raise WorkspaceBlocked('unsafe_runtime_overlay')
+                if hand.PERM().is_secret_path(runtime_repo/rel):
+                    reviewed=(source_exceptions() if source_exceptions else {}).get(rel)
+                    if not reviewed or reviewed.get('file')!=row:raise WorkspaceBlocked('runtime_secret_overlay_requires_review')
                 _,actual=_regular_bytes(runtime_repo/rel)
                 if actual!=row:raise WorkspaceBlocked('runtime_configuration_changed')
                 files[rel]=row

@@ -89,4 +89,34 @@ class Recovery(unittest.TestCase):
      with self.assertRaises(RuntimeError):E.recover_preparation(h,F.ID,active_fn=lambda:True)
     self.assertEqual((root/'execution_contract.json').read_bytes(),contract);self.assertEqual(len(calls),1)
     result=E.recover_preparation(h,F.ID,active_fn=lambda:True);self.assertTrue(result['recovered']);self.assertEqual((Path(result['archive'])/'execution_contract.json').read_bytes(),contract);self.assertTrue(Path(result['preserved_copy']).exists())
+ def test_failed_copy_with_reviewed_token_file_archives_and_recovers_without_scope_leak(self):
+  import subprocess
+  for change in ('unchanged','wronghash','unreviewed'):
+   with self.subTest(change=change),tempfile.TemporaryDirectory() as tmp:
+    f=F.ExecutionTests();h,root,repo,runtime,scratch,hand=f.fixture(tmp);relative='apps/agent-stack/test_public_tokens.py';path=repo/relative;path.write_text('def source_behavior(value): return value + 1\n')
+    for args in [('add','--',relative),('commit','-qm','public recovery fixture')]:subprocess.run(['/usr/bin/git','-c','core.hooksPath=/dev/null','-c','core.fsmonitor=false','-C',str(repo),*args],check=True,capture_output=True)
+    perm=hand.PERM();old=perm.is_secret_path;perm.is_secret_path=lambda p:old(p) or Path(p).name=='test_public_tokens.py';hand.PERM=lambda:perm;a,b=f.context(hand)
+    with a,b:
+     raw=path.read_bytes();E.approve_source_exception(h,F.ID,relative,hashlib.sha256(raw).hexdigest(),authority=E.source_review_authority(),evidence={'offline_independent_review':True})
+     blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest();E._source_exceptions(h,F.ID,fetch_public=True,fetch_fn=lambda *a,**k:json.dumps({'sha':blob,'encoding':'base64','content':base64.b64encode(raw).decode()}).encode())
+     baseline=E.capture_runtime_baseline(runtime,R._git(runtime));receipt=E.make_receipt(h,F.ID,runtime_baseline=baseline);prepare=W.prepare
+     def prepared(*args,**kw):
+      result=prepare(*args,**kw);self.assertTrue(result['ok'],result);raise RuntimeError('offline failure before guard')
+     with patch.object(W,'prepare',side_effect=prepared):
+      with self.assertRaises(RuntimeError):E.prepare_execution(h,F.ID,source_receipt=receipt,runtime_baseline=baseline,scratch_root=scratch,active_fn=lambda:True)
+     target=scratch/('workflow-'+F.ID);contract=(root/'execution_contract.json').read_bytes()
+     with self.assertRaises(Exception):hand.code_repo_snapshot(target)
+     if change=='wronghash':(target/relative).write_text('def different(): return 0\n')
+     if change=='unreviewed':(root/'source_exception_review.json').rename(root/'source_exception_review.saved')
+     if change!='unchanged':
+      with self.assertRaises(Exception):E.recover_preparation(h,F.ID,active_fn=lambda:True)
+      self.assertTrue(target.exists());self.assertEqual((root/'execution_contract.json').read_bytes(),contract);continue
+     move=E._rename_exclusive
+     def moved_then_crash(source,destination):move(source,destination);raise RuntimeError('offline interruption after move')
+     with patch.object(E,'_rename_exclusive',side_effect=moved_then_crash):
+      with self.assertRaises(RuntimeError):E.recover_preparation(h,F.ID,active_fn=lambda:True)
+     archived=next(scratch.glob('workflow-*-preparation-*'))
+     with self.assertRaises(Exception):hand.code_repo_snapshot(archived)
+     result=E.recover_preparation(h,F.ID,active_fn=lambda:True);self.assertTrue(result['recovered']);self.assertEqual((archived/relative).read_bytes(),raw);self.assertEqual((Path(result['archive'])/'execution_contract.json').read_bytes(),contract)
+     with self.assertRaises(Exception):hand.code_repo_snapshot(archived)
 if __name__=='__main__':unittest.main()
