@@ -126,7 +126,21 @@ def requested_path(utterance):
         if not alias:
             return None
         return Path.home() / alias.group(1).capitalize()
-    return Path(raw).expanduser()
+    # A compound request is not one literal target. Leave its tool-selected
+    # targets under the existing roots instead of treating prose as a filename
+    # or repeatedly forcing every next hand back to the first requested file.
+    candidate = Path(raw).expanduser()
+    try:
+        literal_exists = candidate.exists()
+    except OSError:
+        literal_exists = False
+    if not literal_exists:
+        first = _FILE.match(raw)
+        if first and raw[first.end():].strip():
+            return None
+        if re.search(r"\s(?:/|~/)", raw):
+            return None
+    return candidate
 
 
 def run_requested(args, utterance, roots=None):
@@ -324,7 +338,7 @@ def run(args: dict, roots=None) -> dict[str, Any]:
     return _deny("unknown op", op)
 
 
-_FILE = re.compile(r"\b([\w.\-/~]+\.(?:md|txt|py|json|toml|ya?ml|sh|js|ts|cfg|ini|pdf|epub|docx|pptx|xlsx|csv|odt))\b", re.I)
+_FILE = re.compile(r"(?<![\w.\-/~])([\w.\-/~]+\.(?:md|txt|py|json|toml|ya?ml|sh|js|ts|cfg|ini|pdf|epub|docx|pptx|xlsx|csv|odt))\b", re.I)
 # Secret-looking file asks still go through _resolve, which refuses them (SECRET_NAME / SECRET_DIR).
 _SECRET_ASK = re.compile(r"(?<![\w/])(~?/?(?:[\w.\-]+/)*(?:\.env(?:\.[\w-]+)?|id_(?:rsa|dsa|ecdsa|ed25519)(?:\.pub)?|\.netrc|\.npmrc|\.pypirc)"
                          r"|~?/?(?:[\w.\-]+/)*\.(?:ssh|grok-private|gnupg|aws)(?:/[\w.\-]+)*)", re.I)
