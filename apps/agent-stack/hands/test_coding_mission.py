@@ -38,7 +38,7 @@ def queued(adapter, hive):
 def test_persistent_completed_result_is_unverified_and_not_replayed(adapter, tmp_path, monkeypatch):
     root = queued(adapter, tmp_path/'hive')
     runs = []
-    def run(args, cancel_check, progress):
+    def run(args, cancel_check, progress, **kwargs):
         runs.append(args)
         progress({'n':1,'what':'test','status':'verified'})
         return {'ok':True,'verified':True,'steps':[{'what':'test','status':'verified'}]}
@@ -54,7 +54,7 @@ def test_persistent_completed_result_is_unverified_and_not_replayed(adapter, tmp
 
 def test_cooperative_cancel_is_honest_terminal(adapter, tmp_path, monkeypatch):
     root = queued(adapter, tmp_path/'hive')
-    def run(args, cancel_check, progress):
+    def run(args, cancel_check, progress, **kwargs):
         adapter.write_json(root/'control.json', {'cancel':True})
         assert cancel_check()
         return {'ok':True,'verified':True}

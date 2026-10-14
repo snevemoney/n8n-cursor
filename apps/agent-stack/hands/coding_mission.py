@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import importlib.util
+import json
 import os
 import re
 import signal
@@ -57,6 +58,14 @@ def run_coding(args, **kw):
     return _load('coding_agent_tools', STACK/'hands'/'agent_tools.py').run(args, **kw)
 
 
+def checkpoint_payload_guard(value, args):
+    hand = _load('coding_agent_tools', STACK/'hands'/'agent_tools.py')
+    text = json.dumps(value)
+    if (not isinstance(value,dict) or value.get('version') != 1 or value.get('args') != args or
+        len(text) > 2_000_000 or hand._SECRETISH.search(text)):
+        raise ValueError('unsafe coding checkpoint payload')
+
+
 def _identity(pid):
     """Start time and unique argv token prevent signalling a reused PID."""
     if not isinstance(pid, int) or pid <= 0:
@@ -88,6 +97,12 @@ def _owned(owner, root):
         return False
 
 
+def _spawn_worker(root, token):
+    with (root/'worker.log').open('ab') as log:
+        return subprocess.Popen([sys.executable, str(Path(__file__).resolve()), 'worker', str(root.resolve()), token],
+                                stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
+
+
 class CodingMissionHandle:
     def __init__(self, hive):
         self.hive = Path(hive)
@@ -104,6 +119,8 @@ class CodingMissionHandle:
             raise ValueError('repo and coding goal required')
         if not repo.is_absolute():
             repo = hand.PERM().scratch_roots()[0]/repo
+        if any(p.is_symlink() for p in (repo, *repo.parents)):
+            raise ValueError('symlink coding path requires review')
         repo = repo.resolve()
         roots = hand.PERM().scratch_roots()
         if not any(root in repo.parents for root in roots) or hand._repo_ok(repo) != 'allow':
@@ -113,28 +130,102 @@ class CodingMissionHandle:
             raise ValueError('coding branch needs approval')
         if not isinstance(objective, str) or not objective.strip() or len(objective) > 10000:
             raise ValueError('bounded original objective required')
+        args = {'op':'code', 'repo':str(repo), 'goal':str(step['goal']), 'branch':branch}
+        return self._queue(args, objective)
+
+    def _queue(self, args, objective, *, resume_of=None, resume_checkpoint=None):
+        hand = _load('coding_agent_tools', STACK/'hands'/'agent_tools.py')
         mission_id = uuid.uuid4().hex
         root = mission_path(self.hive, mission_id)
         root.mkdir(parents=True)
         # Only the narrow explicit code arguments cross into unattended execution.
-        args = {'op':'code', 'repo':str(repo), 'goal':str(step['goal']), 'branch':branch}
-        write_json(root/'request.json', {'mission_id':mission_id, 'worker_kind':'coding',
-                    'objective':objective, 'code_args':args, 'source_manifest':mission_source_manifest(), 'created':time.time()})
+        request = {'mission_id':mission_id, 'worker_kind':'coding', 'objective':objective,
+                   'code_args':args, 'source_manifest':mission_source_manifest(), 'created':time.time()}
+        if resume_of:
+            request.update(resume_of=resume_of, resume_checkpoint=resume_checkpoint,
+                           resume_checkpoint_digest=hand.checkpoint_digest(resume_checkpoint))
+        write_json(root/'request.json', request)
         write_json(root/'control.json', {'cancel':False})
         write_json(root/'state.json', {'mission_id':mission_id, 'worker_kind':'coding', 'status':'QUEUED', 'verified':False})
+        if resume_of:
+            # Reserve the child before spawn so an interrupted resume request
+            # cannot launch a second continuation of the same checkpoint.
+            write_json(mission_path(self.hive,resume_of)/'resume_child.json', {'mission_id':mission_id})
         token = uuid.uuid4().hex
         try:
-            with (root/'worker.log').open('ab') as log:
-                process = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), 'worker', str(root.resolve()), token],
-                                           stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
+            process = _spawn_worker(root, token)
             write_json(root/'owner.json', {'pid':process.pid, 'token':token, 'identity':_identity(process.pid), 'created':time.time()})
         except OSError:
             self._finish_unavailable(root, 'worker_start_failed')
             raise RuntimeError('coding worker could not start')
         write_json(self.hive/'coding-missions'/'latest.json', {'mission_id':mission_id})
         return {'ok':True, 'tool':'agent_tools', 'mission_id':mission_id, 'task_verified':False,
-                'spoken':'I’ve started the scratch coding task. I’ll report its tests and commit when it finishes.',
+                'resume_of':resume_of,
+                'spoken':'I’ve resumed the scratch coding task from its checked checkpoint.' if resume_of else 'I’ve started the scratch coding task. I’ll report its tests and commit when it finishes.',
                 'wires':['agent_tools','coding_mission'], 'cites':[], 'sent':False}
+
+    def resume(self, mission_id):
+        """Explicit checked continuation creates one child; parent evidence is immutable."""
+        import fcntl
+        root = mission_path(self.hive, mission_id)
+        if not (root/'request.json').is_file():
+            raise ValueError('unknown coding mission')
+        with (root/'resume.lock').open('a') as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            child = read_json(root/'resume_child.json').get('mission_id')
+            if child:
+                if not read_json(mission_path(self.hive,child)/'request.json'):
+                    raise ValueError('reserved coding continuation is unavailable')
+                return {'ok':True, 'tool':'agent_tools', 'mission_id':child, 'resume_of':mission_id,
+                        'task_verified':False, 'spoken':'That checked coding continuation already exists.',
+                        'wires':['agent_tools','coding_mission'], 'cites':[], 'sent':False}
+            with (root/'worker.lock').open('a') as worker_lock:
+                try:
+                    fcntl.flock(worker_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    raise ValueError('coding mission is still active')
+                request = read_json(root/'request.json')
+                result = read_json(root/'result.json') or read_json(root/'state.json')
+                if result.get('status') == 'COMPLETED':
+                    raise ValueError('completed coding missions cannot be resumed')
+                owner = read_json(root/'owner.json')
+                if _owned(owner, root):
+                    raise ValueError('coding worker is still active')
+                pid = owner.get('pid')
+                if isinstance(pid, int) and pid > 0:
+                    try:
+                        os.kill(pid, 0)
+                    except ProcessLookupError:
+                        pass
+                    except PermissionError:
+                        raise ValueError('worker liveness cannot be proven')
+                    else:
+                        raise ValueError('worker identity is unproven but process still exists')
+                envelope = read_json(root/'checkpoint.json')
+                current_manifest = mission_source_manifest()
+                if not envelope or envelope.get('source_manifest') != current_manifest or request.get('source_manifest') != current_manifest:
+                    raise ValueError('checkpoint missing or coding source changed')
+                _load('agent_stack_permissions', STACK/'hands'/'permissions.py')
+                hand = _load('coding_agent_tools', STACK/'hands'/'agent_tools.py')
+                cp = envelope.get('checkpoint')
+                if (envelope.get('mission_id') != mission_id or envelope.get('code_args') != request.get('code_args') or
+                    not isinstance(cp,dict) or hand.checkpoint_digest(cp) != envelope.get('checkpoint_digest')):
+                    raise ValueError('checkpoint provenance mismatch')
+                if hand._SECRETISH.search(json.dumps(cp)):
+                    raise ValueError('checkpoint contains secret-like text')
+                args = request['code_args']
+                repo = Path(args['repo'])
+                if (not any(r in repo.resolve().parents for r in hand.PERM().scratch_roots()) or
+                    hand._repo_ok(repo) != 'allow' or hand.PERM().decide('git_branch',args['branch']) != 'allow'):
+                    raise ValueError('current coding permission denied')
+                try:
+                    # Reconcile now and again under the child worker's repo lock.
+                    hand.reconcile_code_checkpoint(cp, args)
+                except hand._CheckpointBlocked as exc:
+                    raise ValueError('unsafe coding checkpoint: ' + str(exc))
+                child_ack = self._queue(args, request['objective'], resume_of=mission_id, resume_checkpoint=cp)
+                write_json(root/'resume_child.json', {'mission_id':child_ack['mission_id']})
+                return child_ack
 
     def _finish_unavailable(self, root, reason):
         import fcntl

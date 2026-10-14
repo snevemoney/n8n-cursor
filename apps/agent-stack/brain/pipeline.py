@@ -1259,6 +1259,13 @@ def _agent_tools_hand():
 
 
 
+def _coding_resume_match(utterance):
+    return re.fullmatch(
+        r"(?:please\s+)?(?:resume|continue)\s+(?:(?:that|the|my|last|latest)\s+)?"
+        r"(?:coding|code)\s+(?:task|mission)(?:\s+([a-f0-9]{32}))?[.!?]?",
+        str(utterance or "").strip(), re.I)
+
+
 def _coding_mission_hand():
     name = "agent_stack_coding_mission"
     path = STACK / "hands" / "coding_mission.py"
@@ -5652,6 +5659,22 @@ def _run_tool_inner(
         hd = _agent_tools_hand()
         # Only an exact operator code request becomes durable background work.
         # Model-selected arguments cannot widen the request or start another repo.
+        if args.get("action") == "coding_resume":
+            requested = _coding_resume_match(utterance)
+            if not requested:
+                return {"ok": False, "tool": tool, "spoken": "No coding task recovery was requested.",
+                        "task_verified": False, "wires": [tool], "cites": [], "sent": False}
+            if gen is not None and turn_cancelled(hive, gen):
+                return {"ok": False, "tool": tool, "spoken": "The task was stopped.", "cancelled": True,
+                        "task_verified": False, "wires": [tool], "cites": [], "sent": False}
+            adapter = _coding_mission_hand()
+            mission_id = requested.group(1) or adapter.read_json(
+                Path(hive) / "coding-missions" / "latest.json").get("mission_id", "")
+            try:
+                return adapter.CodingMissionHandle(hive).resume(mission_id)
+            except (ValueError, RuntimeError, OSError) as exc:
+                return {"ok": False, "tool": tool, "spoken": "The coding task could not resume: " + str(exc),
+                        "task_verified": False, "wires": [tool], "cites": [], "sent": False}
         explicit = hd.args_from_utterance(utterance)
         steps = explicit.get("steps") or ([explicit] if explicit.get("op") else [])
         if len(steps) == 1 and steps[0].get("op") == "code":
@@ -7177,6 +7200,11 @@ def apply_pipeline_iter(
 
     if re.fullmatch(r"(?:please\s+)?(?:show|what is|give me)\s+(?:the\s+)?(?:coding|code)\s+(?:task|mission)\s+(?:status|progress)[.!?]?", spoken_in.strip(), re.I):
         pick = {"tool": "agent_tools", "args": {"action": "coding_status"}, "speak": ""}
+        brain = "coding_mission"
+
+    if _coding_resume_match(spoken_in):
+        pick = {"tool": "agent_tools", "args": {"action": "coding_resume"}, "speak": ""}
+        ran = None  # only the real checkpoint receipt may acknowledge recovery
         brain = "coding_mission"
 
     # Browser progress is exact mission state, not a conversational model task.

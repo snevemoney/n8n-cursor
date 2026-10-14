@@ -16,6 +16,9 @@ Every decision goes through hands/permissions.decide and is logged (no contents,
 from __future__ import annotations
 
 import importlib.util
+import hashlib
+import configparser
+import stat
 import json
 import os
 import queue
@@ -325,8 +328,17 @@ def op_sent_check(to: str, subject: str, days: int = 3) -> dict:
 
 
 # ---------------------------------------------------------------- repo (sandboxed coding)
-def _git(repo: Path, *a) -> subprocess.CompletedProcess:
-    return subprocess.run(["git", "-C", str(repo), *a], capture_output=True, text=True, timeout=CLI_DEADLINE_S)
+def _git(repo: Path, *a, binary=False) -> subprocess.CompletedProcess:
+    # Validate metadata without asking Git: even `status` may launch fsmonitor.
+    _code_git_metadata(Path(repo))
+    if not (Path(repo)/".git").exists() and (not a or a[0] != "init"):
+        return subprocess.CompletedProcess(a,128,b"" if binary else "",b"" if binary else "")
+    env = {"PATH":"/usr/bin:/bin:/usr/sbin:/sbin", "HOME":os.environ.get("HOME", ""), "LANG":"C.UTF-8"}
+    env.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_SYSTEM="/dev/null", GIT_CONFIG_GLOBAL="/dev/null",
+               GIT_ATTR_NOSYSTEM="1", GIT_TERMINAL_PROMPT="0", GIT_PAGER="cat")
+    return subprocess.run(["/usr/bin/git", "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false", "-c", "core.attributesFile=/dev/null",
+                           "-C", str(repo), *a], capture_output=True, text=not binary,
+                          timeout=CLI_DEADLINE_S, env=env)
 
 
 def _sandbox_profile(repo: Path) -> str:
@@ -462,14 +474,14 @@ def _progress(progress, row) -> None:
         progress(dict(row))
 
 
-def run(args: dict | None = None, approved: bool = False, *, cancel_check=None, progress=None) -> dict:
+def run(args: dict | None = None, approved: bool = False, *, cancel_check=None, progress=None, checkpoint=None, resume_checkpoint=None) -> dict:
     if _stopped(cancel_check):
         return _cancelled()
     args = args or {}
     steps = args.get("steps") or ([args] if args.get("op") else [])
     goal = str(args.get("goal") or " ".join(str(s.get("tool") or s.get("action") or s.get("cmd") or " ".join(s.get("argv") or []) or s.get("query") or "") for s in steps))
     if len(steps) == 1 and steps[0].get("op") == "code":
-        got = op_code(steps[0].get("repo", ""), steps[0].get("goal", ""), steps[0].get("branch") or "jarvis/code", cancel_check=cancel_check, progress=progress)
+        got = op_code(steps[0].get("repo", ""), steps[0].get("goal", ""), steps[0].get("branch") or "jarvis/code", cancel_check=cancel_check, progress=progress, checkpoint=checkpoint, resume_checkpoint=resume_checkpoint)
         return got
     if len(steps) == 1 and (steps[0].get("op") in {"gws_read", "sent_check", "craft_inspect", "fanout"}
                             or (steps[0].get("op") == "cli" and (steps[0].get("argv") or [""])[0] == "gws")):
@@ -874,7 +886,438 @@ class _CodeCancelled(Exception):
     pass
 
 
-def op_code(repo: str, goal: str, branch: str = "jarvis/code", *, cancel_check=None, progress=None) -> dict:
+class _CheckpointBlocked(Exception):
+    pass
+
+
+def checkpoint_digest(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()).hexdigest()
+
+
+def _code_git_metadata(root):
+    """Opaque metadata cannot grant execution authority to a scratch task."""
+    git_dir=root/".git"
+    if not git_dir.exists():
+        if git_dir.is_symlink():
+            raise _CheckpointBlocked("external_git_metadata")
+        return {}
+    if git_dir.is_symlink() or not git_dir.is_dir():
+        raise _CheckpointBlocked("external_git_metadata")
+    count=0
+    for directory,dirs,names in os.walk(git_dir,followlinks=False):
+        for name in dirs+names:
+            p=Path(directory)/name
+            count+=1
+            if count > 5000 or p.is_symlink():
+                raise _CheckpointBlocked("unsafe_git_metadata")
+            mode=p.lstat().st_mode
+            if not (stat.S_ISDIR(mode) or stat.S_ISREG(mode)):
+                raise _CheckpointBlocked("unsafe_git_metadata")
+    if any((git_dir/name).exists() for name in ('config.worktree','commondir','objects/info/alternates')):
+        raise _CheckpointBlocked("unsupported_git_metadata")
+    config=git_dir/'config'
+    if not config.is_file() or config.stat().st_size > 32768:
+        raise _CheckpointBlocked("unsupported_git_config")
+    parser=configparser.RawConfigParser(strict=True,interpolation=None,delimiters=('=',),
+                                         comment_prefixes=('#',';'),empty_lines_in_values=False)
+    try:
+        parser.read_string(config.read_text(encoding='utf-8'))
+    except (ValueError,UnicodeError,configparser.Error):
+        raise _CheckpointBlocked("unsupported_git_config")
+    allowed={'core':{'repositoryformatversion','filemode','bare','logallrefupdates','ignorecase','precomposeunicode'},
+             'user':{'name','email'}}
+    if parser.defaults() or any(section not in allowed for section in parser.sections()):
+        raise _CheckpointBlocked("unsupported_git_config")
+    for section in parser.sections():
+        for key,value in parser.items(section):
+            if key not in allowed[section] or len(value)>200 or '\n' in value or '\\' in value:
+                raise _CheckpointBlocked("unsupported_git_config")
+            if section=='core':
+                expected={'0'} if key=='repositoryformatversion' else ({'false'} if key=='bare' else {'true','false'})
+                if value.lower() not in expected:
+                    raise _CheckpointBlocked("unsupported_git_config")
+    result={}
+    selected=[config]
+    for name in ('hooks','info'):
+        directory=git_dir/name
+        if directory.exists():
+            if not directory.is_dir():
+                raise _CheckpointBlocked("unsafe_git_metadata")
+            selected.extend(p for p in directory.rglob('*') if p.is_file())
+    total=0
+    for p in selected:
+        rel=str(p.relative_to(git_dir))
+        mode=p.stat().st_mode & 0o777
+        size=p.stat().st_size;total+=size
+        if size>32768 or total>262144:
+            raise _CheckpointBlocked("git_metadata_budget_exceeded")
+        if rel.startswith('hooks/') and not p.name.endswith('.sample'):
+            raise _CheckpointBlocked("git_hooks_not_authorized")
+        if rel=='info/attributes' and size:
+            raise _CheckpointBlocked("git_attributes_not_authorized")
+        result[rel]={'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'mode':mode}
+    # Attributes can invoke clean/smudge and diff drivers. No model-generated
+    # attributes or inherited execution setting is part of the scratch contract.
+    count=0
+    for directory,dirs,names in os.walk(root,followlinks=False):
+        dirs[:]=[name for name in dirs if name!='.git']
+        count+=len(dirs)+len(names)
+        if count>2000:
+            raise _CheckpointBlocked("snapshot_budget_exceeded")
+        if '.gitattributes' in names:
+            raise _CheckpointBlocked("git_attributes_not_authorized")
+    return result
+
+
+def code_repo_snapshot(repo):
+    """Bounded full-worktree identity, never a content-bearing log or secret read."""
+    root = Path(repo).expanduser().resolve()
+    if not root.exists():
+        return {"repo": str(root), "exists": False, "head": "", "branch": "", "index": "", "files": {}, "git_metadata":{}}
+    if root.is_symlink() or not root.is_dir():
+        raise _CheckpointBlocked("unsafe_repo_path")
+    git_dir = root/".git"
+    if git_dir.exists() and (git_dir.is_symlink() or not git_dir.is_dir()):
+        raise _CheckpointBlocked("external_git_metadata")
+    files = {}
+    total = 0
+    for directory, dirs, names in os.walk(root, followlinks=False):
+        dirs[:] = [d for d in dirs if d != ".git"]
+        for name in dirs + names:
+            p = Path(directory) / name
+            if name == ".git":
+                continue
+            if p.is_symlink() or PERM().is_secret_path(p):
+                raise _CheckpointBlocked("unsafe_or_secret_repo_path")
+        for name in names:
+            if name == ".git":
+                continue
+            p = Path(directory) / name
+            if not p.is_file():
+                raise _CheckpointBlocked("nonregular_repo_file")
+            stat = p.stat()
+            total += stat.st_size
+            if stat.st_size > 2_000_000 or total > 8_000_000 or len(files) >= 1000:
+                raise _CheckpointBlocked("snapshot_budget_exceeded")
+            files[str(p.relative_to(root))] = {"sha256": hashlib.sha256(p.read_bytes()).hexdigest(), "mode": stat.st_mode & 0o777}
+    metadata=_code_git_metadata(root)
+    head = _git(root, "rev-parse", "--verify", "HEAD")
+    branch = _git(root, "symbolic-ref", "--short", "HEAD")
+    index = _git(root, "ls-files", "--stage", "-z")
+    return {"repo": str(root), "exists": True, "head": head.stdout.strip() if head.returncode == 0 else "",
+            "branch": branch.stdout.strip() if branch.returncode == 0 else "", "index": index.stdout,
+            "files": files, "git_metadata":metadata}
+
+
+def _committed_files(root):
+    rows = _git(root, "ls-tree", "-r", "-z", "HEAD")
+    if rows.returncode:
+        raise _CheckpointBlocked("commit_tree_unreadable")
+    files = {}
+    for row in filter(None, rows.stdout.split("\0")):
+        meta,name=row.split("\t",1)
+        mode,kind,blob=meta.split()
+        if kind != "blob" or mode not in {"100644","100755"}:
+            raise _CheckpointBlocked("unsupported_commit_entry")
+        if PERM().is_secret_path(name):
+            raise _CheckpointBlocked("secret_commit_path")
+        data = _git(root,"cat-file","blob",blob,binary=True)
+        if data.returncode:
+            raise _CheckpointBlocked("commit_blob_unreadable")
+        files[name] = {"sha256":hashlib.sha256(data.stdout).hexdigest(),"mode":mode}
+    return files
+
+
+def reconcile_code_checkpoint(checkpoint, args):
+    """Read-only reconciliation. Unexpected mutations always block continuation."""
+    serialized = json.dumps(checkpoint)
+    if len(serialized) > 2_000_000:
+        raise _CheckpointBlocked("checkpoint_budget_exceeded")
+    cp = json.loads(serialized)
+    if not isinstance(cp,dict):
+        raise _CheckpointBlocked("checkpoint_schema_invalid")
+    if cp.get("version") != 1 or cp.get("args") != args:
+        raise _CheckpointBlocked("checkpoint_task_mismatch")
+    if _SECRETISH.search(json.dumps(cp)):
+        raise _CheckpointBlocked("checkpoint_contains_secret")
+    if (type(cp.get("iteration")) is not int or not 1 <= cp["iteration"] <= MAX_ITERS+1 or
+        type(cp.get("file_cursor")) is not int or not isinstance(cp.get("files"),list) or
+        not 0 <= cp["file_cursor"] <= len(cp["files"]) or len(cp["files"]) > 10 or
+        not all(isinstance(row,(tuple,list)) and len(row)==2 for row in cp["files"]) or
+        not all(isinstance(cp.get(key),list) for key in ("todo","history","plan","skills"))):
+        raise _CheckpointBlocked("checkpoint_schema_invalid")
+    old = cp.get("snapshot")
+    if (not isinstance(old,dict) or not isinstance(old.get("files"),dict) or not isinstance(old.get("git_metadata"),dict) or
+        not all(isinstance(old.get(key),str) for key in ("repo","head","branch","index")) or
+        not isinstance(old.get("exists"),bool) or not all(
+            isinstance(name,str) and name and not Path(name).is_absolute() and ".." not in Path(name).parts and
+            isinstance(row,dict) and re.fullmatch(r"[a-f0-9]{64}",str(row.get("sha256") or "")) and
+            type(row.get("mode")) is int and 0 <= row["mode"] <= 0o777
+            for name,row in old["files"].items())):
+        raise _CheckpointBlocked("checkpoint_snapshot_missing")
+    if cp.get("pending") is not None and not isinstance(cp["pending"],dict):
+        raise _CheckpointBlocked("checkpoint_schema_invalid")
+    if cp.get("phase") in {"files","pending_write","test","pending_test","pending_commit","complete"}:
+        data=cp.get("model_data")
+        output=cp.get("model_output")
+        if not isinstance(data,dict) or not isinstance(output,str) or _json_obj(output) != data:
+            raise _CheckpointBlocked("model_checkpoint_mismatch")
+        expected=list((data.get("files") if isinstance(data.get("files"),dict) else {}).items())[:10]
+        if cp["files"] != json.loads(json.dumps(expected)):
+            raise _CheckpointBlocked("model_files_checkpoint_mismatch")
+    # Reject metadata drift before even the isolated Git reader is invoked.
+    if _code_git_metadata(Path(args["repo"])) != old["git_metadata"]:
+        raise _CheckpointBlocked("git_metadata_checkpoint_mismatch")
+    current = code_repo_snapshot(args["repo"])
+    phase = cp.get("phase")
+    pending = cp.get("pending") or {}
+    if phase in {"pending_write", "pending_gitignore"}:
+        expected = json.loads(json.dumps(old))
+        name = pending.get("path")
+        if not isinstance(name, str) or not name or Path(name).is_absolute() or ".." in Path(name).parts or ".git" in Path(name).parts or Path(name).name==".gitattributes":
+            raise _CheckpointBlocked("unsafe_checkpoint_write")
+        if phase == "pending_write":
+            if cp["file_cursor"] >= len(cp["files"]):
+                raise _CheckpointBlocked("write_cursor_mismatch")
+            path,body=cp["files"][cp["file_cursor"]]
+        else:
+            path,body=".gitignore","__pycache__/\n*.pyc\nLibrary/\n.pytest_cache/\n"
+        if name != str(path) or pending.get("new_sha256") != hashlib.sha256(str(body).encode()).hexdigest():
+            raise _CheckpointBlocked("pending_write_model_mismatch")
+        if current != old:
+            target = current["files"].get(name)
+            if not target or target["sha256"] != pending.get("new_sha256") or target["mode"] != pending.get("mode"):
+                raise _CheckpointBlocked("pending_write_mismatch")
+            expected["files"][name] = target
+            if current != expected:
+                raise _CheckpointBlocked("external_repo_change")
+            if phase == "pending_write":
+                cp["file_cursor"] += 1
+            cp["todo"].append({"n":len(cp["todo"])+1, "what":f"iter {cp['iteration']} write {name}" if phase == "pending_write" else "gitignore",
+                              "status":"verified", "result":"reconciled exact completed write"})
+            cp.update(phase="files" if phase == "pending_write" else "baseline", snapshot=current, pending=None)
+        else:
+            cp.update(phase="files" if phase == "pending_write" else "gitignore", snapshot=current, pending=None)
+    elif phase == "pending_commit":
+        if current["repo"] != old["repo"] or current["branch"] != old["branch"] or current["files"] != old["files"]:
+            raise _CheckpointBlocked("commit_worktree_mismatch")
+        if current["head"] != old["head"]:
+            parents = _git(Path(args["repo"]), "show", "-s", "--format=%P", "HEAD").stdout.strip().split()
+            message = _git(Path(args["repo"]), "show", "-s", "--format=%B", "HEAD").stdout.rstrip("\n")
+            expected_parents = [old["head"]] if old["head"] else []
+            if parents != expected_parents or message != pending.get("message") or _committed_files(Path(args["repo"])) != pending.get("expected_commit_files"):
+                raise _CheckpointBlocked("pending_commit_identity_mismatch")
+            if _git(Path(args["repo"]), "diff", "--cached", "--quiet", "HEAD").returncode:
+                raise _CheckpointBlocked("external_index_change")
+            receipt = "committed " + current["head"][:12] + " " + message[:100]
+            cp["todo"].append({"n":len(cp["todo"])+1, "what":"commit", "status":"verified", "result":receipt})
+            cp.update(phase="complete", commit_receipt=receipt, snapshot=current, pending=None)
+        else:
+            # A crash after git add may alter only the index. Permit precisely
+            # the original index or the complete expected worktree staging.
+            if current["index"] != old["index"]:
+                staged = {}
+                for row in filter(None, current["index"].split("\0")):
+                    meta, name = row.split("\t", 1)
+                    mode, blob, stage = meta.split()
+                    if stage != "0":
+                        raise _CheckpointBlocked("unmerged_index")
+                    data = _git(Path(args["repo"]),"cat-file","blob",blob,binary=True)
+                    if data.returncode:
+                        raise _CheckpointBlocked("index_blob_unreadable")
+                    staged[name] = {"sha256":hashlib.sha256(data.stdout).hexdigest(),"mode":mode}
+                if staged != pending.get("expected_commit_files"):
+                    raise _CheckpointBlocked("external_index_change")
+            cp.update(snapshot=current)
+    elif phase == "pending_branch" and current != old:
+        expected = dict(old, branch=args["branch"])
+        if current != expected:
+            raise _CheckpointBlocked("branch_transition_mismatch")
+        cp["todo"].append({"n":len(cp["todo"])+1,"what":"branch " + args["branch"],"status":"verified","result":"reconciled branch"})
+        cp.update(phase="gitignore", snapshot=current, pending=None)
+    elif current != old:
+        raise _CheckpointBlocked("repo_checkpoint_mismatch")
+    if cp.get("phase") not in {"rank", "init", "pending_init", "branch", "pending_branch", "gitignore", "pending_gitignore", "baseline", "pending_baseline", "model", "files", "test", "pending_test", "pending_commit", "complete"}:
+        raise _CheckpointBlocked("unknown_checkpoint_phase")
+    if cp["phase"] not in {"rank", "init", "pending_init", "branch", "pending_branch"} and current["branch"] != args["branch"]:
+        raise _CheckpointBlocked("branch_checkpoint_mismatch")
+    return cp
+
+
+def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, resume_checkpoint):
+    root = Path(repo).expanduser()
+    if not root.is_absolute():
+        root = PERM().scratch_roots()[0]/root
+    root = root.resolve()
+    args = {"op":"code", "repo":str(root), "goal":goal, "branch":branch}
+    if _repo_ok(root) != "allow" or PERM().decide("git_branch", branch) != "allow":
+        raise _CheckpointBlocked("current_permission_denied")
+    state = reconcile_code_checkpoint(resume_checkpoint, args) if resume_checkpoint else {
+        "version":1, "args":args, "phase":"rank", "iteration":1, "skills":[], "guide":"", "history":[{"role":"system", "content":CODE_SYS}],
+        "plan":[], "model":"", "last_test":"", "files":[], "file_cursor":0, "todo":[], "pending":None}
+    def check():
+        if _stopped(cancel_check):
+            raise _CodeCancelled()
+    def save(*, allow_git_initialization=False):
+        check()
+        previous=state.get("snapshot")
+        metadata=_code_git_metadata(root)
+        if (previous is not None and metadata != previous.get("git_metadata") and
+            not (allow_git_initialization and previous.get("git_metadata")=={})):
+            raise _CheckpointBlocked("git_metadata_changed_during_task")
+        state["snapshot"] = code_repo_snapshot(root)
+        value = json.loads(json.dumps(state))
+        if len(json.dumps(value)) > 2_000_000:
+            raise _CheckpointBlocked("checkpoint_budget_exceeded")
+        if _SECRETISH.search(json.dumps(value)):
+            raise _CheckpointBlocked("checkpoint_contains_secret")
+        if checkpoint is None:
+            raise _CheckpointBlocked("checkpoint_writer_required")
+        checkpoint(value)
+        check()
+    def done(what, got):
+        state["todo"].append({"n":len(state["todo"])+1,"what":what,
+                              "status":"verified" if got.get("verified") else "failed", "result":str(got.get("spoken") or "")[:300]})
+        _progress(progress, state["todo"][-1])
+        check()
+        return bool(got.get("verified"))
+    def operate(action, after, *, what=None, **kw):
+        check()
+        state["phase"] = "pending_" + action
+        save()
+        _progress(progress, {"n":len(state["todo"])+1,"what":what or action,"status":"running"})
+        check()
+        got = op_repo(str(root), action, **kw)
+        # Persist the executed step before consulting cancellation, so an exact
+        # postcondition is recoverable if Stop arrived during the operation.
+        state["todo"].append({"n":len(state["todo"])+1,"what":what or action,
+                              "status":"verified" if got.get("verified") else "failed","result":str(got.get("spoken") or "")[:300]})
+        state["phase"] = after
+        if not _stopped(cancel_check):
+            save(allow_git_initialization=action=="init")
+        _progress(progress, state["todo"][-1])
+        check()
+        return got
+    while True:
+        check()
+        phase = state["phase"]
+        if phase == "rank":
+            save()
+            state["skills"] = rank_skills(goal)
+            check()
+            state["guide"] = "\n\n".join(f"# skill {n}\n{skill_text(n,1500)}" for n in state["skills"][:2])
+            state["phase"] = "init"
+            save()
+        elif phase in {"init", "pending_init"}:
+            if not operate("init", "branch").get("verified"):
+                return _code_report(state["todo"],state["skills"],state["model"],False,state["plan"])
+        elif phase in {"branch", "pending_branch"}:
+            if not operate("branch", "gitignore", what="branch " + branch, name=branch).get("verified"):
+                return _code_report(state["todo"],state["skills"],state["model"],False,state["plan"])
+        elif phase in {"gitignore", "pending_gitignore"}:
+            if not (root/".gitignore").exists():
+                # Use the same repository write hand as every other mutation.
+                body="__pycache__/\n*.pyc\nLibrary/\n.pytest_cache/\n"
+                mask=os.umask(0);os.umask(mask)
+                state["pending"]={"path":".gitignore","new_sha256":hashlib.sha256(body.encode()).hexdigest(),"mode":0o666 & ~mask}
+                state["phase"]="pending_gitignore";save()
+                got=op_repo(str(root),"write",path=".gitignore",content=body)
+                if not done("gitignore",got):
+                    raise _CheckpointBlocked("gitignore_write_failed")
+                state["pending"]=None;state["phase"]="baseline";save()
+            else:
+                state["phase"] = "baseline";save()
+        elif phase in {"baseline", "pending_baseline"}:
+            if any(p.suffix in {".py", ".js", ".ts"} for p in root.iterdir() if p.is_file()):
+                # The special pending phase prevents a crashed baseline from
+                # being confused with the generated iteration's acceptance test.
+                state["phase"] = "pending_baseline";save()
+                got = op_repo(str(root),"test")
+                state["last_test"] = "(baseline before edits) " + str(got.get("output") or got.get("spoken"))[-2500:]
+                done("baseline test", {"verified":True,"spoken":got.get("spoken")})
+            state["phase"] = "model";save()
+        elif phase == "model":
+            if state["iteration"] > MAX_ITERS:
+                return _code_report(state["todo"],state["skills"],state["model"],False,state["plan"])
+            # An interrupted in-flight request has no model output to recover;
+            # retry only this next uncommitted step, retaining prior history.
+            if not state.get("model_request_pending"):
+                state["history"].append({"role":"user","content":f"Goal: {goal}\n\nRelevant skills:\n{state['guide'] or '(none)'}\n\nRepo now:\n{_tree(root)}\n\nLast test output (iteration {state['iteration']-1}):\n{state['last_test'] or '(none yet)'}"})
+                state["model_request_pending"] = True
+            save()
+            text, model = llm(state["history"], CODE_MODEL)
+            check()
+            if not text:
+                done(f"iter {state['iteration']} model", {"verified":False,"spoken":"no model answer"})
+                return _code_report(state["todo"],state["skills"],model,False,state["plan"])
+            data = _json_obj(text)
+            state.update(model=model, model_output=text, model_data=data, model_request_pending=False,
+                         files=list((data.get("files") if isinstance(data.get("files"),dict) else {}).items())[:10], file_cursor=0)
+            state["plan"] = state["plan"] or [str(x)[:120] for x in data.get("plan",[])][:7]
+            state["history"].append({"role":"assistant","content":text[:8000]})
+            state["phase"] = "files";save()
+        elif phase == "files":
+            if state["file_cursor"] >= len(state["files"]):
+                state["phase"] = "test";save();continue
+            name, content = state["files"][state["file_cursor"]]
+            name, content = str(name),str(content)
+            dest = root/name
+            if Path(name).is_absolute() or ".." in Path(name).parts or ".git" in Path(name).parts or Path(name).name==".gitattributes" or root not in dest.resolve().parents or PERM().is_secret_path(dest):
+                raise _CheckpointBlocked("unsafe_checkpoint_write")
+            prior = code_repo_snapshot(root)["files"].get(name)
+            if prior is None:
+                mask = os.umask(0);os.umask(mask)
+                mode = 0o666 & ~mask
+            else:
+                mode = prior["mode"]
+            state["pending"] = {"path":name,"new_sha256":hashlib.sha256(content.encode()).hexdigest(),"mode":mode}
+            state["phase"] = "pending_write";save()
+            got = op_repo(str(root),"write",path=name,content=content)
+            state["file_cursor"] += 1
+            state["pending"] = None;state["phase"] = "files"
+            if not done(f"iter {state['iteration']} write {name}",got):
+                return _code_report(state["todo"],state["skills"],state["model"],False,state["plan"])
+            save()
+        elif phase in {"test", "pending_test"}:
+            state["phase"] = "pending_test";save()
+            got = op_repo(str(root),"test",cmd=str(state["model_data"].get("test_cmd") or "python3 -m unittest discover -v"))
+            state["last_test"] = str(got.get("output") or got.get("spoken"))[-2500:]
+            state["test_result"] = got
+            done(f"iter {state['iteration']} test",got)
+            if not got.get("verified"):
+                state["iteration"] += 1;state["phase"] = "model";save();continue
+            message = str(state["model_data"].get("commit_message") or goal)[:100]
+            names = _git(root,"ls-files","--cached","--others","--exclude-standard","-z").stdout.split("\0")
+            snap = code_repo_snapshot(root)
+            state["pending"] = {"message":message,"expected_commit_files":{
+                name:{"sha256":snap["files"][name]["sha256"],"mode":"100755" if snap["files"][name]["mode"] & 0o111 else "100644"}
+                for name in names if name in snap["files"]}}
+            state["phase"] = "pending_commit";save()
+        elif phase == "pending_commit":
+            check()
+            got = op_repo(str(root),"commit",message=state["pending"]["message"])
+            state["commit_receipt"] = str(got.get("spoken") or "")[:300]
+            state["pending"] = None;state["phase"] = "complete"
+            done("commit",got)
+            save()
+        elif phase == "complete":
+            save()
+            ok = bool(state["todo"] and state["todo"][-1]["what"] == "commit" and state["todo"][-1]["status"] == "verified")
+            return _code_report(state["todo"],state["skills"],state["model"],ok,state["plan"])
+        else:
+            raise _CheckpointBlocked("unreconciled_checkpoint_phase")
+
+
+def op_code(repo: str, goal: str, branch: str = "jarvis/code", *, cancel_check=None, progress=None, checkpoint=None, resume_checkpoint=None) -> dict:
+    if checkpoint is not None or resume_checkpoint is not None:
+        try:
+            return _durable_code(repo, goal, branch, cancel_check=cancel_check, progress=progress,
+                                 checkpoint=checkpoint, resume_checkpoint=resume_checkpoint)
+        except _CodeCancelled:
+            return _cancelled()
+        except _CheckpointBlocked as exc:
+            return {"ok": False, "verified": False, "status": "BLOCKED", "blocked": True,
+                    "spoken": "Coding continuation is blocked: " + str(exc) + ". Nothing was replayed."}
     todo: list[dict] = []
     def check():
         if _stopped(cancel_check):
