@@ -32,11 +32,11 @@ def test_real_bounded_local_read_sends_exact_fixture_only_and_preserves_file(sav
     calls=[]
     def vision(prompt,images):
         calls.append((prompt,images))
-        return 'A tiny fixture image is visible. What would you like to do with it?'
+        return json.dumps({'description':'A tiny fixture image is visible.'})
     result=hand.run_file(receipt,hive=hive,vision_fn=vision,active_fn=lambda:True,follow_up=True)
     assert result['ok'] and not result['task_verified'] and result['source']=='saved_screenshot'
     assert base64.b64decode(calls[0][1][0].split(',',1)[1])==raw
-    assert 'untrusted data' in calls[0][0] and 'useful follow-up' in calls[0][0]
+    assert 'untrusted data' in calls[0][0] and '140 characters' in calls[0][0]
     assert shot.read_bytes()==raw and mac.same_screenshot(mac.screenshot_fingerprint(shot,mac.HOME),receipt)
     assert result['read_evidence']['identity_fields']==7
     assert str(shot) not in json.dumps(hand.log_meta(result))
@@ -45,8 +45,8 @@ def test_real_bounded_local_read_sends_exact_fixture_only_and_preserves_file(sav
 def test_followup_is_not_requested_by_default(saved_image):
     hand,mac,shot,raw,receipt,hive=saved_image
     prompts=[]
-    result=hand.run_file(receipt,hive=hive,vision_fn=lambda p,**k:prompts.append(p) or 'A tiny image.',active_fn=lambda:True)
-    assert result['ok'] and 'Do not ask a follow-up question' in prompts[0]
+    result=hand.run_file(receipt,hive=hive,vision_fn=lambda p,**k:prompts.append(p) or json.dumps({'description':'A tiny image.'}),active_fn=lambda:True)
+    assert result['ok'] and 'No first-person action feedback' in prompts[0] and result['spoken']=='A tiny image.'
 
 
 @pytest.mark.parametrize('change',['replace','modify','symlink','not_image'])
@@ -157,3 +157,30 @@ def test_invalid_reader_diagnostic_cannot_leak_details(saved_image,monkeypatch):
     result=hand.run_file(receipt,hive=hive,vision_fn=Mock(),active_fn=lambda:True)
     assert result['read_evidence']=={'exitcode':9,'stage':'reader','type':'ReaderError','mismatch_fields':[]}
     assert str(shot) not in json.dumps(result) and 'pixels secret' not in json.dumps(result)
+
+
+@pytest.mark.parametrize('description',['Recent deck files opened fine.','The recent files worked fine.','I opened the deck.','I have sent it.','[opens Preview] A dialog is visible.','A'*141,'','A dialog?'])
+def test_unsupported_or_oversized_caption_is_not_delivered(saved_image,description):
+    hand,mac,shot,raw,receipt,hive=saved_image
+    result=hand.run_file(receipt,hive=hive,vision_fn=lambda *a,**kw:json.dumps({'description':description}),active_fn=lambda:True,follow_up=True)
+    assert not result['ok'] and result['reason']=='caption_unverified'
+    assert description not in result['spoken'] if description else True
+
+
+@pytest.mark.parametrize('answer',['plain invented caption','{"description":5}','{"description":"A dialog.","action":"opened"}'])
+def test_invalid_caption_protocol_rejected(saved_image,answer):
+    hand,mac,shot,raw,receipt,hive=saved_image
+    result=hand.run_file(receipt,hive=hive,vision_fn=lambda *a,**kw:answer,active_fn=lambda:True)
+    assert not result['ok'] and result['reason']=='caption_unverified'
+
+
+def test_fenced_caption_and_full_followup_are_bounded(saved_image):
+    hand,mac,shot,raw,receipt,hive=saved_image
+    description='A format error dialog is visible over the DeckCraft window.'
+    calls=[]
+    def vision(*a,**kw):
+        calls.append(kw)
+        return '```json\n'+json.dumps({'description':description})+'\n```'
+    result=hand.run_file(receipt,hive=hive,vision_fn=vision,active_fn=lambda:True,follow_up=True)
+    assert result['ok'] and result['spoken']==description+' What would you like to do with it?'
+    assert len(result['spoken'])<=173 and len(calls)==1
