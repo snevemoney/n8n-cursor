@@ -60,7 +60,8 @@ class GoldenPipelineTest(unittest.TestCase):
             self.assertLess(len(prompt), 2000)
             return {
                 "tool": "vault_read",
-                "args": {"query": "what Jarvis can do"},
+                # Vault search no longer matches on a single shared word (3f7250a41), so the model's query names what the note says.
+                "args": {"query": "Jarvis read vault Safari status"},
                 "speak": "From the store I can read the vault, look at Safari, ask the repo, or report status.",
             }
 
