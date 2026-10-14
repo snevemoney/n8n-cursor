@@ -763,7 +763,21 @@ def wants_workspace_read(utterance: str) -> bool:
     return bool(WORKSPACE_READ_RE.search(utterance or "") or wr.DOCUMENT_FIND_RE.search(utterance or "") or wr.requested_path(utterance) is not None or named_document)
 
 
-DOCUMENT_FOLLOWUP_RE = re.compile(r"\b(?:summari[sz]e|summary|explain|analy[sz]e|conclusion|main points|key points)\b|\b(?:what|how)\b.{0,35}\b(?:it|this|document|file|book|pdf|chapter)\b.{0,25}\b(?:about|mean|say|tell|suggest|contain)\b", re.I)
+DOCUMENT_FOLLOWUP_RE = re.compile(r"\b(?:summari[sz]e|summary|explain|analy[sz]e|compare|comparison|check|correct|review|conclusion|main points|key points)\b|\b(?:what|how)\b.{0,35}\b(?:it|this|document|file|book|pdf|chapter)\b.{0,25}\b(?:about|mean|say|tell|suggest|contain)\b", re.I)
+
+
+def _document_snapshot_followup(text):
+    """Recognize reference-only questions; retained text grants no new action."""
+    line = str(text or '').strip()
+    # Naming a path/file is a new selection, never authority inherited from
+    # the earlier read. Use the existing reader's supported file grammar.
+    if _workspace_read_hand()._FILE.search(line) or re.search(r"(?:^|[\s\"'])(?:/|~/|\.\.?/)[^\s]+", line):
+        return False
+    if re.match(r"(?:please\s+)?(?:read|look|run|execute)\b", line, re.I) or re.search(r"\b(?:open|send|save|write|delete|edit|download|search|find|click|type|create|reread|re-read)\b", line, re.I):
+        return False
+    return bool(DOCUMENT_FOLLOWUP_RE.search(line) and (
+        re.search(r"\b(?:it|this|that|these|those|both|previous|just|comparison|results|document|files?|sources?)\b", line, re.I)
+        or re.fullmatch(r"(?:please\s+)?(?:summari[sz]e|explain|analy[sz]e)(?:\s+it)?[.!?]*", line, re.I)))
 
 
 def _document_context_hand():
@@ -7454,7 +7468,12 @@ def apply_pipeline_iter(
     # Loop on_it: decide the model-free route now so the very first chunk can be the ack line.
     spoken_in = correction_text(spoken_in)
     had_pending = hive is not None and _confirm_path(hive).exists()
-    early = confirm_take(hive, spoken_in) or live_chat_route(spoken_in, had_pending) or _workflow_followup_route(spoken_in, hive) or model_free_route(spoken_in)
+    document_followup = _document_snapshot_followup(spoken_in)
+    retained_context = (_document_context_hand().for_followup(hive, token, is_followup=True)
+                        if document_followup else {})
+    early = confirm_take(hive, spoken_in) or live_chat_route(spoken_in, had_pending) or _workflow_followup_route(spoken_in, hive)
+    if early is None and not document_followup:
+        early = model_free_route(spoken_in)
     ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""
     yield _pipeline_event(
         ok=True,
@@ -7492,11 +7511,11 @@ def apply_pipeline_iter(
     if early is not None and pick is None and ran is None:
         pick = early
         t_tool = time.monotonic()
-        ran = yield from _run_tool_heartbeat(pick, spoken_in, hive=hive, token=gen, brain=None, retrieve_roots=retrieve_roots,
-                                             see_fn=see_fn, status_fn=status_fn, gen=gen)
+        ran = yield from _run_tool_heartbeat(pick, spoken_in, hive=hive, token=token, brain=None, retrieve_roots=retrieve_roots,
+                                             see_fn=see_fn, status_fn=status_fn, gen=token)
         ran["tool_ms"] = int((time.monotonic() - t_tool) * 1000)
         brain = None
-    if pick is None and wants_local_read(spoken_in):
+    if pick is None and not document_followup and wants_local_read(spoken_in):
         pick = {"tool": "vault_read", "args": {"query": spoken_in}, "speak": ""}
         brain = "store"
     if pick is None and is_bare_greeting(spoken_in):
@@ -7761,15 +7780,16 @@ def apply_pipeline_iter(
             if extra and extra not in pack_text:
                 brief = f"{pack_text}\n\n{extra}"
         brief = fit_budget(brief)
-        if DOCUMENT_FOLLOWUP_RE.search(spoken_in):
-            context = _document_context_hand().for_followup(hive, int(gen or 0), is_followup=True)
+        if document_followup:
+            context = retained_context
             if context.get('ok'):
                 brief = fit_budget(context['prompt_block'] + '\n\n' + brief)
-            elif context.get('status') in {'STALE', 'HOLD'}:
+            elif context.get('status') in {'STALE', 'HOLD', 'MISSING'}:
                 brief = 'The previously selected document is not current: ' + context['reason'] + '. Do not invent its contents. Ask to read it again.\n\n' + brief
         provider_brief = fit_budget(brief)
         no_hands = (
-            generation_ask(spoken_in)
+            document_followup
+            or generation_ask(spoken_in)
             or shared_memory_answers(spoken_in)
             or plain_question(spoken_in)
             # Deterministic skill picker ahead of the LLM tool pick: a confident 'converse' needs no hand.
@@ -7924,6 +7944,14 @@ def apply_pipeline_iter(
                 pick = _prose_converse(_talk_speak(talked) or str(pick.get("speak") or ""))
         if pick is not None:
             brain = str((talked or {}).get("engine") or (talked or {}).get("wire") or "openrouter")
+
+    # Reference-only questions are read-snapshot consumers, not a fresh hand
+    # authorization. A tool-shaped model reply cannot escape that host boundary.
+    if document_followup and early is None and pick is not None and pick.get('tool') != 'converse':
+        line = "The answer requested another action instead of using the retained reads. I have not run that action. Please ask me to explain the retained sources again."
+        ran = {"ok": False, "tool": "converse", "spoken": line, "wires": [], "cites": [],
+               "sent": False, "task_verified": False, "outcome": "snapshot_answer_required"}
+        pick = {"tool": "converse", "args": {}, "speak": line}
 
     if pick is None and wants_safari(spoken_in):
         ran = no_model_reply(spoken_in, hive=hive, see_fn=see_fn, retrieve_roots=retrieve_roots, turns=prior_turns)
