@@ -5748,6 +5748,8 @@ def _run_tool_inner(
                 got = {"ok": False, "spoken": "Stopped. Standing by.", "task_verified": False}
             else:
                 got = MACOS.reveal_screenshot(reference["artifact"])
+                if got.get("verification_evidence"):
+                    act_if_current(hive, gen, lambda bus: {**bus, "finder_verification": {"gen": gen, **got["verification_evidence"]}})
         return {**got, "tool": tool, "wires": ["files"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("task_verified")), "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "workspace_read":

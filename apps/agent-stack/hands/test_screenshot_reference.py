@@ -27,7 +27,7 @@ class SavedScreenshot(unittest.TestCase):
     def test_launch_alone_is_not_finder_success(self):
         with tempfile.TemporaryDirectory() as d:
             home=Path(d);f=self.shot(home);receipt=M.screenshot_fingerprint(f,home)
-            with mock.patch.object(M,'_run',side_effect=[subprocess.CompletedProcess([],0,'',''),subprocess.CompletedProcess([],0,'/wrong/file','')]):
+            with mock.patch.object(M,'_run',side_effect=[subprocess.CompletedProcess([],0,'','')]+[subprocess.CompletedProcess([],0,'/wrong/file','')]*3):
                 got=M.reveal_screenshot(receipt,home)
             self.assertFalse(got['ok']);self.assertFalse(got['task_verified'])
     def test_icloud_availability_change_is_not_file_identity_change(self):
@@ -43,6 +43,24 @@ class SavedScreenshot(unittest.TestCase):
             with mock.patch.object(M,'_run',return_value=subprocess.CompletedProcess([],0,'','')):
                 got=M.latest_screenshot(home)
             self.assertIn('Desktop folder.',got['spoken']);self.assertNotIn(str(home),got['spoken'])
+    def test_delayed_selection_is_reobserved_with_a_bound(self):
+        with tempfile.TemporaryDirectory() as d:
+            home=Path(d);f=self.shot(home);receipt=M.screenshot_fingerprint(f,home)
+            with mock.patch.object(M,'_run',side_effect=[subprocess.CompletedProcess([],0,'',''),subprocess.CompletedProcess([],0,'',''),subprocess.CompletedProcess([],0,str(f)+'\n','')]):
+                got=M.reveal_screenshot(receipt,home)
+            self.assertTrue(got['task_verified']);self.assertEqual(got['verification_evidence']['selection_readback_attempts'],2)
+    def test_wrong_file_with_same_bytes_is_not_the_selected_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            home=Path(d);f=self.shot(home);other=self.shot(home,'Screenshot other.png');receipt=M.screenshot_fingerprint(f,home)
+            with mock.patch.object(M,'_run',side_effect=[subprocess.CompletedProcess([],0,'','')]+[subprocess.CompletedProcess([],0,str(other)+'\n','')]*3):
+                got=M.reveal_screenshot(receipt,home)
+            self.assertFalse(got['task_verified']);self.assertFalse(got['verification_evidence']['selection_matched'])
+    def test_permission_denied_is_not_bypassed_or_repeated(self):
+        with tempfile.TemporaryDirectory() as d:
+            home=Path(d);f=self.shot(home);receipt=M.screenshot_fingerprint(f,home)
+            with mock.patch.object(M,'_run',side_effect=[subprocess.CompletedProcess([],0,'',''),subprocess.CompletedProcess([],1,'','Not authorized (-1743)')]) as run:
+                got=M.reveal_screenshot(receipt,home)
+            self.assertFalse(got['task_verified']);self.assertTrue(got['verification_evidence']['permission_denied']);self.assertEqual(run.call_count,2)
     def test_exact_selection_postcondition(self):
         with tempfile.TemporaryDirectory() as d:
             home=Path(d);f=self.shot(home);receipt=M.screenshot_fingerprint(f,home)

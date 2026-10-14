@@ -319,11 +319,21 @@ def reveal_screenshot(artifact,home=None):
         proc=_run(['/usr/bin/open','-R',fresh['path']],timeout=4)
         if proc.returncode != 0: raise ValueError('Finder reveal request failed')
         # Read selection back without interpolating a path or user text into AppleScript.
-        check=_run(['/usr/bin/osascript','-e','tell application "Finder"\nif (count of selection) is 1 then return POSIX path of ((item 1 of selection) as alias)\nreturn ""\nend tell'],timeout=4)
-        visible=check.returncode == 0 and check.stdout.strip() == fresh['path']
+        visible=False; evidence={'selection_readback_attempts':0}
+        for attempt in range(3):
+            check=_run(['/usr/bin/osascript','-e','tell application "Finder"\nset selectedItems to get selection\nif (count of selectedItems) is 1 then return POSIX path of ((item 1 of selectedItems) as alias)\nreturn ""\nend tell'],timeout=1)
+            evidence={'selection_readback_attempts':attempt+1,'returncode':check.returncode,
+                      'selection_present':bool(check.stdout.strip()),'permission_denied':'-1743' in (check.stderr or '')}
+            try:
+                selected=Path(check.stdout.strip())
+                visible=check.returncode == 0 and selected.is_absolute() and selected.samefile(fresh['path'])
+            except (OSError,ValueError): visible=False
+            if visible or evidence['permission_denied']: break
+            if attempt < 2: time.sleep(.15)
         unchanged=same_screenshot(screenshot_fingerprint(fresh['path'],home), fresh)
+        evidence.update({'selection_matched':visible,'file_unchanged':unchanged})
         if not visible or not unchanged:
-            return {'ok':False,'spoken':'I requested Finder to reveal the screenshot, but could not verify its selection.','task_verified':False,'artifact':fresh}
-        return {'ok':True,'spoken':'Finder has selected '+Path(fresh['path']).name+'.','task_verified':True,'artifact':fresh,'postcondition':'exact Finder selection read back'}
+            return {'ok':False,'spoken':'I requested Finder to reveal the screenshot, but could not verify its selection.','task_verified':False,'artifact':fresh,'verification_evidence':evidence}
+        return {'ok':True,'spoken':'Finder has selected '+Path(fresh['path']).name+'.','task_verified':True,'artifact':fresh,'postcondition':'exact Finder selection read back','verification_evidence':evidence}
     except (OSError,ValueError,RuntimeError,subprocess.TimeoutExpired) as exc:
         return {'ok':False,'spoken':'I could not reveal that screenshot in Finder: '+str(exc)+'.','task_verified':False}
