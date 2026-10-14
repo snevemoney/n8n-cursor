@@ -300,7 +300,7 @@ def op_craft_inspect(app: str, path: str) -> dict:
 def op_fanout(args: dict, approved: bool = False) -> dict:
     PERM().log_action("fanout", f"{len(args.get('tasks') or [])} tasks", "allow")
     # op_code is looked up at call time so tests (and a future smarter worker) can replace it
-    return _load("fanout", "fanout.py").run({**args, "approved": bool(approved or args.get("approved"))},
+    return _load("fanout", "fanout.py").run({**args, "approved": approved is True},
                                             code_worker=lambda ask, repo: op_code(repo, ask, "jarvis/fanout"))
 
 

@@ -9,6 +9,7 @@ import json
 import os
 import re
 import stat
+import tempfile
 from pathlib import Path
 
 try:
@@ -54,12 +55,19 @@ def route_secret(text, env_file, name=None):
         return {"ok": False, "stored": False, "redacted": redacted, "spoken": "I need a valid variable name for that key."}
     env_file.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     lines = [l for l in (env_file.read_text().splitlines() if env_file.exists() else []) if not l.startswith(var + "=")]
-    tmp = env_file.with_name(".env.local.tmp")
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w") as f:
-        f.write("\n".join(lines + [f"{var}={value}"]) + "\n")
-    os.replace(tmp, env_file)
-    os.chmod(env_file, stat.S_IRUSR | stat.S_IWUSR)
+    # A unique, exclusively created sibling cannot follow a pre-planted temp symlink.
+    fd, temp_name = tempfile.mkstemp(prefix=".env.local.", suffix=".tmp", dir=env_file.parent)
+    tmp = Path(temp_name)
+    try:
+        with os.fdopen(fd, "w") as f:
+            os.fchmod(f.fileno(), stat.S_IRUSR | stat.S_IWUSR)
+            f.write("\n".join(lines + [f"{var}={value}"]) + "\n")
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, env_file)
+    finally:
+        if tmp.exists():
+            tmp.unlink()
     return {"ok": True, "stored": True, "var": var, "redacted": redacted,
             "spoken": f"Saved as {var} in your .env.local, not in chat. Treat the pasted copy as exposed and rotate it."}
 

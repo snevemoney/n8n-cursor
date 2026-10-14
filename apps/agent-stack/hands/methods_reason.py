@@ -136,7 +136,8 @@ def graduate(root, daily_name, decisions):
         else:
             continue
         done.append((idea, act.split(":")[0]))
-    return {"actions": done, "pending": [i for i in ideas if i not in decisions]}
+    handled = {idea for idea, _ in done}
+    return {"actions": done, "pending": [i for i in ideas if i not in handled]}
 
 
 # ---- X25: small page over personal data -----------------------------------------------------------------------------------

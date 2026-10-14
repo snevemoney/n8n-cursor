@@ -7,6 +7,12 @@
 #      what macOS stores for the grant (CANDIDATE: confirm after the first rebuild that the switch survived; if not, re-toggle it).
 # Prints REBUILT or UNCHANGED as the first word of the last line, so a caller knows whether Evens must re-toggle Accessibility.
 set -e
+# Unit tests may compile an explicit scratch bundle, but never replace the
+# installed application or invalidate its Accessibility identity by default.
+if { [ -n "${PYTEST_CURRENT_TEST:-}" ] || [ "${JARVIS_POINTER_OFF:-}" = "1" ]; } && [ -z "${JARVIS_CLICK_APP:-}" ]; then
+  echo "SKIPPED installed click-app build in test mode; set an explicit scratch destination"
+  exit 0
+fi
 HERE="$(cd "$(dirname "$0")" && pwd)"; APP="${JARVIS_CLICK_APP:-$HOME/Applications/Jarvis Click.app}"; ID=ai.grok.jarvis.click
 SHA="$(cat "$HERE/jarvis_click.swift" "$0" | shasum -a 256 | cut -d' ' -f1)"
 if [ -x "$APP/Contents/MacOS/jarvis_click" ] && [ "$(cat "$APP/Contents/.src.sha" 2>/dev/null)" = "$SHA" ] && [ -z "$JARVIS_CLICK_FORCE" ]; then

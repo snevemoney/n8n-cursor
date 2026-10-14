@@ -80,7 +80,11 @@ def link(root, index_name, topic, name):
     idx, dest = target(root, index_name), target(root, name)
     if idx is None or dest is None:
         raise ValueError("Index and target must both exist")
-    line = f"- {pm.clean_text(topic)}: [[{name}]]"
+    # User-supplied labels are data. A line break cannot create a second route.
+    topic = " ".join(re.sub(r"[:\[\]]", " ", pm.clean_text(topic)).split())
+    if not topic or any(c in name for c in "\r\n[]"):
+        raise ValueError("Give a plain route label and target name")
+    line = f"- {topic}: [[{name}]]"
     text = idx.read_text()
     if line in text:
         return {"added": False, "line": line}

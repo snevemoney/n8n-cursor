@@ -438,6 +438,7 @@ def _apply_turn_iter_inner(
     cursor_ask_fn=None,
     talk_fn=None,
     login_fn=None,
+    _sensitive=False,
 ):
     _ = (approved, grok)
     spoken = (utterance or "").strip()
@@ -446,15 +447,20 @@ def _apply_turn_iter_inner(
     if not spoken:
         yield _door_speak(hive, spoken, "Holding. Say Jarvis, or tap Space.", "idle", retrieve_roots)
         return
+    _methods_claimed = _sensitive
     try:  # Z99 + methods asks: a pasted secret is moved to .env.local and never echoed or sent to a model
         _mr = PIPELINE._load("agent_stack_methods_router", PIPELINE.STACK / "hands" / "methods_router.py")
-        if _mr.wants(spoken):
+        if _sensitive or _mr.wants(spoken):
+            _methods_claimed = True
             _got = _mr.run(spoken)
             _tok_m = PIPELINE.begin_turn(hive) if hasattr(PIPELINE, "begin_turn") else None
             yield _door_speak(hive, "[secret withheld]" if _got.get("secret") else spoken, _got["spoken"], "methods_router", retrieve_roots, gen=_tok_m, execution=_got)
             return
-    except (ImportError, OSError, RuntimeError):
-        pass
+    except Exception:  # Once intercepted, fail closed even if storage/receipt construction fails.
+        if _methods_claimed:
+            yield _door_speak(hive, "[input withheld]", "I withheld that input because its handler failed. Nothing was sent to a model.", "methods_router", retrieve_roots,
+                              execution={"ok": False, "tool": "methods_router", "sent": False, "task_verified": False, "secret": True, "wires": ["methods_handler_failed"]})
+            return
     # Ported from main: "stop/cancel the watch" is a scoped Face Watch cancel.
     _scoped = CONTROLS.parse_stop(spoken) if CONTROLS is not None and hasattr(CONTROLS, "parse_stop") else None
     if _scoped and _scoped[1] == "watch":
@@ -1047,6 +1053,17 @@ def apply_turn_iter(utterance: str, **kw):
     """The turn, then one JSONL log line when it finishes. Logging never breaks a turn."""
     import time as _time
 
+    # Detect sensitive input before reflex cards, crash logs, or fallback calls.
+    # Keep the original only for the dedicated local interceptor.
+    _interceptor_input = utterance
+    _secret_input = False
+    try:
+        _sc = PIPELINE._load("agent_stack_methods_config", PIPELINE.STACK / "hands" / "methods_config.py")
+        _secret_input = _sc.find_secret(utterance or "") is not None
+    except Exception:
+        pass
+    if _secret_input:
+        utterance = "[secret withheld]"
     started = _time.time()
     events: list[dict] = []
     first_ms = None
@@ -1066,7 +1083,7 @@ def apply_turn_iter(utterance: str, **kw):
     prev_line, prev_ask = _previous_exchange(kw.get("hive") or HIVE)
 
     def _inner():
-        for val in _apply_turn_iter_inner(utterance, **kw):
+        for val in _apply_turn_iter_inner(_interceptor_input, _sensitive=_secret_input, **kw):
             # The fixed honest lines (talk wire dark, nothing on disk) are correct for any ask; "say that again" would not help.
             if (isinstance(val, dict) and not val.get("partial") and val.get("verb") in ("converse", None)
                     and not _is_honest_fixed_line(str(val.get("spoken") or "")) and _is_repeat(str(val.get("spoken") or ""), prev_line, utterance, prev_ask)):
@@ -1085,10 +1102,10 @@ def apply_turn_iter(utterance: str, **kw):
         except Exception as exc:  # noqa: BLE001
             # A crashed turn used to surface as "The talk wire is dark this turn." Log the real cause, then answer
             # through the plain talk wire (no tools; online_talk walks the primary + paid fallback models).
-            _turn_crash_log(utterance, exc)
+            _turn_crash_log(utterance, RuntimeError("Sensitive-input handler failed") if _secret_input else exc)
             if any(str(e.get("spoken") or "").strip() for e in events):
                 raise
-            fb = _crash_fallback(utterance)
+            fb = None if _secret_input else _crash_fallback(utterance)
             if not fb:
                 raise
             events.append(fb)

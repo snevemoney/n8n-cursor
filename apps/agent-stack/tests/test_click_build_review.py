@@ -24,7 +24,6 @@ def build_fixture(tmp_path):
     return installed, env
 
 
-@pytest.mark.xfail(strict=True, reason='Build script has no test guard and defaults to installed app')
 def test_default_test_build_never_replaces_installed_bundle(tmp_path):
     installed, env = build_fixture(tmp_path)
     subprocess.run(['bash', str(SCRIPT)], env=env, capture_output=True, text=True, check=True)

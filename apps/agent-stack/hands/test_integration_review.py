@@ -1,4 +1,4 @@
-"""Offline independent defect reproductions; strict XFAILs remain release findings."""
+"""Offline defect regressions; fixes must satisfy the original reproductions."""
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -13,7 +13,6 @@ import fanout
 import agent_tools as at
 
 
-@pytest.mark.xfail(strict=True, reason='Predictable temp path follows existing symlink and truncates target')
 def test_secret_temp_symlink_never_modifies_another_file(tmp_path):
     victim = tmp_path / 'unrelated.txt'
     victim.write_text('preserve me')
@@ -23,7 +22,6 @@ def test_secret_temp_symlink_never_modifies_another_file(tmp_path):
     assert victim.read_text() == 'preserve me'
 
 
-@pytest.mark.xfail(strict=True, reason='Payload approved overrides trusted approved=False')
 def test_fanout_payload_cannot_approve_model_authored_snippet():
     ran = []
     def run(args, **_kw):
@@ -36,21 +34,21 @@ def test_fanout_payload_cannot_approve_model_authored_snippet():
 
 
 @pytest.mark.parametrize('response', ['{"unexpected":true}', '{"messages":[{"id":"invalid-id"}]}', '[]'])
-@pytest.mark.xfail(strict=True, reason='Malformed Sent response becomes clear instead of unknown')
 def test_malformed_sent_response_never_authorizes_send(response):
     got = gr.check_sent_duplicate('reader@example.com', 'subject', runner=lambda _: (0, response, ''))
     assert got['status'] == 'unknown'
 
 
-@pytest.mark.xfail(strict=True, reason='Multiline topic injects more than one index line')
 def test_vault_link_appends_exactly_one_routing_line(tmp_path):
     (tmp_path / 'index.md').write_text('original\n')
     (tmp_path / 'target.md').write_text('target')
     mv.link(tmp_path, 'index', 'pricing\n- injected: [[target]]\nextra', 'target')
-    assert len((tmp_path / 'index.md').read_text().splitlines()) == 2
+    text = (tmp_path / 'index.md').read_text()
+    assert len(text.splitlines()) == 2
+    routes = mv.declared_routes(text)
+    assert len(routes) == 1 and list(routes.values()) == ['target']
 
 
-@pytest.mark.xfail(strict=True, reason='Invalid graduate decisions disappear from pending despite no action')
 def test_invalid_graduation_decision_stays_pending(tmp_path):
     (tmp_path / 'daily.md').write_text('- idea: unfinished\n')
     got = mr.graduate(tmp_path, 'daily', {'unfinished': 'unknown'})

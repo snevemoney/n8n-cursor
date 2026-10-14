@@ -138,11 +138,34 @@ def check_sent_duplicate(to: str, subject: str, days: int = 3, runner: Runner | 
     if rc != 0 or data is None or (isinstance(data, dict) and isinstance(data.get("error"), (dict, str))):
         f = _failure("generic", rc, out, err)
         return _unknown("I couldn't check Sent mail. " + f["spoken"], f["auth_missing"])
-    if isinstance(data, list):  # --page-all style: one document per page
-        ids = [m.get("id") for page in data if isinstance(page, dict) for m in (page.get("messages") or []) if isinstance(m, dict)]
-    else:
-        ids = [m.get("id") for m in (data.get("messages") or []) if isinstance(m, dict)] if isinstance(data, dict) else []
-    ids = [i for i in ids if isinstance(i, str) and MSG_ID.match(i)][:SENT_MAX_IDS]
+    # Validate every page and entry before absence can count as evidence.
+    pages = data if isinstance(data, list) else [data]
+    if not pages:
+        return _unknown("Sent mail returned no readable response pages.")
+    ids = []
+    for page in pages:
+        if not isinstance(page, dict) or "error" in page:
+            return _unknown("Sent mail returned an unreadable response page.")
+        if "resultSizeEstimate" in page and (type(page["resultSizeEstimate"]) is not int or page["resultSizeEstimate"] < 0):
+            return _unknown("Sent mail returned an invalid result count.")
+        if "nextPageToken" in page and not isinstance(page["nextPageToken"], str):
+            return _unknown("Sent mail returned an unreadable pagination token.")
+        if "messages" not in page:
+            if type(page.get("resultSizeEstimate")) is not int or page["resultSizeEstimate"] != 0:
+                return _unknown("Sent mail did not return a message list or an explicit empty result.")
+            entries = []
+        else:
+            entries = page["messages"]
+        if not isinstance(entries, list):
+            return _unknown("Sent mail returned a malformed message list.")
+        for entry in entries:
+            mid = entry.get("id") if isinstance(entry, dict) else None
+            if not isinstance(mid, str) or not MSG_ID.fullmatch(mid):
+                return _unknown("Sent mail returned an unreadable message identifier.")
+            ids.append(mid)
+        if not entries and (page.get("nextPageToken") or page.get("resultSizeEstimate", 0) != 0):
+            return _unknown("Sent mail has more results that could not be checked.")
+    ids = ids[:SENT_MAX_IDS]
     if not ids:
         return {"status": "clear", "count": 0, "auth_missing": False, "matches": [],
                 "spoken": f"No sent mail to {to} with that subject in the last {max(SENT_DAYS_MIN, min(SENT_DAYS_MAX, int(days or 1)))} days."}
