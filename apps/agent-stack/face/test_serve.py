@@ -620,6 +620,25 @@ class FaceServeTest(unittest.TestCase):
             serve.PROVIDER_TEXT_GRACE_SEC = 0.05
             started = threading.Event()
             released = threading.Event()
+            # Deterministic clock: serve's deadline math reads time.monotonic(). It stays at 0 until the
+            # vault_read is open, then jumps far past wall + grace, so the hold is judged by the state of
+            # the turn, not by how fast a loaded machine runs the producer thread.
+            real_time = time
+            jumped = threading.Event()
+            polls_after_jump = []
+
+            class FakeTime:
+                def monotonic(self):
+                    if not started.is_set():
+                        return 0.0
+                    jumped.set()
+                    polls_after_jump.append(1)
+                    return 1000.0
+
+                def __getattr__(self, name):
+                    return getattr(real_time, name)
+
+            serve.time = FakeTime()
             try:
                 def paced(*args, **kwargs):
                     serve.MOUTH.PIPELINE.begin_turn(serve.HIVE)
@@ -668,13 +687,19 @@ class FaceServeTest(unittest.TestCase):
                 )
                 thread.start()
                 self.assertTrue(started.wait(1), "vault_read open signal did not arrive")
-                time.sleep(0.35)
+                # Wait until the loop has judged the (jumped) deadline at least three times while the
+                # vault_read is outstanding, instead of sleeping wall-clock time.
+                deadline_real = real_time.monotonic() + 5
+                while len(polls_after_jump) < 3 and real_time.monotonic() < deadline_real:
+                    real_time.sleep(0.01)
+                self.assertGreaterEqual(len(polls_after_jump), 3, "loop never judged the deadline")
                 mid = handler.wfile.getvalue()
                 released.set()
                 thread.join(3)
                 raw = handler.wfile.getvalue()
             finally:
                 released.set()
+                serve.time = real_time
                 serve.HIVE = old_hive
                 serve.TURN_WALL_SEC = old_wall
                 serve.PROVIDER_TEXT_GRACE_SEC = old_grace
