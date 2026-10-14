@@ -219,6 +219,7 @@ def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
         bus.pop("execution_gen", None)
         bus.pop("task_verified", None)
         bus.pop("task_verified_gen", None)
+        bus.pop("agent_task_progress", None)
         bus["updated_at"] = now_iso()
         if arm_watch:
             watch = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}
@@ -300,6 +301,7 @@ def cancel_turn_scoped(
         # poll cannot read "done" from a cancelled generation.
         bus.pop("task_verified", None)
         bus.pop("task_verified_gen", None)
+        bus.pop("agent_task_progress", None)
         bus["phase"] = "idle"
         bus["job_status"] = "done"
         bus["spoken"] = line
@@ -331,6 +333,7 @@ def cancel_turn(hive: Path) -> int:
         bus["utterance"] = bus.get("utterance") or "stop"
         bus.pop("task_verified", None)
         bus.pop("task_verified_gen", None)
+        bus.pop("agent_task_progress", None)
         watch = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}
         watch["armed"] = False
         watch["held"] = False

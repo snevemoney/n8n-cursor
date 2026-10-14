@@ -413,7 +413,7 @@ def op_repo(repo: str, action: str, **kw) -> dict:
 
 
 # ---------------------------------------------------------------- task loop
-def _step(s: dict, approved: bool) -> dict:
+def _step(s: dict, approved: bool, *, cancel_check=None, progress=None) -> dict:
     op = s.get("op")
     if op == "mcp":
         return op_mcp(s.get("server", ""), s.get("tool", ""), s.get("arguments") or {}, approved)
@@ -433,7 +433,7 @@ def _step(s: dict, approved: bool) -> dict:
     if op == "sent_check":
         return op_sent_check(s.get("to", ""), s.get("subject", ""), s.get("days") or 3)
     if op == "code":
-        return op_code(s.get("repo", ""), s.get("goal", ""), s.get("branch") or "jarvis/code")
+        return op_code(s.get("repo", ""), s.get("goal", ""), s.get("branch") or "jarvis/code", cancel_check=cancel_check, progress=progress)
     if op == "web":
         ws = _load("web_search", "web_search.py")
         got = ws.run({"query": s.get("query", "")})
@@ -443,16 +443,38 @@ def _step(s: dict, approved: bool) -> dict:
     return {"ok": False, "verified": False, "spoken": f"unknown op {op}"}
 
 
-def run(args: dict | None = None, approved: bool = False) -> dict:
+def _cancelled(steps=None) -> dict:
+    return {"ok": False, "verified": False, "cancelled": True, "status": "CANCELLED",
+            "steps": list(steps or []), "spoken": "The task was stopped. Its requested outcome is not verified."}
+
+
+def _stopped(cancel_check) -> bool:
+    if cancel_check is None:
+        return False
+    try:
+        return bool(cancel_check())
+    except Exception:
+        return True  # uncertain cancellation authority cannot permit another mutation
+
+
+def _progress(progress, row) -> None:
+    if progress is not None:
+        progress(dict(row))
+
+
+def run(args: dict | None = None, approved: bool = False, *, cancel_check=None, progress=None) -> dict:
+    if _stopped(cancel_check):
+        return _cancelled()
     args = args or {}
     steps = args.get("steps") or ([args] if args.get("op") else [])
     goal = str(args.get("goal") or " ".join(str(s.get("tool") or s.get("action") or s.get("cmd") or " ".join(s.get("argv") or []) or s.get("query") or "") for s in steps))
     if len(steps) == 1 and steps[0].get("op") == "code":
-        got = op_code(steps[0].get("repo", ""), steps[0].get("goal", ""), steps[0].get("branch") or "jarvis/code")
+        got = op_code(steps[0].get("repo", ""), steps[0].get("goal", ""), steps[0].get("branch") or "jarvis/code", cancel_check=cancel_check, progress=progress)
         return got
     if len(steps) == 1 and (steps[0].get("op") in {"gws_read", "sent_check", "craft_inspect", "fanout"}
                             or (steps[0].get("op") == "cli" and (steps[0].get("argv") or [""])[0] == "gws")):
-        return _step(steps[0], approved)  # one Google read: answer in a sentence, not a step report
+        got = _step(steps[0], approved, cancel_check=cancel_check, progress=progress)
+        return _cancelled() if _stopped(cancel_check) else got
     ranked = rank_skills(goal, 1) if args.get("goal") else []
     skill = ranked[0] if ranked else skill_first(goal)
     if not steps:
@@ -462,12 +484,22 @@ def run(args: dict | None = None, approved: bool = False) -> dict:
              "status": "pending"} for i, s in enumerate(steps[:12])]
     results = []
     for item, s in zip(todo, steps[:12]):
-        got = _step(s, approved)  # act
+        if _stopped(cancel_check):
+            return _cancelled(todo)
+        _progress(progress, dict(item, status="running"))
+        if _stopped(cancel_check):
+            return _cancelled(todo)
+        got = _step(s, approved, cancel_check=cancel_check, progress=progress)  # act
+        if _stopped(cancel_check) or got.get("cancelled"):
+            return _cancelled(todo)
         item["status"] = "verified" if got.get("verified") else ("needs Evens" if got.get("gated") else "failed")  # verify
         item["result"] = str(got.get("spoken") or "")[:400]
         if got.get("cites"):
             item["cites"] = got["cites"][:5]
         results.append(got)
+        _progress(progress, item)
+        if _stopped(cancel_check):
+            return _cancelled(todo)
         if item["status"] != "verified" and not args.get("keep_going"):
             break
     done = sum(1 for t in todo if t["status"] == "verified")
@@ -838,32 +870,63 @@ def _tree(root: Path, cap: int = 6000) -> str:
     return s[:cap]
 
 
-def op_code(repo: str, goal: str, branch: str = "jarvis/code") -> dict:
-    """Plan -> edit -> test -> read failures -> fix -> commit, driven by the strongest coding model."""
+class _CodeCancelled(Exception):
+    pass
+
+
+def op_code(repo: str, goal: str, branch: str = "jarvis/code", *, cancel_check=None, progress=None) -> dict:
     todo: list[dict] = []
+    def check():
+        if _stopped(cancel_check):
+            raise _CodeCancelled()
+    def publish(row):
+        _progress(progress, row)
+        check()
+    def operate(target, action, **kw):
+        check()
+        publish({"n": len(todo) + 1, "what": action, "status": "running"})
+        got = op_repo(target, action, **kw)
+        check()
+        return got
+    try:
+        return _op_code_owned(repo, goal, branch, todo=todo, check=check, publish=publish, operate=operate)
+    except _CodeCancelled:
+        return _cancelled(todo)
+
+
+def _op_code_owned(repo, goal, branch, *, todo, check, publish, operate) -> dict:
+    """Plan -> edit -> test -> read failures -> fix -> commit, driven by the strongest coding model."""
+    check()
     skills = rank_skills(goal)
+    check()
     guide = "\n\n".join(f"# skill {n}\n{skill_text(n, 1500)}" for n in skills[:2])
 
     def step(what, got):
         todo.append({"n": len(todo) + 1, "what": what, "status": "verified" if got.get("verified") else
                      ("needs Evens" if got.get("gated") else "failed"), "result": str(got.get("spoken") or "")[:300]})
+        publish(todo[-1])
         return got.get("verified")
-    if not step("init", op_repo(repo, "init")) or not step(f"branch {branch}", op_repo(repo, "branch", name=branch)):
+    if not step("init", operate(repo, "init")) or not step(f"branch {branch}", operate(repo, "branch", name=branch)):
         return _code_report(todo, skills, "", False)
     root = Path(os.path.expanduser(repo)) if os.path.isabs(os.path.expanduser(repo)) else PERM().scratch_roots()[0] / repo
     history = [{"role": "system", "content": CODE_SYS}]
     last_test, model_used, passed, plan = "", "", False, []
     gi = root / ".gitignore"
     if not gi.exists():
+        check()
         gi.write_text("__pycache__/\n*.pyc\nLibrary/\n.pytest_cache/\n", encoding="utf-8")
+        check()
     if any(p.suffix in {".py", ".js", ".ts"} for p in root.iterdir() if p.is_file()):
-        got0 = op_repo(str(root), "test")  # read the current failures before the model edits anything
+        got0 = operate(str(root), "test")  # read the current failures before the model edits anything
         last_test = "(baseline before edits) " + str(got0.get("output") or got0.get("spoken"))[-2500:]
         step("baseline test", {"verified": True, "spoken": got0.get("spoken")})
     for it in range(1, MAX_ITERS + 1):
+        check()
         history.append({"role": "user", "content": f"Goal: {goal}\n\nRelevant skills:\n{guide or '(none)'}\n\nRepo now:\n{_tree(root)}\n\n"
                         f"Last test output (iteration {it - 1}):\n{last_test or '(none yet)'}"})
+        publish({"n": len(todo) + 1, "what": f"iter {it} model", "status": "running"})
         text, model_used = llm(history, CODE_MODEL)
+        check()
         if not text:
             step(f"iter {it} model", {"verified": False, "spoken": "no model answer (key missing or both models failed)"})
             break
@@ -874,14 +937,14 @@ def op_code(repo: str, goal: str, branch: str = "jarvis/code") -> dict:
         if not isinstance(files, dict):
             files = {}
         for path, content in list(files.items())[:10]:
-            if not step(f"iter {it} write {path}", op_repo(str(root), "write", path=str(path), content=str(content))):
+            if not step(f"iter {it} write {path}", operate(str(root), "write", path=str(path), content=str(content))):
                 return _code_report(todo, skills, model_used, False, plan)
-        got = op_repo(str(root), "test", cmd=str(d.get("test_cmd") or "python3 -m unittest discover -v"))
+        got = operate(str(root), "test", cmd=str(d.get("test_cmd") or "python3 -m unittest discover -v"))
         last_test = str(got.get("output") or got.get("spoken"))[-2500:]
         passed = bool(got.get("verified"))
         step(f"iter {it} test", got)
         if passed:
-            step("commit", op_repo(str(root), "commit", message=str(d.get("commit_message") or goal)[:100]))
+            step("commit", operate(str(root), "commit", message=str(d.get("commit_message") or goal)[:100]))
             break
     return _code_report(todo, skills, model_used, passed and todo[-1]["status"] == "verified", plan)
 

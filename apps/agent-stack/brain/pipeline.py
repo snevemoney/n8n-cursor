@@ -1244,11 +1244,15 @@ def _mcp_inventory_hand():
 
 def _agent_tools_hand():
     name = "agent_stack_agent_tools"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "agent_tools.py")
+    path = STACK / "hands" / "agent_tools.py"
+    stamp = path.stat().st_mtime_ns
+    cached = sys.modules.get(name)
+    if cached is None or getattr(cached, "_source_stamp", None) != stamp:
+        spec = importlib.util.spec_from_file_location(name, path)
         mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
         spec.loader.exec_module(mod)
+        mod._source_stamp = stamp
+        sys.modules[name] = mod
     return sys.modules[name]
 
 
@@ -5624,9 +5628,24 @@ def _run_tool_inner(
                 "task_verified": bool(got.get("ok")), "plan_meta": hd.log_meta(got)}
     if tool == "agent_tools":
         hd = _agent_tools_hand()
-        got = hd.run(dict(args) if args.get("op") or args.get("steps") else hd.args_from_utterance(utterance))
+        def cancelled():
+            return gen is not None and turn_cancelled(hive, gen)
+
+        def progress(row):
+            if gen is None:
+                return
+            # Existing generation owner rejects progress from cancelled or superseded work.
+            BUS_IO.commit_response(hive, gen, lambda bus: dict(bus, agent_task_progress={
+                "gen": gen, "step": int(row.get("n") or 0),
+                "what": str(row.get("what") or "")[:200],
+                "status": str(row.get("status") or "")[:40], "updated_at": now_iso(),
+            }), terminal=False)
+
+        got = hd.run(dict(args) if args.get("op") or args.get("steps") else hd.args_from_utterance(utterance),
+                     cancel_check=cancelled, progress=progress)
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["agent_tools"], "cites": list(got.get("cites") or []), "sent": False,
+                "cancelled": bool(got.get("cancelled")),
                 "task_verified": bool(got.get("verified")), "agent_tools_meta": hd.log_meta(got)}
     if tool == "mcp_call":
         hd = _mcp_call_hand()
