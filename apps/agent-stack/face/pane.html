@@ -319,11 +319,6 @@
     #reflexcard .rxv { border: 1px solid #3a6; border-radius: 8px; text-align: center; font-size: 8px; color: #8fd; }
     #reflexcard .foot { color: #3ddc84; letter-spacing: 0.1em; margin-top: 3px; font-size: 9px; }
     #reflexcard.on { display: block; }
-    #projectReview { position: fixed; z-index: 43; top: 6px; left: 6px; right: 6px; font: 11px/1.4 system-ui; color: #edf2ff; pointer-events: auto; }
-    #projectReview .review-body { max-height: 42vh; overflow: auto; background: #101723; border: 1px solid #5a7199; border-radius: 8px; padding: 8px; }
-    #projectReview article { border-top: 1px solid #536; padding-top: 5px; }
-    #projectReview textarea { width: 100%; box-sizing: border-box; font: inherit; color: #edf2ff; background: #202b40; user-select: text; }
-    #projectReview button { margin: 3px; min-height: 28px; }
     #inboxcard {
       display: none; position: fixed; z-index: 42; right: 6px; left: 6px; bottom: 96px; pointer-events: auto;
       font: 10px/1.4 -apple-system, system-ui, sans-serif; color: #dde; background: rgba(10, 14, 22, 0.94);
@@ -402,7 +397,6 @@
   </div>
   <div id="focusline" role="status"></div>
   <div id="reflexcard" role="status" aria-label="reflex decisions"></div>
-  <section id="projectReview" aria-label="Project draft review" hidden></section>
   <div id="inboxcard" role="status" aria-label="jarvis inbox"></div>
   <div class="hud tr">
     <div>
@@ -429,7 +423,6 @@
   <input id="typed" placeholder="/ type fallback · enter to send" autocomplete="off" />
   <script src="/vendor/3d-force-graph.min.js"></script>
   <script src="/orb.js"></script>
-  <script src="/review-panel.js"></script>
   <script>
     const $ = (id) => document.getElementById(id);
     const synth = window.speechSynthesis;
@@ -1808,7 +1801,6 @@
       }
       if (reflexHideAt && Date.now() > reflexHideAt) { el.classList.remove("on"); reflexHideAt = 0; }
     }
-    const reviewPanel = JarvisReviewPanel.create($("projectReview"), (command) => turn(command, false));
     let lastInboxGen = null;
     function paintInbox(bus) {
       const el = $("inboxcard");
@@ -2047,7 +2039,6 @@
         paintPrebrief(bus);
         paintReflex(bus);
         paintInbox(bus);
-        reviewPanel.paint(bus);
         paintLights({ health, bus, wires });
       } catch (e) {
         $("link").textContent = "NEURAL LINK - LOCAL FACE ONLY";
@@ -2065,7 +2056,6 @@
     }
 
     document.addEventListener("keydown", (e) => {
-      if (e.target.closest && e.target.closest("#projectReview")) return;
       if (e.code === "Space" && e.target !== $("typed")) {
         e.preventDefault();
         armMic();
