@@ -155,12 +155,13 @@ def _mcp_call(spec: dict, tool: str, arguments: dict, deadline: float) -> tuple[
 def op_mcp(server: str, tool: str, arguments: dict | None = None, approved: bool = False) -> dict:
     if not (NAME_OK.match(server or "") and NAME_OK.match(tool or "")):
         return {"ok": False, "verified": False, "spoken": "I need a server name and a tool name."}
-    if (WRITE_TOOL.search(tool) or not READ_TOOL.match(tool)) and not approved:
+    writing = bool(WRITE_TOOL.search(tool) or not READ_TOOL.match(tool))
+    if writing and approved is not True:
         PERM().log_action("mcp_write", f"{server}.{tool}", "confirm")
         return {"ok": False, "verified": False, "gated": True,
                 "spoken": f"{server}.{tool} is not a read-only lookup (it could write, send, run code or drive an app). That needs Evens first; I didn't call it."}
     spec = _load("mcp_inventory", "mcp_inventory.py").server_spec(server)
-    PERM().log_action("mcp_read", f"{server}.{tool}", "allow")
+    PERM().log_action("mcp_write" if writing else "mcp_read", f"{server}.{tool}", "owner_approved" if writing else "allow")
     if spec:
         ok, text = _mcp_call(spec, tool, arguments or {}, MCP_DEADLINE_S)
     else:
@@ -168,8 +169,10 @@ def op_mcp(server: str, tool: str, arguments: dict | None = None, approved: bool
         if got is None:
             return {"ok": False, "verified": False, "spoken": f"No config for {server} in Claude, Cursor or Codex."}
         ok, text = got
-    return {"ok": ok, "verified": ok and bool(text.strip()), "output": text,
-            "spoken": (f"{server}.{tool} answered: " if ok else f"{server}.{tool} failed: ") + text[:600]}
+    return {"ok": ok, "verified": ok and bool(text.strip()) and not writing, "output": text,
+            "action_executed": bool(ok and writing), "outcome_verified": False if writing else bool(ok and text.strip()),
+            "spoken": (f"{server}.{tool} was called with your approval; its outcome still needs verification: " if ok and writing
+                       else f"{server}.{tool} answered: " if ok else f"{server}.{tool} failed: ") + text[:600]}
 
 
 # ---------------------------------------------------------------- cli

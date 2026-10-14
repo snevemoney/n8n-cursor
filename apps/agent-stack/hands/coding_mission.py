@@ -464,6 +464,54 @@ class WorkflowMissionHandle:
             write_json(root/'state.json',state)
             return self.workflow_status(mission_id)
 
+    def approve_project(self, mission_id, answer):
+        """Owner approval belongs to this immutable task and exact project branch."""
+        import fcntl
+        root=mission_path(self.hive,mission_id)
+        with (root/'steering.lock').open('a') as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX)
+            current=self.workflow_status(mission_id)
+            if current['status']=='CANCELLED':
+                raise ValueError('stopped workflow requires explicit continuation')
+            binding=read_json(root/'binding.json')
+            match=re.fullmatch(r'\s*(?:please\s+)?(?:approve|authorize|allow)\s+(?:the\s+)?workflow\s+edits\s+for\s+("[^"\n]+"|\'[^\'\n]+\'|(?:/|~/)[^\s]+)\s+on\s+branch\s+([\w./-]+)[.!]?\s*',answer or '',re.I)
+            if not match or not binding or not _owner_path_matches(answer,Path(binding.get('repo',''))) or match.group(2)!=binding.get('branch'):
+                raise ValueError('explicit approval for the bound project and branch required')
+            branch=binding['branch']
+            if branch in {'main','master'} or not re.fullmatch(r'[\w./-]{1,80}',branch):
+                raise ValueError('an owned isolated branch is still required')
+            request=(root/'request.json').read_bytes();bound=(root/'binding.json').read_bytes()
+            receipt={'scope':'transient_task','mission_id':mission_id,'kind':'workflow_edits',
+                     'target':binding['repo'],'branch':branch,'authority':'explicit_owner_answer',
+                     'request_sha256':hashlib.sha256(request).hexdigest(),
+                     'binding_sha256':hashlib.sha256(bound).hexdigest(),'owner_answer':answer,
+                     'granted_at':time.time(),'configuration_changes_authorized':False}
+            write_json(root/'owner_approval.json',receipt)
+            state={k:v for k,v in current.items() if k not in {'ok','tool','wires','cites','sent','objective'}}
+            source=read_json(root/'source_research.json')
+            status='WAITING_ORIGINAL_IMPLEMENTATION' if source.get('selected') else 'WAITING_SOURCE'
+            line=('Your approval is recorded for this workflow, project and branch. The saved source is preserved; its original implementation still needs verification. No build has run.'
+                  if source.get('selected') else 'Your approval is recorded for this workflow, project and branch. Which saved YouTube source should I use? No build has run.')
+            state.update(status=status,spoken=line,question=line,owner_approved=True,verified=False,task_verified=False)
+            write_json(root/'state.json',state)
+            write_json(root/'checkpoint.json',{'worker_kind':'research_build','phase':'owner_project_approved',
+                'mission_id':mission_id,'request_sha256':receipt['request_sha256'],'original_request_unchanged':True})
+        return self.workflow_status(mission_id)
+
+    def project_approval(self, mission_id):
+        """Executor reads authority from the retained task, never from model flags."""
+        root=mission_path(self.hive,mission_id)
+        row=read_json(root/'owner_approval.json')
+        binding=read_json(root/'binding.json')
+        if (read_json(root/'control.json').get('cancel') or row.get('mission_id')!=mission_id
+            or row.get('scope')!='transient_task' or row.get('authority')!='explicit_owner_answer'
+            or row.get('target')!=binding.get('repo') or row.get('branch')!=binding.get('branch')
+            or row.get('branch') in {'main','master'}
+            or row.get('request_sha256')!=hashlib.sha256((root/'request.json').read_bytes()).hexdigest()
+            or row.get('binding_sha256')!=hashlib.sha256((root/'binding.json').read_bytes()).hexdigest()):
+            return None
+        return row
+
     def continue_workflow(self, mission_id, answer):
         import fcntl
         if not re.fullmatch(r'\s*(?:please\s+)?(?:resume|continue)\s+(?:the\s+)?(?:workflow|task|mission)\s*[.!]?\s*', answer or '', re.I):
@@ -475,7 +523,8 @@ class WorkflowMissionHandle:
             if current['status']!='CANCELLED':
                 return current
             binding=read_json(root/'binding.json')
-            status='WAITING_PROJECT' if not binding else 'WAITING_SOURCE'
+            write_json(root/'control.json',{'cancel':False})
+            status='WAITING_PROJECT' if not binding else ('WAITING_SOURCE' if self.project_approval(mission_id) else 'WAITING_APPROVAL')
             question=WORKFLOW_QUESTION if not binding else 'The project is preserved. Which saved YouTube source should I use? No implementation has run.'
             write_json(root/'control.json',{'cancel':False})
             current.update(status=status,question=question,spoken=question)

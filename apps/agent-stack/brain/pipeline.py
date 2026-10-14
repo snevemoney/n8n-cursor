@@ -950,17 +950,18 @@ ACK_SKIP = frozenset({"say"})
 
 
 # Confirm-before-act (verify round): screen_see sends the screen off the Mac, desk_dispatch acts as a send, and a
-# model-chosen code_run runs code Evens never typed. Each arms a one-shot pending row on the hive bus; only a short
-# explicit "yes/confirm" on the very next turn runs it. Anything else drops it.
-CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run", "pointer_click")
+# model-chosen code_run runs code Evens never typed. Gated agent actions use the same host-owned proposal.
+# An explicit owner approval executes the exact pending action; unrelated chat preserves it.
+CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run", "pointer_click", "agent_tools")
 CONFIRM_TTL_SEC = 120
 CONFIRM_YES_RE = re.compile(
-    r"^\s*(?:yes|yep|yeah|sure|confirm(?:ed)?|go\s+ahead|go\s+for\s+it|allow\s+it|proceed|do\s+it|send\s+it|ok(?:ay)?)\b(?:[\s,]*(?:please|jarvis|sir|do\s+it|go\s+ahead))*[\s.!]*$",
+    r"^\s*(?:yes|yep|yeah|sure|confirm(?:ed)?|go\s+ahead|go\s+for\s+it|allow(?:\s+it)?|approve(?:\s+it)?|proceed|do\s+it|send\s+it|ok(?:ay)?)\b(?:[\s,]*(?:please|jarvis|sir|do\s+it|go\s+ahead))*[\s.!]*$",
     re.I,
 )
 CONFIRM_LINES = {
     "screen_see": "That would send a screenshot of your whole screen to the vision model, off this Mac. Say \"confirm\" to go ahead; I delete the screenshot afterwards.",
     "desk_dispatch": "That would put a job card for the {desk} desk on the hive bus, which acts as a send. Say \"confirm\" to send it.",
+    "agent_tools": "I need your approval for this exact action: {action}. Say confirm to execute it; the task remains saved.",
     "code_run": "I picked code to run that you didn't type. Say \"confirm\" to run it in the sandbox; anything else drops it.",
     "pointer_click": "The arrow is on the {label}. Say \"confirm\" and I click it once; anything else drops it.",
 }
@@ -970,6 +971,23 @@ def _confirm_path(hive: Path) -> Path:
     return Path(hive) / "bus" / "pending_confirm.json"
 
 
+def _confirm_locked(fn):
+    """Serialize proposal/approval on the existing bus, including concurrent turns."""
+    import functools
+    @functools.wraps(fn)
+    def locked(hive, *args, **kwargs):
+        if hive is None:
+            return fn(hive, *args, **kwargs)
+        import fcntl
+        lock = _confirm_path(hive).with_suffix(".lock")
+        lock.parent.mkdir(parents=True, exist_ok=True)
+        with lock.open("a") as fh:
+            fcntl.flock(fh, fcntl.LOCK_EX)
+            return fn(hive, *args, **kwargs)
+    return locked
+
+
+@_confirm_locked
 def confirm_arm(hive: Path, tool: str, args: dict, utterance: str) -> None:
     path = _confirm_path(hive)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -979,8 +997,27 @@ def confirm_arm(hive: Path, tool: str, args: dict, utterance: str) -> None:
     os.replace(tmp, path)
 
 
+class _OwnerApproval:
+    """Host-only, single-use approval. JSON/tool arguments cannot manufacture it."""
+    def __init__(self, tool, args, utterance):
+        import hashlib
+        self.tool = tool
+        self.digest = hashlib.sha256(json.dumps(args, sort_keys=True).encode()).hexdigest()
+        self.utterance = utterance
+        self.used = False
+
+    def take(self, tool, args):
+        import hashlib
+        digest = hashlib.sha256(json.dumps(args, sort_keys=True).encode()).hexdigest()
+        if self.used or tool != self.tool or digest != self.digest:
+            return False
+        self.used = True
+        return True
+
+
+@_confirm_locked
 def confirm_take(hive: Path | None, utterance: str) -> dict | None:
-    """One-shot: returns the pending pick (marked confirmed) on an explicit yes; any turn clears the row."""
+    """Only an explicit answer consumes approval; ordinary chat preserves the task."""
     if hive is None:
         return None
     path = _confirm_path(hive)
@@ -988,31 +1025,49 @@ def confirm_take(hive: Path | None, utterance: str) -> dict | None:
         row = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
-    try:
-        path.unlink()
-    except OSError:
-        pass
     if not isinstance(row, dict) or row.get("tool") not in CONFIRM_TOOLS:
         return None
     rargs = row.get("args") if isinstance(row.get("args"), dict) else {}
-    strict = bool(rargs.get("destructive"))  # Close/Delete/Send/...: only the word "confirm", never "yes"/"ok"
+    strict = bool(rargs.get("destructive"))
     pointer = row.get("tool") == "pointer_click"
-    ok_word = _pointer_hand().G.strict_confirm(utterance) if strict else bool(CONFIRM_YES_RE.match(utterance or ""))
-    if time.time() - float(row.get("at") or 0) > CONFIRM_TTL_SEC or not ok_word:
-        if pointer:
-            _pointer_hand().dismiss()  # the armed click was dropped: take the arrow and Jarvis's cursor off the screen
+    ok_word = _pointer_hand().G.strict_confirm(utterance) if strict else bool(CONFIRM_YES_RE.fullmatch(utterance or ""))
+    cancelled = bool(re.fullmatch(r"\s*(?:cancel|stop|deny|reject|no)(?:\s+(?:it|that|the action))?[.!]?\s*", utterance or "", re.I))
+    try:
+        expired = time.time() - float(row.get("at") or 0) > CONFIRM_TTL_SEC
+    except (ValueError, TypeError):
         return None
+    if cancelled or (expired and pointer):
+        path.unlink(missing_ok=True)
+        if pointer:
+            _pointer_hand().dismiss()
+        return None
+    if not ok_word:
+        return None
+    # Expired non-pointer proposals remain recoverable, but require a fresh proposal.
+    if expired:
+        return {"tool":"say", "args":{}, "speak":"The saved action needs a fresh check before execution. Your task is preserved."}
+    path.unlink(missing_ok=True)
     args = dict(rargs)
     args["_confirmed"] = True
     if strict:
         args["strict_ok"] = True
-    return {"tool": row["tool"], "args": args, "speak": "", "utterance": str(row.get("utterance") or "")}
+    original = str(row.get("utterance") or "")
+    return {"tool": row["tool"], "args": args, "speak": "", "utterance": original,
+            "_owner_approval": _OwnerApproval(row["tool"], args, original)}
 
 
 def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
     """The effective args to arm, or None when the call may run now."""
     if tool not in CONFIRM_TOOLS or args.get("_confirmed"):
         return None
+    if tool == "agent_tools":
+        hd = _agent_tools_hand()
+        eff = dict(args) if args.get("op") or args.get("steps") else hd.args_from_utterance(utterance)
+        steps = eff.get("steps") or ([eff] if eff.get("op") else [])
+        gated = any(step.get("op") == "fanout" or (step.get("op") == "mcp" and
+                    (hd.WRITE_TOOL.search(str(step.get("tool") or "")) or
+                     not hd.READ_TOOL.match(str(step.get("tool") or "")))) for step in steps if isinstance(step, dict))
+        return eff if gated else None
     if tool == "code_run":
         hd = _code_run_hand()
         typed = hd.args_from_utterance(utterance).get("code")
@@ -1294,6 +1349,14 @@ def _workflow_followup_route(utterance, hive):
     text = str(utterance or "").strip()
     if re.fullmatch(r"(?:please\s+)?(?:resume|continue)\s+(?:the\s+)?workflow[.!]?", text, re.I):
         return {"tool":"agent_tools", "args":{"action":"research_build_continue","mission_id":ident}, "speak":""}
+    access = adapter._load("workflow_read_access", STACK / "hands" / "workflow_read_access.py")
+    if access.ALLOW.fullmatch(" ".join(text.split())):
+        return {"tool":"agent_tools", "args":{"action":"research_build_read_access","mission_id":ident}, "speak":""}
+    if re.fullmatch(r"(?:you are permitted[.!]?\s*change the permission to authorize yourself|i[’']?m telling you you are allowed)[.!]?", text, re.I):
+        return {"tool":"agent_tools", "args":{"action":"research_build_permission_info","mission_id":ident}, "speak":""}
+    approval = re.fullmatch(r"(?:please\s+)?(?:approve|authorize|allow)\s+(?:the\s+)?workflow\s+edits\s+for\s+(\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)\s+on\s+branch\s+([\w./-]+)[.!]?", text, re.I)
+    if approval:
+        return {"tool":"agent_tools", "args":{"action":"research_build_approve","mission_id":ident}, "speak":""}
     source = re.fullmatch(r"(?:please\s+)?use\s+saved\s+sources\s+(?P<root>\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)", text, re.I)
     if source:
         return {"tool":"agent_tools", "args":{"action":"research_build_sources","mission_id":ident,"source_root":source.group("root").strip("\"'")}, "speak":""}
@@ -2696,7 +2759,7 @@ def standing_harness() -> str:
         "Hands: session index for chats and sittings — last Cursor chat is the last Cursor sitting, "
         "not a vault keyword mash; vault_read for the vault map and timeline; safari_see for the tab; "
         "cursor_ask for repo code only, never for sittings or what he is talking about with Cursor; "
-        "status for wires; refuse_hard_step for send, pay, deploy, book, publish.\n"
+        "status for wires; For send, pay, deploy, book or publish, prepare concrete agent_tools steps with exact target and content. The host asks the owner for approval before execution. If the configured executor or required details are unavailable, ask for the missing details; never claim execution.\n"
         "If Retrieved cites current disk, that value wins over earlier spoken tokens. "
         "Talking does not write Obsidian notes.\n"
         "If he asked about vault, Obsidian, chats, yesterday, the repo, or the tab, that is already a file hand. "
@@ -5452,32 +5515,38 @@ def _run_tool_inner(
     tool = str(pick.get("tool") or "")
     args = pick.get("args") if isinstance(pick.get("args"), dict) else {}
     speak = str(pick.get("speak") or "")
+    approval = pick.get("_owner_approval")
+    owner_approved = isinstance(approval, _OwnerApproval) and approval.take(tool, args)
+    if not owner_approved:
+        args = {k:v for k,v in args.items() if k not in {"_confirmed", "strict_ok", "approved"}}
     if tool == "safari_see" and str(args.get("act") or "") in {"grab", "screenshot", "share"} and ROUTE_SCREEN_RE.search(utterance or ""):
         tool = "screen_see"  # rank 16: the model's tab grab for a my-screen ask becomes the whole screen
     if tool == "screen_see" and not args.get("_confirmed") and not SCREEN_WORD_RE.search(utterance or ""):
         # A model pick of screen_see for an ask that never mentions the screen (live chat: "Decide").
         return {"ok": True, "tool": "say", "spoken": "I won't look at your screen for that. What would you like me to do?",
                 "wires": ["voice"], "cites": [], "sent": False, "task_verified": False, "outcome": TOOL_LOOP}
-    if tool in CONFIRM_TOOLS and not is_hard_step(utterance):
+    if tool in CONFIRM_TOOLS and (not is_hard_step(utterance) or tool == "agent_tools" or owner_approved):
         arm = _needs_confirm(tool, args, utterance)
         if arm is not None:
             confirm_arm(hive, tool, arm, utterance)
-            line = _pointer_hand().G.confirm_line(str(arm.get("label") or "target")) if tool == "pointer_click" else CONFIRM_LINES[tool].format(desk=str(arm.get("desk") or "named").capitalize(), label=str(arm.get("label") or "target"))
+            line = _pointer_hand().G.confirm_line(str(arm.get("label") or "target")) if tool == "pointer_click" else CONFIRM_LINES[tool].format(desk=str(arm.get("desk") or "named").capitalize(), label=str(arm.get("label") or "target"), action=json.dumps(arm, ensure_ascii=False, sort_keys=True))
             return {"ok": True, "tool": tool, "spoken": line, "wires": [tool], "cites": [], "sent": False,
-                    "task_verified": False, "awaiting_confirm": True, f"{tool}_meta": {"ok": True, "awaiting_confirm": True}}
+                    "task_verified": False, "awaiting_confirm": True, "outcome": "AWAITING_APPROVAL", f"{tool}_meta": {"ok": True, "awaiting_confirm": True}}
         if args.get("_confirmed"):
             args = {k: v for k, v in args.items() if k != "_confirmed"}
             utterance = str(pick.get("utterance") or utterance)
     # A model-picked hand is not authority. Safari runs only on an explicit
     # look. The proposal script runs only on a real send/pay/deploy/book/publish.
-    if is_hard_step(utterance):
+    if is_hard_step(utterance) and not owner_approved:
         return {
             "ok": True,
             "tool": "refuse_hard_step",
-            "spoken": hard_step_line(utterance) if is_hard_step(utterance) else PROPOSAL,
+            "spoken": "I need the exact action, target and content before I can ask for your approval. Your permission can authorize a supported executor; nothing has run.",
             "wires": ["refuse_hard_step"],
             "cites": [],
             "sent": False,
+            "task_verified": False,
+            "outcome": "NEEDS_ACTION_DETAILS",
         }
     unauthorized = (
         tool == "refuse_hard_step"
@@ -5695,7 +5764,7 @@ def _run_tool_inner(
                 "task_verified": bool(got.get("ok")), "plan_meta": hd.log_meta(got)}
     if tool == "agent_tools":
         hd = _agent_tools_hand()
-        if args.get("action") in {"research_build_bind", "research_build_continue", "research_build_sources"}:
+        if args.get("action") in {"research_build_bind", "research_build_continue", "research_build_sources", "research_build_approve", "research_build_read_access", "research_build_permission_info"}:
             owner_pick = _workflow_followup_route(utterance, hive)
             if not owner_pick or owner_pick["args"]["action"] != args.get("action"):
                 return {"ok":False,"tool":tool,"spoken":"No project binding or workflow continuation was requested.","task_verified":False,"wires":[tool],"cites":[],"sent":False}
@@ -5704,7 +5773,20 @@ def _run_tool_inner(
             owned = owner_pick["args"]
             handle = _coding_mission_hand().WorkflowMissionHandle(hive)
             try:
-                if owned["action"] == "research_build_sources":
+                if owned["action"] in {"research_build_read_access", "research_build_permission_info"}:
+                    access = _coding_mission_hand()._load("workflow_read_access", STACK / "hands" / "workflow_read_access.py")
+                    if owned["action"] == "research_build_read_access":
+                        receipt = access.grant(hive, owned["mission_id"], utterance)
+                        if not receipt.get("ok"):
+                            raise ValueError("read permission could not be attached to this active workflow")
+                    expanded = bool(access.roots(hive, owned["mission_id"]))
+                    result = handle.workflow_status(owned["mission_id"])
+                    line = ("Your filesystem read permission is recorded for this workflow. I can now read requested files and folders outside the default roots. The full assignment is preserved; nothing has been built yet."
+                            if expanded else "Your permission can authorize Jarvis actions. I can already read an exact file or folder path you request. To expand reads for the retained assignment, say: Allow read access to my whole filesystem for this workflow. No system settings need changing for that tool scope.")
+                    result.update(spoken=line, question="", task_verified=False, verified=False, filesystem_read_authorized=expanded)
+                elif owned["action"] == "research_build_approve":
+                    result = handle.approve_project(owned["mission_id"], utterance)
+                elif owned["action"] == "research_build_sources":
                     adapter = _coding_mission_hand()
                     controller = adapter._load("coding_mission_controller", STACK / "brain" / "mission_controller.py")
                     default_roots = RETRIEVE.resolve_roots(retrieve_roots) if RETRIEVE is not None else []
@@ -5713,6 +5795,10 @@ def _run_tool_inner(
                 else:
                     result = (handle.continue_workflow(owned["mission_id"], utterance) if owned["action"] == "research_build_continue"
                               else handle.bind_project(owned["mission_id"], owned["repo"], owned["branch"], utterance))
+                if owned["action"] == "research_build_continue":
+                    access = _coding_mission_hand()._load("workflow_read_access", STACK / "hands" / "workflow_read_access.py")
+                    access.resume(hive, owned["mission_id"], utterance)
+                    result["filesystem_read_authorized"] = bool(access.roots(hive, owned["mission_id"]))
                 if owned["action"] in {"research_build_bind", "research_build_sources"} and RETRIEVE is not None:
                     controller = _coding_mission_hand()._load("coding_mission_controller", STACK / "brain" / "mission_controller.py")
                     research_roots = RETRIEVE.resolve_roots(retrieve_roots)
@@ -5800,7 +5886,7 @@ def _run_tool_inner(
             }), terminal=False)
 
         got = hd.run(dict(args) if args.get("op") or args.get("steps") else hd.args_from_utterance(utterance),
-                     cancel_check=cancelled, progress=progress)
+                     approved=owner_approved, cancel_check=cancelled, progress=progress)
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["agent_tools"], "cites": list(got.get("cites") or []), "sent": False,
                 "cancelled": bool(got.get("cancelled")),
@@ -5924,7 +6010,12 @@ def _run_tool_inner(
             return _run_tool_inner({"tool": "vault_read", "args": {"query": utterance}, "speak": ""}, utterance, hive=hive,
                                    retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn,
                                    cursor_ask_fn=cursor_ask_fn, craft_model_fn=craft_model_fn, sent=sent, gen=gen)
-        got = wr.run_requested(wargs, utterance)
+        adapter = _coding_mission_hand()
+        workflow_id = adapter.read_json(Path(hive) / "coding-missions" / "latest_workflow.json").get("mission_id", "")
+        access = adapter._load("workflow_read_access", STACK / "hands" / "workflow_read_access.py")
+        extra_roots = access.roots(hive, workflow_id)
+        allowed_roots = wr.default_roots() + [Path(root) for root in extra_roots] if extra_roots else None
+        got = wr.run_requested(wargs, utterance, roots=allowed_roots)
         result = {
             "ok": bool(got.get("ok")),
             "tool": tool,
@@ -7045,49 +7136,6 @@ def apply_pipeline_iter(
         return
     bus_now = load_json(hive / "bus" / "state.json")
     prior_turns = load_turns(bus_now)
-    if is_hard_step(spoken_in):
-        text, first, rest = _commit_spoken(
-            hive,
-            spoken_in=spoken_in,
-            prior_turns=prior_turns,
-            tool="refuse_hard_step",
-            raw=hard_step_line(spoken_in),
-            wires=["refuse_hard_step"],
-            cites=[],
-            ok=True,
-            pack=None,
-            retrieve_roots=retrieve_roots,
-            gen=token,
-            wire={
-                "path": "refuse_hard_step",
-                "tool": "refuse_hard_step",
-                "outcome": "REFUSED",
-            },
-        )
-        if first and rest:
-            yield _pipeline_event(
-                ok=True,
-                tool="refuse_hard_step",
-                spoken=first,
-                spoken_delta=first,
-                wires=["refuse_hard_step"],
-                cites=[],
-                pack=None,
-                done=False,
-                partial=True,
-                gen=token,
-            )
-        yield _pipeline_event(
-            ok=True,
-            tool="refuse_hard_step",
-            spoken=text,
-            spoken_delta=rest if first and rest else text,
-            wires=["refuse_hard_step"],
-            cites=[],
-            pack=None,
-            gen=token,
-        )
-        return
     if RESUME is not None and RESUME.enabled():
         _rkey = _resume_key(hive)
         if RESUME.is_continue(spoken_in):
@@ -7872,6 +7920,7 @@ def apply_pipeline_iter(
         and ran.get("ok") is not False
         and pick_tool in HANDS
         and pick_tool != "browser_mission"
+        and not ran.get("awaiting_confirm")
         # Craft speaks its own post-action inspect. A paraphrase cannot widen it.
         and pick_tool != "craft"
         and not (pick_tool == "safari_see" and ran.get("ok") is not True)
@@ -8009,7 +8058,7 @@ def apply_pipeline_iter(
         outcome = STORE_DIRECT
     elif used_tool_loop:
         outcome = TOOL_LOOP
-    elif str((ran or {}).get("outcome") or "") in {MODEL_TALK, TOOL_LOOP, STORE_DIRECT, HONEST_UNKNOWN, WIRE_FAILURE}:
+    elif str((ran or {}).get("outcome") or "") in {MODEL_TALK, TOOL_LOOP, STORE_DIRECT, HONEST_UNKNOWN, WIRE_FAILURE, "AWAITING_APPROVAL", "NEEDS_ACTION_DETAILS"}:
         outcome = str(ran.get("outcome"))
     elif str((got or {}).get("finish_reason") or "").lower() == "length" or str((got or {}).get("error") or "") == "length":
         outcome = WIRE_FAILURE
