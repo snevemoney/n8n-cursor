@@ -45,3 +45,10 @@ Files: [ATLAS.md](ATLAS.md) · [GROK-BOX.md](GROK-BOX.md) · [CLAUDE-CODE.md](CL
 5. Claim saved/exported/opened only with evidence; installed ≠ verified.
 6. Run `jev-route` before premium/frontier work; Jev advises, never approves.
 7. Pick the platform from this atlas, and hand off with [HANDOFFS.md](HANDOFFS.md) when another platform is genuinely better.
+
+## Quick facts every platform must know (5-way sync 2026-10-13)
+- **D1 (Tier-3 authority):** merges to main, pushes to the PUBLIC repo `snevemoney/n8n-cursor`, and global-rule edits need Evens's explicit yes; pre-push guard needs `EVENS_OK=yes` only after he approves.
+- **Higgsfield:** no generation/credits/spend without Evens's per-job OK and a quote; read-only balance checks are fine. ArtCraft MCP first.
+- **gods-eye-view:** local MCP server + `gev-call`/`gev-show` CLIs on the Mac (`~/tools/gods-eye-view`) for live world situational data (weather, quakes, flights, ships, satellites) and a 3D globe; advise-only.
+- **jev-route:** `~/.local/bin/jev-route "<task>" <platform>` cheap preflight that picks small/mid/frontier; advice only, never approval.
+- **ArtCraft:** see ARTCRAFT.md (12 apps, MCP `<app>-cli mcp`, Studio tiers, recents-sync + `open`).

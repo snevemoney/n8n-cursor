@@ -32,3 +32,10 @@ Save to `~/Movies/<Project>/` (video/motion) or `~/Documents/ArtCraft Studio/<Pr
 - One engine owner at a time (EffectCraft: "another process owns that engine").
 - Clearfield explainer project references a missing source movie: an export ≠ a rebuildable project.
 - Codex's completeness checker rejects 3-demo coverage, blank scratch docs and fallback-as-native; it never issues PASS.
+
+## Save → recents → open (2026-10-13 fix; every platform)
+- Studio layout: `~/ArtCraft Studio/` = `00 Private` (default for new job work: `00 Private/Projects/<JOB-ID>/`; agent tests `00 Private/_agent-tests-YYYYMMDD/`), `01 Internal` (methods, templates, WIP), `02 Public` (sanitised drafts, never auto-published).
+- After saving any ArtCraft file: `python3 ~/.local/bin/artcraft-recents-sync.py --add "<file>"` then `open "<file>"` (Finder-style).
+- `~/Applications/ArtCraft Openers/Open in {DeckCraft,FilmCraft,DesignCraft,SoundCraft}.app` own those file types and fix the double-click "cannot open files in the X format" bug. Defaults: docx→WordCraft, xlsx/csv→GridCraft, pdf→PdfCraft.
+- Assist-while-chatting skill: `artcraft-assist` (box workflows, ~/.grok-shared/skills, ~/.claude|.codex|.cursor/skills).
+- Correction (2026-10-13, verified): Jarvis DOES drive ArtCraft via its own craft hand (`apps/agent-stack/hands/craft.py`, `<app>-cli mcp` per app; default save dir ~/Documents/Craft). Proven by `Jarvis test note.docx` in `00 Private/_agent-tests-20261013/jarvis/`. Codex `workspace-write` sandbox blocks recents-sync and `open` — run them outside the sandbox.
