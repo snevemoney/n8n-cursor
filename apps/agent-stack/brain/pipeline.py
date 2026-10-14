@@ -1127,6 +1127,8 @@ def model_free_route(spoken_in: str) -> dict | None:
     """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
     if MACOS is not None and (MACOS.LATEST_SCREENSHOT_RE.fullmatch(spoken_in.strip()) or MACOS.FINDER_REFERENCE_RE.fullmatch(spoken_in.strip()) or MACOS.SAVED_IMAGE_RE.fullmatch(spoken_in.strip())):
         return {"tool": "workspace_read", "args": {"op": "screenshot_reference"}, "speak": ""}
+    if _research_build_request(spoken_in):
+        return {"tool":"agent_tools", "args":{"action":"research_build_start"}, "speak":""}
     if wants_memory(spoken_in):
         return {"tool": "memory", "args": _memory_hand().args_from_utterance(spoken_in), "speak": ""}
     if wants_continuity_status(spoken_in):
@@ -1273,6 +1275,12 @@ def _agent_tools_hand():
         sys.modules[name] = mod
     return sys.modules[name]
 
+
+
+def _research_build_request(utterance):
+    """A compound task stays a task; smaller requests do not acquire its scope."""
+    text = str(utterance or "")
+    return all(re.search(pattern, text, re.I) for pattern in (r"\bresearch\b", r"\bsaved\b.{0,30}\byoutube\b", r"\bbuild\b", r"\btests?\b", r"\bartcraft\b", r"\bobsidian\b"))
 
 
 def _coding_resume_match(utterance):
@@ -5667,6 +5675,17 @@ def _run_tool_inner(
                 "task_verified": bool(got.get("ok")), "plan_meta": hd.log_meta(got)}
     if tool == "agent_tools":
         hd = _agent_tools_hand()
+        if args.get("action") == "research_build_start":
+            if not _research_build_request(utterance):
+                return {"ok":False,"tool":tool,"spoken":"No research and build assignment was requested.","task_verified":False,"wires":[tool],"cites":[],"sent":False}
+            if gen is not None and turn_cancelled(hive, gen):
+                return {"ok":False,"tool":tool,"spoken":"Stopped. The assignment was not started.","cancelled":True,"task_verified":False,"wires":[tool],"cites":[],"sent":False}
+            adapter = _coding_mission_hand()
+            controller = adapter._load("coding_mission_controller", STACK / "brain" / "mission_controller.py")
+            try:
+                return controller.MissionController(adapter).start_research_build(hive, utterance)
+            except (ValueError, RuntimeError, OSError) as exc:
+                return {"ok":False,"tool":tool,"spoken":"I couldn't retain the assignment safely: " + str(exc),"task_verified":False,"wires":[tool],"cites":[],"sent":False}
         # Only an exact operator code request becomes durable background work.
         # Model-selected arguments cannot widen the request or start another repo.
         if args.get("action") == "coding_resume":

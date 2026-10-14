@@ -22,6 +22,10 @@ class MissionController:
         if expected is not None and expected != self.adapter.mission_source_manifest():
             raise RuntimeError('mission_control_plane_source_changed')
 
+    def start_research_build(self, hive, objective):
+        """Same mission owner retains the task while its project is unresolved."""
+        return self.adapter.WorkflowMissionHandle(hive).start_workflow(objective)
+
     async def execute(self, root):
         import fcntl
         root = Path(root)
@@ -32,6 +36,9 @@ class MissionController:
                 return {'status': 'ALREADY_RUNNING', 'verified': False}
             if self.adapter.read_json(root / 'request.json').get('worker_kind') == 'coding':
                 return await self._execute_coding_locked(root)
+            if self.adapter.read_json(root / 'request.json').get('worker_kind') == 'research_build':
+                # Intake never masquerades as browser execution or completion.
+                return self.adapter.WorkflowMissionHandle(root.parent.parent).workflow_status(root.name)
             return await self._execute_owned_mission(root)
 
     async def _execute_coding_locked(self, root):
