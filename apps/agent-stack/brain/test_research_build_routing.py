@@ -28,6 +28,8 @@ class ResearchBuildRoute(unittest.TestCase):
   self.assertFalse(P._research_build_request('Research a technical idea from my saved YouTube videos'))
   self.assertFalse(P._research_build_request('Explain how to build a website'))
 class ResearchBuildContinuation(unittest.TestCase):
+ def setUp(self):
+  self.retrieval=mock.patch.object(P,"RETRIEVE",None);self.retrieval.start();self.addCleanup(self.retrieval.stop)
  def test_literal_owner_binding_continues_exact_immutable_request_and_ignores_model_repo(self):
   with tempfile.TemporaryDirectory() as d:
    h=Path(d)/'hive';repo=Path(d).resolve()/'chosen project';repo.mkdir()

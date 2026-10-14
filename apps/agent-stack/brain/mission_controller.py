@@ -26,6 +26,42 @@ class MissionController:
         """Same mission owner retains the task while its project is unresolved."""
         return self.adapter.WorkflowMissionHandle(hive).start_workflow(objective)
 
+    def research_saved_sources(self, hive, mission_id, *, roots, retrieve_fn, read_fn, active_fn, web_fn=None):
+        """Read-only capability phase for the retained owner assignment."""
+        import fcntl
+        root = self.adapter.mission_path(hive, mission_id)
+        with (root / "worker.lock").open("a") as lock:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                raise RuntimeError("workflow phase already owned")
+            request = self.adapter.read_json(root / "request.json")
+            if request.get("worker_kind") != "research_build":
+                raise ValueError("research workflow required")
+            def active():
+                return bool(active_fn() and not self.adapter.read_json(root / "control.json").get("cancel"))
+            if not active():
+                return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
+            phase = self.adapter._load("workflow_research_adapter", self.adapter.STACK / "hands" / "workflow_research.py")
+            result = phase.run(request["objective"], roots=roots, retrieve_fn=retrieve_fn, read_fn=read_fn, active_fn=active, web_fn=web_fn)
+            if not active():
+                return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
+            with (root / "steering.lock").open("a") as steering:
+                fcntl.flock(steering, fcntl.LOCK_EX)
+                if not active():
+                    return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
+                self.adapter.write_json(root / "source_research.json", result)
+                state = self.adapter.read_json(root / "state.json")
+                # Source discovery never clears the independent edit/branch gate.
+                state.update(source_research_status=result["status"], source_bound=bool(result.get("selected")),
+                             progress={"phase":"saved_source_research", "coverage":result.get("coverage")},
+                             task_verified=False, verified=False, spoken=result["spoken"])
+                self.adapter.write_json(root / "state.json", state)
+                self.adapter.write_json(root / "checkpoint.json", {"worker_kind":"research_build", "mission_id":mission_id,
+                    "phase":"source_research", "original_request_sha256":hashlib.sha256((root / "request.json").read_bytes()).hexdigest(),
+                    "source_result":"source_research.json", "implementation_verified":False})
+            return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
+
     async def execute(self, root):
         import fcntl
         root = Path(root)

@@ -5703,6 +5703,14 @@ def _run_tool_inner(
             try:
                 result = (handle.continue_workflow(owned["mission_id"], utterance) if owned["action"] == "research_build_continue"
                           else handle.bind_project(owned["mission_id"], owned["repo"], owned["branch"], utterance))
+                if owned["action"] == "research_build_bind" and RETRIEVE is not None:
+                    controller = _coding_mission_hand()._load("coding_mission_controller", STACK / "brain" / "mission_controller.py")
+                    research_roots = RETRIEVE.resolve_roots(retrieve_roots)
+                    result = controller.MissionController(_coding_mission_hand()).research_saved_sources(
+                        hive, owned["mission_id"], roots=research_roots, retrieve_fn=RETRIEVE.search,
+                        read_fn=RETRIEVE.read_local_text,
+                        active_fn=lambda:gen is None or not turn_cancelled(hive, gen),
+                        web_fn=lambda query:_web_search_hand().run(query))
                 if gen is not None:
                     act_if_current(hive, gen, lambda bus:dict(bus, workflow_mission_id=result["mission_id"], workflow_status=result["status"], workflow_task_verified=False))
                 return result
