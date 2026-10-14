@@ -239,3 +239,85 @@ def files_search(query: str, cap: int = 5) -> dict:
     names = [Path(p).name for p in paths]
     spoken = "Disk: " + "; ".join(names) + "."
     return {"ok": True, "state": "live", "wire": "files", "spoken": spoken, "hits": paths}
+
+
+# Saved screenshots are files, not guesses from the conversation or a new capture.
+LATEST_SCREENSHOT_RE = re.compile(r"^(?:(?:what (?:was|is)|find|show)(?: me)?|where is)\s+(?:(?:my|the)\s+)?(?:last|latest|most recent)\s+(?:screenshotted image|screen ?shot|screenshot image)(?:\s+(?:saved|on my mac))?[.!?]?$", re.I)
+FINDER_REFERENCE_RE = re.compile(r"^(?:(?:can|could|would) you\s+)?(?:please\s+)?(?:open|show|reveal)\s+(?:it|that|that (?:file|image|screenshot))\s+in\s+finder(?:\s+for me)?[.!?]?$", re.I)
+
+
+def screenshot_fingerprint(path, home=None):
+    """Bounded header + metadata only. Refuse symlinks and private/secret locations."""
+    home = Path(home or HOME).resolve()
+    path = Path(path)
+    if path.is_symlink() or not path.is_absolute():
+        raise ValueError('unsafe screenshot path')
+    real = path.resolve(strict=True)
+    if home not in real.parents or any(part.startswith('.') or part in {'Library','Private'} for part in real.relative_to(home).parts):
+        raise ValueError('screenshot outside visible home folders')
+    if not real.is_file() or not re.match(r'^(?:Screenshot|Screen Shot|Capture d[’\x27]écran)\b', real.name, re.I):
+        raise ValueError('not a saved screenshot')
+    suffix = real.suffix.lower()
+    st = real.stat()
+    cloud = bool(getattr(st, 'st_flags', 0) & 0x40000000)
+    if cloud:
+        header = b''  # Never hydrate a cloud file just to identify or reveal it.
+    else:
+        with real.open('rb') as handle:
+            header = handle.read(12)
+    image = (cloud and suffix in {'.png','.jpg','.jpeg','.heic','.heif'}) or ((suffix == '.png' and header.startswith(b'\x89PNG\r\n\x1a\n')) or
+             (suffix in {'.jpg','.jpeg'} and header.startswith(b'\xff\xd8\xff')) or
+             (suffix in {'.heic','.heif'} and header[4:8] == b'ftyp' and header[8:12] in {b'heic',b'heix',b'hevc',b'hevx',b'mif1'}))
+    if not image:
+        raise ValueError('not an image file')
+    st = real.stat()
+    return {'path':str(real),'size':st.st_size,'mtime_ns':st.st_mtime_ns,'inode':st.st_ino,'device':st.st_dev,
+            'created':getattr(st,'st_birthtime',st.st_mtime),'kind':'saved_screenshot',
+            'verification':'filename_and_metadata_only' if cloud else 'image_header_and_metadata','locally_available':not cloud}
+
+
+def latest_screenshot(home=None):
+    """Spotlight plus bounded Desktop/Downloads discovery; never reads image contents."""
+    home=Path(home or HOME).resolve(); paths=[]; notes=[]
+    try:
+        proc=_run(['/usr/bin/mdfind','-onlyin',str(home),'kMDItemIsScreenCapture == 1'], timeout=4)
+        if proc.returncode == 0:
+            paths.extend(Path(x) for x in proc.stdout.splitlines()[:2000] if x.startswith('/'))
+        else: notes.append('Spotlight unavailable')
+    except (OSError,subprocess.TimeoutExpired): notes.append('Spotlight unavailable')
+    for folder in (home/'Desktop',home/'Downloads'):
+        try:
+            for index,path in enumerate(folder.iterdir()):
+                if index >= 2000:
+                    notes.append('folder scan capped');break
+                if re.match(r'^(?:Screenshot|Screen Shot|Capture d[’\x27]écran)\b',path.name,re.I): paths.append(path)
+        except OSError: notes.append('a folder was inaccessible')
+    found=[]
+    for path in set(paths):
+        try: found.append(screenshot_fingerprint(path,home))
+        except (OSError,ValueError,RuntimeError): continue
+    if not found:
+        return {'ok':False,'spoken':'I could not verify a saved screenshot in Spotlight, Desktop or Downloads. I did not take a new screenshot.','artifact':None,'scope_notes':notes}
+    found.sort(key=lambda x:(x['created'],x['mtime_ns'],x['path']),reverse=True)
+    chosen=found[0]
+    cloud_note = ' Its contents are in iCloud; I checked its filename and file metadata, not its image contents.' if not chosen['locally_available'] else ''
+    return {'ok':True,'spoken':'The latest saved screenshot I found is '+Path(chosen['path']).name+' in '+str(Path(chosen['path']).parent)+'.'+cloud_note,
+            'artifact':chosen,'scope_notes':notes,'scope':'Spotlight plus Desktop and Downloads; other unindexed locations may be missing'}
+
+
+def reveal_screenshot(artifact,home=None):
+    """Only a previously verified screenshot receipt; launch is not visibility proof."""
+    try:
+        fresh=screenshot_fingerprint(artifact.get('path',''),home)
+        if fresh != artifact: raise ValueError('the screenshot changed since lookup')
+        proc=_run(['/usr/bin/open','-R',fresh['path']],timeout=4)
+        if proc.returncode != 0: raise ValueError('Finder reveal request failed')
+        # Read selection back without interpolating a path or user text into AppleScript.
+        check=_run(['/usr/bin/osascript','-e','tell application "Finder"\nif (count of selection) is 1 then return POSIX path of ((item 1 of selection) as alias)\nreturn ""\nend tell'],timeout=4)
+        visible=check.returncode == 0 and check.stdout.strip() == fresh['path']
+        unchanged=screenshot_fingerprint(fresh['path'],home) == fresh
+        if not visible or not unchanged:
+            return {'ok':False,'spoken':'I requested Finder to reveal the screenshot, but could not verify its selection.','task_verified':False,'artifact':fresh}
+        return {'ok':True,'spoken':'Finder has selected '+Path(fresh['path']).name+'.','task_verified':True,'artifact':fresh,'postcondition':'exact Finder selection read back'}
+    except (OSError,ValueError,RuntimeError,subprocess.TimeoutExpired) as exc:
+        return {'ok':False,'spoken':'I could not reveal that screenshot in Finder: '+str(exc)+'.','task_verified':False}

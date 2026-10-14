@@ -1125,6 +1125,8 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
 
 def model_free_route(spoken_in: str) -> dict | None:
     """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
+    if MACOS is not None and (MACOS.LATEST_SCREENSHOT_RE.fullmatch(spoken_in.strip()) or MACOS.FINDER_REFERENCE_RE.fullmatch(spoken_in.strip())):
+        return {"tool": "workspace_read", "args": {"op": "screenshot_reference"}, "speak": ""}
     if wants_memory(spoken_in):
         return {"tool": "memory", "args": _memory_hand().args_from_utterance(spoken_in), "speak": ""}
     if wants_continuity_status(spoken_in):
@@ -5727,6 +5729,27 @@ def _run_tool_inner(
         return {"ok": got["ok"], "tool": tool, "spoken": got["spoken"],
                 "wires": ["memory"], "cites": [], "sent": False,
                 "task_verified": got["ok"], "memory_meta": got["log"]}
+    if tool == "workspace_read" and MACOS is not None and (MACOS.LATEST_SCREENSHOT_RE.fullmatch(utterance.strip()) or MACOS.FINDER_REFERENCE_RE.fullmatch(utterance.strip())):
+        if gen is None or turn_cancelled(hive, gen):
+            return {"ok": False, "tool": tool, "spoken": "Stopped. Standing by.", "task_verified": False, "cancelled": True}
+        if MACOS.LATEST_SCREENSHOT_RE.fullmatch(utterance.strip()):
+            got = MACOS.latest_screenshot()
+            def remember_artifact(bus):
+                bus.pop("screenshot_reference", None)
+                if got.get("ok") and got.get("artifact"):
+                    bus["screenshot_reference"] = {"gen": gen, "artifact": got["artifact"]}
+                return bus
+            act_if_current(hive, gen, remember_artifact)
+        else:
+            reference = (load_json(Path(hive) / "bus/state.json") or {}).get("screenshot_reference") or {}
+            if reference.get("gen") != gen - 1 or not reference.get("artifact"):
+                got = {"ok": False, "spoken": "I do not have a verified screenshot from the previous turn. Ask me to find your latest saved screenshot first.", "task_verified": False}
+            elif turn_cancelled(hive, gen):
+                got = {"ok": False, "spoken": "Stopped. Standing by.", "task_verified": False}
+            else:
+                got = MACOS.reveal_screenshot(reference["artifact"])
+        return {**got, "tool": tool, "wires": ["files"], "cites": [], "sent": False,
+                "task_verified": bool(got.get("task_verified")), "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "workspace_read":
         wr = _workspace_read_hand()
         parsed = wr.args_from_utterance(utterance)
