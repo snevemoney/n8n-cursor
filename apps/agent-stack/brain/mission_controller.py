@@ -235,6 +235,7 @@ class MissionController:
             with (root/"worker.lock").open("a") as worker_lock:
                 try:fcntl.flock(worker_lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
                 except BlockingIOError:return state
+                fcntl.flock(worker_lock,fcntl.LOCK_UN)
                 dispatch={"mission_id":mission_id,"source_manifest":self._workflow_manifest(),
                           "request_sha256":hashlib.sha256((root/"request.json").read_bytes()).hexdigest()}
                 self.adapter.write_json(root/"execution_dispatch.json",dispatch)
@@ -297,6 +298,9 @@ class MissionController:
             phase=self.adapter._load("workflow_execution",self.adapter.STACK/"hands/workflow_execution.py")
             owner=self.adapter.read_json(root/"execution_owner.json")
             if not owner:
+                if not (root/'execution_guard.json').exists():
+                    persist('PREPARING','I’m checking the preserved preparation before continuing in an isolated working copy.')
+                    phase.recover_preparation(hive,ident,active_fn=active)
                 if (root/"execution_contract.json").exists():
                     # Complete preparation may survive an interruption before the
                     # host owner receipt. Reuse only its independently checked copy.

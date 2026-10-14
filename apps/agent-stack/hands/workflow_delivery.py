@@ -175,7 +175,10 @@ class Delivery:
         owner=self.a.read_json(self.root/'execution_owner.json');origin=self.a.read_json(self.root/'original_implementation.json')
         hand=self.a._load('delivery_agent_tools',self.a.STACK/'hands/agent_tools.py')
         wrapped=self.a.read_json(child_root/'checkpoint.json');checkpoint=wrapped.get('checkpoint') or {}
-        snapshot=hand.code_repo_snapshot(owner['working_copy'])
+        if (self.root/'source_exception_review.json').exists():
+            phase=self.a._load('delivery_execution',self.a.STACK/'hands/workflow_execution.py')
+            with hand.source_exception_scope(phase.source_exception_guard(self.hive,self.ident,owner['working_copy'])):snapshot=hand.code_repo_snapshot(owner['working_copy'])
+        else:snapshot=hand.code_repo_snapshot(owner['working_copy'])
         if (not isinstance(wrapped.get('source_manifest'),dict) or wrapped.get('source_manifest')!=child_request.get('source_manifest')
             or wrapped.get('code_args')!=child_request.get('code_args') or checkpoint.get('phase')!='complete'
             or wrapped.get('checkpoint_digest')!=hand.checkpoint_digest(checkpoint) or checkpoint.get('snapshot')!=snapshot
@@ -325,7 +328,11 @@ class Runtime:
             or plan.get('request_sha256')!=hashlib.sha256((owner.root/'request.json').read_bytes()).hexdigest()):
             raise ValueError('host_delivery_scope_changed')
         hand=self.load('agent_tools');pinned=plan.get('implementation_evidence') or {}
-        if digest(hand.code_repo_snapshot(pinned.get('working_copy','')))!=pinned.get('implementation_snapshot_sha256'):
+        if (owner.root/'source_exception_review.json').exists():
+            phase=self.a._load('delivery_execution',self.a.STACK/'hands/workflow_execution.py')
+            with hand.source_exception_scope(phase.source_exception_guard(owner.hive,owner.ident,pinned.get('working_copy',''))):current=hand.code_repo_snapshot(pinned.get('working_copy',''))
+        else:current=hand.code_repo_snapshot(pinned.get('working_copy',''))
+        if digest(current)!=pinned.get('implementation_snapshot_sha256'):
             raise ValueError('implementation_readback_changed')
         return owner,state,plan
     def artifact_scope(self,path):

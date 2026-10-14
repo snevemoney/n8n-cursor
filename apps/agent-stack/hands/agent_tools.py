@@ -558,7 +558,24 @@ def _progress(progress, row) -> None:
         progress(dict(row))
 
 
-def run(args: dict | None = None, approved: bool = False, *, cancel_check=None, progress=None, checkpoint=None, resume_checkpoint=None, mutation_guard=None) -> dict:
+import contextvars
+from contextlib import contextmanager
+_SOURCE_EXCEPTION=contextvars.ContextVar('host_source_exception',default=None)
+@contextmanager
+def source_exception_scope(callback):
+    if callback is not None and not callable(callback):raise ValueError('host source callback required')
+    token=_SOURCE_EXCEPTION.set(callback)
+    try:yield
+    finally:_SOURCE_EXCEPTION.reset(token)
+def _reviewed_source(repo,relative,sha):
+    callback=_SOURCE_EXCEPTION.get()
+    return bool(callback is not None and callback(str(repo),str(relative),sha) is True)
+def run(args=None,approved=False,*,source_exception_guard=None,**kw):
+    if isinstance(args,dict) and 'source_exception_guard' in args:raise ValueError('model arguments cannot confer source authority')
+    with source_exception_scope(source_exception_guard):return _run(args,approved,**kw)
+
+
+def _run(args: dict | None = None, approved: bool = False, *, cancel_check=None, progress=None, checkpoint=None, resume_checkpoint=None, mutation_guard=None) -> dict:
     if _stopped(cancel_check):
         return _cancelled()
     args = args or {}
@@ -956,17 +973,118 @@ def _json_obj(text: str) -> dict:
         return {}
 
 
+CODE_INSPECTION_HINT = (
+    '\nRepository operations: to inspect existing code first, return JSON with '
+    '"read_paths":[{"path":"relative/file.py","start_line":1,"line_count":120}] and no files/edits. '
+    'Actual bounded file contents and SHA256 will be returned. For an existing large file, '
+    'use "edits":[{"path":"relative/file.py","old":"exact unique existing text","new":"replacement"}] '
+    'instead of rewriting unseen contents. Existing files/test_cmd/commit_message still work. '
+    'A repository view is partial context, never proof of execution.')
+
+
+def _owned_code_bytes(root, name):
+    path = Path(str(name))
+    if (path.is_absolute() or not path.parts or '..' in path.parts or '.git' in path.parts
+        ):
+        raise _CheckpointBlocked('unsafe_inspection_path')
+    target = root/path
+    secret_path=bool(PERM().is_secret_path(path) or PERM().is_secret_path(target))
+    if secret_path and not _reviewed_source(root,path,None):raise _CheckpointBlocked('unsafe_inspection_path')
+    if any(p.is_symlink() for p in (target, *target.parents)) or root not in target.resolve().parents:
+        raise _CheckpointBlocked('unsafe_inspection_path')
+    with os.fdopen(os.open(target, os.O_RDONLY | os.O_NOFOLLOW), 'rb') as stream:
+        before = os.fstat(stream.fileno())
+        if not stat.S_ISREG(before.st_mode) or before.st_size > (64000 if secret_path else 2_000_000):
+            raise _CheckpointBlocked('inspection_file_budget')
+        raw = stream.read(2_000_001); after = os.fstat(stream.fileno())
+    current = target.stat()
+    identity = lambda x: (x.st_dev, x.st_ino, x.st_size, x.st_mtime_ns, x.st_mode)
+    if len(raw) > 2_000_000 or identity(before) != identity(after) or identity(after) != identity(current):
+        raise _CheckpointBlocked('inspection_source_changed')
+    if secret_path and not _reviewed_source(root,path,hashlib.sha256(raw).hexdigest()):raise _CheckpointBlocked('unsafe_inspection_path')
+    text = raw.decode('utf-8')
+    if '\0' in text or _SECRETISH.search(text):
+        raise _CheckpointBlocked('inspection_secret_or_binary')
+    return raw, text
+
+
+def _code_reads(root, data):
+    requests = data.get('read_paths')
+    if not isinstance(requests, list) or not 1 <= len(requests) <= 8:
+        raise _CheckpointBlocked('bounded_inspection_required')
+    if data.get('files') or data.get('edits'):
+        raise _CheckpointBlocked('inspection_and_write_must_be_separate')
+    rows = []; remaining = 48000
+    for request in requests:
+        if isinstance(request, str): request = {'path': request}
+        if not isinstance(request, dict) or set(request) - {'path','start_line','line_count'}:
+            raise _CheckpointBlocked('invalid_inspection_request')
+        name = request.get('path'); start = request.get('start_line', 1); count = request.get('line_count', 120)
+        if not isinstance(name, str) or type(start) is not int or start < 1 or type(count) is not int or not 1 <= count <= 240:
+            raise _CheckpointBlocked('invalid_inspection_request')
+        try:
+            raw, text = _owned_code_bytes(root, name); lines = text.splitlines(keepends=True)
+            selected = ''.join(lines[start-1:start-1+count]); limit = min(16000, remaining)
+            content = selected[:limit]; remaining -= len(content)
+            rows.append({'path':name,'sha256':hashlib.sha256(raw).hexdigest(),'first_line':start,
+                         'total_lines':len(lines),'content':content,'truncated':len(content)<len(selected),
+                         'partial_file':start != 1 or start-1+count < len(lines) or len(content)<len(selected)})
+        except (OSError, UnicodeError, _CheckpointBlocked) as exc:
+            rows.append({'path':name,'error':str(exc) if isinstance(exc,_CheckpointBlocked) else 'source_unavailable'})
+        if remaining <= 0: break
+    return rows
+
+
+def _code_files(root, data):
+    files = data.get('files') or {}
+    edits = data.get('edits') or []
+    if not isinstance(files, dict) or not isinstance(edits, list) or len(files)+len(edits)>10:
+        raise _CheckpointBlocked('bounded_code_changes_required')
+    result = dict(files); preimages = {}
+    for edit in edits:
+        if not isinstance(edit, dict) or set(edit) != {'path','old','new'}:
+            raise _CheckpointBlocked('invalid_exact_edit')
+        name, old, new = edit['path'], edit['old'], edit['new']
+        if not all(isinstance(x,str) for x in (name,old,new)) or not old or name in result:
+            raise _CheckpointBlocked('invalid_exact_edit')
+        raw, text = _owned_code_bytes(root, name)
+        if text.count(old) != 1: raise _CheckpointBlocked('exact_edit_anchor_not_unique')
+        body = text.replace(old,new,1)
+        if len(body.encode())>2_000_000: raise _CheckpointBlocked('exact_edit_file_budget')
+        result[name]=body; preimages[name]={'sha256':hashlib.sha256(raw).hexdigest(),'offset':text.index(old)}
+    return list(result.items()), preimages
+
+
+def _check_edit_preimage(root, name, expected):
+    expected = expected.get('sha256') if isinstance(expected,dict) else expected
+    if expected and hashlib.sha256(_owned_code_bytes(root,name)[0]).hexdigest()!=expected:
+        raise _CheckpointBlocked('exact_edit_source_changed')
+
+
 def _tree(root: Path, cap: int = 6000) -> str:
-    out = []
-    for p in sorted(root.rglob("*")):
-        if ".git" in p.parts or not p.is_file() or p.stat().st_size > 20000:
-            continue
-        rel = p.relative_to(root)
-        if PERM().is_secret_path(rel):
-            continue
-        out.append(f"--- {rel}\n{p.read_text(encoding='utf-8', errors='replace')}")
-    s = "\n".join(out)
-    return s[:cap]
+    # A bounded inventory identifies large source files for explicit inspection.
+    paths=[]; snippets=[]; used=0
+    for directory, dirs, names in os.walk(root, followlinks=False):
+        dirs[:] = sorted(d for d in dirs if d not in {'.git','.hive','__pycache__','.pytest_cache','node_modules','logs','Library'}
+                         and not (Path(directory)/d).is_symlink() and not PERM().is_secret_path(Path(directory)/d))
+        for name in sorted(names):
+            target=Path(directory)/name
+            if target.is_symlink() or not target.is_file() or PERM().is_secret_path(target): continue
+            rel=str(target.relative_to(root)); size=target.stat().st_size
+            if len(paths)>=1000: break
+            paths.append((rel,size))
+            if size<=20000 and used<2000:
+                try:
+                    _, text=_owned_code_bytes(root,rel)
+                    part=text[:min(1200,2000-used)]; used+=len(part)
+                    snippets.append('--- '+rel+' (partial context)\n'+part)
+                except (OSError,UnicodeError,_CheckpointBlocked): pass
+        if len(paths)>=1000: break
+    inventory='\n'.join(f'{name} ({size} bytes)' for name,size in paths)
+    prefix='PARTIAL repository view; request read_paths for actual source before editing.\n'
+    listing=inventory[:max(0,cap-2100)]
+    suffix='\n[Inventory truncated]\n' if len(listing)<len(inventory) else '\n'
+    return (prefix+listing+suffix+'\n'.join(snippets))[:cap]
 
 
 class _CodeCancelled(Exception):
@@ -1074,8 +1192,10 @@ def code_repo_snapshot(repo):
             p = Path(directory) / name
             if name == ".git":
                 continue
-            if p.is_symlink() or PERM().is_secret_path(p):
-                raise _CheckpointBlocked("unsafe_or_secret_repo_path")
+            if p.is_symlink():raise _CheckpointBlocked("unsafe_or_secret_repo_path")
+            if PERM().is_secret_path(p):
+                if not p.is_file() or p.stat().st_size>64000 or not _reviewed_source(root,p.relative_to(root),None) or not _reviewed_source(root,p.relative_to(root),hashlib.sha256(p.read_bytes()).hexdigest()):
+                    raise _CheckpointBlocked("unsafe_or_secret_repo_path")
         for name in names:
             if name == ".git":
                 continue
@@ -1107,11 +1227,15 @@ def _committed_files(root):
         if kind != "blob" or mode not in {"100644","100755"}:
             raise _CheckpointBlocked("unsupported_commit_entry")
         if PERM().is_secret_path(name):
-            raise _CheckpointBlocked("secret_commit_path")
+            if not _reviewed_source(root,name,None):raise _CheckpointBlocked("secret_commit_path")
+            size=_git(root,"cat-file","-s",blob)
+            if size.returncode or not size.stdout.strip().isdigit() or int(size.stdout)>64000:raise _CheckpointBlocked("secret_commit_path")
         data = _git(root,"cat-file","blob",blob,binary=True)
         if data.returncode:
             raise _CheckpointBlocked("commit_blob_unreadable")
-        files[name] = {"sha256":hashlib.sha256(data.stdout).hexdigest(),"mode":mode}
+        sha=hashlib.sha256(data.stdout).hexdigest()
+        if PERM().is_secret_path(name) and not _reviewed_source(root,name,sha):raise _CheckpointBlocked("secret_commit_path")
+        files[name] = {"sha256":sha,"mode":mode}
     return files
 
 
@@ -1150,7 +1274,30 @@ def reconcile_code_checkpoint(checkpoint, args):
         if not isinstance(data,dict) or not isinstance(output,str) or _json_obj(output) != data:
             raise _CheckpointBlocked("model_checkpoint_mismatch")
         expected=list((data.get("files") if isinstance(data.get("files"),dict) else {}).items())[:10]
-        if cp["files"] != json.loads(json.dumps(expected)):
+        edits=data.get('edits') or []
+        preimages=cp.get('edit_preimages',{})
+        bodies=dict(cp['files'])
+        if not isinstance(edits,list) or not isinstance(preimages,dict):
+            raise _CheckpointBlocked('exact_edit_checkpoint_mismatch')
+        names=set(name for name,_ in expected); edited=set()
+        for edit in edits:
+            if not isinstance(edit,dict) or set(edit)!={'path','old','new'}:
+                raise _CheckpointBlocked('exact_edit_checkpoint_mismatch')
+            name,anchor,replacement=edit['path'],edit['old'],edit['new']
+            row=preimages.get(name) if isinstance(name,str) else None
+            body=bodies.get(name) if isinstance(name,str) else None
+            if (not all(isinstance(x,str) for x in (name,anchor,replacement,body)) or not anchor
+                or name in names or name in edited or not isinstance(row,dict) or set(row)!={'sha256','offset'}
+                or type(row['offset']) is not int or not 0<=row['offset']<=len(body)
+                or not re.fullmatch(r'[a-f0-9]{64}',str(row['sha256']))):
+                raise _CheckpointBlocked('exact_edit_checkpoint_mismatch')
+            offset=row['offset']
+            original=body[:offset]+anchor+body[offset+len(replacement):]
+            if (body[offset:offset+len(replacement)]!=replacement or original.count(anchor)!=1
+                or original.find(anchor)!=offset or hashlib.sha256(original.encode()).hexdigest()!=row['sha256']):
+                raise _CheckpointBlocked('exact_edit_checkpoint_mismatch')
+            expected.append((name,body));edited.add(name)
+        if set(preimages)!=edited or cp["files"] != json.loads(json.dumps(expected)):
             raise _CheckpointBlocked("model_files_checkpoint_mismatch")
     # Reject metadata drift before even the isolated Git reader is invoked.
     if _code_git_metadata(Path(args["repo"])) != old["git_metadata"]:
@@ -1344,7 +1491,7 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
             # An interrupted in-flight request has no model output to recover;
             # retry only this next uncommitted step, retaining prior history.
             if not state.get("model_request_pending"):
-                state["history"].append({"role":"user","content":f"Goal: {goal}\n\nRelevant skills:\n{state['guide'] or '(none)'}\n\nRepo now:\n{_tree(root)}\n\nLast test output (iteration {state['iteration']-1}):\n{state['last_test'] or '(none yet)'}"})
+                state["history"].append({"role":"user","content":f"Goal: {goal}{CODE_INSPECTION_HINT}\n\nRelevant skills:\n{state['guide'] or '(none)'}\n\nRepo now:\n{_tree(root)}\n\nLast test output (iteration {state['iteration']-1}):\n{state['last_test'] or '(none yet)'}"})
                 state["model_request_pending"] = True
             save()
             text, model = llm(state["history"], CODE_MODEL)
@@ -1353,8 +1500,15 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
                 done(f"iter {state['iteration']} model", {"verified":False,"spoken":"no model answer"})
                 return _code_report(state["todo"],state["skills"],model,False,state["plan"])
             data = _json_obj(text)
-            state.update(model=model, model_output=text, model_data=data, model_request_pending=False,
-                         files=list((data.get("files") if isinstance(data.get("files"),dict) else {}).items())[:10], file_cursor=0)
+            state.update(model=model, model_output=text, model_data=data, model_request_pending=False)
+            if data.get('read_paths'):
+                rows = _code_reads(root,data)
+                state['history'].append({'role':'assistant','content':text[:8000]})
+                state['history'].append({'role':'user','content':'Actual repository inspection results: '+json.dumps(rows)})
+                done(f"iter {state['iteration']} inspect", {'verified':all('error' not in row for row in rows),'spoken':'Bounded source inspection completed; no files changed.'})
+                state['iteration'] += 1; state['phase']='model'; save(); continue
+            files, preimages = _code_files(root,data)
+            state.update(files=files,edit_preimages=preimages,file_cursor=0)
             state["plan"] = state["plan"] or [str(x)[:120] for x in data.get("plan",[])][:7]
             state["history"].append({"role":"assistant","content":text[:8000]})
             state["phase"] = "files";save()
@@ -1363,6 +1517,7 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
                 state["phase"] = "test";save();continue
             name, content = state["files"][state["file_cursor"]]
             name, content = str(name),str(content)
+            _check_edit_preimage(root,name,state.get('edit_preimages',{}).get(name))
             dest = root/name
             if Path(name).is_absolute() or ".." in Path(name).parts or ".git" in Path(name).parts or Path(name).name==".gitattributes" or root not in dest.resolve().parents or PERM().is_secret_path(dest):
                 raise _CheckpointBlocked("unsafe_checkpoint_write")
@@ -1475,7 +1630,7 @@ def _op_code_owned(repo, goal, branch, *, todo, check, publish, operate) -> dict
         step("baseline test", {"verified": True, "spoken": got0.get("spoken")})
     for it in range(1, MAX_ITERS + 1):
         check()
-        history.append({"role": "user", "content": f"Goal: {goal}\n\nRelevant skills:\n{guide or '(none)'}\n\nRepo now:\n{_tree(root)}\n\n"
+        history.append({"role": "user", "content": f"Goal: {goal}{CODE_INSPECTION_HINT}\n\nRelevant skills:\n{guide or '(none)'}\n\nRepo now:\n{_tree(root)}\n\n"
                         f"Last test output (iteration {it - 1}):\n{last_test or '(none yet)'}"})
         publish({"n": len(todo) + 1, "what": f"iter {it} model", "status": "running"})
         text, model_used = llm(history, CODE_MODEL)
@@ -1486,10 +1641,14 @@ def _op_code_owned(repo, goal, branch, *, todo, check, publish, operate) -> dict
         history.append({"role": "assistant", "content": text[:8000]})
         d = _json_obj(text)
         plan = plan or [str(x)[:120] for x in (d.get("plan") or [])][:7]
-        files = d.get("files") or {}
-        if not isinstance(files, dict):
-            files = {}
-        for path, content in list(files.items())[:10]:
+        if d.get('read_paths'):
+            rows = _code_reads(root,d)
+            history.append({'role':'user','content':'Actual repository inspection results: '+json.dumps(rows)})
+            step(f"iter {it} inspect",{'verified':all('error' not in row for row in rows),'spoken':'Bounded source inspection completed; no files changed.'})
+            continue
+        files, preimages = _code_files(root,d)
+        for path, content in files:
+            _check_edit_preimage(root,str(path),preimages.get(str(path)))
             if not step(f"iter {it} write {path}", operate(str(root), "write", path=str(path), content=str(content))):
                 return _code_report(todo, skills, model_used, False, plan)
         got = operate(str(root), "test", cmd=str(d.get("test_cmd") or "python3 -m unittest discover -v"))

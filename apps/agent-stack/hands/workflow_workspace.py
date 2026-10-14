@@ -21,6 +21,7 @@ LOCKED=('brain/online.py','brain/shared_context.py','face/serve.py','hands/craft
 class WorkspaceBlocked(ValueError):pass
 
 
+
 def _hand():
     spec=importlib.util.spec_from_file_location('workflow_workspace_agent_tools',STACK/'hands'/'agent_tools.py')
     module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
@@ -80,7 +81,9 @@ def _git_identity(repo,receipt,perm):
     return {'head':head,'branch':branch}
 
 
-def _snapshot(repo,subtree,hand,dependencies):
+def _snapshot(repo,subtree,hand,dependencies,source_exceptions=None):
+    if source_exceptions is not None and not callable(source_exceptions):raise WorkspaceBlocked('host_source_exception_required')
+    source_exceptions=source_exceptions() if source_exceptions is not None else {}
     app=repo/subtree
     if not app.is_dir() or any(p.is_symlink() for p in (app,*app.parents)):
         raise WorkspaceBlocked('source_subtree_unavailable')
@@ -93,7 +96,13 @@ def _snapshot(repo,subtree,hand,dependencies):
             if name in EXCLUDED or hand.PERM().is_secret_path(path):dirs.remove(name);excluded.append(str(path.relative_to(repo)))
         for name in names:
             path=parent/name;rel=str(path.relative_to(repo))
-            if hand.PERM().is_secret_path(path):excluded.append(rel);continue
+            if hand.PERM().is_secret_path(path):
+                exception=(source_exceptions or {}).get(rel)
+                if not exception:excluded.append(rel);continue
+                raw,row=_regular_bytes(path,64000)
+                if row!=exception.get('file') or hand._SECRETISH.search(raw.decode()) or exception.get('public_proof',{}).get('verification_method')!='independent_public_git_blob':
+                    raise WorkspaceBlocked('source_exception_changed')
+
             raw,row=_regular_bytes(path);total+=len(raw);files[rel]=row
             if len(files)>MAX_FILES or total>MAX_BYTES:raise WorkspaceBlocked('source_snapshot_budget_exceeded')
     for rel in dependencies:
@@ -118,7 +127,7 @@ def verify_working_copy(working_copy,manifest):
     return bool(manifest.get('protected_model_files'))
 
 
-def prepare(mission_id,*,source_receipt,scratch_root,active_fn,runtime_baseline=None):
+def prepare(mission_id,*,source_receipt,scratch_root,active_fn,runtime_baseline=None,source_exceptions=None):
     base={'tool':'workflow_workspace','verified':False,'task_verified':False,'sent':False,'actions':[]}
     def active():
         try:return callable(active_fn) and bool(active_fn())
@@ -141,7 +150,7 @@ def prepare(mission_id,*,source_receipt,scratch_root,active_fn,runtime_baseline=
         _git_identity(repo,source_receipt,hand.PERM())
         dependencies=source_receipt.get('dependencies') or {}
         if not isinstance(dependencies,dict):raise WorkspaceBlocked('invalid_dependency_manifest')
-        files,excluded=_snapshot(repo,subtree,hand,dependencies)
+        files,excluded=_snapshot(repo,subtree,hand,dependencies,source_exceptions)
         expected=source_receipt.get('app_manifest')
         app_files={rel:row for rel,row in files.items() if rel.startswith(subtree+'/')}
         if expected!=app_files or any(files.get(rel)!=row for rel,row in dependencies.items()):
@@ -192,7 +201,7 @@ def prepare(mission_id,*,source_receipt,scratch_root,active_fn,runtime_baseline=
             destination=target/rel;destination.parent.mkdir(parents=True,exist_ok=True)
             with os.fdopen(os.open(destination,os.O_WRONLY|os.O_CREAT|os.O_EXCL,row['mode']),'wb') as out:out.write(raw)
             destination.chmod(row['mode'])
-        after,_=_snapshot(repo,subtree,hand,dependencies)
+        after,_=_snapshot(repo,subtree,hand,dependencies,source_exceptions)
         if after!=source_files:raise WorkspaceBlocked('source_changed_during_copy')
         _git_identity(repo,source_receipt,hand.PERM())
         if runtime_repo is not None:
@@ -206,7 +215,10 @@ def prepare(mission_id,*,source_receipt,scratch_root,active_fn,runtime_baseline=
             result=hand.op_repo(str(target),action,**kw)
             if not result.get('verified'):raise WorkspaceBlocked('working_copy_'+action+'_unverified')
             if not active():raise WorkspaceBlocked('cancelled')
-        snapshot=hand.code_repo_snapshot(target)
+        def reviewed(actual,relative,sha):
+            row=(source_exceptions() if source_exceptions else {}).get(relative)
+            return bool(Path(actual).resolve()==target.resolve() and row and (sha is None or row['file']['sha256']==sha))
+        with hand.source_exception_scope(reviewed):snapshot=hand.code_repo_snapshot(target)
         if snapshot['files']!= {rel:{'sha256':row['sha256'],'mode':row['mode']} for rel,row in files.items()}:
             raise WorkspaceBlocked('working_copy_manifest_mismatch')
         if not active():raise WorkspaceBlocked('cancelled')

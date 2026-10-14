@@ -70,7 +70,7 @@ def run_coding(args, *, workflow_context=None, **kw):
             _validate_workflow_context(workflow_context,args)
             return phase.guard(hive,owner['parent_mission_id'],expected_contract_digest=owner['execution_contract_digest'],
                                expected_configuration_digest=owner['configuration_digest'],proposedwrites=proposedwrites)
-        kw.update(cancel_check=cancelled,mutation_guard=guard)
+        kw.update(cancel_check=cancelled,mutation_guard=guard,source_exception_guard=phase.source_exception_guard(hive,owner['parent_mission_id'],args['repo']))
     elif re.fullmatch(r'workflow-[a-f0-9]{32}',Path(str((args or {}).get('repo',''))).name):
         raise ValueError('host workflow context required')
     return _load('coding_agent_tools', STACK/'hands'/'agent_tools.py').run(args, **kw)

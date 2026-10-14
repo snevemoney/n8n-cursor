@@ -87,7 +87,8 @@ def make_receipt(hive,mission_id,*,runtime_baseline,dependencies=()):
                 if hand.PERM().is_secret_path(path):raise ValueError('secret_fixture_dependency')
                 dep[rel]=W._regular_bytes(path)[1]
                 if len(dep)>W.MAX_FILES:raise ValueError('dependency_budget')
-    files,excluded=W._snapshot(repo,'apps/agent-stack',hand,dep)
+    exceptions=_source_exceptions(hive,mission_id,fetch_public=True)
+    files,excluded=W._snapshot(repo,'apps/agent-stack',hand,dep,lambda:exceptions)
     # Read-only Git index query uses an isolated environment and disables executable metadata hooks.
     env={'PATH':'/usr/bin:/bin','HOME':'/nonexistent','GIT_CONFIG_NOSYSTEM':'1','GIT_CONFIG_GLOBAL':'/dev/null','GIT_PAGER':'cat'}
     got=subprocess.run(['/usr/bin/git','-c','core.hooksPath=/dev/null','-c','core.fsmonitor=false','-c','core.attributesFile=/dev/null',
@@ -106,7 +107,7 @@ def make_receipt(hive,mission_id,*,runtime_baseline,dependencies=()):
             'bound_source_repo':str(repo),'source_subtree':'apps/agent-stack','git_dir':identity['git_dir'],
             'git_common_dir':identity['git_common_dir'],'source_head':identity['head'],'source_branch':identity['branch'],
             'app_manifest':app,'tracked_app_paths':eligible_tracked,'excluded_tracked_app_paths':excluded_tracked,'source_excluded_paths':excluded,'locked_files':{'apps/agent-stack/'+rel:files['apps/agent-stack/'+rel] for rel in W.LOCKED},
-            'dependencies':dep,'integration_target':str(repo),'task_provenance':task}
+            'source_exceptions':exceptions,'dependencies':dep,'integration_target':str(repo),'task_provenance':task}
 
 
 def prepare_execution(hive,mission_id,*,source_receipt,runtime_baseline,scratch_root,active_fn):
@@ -115,6 +116,7 @@ def prepare_execution(hive,mission_id,*,source_receipt,runtime_baseline,scratch_
     if source_receipt.get('task_provenance')!=task or source_receipt.get('bound_source_repo')!=binding['repo']:
         raise ValueError('source_task_receipt_mismatch')
     C=_load('workflow_config_lock');W=_load('workflow_workspace')
+    if source_receipt.get('source_exceptions',{})!=_source_exceptions(hive,mission_id):raise ValueError('source_exception_receipt_changed')
     runtime=Path(runtime_baseline['source_repo'])/'apps/agent-stack'
     if not C.validate_candidate(runtime_baseline['configuration_lock'],runtime,{},expected_digest=runtime_baseline['configuration_digest'])['ok']:
         raise ValueError('runtime_configuration_drift')
@@ -131,7 +133,7 @@ def prepare_execution(hive,mission_id,*,source_receipt,runtime_baseline,scratch_
     def active():
         try:return bool(active_fn()) and _task(hive,mission_id)[3]==task
         except Exception:return False
-    result=W.prepare(mission_id,source_receipt=source_receipt,scratch_root=scratch_root,active_fn=active,runtime_baseline=runtime_baseline)
+    result=W.prepare(mission_id,source_receipt=source_receipt,scratch_root=scratch_root,active_fn=active,runtime_baseline=runtime_baseline,source_exceptions=lambda:_source_exceptions(hive,mission_id))
     if not result.get('ok'):return result
     app=Path(result['working_copy'])/'apps/agent-stack'
     # Current selector AST must still match live; altered harness selectors need manual independent review.
@@ -153,7 +155,8 @@ def guard(hive,mission_id,*,expected_contract_digest,expected_configuration_dige
         if digest!=expected_contract_digest or _digest(row)!=digest or any(row.get(k)!=v for k,v in task.items()):raise ValueError('contract_changed')
         source=row['source_receipt'];identity=R._git(Path(source['source_repo']))
         if identity['head']!=source['source_head'] or identity['branch']!=source['source_branch']:raise ValueError('source_changed')
-        snapshot,_=W._snapshot(Path(source['source_repo']),'apps/agent-stack',W._hand(),source['dependencies'])
+        if source.get('source_exceptions',{})!=_source_exceptions(hive,mission_id):raise ValueError('source_exception_receipt_changed')
+        snapshot,_=W._snapshot(Path(source['source_repo']),'apps/agent-stack',W._hand(),source['dependencies'],lambda:_source_exceptions(hive,mission_id))
         if snapshot!={**source['app_manifest'],**source['dependencies']}:raise ValueError('source_changed')
         baseline=row['runtime_baseline']
         if R._git(Path(baseline['source_repo']))!=baseline['identity']:raise ValueError('runtime_identity_changed')
@@ -166,3 +169,144 @@ def guard(hive,mission_id,*,expected_contract_digest,expected_configuration_dige
             or not expected_configuration_digest or receipt.get('configuration_digest')!=expected_configuration_digest):raise ValueError('guard_changed')
         return C.validate_candidate(receipt['configuration_lock'],Path(row['working_copy'])/'apps/agent-stack',proposedwrites or {},expected_digest=receipt['configuration_digest'])
     except (OSError,ValueError,TypeError,KeyError):return {'ok':False,'reason':'execution_authority_or_configuration_changed'}
+
+_SOURCE_REVIEW_KEY=object()
+class SourceReviewAuthority:
+    def __init__(self,key):
+        if key is not _SOURCE_REVIEW_KEY:raise ValueError('independent_source_review_required')
+def source_review_authority():
+    """Trusted independent host only; never a model tool."""
+    return SourceReviewAuthority(_SOURCE_REVIEW_KEY)
+
+def _new_json(path,row):
+    raw=json.dumps(row,sort_keys=True,separators=(',',':')).encode()
+    fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
+    with os.fdopen(fd,'wb') as out:out.write(raw);out.flush();os.fsync(out.fileno())
+
+def approve_source_exception(hive,mission_id,relative,expected_sha256,*,authority,evidence):
+    if not isinstance(authority,SourceReviewAuthority) or not isinstance(evidence,dict) or not evidence:raise ValueError('independent_source_review_required')
+    W=_load('workflow_workspace');R=_load('workflow_repo_context');root,request,binding,task=_task(hive,mission_id)
+    path=Path(relative)
+    if (path.is_absolute() or '..' in path.parts or not str(path).startswith('apps/agent-stack/')
+        or path.suffix!='.py' or not re.fullmatch(r'test_[A-Za-z0-9_]+\.py',path.name)
+        or any(part.startswith('.') or re.fullmatch(r'credentials?|secrets?|keys?|passwords?',part,re.I) for part in path.parts)):
+        raise ValueError('source_exception_class_refused')
+    raw,row=W._regular_bytes(Path(binding['repo'])/path,64000);hand=W._hand()
+    if row['sha256']!=expected_sha256 or hand._SECRETISH.search(raw.decode()):raise ValueError('source_exception_content_refused')
+    identity=R._git(Path(binding['repo']))
+    record={'version':1,'mission_id':mission_id,'relative':str(path),'source_repo':binding['repo'],'source_identity':identity,
+            'file':row,'task_provenance':task,'authority':'independent_exact_public_source_review','evidence':evidence}
+    record['digest']=_digest(record);_new_json(root/'source_exception_review.json',record);return record
+
+def _source_exceptions(hive,mission_id,*,fetch_public=False,fetch_fn=None):
+    import base64
+    W=_load('workflow_workspace');R=_load('workflow_repo_context');root,request,binding,task=_task(hive,mission_id)
+    if not (root/'source_exception_review.json').exists():return {}
+    review=json.loads(W._regular_bytes(root/'source_exception_review.json',128000)[0]);unsigned=dict(review);signature=unsigned.pop('digest',None)
+    if (_digest(unsigned)!=signature or review.get('authority')!='independent_exact_public_source_review'
+        or review.get('mission_id')!=mission_id or review.get('task_provenance')!=task or review.get('source_repo')!=binding['repo']
+        or review.get('source_identity')!=R._git(Path(binding['repo']))):raise ValueError('source_exception_review_changed')
+    relative=review['relative'];raw,row=W._regular_bytes(Path(binding['repo'])/relative,64000)
+    if row!=review['file'] or W._hand()._SECRETISH.search(raw.decode()):raise ValueError('source_exception_content_changed')
+    blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+    env={'PATH':'/usr/bin:/bin','HOME':'/nonexistent','GIT_CONFIG_NOSYSTEM':'1','GIT_CONFIG_GLOBAL':'/dev/null'}
+    tracked=subprocess.run(['/usr/bin/git','-c','core.hooksPath=/dev/null','-c','core.fsmonitor=false','-c','core.attributesFile=/dev/null','-C',binding['repo'],'ls-files','--stage','--',relative],capture_output=True,text=True,env=env,timeout=4)
+    if tracked.returncode or tracked.stdout.strip()!=('100644 '+blob+' 0\t'+relative):raise ValueError('public_source_tracked_blob_required')
+    repository=review['source_identity']['remote_repository_ids']
+    if len(repository)!=1:raise ValueError('public_source_repository_ambiguous')
+    endpoint='/repos/'+repository[0]+'/git/blobs/'+blob
+    proof_path=root/'source_exception_public.json'
+    if proof_path.exists():proof=json.loads(W._regular_bytes(proof_path,128000)[0])
+    elif fetch_public:
+        fetch=fetch_fn or _load('workflow_origin')._public_get
+        body=fetch(endpoint,timeout=4,max_bytes=100000)
+        if isinstance(body,(bytes,str)):body=json.loads(body)
+        if body.get('sha')!=blob or body.get('encoding')!='base64':raise ValueError('public_source_blob_unproved')
+        public=base64.b64decode(body.get('content',''),validate=False)
+        if public!=raw:raise ValueError('public_source_blob_mismatch')
+        proof={'review_digest':signature,'endpoint':endpoint,'blob_sha':blob,'sha256':row['sha256'],'public_response_digest':_digest(body),'verification_method':'independent_public_git_blob'}
+        proof['digest']=_digest(proof);_new_json(proof_path,proof)
+    else:raise ValueError('public_source_proof_required')
+    unsigned=dict(proof);signature=unsigned.pop('digest',None)
+    if (_digest(unsigned)!=signature or proof.get('review_digest')!=review['digest'] or proof.get('endpoint')!=endpoint
+        or proof.get('sha256')!=row['sha256'] or proof.get('blob_sha')!=blob or proof.get('verification_method')!='independent_public_git_blob'):
+        raise ValueError('public_source_proof_changed')
+    return {relative:{'file':row,'public_proof':proof,'review_digest':review['digest']}}
+
+def _rename_exclusive(source,target):
+    """macOS atomic no-replace directory/file move, never os.rename overwrite."""
+    import ctypes,errno
+    library=ctypes.CDLL(None,use_errno=True)
+    rename=getattr(library,'renamex_np',None)
+    if rename is None:raise ValueError('exclusive_archive_move_unavailable')
+    rename.argtypes=[ctypes.c_char_p,ctypes.c_char_p,ctypes.c_uint];rename.restype=ctypes.c_int
+    if rename(os.fsencode(source),os.fsencode(target),4)!=0:
+        raise OSError(ctypes.get_errno(),'exclusive preparation archive move failed')
+
+def recover_preparation(hive,mission_id,*,active_fn):
+    """Preserve an exact, clean pre-builder attempt; canonical preparation starts afresh."""
+    W=_load('workflow_workspace');root,request,binding,task=_task(hive,mission_id);hand=W._hand()
+    def active():
+        if not active_fn() or _task(hive,mission_id)[3]!=task:raise ValueError('preparation_recovery_cancelled')
+        if any((root/name).exists() for name in ('execution_guard.json','execution_owner.json','coding_child.json','result.json')):
+            raise ValueError('preparation_recovery_builder_or_guard_present')
+    active();canonical=root/'execution_contract.json';history=root/'preparation-history';pending=[]
+    if history.exists():
+        if history.is_symlink():raise ValueError('unsafe_preparation_history')
+        pending=[p for p in history.iterdir() if p.is_dir() and (p/'plan.json').exists() and not (p/'completed.json').exists()]
+        if len(pending)>1:raise ValueError('ambiguous_preparation_recovery')
+    if pending:
+        archive=pending[0];plan=json.loads(W._regular_bytes(archive/'plan.json',2_000_000)[0]);contract=plan['contract']
+        unsigned_plan=dict(plan);signature=unsigned_plan.pop('digest',None)
+        if _digest(unsigned_plan)!=signature:raise ValueError('preparation_archive_plan_changed')
+    elif canonical.exists():
+        raw,_=W._regular_bytes(canonical,2_000_000);contract=json.loads(raw);unsigned=dict(contract);signature=unsigned.pop('digest',None)
+        if _digest(unsigned)!=signature or any(contract.get(k)!=v for k,v in task.items()):raise ValueError('preparation_contract_changed')
+        original=Path(contract['working_copy'])
+        if any(p.is_symlink() for p in (original,*original.parents)):raise ValueError('unsafe_preparation_copy')
+        if original.name!='workflow-'+mission_id or original.parent not in hand.PERM().scratch_roots():raise ValueError('unowned_preparation_copy')
+        archive=history/signature
+        if archive.exists():raise ValueError('preparation_archive_already_completed')
+        source=contract['source_receipt'];expected={**source['app_manifest'],**source.get('dependencies',{}),**contract['runtime_baseline']['files']}
+        expected={rel:{'sha256':row['sha256'],'mode':row['mode']} for rel,row in expected.items()}
+        snapshot=hand.code_repo_snapshot(original)
+        if snapshot['files']!=expected or snapshot['branch']!='jarvis/workflow-'+mission_id:raise ValueError('preparation_copy_changed')
+        if (hand._git(original,'status','--porcelain').stdout.strip() or hand._git(original,'rev-list','--count','HEAD').stdout.strip()!='1'
+            or hand._git(original,'log','-1','--format=%s').stdout.strip()!='jarvis: exact project source baseline '+mission_id):raise ValueError('unproved_preparation_baseline')
+        history.mkdir(exist_ok=True,mode=0o700);archive.mkdir(mode=0o700)
+        plan={'version':1,'mission_id':mission_id,'task_provenance':task,'contract':contract,'contract_sha256':_sha(raw),
+              'snapshot':snapshot,'original_copy':str(original),'archived_copy':str(original.with_name(original.name+'-preparation-'+signature[:16]))}
+        plan['digest']=_digest(plan)
+        _new_json(archive/'plan.json',plan)
+    else:return {'recovered':False}
+    unsigned_contract=dict(contract);signature=unsigned_contract.pop('digest',None)
+    if plan.get('task_provenance')!=task or signature!=archive.name or _digest(unsigned_contract)!=signature or any(contract.get(k)!=v for k,v in task.items()):raise ValueError('preparation_recovery_scope_changed')
+    original=Path(plan['original_copy']);moved=Path(plan['archived_copy'])
+    if original.name!='workflow-'+mission_id or moved!=original.with_name(original.name+'-preparation-'+archive.name[:16]) or original.parent not in hand.PERM().scratch_roots():raise ValueError('unowned_preparation_copy')
+    def relocated_snapshot(path):
+        row=hand.code_repo_snapshot(path);row['repo']=plan['snapshot']['repo'];return row
+    candidate=original if original.exists() else moved
+    if any(p.is_symlink() for p in (candidate,*candidate.parents,archive,*archive.parents)):raise ValueError('unsafe_preparation_archive')
+    if relocated_snapshot(candidate)!=plan['snapshot'] or hand._git(candidate,'status','--porcelain').stdout.strip():raise ValueError('preparation_copy_changed')
+    active()
+    if original.exists():_rename_exclusive(original,moved)
+    if relocated_snapshot(moved)!=plan['snapshot']:raise ValueError('preparation_copy_changed')
+    active();archived_contract=archive/'execution_contract.json'
+    if canonical.exists():
+        if _sha(W._regular_bytes(canonical,2_000_000)[0])!=plan['contract_sha256']:raise ValueError('preparation_contract_changed')
+        _rename_exclusive(canonical,archived_contract)
+    if _sha(W._regular_bytes(archived_contract,2_000_000)[0])!=plan['contract_sha256']:raise ValueError('archived_contract_changed')
+    active();_new_json(archive/'completed.json',{'task_provenance':task,'preserved_snapshot_sha256':_digest(plan['snapshot']),'archived_copy':str(moved),'original_contract_digest':contract['digest']})
+    return {'recovered':True,'archive':str(archive),'preserved_copy':str(moved)}
+
+def source_exception_guard(hive,mission_id,repo):
+    """Host-only exact owned-copy callback, revalidated on every use."""
+    W=_load('workflow_workspace');root,request,binding,task=_task(hive,mission_id)
+    contract=json.loads(W._regular_bytes(root/'execution_contract.json',2_000_000)[0])
+    expected=Path(contract['working_copy']).resolve()
+    if Path(repo).resolve()!=expected:raise ValueError('source_exception_working_copy_mismatch')
+    def allowed(actual,relative,sha):
+        if Path(actual).resolve()!=expected:return False
+        row=_source_exceptions(hive,mission_id).get(relative)
+        return bool(row and (sha is None or row['file']['sha256']==sha and row['public_proof']['sha256']==sha))
+    return allowed
