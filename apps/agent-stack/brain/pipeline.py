@@ -1597,12 +1597,25 @@ def _skills_hand():
 
 def _workspace_read_hand():
     name = "agent_stack_workspace_read"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "workspace_read.py")
+    path = STACK / "hands" / "workspace_read.py"
+    with _LAZY_HAND_LOCK:
+        current = path.stat()
+        stamp = (current.st_mtime_ns, current.st_size, current.st_ino)
+        cached = sys.modules.get(name)
+        if cached is not None and getattr(cached, "_source_stamp", None) == stamp:
+            return cached
+        raw = path.read_bytes()
+        after = path.stat()
+        if stamp != (after.st_mtime_ns, after.st_size, after.st_ino):
+            raise RuntimeError("workspace hand changed during load")
+        spec = importlib.util.spec_from_file_location(name, path)
         mod = importlib.util.module_from_spec(spec)
+        # Execute the current bytes: SourceFileLoader may reuse same-second,
+        # same-size bytecode even though the nanosecond source stamp changed.
+        exec(compile(raw, str(path), "exec"), mod.__dict__)
+        mod._source_stamp = stamp
         sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+        return mod
 
 
 def wants_local_read(utterance: str) -> bool:
@@ -5483,7 +5496,9 @@ def _hand_loop_receipt(pick,ran):
         return '[unsupported receipt value]'
     row={'hand':str(pick.get('tool') or ''),'result_tool':str(ran.get('tool') or ''),
          'result':{key:bounded(ran[key]) for key in fields if key in ran}}
-    row['text_capped']=len(str(ran.get('workspace_text') or ''))>6000
+    if isinstance(ran.get('workspace_text'),str):
+        row['result']['workspace_text']=ran['workspace_text'][:12000]
+    row['text_capped']=len(str(ran.get('workspace_text') or ''))>12000
     return row
 
 
