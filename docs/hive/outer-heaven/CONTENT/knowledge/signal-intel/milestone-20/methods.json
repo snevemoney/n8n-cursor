@@ -1,0 +1,582 @@
+[
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-09"
+    ],
+    "composed_of": [],
+    "concept": "90-minute-camera-on-poc",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-90-minute-camera-on-poc-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "15 min draw flow \u2192 60 min rough build on one platform \u2192 15 min 3-min Loom (before / solution / result) with camera on."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-CB5bG4mvnS0-01"
+    ],
+    "composed_of": [],
+    "concept": "api-macro-vision-is-the-order",
+    "domain": "tooling",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-api-macro-vision-is-the-order-tooling",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "CB5bG4mvnS0"
+    ],
+    "statement": "Browser-use is the last resort. If an API exists, use it. If the clicks never change, a pixel macro is cheaper and safer than a model that looks. Vision is for UIs that branch."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-CB5bG4mvnS0-02"
+    ],
+    "composed_of": [],
+    "concept": "break-it-qa-is-headed-first-then-optional-goal-volume",
+    "domain": "evaluation",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-break-it-qa-is-headed-first-then-optional-goal-volume-evaluation",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "CB5bG4mvnS0"
+    ],
+    "statement": "Annotate seeded layout bugs; then a break-it pass finds data-integrity and mobile issues a human five-case test misses. Headed so you can see; headless for long background. Then \u201cgo fix.\u201d"
+  },
+  {
+    "applies_to": [
+      "CAP-x-2088007687149601254-inbound-from-demonstrated-build"
+    ],
+    "claim_ids": [
+      "K-x-2088007687149601254-03"
+    ],
+    "composed_of": [],
+    "concept": "buyers-dislike-term-AI",
+    "domain": "offer-positioning",
+    "gap": null,
+    "id": "method-buyers-dislike-term-ai-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "x-2088007687149601254"
+    ],
+    "statement": "Most people don\u2019t like the term AI. Lead with the outcome, not the word \u2014 unless the prospect is AI-native."
+  },
+  {
+    "applies_to": [
+      "CAP-x-2088007687149601254-inbound-from-demonstrated-build"
+    ],
+    "claim_ids": [
+      "K-x-2088007687149601254-01"
+    ],
+    "composed_of": [],
+    "concept": "category-pitch-fails",
+    "domain": "offer-positioning",
+    "gap": null,
+    "id": "method-category-pitch-fails-offer-positioning",
+    "maturity": "EXPERIMENT_REQUIRED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "x-2088007687149601254"
+    ],
+    "statement": "Outbound \u201cI can help you automate your business\u201d (or cold \u201cAI consulting\u201d) means a million and a half things. Nobody bites."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-28"
+    ],
+    "composed_of": [],
+    "concept": "contrarian-stop-selling-agents-while-his-other-titles-sell-agents",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-contrarian-stop-selling-agents-while-his-other-titles-sell-agents-offer-positioning",
+    "maturity": "EXPERIMENT_REQUIRED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "Stop selling agents (while his other titles sell agents). Lowest-view videos can be the money videos. Do not build custom n8n by default. Informational / no-pitch opener (then a priced solution). Free work as strategy vs `HNKlFTd1maM` raise-if-high-close \u2014 keep both. AI-OS and \u201cregular automations\u201d are explicitly not what he means by solutions."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-01"
+    ],
+    "composed_of": [],
+    "concept": "diagnose-solve-value-price",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-diagnose-solve-value-price-offer-positioning",
+    "maturity": "EXPERIMENT_REQUIRED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "Every sale is four moves: find the leak (time/money/focus), build the fix, translate to hours/$ /revenue, anchor price as a fraction of that value."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-16"
+    ],
+    "composed_of": [],
+    "concept": "example-first-1-200-linkedin-content-workflow-2-hours",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-example-first-1-200-linkedin-content-workflow-2-hours-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "Situation: First $1,200 LinkedIn/content workflow, ~2 hours. Action: Pitched hours saved, not 15 nodes. Outcome: Paid; he calls $600/h the wrong frame."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-19"
+    ],
+    "composed_of": [],
+    "concept": "example-imposter-would-have-worked-free",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-example-imposter-would-have-worked-free-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "Situation: Imposter, would have worked free. Action: Free/cheap or money-back for reps. Outcome: He claims $1\u20132k \u2192 $30k+ later."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-18"
+    ],
+    "composed_of": [],
+    "concept": "example-linkedin-outreach-bot-as-product",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-example-linkedin-outreach-bot-as-product-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "Situation: LinkedIn outreach bot as product. Action: Reframe to qualified leads without ads. Outcome: \u201csuddenly people see the value.\u201d"
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-17"
+    ],
+    "composed_of": [],
+    "concept": "example-pedagogy-onboarding",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-example-pedagogy-onboarding-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "Situation: Pedagogy onboarding. Action: 5h/week, 80%, $50/h, $10k/year, charge $3k. Outcome: \u201cnot a cost.\u201d"
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-05"
+    ],
+    "composed_of": [],
+    "concept": "flashy-videos-win-views-practical-videos-win-money",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-flashy-videos-win-views-practical-videos-win-money-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "Best-performing YouTube = flashy multi-agent; most practical / highest-ROI builds = some of his lowest-performing videos."
+  },
+  {
+    "applies_to": [
+      "CAP-x-2088007687149601254-inbound-from-demonstrated-build"
+    ],
+    "claim_ids": [
+      "K-x-2088007687149601254-04"
+    ],
+    "composed_of": [],
+    "concept": "free-work-for-proof",
+    "domain": "offer-positioning",
+    "gap": null,
+    "id": "method-free-work-for-proof-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "x-2088007687149601254"
+    ],
+    "statement": "If you must enter rooms / outbound anyway: offer free work. The only exchange is you get to document what you built and post it."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-07"
+    ],
+    "composed_of": [],
+    "concept": "lrp-interview-listen-repeat-poke",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-lrp-interview-listen-repeat-poke-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "On 5\u201310 \u201cinformational\u201d calls, listen to the week, repeat the pattern, poke until hours/cost/errors/focus/trigger are numbered."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-glM8godEcic-02"
+    ],
+    "composed_of": [],
+    "concept": "new-vs-existing-is-a-branch",
+    "domain": "agent-ops",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-new-vs-existing-is-a-branch-agent-ops",
+    "maturity": "EXPERIMENT_REQUIRED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "glM8godEcic"
+    ],
+    "statement": "First question is email lookup; \u201cI\u2019m new\u201d switches to collect+CRM create, then availability+book."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-glM8godEcic-01"
+    ],
+    "composed_of": [],
+    "concept": "one-function-tools-not-a-god-tool",
+    "domain": "workflow-build",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-one-function-tools-not-a-god-tool-workflow-build",
+    "maturity": "EXPERIMENT_REQUIRED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "glM8godEcic"
+    ],
+    "statement": "The MCP server is seven single-purpose workflows; the voice layer only chooses."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-15"
+    ],
+    "composed_of": [],
+    "concept": "ordered-procedure",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-ordered-procedure-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "Ordered procedure from LEARNED \u00a7D \u2014 do not slogan-compress."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-10"
+    ],
+    "composed_of": [],
+    "concept": "resourceful-custom-agent",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-resourceful-custom-agent-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "Often you do not need a custom n8n agent; a platform or the CRM already does it. Do not multi-agent, five-vendor, or build a platform for Tuesday\u2019s bottleneck."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-21"
+    ],
+    "composed_of": [],
+    "concept": "rule-if-a-template-bundle-is-the-product-he-says-race-to-the-bottom-lear",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-rule-if-a-template-bundle-is-the-product-he-says-race-to-the-bottom-lear-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "IF a template bundle is the product \u2192 he says race to the bottom (learn; do not resell his)."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-25"
+    ],
+    "composed_of": [],
+    "concept": "rule-if-building-90-min-for-a-poc-he-says-you-drifted",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-rule-if-building-90-min-for-a-poc-he-says-you-drifted-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "IF building >90 min for a POC \u2192 he says you drifted."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-22"
+    ],
+    "composed_of": [],
+    "concept": "rule-if-niche-fails-repeat-pay-fast-language-pick-another-hive-catalog-o",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-rule-if-niche-fails-repeat-pay-fast-language-pick-another-hive-catalog-o-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "IF niche fails repeat / pay-fast / language \u2192 pick another (hive: catalog only, no new id)."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-27"
+    ],
+    "composed_of": [],
+    "concept": "rule-if-no-proof-yet-he-chooses-free-cheap-or-guarantee-hive-evens-only-",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-rule-if-no-proof-yet-he-chooses-free-cheap-or-guarantee-hive-evens-only-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "IF no proof yet \u2192 he chooses free/cheap or guarantee (hive: Evens only; else steal the proof artifacts only)."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-26"
+    ],
+    "composed_of": [],
+    "concept": "rule-if-scope-is-vague-write-the-ten-functionalities-definition-of-done-",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-rule-if-scope-is-vague-write-the-ten-functionalities-definition-of-done-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "IF scope is vague \u2192 write the ten functionalities / definition of done (his underscope scar)."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-20"
+    ],
+    "composed_of": [],
+    "concept": "rule-if-the-pitch-names-the-tool-agent-chatbot-linkedin-bot-rewrite-to-t",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-rule-if-the-pitch-names-the-tool-agent-chatbot-linkedin-bot-rewrite-to-t-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "IF the pitch names the tool (agent, chatbot, LinkedIn bot) \u2192 rewrite to T/M/F outcome."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-23"
+    ],
+    "composed_of": [],
+    "concept": "rule-if-they-describe-a-week-lrp-until-numbers-exist",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-rule-if-they-describe-a-week-lrp-until-numbers-exist-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "IF they describe a week \u2192 LRP until numbers exist."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-24"
+    ],
+    "composed_of": [],
+    "concept": "rule-if-tuesday-s-bottleneck-fits-crm-native-do-not-custom-agent",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-rule-if-tuesday-s-bottleneck-fits-crm-native-do-not-custom-agent-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "IF Tuesday\u2019s bottleneck fits CRM-native \u2192 do not custom-agent."
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-CB5bG4mvnS0-03"
+    ],
+    "composed_of": [],
+    "concept": "saved-session-saved-secret-2fa-is-the-wall",
+    "domain": "agent-ops",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-saved-session-saved-secret-2fa-is-the-wall-agent-ops",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "CB5bG4mvnS0"
+    ],
+    "statement": "Codex keeps cookies for Skool/X/IG. Banks boot you. Password manager CSV is \u201cmore secure than chat\u201d and still a file of secrets. Computer-use paints a blue frame; it refused an OS Bluetooth permission then did the in-app toggle."
+  },
+  {
+    "applies_to": [
+      "CAP-x-2088007687149601254-inbound-from-demonstrated-build"
+    ],
+    "claim_ids": [
+      "K-x-2088007687149601254-02"
+    ],
+    "composed_of": [],
+    "concept": "show-specific-build-inbound",
+    "domain": "offer-positioning",
+    "gap": null,
+    "id": "method-show-specific-build-inbound-offer-positioning",
+    "maturity": "RECOVERED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "x-2088007687149601254"
+    ],
+    "statement": "Post examples of builds already made (videos + threads). Heads turn: inbound \u201coh now could you do this actually.\u201d"
+  },
+  {
+    "applies_to": [],
+    "claim_ids": [
+      "K-w9-gfaV5vlM-03"
+    ],
+    "composed_of": [],
+    "concept": "time-money-focus-only",
+    "domain": "offer-positioning",
+    "gap": "no existing capability match in this checkout",
+    "id": "method-time-money-focus-only-offer-positioning",
+    "maturity": "EXPERIMENT_REQUIRED",
+    "outcome_ids": [],
+    "owner": "researcher",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "w9-gfaV5vlM"
+    ],
+    "statement": "Businesses care about three things; delivery vehicle (AI, VA, duct tape) is secondary."
+  },
+  {
+    "applies_to": [
+      "signal-retrieve"
+    ],
+    "claim_ids": [],
+    "composed_of": [],
+    "concept": "signal-intel-retrieve",
+    "domain": "retrieval",
+    "gap": null,
+    "id": "method-signal-intel-retrieve",
+    "maturity": "LOCALLY_SUPPORTED",
+    "outcome_ids": [
+      "out-retrieve-milestone-20"
+    ],
+    "owner": "librarian",
+    "popularity_used_for_adoption": false,
+    "sources": [
+      "milestone-20"
+    ],
+    "statement": "Retrieve at most 3 method-graph refs for a later task, or none."
+  }
+]

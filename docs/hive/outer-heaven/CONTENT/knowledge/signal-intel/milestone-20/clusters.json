@@ -1,0 +1,165 @@
+[
+  {
+    "approaches": [
+      "new-vs-existing-is-a-branch",
+      "safe-wrong-then-constraints",
+      "saved-session-saved-secret-2fa-is-the-wall",
+      "speech-ne-behavior"
+    ],
+    "claim_ids": [
+      "K-eFOTQpbGcy8-01",
+      "K-glM8godEcic-02",
+      "K-CB5bG4mvnS0-03",
+      "K-CB5bG4mvnS0-04",
+      "K-CB5bG4mvnS0-05",
+      "K-CB5bG4mvnS0-06"
+    ],
+    "id": "problem-agent-ops",
+    "owner": "researcher",
+    "problem": "agent-ops",
+    "sources": [
+      "CB5bG4mvnS0",
+      "eFOTQpbGcy8",
+      "glM8godEcic"
+    ]
+  },
+  {
+    "approaches": [
+      "90-minute-camera-on-poc",
+      "beginner-200-300k-unverified",
+      "buyers-dislike-term-AI",
+      "category-pitch-fails",
+      "contrarian-stop-selling-agents-while-his-other-titles-sell-agents",
+      "diagnose-solve-value-price",
+      "example-first-1-200-linkedin-content-workflow-2-hours",
+      "example-imposter-would-have-worked-free",
+      "example-linkedin-outreach-bot-as-product",
+      "example-pedagogy-onboarding",
+      "flashy-videos-win-views-practical-videos-win-money",
+      "fraction-of-annual-price-written-scope",
+      "free-cheap-or-money-back-for-first-3-5",
+      "free-work-for-proof",
+      "lrp-interview-listen-repeat-poke",
+      "ordered-procedure",
+      "resourceful-custom-agent",
+      "rule-if-a-template-bundle-is-the-product-he-says-race-to-the-bottom-lear",
+      "rule-if-building-90-min-for-a-poc-he-says-you-drifted",
+      "rule-if-niche-fails-repeat-pay-fast-language-pick-another-hive-catalog-o",
+      "rule-if-no-proof-yet-he-chooses-free-cheap-or-guarantee-hive-evens-only-",
+      "rule-if-scope-is-vague-write-the-ten-functionalities-definition-of-done-",
+      "rule-if-the-pitch-names-the-tool-agent-chatbot-linkedin-bot-rewrite-to-t",
+      "rule-if-they-describe-a-week-lrp-until-numbers-exist",
+      "rule-if-tuesday-s-bottleneck-fits-crm-native-do-not-custom-agent",
+      "show-specific-build-inbound",
+      "speech-ne-behavior",
+      "time-money-focus-only"
+    ],
+    "claim_ids": [
+      "K-x-2088007687149601254-01",
+      "K-x-2088007687149601254-02",
+      "K-x-2088007687149601254-03",
+      "K-x-2088007687149601254-04",
+      "K-x-2088007687149601254-05",
+      "K-w9-gfaV5vlM-01",
+      "K-w9-gfaV5vlM-02",
+      "K-w9-gfaV5vlM-03",
+      "K-w9-gfaV5vlM-04",
+      "K-w9-gfaV5vlM-05",
+      "K-w9-gfaV5vlM-06",
+      "K-w9-gfaV5vlM-07",
+      "K-w9-gfaV5vlM-08",
+      "K-w9-gfaV5vlM-09",
+      "K-w9-gfaV5vlM-10",
+      "K-w9-gfaV5vlM-11",
+      "K-w9-gfaV5vlM-12",
+      "K-w9-gfaV5vlM-13",
+      "K-w9-gfaV5vlM-14",
+      "K-w9-gfaV5vlM-15",
+      "K-w9-gfaV5vlM-16",
+      "K-w9-gfaV5vlM-17",
+      "K-w9-gfaV5vlM-18",
+      "K-w9-gfaV5vlM-19",
+      "K-w9-gfaV5vlM-20",
+      "K-w9-gfaV5vlM-21",
+      "K-w9-gfaV5vlM-22",
+      "K-w9-gfaV5vlM-23",
+      "K-w9-gfaV5vlM-24",
+      "K-w9-gfaV5vlM-25",
+      "K-w9-gfaV5vlM-26",
+      "K-w9-gfaV5vlM-27",
+      "K-w9-gfaV5vlM-28"
+    ],
+    "id": "problem-offer-positioning",
+    "owner": "researcher",
+    "problem": "offer-positioning",
+    "sources": [
+      "w9-gfaV5vlM",
+      "x-2088007687149601254"
+    ]
+  },
+  {
+    "approaches": [
+      "close-rate-40-50pct-raise",
+      "mcp-as-a-sales-lever-not-just-architecture",
+      "no-freelancer-position-inbound",
+      "outreach-agent-fills-db-does-not-send",
+      "random-1-650-then-retrofit-roi",
+      "sales-agent-flywheel-admin-assistant-complexity",
+      "team-pricing-cost-the-process-then-invest",
+      "title-200k-absent-from-body",
+      "traps-underprice-underscope-early-retainers",
+      "two-week-qa"
+    ],
+    "claim_ids": [
+      "K-HNKlFTd1maM-01",
+      "K-HNKlFTd1maM-02",
+      "K-HNKlFTd1maM-03",
+      "K-HNKlFTd1maM-04",
+      "K-HNKlFTd1maM-05",
+      "K-HNKlFTd1maM-06",
+      "K-HNKlFTd1maM-07",
+      "K-HNKlFTd1maM-08",
+      "K-HNKlFTd1maM-09",
+      "K-eFOTQpbGcy8-02"
+    ],
+    "id": "problem-offer-pricing",
+    "owner": "researcher",
+    "problem": "offer-pricing",
+    "sources": [
+      "HNKlFTd1maM",
+      "eFOTQpbGcy8"
+    ]
+  },
+  {
+    "approaches": [],
+    "claim_ids": [
+      "K-CB5bG4mvnS0-04",
+      "K-CB5bG4mvnS0-05",
+      "K-CB5bG4mvnS0-06",
+      "K-HNKlFTd1maM-03",
+      "K-HNKlFTd1maM-06",
+      "K-HNKlFTd1maM-09",
+      "K-eFOTQpbGcy8-02",
+      "K-w9-gfaV5vlM-01",
+      "K-w9-gfaV5vlM-02",
+      "K-w9-gfaV5vlM-03",
+      "K-w9-gfaV5vlM-04",
+      "K-w9-gfaV5vlM-06",
+      "K-w9-gfaV5vlM-08",
+      "K-w9-gfaV5vlM-11",
+      "K-w9-gfaV5vlM-13",
+      "K-w9-gfaV5vlM-14",
+      "K-w9-gfaV5vlM-28"
+    ],
+    "id": "problem-in-cohort-contradictions",
+    "owner": "researcher",
+    "problem": "stored disagreements inside the cohort",
+    "sources": [
+      "CB5bG4mvnS0",
+      "HNKlFTd1maM",
+      "eFOTQpbGcy8",
+      "glM8godEcic",
+      "w9-gfaV5vlM"
+    ]
+  }
+]

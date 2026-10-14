@@ -1,0 +1,28 @@
+[
+  {
+    "claim_ids": [
+      "K-w9-gfaV5vlM-02",
+      "K-w9-gfaV5vlM-04",
+      "K-w9-gfaV5vlM-06",
+      "K-w9-gfaV5vlM-08",
+      "K-w9-gfaV5vlM-11",
+      "K-w9-gfaV5vlM-14",
+      "K-CB5bG4mvnS0-04",
+      "K-CB5bG4mvnS0-05",
+      "K-CB5bG4mvnS0-06"
+    ],
+    "concept": "speech-ne-behavior",
+    "conditions_by_source": {
+      "CB5bG4mvnS0": "Caption-only. Store mismatch; do not pick a winner.",
+      "w9-gfaV5vlM": "Caption-only. Store mismatch; do not pick a winner."
+    },
+    "id": "atom-speech-ne-behavior",
+    "maturity": "CANDIDATE",
+    "owner": "librarian",
+    "sources": [
+      "CB5bG4mvnS0",
+      "w9-gfaV5vlM"
+    ],
+    "statement": "Shared concept `speech-ne-behavior` across 2 sources. Conditions stay per source. Not averaged."
+  }
+]
