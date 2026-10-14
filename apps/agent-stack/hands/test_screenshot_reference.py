@@ -30,6 +30,19 @@ class SavedScreenshot(unittest.TestCase):
             with mock.patch.object(M,'_run',side_effect=[subprocess.CompletedProcess([],0,'',''),subprocess.CompletedProcess([],0,'/wrong/file','')]):
                 got=M.reveal_screenshot(receipt,home)
             self.assertFalse(got['ok']);self.assertFalse(got['task_verified'])
+    def test_icloud_availability_change_is_not_file_identity_change(self):
+        with tempfile.TemporaryDirectory() as d:
+            home=Path(d);f=self.shot(home);receipt=M.screenshot_fingerprint(f,home)
+            fresh={**receipt,'locally_available':False,'verification':'filename_and_metadata_only'}
+            with mock.patch.object(M,'screenshot_fingerprint',return_value=fresh), mock.patch.object(M,'_run',side_effect=[subprocess.CompletedProcess([],0,'',''),subprocess.CompletedProcess([],0,str(f)+'\n','')]):
+                got=M.reveal_screenshot(receipt,home)
+            self.assertTrue(got['task_verified'])
+    def test_folder_name_survives_user_facing_path_scrubbing(self):
+        with tempfile.TemporaryDirectory() as d:
+            home=Path(d);self.shot(home)
+            with mock.patch.object(M,'_run',return_value=subprocess.CompletedProcess([],0,'','')):
+                got=M.latest_screenshot(home)
+            self.assertIn('Desktop folder.',got['spoken']);self.assertNotIn(str(home),got['spoken'])
     def test_exact_selection_postcondition(self):
         with tempfile.TemporaryDirectory() as d:
             home=Path(d);f=self.shot(home);receipt=M.screenshot_fingerprint(f,home)

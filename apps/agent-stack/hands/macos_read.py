@@ -301,21 +301,27 @@ def latest_screenshot(home=None):
     found.sort(key=lambda x:(x['created'],x['mtime_ns'],x['path']),reverse=True)
     chosen=found[0]
     cloud_note = ' Its contents are in iCloud; I checked its filename and file metadata, not its image contents.' if not chosen['locally_available'] else ''
-    return {'ok':True,'spoken':'The latest saved screenshot I found is '+Path(chosen['path']).name+' in '+str(Path(chosen['path']).parent)+'.'+cloud_note,
+    return {'ok':True,'spoken':'The latest saved screenshot I found is '+Path(chosen['path']).name+' in '+Path(chosen['path']).parent.name+' folder.'+cloud_note,
             'artifact':chosen,'scope_notes':notes,'scope':'Spotlight plus Desktop and Downloads; other unindexed locations may be missing'}
+
+
+def same_screenshot(left, right):
+    # iCloud local availability is observation status, not file identity.
+    keys = ('path','size','mtime_ns','inode','device','created','kind')
+    return all(left.get(key) == right.get(key) for key in keys)
 
 
 def reveal_screenshot(artifact,home=None):
     """Only a previously verified screenshot receipt; launch is not visibility proof."""
     try:
         fresh=screenshot_fingerprint(artifact.get('path',''),home)
-        if fresh != artifact: raise ValueError('the screenshot changed since lookup')
+        if not same_screenshot(fresh, artifact): raise ValueError('the screenshot changed since lookup')
         proc=_run(['/usr/bin/open','-R',fresh['path']],timeout=4)
         if proc.returncode != 0: raise ValueError('Finder reveal request failed')
         # Read selection back without interpolating a path or user text into AppleScript.
         check=_run(['/usr/bin/osascript','-e','tell application "Finder"\nif (count of selection) is 1 then return POSIX path of ((item 1 of selection) as alias)\nreturn ""\nend tell'],timeout=4)
         visible=check.returncode == 0 and check.stdout.strip() == fresh['path']
-        unchanged=screenshot_fingerprint(fresh['path'],home) == fresh
+        unchanged=same_screenshot(screenshot_fingerprint(fresh['path'],home), fresh)
         if not visible or not unchanged:
             return {'ok':False,'spoken':'I requested Finder to reveal the screenshot, but could not verify its selection.','task_verified':False,'artifact':fresh}
         return {'ok':True,'spoken':'Finder has selected '+Path(fresh['path']).name+'.','task_verified':True,'artifact':fresh,'postcondition':'exact Finder selection read back'}
