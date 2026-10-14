@@ -1283,6 +1283,23 @@ def _research_build_request(utterance):
     return all(re.search(pattern, text, re.I) for pattern in (r"\bresearch\b", r"\bsaved\b.{0,30}\byoutube\b", r"\bbuild\b", r"\btests?\b", r"\bartcraft\b", r"\bobsidian\b"))
 
 
+def _workflow_followup_route(utterance, hive):
+    """A named project answer continues the retained task, never a model guess."""
+    if hive is None:
+        return None
+    adapter = _coding_mission_hand()
+    ident = adapter.read_json(Path(hive) / "coding-missions" / "latest_workflow.json").get("mission_id", "")
+    if not re.fullmatch(r"[a-f0-9]{32}", str(ident)):
+        return None
+    text = str(utterance or "").strip()
+    if re.fullmatch(r"(?:please\s+)?(?:resume|continue)\s+(?:the\s+)?workflow[.!]?", text, re.I):
+        return {"tool":"agent_tools", "args":{"action":"research_build_continue","mission_id":ident}, "speak":""}
+    match = re.fullmatch(r"(?:please\s+)?use\s+(?:project\s+)?(?P<repo>\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)(?:\s+on\s+branch\s+(?P<branch>[\w./-]+))?[.!]?", text, re.I)
+    if match:
+        return {"tool":"agent_tools", "args":{"action":"research_build_bind","mission_id":ident,"repo":match.group("repo").strip("\"'"),"branch":match.group("branch") or ""}, "speak":""}
+    return None
+
+
 def _coding_resume_match(utterance):
     return re.fullmatch(
         r"(?:please\s+)?(?:resume|continue)\s+(?:(?:that|the|my|last|latest)\s+)?"
@@ -5675,6 +5692,22 @@ def _run_tool_inner(
                 "task_verified": bool(got.get("ok")), "plan_meta": hd.log_meta(got)}
     if tool == "agent_tools":
         hd = _agent_tools_hand()
+        if args.get("action") in {"research_build_bind", "research_build_continue"}:
+            owner_pick = _workflow_followup_route(utterance, hive)
+            if not owner_pick or owner_pick["args"]["action"] != args.get("action"):
+                return {"ok":False,"tool":tool,"spoken":"No project binding or workflow continuation was requested.","task_verified":False,"wires":[tool],"cites":[],"sent":False}
+            if gen is not None and turn_cancelled(hive, gen):
+                return {"ok":False,"tool":tool,"spoken":"Stopped. The assignment is preserved.","task_verified":False,"cancelled":True,"wires":[tool],"cites":[],"sent":False}
+            owned = owner_pick["args"]
+            handle = _coding_mission_hand().WorkflowMissionHandle(hive)
+            try:
+                result = (handle.continue_workflow(owned["mission_id"], utterance) if owned["action"] == "research_build_continue"
+                          else handle.bind_project(owned["mission_id"], owned["repo"], owned["branch"], utterance))
+                if gen is not None:
+                    act_if_current(hive, gen, lambda bus:dict(bus, workflow_mission_id=result["mission_id"], workflow_status=result["status"], workflow_task_verified=False))
+                return result
+            except (ValueError, RuntimeError, OSError) as exc:
+                return {"ok":False,"tool":tool,"spoken":"The assignment is preserved, but its project could not be bound: " + str(exc),"task_verified":False,"wires":[tool],"cites":[],"sent":False}
         if args.get("action") == "research_build_start":
             if not _research_build_request(utterance):
                 return {"ok":False,"tool":tool,"spoken":"No research and build assignment was requested.","task_verified":False,"wires":[tool],"cites":[],"sent":False}
@@ -5683,7 +5716,10 @@ def _run_tool_inner(
             adapter = _coding_mission_hand()
             controller = adapter._load("coding_mission_controller", STACK / "brain" / "mission_controller.py")
             try:
-                return controller.MissionController(adapter).start_research_build(hive, utterance)
+                result = controller.MissionController(adapter).start_research_build(hive, utterance)
+                if gen is not None:
+                    act_if_current(hive, gen, lambda bus:dict(bus, workflow_mission_id=result["mission_id"], workflow_status=result["status"], workflow_task_verified=False))
+                return result
             except (ValueError, RuntimeError, OSError) as exc:
                 return {"ok":False,"tool":tool,"spoken":"I couldn't retain the assignment safely: " + str(exc),"task_verified":False,"wires":[tool],"cites":[],"sent":False}
         # Only an exact operator code request becomes durable background work.
@@ -7164,7 +7200,7 @@ def apply_pipeline_iter(
     # Loop on_it: decide the model-free route now so the very first chunk can be the ack line.
     spoken_in = correction_text(spoken_in)
     had_pending = hive is not None and _confirm_path(hive).exists()
-    early = confirm_take(hive, spoken_in) or live_chat_route(spoken_in, had_pending) or model_free_route(spoken_in)
+    early = confirm_take(hive, spoken_in) or live_chat_route(spoken_in, had_pending) or _workflow_followup_route(spoken_in, hive) or model_free_route(spoken_in)
     ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""
     yield _pipeline_event(
         ok=True,
