@@ -98,20 +98,84 @@ function inputRoutes() {
   const c = vm.createContext({$:()=>typed,turn:(...args)=>calls.push(args),
     unlockAudio:()=>assert.fail('Keyboard input must not unlock audio'),
     state:{pending:'Pending question'},isMouthEcho:()=>false,
-    WAKE_RE:/^jarvis[, ]*/i,YES_RE:/^yes$/i,greet:()=>{},lastTtsBusyAt:0,FOLLOW_UP_MS:12000});
+    STOP_RE:/^(?:jarvis[, ]*)?(stop|cancel|never mind|forget it|shut up)[.!?]?$/i,WAKE_RE:/^jarvis[, ]*/i,YES_RE:/^yes$/i,greet:()=>{},lastTtsBusyAt:0,FOLLOW_UP_MS:12000});
   const typedSource=html.slice(html.indexOf('    $("typed").addEventListener("keydown"'),html.indexOf('    if (WIDGET)',html.indexOf('    $("typed").addEventListener("keydown"')));
   vm.runInContext(typedSource,c);
   keyHandler({key:'Enter'});
-  assert.deepEqual(calls.shift(),['Keyboard question',false]);
+  assert.deepEqual(calls.shift(),['Keyboard question',false,false],'typed Enter must pass voice=false explicitly');
   assert.equal(typed.value,'');
   const micSource=html.slice(html.indexOf('    function handleHeard'),html.indexOf('    // FINISH_MS'));
   vm.runInContext(micSource,c);
+  for (const lastBusy of [0, Date.now() - 60000]) {
+    c.lastTtsBusyAt = lastBusy;
+    c.handleHeard('stop');
+    assert.deepEqual(calls.shift(), ['stop',false,true], 'bare stop must reach cancellation without wake or recent TTS');
+  }
+  c.lastTtsBusyAt = 0;
   c.handleHeard('Jarvis explain');
-  assert.deepEqual(calls.shift(),['explain',false,true]);
+  assert.deepEqual(calls.shift(),['explain',false,true],'mic path must pass voice=true');
   c.handleHeard('yes');
   assert.deepEqual(calls.shift(),['Pending question',true,true]);
   c.handleHeard('The Routines section in the middle of your screen');  // no wake word, no live exchange: ignored
   assert.equal(calls.length,0,'unaddressed speech must not start a turn (self-echo loop)');
+}
+function watchNoticeTypedSilent() {
+  // BUS300-P0-002: Watch push notice paints text always; TTS only when mic armed.
+  const spoken = {textContent:''};
+  const spokenOut = [];
+  const fetches = [];
+  const c = vm.createContext({
+    state:{turning:false,armed:false}, watchNoticeId:null,
+    $:()=>spoken, enqueueSpeak:(t)=>spokenOut.push(t),
+    api:async()=>({}),
+    fetch:(url,opts)=>{fetches.push({url,opts}); return Promise.resolve({});},
+  });
+  const start = html.indexOf('        const notice = bus && bus.watch_notice;');
+  const end = html.indexOf('        reconcilePhase(bus);', start);
+  assert.ok(start > 0 && end > start, 'watch_notice slice');
+  // Wrap the notice block into an async fn for the harness.
+  vm.runInContext(
+    'async function runNotice(bus){\n' + html.slice(start, end) + '\n}',
+    c
+  );
+  return c.runNotice({
+    watch_notice:{event_id:'n1', delivered:false, spoken:'Watch saw a change.'}
+  }).then(()=>{
+    assert.equal(spoken.textContent,'Watch saw a change.');
+    assert.deepEqual(spokenOut,[],'disarmed mic must not TTS watch notices');
+    assert.equal(fetches.length,1,'ack still fires');
+    c.state.armed = true;
+    c.watchNoticeId = null;
+    return c.runNotice({
+      watch_notice:{event_id:'n2', delivered:false, spoken:'Second notice.'}
+    });
+  }).then(()=>{
+    assert.deepEqual(spokenOut,['Second notice.'],'armed mic may speak watch notices');
+  });
+}
+function selfEchoGuards() {
+  // Offline contract for the 15:12 mic self-loop: TTS busy/tail + fuzzy match of recent Jarvis lines.
+  const c = vm.createContext({
+    Date, STOP_RE:/^stop$/i, ECHO_RE:/adopted path missing/i,
+    ttsBusy:false, synth:null, ttsSource:null, ttsAudio:null,
+    lastTtsBusyAt:0, ECHO_TAIL_MS:1800, FOLLOW_UP_MS:12000,
+    recentSpoken:[], lastSpoken:'', state:{turning:false},
+  });
+  const ttsSrc = html.slice(html.indexOf('    const ttsSpeaking = () =>'), html.indexOf('    const echoWords = (t) =>'));
+  const echoSrc = html.slice(html.indexOf('    const echoWords = (t) =>'), html.indexOf('    function pageVisible()'));
+  const mouthSrc = html.slice(html.indexOf('    function isMouthEcho(said)'), html.indexOf('    function handleHeard(raw)'));
+  vm.runInContext(ttsSrc + echoSrc + mouthSrc, c);
+  c.lastSpoken = 'Handing the wheel back, sir. It is yours.';
+  c.recentSpoken = ['Handing the wheel back, sir. It is yours.'];
+  assert.equal(c.soundsLikeJarvis('Handing the wheel back sir it is yours'), true, 'fuzzy match of last Jarvis line');
+  assert.equal(c.soundsLikeJarvis('open Safari for me please'), false, 'unrelated ask is not an echo');
+  assert.equal(c.isMouthEcho('Handing the wheel back sir it is yours'), true);
+  assert.equal(c.isMouthEcho('stop'), false, 'stop must never be treated as echo');
+  c.lastTtsBusyAt = Date.now();
+  assert.equal(c.isMouthEcho('Jarvis what time is it'), true, 'TTS tail gates the mic');
+  c.lastTtsBusyAt = Date.now() - 5000;
+  c.lastSpoken = ''; c.recentSpoken = [];
+  assert.equal(c.isMouthEcho('Jarvis what time is it'), false);
 }
 async function terminalReceiptDoesNotWaitForEOF() {
   const element={textContent:"previous",className:""};
@@ -169,9 +233,11 @@ function busReconciliation() {
   await blockedAudioDoesNotBlockText(false);
   await blockedAudioDoesNotBlockText(true);
   inputRoutes();
+  await watchNoticeTypedSilent();
+  selfEchoGuards();
   busReconciliation();
   for(const voice of [undefined,true]) for(const json of [false,true]) await scenario(voice,json);
   for(const voice of [undefined,true]) await scenario(voice,false,true);
   for(const json of [false,true]) await scenario(false,json,false,true);
-  console.log('Real blocked-TTS pump, input routing, 8 response cases and bus reconciliation passed: typed silent, mic speaks, partial text, duplicate finals, stale polls, failed Watch results and remount.');
+  console.log('Real blocked-TTS pump, input routing, typed-vs-mic watch-notice gate, self-echo guards, 8 response cases and bus reconciliation passed: typed silent, mic speaks, partial text, duplicate finals, stale polls, failed Watch results and remount.');
 })().catch(e=>{console.error(e);process.exitCode=1});

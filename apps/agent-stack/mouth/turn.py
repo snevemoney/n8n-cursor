@@ -757,7 +757,7 @@ def _apply_turn_iter_inner(
         _rx2 = _reflex(spoken) or {}
         if _sl and float(_rx2.get("stakes") or 0) >= 0.5 and float(_rx2.get("vault_hit") or 0) < 0.6:
             got = {"ok": True, "tool": "slots", "spoken": _sl["spoken"], "missing": _sl["missing"], "wires": ["reflex", "slots"],
-                   "cites": [], "sent": False, "task_verified": True, "outcome": "ASK_NOTHING_IMPROVISED"}
+                   "cites": [], "sent": False, "task_verified": False, "outcome": "ASK_NOTHING_IMPROVISED"}
             PIPELINE.mutate_bus(Path(hive), lambda bus: dict(bus, reflex=dict(bus.get("reflex") or {}, verdict="ASK \u00b7 NOTHING IMPROVISED")))
             yield _door_speak(hive, spoken, got["spoken"], "slots", retrieve_roots, gen=token, execution=got)
             _lp = PIPELINE._load("agent_stack_lapse", PIPELINE.STACK / "hands" / "lapse.py")

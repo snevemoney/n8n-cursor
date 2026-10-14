@@ -739,11 +739,15 @@ WORKSPACE_READ_RE = re.compile(
 
 def _memory_hand():
     name = "agent_stack_memory"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "remember.py")
+    path = STACK / "hands" / "remember.py"
+    stamp = path.stat().st_mtime_ns
+    cached = sys.modules.get(name)
+    if cached is None or getattr(cached, "_source_stamp", None) != stamp:
+        spec = importlib.util.spec_from_file_location(name, path)
         mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
         spec.loader.exec_module(mod)
+        mod._source_stamp = stamp
+        sys.modules[name] = mod
     return sys.modules[name]
 
 
@@ -5520,7 +5524,7 @@ def _run_tool_inner(
         got = _screen_see_hand().run({}, hive=hive, vision_fn=_vision)
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
                 "wires": ["screen_see"], "cites": [], "sent": False,
-                "task_verified": bool(got.get("ok")), "screen_see_meta": hd.log_meta(got)}
+                "task_verified": bool(got.get("task_verified")), "screen_see_meta": hd.log_meta(got)}
     if tool == "prebrief":
         got = _prebrief_hand().prep(utterance, cal_fn=_cal_today, search_fn=lambda q: RETRIEVE.search(q) if RETRIEVE else {})
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["calendar", "vault"],
@@ -5657,7 +5661,7 @@ def _run_tool_inner(
         }
     if tool == "memory":
         mem = _memory_hand()
-        got = mem.run(dict(args) if args.get("op") else mem.args_from_utterance(utterance))
+        got = mem.run(dict(args) if args.get("op") else mem.args_from_utterance(utterance), utterance=utterance)
         return {"ok": got["ok"], "tool": tool, "spoken": got["spoken"],
                 "wires": ["memory"], "cites": [], "sent": False,
                 "task_verified": got["ok"], "memory_meta": got["log"]}
@@ -6057,8 +6061,9 @@ def handback(hive: Path, gen: int | None = None) -> dict:
     except Exception:
         pass
     where = f" I stopped after {last[0].lower() + last[1:]}" if last.startswith("Step") else " Nothing was mid-step."
+    # Handback disarms Watch. It is not independent proof that a user task completed.
     return {"ok": True, "tool": "handback", "spoken": "The wheel is yours." + where + " I won't click or type until you ask again.",
-            "wires": ["watch"], "cites": [], "sent": False, "task_verified": True, "outcome": TOOL_LOOP}
+            "wires": ["watch"], "cites": [], "sent": False, "task_verified": False, "outcome": TOOL_LOOP}
 
 
 def _watch_stopped(cycles: int = 0) -> dict:

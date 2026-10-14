@@ -190,6 +190,8 @@ class FaceServeTest(unittest.TestCase):
         self.assertIn("if (!ok && gen === ttsGen) ok = await speakLocal(next, gen)", html)
         self.assertIn("unlockAudio", html)
         self.assertIn("async function turn(utterance, approved, voice = false)", html)
+        self.assertIn('turn($("typed").value.trim(), false, false)', html)
+        self.assertIn("if (state.armed) enqueueSpeak(line)", html.split("watch_notice", 1)[1][:800])
         self.assertIn("else if (!WIDGET)", html)
         self.assertIn('document.addEventListener("pointerdown", unlockAudio, true)', html)
         self.assertIn("const FINISH_MS = 900", html)

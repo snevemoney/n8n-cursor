@@ -1139,7 +1139,7 @@
       if (isMouthEcho(said)) return;
       const woke = WAKE_RE.test(said);
       const followUp = lastTtsBusyAt && Date.now() - lastTtsBusyAt < FOLLOW_UP_MS;
-      if (!woke && !followUp && !(state.pending && YES_RE.test(said))) return;  // not addressed: no wake word, no live exchange
+      if (!STOP_RE.test(said) && !woke && !followUp && !(state.pending && YES_RE.test(said))) return;  // not addressed: no wake word, no live exchange
       said = said.replace(WAKE_RE, "").trim() || (woke ? "" : said);
       if (!said) { greet(); return; }
       if (state.pending && YES_RE.test(said)) turn(state.pending, true, true);
@@ -1810,17 +1810,37 @@
       if (el.classList.contains("on") && Number(bus && bus.turn_gen || 0) > Number(el.dataset.turnGen || 0)) {
         el.classList.remove("on");  // a new turn started: the previous turn's card steps aside
       }
-      if (lastInboxGen === null) { lastInboxGen = gen; return; }
+      if (lastInboxGen === null) {
+        const first = ib && (ib.items || [])[ib.items.length - 1];
+        // Seed historical cards silently, but retain a future card for bus catch-up.
+        if (!first || first.turn_gen == null || Number(first.turn_gen) <= Number(bus.turn_gen || 0)) {
+          lastInboxGen = gen;
+          return;
+        }
+        lastInboxGen = gen - 1;
+      }
       if (gen <= lastInboxGen) return;
-      lastInboxGen = gen;
       const c = (ib.items || [])[ib.items.length - 1];
-      if (!c) return;
+      if (!c) { lastInboxGen = gen; return; }
       // Cards are bound to the turn that produced them (turn_gen). A card from an older turn,
       // or a background card while a turn is running, never covers the current reply.
+      // Do not advance lastInboxGen until paint succeeds or the card is permanently stale —
+      // otherwise a same-turn card arriving before bus.turn_gen catches up is lost forever.
       const cur = Number(bus.turn_gen || 0);
       if (c.turn_gen !== undefined && c.turn_gen !== null) {
-        if (Number(c.turn_gen) !== cur) return;
-      } else if (!c.background || bus.job_status === "working") return;
+        const cardGen = Number(c.turn_gen);
+        if (cardGen !== cur) {
+          if (cardGen > cur) return;  // bus lag: retry on the next poll
+          lastInboxGen = gen;  // older turn: drop
+          return;
+        }
+      } else if (!c.background) {
+        lastInboxGen = gen;  // non-background without turn_gen is invalid
+        return;
+      } else if (bus.job_status === "working") {
+        return;  // background while a turn runs: retry when idle
+      }
+      lastInboxGen = gen;
       el.dataset.turnGen = String(c.turn_gen === undefined || c.turn_gen === null ? cur : c.turn_gen);
       const esc = (x) => String(x || "").replace(/[&<>]/g, (k) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[k]));
       el.innerHTML = `<div class="h">JARVIS \u00b7 INBOX</div><div class="t">${esc(c.title)}</div>`
@@ -2017,7 +2037,8 @@
           const line = String(notice.spoken || "");
           if (line) {
             $("spoken").textContent = line;
-            enqueueSpeak(line);
+            // BUS300-P0-002: typed-only / mic-disarmed stays text; speak only when mic is armed.
+            if (state.armed) enqueueSpeak(line);
             fetch("/api/watch/ack", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -2069,7 +2090,8 @@
     });
     $("typed").addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
-        turn($("typed").value.trim(), false);
+        // BUS300-P0-002: typed = text only (voice=false); mic path alone may speak.
+        turn($("typed").value.trim(), false, false);
         $("typed").value = "";
       }
     });
@@ -2087,7 +2109,7 @@
     if ($("stopBtn")) $("stopBtn").addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      turn("stop", false);
+      turn("stop", false, false);
     });
     if ($("hideBtn")) $("hideBtn").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); toggleChrome(); });
     if ($("micBtn")) {

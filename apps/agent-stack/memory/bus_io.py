@@ -217,6 +217,8 @@ def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
         # An earlier tool's receipt is not evidence for the newly opened turn.
         bus.pop("execution", None)
         bus.pop("execution_gen", None)
+        bus.pop("task_verified", None)
+        bus.pop("task_verified_gen", None)
         bus["updated_at"] = now_iso()
         if arm_watch:
             watch = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}
@@ -294,6 +296,10 @@ def cancel_turn_scoped(
         bus["terminal_response_gen"] = running
         bus["response_ok"] = line == "Stopped. Standing by."
         bus["response_ok_gen"] = running
+        # A cancel is never task proof. Drop stale verified flags so a later
+        # poll cannot read "done" from a cancelled generation.
+        bus.pop("task_verified", None)
+        bus.pop("task_verified_gen", None)
         bus["phase"] = "idle"
         bus["job_status"] = "done"
         bus["spoken"] = line
@@ -323,6 +329,8 @@ def cancel_turn(hive: Path) -> int:
         bus["spoken"] = "Stopped. Standing by."
         bus["permission_ask"] = None
         bus["utterance"] = bus.get("utterance") or "stop"
+        bus.pop("task_verified", None)
+        bus.pop("task_verified_gen", None)
         watch = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}
         watch["armed"] = False
         watch["held"] = False

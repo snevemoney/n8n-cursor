@@ -28,10 +28,17 @@ class HandbackTest(unittest.TestCase):
         self.assertEqual(w["steps"], ["Step 1: Clicking Notifications in Safari.", 'Step 2: Typing "hi" in Safari.'])
         got = P.handback(self.hive, 3)
         self.assertTrue(got["ok"])
+        self.assertFalse(got["task_verified"], "disarming Watch must not claim task proof")
         self.assertIn("wheel is yours", got["spoken"])
         self.assertIn("step 2", got["spoken"])
         w = json.loads((self.hive / "bus" / "state.json").read_text())["watch"]
         self.assertFalse(w["armed"])
+
+    def test_handback_never_self_certifies_task(self):
+        got = P.handback(self.hive, 3)
+        self.assertTrue(got["ok"])
+        self.assertFalse(got.get("task_verified"))
+        self.assertFalse(got.get("sent"))
 
 
 if __name__ == "__main__":

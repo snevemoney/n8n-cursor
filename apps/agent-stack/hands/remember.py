@@ -44,8 +44,22 @@ def _write(path: Path, items: list[str]) -> None:
             os.unlink(name)
 
 
-def run(args: dict) -> dict:
+def run(args: dict, *, utterance: str | None = None) -> dict:
+    """Execute memory operations; user-facing callers supply the original utterance.
+
+    Routing to this hand is not authority to persist a request. When the original
+    utterance is available, its explicit memory command determines both operation
+    and literal content, never the model's inferred or expanded arguments. The
+    arguments-only form remains for existing trusted programmatic callers.
+    """
     args = args or {}
+    if utterance is not None:
+        if not INTENT_RE.search(utterance) or re.match(r"^\s*(?:please\s+)?forget\s+(?:it|that)\s*[,.!?]?(?:\s+(?:stop|cancel|never mind)\b.*)?$", utterance, re.I):
+            result = {"op": str(args.get("op") or "recall"), "ok": False,
+                      "count": 0, "spoken": "You didn't ask me to remember, recall, or forget anything."}
+            result["log"] = {key: result[key] for key in ("op", "ok", "count")}
+            return result
+        args = args_from_utterance(utterance)
     op = str(args.get("op") or "recall")
     text = str(args.get("text") or "").strip()
     count = 0

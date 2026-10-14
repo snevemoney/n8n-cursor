@@ -67,8 +67,9 @@ def run(args: dict | None = None, *, hive: Path | None = None, grab_fn=None, vis
     if not text or not str(text).strip():
         return {**base, "ok": False, "wires": ["screen", "vision"],
                 "spoken": "I grabbed your screen, but the vision model is dark, so I can't describe it."}
+    # A vision description proves capture+model text, not that a user task completed.
     return {**base, "ok": True, "wires": ["screen", "vision"], "spoken": str(text).strip()[:600],
-            "task_verified": True}
+            "task_verified": False}
 
 
 def args_from_utterance(u: str) -> dict:
