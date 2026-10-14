@@ -10,6 +10,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+import time
 from pathlib import Path
 from typing import Any
 
@@ -86,9 +87,83 @@ def _git(d: Path, *args: str) -> tuple[int, str]:
         return 1, ""
 
 
+# File-type discovery reads directory entries only, never document contents.
+DOCUMENT_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|list|search|show)\b.{0,100}\b(?:books?|ebooks?|epubs?|pdfs?)\b", re.I)
+FIND_MAX_ENTRIES = 100000
+FIND_MAX_RESULTS = 2000
+FIND_SECONDS = 5.0
+
+
+def _find_documents(args, rs):
+    suffixes = args.get("extensions") or [".epub", ".pdf"]
+    if not isinstance(suffixes, list) or not suffixes or any(x not in (".epub", ".pdf") for x in suffixes):
+        return _deny("document search supports EPUB and PDF", "find")
+    if not rs:
+        return _deny("no allowed folders", "find")
+    raw = str(args.get("path") or "")
+    if raw:
+        root, err = _resolve(raw, rs)
+        if root is None:
+            return _deny(err, "find")
+        scan_roots = [root]
+    else:
+        scan_roots = rs
+    found, seen, errors, count = [], set(), [], 0
+    complete = True
+    deadline = time.monotonic() + FIND_SECONDS
+    for root in scan_roots:
+        if not root.is_dir():
+            errors.append(f"{root.name}: unavailable")
+            continue
+        def onerror(exc):
+            errors.append(f"{Path(exc.filename or root).name}: inaccessible")
+        for directory, dirs, files in os.walk(root, followlinks=False, onerror=onerror):
+            dirs[:] = sorted(d for d in dirs if not d.startswith(".") and not SECRET_NAME.search(d) and not (Path(directory) / d).is_symlink())
+            count += len(dirs) + len(files)
+            if count > FIND_MAX_ENTRIES or time.monotonic() >= deadline:
+                complete = False
+                break
+            for name in sorted(files):
+                if time.monotonic() >= deadline:
+                    complete = False
+                    break
+                if Path(name).suffix.lower() not in suffixes or SECRET_NAME.search(name):
+                    continue
+                path = Path(directory) / name
+                if path.is_symlink():
+                    continue
+                resolved, _ = _resolve(str(path), rs)
+                if resolved is None or not resolved.is_file() or str(resolved) in seen:
+                    continue
+                seen.add(str(resolved)); found.append(str(resolved))
+                if len(found) >= FIND_MAX_RESULTS:
+                    complete = False
+                    break
+            if not complete:
+                break
+        if not complete:
+            break
+    complete = complete and not errors
+    found.sort(key=str.casefold)
+    scope = "the requested allowed folder" if raw else "my currently allowed folders"
+    spoken = f"Found {len(found)} EPUB/PDF documents in {scope}. "
+    if found:
+        spoken += "Candidates: " + "; ".join(found[:12]) + ". "
+        if len(found) > 12:
+            spoken += f"The inventory contains all {len(found)} paths; only the first 12 are spoken. "
+    spoken += "PDFs may be articles or other documents, so these are not all confirmed books. "
+    spoken += "This is not a whole-Mac search."
+    if not complete:
+        spoken += " The inventory is incomplete: some folders were inaccessible or the search limit was reached."
+    return {"ok": True, "op": "find", "files": found, "count": len(found), "complete": complete,
+            "scope": [str(r) for r in scan_roots], "errors": errors, "spoken": spoken}
+
+
 def run(args: dict, roots=None) -> dict[str, Any]:
     op = str((args or {}).get("op") or "read")
     rs = _roots(roots)
+    if op == "find":
+        return _find_documents(args or {}, rs)
     if op == "repos":
         names = []
         for r in rs:
@@ -172,6 +247,11 @@ _FOLDER = re.compile(r"\b(?:in|from|inside)\s+(?:my\s+|the\s+)?(downloads|deskto
 
 def args_from_utterance(u: str) -> dict:
     s = u or ""
+    if DOCUMENT_FIND_RE.search(s):
+        suffixes = ([".epub"] if re.search(r"\bepubs?\b", s, re.I) else []) + ([".pdf"] if re.search(r"\bpdfs?\b", s, re.I) else [])
+        folder = _FOLDER.search(s)
+        return {"op": "find", "extensions": suffixes or [".epub", ".pdf"],
+                "path": str(Path.home() / folder.group(1).capitalize()) if folder else ""}
     if _words().STATUS_ASK.search(s) and not _FILE.search(s):
         return {"op": "status", "path": ""}
     sec = _SECRET_ASK.search(s)

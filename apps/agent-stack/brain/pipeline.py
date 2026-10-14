@@ -753,7 +753,7 @@ def wants_memory(utterance: str) -> bool:
 
 def wants_workspace_read(utterance: str) -> bool:
     """Explicit read-only file / folder / git ask. Goes to hands/workspace_read, never a guess."""
-    return bool(WORKSPACE_READ_RE.search(utterance or ""))
+    return bool(WORKSPACE_READ_RE.search(utterance or "") or _workspace_read_hand().DOCUMENT_FIND_RE.search(utterance or ""))
 
 
 SKILLS_RE = re.compile(
@@ -5653,7 +5653,8 @@ def _run_tool_inner(
                 "task_verified": got["ok"], "memory_meta": got["log"]}
     if tool == "workspace_read":
         wr = _workspace_read_hand()
-        wargs = dict(args) if args.get("op") else wr.args_from_utterance(utterance)
+        parsed = wr.args_from_utterance(utterance)
+        wargs = parsed if parsed.get("op") == "find" else (dict(args) if args.get("op") else parsed)
         wpath = str(wargs.get("path") or "")
         invented = wargs.get("op") == "read" and wpath and Path(wpath).name.lower() not in (utterance or "").lower()
         if invented and not PULL_UP_MY_RE.search(utterance or ""):
@@ -5673,8 +5674,11 @@ def _run_tool_inner(
             "wires": ["workspace_read"],
             "cites": [],
             "sent": False,
-            "task_verified": bool(got.get("ok")),
+            "task_verified": bool(got.get("ok")) and (got.get("complete") is True if wargs.get("op") == "find" else True),
             "workspace_meta": wr.log_meta(got),
+            "workspace_files": got.get("files", []),
+            "workspace_complete": got.get("complete"),
+            "workspace_scope": got.get("scope", []),
         }
     if tool == "converse":
         return {
