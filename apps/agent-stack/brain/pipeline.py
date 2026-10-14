@@ -1256,6 +1256,21 @@ def _agent_tools_hand():
     return sys.modules[name]
 
 
+
+def _coding_mission_hand():
+    name = "agent_stack_coding_mission"
+    path = STACK / "hands" / "coding_mission.py"
+    stamp = path.stat().st_mtime_ns
+    cached = sys.modules.get(name)
+    if cached is None or getattr(cached, "_source_stamp", None) != stamp:
+        spec = importlib.util.spec_from_file_location(name, path)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+        mod._source_stamp = stamp
+    return sys.modules[name]
+
+
 def _code_run_hand():
     name = "agent_stack_code_run"
     if name not in sys.modules:
@@ -1600,6 +1615,7 @@ def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
 
 def cancel_turn(hive: Path) -> int:
     browser_runtime().BrowserMissionHandle(hive).cancel_active()
+    _coding_mission_hand().CodingMissionHandle(hive).cancel_active()
     if BUS_IO is not None and hasattr(BUS_IO, "cancel_turn"):
         gen = int(BUS_IO.cancel_turn(hive))
         note_wire(
@@ -5628,6 +5644,33 @@ def _run_tool_inner(
                 "task_verified": bool(got.get("ok")), "plan_meta": hd.log_meta(got)}
     if tool == "agent_tools":
         hd = _agent_tools_hand()
+        # Only an exact operator code request becomes durable background work.
+        # Model-selected arguments cannot widen the request or start another repo.
+        explicit = hd.args_from_utterance(utterance)
+        steps = explicit.get("steps") or ([explicit] if explicit.get("op") else [])
+        if len(steps) == 1 and steps[0].get("op") == "code":
+            if gen is not None and turn_cancelled(hive, gen):
+                return {"ok": False, "tool": tool, "spoken": "The task was stopped.",
+                        "wires": [tool], "cites": [], "sent": False,
+                        "cancelled": True, "task_verified": False}
+            try:
+                return _coding_mission_hand().CodingMissionHandle(hive).start(steps[0], utterance)
+            except (ValueError, RuntimeError, OSError) as exc:
+                return {"ok": False, "tool": tool, "spoken": "The coding task could not start: " + str(exc),
+                        "wires": [tool], "cites": [], "sent": False, "task_verified": False}
+        if args.get("action") == "coding_status" and re.fullmatch(
+                r"(?:please\s+)?(?:show|what is|give me)\s+(?:the\s+)?(?:coding|code)\s+(?:task|mission)\s+(?:status|progress)[.!?]?", utterance.strip(), re.I):
+            adapter = _coding_mission_hand()
+            mission_id = adapter.read_json(Path(hive) / "coding-missions" / "latest.json").get("mission_id", "")
+            try:
+                state = adapter.CodingMissionHandle(hive).status(mission_id)
+                spoken = adapter.progress_line(state)
+                return {"ok": True, "tool": tool, "spoken": spoken,
+                        "mission_id": mission_id, "task_verified": False,
+                        "wires": [tool], "cites": [], "sent": False, "source": "mission_state"}
+            except (ValueError, RuntimeError, OSError) as exc:
+                return {"ok": False, "tool": tool, "spoken": "Coding task status is unavailable: " + str(exc),
+                        "task_verified": False, "wires": [tool], "cites": [], "sent": False}
         def cancelled():
             return gen is not None and turn_cancelled(hive, gen)
 
@@ -7059,6 +7102,10 @@ def apply_pipeline_iter(
         except (OSError, TypeError, AttributeError):
             pass
 
+    if re.fullmatch(r"(?:please\s+)?(?:show|what is|give me)\s+(?:the\s+)?(?:coding|code)\s+(?:task|mission)\s+(?:status|progress)[.!?]?", spoken_in.strip(), re.I):
+        pick = {"tool": "agent_tools", "args": {"action": "coding_status"}, "speak": ""}
+        brain = "coding_mission"
+
     # Browser progress is exact mission state, not a conversational model task.
     if (re.search(r"\bbrowser (?:research )?(?:flows?|mission|work|research)\b", spoken_in, re.I)
             and re.search(r"\b(how many|progress|status|finished|completed|done|so far)\b", spoken_in, re.I)
@@ -7871,7 +7918,7 @@ def apply_pipeline_iter(
             tool_ms=(ran or {}).get("tool_ms"),
         tool=tool,
         see=ran.get("see"),
-        mission=ran if tool == "browser_mission" else None,
+        mission=ran if tool == "browser_mission" or (ran or {}).get("mission_id") else None,
         spoken=text,
         spoken_delta=extra,
         wires=wires,
@@ -7939,7 +7986,8 @@ def deliver_browser_missions(hive: Path) -> dict | None:
     if BUS_IO is None or not hasattr(BUS_IO, "commit_mission_response"):
         return None
     runtime = browser_runtime()
-    results = sorted((Path(hive) / "browser-missions").glob("*/result.json"))
+    results = sorted(list((Path(hive) / "browser-missions").glob("*/result.json")) +
+                     list((Path(hive) / "coding-missions").glob("*/result.json")))
     for path in results:
         result = runtime.read_json(path)
         mission_id = result.get("mission_id")
@@ -7947,16 +7995,26 @@ def deliver_browser_missions(hive: Path) -> dict | None:
         spoken = result.get("spoken")
         if not mission_id or not completion_id or not isinstance(spoken, str) or not spoken.strip():
             continue
+        coding = path.parent.parent.name == "coding-missions"
+        tool = "agent_tools" if coding else "browser_mission"
+        verified = not coding and bool(result.get("verified"))
         request = runtime.read_json(path.parent / "request.json")
-        objective = str(request.get("objective") or "Browser research")
+        objective = str(request.get("objective") or ("Coding task" if coding else "Browser research"))
         def apply(bus, gen):
-            text = spoken.strip()  # already synthesized; persona must not prefix unverified results with Done
+            text = spoken.strip()
             bus.update({"phase":"speak", "job_status":"done", "spoken":text,
-                "utterance":objective, "tool":"browser_mission", "wires":["browser_mission"],
-                "response_ok":bool(result.get("verified")), "response_ok_gen":gen,
-                "task_verified":bool(result.get("verified")), "task_verified_gen":gen, "browser_mission_id":mission_id,
-                "browser_mission_result":str(path), "updated_at":now_iso(),
+                "utterance":objective, "tool":tool, "wires":[tool],
+                "response_ok":bool(result.get("status") == "COMPLETED" and result.get("builder_verified")) if coding else verified, "response_ok_gen":gen,
+                "task_verified":verified, "task_verified_gen":gen, "mission_id":mission_id,
+                "mission_result":str(path), "updated_at":now_iso(),
                 "turns":append_turn(load_turns(bus), objective, text)})
+            if coding:
+                bus["coding_mission_id"] = mission_id
+                bus.pop("browser_mission_id", None); bus.pop("browser_mission_result", None)
+            else:
+                bus["browser_mission_id"] = mission_id
+                bus["browser_mission_result"] = str(path)
+                bus.pop("coding_mission_id", None)
             bus.pop("response_see",None);bus.pop("response_see_gen",None)
             return bus
         committed = BUS_IO.commit_mission_response(hive, mission_id, completion_id, apply)

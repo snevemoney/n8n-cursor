@@ -5,6 +5,7 @@ The browser adapter still supplies planning, specialized execution and proof.
 Other worker adapters must extend this owner rather than create terminal writers.
 """
 import json
+import hashlib
 import threading
 import time
 import uuid
@@ -29,7 +30,118 @@ class MissionController:
                 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except BlockingIOError:
                 return {'status': 'ALREADY_RUNNING', 'verified': False}
+            if self.adapter.read_json(root / 'request.json').get('worker_kind') == 'coding':
+                return await self._execute_coding_locked(root)
             return await self._execute_owned_mission(root)
+
+    async def _execute_coding_locked(self, root):
+        """Bound coding resources and serialize every mutation of a scratch repo."""
+        import fcntl
+        request = self.adapter.read_json(root/'request.json')
+        existing = self.adapter.read_json(root/'result.json')
+        if existing:
+            return existing
+        repo = str(Path(request['code_args']['repo']).expanduser().resolve())
+        locks = root.parent/'worker-locks'
+        locks.mkdir(exist_ok=True)
+        acquired = []
+        reason = 'coding_worker_capacity_exhausted'
+        try:
+            repo_lock = (locks/('repo-' + hashlib.sha256(repo.encode()).hexdigest() + '.lock')).open('a')
+            try:
+                fcntl.flock(repo_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                repo_lock.close()
+                reason = 'coding_repo_already_owned'
+            else:
+                acquired.append(repo_lock)
+                for number in range(3):
+                    slot = (locks/f'slot-{number}.lock').open('a')
+                    try:
+                        fcntl.flock(slot, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    except BlockingIOError:
+                        slot.close()
+                    else:
+                        acquired.append(slot)
+                        return await self._execute_coding_mission(root)
+            with (root/'steering.lock').open('a') as lock:
+                fcntl.flock(lock, fcntl.LOCK_EX)
+                existing = self.adapter.read_json(root/'result.json')
+                if existing:
+                    return existing
+                result = self.adapter.read_json(root/'state.json')
+                result.update(mission_id=request['mission_id'], worker_kind='coding', status='BLOCKED',
+                              verified=False, builder_verified=False, terminal_reason=reason,
+                              spoken='The coding task could not start because its repo or worker capacity is already in use. No coding work was run.',
+                              terminal_commit_id=uuid.uuid4().hex, finished=time.time())
+                self.adapter.write_json(root/'result.json', result)
+                self.adapter.write_json(root/'state.json', result)
+                return result
+        finally:
+            for lock in reversed(acquired):
+                lock.close()
+
+    async def _execute_coding_mission(self, root):
+        """Coding adapter shares this owner's locks and immutable terminal receipt.
+
+        Builder tests are evidence, not independent mission acceptance. Interrupted
+        nonterminal coding work is never replayed automatically.
+        """
+        import fcntl
+        request = self.adapter.read_json(root / 'request.json')
+        existing = self.adapter.read_json(root / 'result.json')
+        if existing:
+            return existing
+        state = self.adapter.read_json(root / 'state.json')
+        started = time.monotonic()
+        def cancelled():
+            return bool(self.adapter.read_json(root / 'control.json').get('cancel'))
+        def stop_check():
+            self._assert_source_current(request)
+            return cancelled()
+        def progress(row):
+            state.update(progress=row, updated=time.time())
+            self.adapter.write_json(root / 'state.json', state)
+            with (root / 'trace.jsonl').open('a') as out:
+                out.write(json.dumps({'mission_id':request['mission_id'], 'event':'coding.progress', **row}) + '\n')
+        try:
+            self._assert_source_current(request)
+            if state.get('work_started'):
+                raise RuntimeError('interrupted_coding_requires_reconciliation; automatic_resume_disabled')
+            state.update(status='RUNNING', work_started=True, verified=False)
+            self.adapter.write_json(root / 'state.json', state)
+            got = self.adapter.run_coding(request['code_args'], cancel_check=stop_check, progress=progress)
+            self._assert_source_current(request)
+            stopped = cancelled() or bool(got.get('cancelled'))
+            repo = str(request['code_args']['repo'])
+            branch = str(request['code_args'].get('branch') or 'jarvis/code')
+            commit = next((row for row in got.get('steps', []) if row.get('what') == 'commit' and row.get('status') == 'verified'), None)
+            tests = [row for row in got.get('steps', []) if str(row.get('what', '')).endswith(' test') and row.get('status') == 'verified']
+            receipt = str((commit or {}).get('result') or '')[:300]
+            completion = (f'Coding files are in {repo}. ' + ('Builder tests passed. ' if tests else 'Builder test evidence is missing. ')
+                          + (receipt + '. ' if receipt else 'A commit receipt is missing. ') + 'Independent acceptance pending.')
+            state.update(status='CANCELLED' if stopped else ('COMPLETED' if got.get('ok') else 'FAILED'),
+                         verified=False, builder_verified=bool(got.get('verified')) and not stopped,
+                         coding_result=got, coding_evidence={'repo':repo, 'branch':branch, 'builder_test_steps':tests, 'commit_receipt':receipt},
+                         spoken=('The coding task was stopped. Its outcome is not verified.' if stopped else (completion if got.get('ok') else f'The coding task in {repo} ended without verified results.')),
+                         terminal_reason='user_cancel' if stopped else ('independent_acceptance_required' if got.get('ok') else 'coding_execution_failed'))
+        except Exception as exc:
+            state.update(status='FAILED', verified=False, builder_verified=False,
+                         terminal_reason=type(exc).__name__ + ': ' + str(exc)[:300],
+                         spoken='The coding task did not complete. Its outcome is not verified.')
+        state.update(mission_id=request['mission_id'], worker_kind='coding', duration=time.monotonic()-started,
+                     terminal_commit_id=uuid.uuid4().hex, finished=time.time())
+        with (root / 'steering.lock').open('a') as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            existing = self.adapter.read_json(root / 'result.json')
+            if existing:
+                return existing
+            if cancelled():
+                state.update(status='CANCELLED', verified=False, builder_verified=False,
+                             terminal_reason='user_cancel', spoken='The coding task was stopped. Its outcome is not verified.')
+            self.adapter.write_json(root / 'result.json', state)
+            self.adapter.write_json(root / 'state.json', state)
+        return state
 
     async def _execute_owned_mission(self, root):
         root = Path(root)
