@@ -65,12 +65,15 @@ class PipelineDarkCursorTest(unittest.TestCase):
             )
             last = PIPE.LAST_WIRE.read(hive) if PIPE.LAST_WIRE is not None else {}
         self.assertEqual(len(calls), 1)
-        self.assertTrue(out.get("unknown") or out.get("verb") == "pipeline")
-        self.assertIn("agent login", out.get("spoken") or "")
+        # Cursor is no longer the talk owner (OpenRouter / talk_fn is). A dark cursor pick door ends in the one
+        # honest talk-wire line, never a login kiosk, and the turn is a failed (not an "unknown") converse.
+        self.assertFalse(out.get("ok"))
+        self.assertIn(PIPE.TALK_DARK, out.get("spoken") or "")
+        self.assertNotIn("agent login", (out.get("spoken") or "").lower())
         self.assertNotIn("returned no reply", out.get("spoken") or "")
         self.assertNotIn("XAI_API_KEY", out.get("spoken") or "")
         self.assertEqual((last.get("wire") or {}).get("path"), "cursor")
-        self.assertIn("agent login", str((last.get("wire") or {}).get("error") or ""))
+        self.assertIn("agent login", str((last.get("wire") or {}).get("error") or ""))  # the real cursor failure stays in the wire log
 
     def test_prose_pick_is_converse_no_retry(self) -> None:
         calls: list[str] = []
@@ -159,7 +162,7 @@ class PipelineDarkCursorTest(unittest.TestCase):
                 cursor_fn=dark_cursor,
             )
         self.assertEqual(len(calls), 1)
-        self.assertIn("agent login", first.get("spoken") or "")
+        self.assertIn(PIPE.TALK_DARK, first.get("spoken") or "")
         second_spoken = second.get("spoken") or ""
         self.assertNotIn("I heard you", second_spoken)
         self.assertNotIn("Before that you said", second_spoken)
@@ -172,7 +175,7 @@ class PipelineDarkCursorTest(unittest.TestCase):
         self.assertNotIn("Still on that", second_spoken)
         self.assertNotEqual(second.get("verb"), "can")
         self.assertTrue(second_spoken.startswith("Sir."))
-        self.assertIn(PIPE.NO_MODEL.lower(), second_spoken.lower())
+        self.assertIn(PIPE.TALK_DARK.lower(), second_spoken.lower())
         self.assertNotIn("Still need", second_spoken)
 
     def test_dark_local_read_uses_the_vault_and_writes_a_receipt(self) -> None:
@@ -517,7 +520,7 @@ class PipelineDarkCursorTest(unittest.TestCase):
             )
         spoken = second.get("spoken") or ""
         self.assertEqual(len(calls), 1)
-        self.assertIn("agent login", first.get("spoken") or "")
+        self.assertIn(PIPE.TALK_DARK, first.get("spoken") or "")
         for leak in (
             "adopted path missing",
             "22:48",
@@ -528,11 +531,11 @@ class PipelineDarkCursorTest(unittest.TestCase):
         ):
             self.assertNotIn(leak, spoken)
         self.assertTrue(spoken.startswith("Sir."))
-        self.assertIn(PIPE.NO_MODEL.lower(), spoken.lower())
+        self.assertIn(PIPE.TALK_DARK.lower(), spoken.lower())
         self.assertNotIn("Last you said", spoken)
         self.assertNotIn("You were at", spoken)
         self.assertNotIn("I'm here", spoken)
-        self.assertIn("agent login", (why.get("spoken") or "").lower())
+        self.assertIn(PIPE.TALK_DARK.lower(), (why.get("spoken") or "").lower())
 
 
 class Live4018MouthContractTest(unittest.TestCase):
@@ -624,7 +627,7 @@ class Live4018MouthContractTest(unittest.TestCase):
                 self.assertTrue(spoken.startswith("Sir."), spoken)
                 low = spoken.lower()
                 self.assertTrue(
-                    PIPE.NO_MODEL.lower() in low or "agent login" in low,
+                    PIPE.TALK_DARK.lower() in low or "don't have that on disk" in low,  # private-claim ask: honest miss, no vault dump
                     spoken,
                 )
                 self.assertNotIn("Last you said", spoken)
@@ -661,9 +664,10 @@ class Live4018MouthContractTest(unittest.TestCase):
         star_spoken = star.get("spoken") or ""
         self.assertNotIn("Watchdog", work_spoken)
         self.assertNotIn("factory close", work_spoken.lower())
-        self.assertIn(PIPE.NO_MODEL.lower(), work_spoken.lower())
+        self.assertIn(PIPE.TALK_DARK.lower(), work_spoken.lower())
         self.assertNotIn("Last you said", work_spoken)
-        self.assertIn(PIPE.NO_MODEL.lower(), star_spoken.lower())
+        # Private ask with the talk wire dark: the honest miss line, still no vault dump.
+        self.assertIn("don't have that on disk", star_spoken.lower())
         self.assertNotIn("leverage", star_spoken.lower())
         self.assertNotIn("Watchdog", star_spoken)
 
@@ -692,7 +696,7 @@ class Live4018MouthContractTest(unittest.TestCase):
         ):
             self.assertNotIn(leak, spoken, spoken)
         self.assertTrue(spoken.startswith("Sir."), spoken)
-        self.assertIn(PIPE.NO_MODEL.lower(), spoken.lower())
+        self.assertIn(PIPE.TALK_DARK.lower(), spoken.lower())
         self.assertLess(len(spoken), 280)
 
     def test_dark_cursor_safari_see_calls_see_py(self) -> None:
@@ -711,12 +715,13 @@ class Live4018MouthContractTest(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="pipeline-store-see-") as tmp:
             hive, vault = self._live_hive(tmp)
             out = MOUTH.apply_turn(
-                "Scroll the page",
+                # Without "Safari" a bare scroll is a Desktop action and is blocked while Desktop is off (turn.py, test_turn).
+                "Scroll the page in Safari",
                 hive=hive,
                 retrieve_roots=[vault],
                 see_fn=fake_see,
             )
-        self.assertEqual(saw, ["Scroll the page"])
+        self.assertEqual(saw, ["Scroll the page in Safari"])
         self.assertEqual(out.get("verb"), "safari_see")
         self.assertIn("scrolled the tab", (out.get("spoken") or "").lower())
 
@@ -761,9 +766,9 @@ class Live4018MouthContractTest(unittest.TestCase):
         self.assertNotIn(lanes, tube_spoken)
         self.assertNotIn("On disk: Website / AI Partner", greet_spoken)
         self.assertNotIn("On disk: Website / AI Partner", can_spoken)
-        self.assertIn(PIPE.NO_MODEL.lower(), greet_spoken.lower())
-        self.assertIn(PIPE.NO_MODEL.lower(), can_spoken.lower())
-        self.assertIn(PIPE.NO_MODEL.lower(), school_spoken.lower())
+        self.assertIn(PIPE.TALK_DARK.lower(), greet_spoken.lower())
+        self.assertIn(PIPE.TALK_DARK.lower(), can_spoken.lower())
+        self.assertIn(PIPE.TALK_DARK.lower(), school_spoken.lower())
         self.assertNotIn("Last you said", greet_spoken)
         self.assertNotIn("You were at", can_spoken)
         self.assertNotIn("I'm here", greet_spoken)
@@ -792,8 +797,8 @@ class Live4018MouthContractTest(unittest.TestCase):
                 "spoken": PIPE.LOGIN_UNKNOWN,
             }
 
-        def fake_bot(prompt: str, context: str = "") -> dict:
-            self.assertIn("pipeline-pack.md", prompt + context)
+        def fake_bot(prompt: str, context: str = "", **kw) -> dict:
+            self.assertIn("Operator:", prompt + context)  # the inline sitting brief (the pack file is no longer named to the talk wire)
             return {
                 "ok": True,
                 "unknown": False,
@@ -837,12 +842,13 @@ class Live4018MouthContractTest(unittest.TestCase):
             )
         self.assertEqual(out.get("brain"), "grokbot")
         self.assertIn("sitting is quiet", out.get("spoken") or "")
-        self.assertNotIn(PIPE.NO_MODEL, out.get("spoken") or "")
+        self.assertNotIn(PIPE.TALK_DARK, out.get("spoken") or "")
         self.assertNotIn("No model is available", out.get("spoken") or "")
         miss_spoken = miss.get("spoken") or ""
         self.assertNotIn("sitting is quiet", miss_spoken)
         self.assertTrue(
-            "agent login" in miss_spoken.lower() or PIPE.NO_MODEL.lower() in miss_spoken.lower(),
+            # The provider's own miss line is kept (provider_miss_spoken: do not hide the wire); never the invented sitting.
+            "grok bot sendprompt did not return" in miss_spoken.lower() or PIPE.TALK_DARK.lower() in miss_spoken.lower(),
             miss_spoken,
         )
 
@@ -865,9 +871,9 @@ class Live4018MouthContractTest(unittest.TestCase):
                 "spoken": PIPE.LOGIN_UNKNOWN,
             }
 
-        def fake_xai(prompt: str, context: str = "") -> dict:
+        def fake_xai(prompt: str, context: str = "", **kw) -> dict:
             talks.append(prompt)
-            self.assertIn("pipeline-pack.md", prompt + context)
+            self.assertIn("Operator:", prompt + context)
             self.assertNotIn(context[:4000] if False else "Last you said", context)
             return {
                 "ok": True,
@@ -901,7 +907,8 @@ class Live4018MouthContractTest(unittest.TestCase):
                 cursor_fn=dark_cursor,
                 talk_fn=fake_xai,
             )
-        self.assertEqual(len(cursor_calls), 1)
+        # talk_fn is the production talk owner: when it is wired the cursor pick door is not called at all.
+        self.assertEqual(len(cursor_calls), 0)
         self.assertEqual(len(talks), 3)
         self.assertEqual(first.get("brain"), "xai")
         self.assertIn("Quiet night", first.get("spoken") or "")
