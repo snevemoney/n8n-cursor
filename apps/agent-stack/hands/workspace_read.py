@@ -143,6 +143,69 @@ def requested_path(utterance):
     return candidate
 
 
+def _folder_contents_requested(utterance, literal):
+    """A mentioned/listed folder is not automatically a content-read request."""
+    line=str(utterance or '')
+    selected=line.replace(literal,' SELECTED_FOLDER ')
+    if re.search(r"\b(?:do\s+not|don't|never|avoid|ignore|exclude|skip|except|without)\b[^.!?;\n]{0,200}SELECTED_FOLDER",selected,re.I):
+        return False
+    if re.search(r"\b(?:do\s+not|don't|never)\s+(?:read|open|inspect|review|analy[sz]e)\b[^.!?;\n]{0,100}\b(?:files?|contents?|records?)\b",line,re.I):
+        return False
+    if re.search(r"\b(?:names?[- ]only|list(?:ing)?[- ]only|only\s+(?:list|show)|(?:list|show)\s+(?:just|only)\s+(?:the\s+)?names?)\b",line,re.I):
+        return False
+    verbs=r"(?:read|inspect|review|analy[sz]e|research|examine|study)"
+    return bool(re.search(r"(?:^|[.!?;]\s+)(?:(?:please|can you|could you|would you)\s+)?"+verbs+r"\b",line,re.I)
+                or re.search(r"\bI\s+(?:want|need|ask)\s+you\s+to\s+"+verbs+r"\b",line,re.I))
+
+
+def selected_folder_receipt(utterance, result):
+    """Host captures a successful actual listing explicitly selected by the owner."""
+    if not isinstance(result, dict) or not result.get('ok') or result.get('op') != 'ls':
+        return None
+    names = result.get('names')
+    if not isinstance(names, list) or len(names)>MAX_NAMES or any(not isinstance(n,str) or Path(n).name != n or n in {'.','..'} for n in names):
+        return None
+    try:
+        actual=Path(result['path']).resolve(strict=True)
+        candidates=re.findall(r"[\"']((?:/|~/)[^\"']+)[\"']|(?<![\w:/~])((?:/|~/)[^\s\"'<>]+)",str(utterance or ''))
+        for quoted,plain in candidates:
+            raw=quoted or plain
+            if not _folder_contents_requested(utterance,raw):continue
+            path=Path(raw).expanduser()
+            if not path.exists():path=Path(raw.rstrip(',;.!?')).expanduser()
+            if path.is_symlink() or not path.is_dir() or path.resolve(strict=True)!=actual:continue
+            if any(part in SECRET_DIR for part in path.parts) or SECRET_NAME.search(path.name):continue
+            observed=result.get('fingerprint')
+            current=fingerprint(actual)
+            if observed is None or current!=observed:return None
+            return {'path':str(actual),'literal_path':str(path),'fingerprint':current,'names':list(names),'more':bool(result.get('more'))}
+    except (OSError,RuntimeError,KeyError,TypeError):
+        return None
+    return None
+
+
+def run_selected_child(args, receipt):
+    """One same-turn host-authorized direct child; no persistent roots are added."""
+    if not isinstance(receipt,dict) or args.get('op')!='read':return None
+    try:
+        folder=Path(receipt['path']);literal=Path(receipt['literal_path'])
+        if (literal.is_symlink() or literal.resolve(strict=True)!=folder or not folder.is_dir()
+                or fingerprint(folder)!=receipt['fingerprint']):return _deny('selected folder changed','read')
+        requested=Path(str(args.get('path') or '')).expanduser()
+        target=requested if requested.is_absolute() else folder/requested
+        if target.parent!=folder or target.parent.resolve(strict=True)!=folder or target.name not in receipt['names']:
+            return _deny('file was not in the selected folder listing','read')
+        if target.is_symlink() or not target.is_file():return _deny('selected child is not a regular file','read')
+        actual=target.resolve(strict=True)
+        if actual.parent!=folder:return _deny('outside the selected folder','read')
+        result=run({'op':'read','path':str(actual)},roots=[folder])
+        if fingerprint(folder)!=receipt['fingerprint'] or literal.resolve(strict=True)!=folder:
+            return _deny('selected folder changed during the read','read')
+        return result
+    except (OSError,RuntimeError,KeyError,TypeError):
+        return _deny('selected folder is unavailable','read')
+
+
 def run_requested(args, utterance, roots=None):
     if DOCUMENT_FIND_RE.search(utterance or '') and re.search(r'\b(?:on|across|in)\s+(?:my|this)\s+(?:mac|computer|pc)\b', utterance or '', re.I):
         # User-requested discovery only; never adds persistent read permissions.
@@ -299,6 +362,7 @@ def run(args: dict, roots=None) -> dict[str, Any]:
     if op == "ls":
         if not path.is_dir():
             return _deny("not a folder", op)
+        before = fingerprint(path)
         try:
             allnames = sorted(n.name for n in path.iterdir() if not n.name.startswith(".") and not SECRET_NAME.search(n.name))
         except PermissionError:
@@ -308,7 +372,10 @@ def run(args: dict, roots=None) -> dict[str, Any]:
         names = allnames[:MAX_NAMES]
         more = len(allnames) > MAX_NAMES
         sp = f"{path.name} has {len(allnames)} items" + (": " + ", ".join(names[:10]) if names else "") + ("…" if len(allnames) > 10 else ".")
-        return {"ok": True, "op": op, "path": str(path), "names": names, "more": more, "spoken": sp}
+        if fingerprint(path) != before:
+            return _deny('folder changed during listing', op)
+        return {"ok": True, "op": op, "path": str(path), "names": names, "more": more, "spoken": sp,
+                "fingerprint": before}
     if op == "git":
         d = path if path.is_dir() else path.parent
         rc, top = _git(d, "rev-parse", "--show-toplevel")
