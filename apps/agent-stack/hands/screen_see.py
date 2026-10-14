@@ -35,41 +35,54 @@ def _macos():
 _FILE_READ_SCRIPT = r'''
 import base64, importlib.util, json, os, stat, sys
 from pathlib import Path
-source, home, receipt_json, limit = sys.argv[1:]
-spec = importlib.util.spec_from_file_location("saved_image_macos", source)
-mac = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(mac)
-receipt = json.loads(receipt_json)
-keys = ("path","size","mtime_ns","inode","device","created","kind")
-before = mac.screenshot_fingerprint(receipt["path"], home)
-if not mac.same_screenshot(before, receipt):
-    raise ValueError("changed")
-path = Path(before["path"])
-fd = os.open(str(path), os.O_RDONLY | os.O_NOFOLLOW)
-with os.fdopen(fd, "rb") as stream:
-    initial = os.fstat(stream.fileno())
-    if not stat.S_ISREG(initial.st_mode) or initial.st_ino != before["inode"] or initial.st_dev != before["device"]:
+stage = "reader_init"
+mismatch = []
+try:
+    source, home, receipt_json, limit = sys.argv[1:]
+    spec = importlib.util.spec_from_file_location("saved_image_macos", source)
+    mac = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mac)
+    receipt = json.loads(receipt_json)
+    keys = ("path","size","mtime_ns","inode","device","created","kind")
+    stage = "before_fingerprint"
+    before = mac.screenshot_fingerprint(receipt["path"], home)
+    if not mac.same_screenshot(before, receipt):
+        mismatch = [key for key in keys if (before or {}).get(key) != receipt.get(key)]
         raise ValueError("changed")
-    raw = stream.read(int(limit) + 1)
-    final = os.fstat(stream.fileno())
-if (not raw or len(raw) > int(limit) or len(raw) != before["size"] or
-    initial.st_size != final.st_size or initial.st_mtime_ns != final.st_mtime_ns or
-    final.st_ino != before["inode"] or final.st_dev != before["device"]):
-    raise ValueError("changed or oversized")
-after = mac.screenshot_fingerprint(path, home)
-if not mac.same_screenshot(after, receipt):
-    raise ValueError("changed")
-if raw.startswith(b"\x89PNG\r\n\x1a\n"):
-    mime = "image/png"
-elif raw.startswith(b"\xff\xd8\xff"):
-    mime = "image/jpeg"
-elif raw[4:8] == b"ftyp" and raw[8:12] in (b"heic", b"heix", b"hevc", b"hevx", b"mif1"):
-    mime = "image/heic"
-else:
-    raise ValueError("unknown image")
-print(json.dumps({"before":{key:before[key] for key in keys},
-                  "after":{key:after[key] for key in keys},
-                  "mime":mime,"data":base64.b64encode(raw).decode("ascii")}))
+    path = Path(before["path"])
+    stage = "read"
+    fd = os.open(str(path), os.O_RDONLY | os.O_NOFOLLOW)
+    with os.fdopen(fd, "rb") as stream:
+        initial = os.fstat(stream.fileno())
+        if not stat.S_ISREG(initial.st_mode) or initial.st_ino != before["inode"] or initial.st_dev != before["device"]:
+            raise ValueError("changed")
+        raw = stream.read(int(limit) + 1)
+        final = os.fstat(stream.fileno())
+    if (not raw or len(raw) > int(limit) or len(raw) != before["size"] or
+        initial.st_size != final.st_size or initial.st_mtime_ns != final.st_mtime_ns or
+        final.st_ino != before["inode"] or final.st_dev != before["device"]):
+        raise ValueError("changed or oversized")
+    stage = "after_fingerprint"
+    after = mac.screenshot_fingerprint(path, home)
+    if not mac.same_screenshot(after, receipt):
+        mismatch = [key for key in keys if (after or {}).get(key) != receipt.get(key)]
+        raise ValueError("changed")
+    stage = "image_header"
+    if raw.startswith(b"\x89PNG\r\n\x1a\n"):
+        mime = "image/png"
+    elif raw.startswith(b"\xff\xd8\xff"):
+        mime = "image/jpeg"
+    elif raw[4:8] == b"ftyp" and raw[8:12] in (b"heic", b"heix", b"hevc", b"hevx", b"mif1"):
+        mime = "image/heic"
+    else:
+        raise ValueError("unknown image")
+    print(json.dumps({"before":{key:before[key] for key in keys},
+                      "after":{key:after[key] for key in keys},
+                      "mime":mime,"data":base64.b64encode(raw).decode("ascii")}))
+except Exception as exc:
+    allowed = {"PermissionError", "FileNotFoundError", "ValueError", "OSError", "ImportError", "ModuleNotFoundError"}
+    print(json.dumps({"error":{"stage":stage,"type":type(exc).__name__ if type(exc).__name__ in allowed else "ReaderError", "mismatch_fields":mismatch}}))
+    sys.exit(2)
 '''
 
 
@@ -77,8 +90,11 @@ def run_file(receipt: dict, *, hive, vision_fn, active_fn, follow_up=False) -> d
     """Describe an explicitly authorized saved-file receipt, never a new capture."""
     base = {"tool":"screen_see", "source":"saved_screenshot", "wires":["saved_screenshot"],
             "cites":[], "sent":False, "task_verified":False}
-    def fail(reason, spoken):
-        return {**base, "ok":False, "reason":reason, "spoken":spoken}
+    def fail(reason, spoken, evidence=None):
+        result = {**base, "ok":False, "reason":reason, "spoken":spoken}
+        if evidence is not None:
+            result["read_evidence"] = evidence
+        return result
     def active():
         try:
             return callable(active_fn) and bool(active_fn())
@@ -99,13 +115,24 @@ def run_file(receipt: dict, *, hive, vision_fn, active_fn, follow_up=False) -> d
         mac = _macos()
         if not active():
             return fail("stale_turn", "That screenshot request was stopped. I did not describe it.")
-        got = mac._run(["/usr/bin/python3", "-I", "-S", "-c", _FILE_READ_SCRIPT,
+        got = mac._run([sys.executable, "-I", "-S", "-c", _FILE_READ_SCRIPT,
                         str(Path(mac.__file__).resolve()), str(mac.HOME),
                         json.dumps({key:receipt[key] for key in FILE_IDENTITY}), str(MAX_BYTES)], timeout=4)
         if not active():
             return fail("stale_turn", "That screenshot request was stopped. I did not describe it.")
         if got.returncode != 0:
-            return fail("file_read_unverified", "I couldn't read the unchanged saved screenshot safely, so I won't guess.")
+            evidence = {"exitcode":int(got.returncode), "stage":"reader", "type":"ReaderError", "mismatch_fields":[]}
+            try:
+                diagnostic = json.loads(got.stdout) if isinstance(got.stdout,str) and len(got.stdout) <= 2048 else {}
+                error = diagnostic.get("error", {})
+                if error.get("stage") in {"reader_init","before_fingerprint","read","after_fingerprint","image_header"}:
+                    evidence["stage"] = error["stage"]
+                if error.get("type") in {"PermissionError","FileNotFoundError","ValueError","OSError","ImportError","ModuleNotFoundError","ReaderError"}:
+                    evidence["type"] = error["type"]
+                evidence["mismatch_fields"] = [key for key in FILE_IDENTITY if key in error.get("mismatch_fields", [])]
+            except Exception:
+                pass
+            return fail("file_read_unverified", "I couldn't read the unchanged saved screenshot safely, so I won't guess.", evidence)
         if not isinstance(got.stdout,str) or len(got.stdout) > MAX_BYTES * 4 // 3 + 8192:
             return fail("file_read_unverified", "I couldn't verify the bounded saved image read, so I won't guess.")
         payload = json.loads(got.stdout)
@@ -124,7 +151,7 @@ def run_file(receipt: dict, *, hive, vision_fn, active_fn, follow_up=False) -> d
             return fail("file_read_unverified", "The saved file did not contain the expected image format. I won't guess.")
         url = "data:" + mime + ";base64," + base64.b64encode(raw).decode("ascii")
     except subprocess.TimeoutExpired:
-        return fail("file_read_timeout", "The saved screenshot didn't become readable in time. I haven't described its contents.")
+        return fail("file_read_timeout", "The saved screenshot didn't become readable in time. I haven't described its contents.", {"stage":"reader", "type":"TimeoutExpired", "mismatch_fields":[]})
     except Exception:
         return fail("file_read_unverified", "I couldn't read the saved screenshot safely. I haven't described its contents.")
     if not active():

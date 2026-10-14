@@ -5760,7 +5760,7 @@ def _run_tool_inner(
         if not active():
             return {"ok":False,"tool":tool,"spoken":"Stopped. Standing by.","task_verified":False,"cancelled":True}
         line=" ".join(x for x in (viewed.get("spoken"),described.get("spoken")) if x)
-        evidence={"gen":gen,"opened":bool(viewed.get("opened")),"described":bool(described.get("ok")),"source":"saved_screenshot","full_screen_capture":False}
+        evidence={"gen":gen,"opened":bool(viewed.get("opened")),"described":bool(described.get("ok")),"source":"saved_screenshot","full_screen_capture":False,"view_evidence":viewed.get("view_evidence"),"read_evidence":described.get("read_evidence"),"reason":described.get("reason")}
         act_if_current(hive,gen,lambda b:{**b,"saved_image_result":evidence})
         return {**described,"tool":tool,"spoken":line,"view_evidence":viewed.get("view_evidence"),"task_verified":False,
                 "outcome":TOOL_LOOP if described.get("ok") else HONEST_UNKNOWN,"wires":["files","vision"],"cites":[],"sent":False}

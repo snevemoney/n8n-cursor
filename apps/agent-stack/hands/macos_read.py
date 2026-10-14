@@ -7,6 +7,7 @@ import re
 import signal
 import subprocess
 import time
+import urllib.parse
 from pathlib import Path
 
 HOME = Path.home()
@@ -353,12 +354,24 @@ def open_screenshot(artifact, home=None):
         if not same_screenshot(fresh,artifact): raise ValueError('the screenshot changed since lookup')
         proc=_run(['/usr/bin/open','-a','Preview',fresh['path']],timeout=4)
         if proc.returncode: raise ValueError('the image viewer did not accept the file')
-        observed=frontmost_app(timeout=1)
-        names={Path(fresh['path']).name,Path(fresh['path']).stem}
-        verified=observed.get('ok') and observed.get('app')=='Preview' and observed.get('title') in names
+        verified=False; observed={'document_present':False,'document_matched':False}
+        for attempt in range(3):
+            try:
+                check=_run(['/usr/bin/osascript','-e','tell application "System Events"\ntell process "Preview"\nif (count of windows) is 0 then return ""\nreturn value of attribute "AXDocument" of front window\nend tell\nend tell'],timeout=1)
+            except subprocess.TimeoutExpired:
+                observed={'attempts':attempt+1,'document_present':False,'permission_denied':False,'readback_timeout':True}
+                continue
+            observed={'attempts':attempt+1,'returncode':check.returncode,'document_present':bool(check.stdout.strip()),
+                      'permission_denied':'-1743' in (check.stderr or '')}
+            try:
+                uri=urllib.parse.urlparse(check.stdout.strip())
+                verified=check.returncode==0 and uri.scheme=='file' and uri.hostname in {None,'','localhost'} and Path(urllib.parse.unquote(uri.path)).samefile(fresh['path'])
+            except (OSError,ValueError): verified=False
+            if verified or observed['permission_denied']: break
+            if attempt<2: time.sleep(.15)
         unchanged=same_screenshot(screenshot_fingerprint(fresh['path'],home),fresh)
         return {'ok':True,'opened':bool(verified and unchanged),'artifact':fresh,
                 'spoken':'The screenshot is open in Preview.' if verified and unchanged else 'I asked Preview to open the screenshot; its window is not yet verified.',
-                'view_evidence':{'request_accepted':True,'matching_viewer_title':bool(verified),'file_unchanged':unchanged}}
+                'view_evidence':{**observed,'request_accepted':True,'document_matched':bool(verified),'file_unchanged':unchanged}}
     except (OSError,ValueError,RuntimeError,subprocess.TimeoutExpired) as exc:
         return {'ok':False,'opened':False,'spoken':'I could not open the saved screenshot: '+str(exc)+'.'}

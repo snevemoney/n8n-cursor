@@ -57,15 +57,27 @@ class SavedImageOpen(unittest.TestCase):
     def test_preview_matching_title_and_unchanged_file_prove_open(self):
         with tempfile.TemporaryDirectory() as d:
             h=Path(d);a=self.artifact(h)
-            with mock.patch.object(P.MACOS,'_run',return_value=subprocess.CompletedProcess([],0,'','')) as run,mock.patch.object(P.MACOS,'frontmost_app',return_value={'ok':True,'app':'Preview','title':'Screenshot sample.png'}):
+            with mock.patch.object(P.MACOS,'_run',side_effect=[subprocess.CompletedProcess([],0,'',''),subprocess.CompletedProcess([],0,Path(a['path']).as_uri(),'')]) as run:
                 got=P.MACOS.open_screenshot(a,h)
-            self.assertTrue(got['opened']);self.assertEqual(run.call_args.args[0],['/usr/bin/open','-a','Preview',a['path']])
+            self.assertTrue(got['opened']);self.assertEqual(run.call_args_list[0].args[0],['/usr/bin/open','-a','Preview',a['path']])
     def test_launch_accepted_is_not_a_verified_window(self):
         with tempfile.TemporaryDirectory() as d:
             h=Path(d);a=self.artifact(h)
-            with mock.patch.object(P.MACOS,'_run',return_value=subprocess.CompletedProcess([],0,'','')),mock.patch.object(P.MACOS,'frontmost_app',return_value={'ok':True,'app':'Finder','title':'Desktop'}):
+            with mock.patch.object(P.MACOS,'_run',return_value=subprocess.CompletedProcess([],0,'','')):
                 got=P.MACOS.open_screenshot(a,h)
             self.assertTrue(got['ok']);self.assertFalse(got['opened']);self.assertIn('not yet verified',got['spoken'])
+    def test_unrelated_document_never_verifies_the_requested_image(self):
+        with tempfile.TemporaryDirectory() as d:
+            h=Path(d);a=self.artifact(h);other=h/'Desktop/Screenshot other.png';other.write_bytes(Path(a['path']).read_bytes())
+            with mock.patch.object(P.MACOS,'_run',side_effect=[subprocess.CompletedProcess([],0,'','')]+[subprocess.CompletedProcess([],0,other.as_uri(),'')]*3):
+                got=P.MACOS.open_screenshot(a,h)
+            self.assertFalse(got['opened']);self.assertFalse(got['view_evidence']['document_matched'])
+    def test_view_readback_timeout_does_not_fake_open_or_drop_the_requested_read(self):
+        with tempfile.TemporaryDirectory() as d:
+            h=Path(d);a=self.artifact(h)
+            with mock.patch.object(P.MACOS,'_run',side_effect=[subprocess.CompletedProcess([],0,'','')]+[subprocess.TimeoutExpired('read document',1)]*3) as run:
+                got=P.MACOS.open_screenshot(a,h)
+            self.assertTrue(got['ok']);self.assertFalse(got['opened']);self.assertEqual(run.call_count,4);self.assertTrue(got['view_evidence']['readback_timeout'])
     def test_changed_file_cannot_be_opened(self):
         with tempfile.TemporaryDirectory() as d:
             h=Path(d);a=self.artifact(h);Path(a['path']).write_bytes(b'changed')

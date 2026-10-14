@@ -135,3 +135,25 @@ def test_changed_identity_after_bounded_read_refused(saved_image,monkeypatch):
     vision=Mock()
     result=hand.run_file(receipt,hive=hive,vision_fn=vision,active_fn=lambda:True)
     assert result['reason']=='file_changed' and not vision.called
+
+
+def test_reader_uses_current_runtime_and_sanitizes_error_metadata(saved_image,monkeypatch):
+    hand,mac,shot,raw,receipt,hive=saved_image
+    commands=[]
+    def failed(argv,timeout):
+        commands.append((argv,timeout))
+        return subprocess.CompletedProcess(argv,2,json.dumps({'error':{'stage':'before_fingerprint','type':'PermissionError','mismatch_fields':['inode','secret-path',str(shot)],'detail':'pixels secret'}}),str(shot))
+    monkeypatch.setattr(mac,'_run',failed)
+    vision=Mock()
+    result=hand.run_file(receipt,hive=hive,vision_fn=vision,active_fn=lambda:True)
+    assert commands[0][0][:3]==[sys.executable,'-I','-S'] and commands[0][1]==4
+    assert result['read_evidence']=={'exitcode':2,'stage':'before_fingerprint','type':'PermissionError','mismatch_fields':['inode']}
+    assert not vision.called and str(shot) not in json.dumps(result) and 'pixels secret' not in json.dumps(result)
+
+
+def test_invalid_reader_diagnostic_cannot_leak_details(saved_image,monkeypatch):
+    hand,mac,shot,raw,receipt,hive=saved_image
+    monkeypatch.setattr(mac,'_run',lambda *a,**kw:subprocess.CompletedProcess([],9,json.dumps({'error':{'stage':str(shot),'type':'user secret','mismatch_fields':None}}),'pixels secret'))
+    result=hand.run_file(receipt,hive=hive,vision_fn=Mock(),active_fn=lambda:True)
+    assert result['read_evidence']=={'exitcode':9,'stage':'reader','type':'ReaderError','mismatch_fields':[]}
+    assert str(shot) not in json.dumps(result) and 'pixels secret' not in json.dumps(result)
