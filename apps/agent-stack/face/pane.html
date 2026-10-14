@@ -2101,7 +2101,7 @@
     $("chip").addEventListener("click", onArmGesture);
     $("board").addEventListener("click", onArmGesture);
     $("mic").addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); pressMic(); });
-    $("stop").addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); pressStop(); });
+    $("stop").addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); turn("stop", false, false); });
     $("hide").addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); hidePresentation(); });
     if ($("eyesBtn")) $("eyesBtn").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); toggleEyes(); });
     if ($("watchBtn")) $("watchBtn").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); clickWatch(); });
