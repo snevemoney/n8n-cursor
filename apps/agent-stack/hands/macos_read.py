@@ -337,3 +337,28 @@ def reveal_screenshot(artifact,home=None):
         return {'ok':True,'spoken':'Finder has selected '+Path(fresh['path']).name+'.','task_verified':True,'artifact':fresh,'postcondition':'exact Finder selection read back','verification_evidence':evidence}
     except (OSError,ValueError,RuntimeError,subprocess.TimeoutExpired) as exc:
         return {'ok':False,'spoken':'I could not reveal that screenshot in Finder: '+str(exc)+'.','task_verified':False}
+
+
+SAVED_IMAGE_RE = re.compile(
+    r"^(?:(?:can|could|would) you\s+)?(?:please\s+)?(?:open|show|describe|analyse|analyze|explain)\s+"
+    r"(?:(?:the|that|my|saved|last|latest)\s+)?(?:screenshot|image|it)(?:\s+you\s+just\s+found)?"
+    r"(?:\s+and\s+(?:describe|explain|summarize)\s+(?:it|the image|the screenshot))?"
+    r"(?:\s+(?:briefly|quickly))?(?:[.!]?\s+then\s+ask\s+me\s+(?:what|how)\b.{0,100})?[.!?]?$", re.I)
+
+
+def open_screenshot(artifact, home=None):
+    """Requested local image viewing through the existing bounded Mac hand."""
+    try:
+        fresh=screenshot_fingerprint(artifact.get('path',''),home)
+        if not same_screenshot(fresh,artifact): raise ValueError('the screenshot changed since lookup')
+        proc=_run(['/usr/bin/open','-a','Preview',fresh['path']],timeout=4)
+        if proc.returncode: raise ValueError('the image viewer did not accept the file')
+        observed=frontmost_app(timeout=1)
+        names={Path(fresh['path']).name,Path(fresh['path']).stem}
+        verified=observed.get('ok') and observed.get('app')=='Preview' and observed.get('title') in names
+        unchanged=same_screenshot(screenshot_fingerprint(fresh['path'],home),fresh)
+        return {'ok':True,'opened':bool(verified and unchanged),'artifact':fresh,
+                'spoken':'The screenshot is open in Preview.' if verified and unchanged else 'I asked Preview to open the screenshot; its window is not yet verified.',
+                'view_evidence':{'request_accepted':True,'matching_viewer_title':bool(verified),'file_unchanged':unchanged}}
+    except (OSError,ValueError,RuntimeError,subprocess.TimeoutExpired) as exc:
+        return {'ok':False,'opened':False,'spoken':'I could not open the saved screenshot: '+str(exc)+'.'}

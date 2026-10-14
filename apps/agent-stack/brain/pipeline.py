@@ -1125,7 +1125,7 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
 
 def model_free_route(spoken_in: str) -> dict | None:
     """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
-    if MACOS is not None and (MACOS.LATEST_SCREENSHOT_RE.fullmatch(spoken_in.strip()) or MACOS.FINDER_REFERENCE_RE.fullmatch(spoken_in.strip())):
+    if MACOS is not None and (MACOS.LATEST_SCREENSHOT_RE.fullmatch(spoken_in.strip()) or MACOS.FINDER_REFERENCE_RE.fullmatch(spoken_in.strip()) or MACOS.SAVED_IMAGE_RE.fullmatch(spoken_in.strip())):
         return {"tool": "workspace_read", "args": {"op": "screenshot_reference"}, "speak": ""}
     if wants_memory(spoken_in):
         return {"tool": "memory", "args": _memory_hand().args_from_utterance(spoken_in), "speak": ""}
@@ -1315,11 +1315,15 @@ def _voice_engine_hand():
 
 def _screen_see_hand():
     name = "agent_stack_screen_see"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "screen_see.py")
+    path = STACK / "hands" / "screen_see.py"
+    stamp = path.stat().st_mtime_ns
+    cached = sys.modules.get(name)
+    if cached is None or getattr(cached, "_source_stamp", None) != stamp:
+        spec = importlib.util.spec_from_file_location(name, path)
         mod = importlib.util.module_from_spec(spec)
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
+        mod._source_stamp = stamp
     return sys.modules[name]
 
 
@@ -5729,6 +5733,37 @@ def _run_tool_inner(
         return {"ok": got["ok"], "tool": tool, "spoken": got["spoken"],
                 "wires": ["memory"], "cites": [], "sent": False,
                 "task_verified": got["ok"], "memory_meta": got["log"]}
+    if tool == "workspace_read" and MACOS is not None and MACOS.SAVED_IMAGE_RE.fullmatch(utterance.strip()):
+        active = lambda: gen is not None and not turn_cancelled(hive, gen)
+        if not active():
+            return {"ok":False,"tool":tool,"spoken":"Stopped. Standing by.","task_verified":False,"cancelled":True}
+        bus=load_json(Path(hive)/"bus/state.json") or {}
+        reference=bus.get("screenshot_reference") or {}
+        prior=(bus.get("turns") or [])[-1:] or [{}]
+        previous_user=str(prior[-1].get("user") or "")
+        direct=reference.get("gen")==gen-1
+        finder_chain=reference.get("gen")==gen-2 and MACOS.FINDER_REFERENCE_RE.fullmatch(previous_user.strip())
+        if not (direct or finder_chain) or not reference.get("artifact"):
+            return {"ok":False,"tool":tool,"spoken":"Which image do you mean? Ask me to find your latest saved screenshot, or name the image file.","task_verified":False,"outcome":HONEST_UNKNOWN}
+        artifact=reference["artifact"]
+        wants_open=bool(re.match(r"^(?:(?:can|could|would) you\s+)?(?:please\s+)?(?:open|show)\b",utterance.strip(),re.I))
+        viewed=MACOS.open_screenshot(artifact) if wants_open else {"ok":True,"opened":False,"artifact":artifact,"spoken":""}
+        if not viewed.get("ok") or not active():
+            return {**viewed,"tool":tool,"task_verified":False,"outcome":HONEST_UNKNOWN,"wires":["files"],"cites":[],"sent":False}
+        def vision(prompt, images=None):
+            if not active(): return None
+            got=online_talk(prompt,"",images=images or [],hands=False)
+            return str((got or {}).get("spoken") or "") if (got or {}).get("ok") else None
+        if (viewed.get("view_evidence") or {}).get("file_unchanged") and active():
+            act_if_current(hive,gen,lambda b:{**b,"screenshot_reference":{"gen":gen,"artifact":viewed.get("artifact") or artifact}})
+        described=_screen_see_hand().run_file(artifact,hive=hive,vision_fn=vision,active_fn=active,follow_up=True)
+        if not active():
+            return {"ok":False,"tool":tool,"spoken":"Stopped. Standing by.","task_verified":False,"cancelled":True}
+        line=" ".join(x for x in (viewed.get("spoken"),described.get("spoken")) if x)
+        evidence={"gen":gen,"opened":bool(viewed.get("opened")),"described":bool(described.get("ok")),"source":"saved_screenshot","full_screen_capture":False}
+        act_if_current(hive,gen,lambda b:{**b,"saved_image_result":evidence})
+        return {**described,"tool":tool,"spoken":line,"view_evidence":viewed.get("view_evidence"),"task_verified":False,
+                "outcome":TOOL_LOOP if described.get("ok") else HONEST_UNKNOWN,"wires":["files","vision"],"cites":[],"sent":False}
     if tool == "workspace_read" and MACOS is not None and (MACOS.LATEST_SCREENSHOT_RE.fullmatch(utterance.strip()) or MACOS.FINDER_REFERENCE_RE.fullmatch(utterance.strip())):
         if gen is None or turn_cancelled(hive, gen):
             return {"ok": False, "tool": tool, "spoken": "Stopped. Standing by.", "task_verified": False, "cancelled": True}
@@ -5749,7 +5784,12 @@ def _run_tool_inner(
             else:
                 got = MACOS.reveal_screenshot(reference["artifact"])
                 if got.get("verification_evidence"):
-                    act_if_current(hive, gen, lambda bus: {**bus, "finder_verification": {"gen": gen, **got["verification_evidence"]}})
+                    def finder_receipt(bus):
+                        bus["finder_verification"]={"gen":gen,**got["verification_evidence"]}
+                        if got["verification_evidence"].get("file_unchanged") and got.get("artifact"):
+                            bus["screenshot_reference"]={"gen":gen,"artifact":got["artifact"]}
+                        return bus
+                    act_if_current(hive, gen, finder_receipt)
         return {**got, "tool": tool, "wires": ["files"], "cites": [], "sent": False,
                 "task_verified": bool(got.get("task_verified")), "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "workspace_read":
