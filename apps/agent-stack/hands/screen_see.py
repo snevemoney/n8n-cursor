@@ -171,6 +171,7 @@ def run_file(receipt: dict, *, hive, vision_fn, active_fn, follow_up=False) -> d
         return fail("stale_turn", "That screenshot request was stopped. I did not describe it.")
     if not isinstance(text,str) or not text.strip():
         return fail("vision_unavailable", "I read the saved screenshot, but the vision model returned no description. I won't guess.")
+    diagnostic = {"stage":"caption", "response_chars":len(text), "failure":"json"}
     try:
         encoded = text.strip()
         if encoded.startswith("```json\n") and encoded.endswith("\n```"):
@@ -178,14 +179,16 @@ def run_file(receipt: dict, *, hive, vision_fn, active_fn, follow_up=False) -> d
         elif encoded.startswith("```\n") and encoded.endswith("\n```"):
             encoded = encoded[4:-4]
         caption = json.loads(encoded)
+        diagnostic["failure"] = "shape"
         if type(caption) is not dict or set(caption) != {"description"} or type(caption["description"]) is not str:
             raise ValueError("invalid caption")
         description = caption["description"].strip()
         forbidden = re.compile(r"(?:opened|worked)\s+fine|\b(?:I|I've|we|we've)\s+(?:have\s+)?(?:opened|sent|completed|finished|changed|saved|deleted|clicked)\b|[\[\]{}<>]|[\r\n?]", re.I)
+        diagnostic.update({"failure":"content", "description_chars":len(description), "empty":not bool(description), "over_limit":len(description)>140, "forbidden":bool(forbidden.search(description))})
         if not description or len(description) > 140 or forbidden.search(description):
             raise ValueError("unverified caption")
     except (ValueError, TypeError, KeyError):
-        return fail("caption_unverified", "The image description wasn't reliable enough to share. I won't guess.")
+        return fail("caption_unverified", "The image description wasn't reliable enough to share. I won't guess.", diagnostic)
     spoken = description + (" What would you like to do with it?" if follow_up else "")
     return {**base, "ok":True, "spoken":spoken, "wires":["saved_screenshot","vision"],
             "read_evidence":{"bytes_read":len(raw), "file_unchanged":True, "identity_fields":7}}
