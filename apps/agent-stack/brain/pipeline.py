@@ -1294,6 +1294,9 @@ def _workflow_followup_route(utterance, hive):
     text = str(utterance or "").strip()
     if re.fullmatch(r"(?:please\s+)?(?:resume|continue)\s+(?:the\s+)?workflow[.!]?", text, re.I):
         return {"tool":"agent_tools", "args":{"action":"research_build_continue","mission_id":ident}, "speak":""}
+    source = re.fullmatch(r"(?:please\s+)?use\s+saved\s+sources\s+(?P<root>\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)", text, re.I)
+    if source:
+        return {"tool":"agent_tools", "args":{"action":"research_build_sources","mission_id":ident,"source_root":source.group("root").strip("\"'")}, "speak":""}
     match = re.fullmatch(r"(?:please\s+)?use\s+(?:project\s+)?(?P<repo>\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)(?:\s+on\s+branch\s+(?P<branch>[\w./-]+))?[.!]?", text, re.I)
     if match:
         return {"tool":"agent_tools", "args":{"action":"research_build_bind","mission_id":ident,"repo":match.group("repo").strip("\"'"),"branch":match.group("branch") or ""}, "speak":""}
@@ -5692,7 +5695,7 @@ def _run_tool_inner(
                 "task_verified": bool(got.get("ok")), "plan_meta": hd.log_meta(got)}
     if tool == "agent_tools":
         hd = _agent_tools_hand()
-        if args.get("action") in {"research_build_bind", "research_build_continue"}:
+        if args.get("action") in {"research_build_bind", "research_build_continue", "research_build_sources"}:
             owner_pick = _workflow_followup_route(utterance, hive)
             if not owner_pick or owner_pick["args"]["action"] != args.get("action"):
                 return {"ok":False,"tool":tool,"spoken":"No project binding or workflow continuation was requested.","task_verified":False,"wires":[tool],"cites":[],"sent":False}
@@ -5701,11 +5704,21 @@ def _run_tool_inner(
             owned = owner_pick["args"]
             handle = _coding_mission_hand().WorkflowMissionHandle(hive)
             try:
-                result = (handle.continue_workflow(owned["mission_id"], utterance) if owned["action"] == "research_build_continue"
-                          else handle.bind_project(owned["mission_id"], owned["repo"], owned["branch"], utterance))
-                if owned["action"] == "research_build_bind" and RETRIEVE is not None:
+                if owned["action"] == "research_build_sources":
+                    adapter = _coding_mission_hand()
+                    controller = adapter._load("coding_mission_controller", STACK / "brain" / "mission_controller.py")
+                    default_roots = RETRIEVE.resolve_roots(retrieve_roots) if RETRIEVE is not None else []
+                    controller.MissionController(adapter).bind_saved_source_root(hive, owned["mission_id"], owned["source_root"], utterance, default_roots=default_roots)
+                    result = handle.workflow_status(owned["mission_id"])
+                else:
+                    result = (handle.continue_workflow(owned["mission_id"], utterance) if owned["action"] == "research_build_continue"
+                              else handle.bind_project(owned["mission_id"], owned["repo"], owned["branch"], utterance))
+                if owned["action"] in {"research_build_bind", "research_build_sources"} and RETRIEVE is not None:
                     controller = _coding_mission_hand()._load("coding_mission_controller", STACK / "brain" / "mission_controller.py")
                     research_roots = RETRIEVE.resolve_roots(retrieve_roots)
+                    source_context = _coding_mission_hand().read_json(_coding_mission_hand().mission_path(hive, owned["mission_id"]) / "source_roots.json")
+                    if source_context.get("roots"):
+                        research_roots = [Path(root) for root in source_context["roots"]]
                     result = controller.MissionController(_coding_mission_hand()).research_saved_sources(
                         hive, owned["mission_id"], roots=research_roots, retrieve_fn=RETRIEVE.search,
                         read_fn=RETRIEVE.read_local_text,

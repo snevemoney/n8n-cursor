@@ -76,7 +76,17 @@ def run(objective, *, retrieve_fn, read_fn, roots, active_fn, web_fn=None):
         if not active():return stopped()
         coverage['query_count']+=1
         coverage['unavailable_records']+=len(found.get('unavailable') or []) if isinstance(found,dict) else 0
-        for hit in (found.get('hits') or [])[:MAX_RECORDS] if isinstance(found,dict) else []:
+        hits = list(found.get('hits') or []) if isinstance(found,dict) else []
+        # The vault retriever intentionally scans CONTENT. Recovered saved-video
+        # packets use watch/<id>.md, so discover only that finite packet layout.
+        import itertools
+        for approved_root in approved:
+            watch = approved_root / "watch"
+            if watch.is_dir() and not watch.is_symlink():
+                for record in sorted(itertools.islice(watch.iterdir(), 60)):
+                    if record.suffix == ".md" and re.fullmatch(r"[A-Za-z0-9_-]{11}", record.stem):
+                        hits.append({"abs":str(record), "source":"owner_bound_watch_packet"})
+        for hit in hits[:MAX_RECORDS]:
             if len(seen)>=MAX_RECORDS:break
             if not isinstance(hit,dict):continue
             raw=hit.get('abs')
@@ -103,6 +113,11 @@ def run(objective, *, retrieve_fn, read_fn, roots, active_fn, web_fn=None):
             if SECRET.search(text) or RISK.search(text):continue
             urls=URL.findall(text)
             videos=list(dict.fromkeys(u for raw_url in urls if (u:=_video_url(raw_url))))
+            video_provenance = "explicit_record_url"
+            if not videos and real.parent.name == "watch" and re.fullmatch(r"[A-Za-z0-9_-]{11}", real.stem):
+                if re.match(r"^#\s+" + re.escape(real.stem) + r"(?:\s|$)", text):
+                    videos = ["https://www.youtube.com/watch?v=" + real.stem]
+                    video_provenance = "matching_saved_watch_record_id"
             implementations=list(dict.fromkeys(u for raw_url in urls if (u:=_implementation_url(raw_url))))
             # Catalogues containing many videos are discovery indexes, not one source method.
             if not videos or len(videos)>3 or not TECH.search(text):continue
@@ -111,7 +126,7 @@ def run(objective, *, retrieve_fn, read_fn, roots, active_fn, web_fn=None):
             if not excerpt:continue
             candidates.append({'saved_youtube_url':videos[0],'source_record':str(real),
                 'read_text_sha256':hashlib.sha256(text.encode()).hexdigest(),'read_truncated':before.st_size>MAX_READ,
-                'source_method':'saved_record_text_only','method_excerpt':excerpt,
+                'source_method':'saved_record_text_only','video_url_provenance':video_provenance,'method_excerpt':excerpt,
                 'original_implementation_url':implementations[0] if implementations else None,
                 'implementation_verified':False,'source_record_verified':True,'source_text_is_untrusted_data':True,
                 '_score':(20 if implementations else 0)+min(12,len(TECH.findall(text)))})

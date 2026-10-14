@@ -25,4 +25,16 @@ class WorkflowSourcePhase(unittest.TestCase):
     handle.cancel(task['mission_id']);return {'hits':[]}
    got=MissionController(adapter).research_saved_sources(h,task['mission_id'],roots=[source],retrieve_fn=retrieve,read_fn=lambda *a:('',None),active_fn=lambda:True)
    self.assertEqual(got['status'],'CANCELLED');self.assertFalse((root/'source_research.json').exists());self.assertEqual((root/'request.json').read_bytes(),original)
+class WorkflowSourceBinding(unittest.TestCase):
+ def test_explicit_packet_is_bound_only_inside_current_job_or_existing_source_roots(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d).resolve();job=root/'job'/'work';project=job/'project';project.mkdir(parents=True);packet=job/'source packet';packet.mkdir()
+   h=root/'hive';adapter=P._coding_mission_hand();handle=adapter.WorkflowMissionHandle(h);task=handle.start_workflow(REQUEST)
+   handle.bind_project(task['mission_id'],str(project),'jarvis/source','Use "'+str(project)+'"')
+   mc=MissionController(adapter);mc.bind_saved_source_root(h,task['mission_id'],str(packet),'Use saved sources "'+str(packet)+'"',default_roots=[])
+   receipt=adapter.read_json(adapter.mission_path(h,task['mission_id'])/'source_roots.json')
+   self.assertEqual(receipt['roots'],[str(packet)]);self.assertFalse(receipt['global_read_roots_changed'])
+   outside=root/'other';outside.mkdir()
+   with self.assertRaises(ValueError):mc.bind_saved_source_root(h,task['mission_id'],str(outside),'Use saved sources "'+str(outside)+'"',default_roots=[])
+   with self.assertRaises(ValueError):mc.bind_saved_source_root(h,task['mission_id'],str(packet),'Use saved sources "'+str(packet)+'-other"',default_roots=[])
 if __name__=='__main__':unittest.main()

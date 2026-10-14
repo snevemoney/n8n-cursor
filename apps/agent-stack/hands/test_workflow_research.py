@@ -70,4 +70,27 @@ class WorkflowResearchTests(unittest.TestCase):
             many=TEXT+'\n'.join('https://youtu.be/'+chr(65+i)*11 for i in range(4))
             result,_,_=self.run_fixture(root,many);self.assertFalse(result['ok'])
 
+class RecoveredWatchRecords(unittest.TestCase):
+ def test_actual_saved_watch_id_format_derives_canonical_url_with_explicit_provenance(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d).resolve();watch=root/'watch';watch.mkdir();file=watch/'abcdefghijk.md'
+   text='# abcdefghijk — Saved personal assistant video\n## Method\nThe Python memory agent uses bounded browser observation checkpoints.\n'
+   file.write_text(text)
+   got=M.run('goal',retrieve_fn=lambda *a,**k:{'hits':[{'abs':str(file)}]},read_fn=lambda p,cap:(p.read_text(),None),roots=[root],active_fn=lambda:True)
+   self.assertTrue(got['ok']);self.assertEqual(got['selected']['saved_youtube_url'],'https://www.youtube.com/watch?v=abcdefghijk')
+   self.assertEqual(got['selected']['video_url_provenance'],'matching_saved_watch_record_id');self.assertFalse(got['selected']['implementation_verified'])
+ def test_arbitrary_filename_or_mismatched_header_cannot_invent_video_provenance(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d).resolve();watch=root/'watch';watch.mkdir();file=watch/'abcdefghijk.md';file.write_text('# wrong-id\nPython memory agent implementation')
+   got=M.run('goal',retrieve_fn=lambda *a,**k:{'hits':[{'abs':str(file)}]},read_fn=lambda p,cap:(p.read_text(),None),roots=[root],active_fn=lambda:True)
+   self.assertFalse(got['ok'])
+class ActualVaultPacketBridge(unittest.TestCase):
+ def test_real_content_only_vault_retriever_does_not_hide_explicit_watch_packet(self):
+  from brain import pipeline as P
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d).resolve();watch=root/'watch';watch.mkdir();file=watch/'abcdefghijk.md'
+   file.write_text('# abcdefghijk — saved technical video\nThe Python memory agent uses browser observation checkpoints.\n')
+   self.assertEqual(P.RETRIEVE.candidate_files([root]),[])
+   got=M.run('goal',retrieve_fn=P.RETRIEVE.search,read_fn=P.RETRIEVE.read_local_text,roots=[root],active_fn=lambda:True)
+   self.assertTrue(got['ok']);self.assertEqual(got['selected']['source_record'],str(file));self.assertFalse(got['selected']['implementation_verified'])
 if __name__=='__main__':unittest.main()

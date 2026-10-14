@@ -26,6 +26,35 @@ class MissionController:
         """Same mission owner retains the task while its project is unresolved."""
         return self.adapter.WorkflowMissionHandle(hive).start_workflow(objective)
 
+    def bind_saved_source_root(self, hive, mission_id, source, answer, *, default_roots):
+        """One explicit source packet belongs to this task, not a global read rule."""
+        import fcntl
+        root = self.adapter.mission_path(hive, mission_id)
+        path = Path(source).expanduser()
+        permission = self.adapter._load("agent_stack_permissions", self.adapter.STACK / "hands" / "permissions.py")
+        if (not path.is_absolute() or not self.adapter._owner_path_matches(answer, path)
+            or permission.is_secret_path(path) or "Library" in path.parts
+            or any(p.startswith(".") for p in path.parts) or any(p.is_symlink() for p in (path, *path.parents))):
+            raise ValueError("an exact safe owner-named source folder is required")
+        path = path.resolve(strict=True)
+        if not path.is_dir():
+            raise ValueError("saved-source folder unavailable")
+        binding = self.adapter.read_json(root / "binding.json")
+        project = Path(str(binding.get("repo") or ""))
+        approved = [Path(p).resolve() for p in default_roots]
+        # Recovered packets in this isolated job's work folder are task resources.
+        if project.is_absolute() and project.parent.name == "work":
+            approved.append(project.parent.resolve())
+        if not any(path == allowed or allowed in path.parents for allowed in approved):
+            raise ValueError("source folder is outside this task's approved project context")
+        with (root / "steering.lock").open("a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            request = self.adapter.read_json(root / "request.json")
+            if request.get("worker_kind") != "research_build" or self.adapter.read_json(root / "control.json").get("cancel"):
+                raise ValueError("active research assignment required")
+            self.adapter.write_json(root / "source_roots.json", {"roots":[str(path)], "owner_answer":answer,
+                "request_scope":"transient_task", "mission_id":mission_id, "global_read_roots_changed":False})
+
     def research_saved_sources(self, hive, mission_id, *, roots, retrieve_fn, read_fn, active_fn, web_fn=None):
         """Read-only capability phase for the retained owner assignment."""
         import fcntl
