@@ -973,6 +973,24 @@ def _json_obj(text: str) -> dict:
         return {}
 
 
+CODE_REPLY_RECOVERY = (
+    'The previous coding reply was invalid or incomplete; no writes, tests, or commits from that reply ran. '
+    'Return one complete JSON object only. Keep the response bounded: inspect with read_paths first, '
+    'prefer compact exact edits for large existing files, and include only small necessary new files. '
+    'Include an explicit meaningful test_cmd. Complete only the work authorized by the current goal. '
+    'Do not resend whole large files.')
+
+def _code_reply(text):
+    """A rejected response is feedback, never an empty default test action."""
+    raw=re.sub(r'^```(?:json)?|```$', '', (text or '').strip(),flags=re.M).strip()
+    try:data=json.loads(raw)
+    except (ValueError,TypeError):return None,'malformed_or_truncated_json'
+    if not isinstance(data,dict) or not data:return None,'nonempty_object_required'
+    if data.get('read_paths'):return data,None
+    if not (data.get('files') or data.get('edits')) and not (isinstance(data.get('test_cmd'),str) and data['test_cmd'].strip()):return None,'coding_action_or_test_command_required'
+    return data,None
+
+
 CODE_INSPECTION_HINT = (
     '\nRepository operations: to inspect existing code first, return JSON with '
     '"read_paths":[{"path":"relative/file.py","start_line":1,"line_count":120}] and no files/edits. '
@@ -1499,7 +1517,14 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
             if not text:
                 done(f"iter {state['iteration']} model", {"verified":False,"spoken":"no model answer"})
                 return _code_report(state["todo"],state["skills"],model,False,state["plan"])
-            data = _json_obj(text)
+            data,error = _code_reply(text)
+            if error:
+                state.update(model=model,model_output=text,model_data={},model_request_pending=False,files=[],edit_preimages={},file_cursor=0)
+                state['history'].append({'role':'assistant','content':text[:8000]})
+                state['history'].append({'role':'user','content':CODE_REPLY_RECOVERY+' Rejection reason: '+error+'.'})
+                done(f"iter {state['iteration']} model response",{'verified':False,'spoken':'Coding response rejected: '+error+'; no operations from this reply ran.'})
+                state['model_response_error']=error;state['iteration']+=1;state['phase']='model';save();continue
+            state.pop('model_response_error',None)
             state.update(model=model, model_output=text, model_data=data, model_request_pending=False)
             if data.get('read_paths'):
                 rows = _code_reads(root,data)
@@ -1540,7 +1565,7 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
         elif phase in {"test", "pending_test"}:
             state["phase"] = "pending_test";save()
             guard("before_test")
-            got = op_repo(str(root),"test",cmd=str(state["model_data"].get("test_cmd") or "python3 -m unittest discover -v"))
+            got = op_repo(str(root),"test",cmd=str(state['model_data'].get('test_cmd') or 'python3 -m unittest discover -v'))
             guard("after_test")
             state["last_test"] = str(got.get("output") or got.get("spoken"))[-2500:]
             state["test_result"] = got
@@ -1639,7 +1664,11 @@ def _op_code_owned(repo, goal, branch, *, todo, check, publish, operate) -> dict
             step(f"iter {it} model", {"verified": False, "spoken": "no model answer (key missing or both models failed)"})
             break
         history.append({"role": "assistant", "content": text[:8000]})
-        d = _json_obj(text)
+        d,error = _code_reply(text)
+        if error:
+            history.append({'role':'user','content':CODE_REPLY_RECOVERY+' Rejection reason: '+error+'.'})
+            step(f"iter {it} model response",{'verified':False,'spoken':'Coding response rejected: '+error+'; no operations from this reply ran.'})
+            continue
         plan = plan or [str(x)[:120] for x in (d.get("plan") or [])][:7]
         if d.get('read_paths'):
             rows = _code_reads(root,d)
@@ -1651,7 +1680,7 @@ def _op_code_owned(repo, goal, branch, *, todo, check, publish, operate) -> dict
             _check_edit_preimage(root,str(path),preimages.get(str(path)))
             if not step(f"iter {it} write {path}", operate(str(root), "write", path=str(path), content=str(content))):
                 return _code_report(todo, skills, model_used, False, plan)
-        got = operate(str(root), "test", cmd=str(d.get("test_cmd") or "python3 -m unittest discover -v"))
+        got = operate(str(root), "test", cmd=str(d.get('test_cmd') or 'python3 -m unittest discover -v'))
         last_test = str(got.get("output") or got.get("spoken"))[-2500:]
         passed = bool(got.get("verified"))
         step(f"iter {it} test", got)
