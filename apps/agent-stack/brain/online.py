@@ -1433,6 +1433,7 @@ def _openrouter_length_retry(
     headers: dict,
     *,
     timeout: float = 10.0,
+    tool_history: list | None = None,
 ) -> tuple[str, str]:
     finish_user = f"{user}\n\nFinish the thought. Do not recap. No scratchpad."
     try:
@@ -1444,6 +1445,7 @@ def _openrouter_length_retry(
                 stream=False,
                 max_tokens=LENGTH_RETRY_TOKENS,
                 images=stills,
+                tool_history=tool_history,
             ),
             headers=headers,
             timeout=max(1.0, float(timeout)),
@@ -1523,6 +1525,35 @@ def _ask_only(user: str) -> str:
     return text.rsplit("Current ask:\n", 1)[-1] if "Current ask:\n" in text else text
 
 
+def _bounded_tool_history(history):
+    """Accept only complete host-provided assistant/tool pairs, never system roles."""
+    if not history:
+        return []
+    if not isinstance(history, list) or len(history) > 8 or len(history) % 2:
+        raise ValueError("invalid tool history shape")
+    if len(json.dumps(history, ensure_ascii=False).encode()) > 96000:
+        raise ValueError("tool history exceeds bound")
+    out = []; seen = set()
+    for index in range(0, len(history), 2):
+        assistant, result = history[index:index + 2]
+        calls = assistant.get('tool_calls') if isinstance(assistant, dict) else None
+        if not isinstance(assistant, dict) or assistant.get('role') != 'assistant' or not isinstance(calls, list) or len(calls) != 1:
+            raise ValueError("invalid assistant tool history")
+        call = calls[0]; fn = call.get('function') or {}; cid = call.get('id')
+        if (call.get('type') != 'function' or not isinstance(cid, str) or not cid or len(cid)>200
+                or cid in seen or not isinstance(fn.get('name'), str)
+                or not re.fullmatch(r'[A-Za-z0-9_-]{1,80}', fn['name'])
+                or not isinstance(fn.get('arguments'), str)):
+            raise ValueError("invalid provider tool call")
+        if not isinstance(result, dict) or result.get('role') != 'tool' or result.get('tool_call_id') != cid or not isinstance(result.get('content'), str):
+            raise ValueError("unpaired tool result")
+        seen.add(cid)
+        out.extend([{'role':'assistant','content':str(assistant.get('content') or '')[:6000],
+                     'tool_calls':[{'id':cid,'type':'function','function':{'name':fn['name'],'arguments':fn['arguments']}}]},
+                    {'role':'tool','tool_call_id':cid,'content':result['content']}])
+    return out
+
+
 def _openrouter_payload(
     model: str,
     user: str,
@@ -1534,6 +1565,7 @@ def _openrouter_payload(
     extra_tools: list | None = None,
     hands: bool = True,
     primary: str = "",
+    tool_history: list | None = None,
 ) -> dict:
     content: str | list
     stills = [str(u) for u in (images or []) if str(u or "").startswith("data:image")]
@@ -1556,6 +1588,7 @@ def _openrouter_payload(
             {"role": "user", "content": content},
         ],
     }
+    body['messages'].extend(_bounded_tool_history(tool_history))
     if model in OPENROUTER_PAID_FALLBACKS:
         # The conversational token ceiling needs answer tokens, not an unfinished thinking trace.
         body["reasoning"] = {"enabled": False}
@@ -1589,7 +1622,13 @@ def _tool_pick_from_message(msg: dict) -> dict | None:
             parsed = {}
         if isinstance(parsed, dict):
             args = parsed
-    return {"tool": name, "args": args, "speak": str(msg.get("content") or "").strip()}
+    pick = {"tool": name, "args": args, "speak": str(msg.get("content") or "").strip()}
+    # Only a real single provider call can acquire a paired result. Multiple
+    # requested calls are not falsely represented as all executed.
+    if len(calls) == 1 and isinstance(first.get('id'), str) and isinstance(raw_args, str):
+        pick['provider_tool_call'] = {'id':first['id'],'type':first.get('type'),
+                                     'function':{'name':name,'arguments':raw_args}}
+    return pick
 
 
 WORKER_MAX_TOKENS = int(os.environ.get("JARVIS_WORKER_MAX_TOKENS") or 600)
@@ -1689,6 +1728,7 @@ def call_openrouter(
     images: list | None = None,
     extra_tools: list | None = None,
     hands: bool = True,
+    tool_history: list | None = None,
 ) -> dict:
     """OpenRouter chat. Free first. Paid fallback on the same host when :free is 429.
 
@@ -1696,7 +1736,8 @@ def call_openrouter(
     """
     began = time.monotonic()
     STREAM_USAGE.clear()
-    got = _call_openrouter_inner(prompt, context, images=images, extra_tools=extra_tools, hands=hands)
+    got = _call_openrouter_inner(prompt, context, images=images, extra_tools=extra_tools, hands=hands,
+                                  **({"tool_history": tool_history} if tool_history else {}))
     primary = str(LAST_INJECT.get("primary") or "") or (openrouter_vision_model() if images else "") or openrouter_model()
     model = str(got.get("model") or "") if isinstance(got, dict) else ""
     reply = str(got.get("spoken") or "") if isinstance(got, dict) else ""
@@ -1853,6 +1894,7 @@ def _call_openrouter_inner(
     images: list | None = None,
     extra_tools: list | None = None,
     hands: bool = True,
+    tool_history: list | None = None,
 ) -> dict:
     """OpenRouter chat. Free first. Paid fallback on the same host when :free is 429.
 
@@ -1903,6 +1945,7 @@ def _call_openrouter_inner(
 
     def _openrouter_payload(*args, **kw):  # noqa: F811 — same payload, primary named for the self-report
         kw.setdefault("primary", primary_mid)
+        kw.setdefault("tool_history", tool_history)
         racer = kw.get("primary") != primary_mid
         keep = {k: LAST_INJECT.get(k) for k in ("primary", "model")}
         out = globals()["_openrouter_payload"](*args, **kw)
@@ -2084,7 +2127,7 @@ def _call_openrouter_inner(
                 data = _http_json(
                     OPENROUTER_URL,
                     data=_openrouter_payload(
-                        mid, user, stream=False, max_tokens=max_tokens, images=stills
+                        mid, user, stream=False, max_tokens=max_tokens, images=stills, tool_history=[]
                     ),
                     headers=headers,
                     timeout=min(OPENROUTER_ATTEMPT_SEC, remain),
@@ -2116,6 +2159,7 @@ def _call_openrouter_inner(
                 "engine": "openrouter",
                 "tool": pick.get("tool"),
                 "args": pick.get("args") or {},
+                **({'provider_tool_call':pick['provider_tool_call']} if pick.get('provider_tool_call') else {}),
                 "speak": pick.get("speak") or "",
                 "spoken": clip_spoken(
                     str(pick.get("speak") or ""),
@@ -2136,7 +2180,8 @@ def _call_openrouter_inner(
                 more = ""
                 if remain >= 3.0:
                     more, retry_finish = _openrouter_length_retry(
-                        mid, user, stills, headers, timeout=min(10.0, remain)
+                        mid, user, stills, headers, timeout=min(10.0, remain),
+                        **({"tool_history":tool_history} if tool_history else {})
                     )
                 kept = _usable_length_text(more)
             if kept:
@@ -2354,9 +2399,9 @@ def _named_openrouter_failure(got) -> bool:
     )
 
 
-def call_grok(prompt: str, context: str = "") -> dict:
+def call_grok(prompt: str, context: str = "", *, tool_history: list | None = None) -> dict:
     if openrouter_api_key():
-        got = call_openrouter(prompt, context)
+        got = call_openrouter(prompt, context, **({"tool_history":tool_history} if tool_history else {}))
         if usable_openrouter(got):
             return got
         if _named_openrouter_failure(got):
