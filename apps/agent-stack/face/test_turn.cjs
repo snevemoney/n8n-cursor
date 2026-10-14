@@ -208,6 +208,8 @@ function busReconciliation() {
   const c = vm.createContext({busGen:8,state:{turning:false,phase:'idle',listening:false,armed:false},
     $:()=>element,productLine:t=>t||'',isStatusLine:()=>false,isFallbackLine:t=>t.includes('dark'),
     ttsSpeaking:()=>false,paintPhase:()=>{}});
+  const helper=html.indexOf('    function showCurrentResponse(target)');
+  vm.runInContext(html.slice(helper,html.indexOf('    async function turn',helper)),c);
   const start=html.indexOf('    function reconcilePhase(bus)');
   vm.runInContext(html.slice(start,html.indexOf('    async function refresh()',start)),c);
   c.reconcilePhase({turn_gen:7,job_status:'done',spoken:'Old generation answer.'});

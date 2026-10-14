@@ -975,8 +975,18 @@
     let turnAbort = null;
     let turnGen = 0;
     let spokenLock = "";
+    function showCurrentResponse(target) {
+      const chip = $("chip");
+      if (!chip) return;
+      chip.scrollTop = 0;
+      if (target && typeof target.getBoundingClientRect === "function" &&
+          typeof chip.getBoundingClientRect === "function") {
+        chip.scrollTop = Math.max(0, target.getBoundingClientRect().top - chip.getBoundingClientRect().top);
+      }
+    }
     async function turn(utterance, approved, voice = false) {
       if (!utterance) return;
+      showCurrentResponse();
       if ($("heard") && $("heard") !== $("spoken")) $("heard").textContent = "› " + String(utterance).slice(0, 160);
       speakHeld = false;
       const isStop = STOP_RE.test(utterance || "");
@@ -1996,6 +2006,7 @@
         if (line && !bus.mission_delivery_pending && !(bus.tool === "browser_mission" && bus.browser_mission_id && Array.from($("browserResults").children).some(el => el.dataset.missionId === bus.browser_mission_id)) && (newerReply || !now || isStatusLine(now) || isFallbackLine(now) || /^listening\.?$/i.test(now))) {
           $("spoken").textContent = line;
           state.renderedBusGen = Number(bus.turn_gen || 0);
+          if (newerReply) showCurrentResponse();
           if (bus.utterance && $("heard") && $("heard") !== $("spoken")) $("heard").textContent = "› " + String(bus.utterance).slice(0, 160);
           if (bus.watch && bus.watch.armed && bus.watch.narration && $("heard") && $("heard") !== $("spoken")) $("heard").textContent = "▶ " + String(bus.watch.narration).slice(0, 160);
         }
@@ -2010,6 +2021,8 @@
             answer.dataset.missionId = pending.mission_id;
             answer.textContent = pending.spoken;
             results.appendChild(answer);
+            state.renderedBusGen = Math.max(Number(state.renderedBusGen || 0), Number(pending.gen || 0));
+            showCurrentResponse(answer);
             if (bus.browser_mission_id === pending.mission_id) $("spoken").textContent = "";
             if (state.armed) { enqueueSpeak(pending.spoken); return; }
           }
