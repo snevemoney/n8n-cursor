@@ -1347,8 +1347,17 @@ def _workflow_followup_route(utterance, hive):
     if not re.fullmatch(r"[a-f0-9]{32}", str(ident)):
         return None
     text = str(utterance or "").strip()
+    # A complete new assignment retains its own objective before contextual
+    # clarifications of an older task; exact repeated objectives dedupe at intake.
+    if _research_build_request(text):
+        return None
     if re.fullmatch(r"(?:please\s+)?(?:resume|continue)\s+(?:the\s+)?workflow[.!]?", text, re.I):
         return {"tool":"agent_tools", "args":{"action":"research_build_continue","mission_id":ident}, "speak":""}
+    repository = adapter._load("workflow_repo_context", STACK / "hands" / "workflow_repo_context.py")
+    if len(text)<=256 and repository.NAME.fullmatch(text) and re.search(r"\b(?:repo|repository)\b",text,re.I):
+        return {"tool":"agent_tools", "args":{"action":"research_build_repo_context","mission_id":ident}, "speak":""}
+    if re.search(r"\b(?:signals?|bookmarks?|saved\s+(?:youtube\s+)?videos?)\b",text,re.I) and re.search(r"\b(?:repo|repository)\b",text,re.I):
+        return {"tool":"agent_tools", "args":{"action":"research_build_repo_sources","mission_id":ident}, "speak":""}
     access = adapter._load("workflow_read_access", STACK / "hands" / "workflow_read_access.py")
     if access.ALLOW.fullmatch(" ".join(text.split())):
         return {"tool":"agent_tools", "args":{"action":"research_build_read_access","mission_id":ident}, "speak":""}
@@ -5764,7 +5773,7 @@ def _run_tool_inner(
                 "task_verified": bool(got.get("ok")), "plan_meta": hd.log_meta(got)}
     if tool == "agent_tools":
         hd = _agent_tools_hand()
-        if args.get("action") in {"research_build_bind", "research_build_continue", "research_build_sources", "research_build_approve", "research_build_read_access", "research_build_permission_info"}:
+        if args.get("action") in {"research_build_bind", "research_build_continue", "research_build_sources", "research_build_approve", "research_build_read_access", "research_build_permission_info", "research_build_repo_context", "research_build_repo_sources"}:
             owner_pick = _workflow_followup_route(utterance, hive)
             if not owner_pick or owner_pick["args"]["action"] != args.get("action"):
                 return {"ok":False,"tool":tool,"spoken":"No project binding or workflow continuation was requested.","task_verified":False,"wires":[tool],"cites":[],"sent":False}
@@ -5773,7 +5782,32 @@ def _run_tool_inner(
             owned = owner_pick["args"]
             handle = _coding_mission_hand().WorkflowMissionHandle(hive)
             try:
-                if owned["action"] in {"research_build_read_access", "research_build_permission_info"}:
+                if owned["action"] in {"research_build_repo_context", "research_build_repo_sources"}:
+                    adapter = _coding_mission_hand()
+                    repository = adapter._load("workflow_repo_context", STACK / "hands" / "workflow_repo_context.py")
+                    task_root = adapter.mission_path(hive, owned["mission_id"])
+                    original = (task_root / "request.json").read_bytes()
+                    binding = adapter.read_json(task_root / "binding.json")
+                    named = utterance if owned["action"] == "research_build_repo_context" else Path(str(binding.get("repo") or "")).name + " repo"
+                    context = repository.resolve(hive,owned["mission_id"],named,expected_request_sha256=hashlib.sha256(original).hexdigest())
+                    if not context.get("ok"):
+                        return {"ok":False,"tool":tool,"spoken":context["question"],"task_verified":False,"outcome":"NEEDS_ACTION_DETAILS","wires":[tool],"cites":[],"sent":False}
+                    context.update(owner_answer=utterance, reference_resolution="literal_repository_name" if owned["action"] == "research_build_repo_context" else "existing_owner_bound_repository_reference")
+                    import fcntl
+                    with (task_root / "steering.lock").open("a") as steering:
+                        fcntl.flock(steering, fcntl.LOCK_EX)
+                        if (adapter.read_json(task_root / "control.json").get("cancel")
+                            or (gen is not None and turn_cancelled(hive,gen))):
+                            stopped = handle.workflow_status(owned["mission_id"])
+                            stopped.update(ok=False,cancelled=True,task_verified=False,verified=False)
+                            return stopped
+                        if ((task_root / "request.json").read_bytes()!=original
+                            or adapter.read_json(task_root / "binding.json")!=binding):
+                            raise ValueError("workflow task or project changed during repository resolution")
+                        adapter.write_json(task_root / "repo_context.json",context)
+                        result = handle.workflow_status(owned["mission_id"])
+                        result.update(spoken="I resolved the repository from its actual Git identity and found its saved-source index locations. The original project and workflow remain bound; I have not inspected the whole signals corpus or built the implementation.", question="", task_verified=False, verified=False)
+                elif owned["action"] in {"research_build_read_access", "research_build_permission_info"}:
                     access = _coding_mission_hand()._load("workflow_read_access", STACK / "hands" / "workflow_read_access.py")
                     if owned["action"] == "research_build_read_access":
                         receipt = access.grant(hive, owned["mission_id"], utterance)
@@ -5799,17 +5833,29 @@ def _run_tool_inner(
                     access = _coding_mission_hand()._load("workflow_read_access", STACK / "hands" / "workflow_read_access.py")
                     access.resume(hive, owned["mission_id"], utterance)
                     result["filesystem_read_authorized"] = bool(access.roots(hive, owned["mission_id"]))
-                if owned["action"] in {"research_build_bind", "research_build_sources"} and RETRIEVE is not None:
+                if owned["action"] in {"research_build_bind", "research_build_sources", "research_build_repo_context", "research_build_repo_sources"} and RETRIEVE is not None:
                     controller = _coding_mission_hand()._load("coding_mission_controller", STACK / "brain" / "mission_controller.py")
                     research_roots = RETRIEVE.resolve_roots(retrieve_roots)
                     source_context = _coding_mission_hand().read_json(_coding_mission_hand().mission_path(hive, owned["mission_id"]) / "source_roots.json")
                     if source_context.get("roots"):
                         research_roots = [Path(root) for root in source_context["roots"]]
+                    repo_context = _coding_mission_hand().read_json(_coding_mission_hand().mission_path(hive, owned["mission_id"]) / "repo_context.json")
+                    research_roots += [Path(root) for root in repo_context.get("source_inventory_roots", []) if Path(root).is_dir()]
+                    binding = _coding_mission_hand().read_json(_coding_mission_hand().mission_path(hive, owned["mission_id"]) / "binding.json")
+                    project_context={"verified":binding.get("authority") in {"literal_owner_answer","owner_project_contract"}, "source":"owner_project_binding", "name":Path(str(binding.get("repo") or "")).name,
+                        "summary":"Existing private Jarvis agent project" if (Path(str(binding.get("repo") or ""))/"apps/agent-stack").is_dir() else "Existing owner selected project",
+                        "capabilities":["assistant","agent","memory","coding","browser"] if (Path(str(binding.get("repo") or ""))/"apps/agent-stack").is_dir() else []}
+                    def primary_metadata(probe):
+                        phase = _coding_mission_hand()._load("workflow_research_adapter", STACK / "hands" / "workflow_research.py")
+                        expected = phase.primary_origin_probe(probe.get("url", ""))
+                        if probe != expected:
+                            return {"ok":False,"output":""}
+                        return hd.op_cli(expected["argv"])
                     result = controller.MissionController(_coding_mission_hand()).research_saved_sources(
                         hive, owned["mission_id"], roots=research_roots, retrieve_fn=RETRIEVE.search,
                         read_fn=RETRIEVE.read_local_text,
                         active_fn=lambda:gen is None or not turn_cancelled(hive, gen),
-                        web_fn=lambda query:_web_search_hand().run(query))
+                        web_fn=lambda query:_web_search_hand().run(query),project_context=project_context,primary_metadata_fn=primary_metadata)
                 if gen is not None:
                     act_if_current(hive, gen, lambda bus:dict(bus, workflow_mission_id=result["mission_id"], workflow_status=result["status"], workflow_task_verified=False))
                 return result
@@ -8051,7 +8097,9 @@ def apply_pipeline_iter(
     if not source and cites and isinstance(cites[0], dict):
         source = str(cites[0].get("source") or "")
     ran_spoken = str((ran or {}).get("spoken") or "")
-    if tool == "browser_mission" and (pick or {}).get("args",{}).get("action") == "status":
+    if ran and ran.get("ok") is False and tool in HANDS:
+        outcome = "CANCELLED" if ran.get("cancelled") else "ACTION_FAILED"
+    elif tool == "browser_mission" and (pick or {}).get("args",{}).get("action") == "status":
         outcome = TOOL_LOOP
         source = "mission_state"
     elif vault_spoke:

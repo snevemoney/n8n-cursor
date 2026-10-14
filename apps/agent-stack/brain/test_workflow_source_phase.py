@@ -14,7 +14,7 @@ class WorkflowSourcePhase(unittest.TestCase):
    retrieve=mock.Mock(return_value={'hits':[{'abs':str(file)}]});read=lambda path,cap:(path.read_text()[:cap],None)
    got=MissionController(adapter).research_saved_sources(h,task['mission_id'],roots=[source],retrieve_fn=retrieve,read_fn=read,active_fn=lambda:True)
    root=adapter.mission_path(h,task['mission_id']);proof=adapter.read_json(root/'source_research.json')
-   self.assertEqual(retrieve.call_count,3);self.assertEqual(proof['selected']['original_implementation_url'],'https://github.com/example/memory-agent')
+   self.assertEqual(retrieve.call_count,3);self.assertIsNone(proof['selected']['original_implementation_url']);self.assertEqual(proof['selected']['origin_candidates'][0]['url'],'https://github.com/example/memory-agent');self.assertFalse(proof['selected']['origin_candidates'][0]['associated'])
    self.assertEqual(got['status'],'WAITING_APPROVAL');self.assertFalse(got['task_verified']);self.assertEqual(got['objective'],REQUEST)
    self.assertEqual(adapter.read_json(root/'checkpoint.json')['phase'],'source_research');self.assertFalse((root/'result.json').exists())
  def test_stop_during_retrieval_cannot_store_candidate_or_clear_original_task(self):

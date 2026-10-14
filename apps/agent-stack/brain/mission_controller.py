@@ -55,7 +55,7 @@ class MissionController:
             self.adapter.write_json(root / "source_roots.json", {"roots":[str(path)], "owner_answer":answer,
                 "request_scope":"transient_task", "mission_id":mission_id, "global_read_roots_changed":False})
 
-    def research_saved_sources(self, hive, mission_id, *, roots, retrieve_fn, read_fn, active_fn, web_fn=None):
+    def research_saved_sources(self, hive, mission_id, *, roots, retrieve_fn, read_fn, active_fn, web_fn=None, project_context=None, primary_metadata_fn=None):
         """Read-only capability phase for the retained owner assignment."""
         import fcntl
         root = self.adapter.mission_path(hive, mission_id)
@@ -72,13 +72,22 @@ class MissionController:
             if not active():
                 return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
             phase = self.adapter._load("workflow_research_adapter", self.adapter.STACK / "hands" / "workflow_research.py")
-            result = phase.run(request["objective"], roots=roots, retrieve_fn=retrieve_fn, read_fn=read_fn, active_fn=active, web_fn=web_fn)
+            result = phase.run(request["objective"], roots=roots, retrieve_fn=retrieve_fn, read_fn=read_fn, active_fn=active, web_fn=web_fn, project_context=project_context, primary_metadata_fn=primary_metadata_fn)
             if not active():
                 return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
             with (root / "steering.lock").open("a") as steering:
                 fcntl.flock(steering, fcntl.LOCK_EX)
                 if not active():
                     return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
+                previous = root / "source_research.json"
+                if previous.is_file():
+                    raw = previous.read_bytes()
+                    history = root / "source-research-history"
+                    history.mkdir(exist_ok=True)
+                    target = history / (hashlib.sha256(raw).hexdigest()+".json")
+                    if not target.exists():
+                        pm=self.adapter._load("workflow_project_methods",self.adapter.STACK/"hands"/"project_methods.py")
+                        pm.write_new(target,raw.decode("utf-8"))
                 self.adapter.write_json(root / "source_research.json", result)
                 state = self.adapter.read_json(root / "state.json")
                 # Source discovery never clears the independent edit/branch gate.
