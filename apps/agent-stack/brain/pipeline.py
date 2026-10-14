@@ -1212,16 +1212,32 @@ def fixed_route(utterance: str) -> dict | None:
     return None
 
 
-def _code_author_hand():
-    if "hands.code_author" in sys.modules:  # same instance as a package import (tests swap CHAT on it)
-        return sys.modules["hands.code_author"]
-    name = "agent_stack_code_author"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "code_author.py")
+# Pipeline can be loaded under several names; they still share one cache lock.
+_LAZY_HAND_LOCK = sys.__dict__.setdefault("_jarvis_lazy_hand_lock", threading.RLock())
+
+
+def _load_ready_hand(name, path):
+    # Module initialization is one transaction: concurrent routing readers cannot
+    # observe the cache entry while exec_module is still defining its API.
+    with _LAZY_HAND_LOCK:
+        if name in sys.modules:
+            return sys.modules[name]
+        spec = importlib.util.spec_from_file_location(name, path)
         mod = importlib.util.module_from_spec(spec)
         sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+        try:
+            spec.loader.exec_module(mod)
+        except BaseException:
+            if sys.modules.get(name) is mod:
+                sys.modules.pop(name, None)
+            raise
+        return mod
+
+
+def _code_author_hand():
+    if "hands.code_author" in sys.modules:  # preserve the package instance and injected CHAT
+        return sys.modules["hands.code_author"]
+    return _load_ready_hand("agent_stack_code_author", STACK / "hands" / "code_author.py")
 
 
 def _web_search_hand():
@@ -1426,13 +1442,7 @@ def _cost_hand():
 
 
 def _pointer_hand():
-    key = "agent_stack_pointer"
-    if key not in sys.modules:
-        spec = importlib.util.spec_from_file_location(key, STACK / "hands" / "pointer.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[key] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[key]
+    return _load_ready_hand("agent_stack_pointer", STACK / "hands" / "pointer.py")
 
 
 def _pickup_hand():
