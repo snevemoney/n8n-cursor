@@ -180,6 +180,11 @@ class MissionController:
             self.adapter.write_json(root/'state.json',state)
         return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
 
+    def configure_headless_notes(self,hive,mission_id,owner_answer,*,vault_root=None):
+        """Host owner directive only; configures this retained task, no note IO."""
+        phase=self.adapter._load('workflow_delivery',self.adapter.STACK/'hands/workflow_delivery.py')
+        return phase.enable_headless_notes(self.adapter,hive,mission_id,owner_answer=owner_answer,vault_root=vault_root)
+
     def record_workflow_review(self,hive,mission_id,kind,verdict,evidence,authority):
         """Trusted independent reviewer integration, never a model-selected action."""
         import fcntl

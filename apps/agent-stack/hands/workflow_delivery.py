@@ -5,7 +5,7 @@ only its new private artifacts and one unique note. Independent receipts are
 host-only inputs; model arguments never enter review or delivery authority.
 """
 from __future__ import annotations
-import hashlib,json,os,re,stat,time
+import hashlib,json,os,re,stat,time,subprocess,sys,uuid
 from urllib.parse import unquote,urlparse
 from pathlib import Path
 
@@ -34,6 +34,123 @@ def file_receipt(path):
     if path.suffix=='.pdf' and not raw.startswith(b'%PDF-'):raise ValueError('invalid_pdf')
     if path.suffix=='.png' and not raw.startswith(b'\x89PNG\r\n\x1a\n'):raise ValueError('invalid_preview')
     return {'path':str(path),'sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw)}
+
+def enable_headless_notes(adapter,hive,mission_id,*,owner_answer,vault_root=None):
+    """Host-only current owner directive; not exposed as model arguments."""
+    answer=str(owner_answer or '')
+    if (len(answer)>2000 or not re.search(r'\bheadless\b',answer,re.I)
+        or not re.search(r'\bobsidian\b',answer,re.I)
+        or not re.search(r'\b(use|prefer|want)\b',answer,re.I)
+        or re.search(r"\b(no|not|never|don.t)\b.{0,25}\bheadless\b",answer,re.I)):
+        raise ValueError('explicit_headless_owner_directive_required')
+    root=adapter.mission_path(hive,mission_id);raw=(root/'request.json').read_bytes();request=json.loads(raw)
+    if ('obsidian' not in request.get('objective','').lower() or request.get('worker_kind')!='research_build'
+        or adapter.read_json(root/'control.json').get('cancel') is not False or (root/'result.json').exists()):
+        raise ValueError('current_requested_note_required')
+    vault=Path(vault_root or Path.home()/'Documents/My_Billion_Dollar_Vault').absolute()
+    inbox=vault/'00_Outer_Heaven/shared/inbox'
+    if any(p.is_symlink() for p in (inbox,*inbox.parents)) or not inbox.is_dir() or not (vault/'.obsidian').is_dir():
+        raise ValueError('headless_vault_identity_required')
+    info=inbox.stat()
+    row={'version':1,'mission_id':mission_id,'request_sha256':hashlib.sha256(raw).hexdigest(),
+         'authority':'explicit_current_owner_headless_notes','owner_answer_sha256':hashlib.sha256(answer.encode()).hexdigest(),
+         'vault_root':str(vault),'inbox':str(inbox),'directory_identity':[info.st_dev,info.st_ino],
+         'note_path':'00_Outer_Heaven/shared/inbox/Jarvis-implementation-'+mission_id+'.md'}
+    row['digest']=digest(row)
+    existing=adapter.read_json(root/'delivery_backend.json')
+    if existing:
+        if any(existing.get(k)!=row[k] for k in ('mission_id','request_sha256','vault_root','inbox','directory_identity','note_path')):
+            raise ValueError('headless_note_scope_changed')
+        return existing
+    target=root/'delivery_backend.json'
+    fd=os.open(target,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
+    with os.fdopen(fd,'w') as out:json.dump(row,out);out.flush();os.fsync(out.fileno())
+    return row
+
+
+class HeadlessNote:
+    """One private new note. No daemon, app, overwrite, or standing vault grant."""
+    def __init__(self,runtime):
+        self.runtime=runtime;self.owner,self.state,self.plan=runtime.scope();self.a=runtime.a
+    def scope(self):
+        self.runtime.check();row=self.a.read_json(self.owner.root/'delivery_backend.json');proof=dict(row);expected=proof.pop('digest',None)
+        if (digest(proof)!=expected or row.get('authority')!='explicit_current_owner_headless_notes'
+            or row.get('mission_id')!=self.owner.ident or row.get('request_sha256')!=self.plan['request_sha256']
+            or row.get('note_path')!=self.plan['note_path']):raise ValueError('headless_note_authority_changed')
+        inbox=Path(row['inbox']);vault=Path(row['vault_root'])
+        if (inbox!=vault/'00_Outer_Heaven/shared/inbox' or not (vault/'.obsidian').is_dir()
+            or any(p.is_symlink() for p in (inbox,*inbox.parents))):raise ValueError('headless_vault_identity_changed')
+        info=inbox.stat()
+        if [info.st_dev,info.st_ino]!=row.get('directory_identity') or not stat.S_ISDIR(info.st_mode):raise ValueError('headless_vault_identity_changed')
+        return row,inbox,Path(row['note_path']).name
+    def contract(self):
+        row,_,_=self.scope()
+        return {'server':'host_headless_vault','write':'headless_create_note','read':'headless_read_note','list':'headless_target_presence',
+                'schema_verified':True,'schema_sha256':row['digest'],'backend':'headless_filesystem'}
+    def read(self,path):
+        row,inbox,name=self.scope()
+        if path!=row['note_path']:raise ValueError('headless_note_outside_scope')
+        # A separate bounded read prevents an iCloud dataless file blocking the
+        # worker. No private text, pathname or child stderr is logged.
+        program="""import json,os,stat,sys
+r=json.load(sys.stdin);out={'ok':False};directory=None
+try:
+ directory=os.open(r['directory'],os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
+ info=os.fstat(directory)
+ if [info.st_dev,info.st_ino]!=r['identity']:raise ValueError('directory_changed')
+ before=os.stat(r['name'],dir_fd=directory,follow_symlinks=False)
+ if stat.S_ISREG(before.st_mode) and not stat.S_ISLNK(before.st_mode) and 0<before.st_size<=20000 and not getattr(before,'st_flags',0)&0x40000000:
+  fd=os.open(r['name'],os.O_RDONLY|os.O_NOFOLLOW,dir_fd=directory)
+  with os.fdopen(fd,'rb') as f:raw=f.read(20001);actual=os.fstat(f.fileno())
+  after=os.stat(r['name'],dir_fd=directory,follow_symlinks=False)
+  identity=lambda s:(s.st_dev,s.st_ino,s.st_size,s.st_mtime_ns)
+  if identity(before)==identity(actual)==identity(after) and len(raw)<=20000:out={'ok':True,'content':raw.decode('utf-8'),'identity':list(identity(after))}
+except (OSError,ValueError):pass
+finally:
+ if directory is not None:os.close(directory)
+print(json.dumps(out))
+"""
+        try:
+            got=subprocess.run([sys.executable,'-I','-S','-c',program],input=json.dumps({'directory':str(inbox),'name':name,'identity':row['directory_identity']}),capture_output=True,text=True,timeout=4)
+            value=json.loads(got.stdout) if got.returncode==0 and len(got.stdout)<=130000 else {'ok':False}
+        except (OSError,ValueError,subprocess.TimeoutExpired):value={'ok':False}
+        self.scope();return value
+    def presence(self,path):
+        row,inbox,name=self.scope()
+        if path!=str(Path(row['note_path']).parent):raise ValueError('headless_note_outside_scope')
+        try:info=os.lstat(inbox/name)
+        except FileNotFoundError:return {'ok':True,'names':[],'coverage':'exact_target_only'}
+        return {'ok':stat.S_ISREG(info.st_mode) and not stat.S_ISLNK(info.st_mode),'names':[name],'coverage':'exact_target_only'}
+    def write(self,action):
+        row,inbox,name=self.scope()
+        if action!={'server':'host_headless_vault','tool':'headless_create_note','arguments':{'filepath':row['note_path'],'content':self.plan['note_content']}}:
+            raise ValueError('scoped_note_write_receipt_required')
+        _owner,state,plan=self.runtime.scope()
+        if (state.get('pending_note')!={'action_digest':digest(action)} or state.get('note_action_digest')!=digest(action) or state.get('note_contract')!=self.contract() or state.get('note_contract_digest')!=digest(state.get('note_contract') or {})):raise ValueError('scoped_note_write_receipt_required')
+        text=plan['note_content'];self.a._load('delivery_project_methods',self.a.STACK/'hands/project_methods.py').clean_text(text)
+        if len(text.encode())>20000:raise ValueError('implementation_note_budget')
+        directory=os.open(inbox,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW);temporary='.jarvis-note-'+uuid.uuid4().hex;created=False;temporary_identity=None
+        try:
+            info=os.fstat(directory)
+            if [info.st_dev,info.st_ino]!=row['directory_identity']:raise ValueError('headless_vault_identity_changed')
+            fd=os.open(temporary,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600,dir_fd=directory)
+            created=True
+            with os.fdopen(fd,'wb') as out:
+                out.write(text.encode());out.flush();os.fsync(out.fileno());info=os.fstat(out.fileno());temporary_identity=(info.st_dev,info.st_ino,info.st_size,info.st_mtime_ns)
+            self.scope()
+            current=os.stat(temporary,dir_fd=directory,follow_symlinks=False)
+            if (current.st_dev,current.st_ino,current.st_size,current.st_mtime_ns)!=temporary_identity:raise ValueError('headless_temporary_changed')
+            os.link(temporary,name,src_dir_fd=directory,dst_dir_fd=directory,follow_symlinks=False)
+            os.fsync(directory);self.scope()
+        finally:
+            if created and temporary_identity is not None:
+                try:
+                    current=os.stat(temporary,dir_fd=directory,follow_symlinks=False)
+                    if (current.st_dev,current.st_ino,current.st_size,current.st_mtime_ns)==temporary_identity:os.unlink(temporary,dir_fd=directory)
+                except FileNotFoundError:pass
+            os.close(directory)
+        return {'ok':True,'action_executed':True,'outcome_verified':False}
+
 
 class Delivery:
     def __init__(self,adapter,hive,mission_id,*,active_fn,artifact_base=None,runtime=None):
@@ -277,6 +394,8 @@ class Runtime:
         matches=bool(observed and Path(observed).resolve()==path.resolve())
         return {'verified':read.returncode==0 and matches,'app':'DeckCraft','document_matches':matches}
     def note_contract(self):
+        owner=getattr(self.check,'__self__',None)
+        if isinstance(owner,Delivery) and (owner.root/'delivery_backend.json').exists():return HeadlessNote(self).contract()
         hand=self.load('agent_tools');inventory=self.load('mcp_inventory')
         names={row['name'] for row in inventory.inventory()[0]}
         for server in sorted(names,key=lambda n:(n!='MCP_DOCKER',n)):
@@ -315,15 +434,18 @@ class Runtime:
         try:return json.loads(text)
         except ValueError:return text
     def note_read(self,c,path):
+        if c.get('backend')=='headless_filesystem':return HeadlessNote(self).read(path)
         value=self.note_result(c,c['read'],{'filepath':path})
         text=value.get('content') if isinstance(value,dict) else value
         return {'ok':isinstance(text,str) and bool(text),'content':text if isinstance(text,str) else ''}
     def note_list(self,c,path):
+        if c.get('backend')=='headless_filesystem':return HeadlessNote(self).presence(path)
         value=self.note_result(c,c['list'],{'dirpath':path})
         names=value.get('files') if isinstance(value,dict) else value
         valid=isinstance(names,list) and all(isinstance(n,str) for n in names)
         return {'ok':valid,'names':[Path(n).name for n in names] if valid else []}
     def note_write(self,action):
+        if action.get('server')=='host_headless_vault':return HeadlessNote(self).write(action)
         _owner,state,plan=self.scope()
         expected={'filepath':plan['note_path'],'content':plan['note_content']}
         if (set(action)!={'server','tool','arguments'} or action.get('tool') not in {'obsidian_append_content','append_content'}
