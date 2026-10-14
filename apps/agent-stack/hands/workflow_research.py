@@ -117,15 +117,21 @@ def associate_primary_origin(video_url, tool_result):
     Association is distinct from inspecting a repository/license or executing it.
     """
     result = {'origin_association_verified': False, 'original_implementation_url': None,
-              'implementation_verified': False, 'origin_status': 'WAITING_PRIMARY_SOURCE', 'origin_candidates': []}
+              'implementation_verified': False, 'origin_status': 'WAITING_PRIMARY_SOURCE', 'origin_candidates': [],
+              'primary_probe_status': 'PRIMARY_PROBE_UNAVAILABLE'}
     if not isinstance(tool_result, dict) or tool_result.get('ok') is not True:
         return result
     raw = tool_result.get('output')
-    if not isinstance(raw, str) or len(raw) > MAX_READ or SECRET.search(raw):
+    if tool_result.get('output_truncated') or isinstance(raw, str) and len(raw) > MAX_READ:
+        result['primary_probe_status'] = 'PRIMARY_OUTPUT_TRUNCATED'
+        return result
+    if not isinstance(raw, str) or SECRET.search(raw):
+        result['primary_probe_status'] = 'PRIMARY_OUTPUT_UNUSABLE'
         return result
     try:
         metadata = json.loads(raw)
     except (ValueError, TypeError):
+        result['primary_probe_status'] = 'PRIMARY_INVALID_JSON'
         return result
     canonical = _video_url(video_url)
     if not canonical or not isinstance(metadata, dict) or metadata.get('id') != parse_qs(urlparse(canonical).query)['v'][0]:
@@ -148,6 +154,7 @@ def associate_primary_origin(video_url, tool_result):
                 'associated': explicit, 'description_line': number + 1})
             if explicit and url not in associated:
                 associated.append(url)
+    result['primary_probe_status'] = 'PRIMARY_METADATA_READ'
     result['primary_metadata_sha256'] = hashlib.sha256(raw.encode()).hexdigest()
     result['primary_video_url'] = canonical
     if len(associated) == 1:

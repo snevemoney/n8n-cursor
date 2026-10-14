@@ -199,7 +199,7 @@ CLI_ALLOW = {
 CLI_GATED = re.compile(r"\b(merge|push|close|delete|create|edit|comment|review|release|deploy|reset|rebase|--force|-X\s*(POST|PUT|PATCH|DELETE))\b", re.I)
 
 
-def op_cli(argv: list[str], cwd: str | None = None) -> dict:
+def op_cli(argv: list[str], cwd: str | None = None, *, max_output_chars: int = OUT_CAP) -> dict:
     if not argv or argv[0] not in CLI_ALLOW:
         return {"ok": False, "verified": False, "spoken": f"{(argv or ['?'])[0]} isn't on the read-only CLI list."}
     rest = " ".join(argv[1:])
@@ -222,9 +222,15 @@ def op_cli(argv: list[str], cwd: str | None = None) -> dict:
         res = g.speak(g.kind_of(argv[1:]), p.stdout or "", p.stderr or "", p.returncode)
         return {"ok": res["ok"], "verified": res["ok"], "exit": p.returncode, "auth_missing": res["auth_missing"],
                 "spoken": _scrub(res["spoken"])}
-    text = _cap(_scrub(p.stdout or p.stderr))
+    # Fixed host metadata probes need complete bounded JSON, not a speech-sized
+    # prefix with a missing closing delimiter. Default CLI output stays unchanged.
+    limit = max(1, min(int(max_output_chars), 12000))
+    raw_text = _scrub(p.stdout or p.stderr).strip()
+    truncated = len(raw_text) > limit
+    text = raw_text[:limit] + ("…" if truncated else "")
     ok = p.returncode == 0
     return {"ok": ok, "verified": ok and bool(text), "output": text, "exit": p.returncode,
+            "output_truncated": truncated,
             "spoken": (f"{argv[0]} ok: " if ok else f"{argv[0]} exited {p.returncode}: ") + text[:600]}
 
 

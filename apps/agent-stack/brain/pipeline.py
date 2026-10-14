@@ -5969,7 +5969,7 @@ def _run_tool_inner(
                 phase=adapter._load('workflow_research_adapter',STACK/'hands/workflow_research.py')
                 expected=phase.primary_origin_probe(probe.get('url',''))
                 if probe!=expected or turn_cancelled(hive,gen):return {'ok':False,'output':''}
-                return hd.op_cli(expected['argv'])
+                return hd.op_cli(expected['argv'], max_output_chars=phase.MAX_READ)
             try:
                 return controller.MissionController(adapter).nominate_saved_source(hive,str(args['mission_id']),str(args['source_record']),
                     owner_utterance=utterance,gen=gen,primary_metadata_fn=publisher)
