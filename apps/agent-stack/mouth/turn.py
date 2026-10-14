@@ -620,6 +620,13 @@ def _apply_turn_iter_inner(
         return
     if _project_want:
         got = _project_hand.run(spoken, root=Path(os.environ.get("JARVIS_PROJECT_ROOT") or Path.home() / ".jarvis" / "projects"))
+        if got.get("ok"):
+            try:
+                _pv = PIPELINE._load("agent_stack_project_view", PIPELINE.STACK / "hands" / "project_view.py")
+                got["project_view"] = _pv.snapshot(_project_hand, Path(os.environ.get("JARVIS_PROJECT_ROOT") or Path.home() / ".jarvis" / "projects"), spoken)
+            except Exception:
+                # Presentation failure cannot replay an already committed draft through the model.
+                got["spoken"] += " The review panel is unavailable; use project review queue to refresh it."
         yield _door_speak(hive, spoken, got["spoken"], "project_methods", retrieve_roots, gen=token, execution=got)
         return
     # Z82 (dCK 4:39): "find my note about X" -> name the title, ask, then fetch on "open it/yes". Z83 grounded writing.
