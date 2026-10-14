@@ -47,3 +47,12 @@ def test_helper_ignores_short_and_different_lines():
     assert not mod._is_repeat("Yes.", "Yes.", "a", "b")
     assert not mod._is_repeat("Four, sir.", PREV, "x", "y")
     assert mod._is_repeat(PREV, PREV.upper(), "x", "y")
+
+
+def test_fixed_honest_lines_are_never_replaced(tmp_path, monkeypatch):
+    # The dark-wire and nothing-on-disk lines are right for any ask; "say that again" would be wrong.
+    mod = _mod(monkeypatch)
+    dark = mod.PIPELINE.TALK_DARK
+    assert mod._is_honest_fixed_line(f"Sir. {dark}")
+    assert mod._is_honest_fixed_line("Sir. I don't have that on disk.")
+    assert not mod._is_honest_fixed_line(PREV)

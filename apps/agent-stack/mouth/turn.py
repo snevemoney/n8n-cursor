@@ -1024,6 +1024,10 @@ REPEAT_MIN_CHARS = 20
 REPEAT_LINE = "Sorry, sir, I was about to repeat myself. Say that again and I will answer it properly."
 
 
+def _is_honest_fixed_line(spoken: str) -> bool:
+    return PIPELINE.TALK_DARK in spoken or bool(PIPELINE._only_honest_unknown(spoken))
+
+
 def _is_repeat(spoken: str, previous: str, utterance: str, previous_utterance: str) -> bool:
     """True when a reply is Jarvis's last line word for word, given for a different ask."""
     norm = lambda t: re.sub(r"^sir\s+", "", re.sub(r"\s+", " ", re.sub(r"[^\w\s]", "", str(t or "").lower())).strip())
@@ -1063,8 +1067,9 @@ def apply_turn_iter(utterance: str, **kw):
 
     def _inner():
         for val in _apply_turn_iter_inner(utterance, **kw):
+            # The fixed honest lines (talk wire dark, nothing on disk) are correct for any ask; "say that again" would not help.
             if (isinstance(val, dict) and not val.get("partial") and val.get("verb") in ("converse", None)
-                    and _is_repeat(str(val.get("spoken") or ""), prev_line, utterance, prev_ask)):
+                    and not _is_honest_fixed_line(str(val.get("spoken") or "")) and _is_repeat(str(val.get("spoken") or ""), prev_line, utterance, prev_ask)):
                 val = dict(val, spoken=REPEAT_LINE, spoken_delta=REPEAT_LINE if val.get("spoken_delta") else val.get("spoken_delta"))
             if gen_doc and isinstance(val, dict) and not val.get("partial") and val.get("verb") in ("converse", "drafts", "think", None):
                 val = dict(val, spoken=_placeholders(str(val.get("spoken") or ""), utterance))
