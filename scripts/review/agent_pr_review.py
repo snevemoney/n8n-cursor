@@ -30,6 +30,6 @@ rev=llm.chat([{'role':'system','content':sysm},{'role':'user','content':f"PR #{n
 out=f'REVIEW-{n}.md'
 import re
 if truncated: rev=re.sub(r'(?im)^(\W*verdict\W*)\s*(APPROVE|REQUEST_CHANGES|COMMENT)\b',r'\1 INCOMPLETE (diff truncated; was \2)',rev)
-open(out,'w').write(f"# Local agent review — PR #{n} {meta['title']}\nFailing checks at review time: {', '.join(fails) or 'none'}\n{'**Diff truncated: review incomplete.**' if truncated else ''}\nAdvisory only (COMMENT); human/critic decides.\n\n{rev}\n")
+open(out,'w').write(f"# Agent PR review (advisory) — PR #{n} {meta['title']}\nFailing checks at review time: {', '.join(fails) or 'none'}\n{'**Diff truncated: review incomplete.**' if truncated else ''}\nAdvisory only (COMMENT); human/critic decides.\n\n{rev}\n")
 print(out)
 if '--post' in sys.argv: subprocess.run(['gh','pr','review',n,'-R',repo,'--comment','--body-file',out],check=True)
