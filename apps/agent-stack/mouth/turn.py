@@ -64,6 +64,23 @@ QUIET_THINK_RE = re.compile(
 )
 
 
+def _needs_source_evidence(text: str) -> bool:
+    """A scoring panel has no file tools; source questions need the pipeline.
+
+    This is routing only. The normal hand still resolves paths and enforces
+    scope, freshness and permissions before reading anything.
+    """
+    if re.search(r"\b(?:files?|documents?|source|code|repository|repo|implementation)\b", text or "", re.I):
+        return True
+    try:
+        reader = PIPELINE._workspace_read_hand()
+        return bool(reader._FILE.search(text or "") or reader._SECRET_ASK.search(text or "")
+                    or PIPELINE.wants_workspace_read(text or ""))
+    except Exception:
+        # With an unavailable detector, let the normal pipeline resolve intent.
+        return True
+
+
 def _safe_path(value: str) -> str:
     """HOME-relative or file-name-only: never an absolute machine path."""
     text = str(value or "")
@@ -712,7 +729,7 @@ def _apply_turn_iter_inner(
         elif _fr.PAID_RE.search(spoken or "") and not re.search(r"\b(?:write|draft|email)\b", spoken or "", re.I):
             _inv = PIPELINE._load("agent_stack_mcp_inventory", PIPELINE.STACK / "hands" / "mcp_inventory.py").inventory()[0]
             got = _fr.preflight(spoken, [str(x.get("name") or "") for x in _inv])
-        elif _fr.PANEL_RE.match(re.sub(r"^\s*(?:hey\s+)?jarvis[,.]?\s*(?:please\s+)?", "", spoken or "", flags=re.I)):
+        elif _fr.PANEL_RE.match(re.sub(r"^\s*(?:hey\s+)?jarvis[,.]?\s*(?:please\s+)?", "", spoken or "", flags=re.I)) and not _needs_source_evidence(spoken):
             got = _fr.panel(spoken)
         if got is not None:
             yield _door_speak(hive, spoken, got["spoken"], got.get("tool") or "frontier", retrieve_roots, gen=token, execution=got)
