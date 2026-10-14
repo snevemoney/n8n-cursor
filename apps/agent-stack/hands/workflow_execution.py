@@ -28,7 +28,7 @@ def _digest(row):return _sha(json.dumps(row,sort_keys=True,separators=(',',':'))
 def _task(hive,mission_id):
     if not re.fullmatch(r'[a-f0-9]{32}',str(mission_id)):raise ValueError('invalid_mission')
     W=_load('workflow_workspace');root=Path(hive)/'coding-missions'/mission_id
-    read=lambda name:W._regular_bytes(root/(name+'.json'),64000)[0]
+    read=lambda name:W._regular_bytes(root/(name+'.json'),2_000_000 if name=='state' else 64000)[0]
     original=read('request');bound=read('binding');request=json.loads(original);binding=json.loads(bound)
     state=json.loads(read('state'));control=json.loads(read('control'));approval=json.loads(read('owner_approval'))
     if (request.get('mission_id')!=mission_id or request.get('worker_kind')!='research_build'
