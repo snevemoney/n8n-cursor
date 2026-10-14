@@ -753,7 +753,17 @@ def wants_memory(utterance: str) -> bool:
 
 def wants_workspace_read(utterance: str) -> bool:
     """Explicit read-only file / folder / git ask. Goes to hands/workspace_read, never a guess."""
-    return bool(WORKSPACE_READ_RE.search(utterance or "") or _workspace_read_hand().DOCUMENT_FIND_RE.search(utterance or ""))
+    wr = _workspace_read_hand()
+    direct = wr.REQUEST_PATH_RE.fullmatch(utterance or "")
+    named_document = direct and wr._FILE.match(direct.group(1).lstrip("\"'"))
+    return bool(WORKSPACE_READ_RE.search(utterance or "") or wr.DOCUMENT_FIND_RE.search(utterance or "") or wr.requested_path(utterance) is not None or named_document)
+
+
+DOCUMENT_FOLLOWUP_RE = re.compile(r"\b(?:summari[sz]e|summary|explain|analy[sz]e|conclusion|main points|key points)\b|\b(?:what|how)\b.{0,35}\b(?:it|this|document|file|book|pdf|chapter)\b.{0,25}\b(?:about|mean|say|tell|suggest|contain)\b", re.I)
+
+
+def _document_context_hand():
+    return _load('agent_stack_document_context', STACK / 'memory' / 'document_context.py')
 
 
 SKILLS_RE = re.compile(
@@ -5666,20 +5676,27 @@ def _run_tool_inner(
             return _run_tool_inner({"tool": "vault_read", "args": {"query": utterance}, "speak": ""}, utterance, hive=hive,
                                    retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn,
                                    cursor_ask_fn=cursor_ask_fn, craft_model_fn=craft_model_fn, sent=sent, gen=gen)
-        got = wr.run(wargs)
-        return {
+        got = wr.run_requested(wargs, utterance)
+        result = {
             "ok": bool(got.get("ok")),
             "tool": tool,
             "spoken": str(got.get("spoken") or ""),
             "wires": ["workspace_read"],
             "cites": [],
             "sent": False,
-            "task_verified": bool(got.get("ok")) and (got.get("complete") is True if wargs.get("op") == "find" else True),
+            "task_verified": bool(got.get("ok")) and (got.get("complete") is True if got.get("op") == "find" else not got.get("truncated", False)),
             "workspace_meta": wr.log_meta(got),
             "workspace_files": got.get("files", []),
             "workspace_complete": got.get("complete"),
             "workspace_scope": got.get("scope", []),
+            "workspace_text": got.get("text", ""),
+            "workspace_path": got.get("path", ""),
+            "workspace_truncated": got.get("truncated", False),
+            'workspace_fingerprint': got.get('fingerprint'),
         }
+        if gen is not None and result['workspace_text']:
+            result['document_context'] = _document_context_hand().retain(hive, int(gen), result, user_utterance=utterance)
+        return result
     if tool == "converse":
         return {
             "ok": True,
@@ -7004,7 +7021,7 @@ def apply_pipeline_iter(
         ran = local_greeting_reply()
         pick = {"tool": "pipeline", "args": {}, "speak": LOCAL_GREET}
         brain = None
-    if pick is None:
+    if pick is None and not DOCUMENT_FOLLOWUP_RE.search(spoken_in):
         _recall = store_recall(spoken_in, prior_turns)
         if _recall:
             ran = {"ok": True, "tool": "converse", "spoken": _recall, "wires": ["store"],
@@ -7253,6 +7270,12 @@ def apply_pipeline_iter(
             if extra and extra not in pack_text:
                 brief = f"{pack_text}\n\n{extra}"
         brief = fit_budget(brief)
+        if DOCUMENT_FOLLOWUP_RE.search(spoken_in):
+            context = _document_context_hand().for_followup(hive, int(gen or 0), is_followup=True)
+            if context.get('ok'):
+                brief = fit_budget(context['prompt_block'] + '\n\n' + brief)
+            elif context.get('status') in {'STALE', 'HOLD'}:
+                brief = 'The previously selected document is not current: ' + context['reason'] + '. Do not invent its contents. Ask to read it again.\n\n' + brief
         provider_brief = fit_budget(brief)
         no_hands = (
             generation_ask(spoken_in)

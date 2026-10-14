@@ -52,7 +52,7 @@ def test_actual_pipeline_overrides_guessed_listing(tmp_path):
     pipe = importlib.util.module_from_spec(spec); sys.modules[spec.name] = pipe; spec.loader.exec_module(pipe)
     assert pipe.wants_workspace_read(ASK)
     (tmp_path / 'book.epub').write_text('fixture')
-    with patch.dict('os.environ', {'JARVIS_READ_ROOTS': str(tmp_path)}):
+    with patch.dict('os.environ', {'JARVIS_READ_ROOTS': str(tmp_path)}), patch.object(wr.Path, 'home', return_value=tmp_path):
         got = pipe._run_tool_inner({'tool': 'workspace_read', 'args': {'op': 'ls', 'path': str(tmp_path)}, 'speak': ''}, ASK, hive=tmp_path / 'hive', retrieve_roots=[])
     assert got['workspace_complete'] and got['workspace_files'] == [str(tmp_path / 'book.epub')]
     assert 'items:' not in got['spoken']
