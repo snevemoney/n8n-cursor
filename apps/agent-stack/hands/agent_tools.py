@@ -357,6 +357,66 @@ def _repo_ok(repo: Path) -> str:
     return perm.decide("edit", str(repo))
 
 
+def _test_runner_command(cmd, root):
+    """A test receipt must come from a test runner, never inline shell output."""
+    import shlex
+    if isinstance(cmd,str):
+        try:cmd=shlex.split(cmd)
+        except ValueError:return None
+    if not isinstance(cmd,list) or not cmd or not all(isinstance(x,str) for x in cmd):return None
+    def runner(argv):
+        return bool(argv and (argv[0] in {"pytest","jest","vitest","mocha"}
+            or argv[0]=="python3" and len(argv)>=3 and argv[1]=="-m" and argv[2] in {"unittest","pytest"}
+            or argv[0]=="node" and len(argv)>=2 and argv[1]=="--test"))
+    if runner(cmd):return cmd
+    if cmd in (["npm","test"],["npm","run","test"]):
+        path=root/"package.json"
+        if path.is_symlink() or not path.is_file() or path.stat().st_size>200000:return None
+        try:
+            scripts=json.loads(path.read_text()).get("scripts",{})
+            if scripts.get("pretest") or scripts.get("posttest"):return None
+            body=scripts.get("test","")
+            if not isinstance(body,str) or re.search(r"[;&|`$<>\n]",body):return None
+            return cmd if runner(shlex.split(body)) else None
+        except (ValueError,OSError,AttributeError):return None
+    if cmd==["make","test"]:
+        path=root/"Makefile"
+        if path.is_symlink() or not path.is_file() or path.stat().st_size>200000:return None
+        text=path.read_text()
+        # Make evaluates the whole file. Only a standalone literal test target
+        # can be attributed to the declaration checked here; complex Makefiles
+        # should name their underlying test runner directly.
+        text="\n".join(line for line in text.splitlines() if line.strip() and not line.lstrip().startswith("#"))+"\n"
+        match=re.fullmatch(r"(?:\.PHONY:[ \t]*test[ \t]*\n)?test:[ \t]*\n((?:\t[^\n]*\n)+)",text)
+        if not match:return None
+        lines=[line.strip().lstrip("@") for line in match.group(1).splitlines() if line.strip()]
+        try:return cmd if lines and all(not re.search(r"[;&|`$<>]",line) and runner(shlex.split(line)) for line in lines) else None
+        except ValueError:return None
+    return None
+
+
+def _test_counts(output):
+    """Record executed tests; a zero-test exit code is not a test pass."""
+    text=str(output or "")
+    if (re.search(r"(?im)^FAILED(?:\s|$)|^FAIL(?:\s|:)|^ERROR(?:\s|:)|^#\s+fail\s+[1-9]",text)
+        or re.search(r"\b[1-9]\d*\s+(?:failed|errors?)\b",text,re.I)):
+        return {"tests_run":None,"tests_passed":0,"runner_receipt":"failure"}
+    unittest_counts=list(re.finditer(r"Ran\s+(\d+)\s+tests?\b",text))
+    if unittest_counts:
+        unittest_count=unittest_counts[-1]
+        total=int(unittest_count.group(1))
+        skipped=re.search(r"OK\s*\(skipped=(\d+)\)",text[unittest_count.end():])
+        return {"tests_run":total,"tests_passed":max(0,total-(int(skipped.group(1)) if skipped else 0)),"runner_receipt":"unittest"}
+    passed=re.findall(r"\b(\d+)\s+passed\b",text)
+    if passed:
+        return {"tests_run":int(passed[-1]),"tests_passed":int(passed[-1]),"runner_receipt":"test_summary"}
+    tap=re.search(r"(?m)^#\s+tests\s+(\d+)\s*$",text)
+    tap_pass=re.search(r"(?m)^#\s+pass\s+(\d+)\s*$",text)
+    if tap and tap_pass:
+        return {"tests_run":int(tap.group(1)),"tests_passed":int(tap_pass.group(1)),"runner_receipt":"tap"}
+    return {"tests_run":None,"tests_passed":None,"runner_receipt":"unavailable"}
+
+
 def op_repo(repo: str, action: str, **kw) -> dict:
     root = Path(os.path.expanduser(repo or ""))
     if not repo:
@@ -394,23 +454,28 @@ def op_repo(repo: str, action: str, **kw) -> dict:
         return {"ok": ok, "verified": ok, "spoken": f"wrote {rel} ({len(body)} chars), read back {'matches' if ok else 'DIFFERS'}"}
     if action == "test":
         cmd = kw.get("cmd") or ["python3", "-m", "unittest", "discover", "-v"]
-        if isinstance(cmd, str):
-            cmd = cmd.split()
-        if cmd[0] not in {"python3", "pytest", "node", "npm", "make"}:
-            return {"ok": False, "verified": False, "spoken": f"test runner {cmd[0]} not allowed"}
+        cmd = _test_runner_command(cmd,root)
+        if cmd is None:
+            return {"ok": False, "verified": False, "spoken": "The command does not identify a supported test runner; no tests were run."}
         sb = shutil.which("sandbox-exec")
         if not sb:
             return {"ok": False, "verified": False, "spoken": "no sandbox-exec; I won't run tests bare."}
-        exe = "/usr/bin/python3" if cmd[0] == "python3" else (shutil.which(cmd[0]) or cmd[0])
+        exe = sys.executable if cmd[0] == "python3" else (shutil.which(cmd[0]) or cmd[0])
+        # Resolve the installed runner before test discovery adds the repo: a
+        # local unittest.py/pytest.py must not impersonate the test framework.
+        runner_args = (["-P"] if cmd[0] == "python3" else []) + cmd[1:]
         try:
-            p = subprocess.run([sb, "-p", _sandbox_profile(root), exe, *cmd[1:]], cwd=str(root), capture_output=True,
+            p = subprocess.run([sb, "-p", _sandbox_profile(root), exe, *runner_args], cwd=str(root), capture_output=True,
                                text=True, timeout=TEST_DEADLINE_S, env={"PATH": "/usr/bin:/bin:/opt/homebrew/bin", "HOME": "/private/tmp", "PYTHONDONTWRITEBYTECODE": "1"})
         except subprocess.TimeoutExpired:
             return {"ok": False, "verified": False, "spoken": "tests timed out"}
-        text = _cap((p.stdout or "") + (p.stderr or ""))
-        ok = p.returncode == 0
+        raw = (p.stdout or "") + (p.stderr or "")
+        counts = _test_counts(raw)
+        text = raw if len(raw)<=OUT_CAP else raw[:OUT_CAP//2]+"\n[output capped]\n"+raw[-OUT_CAP//2:]
+        ok = p.returncode == 0 and bool(counts.get("tests_passed"))
         tail = text.strip().splitlines()[-1] if text.strip() else ""
-        return {"ok": ok, "verified": ok, "output": text, "spoken": f"tests {'passed' if ok else 'FAILED'} ({tail})"}
+        return {"ok": ok, "verified": ok, "output": text, "exit_code":p.returncode, **counts,
+                "spoken": f"tests {'passed' if ok else 'not verified'} ({tail})"}
     if action == "commit":
         br = _git(root, "symbolic-ref", "--short", "HEAD").stdout.strip()
         if PERM().decide("git_commit", br) != "allow":
@@ -477,14 +542,15 @@ def _progress(progress, row) -> None:
         progress(dict(row))
 
 
-def run(args: dict | None = None, approved: bool = False, *, cancel_check=None, progress=None, checkpoint=None, resume_checkpoint=None) -> dict:
+def run(args: dict | None = None, approved: bool = False, *, cancel_check=None, progress=None, checkpoint=None, resume_checkpoint=None, mutation_guard=None) -> dict:
     if _stopped(cancel_check):
         return _cancelled()
     args = args or {}
     steps = args.get("steps") or ([args] if args.get("op") else [])
     goal = str(args.get("goal") or " ".join(str(s.get("tool") or s.get("action") or s.get("cmd") or " ".join(s.get("argv") or []) or s.get("query") or "") for s in steps))
     if len(steps) == 1 and steps[0].get("op") == "code":
-        got = op_code(steps[0].get("repo", ""), steps[0].get("goal", ""), steps[0].get("branch") or "jarvis/code", cancel_check=cancel_check, progress=progress, checkpoint=checkpoint, resume_checkpoint=resume_checkpoint)
+        got = op_code(steps[0].get("repo", ""), steps[0].get("goal", ""), steps[0].get("branch") or "jarvis/code", cancel_check=cancel_check, progress=progress, checkpoint=checkpoint, resume_checkpoint=resume_checkpoint,
+                      **({"mutation_guard":mutation_guard} if mutation_guard is not None else {}))
         return got
     if len(steps) == 1 and (steps[0].get("op") in {"gws_read", "sent_check", "craft_inspect", "fanout"}
                             or (steps[0].get("op") == "cli" and (steps[0].get("argv") or [""])[0] == "gws")):
@@ -1147,7 +1213,7 @@ def reconcile_code_checkpoint(checkpoint, args):
     return cp
 
 
-def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, resume_checkpoint):
+def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, resume_checkpoint, mutation_guard=None):
     root = Path(repo).expanduser()
     if not root.is_absolute():
         root = PERM().scratch_roots()[0]/root
@@ -1161,6 +1227,15 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
     def check():
         if _stopped(cancel_check):
             raise _CodeCancelled()
+    def guard(event, writes=None):
+        check()
+        if mutation_guard is not None:
+            if not callable(mutation_guard):
+                raise _CheckpointBlocked("host_configuration_guard_required")
+            receipt=mutation_guard(event, writes or {})
+            if not isinstance(receipt,dict) or receipt.get("ok") is not True or receipt.get("configuration_preserved") is not True:
+                raise _CheckpointBlocked("host_configuration_guard_rejected_"+event)
+        check()
     def save(*, allow_git_initialization=False):
         check()
         previous=state.get("snapshot")
@@ -1190,7 +1265,9 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
         save()
         _progress(progress, {"n":len(state["todo"])+1,"what":what or action,"status":"running"})
         check()
+        guard("before_"+action)
         got = op_repo(str(root), action, **kw)
+        guard("after_"+action)
         # Persist the executed step before consulting cancellation, so an exact
         # postcondition is recoverable if Stop arrived during the operation.
         state["todo"].append({"n":len(state["todo"])+1,"what":what or action,
@@ -1224,7 +1301,9 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
                 mask=os.umask(0);os.umask(mask)
                 state["pending"]={"path":".gitignore","new_sha256":hashlib.sha256(body.encode()).hexdigest(),"mode":0o666 & ~mask}
                 state["phase"]="pending_gitignore";save()
+                guard("before_write", {".gitignore":body})
                 got=op_repo(str(root),"write",path=".gitignore",content=body)
+                guard("after_write")
                 if not done("gitignore",got):
                     raise _CheckpointBlocked("gitignore_write_failed")
                 state["pending"]=None;state["phase"]="baseline";save()
@@ -1235,9 +1314,11 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
                 # The special pending phase prevents a crashed baseline from
                 # being confused with the generated iteration's acceptance test.
                 state["phase"] = "pending_baseline";save()
+                guard("before_test")
                 got = op_repo(str(root),"test")
+                guard("after_test")
                 state["last_test"] = "(baseline before edits) " + str(got.get("output") or got.get("spoken"))[-2500:]
-                done("baseline test", {"verified":True,"spoken":got.get("spoken")})
+                done("baseline test", got)
             state["phase"] = "model";save()
         elif phase == "model":
             if state["iteration"] > MAX_ITERS:
@@ -1275,7 +1356,9 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
                 mode = prior["mode"]
             state["pending"] = {"path":name,"new_sha256":hashlib.sha256(content.encode()).hexdigest(),"mode":mode}
             state["phase"] = "pending_write";save()
+            guard("before_write", {name:content})
             got = op_repo(str(root),"write",path=name,content=content)
+            guard("after_write")
             state["file_cursor"] += 1
             state["pending"] = None;state["phase"] = "files"
             if not done(f"iter {state['iteration']} write {name}",got):
@@ -1283,7 +1366,9 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
             save()
         elif phase in {"test", "pending_test"}:
             state["phase"] = "pending_test";save()
+            guard("before_test")
             got = op_repo(str(root),"test",cmd=str(state["model_data"].get("test_cmd") or "python3 -m unittest discover -v"))
+            guard("after_test")
             state["last_test"] = str(got.get("output") or got.get("spoken"))[-2500:]
             state["test_result"] = got
             done(f"iter {state['iteration']} test",got)
@@ -1298,7 +1383,9 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
             state["phase"] = "pending_commit";save()
         elif phase == "pending_commit":
             check()
+            guard("before_commit")
             got = op_repo(str(root),"commit",message=state["pending"]["message"])
+            guard("after_commit")
             state["commit_receipt"] = str(got.get("spoken") or "")[:300]
             state["pending"] = None;state["phase"] = "complete"
             done("commit",got)
@@ -1311,16 +1398,18 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
             raise _CheckpointBlocked("unreconciled_checkpoint_phase")
 
 
-def op_code(repo: str, goal: str, branch: str = "jarvis/code", *, cancel_check=None, progress=None, checkpoint=None, resume_checkpoint=None) -> dict:
+def op_code(repo: str, goal: str, branch: str = "jarvis/code", *, cancel_check=None, progress=None, checkpoint=None, resume_checkpoint=None, mutation_guard=None) -> dict:
     if checkpoint is not None or resume_checkpoint is not None:
         try:
             return _durable_code(repo, goal, branch, cancel_check=cancel_check, progress=progress,
-                                 checkpoint=checkpoint, resume_checkpoint=resume_checkpoint)
+                                 checkpoint=checkpoint, resume_checkpoint=resume_checkpoint, mutation_guard=mutation_guard)
         except _CodeCancelled:
             return _cancelled()
         except _CheckpointBlocked as exc:
             return {"ok": False, "verified": False, "status": "BLOCKED", "blocked": True,
                     "spoken": "Coding continuation is blocked: " + str(exc) + ". Nothing was replayed."}
+    if mutation_guard is not None:
+        return {"ok":False,"verified":False,"blocked":True,"spoken":"A guarded workflow requires its durable checkpoint writer. Nothing ran."}
     todo: list[dict] = []
     def check():
         if _stopped(cancel_check):

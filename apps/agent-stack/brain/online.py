@@ -115,6 +115,9 @@ OPENROUTER_PLAIN_TOKENS = int(os.environ.get("JARVIS_PLAIN_MAX_TOKENS") or 256)
 LENGTH_RETRY_TOKENS = 640
 LENGTH_MISS = "UNKNOWN. That answer ran out of room."
 OPENROUTER_HANDS = (
+    {"type":"function","function":{"name":"agent_tools",
+        "description":"For a retained saved-video research/build assignment explicitly identified in the current owner request: nominate one saved source record you actually read this turn. This records a candidate, never proves its implementation or approves building. Supply only the real read path and existing mission ID; do not invent URLs or verification flags.",
+        "parameters":{"type":"object","properties":{"action":{"type":"string","enum":["research_build_select_source"]},"mission_id":{"type":"string"},"source_record":{"type":"string"}},"required":["action","mission_id","source_record"],"additionalProperties":False}}},
     {
         "type": "function",
         "function": {

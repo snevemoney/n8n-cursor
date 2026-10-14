@@ -5960,6 +5960,21 @@ def _run_tool_inner(
                 "task_verified": bool(got.get("ok")), "plan_meta": hd.log_meta(got)}
     if tool == "agent_tools":
         hd = _agent_tools_hand()
+        if args.get('action') == 'research_build_select_source':
+            if set(args)!={'action','mission_id','source_record'} or gen is None or turn_cancelled(hive,gen):
+                return {'ok':False,'tool':tool,'spoken':'A current actual saved-source read is required.','task_verified':False,'wires':[tool],'cites':[],'sent':False}
+            adapter=_coding_mission_hand()
+            controller=adapter._load('coding_mission_controller',STACK/'brain/mission_controller.py')
+            def publisher(probe):
+                phase=adapter._load('workflow_research_adapter',STACK/'hands/workflow_research.py')
+                expected=phase.primary_origin_probe(probe.get('url',''))
+                if probe!=expected or turn_cancelled(hive,gen):return {'ok':False,'output':''}
+                return hd.op_cli(expected['argv'])
+            try:
+                return controller.MissionController(adapter).nominate_saved_source(hive,str(args['mission_id']),str(args['source_record']),
+                    owner_utterance=utterance,gen=gen,primary_metadata_fn=publisher)
+            except (ValueError,RuntimeError,OSError):
+                return {'ok':False,'tool':tool,'spoken':'That source could not be bound to this assignment from an actual current read. The original task is preserved.','task_verified':False,'wires':[tool],'cites':[],'sent':False}
         if args.get("action") in {"research_build_bind", "research_build_continue", "research_build_sources", "research_build_approve", "research_build_read_access", "research_build_permission_info", "research_build_repo_context", "research_build_repo_sources"}:
             owner_pick = _workflow_followup_route(utterance, hive)
             if not owner_pick or owner_pick["args"]["action"] != args.get("action"):
@@ -6013,9 +6028,12 @@ def _run_tool_inner(
                     default_roots = RETRIEVE.resolve_roots(retrieve_roots) if RETRIEVE is not None else []
                     controller.MissionController(adapter).bind_saved_source_root(hive, owned["mission_id"], owned["source_root"], utterance, default_roots=default_roots)
                     result = handle.workflow_status(owned["mission_id"])
+                elif owned["action"] == "research_build_continue":
+                    adapter = _coding_mission_hand()
+                    controller = adapter._load("coding_mission_controller", STACK / "brain" / "mission_controller.py")
+                    result = controller.MissionController(adapter).continue_research_build(hive, owned["mission_id"], utterance)
                 else:
-                    result = (handle.continue_workflow(owned["mission_id"], utterance) if owned["action"] == "research_build_continue"
-                              else handle.bind_project(owned["mission_id"], owned["repo"], owned["branch"], utterance))
+                    result = handle.bind_project(owned["mission_id"], owned["repo"], owned["branch"], utterance)
                 if owned["action"] == "research_build_continue":
                     access = _coding_mission_hand()._load("workflow_read_access", STACK / "hands" / "workflow_read_access.py")
                     access.resume(hive, owned["mission_id"], utterance)
