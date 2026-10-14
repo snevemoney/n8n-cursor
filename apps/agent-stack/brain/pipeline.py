@@ -6280,10 +6280,11 @@ def _run_tool_inner(
         scope = wr.selected_folder_receipt(utterance, got)
         if scope is not None and gen is not None:
             result['_selected_folder_scope']={**scope,'owner_gen':gen,'request_sha256':hashlib.sha256(utterance.encode()).hexdigest()}
+            _document_context_hand().begin_folder_selection(hive, int(gen), result['_selected_folder_scope'], user_utterance=utterance)
         if gen is not None and turn_cancelled(hive, gen):
             return {'ok':False,'tool':tool,'spoken':'Stopped. Standing by.','cancelled':True,'task_verified':False}
         if gen is not None and result['workspace_text']:
-            result['document_context'] = _document_context_hand().retain(hive, int(gen), result, user_utterance=utterance)
+            result['document_context'] = _document_context_hand().retain(hive, int(gen), result, user_utterance=utterance, selected_folder_scope=selected_folder_scope if scoped_child is not None and result['ok'] else None)
         return result
     if tool == "converse":
         return {

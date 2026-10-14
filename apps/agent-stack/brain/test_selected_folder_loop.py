@@ -40,6 +40,27 @@ class SelectedFolder(unittest.TestCase):
   self.assertIn('actual child content 22',result['spoken'])
   self.assertEqual(result['hand_loop_meta']['history_rounds'],[{'pairs':0,'provider_call_provenance':False}]*2)
 
+ def test_new_folder_replaces_old_context_and_keeps_actual_children_for_followup(self):
+  P.BUS_IO.mutate_bus(self.hive,lambda b:{**b,'document_context':{'owner_gen':1,'text':'old unrelated source'}})
+  scope=self.scope()
+  self.assertNotIn('document_context',P.BUS_IO.load_json(self.hive/'bus/state.json'))
+  for number in (21,22):
+   result=self.hand({'op':'read','path':str(self.folder/f'file{number:02}.txt')},selected_folder_scope=scope)
+   self.assertTrue(result['document_context']['ok'],result)
+  P.BUS_IO.mutate_bus(self.hive,lambda b:{**b,'turn_gen':4})
+  follow=P._document_context_hand().for_followup(self.hive,4,is_followup=True)
+  self.assertTrue(follow['ok']);self.assertEqual(follow['source_count'],2)
+  self.assertEqual([d['source_name'] for d in follow['documents']],['file21.txt','file22.txt'])
+  self.assertNotIn('old unrelated',follow['prompt_block'])
+ def test_untrusted_or_stale_folder_scope_cannot_retain_a_read(self):
+  scope=self.scope();path=self.folder/'file22.txt';got=W.run({'op':'read','path':str(path)},roots=[self.root])
+  result={'ok':True,'tool':'workspace_read','workspace_path':got['path'],'workspace_text':got['text'],'workspace_fingerprint':got['fingerprint']}
+  doc=P._document_context_hand()
+  for bad in (None,{**scope,'owner_gen':2},{**scope,'request_sha256':'other'},{**scope,'names':['file01.txt']}):
+   self.assertFalse(doc.retain(self.hive,self.gen,result,user_utterance=self.ask,selected_folder_scope=bad)['ok'])
+  (self.folder/'added.txt').write_text('directory changed')
+  self.assertFalse(doc.retain(self.hive,self.gen,result,user_utterance=self.ask,selected_folder_scope=scope)['ok'])
+
  def test_outside_nested_symlink_secret_unlisted_or_changed_folder_denied(self):
   outside=self.root/'outside.txt';outside.write_text('outside')
   link=self.folder/'link.txt';link.symlink_to(outside)

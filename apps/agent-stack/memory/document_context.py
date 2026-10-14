@@ -111,6 +111,34 @@ def scrub_text(text):
     return _scrub_tokens(str(text or ''))
 
 
+def _folder_selection(scope, gen, utterance):
+    """Validate a host listing receipt; model read arguments cannot supply it."""
+    if (not isinstance(scope, dict) or scope.get('owner_gen') != gen
+        or scope.get('request_sha256') != hashlib.sha256(str(utterance).encode()).hexdigest()):
+        return None
+    try:
+        spec = importlib.util.spec_from_file_location('document_folder_reader', Path(__file__).parents[1]/'hands/workspace_read.py')
+        reader = importlib.util.module_from_spec(spec); spec.loader.exec_module(reader)
+        receipt = reader.selected_folder_receipt(utterance, {'ok': True, 'op': 'ls', **scope})
+        if receipt is None or receipt.get('fingerprint') != scope.get('fingerprint'):
+            return None
+        return receipt
+    except (OSError, RuntimeError, ValueError, TypeError, KeyError):
+        return None
+
+
+def begin_folder_selection(hive, gen, scope, *, user_utterance):
+    """A newly selected folder supersedes unrelated snapshots, even before a read."""
+    if _folder_selection(scope, gen, user_utterance) is None:
+        return False
+    def apply(bus):
+        old = bus.get('document_context') or {}
+        if old.get('owner_gen') != gen or old.get('selection_request_sha256') != scope['request_sha256']:
+            bus.pop('document_context', None)
+        return bus
+    return _bus_io().act_if_current(Path(hive), gen, apply) is not None
+
+
 def retain(
     hive: Path,
     gen: int,
@@ -118,6 +146,7 @@ def retain(
     *,
     user_utterance: str,
     ttl_seconds: int = DEFAULT_TTL_SECONDS,
+    selected_folder_scope=None,
 ) -> dict[str, Any]:
     """Retain a successful exact-document read if its generation still owns the bus.
 
@@ -144,7 +173,9 @@ def retain(
             return {'ok': False, 'status': 'STALE', 'reason': 'source changed after the actual read'}
     except (OSError, RuntimeError):
         return {"ok": False, "status": "MISSING", "reason": "selected source is unavailable"}
-    if not _explicitly_selected(path, user_utterance):
+    folder = _folder_selection(selected_folder_scope, gen, user_utterance)
+    selected_child = bool(folder and path.parent == Path(folder['path']) and path.name in folder['names'])
+    if not _explicitly_selected(path, user_utterance) and not selected_child:
         return {"ok": False, "status": "HOLD", "reason": "explicit user selection was not established"}
 
     content, token_scrubbed = _scrub_tokens(content)
@@ -159,7 +190,7 @@ def retain(
     payload = {
         "schema": SCHEMA,
         "source": source,
-        "selected_by": "user_utterance_exact_path_or_filename",
+        "selected_by": "host_selected_folder_child" if selected_child else "user_utterance_exact_path_or_filename",
         "selection_utterance": str(user_utterance)[:500],
         "selection_request_sha256": hashlib.sha256(str(user_utterance).encode()).hexdigest(),
         "owner_gen": int(gen),
