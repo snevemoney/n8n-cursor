@@ -180,9 +180,23 @@ class MissionController:
             self.adapter.write_json(root/'state.json',state)
         return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
 
+    def record_workflow_review(self,hive,mission_id,kind,verdict,evidence,authority):
+        """Trusted independent reviewer integration, never a model-selected action."""
+        import fcntl
+        root=self.adapter.mission_path(hive,mission_id)
+        phase=self.adapter._load('workflow_delivery',self.adapter.STACK/'hands/workflow_delivery.py')
+        with (root/'steering.lock').open('a') as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX)
+            state=self.adapter.read_json(root/'state.json')
+            expected={'coding_delivery':'WAITING_INDEPENDENT_REVIEW','final_delivery':'WAITING_FINAL_REVIEW'}
+            if state.get('status')!=expected.get(kind) or not isinstance(state.get('review_subject'),dict):
+                raise ValueError('current independent review subject required')
+            delivery=phase.Delivery(self.adapter,hive,mission_id,active_fn=lambda:not self.adapter.read_json(root/'control.json').get('cancel'))
+            return delivery.record_review(kind,state['review_subject'],verdict,evidence,authority)
+
     def _workflow_manifest(self):
         files=dict(self.adapter.mission_source_manifest())
-        for name in ("hands/workflow_origin.py","hands/workflow_research.py"):
+        for name in ("hands/workflow_origin.py","hands/workflow_research.py","hands/workflow_delivery.py","hands/craft.py","brain/online.py","hands/macos_read.py","hands/mcp_call.py"):
             files[name]=hashlib.sha256((self.adapter.STACK/name).read_bytes()).hexdigest()
         return files
 
@@ -203,7 +217,7 @@ class MissionController:
         with (root/"steering.lock").open("a") as lock:
             fcntl.flock(lock,fcntl.LOCK_EX)
             state=handle.workflow_status(mission_id)
-            if state.get("status")=="CANCELLED" or not handle.project_approval(mission_id):return state
+            if state.get("status") in {"CANCELLED","COMPLETED","DONE","SUCCEEDED","VERIFIED"} or not handle.project_approval(mission_id):return state
             source=self.adapter.read_json(root/"source_research.json")
             if not source.get("selected"):return state
             owner=self.adapter.read_json(root/"owner.json")
@@ -231,6 +245,9 @@ class MissionController:
         import asyncio,fcntl
         hive=root.parent.parent;ident=root.name
         handle=self.adapter.WorkflowMissionHandle(hive)
+        terminal=self.adapter.read_json(root/'result.json')
+        if terminal.get('status')=='COMPLETED' and terminal.get('independent_acceptance') is True:
+            return handle.workflow_status(ident)
         dispatch=self.adapter.read_json(root/"execution_dispatch.json")
         def active():
             try:
@@ -317,7 +334,17 @@ class MissionController:
                     return handle.workflow_status(ident)
                 return persist("BUILDING","The coding worker is still active. Its work and progress are preserved.")
             if result.get("status")=="COMPLETED" and result.get("builder_verified"):
-                return persist("WAITING_INDEPENDENT_REVIEW","The working version and builder tests are ready for independent review. The ArtCraft demonstration and Obsidian documentation are still pending.",coding_evidence=result.get("coding_evidence"),coding_mission_id=child)
+                delivery=self.adapter._load('workflow_delivery',self.adapter.STACK/'hands/workflow_delivery.py')
+                outcome=delivery.Delivery(self.adapter,hive,ident,active_fn=active).advance(result)
+                status=outcome.pop('status');spoken=outcome.pop('spoken');outcome.pop('verified',None);outcome.pop('task_verified',None)
+                state=persist(status,spoken,**outcome,coding_evidence=result.get("coding_evidence"),coding_mission_id=child)
+                if status=='COMPLETED' and outcome.get('independent_acceptance') is True and active():
+                    receipt={**self.adapter.read_json(root/'state.json'),'mission_id':ident,
+                             'request_sha256':dispatch['request_sha256'],'verified':True,'task_verified':True}
+                    pm=self.adapter._load('workflow_delivery_methods',self.adapter.STACK/'hands/project_methods.py')
+                    if not (root/'result.json').exists():pm.write_new(root/'result.json',json.dumps(receipt))
+                    return handle.workflow_status(ident)
+                return state
             return persist("CODING_RECOVERY_REQUIRED","The coding phase needs recovery. Its checkpoint and original assignment are preserved.",coding_mission_id=child,coding_failure=result.get("terminal_reason"))
         except Exception as exc:
             return persist("EXECUTION_BLOCKED","The workflow could not advance; its task and completed evidence are preserved.",execution_error=type(exc).__name__+": "+str(exc)[:240])

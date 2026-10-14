@@ -11,11 +11,26 @@ class WorkflowExecutionController(unittest.TestCase):
   fixture=CodingWorkflowGuardTests()
   with tempfile.TemporaryDirectory() as tmp:
    h,root,repo,runtime,scratch,hand=fixture.fixture(tmp);a,b=T.ExecutionTests().context(hand)
+   # This controller case requests delivery explicitly; its offline worker
+   # persists a terminal receipt, rather than status prose standing in for IO.
+   request=D.read_json(root/'request.json');request['objective']='Original technical build with ArtCraft demonstration and one Obsidian implementation note.';D.write_json(root/'request.json',request)
+   sha=hashlib.sha256((root/'request.json').read_bytes()).hexdigest()
+   for name in ('owner_approval.json','original_implementation.json'):
+    row=D.read_json(root/name);row['request_sha256']=sha;D.write_json(root/name,row)
+   def completed(child):
+    child_root=D.mission_path(h,child);request=D.read_json(child_root/'request.json');owned=Path(request['code_args']['repo']);source=owned/'offline_delivery_feature.py'
+    if not source.exists():
+     source.write_text('def actual_fixture_behavior(value):\n    return value + 1\n');hand._git(owned,'add','--','offline_delivery_feature.py');hand._git(owned,'commit','-q','-m','offline delivery fixture')
+    docs=owned/'docs';docs.mkdir(exist_ok=True);(docs/('IMPLEMENTATION-'+root.name+'.md')).write_text('# Offline fixture implementation\n\nMethod, usage, meaningful fixture tests and limitations.\n');hand._git(owned,'add','--','docs');hand._git(owned,'commit','-q','-m','offline documentation fixture')
+    cp={'phase':'complete','snapshot':hand.code_repo_snapshot(owned),'files':[['offline_delivery_feature.py',source.read_text()]]}
+    D.write_json(child_root/'checkpoint.json',{'checkpoint':cp,'checkpoint_digest':hand.checkpoint_digest(cp),'code_args':request['code_args'],'source_manifest':request['source_manifest']})
+    result={'mission_id':child,'status':'COMPLETED','builder_verified':True,'coding_evidence':{'offline_fixture':True}}
+    D.write_json(D.mission_path(h,child)/'result.json',result);return result
    with a,b,fixture.setup(hand),patch.object(D,'_spawn_worker',return_value=Mock(pid=876543)),patch.object(D,'_identity',return_value='offline fixture'):
     fixture.prepare(h,repo,runtime,scratch);mc=MissionController(D)
     raw=(root/'request.json').read_bytes()
     D.write_json(root/'execution_dispatch.json',{'mission_id':ID,'request_sha256':hashlib.sha256(raw).hexdigest(),'source_manifest':mc._workflow_manifest()})
-    with patch.object(T.E,'prepare_execution',side_effect=AssertionError('do not repeat preparation')),patch.object(D.CodingMissionHandle,'status',return_value={'status':'COMPLETED','builder_verified':True,'coding_evidence':{'fixture':True}}):
+    with patch.object(T.E,'prepare_execution',side_effect=AssertionError('do not repeat preparation')),patch.object(D.CodingMissionHandle,'status',side_effect=completed):
      got=asyncio.run(mc.execute(root))
     self.assertEqual(got['status'],'WAITING_INDEPENDENT_REVIEW',got)
     self.assertFalse(got['verified']);self.assertFalse(got['task_verified'])

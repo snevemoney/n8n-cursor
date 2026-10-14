@@ -87,20 +87,25 @@ def make_receipt(hive,mission_id,*,runtime_baseline,dependencies=()):
                 if hand.PERM().is_secret_path(path):raise ValueError('secret_fixture_dependency')
                 dep[rel]=W._regular_bytes(path)[1]
                 if len(dep)>W.MAX_FILES:raise ValueError('dependency_budget')
-    files,_=W._snapshot(repo,'apps/agent-stack',hand,dep)
+    files,excluded=W._snapshot(repo,'apps/agent-stack',hand,dep)
     # Read-only Git index query uses an isolated environment and disables executable metadata hooks.
     env={'PATH':'/usr/bin:/bin','HOME':'/nonexistent','GIT_CONFIG_NOSYSTEM':'1','GIT_CONFIG_GLOBAL':'/dev/null','GIT_PAGER':'cat'}
     got=subprocess.run(['/usr/bin/git','-c','core.hooksPath=/dev/null','-c','core.fsmonitor=false','-c','core.attributesFile=/dev/null',
                         '-C',str(repo),'ls-files','-z','--','apps/agent-stack'],capture_output=True,env=env,timeout=5)
     if got.returncode or len(got.stdout)>2_000_000:raise ValueError('tracked_source_unavailable')
     tracked=[p for p in got.stdout.decode().split('\0') if p]
-    if not set(tracked).issubset(files):raise ValueError('tracked_source_missing')
+    # Exclude only paths actually omitted by the existing snapshot policy.
+    # Missing ordinary tracked files must still fail closed.
+    excluded_paths={Path(path) for path in excluded}
+    excluded_tracked=[path for path in tracked if any(Path(path)==omit or omit in Path(path).parents for omit in excluded_paths)]
+    eligible_tracked=[path for path in tracked if path not in set(excluded_tracked)]
+    if not set(eligible_tracked).issubset(files):raise ValueError('tracked_source_missing')
     if R._git(repo)!=identity or _task(hive,mission_id)[3]!=task:raise ValueError('task_or_source_changed')
     app={rel:row for rel,row in files.items() if rel.startswith('apps/agent-stack/')}
     return {'verified':True,'verification_method':'owner_verified_current_checkout','source_repo':str(repo),
             'bound_source_repo':str(repo),'source_subtree':'apps/agent-stack','git_dir':identity['git_dir'],
             'git_common_dir':identity['git_common_dir'],'source_head':identity['head'],'source_branch':identity['branch'],
-            'app_manifest':app,'tracked_app_paths':tracked,'locked_files':{'apps/agent-stack/'+rel:files['apps/agent-stack/'+rel] for rel in W.LOCKED},
+            'app_manifest':app,'tracked_app_paths':eligible_tracked,'excluded_tracked_app_paths':excluded_tracked,'source_excluded_paths':excluded,'locked_files':{'apps/agent-stack/'+rel:files['apps/agent-stack/'+rel] for rel in W.LOCKED},
             'dependencies':dep,'integration_target':str(repo),'task_provenance':task}
 
 

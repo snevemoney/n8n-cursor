@@ -89,7 +89,7 @@ def skill_first(goal: str) -> str:
 
 
 # ---------------------------------------------------------------- mcp
-def _mcp_session(spec: dict, calls: list, deadline: float) -> list:
+def _mcp_session(spec: dict, calls: list, deadline: float, *, result_fn=None) -> list:
     """One stdio server, one handshake, several tools/call in order. Returns [(ok, text)] for the calls that ran; a failure
     ends the list with (False, reason) so a later call never runs on a broken state."""
     env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin") + ":/opt/homebrew/bin:/usr/local/bin", "HOME": os.environ.get("HOME", "")}
@@ -134,6 +134,8 @@ def _mcp_session(spec: dict, calls: list, deadline: float) -> list:
             if m.get("error"):
                 return results + [(False, "tool error: " + str((m["error"] or {}).get("message"))[:300])]
             res = m.get("result") or {}
+            if result_fn is not None:
+                _host_mcp_result(result_fn, res)
             text = "\n".join(str(c.get("text")) for c in (res.get("content") or []) if isinstance(c, dict) and c.get("type") == "text")
             results.append(((not res.get("isError")), _cap(_scrub(text or json.dumps(res)[:OUT_CAP]))))
             if res.get("isError"):
@@ -148,11 +150,19 @@ def _mcp_session(spec: dict, calls: list, deadline: float) -> list:
             pass
 
 
-def _mcp_call(spec: dict, tool: str, arguments: dict, deadline: float) -> tuple[bool, str]:
-    return _mcp_session(spec, [(tool, arguments)], deadline)[-1]
+def _host_mcp_result(callback, result):
+    """Bounded host-only actual result; never model arguments or speech output."""
+    if not callable(callback):raise ValueError("host result callback required")
+    raw=json.dumps(result,ensure_ascii=False).encode()
+    if len(raw)>65536:raise ValueError("host MCP result exceeds bound")
+    callback(json.loads(raw))
 
 
-def op_mcp(server: str, tool: str, arguments: dict | None = None, approved: bool = False) -> dict:
+def _mcp_call(spec: dict, tool: str, arguments: dict, deadline: float, *, result_fn=None) -> tuple[bool, str]:
+    return _mcp_session(spec, [(tool, arguments)], deadline, result_fn=result_fn)[-1]
+
+
+def op_mcp(server: str, tool: str, arguments: dict | None = None, approved: bool = False, *, result_fn=None) -> dict:
     if not (NAME_OK.match(server or "") and NAME_OK.match(tool or "")):
         return {"ok": False, "verified": False, "spoken": "I need a server name and a tool name."}
     writing = bool(WRITE_TOOL.search(tool) or not READ_TOOL.match(tool))
@@ -163,9 +173,9 @@ def op_mcp(server: str, tool: str, arguments: dict | None = None, approved: bool
     spec = _load("mcp_inventory", "mcp_inventory.py").server_spec(server)
     PERM().log_action("mcp_write" if writing else "mcp_read", f"{server}.{tool}", "owner_approved" if writing else "allow")
     if spec:
-        ok, text = _mcp_call(spec, tool, arguments or {}, MCP_DEADLINE_S)
+        ok, text = _mcp_call(spec, tool, arguments or {}, MCP_DEADLINE_S, result_fn=result_fn)
     else:
-        got = op_mcp_http_call(server, tool, arguments or {}, MCP_DEADLINE_S)
+        got = op_mcp_http_call(server, tool, arguments or {}, MCP_DEADLINE_S, result_fn=result_fn)
         if got is None:
             return {"ok": False, "verified": False, "spoken": f"No config for {server} in Claude, Cursor or Codex."}
         ok, text = got
@@ -910,7 +920,7 @@ def op_mcp_list(server: str, deadline: float = 30) -> dict:
             if ok else f"{server} ({kind}) failed: {why}"}
 
 
-def op_mcp_http_call(server: str, tool: str, arguments: dict, deadline: float = 40) -> tuple[bool, str] | None:
+def op_mcp_http_call(server: str, tool: str, arguments: dict, deadline: float = 40, *, result_fn=None) -> tuple[bool, str] | None:
     hs = http_spec(server)
     if not hs:
         return None
@@ -921,6 +931,8 @@ def op_mcp_http_call(server: str, tool: str, arguments: dict, deadline: float = 
     if res.get("error"):
         return False, "tool error: " + str(res["error"].get("message"))[:300]
     r = res.get("result") or {}
+    if result_fn is not None:
+        _host_mcp_result(result_fn, r)
     text = "\n".join(str(c.get("text")) for c in (r.get("content") or []) if isinstance(c, dict) and c.get("type") == "text")
     return (not r.get("isError")), _cap(_scrub(text or json.dumps(r)[:OUT_CAP]))
 

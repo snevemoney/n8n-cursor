@@ -43,7 +43,7 @@ def allowlist() -> set[str]:
     return {s.strip() for s in raw.split(",") if s.strip()}
 
 
-def _list_tools(spec: dict, deadline: float | None = None) -> list[str] | None:
+def _list_tools(spec: dict, deadline: float | None = None, *, metadata_fn=None) -> list[str] | None:
     env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": os.environ.get("HOME", "")}
     env.update(spec.get("env") or {})
     try:
@@ -87,6 +87,9 @@ def _list_tools(spec: dict, deadline: float | None = None) -> list[str] | None:
         res = wait(2)
         if not isinstance(res, dict):
             return None
+        if metadata_fn is not None:
+            if not callable(metadata_fn):raise ValueError('metadata callback required')
+            metadata_fn([t for t in (res.get('tools') or []) if isinstance(t,dict) and t.get('name')])
         names = [str(t.get("name")) for t in (res.get("tools") or []) if isinstance(t, dict) and t.get("name")]
         return sorted(n for n in names if NAME_OK.match(n))
     except (OSError, ValueError):

@@ -515,9 +515,23 @@ class WorkflowMissionHandle:
         self.hive = Path(hive)
 
     def _reply(self, request, state):
+        terminal=read_json(mission_path(self.hive,request['mission_id'])/'result.json')
+        original=mission_path(self.hive,request['mission_id'])/'request.json'
+        accepted=bool(terminal.get('status')=='COMPLETED' and terminal.get('independent_acceptance') is True
+                      and terminal.get('request_sha256')==hashlib.sha256(original.read_bytes()).hexdigest()
+                      and terminal.get('verified') is True and terminal.get('task_verified') is True)
+        if accepted:
+            try:
+                delivery=_load('workflow_delivery',STACK/'hands/workflow_delivery.py')
+                for phase in ('native','export','preview'):
+                    artifact=terminal['delivery_artifacts'][phase]['file']
+                    if delivery.file_receipt(artifact['path'])!=artifact:accepted=False
+            except (OSError,ValueError,KeyError,TypeError):accepted=False
+            if not accepted:state={**state,'status':'DELIVERY_EVIDENCE_STALE','spoken':'A delivered artifact changed after independent review. The assignment and its receipts are preserved.'}
+        if accepted:state=terminal
         return {**state, 'ok':True, 'tool':'agent_tools', 'mission_id':request['mission_id'],
-                'objective':request['objective'], 'goal_preserved':True, 'task_verified':False,
-                'verified':False, 'wires':['workflow_intake'], 'cites':[], 'sent':False, 'actions':[]}
+                'objective':request['objective'], 'goal_preserved':True, 'task_verified':accepted,
+                'verified':accepted, 'wires':['workflow_delivery'] if accepted else ['workflow_intake'], 'cites':[], 'sent':False, 'actions':[]}
 
     def start_workflow(self, objective):
         import fcntl

@@ -79,6 +79,27 @@ class ExecutionTests(unittest.TestCase):
     self.assertFalse(self.guard(hive,result,{'brain/online.py':'MODEL="unapproved"\n'})['ok'])
     self.assertFalse(result['task_verified'])
 
+ def test_actual_tracked_policy_exclusion_recorded_without_copy_or_policy_change(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   hive,root,repo,runtime,scratch,hand=self.fixture(tmp)
+   secret=repo/'apps/agent-stack/tests/test_literal_tokens_and_budget.py';secret.parent.mkdir();secret.write_text('# conservatively excluded public fixture\n')
+   for args in [('add','--',str(secret.relative_to(repo))),('commit','-q','-m','tracked excluded fixture')]:
+    subprocess.run(['/usr/bin/git','-c','core.hooksPath=/dev/null','-c','core.fsmonitor=false','-C',str(repo),*args],env={'PATH':'/usr/bin:/bin','HOME':tmp,'GIT_CONFIG_GLOBAL':'/dev/null','GIT_CONFIG_NOSYSTEM':'1'},check=True,capture_output=True)
+   perm=hand.PERM();old_secret=perm.is_secret_path
+   perm.is_secret_path=lambda path:old_secret(path) or Path(path).name=='test_literal_tokens_and_budget.py';hand.PERM=lambda:perm
+   a,b=self.context(hand)
+   with a,b:
+    baseline,receipt,result=self.prepare(hive,repo,runtime,scratch)
+    rel='apps/agent-stack/tests/test_literal_tokens_and_budget.py'
+    self.assertEqual(receipt['excluded_tracked_app_paths'],[rel]);self.assertNotIn(rel,receipt['tracked_app_paths']);self.assertNotIn(rel,receipt['app_manifest']);self.assertTrue(result['ok'],result)
+    self.assertFalse((Path(result['working_copy'])/rel).exists());self.assertTrue(secret.exists());self.assertTrue(perm.is_secret_path(secret))
+ def test_missing_normal_tracked_file_still_blocks_receipt(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   hive,root,repo,runtime,scratch,hand=self.fixture(tmp);(repo/'apps/agent-stack/feature.py').unlink();a,b=self.context(hand)
+   with a,b:
+    baseline=E.capture_runtime_baseline(runtime,R._git(runtime))
+    with self.assertRaisesRegex(ValueError,'tracked_source_missing'):E.make_receipt(hive,ID,runtime_baseline=baseline)
+    self.assertFalse((root/'execution_contract.json').exists());self.assertEqual(list(scratch.iterdir()),[])
  def test_contract_is_exclusive_before_second_mutation_and_guard_pins_both_digests(self):
   with tempfile.TemporaryDirectory() as tmp:
    hive,root,repo,runtime,scratch,hand=self.fixture(tmp);a,b=self.context(hand)
