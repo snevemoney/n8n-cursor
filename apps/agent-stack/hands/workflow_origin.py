@@ -1,7 +1,7 @@
 """Host-invoked bounded public primary-source inspection, never installation/execution.
 
 Publisher-associated URLs remain reference data, not permission. No authentication,
-cookies, redirect following, proxy/session fallback or model/provider changes.
+cookies, arbitrary redirects, proxy/session fallback or model/provider changes.
 """
 from __future__ import annotations
 import ast
@@ -11,7 +11,7 @@ import json
 import re
 import time
 from urllib.error import HTTPError
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 from urllib.request import Request,build_opener,HTTPRedirectHandler,ProxyHandler
 
 SUPPORTED={'MIT','Apache-2.0','BSD-2-Clause','BSD-3-Clause','ISC','0BSD','CC0-1.0','Unlicense'}
@@ -37,17 +37,52 @@ class Stopped(OriginHold):pass
 
 
 class _NoRedirect(HTTPRedirectHandler):
- def redirect_request(self,req,fp,code,msg,headers,newurl):raise OriginHold('redirect_refused')
+ def redirect_request(self,req,fp,code,msg,headers,newurl):
+  target=urlparse(newurl)
+  if (req is not None and target.scheme=='https' and target.netloc=='api.github.com'
+      and not target.query and not target.fragment
+      and re.fullmatch(r'/repositories/[1-9][0-9]{0,18}',target.path)
+      and re.fullmatch(r'https://api.github.com/repos/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+',req.full_url)):
+   return None
+  raise OriginHold('redirect_refused')
 
 
-def _public_get(path,*,timeout,max_bytes):
+def _public_get(path,*,timeout,max_bytes,redirects=None):
  if not path.startswith('/repos/') or len(path)>512 or any(c in path for c in ('\n','\r','\\','@')):
   raise OriginHold('unsafe_public_endpoint')
  request=Request('https://api.github.com'+path,headers={'Accept':'application/vnd.github+json','User-Agent':'Jarvis-public-primary-source'},method='GET')
  opener=build_opener(ProxyHandler({}),_NoRedirect())
- with opener.open(request,timeout=timeout) as response:
-  if response.geturl()!=request.full_url:raise OriginHold('redirect_refused')
-  raw=response.read(max_bytes+1)
+ try:
+  response=opener.open(request,timeout=timeout)
+ except HTTPError as exc:
+  # GitHub repository renames resolve to its immutable numeric repository ID.
+  # Only this metadata-only, same-service relocation may be followed once.
+  location=exc.headers.get('Location','');exc.close();target=urlparse(location)
+  moved=re.fullmatch(r'/repositories/([1-9][0-9]{0,18})',target.path)
+  if (redirects is None or exc.code not in {301,302,307,308}
+      or not re.fullmatch(r'/repos/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+',path)
+      or target.scheme!='https' or target.netloc!='api.github.com'
+      or target.query or target.fragment or not moved):raise OriginHold('redirect_refused')
+  second=Request(location,headers={'Accept':'application/vnd.github+json','User-Agent':'Jarvis-public-primary-source'},method='GET')
+  try:response=opener.open(second,timeout=timeout)
+  except HTTPError as repeated:
+   repeated.close()
+   if repeated.code in {301,302,307,308}:raise OriginHold('redirect_refused')
+   raise
+  with response:
+   if response.geturl()!=location:raise OriginHold('redirect_refused')
+   raw=response.read(max_bytes+1)
+  if len(raw)>max_bytes:raise OriginHold('public_response_budget')
+  try:identity=json.loads(raw)
+  except (ValueError,UnicodeError):raise OriginHold('repository_identity_mismatch')
+  if not isinstance(identity,dict) or type(identity.get('id')) is not int or identity['id']!=int(moved.group(1)):
+   raise OriginHold('repository_identity_mismatch')
+  redirects.append({'requested_path':path,'target_path':target.path,'repository_id':identity['id'],
+                    'metadata_sha256':hashlib.sha256(raw).hexdigest()})
+ else:
+  with response:
+   if response.geturl()!=request.full_url:raise OriginHold('redirect_refused')
+   raw=response.read(max_bytes+1)
  if len(raw)>max_bytes:raise OriginHold('public_response_budget')
  return raw
 
@@ -83,12 +118,28 @@ def _meaningful(path,text):
  return bool(re.search(r'\b(?:function|class|func|fn|impl)\b|=>',text))
 
 
+def repository_matches_publisher(origin, published_url):
+ name=(origin.get('repository') or {}).get('full_name')
+ original=published_url.removeprefix('https://github.com/').rstrip('/')
+ if name==original and not origin.get('repository_identity_redirects'):return True
+ rows=origin.get('repository_identity_redirects')
+ identity=(origin.get('repository') or {}).get('id')
+ return bool(isinstance(name,str) and re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+',name)
+   and type(identity) is int and identity>0 and isinstance(rows,list) and len(rows)==1
+   and rows[0].get('requested_path')=='/repos/'+original
+   and rows[0].get('target_path')=='/repositories/'+str(identity)
+   and rows[0].get('repository_id')==identity
+   and re.fullmatch(r'[a-f0-9]{64}',str(rows[0].get('metadata_sha256','')))
+   and any(r.get('endpoint')=='/repos/'+original and r.get('body_sha256')==rows[0]['metadata_sha256'] for r in origin.get('read_evidence',[]) if isinstance(r,dict))
+   and origin.get('canonical_implementation_url')=='https://github.com/'+name)
+
+
 def inspect(request,source_research,*,mission_id,request_sha256,source_research_sha256,active_fn,fetch_fn=None):
  """Return primary-study evidence only; caller persists it under retained owner lock."""
  result={'mission_id':mission_id,'request_sha256':request_sha256,'source_research_sha256':source_research_sha256,
          'verified':False,'task_verified':False,'verification_method':'public_primary_source_read',
          'status':'WAITING_ORIGINAL_IMPLEMENTATION','actions':[],'sent':False}
- end=time.monotonic()+DEADLINE;total=0;calls=0;evidence=[]
+ end=time.monotonic()+DEADLINE;total=0;calls=0;evidence=[];redirects=[]
  def active():
   try:return callable(active_fn) and bool(active_fn())
   except Exception:return False
@@ -100,7 +151,9 @@ def inspect(request,source_research,*,mission_id,request_sha256,source_research_
   check();calls+=1
   if calls>5+MAX_FILES:raise OriginHold('public_request_count')
   if total>=MAX_TOTAL:raise OriginHold('public_response_budget')
-  raw=(fetch_fn or _public_get)(path,timeout=min(3.0,max(.05,end-time.monotonic())),max_bytes=min(MAX_BODY,MAX_TOTAL-total))
+  options={'timeout':min(3.0,max(.05,end-time.monotonic())), 'max_bytes':min(MAX_BODY,MAX_TOTAL-total)}
+  raw=fetch_fn(path,**options) if fetch_fn else _public_get(path,redirects=redirects,**options)
+  if calls+len(redirects)>6+MAX_FILES:raise OriginHold('public_request_count')
   check()
   if not isinstance(raw,bytes) or len(raw)>MAX_BODY:raise OriginHold('invalid_public_response')
   total+=len(raw)
@@ -124,7 +177,18 @@ def inspect(request,source_research,*,mission_id,request_sha256,source_research_
   if not match or '..' in match.group(2):raise OriginHold('unsafe_original_repository')
   owner,repo=match.groups();prefix='/repos/'+owner+'/'+repo;result['original_implementation_url']=url
   metadata=get(prefix)
-  if str(metadata.get('full_name','')).casefold()!=(owner+'/'+repo).casefold():raise OriginHold('repository_identity_mismatch')
+  canonical=metadata.get('full_name','')
+  if redirects:
+   if (len(redirects)!=1 or redirects[0].get('requested_path')!=prefix
+       or type(metadata.get('id')) is not int or redirects[0].get('repository_id')!=metadata['id']
+       or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,38}/[A-Za-z0-9][A-Za-z0-9_.-]{0,99}',str(canonical))
+       or '..' in canonical.split('/')[-1]
+       or metadata.get('url')!='https://api.github.com/repos/'+canonical
+       or metadata.get('html_url')!='https://github.com/'+canonical):raise OriginHold('repository_identity_mismatch')
+   owner,repo=canonical.split('/');prefix='/repos/'+canonical
+  elif str(canonical).casefold()!=(owner+'/'+repo).casefold():raise OriginHold('repository_identity_mismatch')
+  result['canonical_implementation_url']='https://github.com/'+owner+'/'+repo
+  result['repository_identity_redirects']=list(redirects)
   if metadata.get('archived') is not False or metadata.get('disabled') is True:raise OriginHold('archived_or_unavailable_repository')
   if metadata.get('private') is not False:raise OriginHold('public_repository_required')
   pushed=metadata.get('pushed_at');ref=metadata.get('default_branch','')
@@ -164,7 +228,7 @@ def inspect(request,source_research,*,mission_id,request_sha256,source_research_
   check()
   body_sha=hashlib.sha256(json.dumps(code,sort_keys=True,separators=(',',':')).encode()).hexdigest()
   result.update(verified=True,status='ORIGINAL_IMPLEMENTATION_INSPECTED',body_sha256=body_sha,
-                repository={'full_name':owner+'/'+repo,'archived':False,'pushed_at':pushed,'default_branch':ref,'commit':sha,'tree':tree_sha},
+                repository={'full_name':owner+'/'+repo,'id':metadata.get('id'),'archived':False,'pushed_at':pushed,'default_branch':ref,'commit':sha,'tree':tree_sha},
                 license={'spdx_id':spdx,'sha256':hashlib.sha256(license_raw).hexdigest(),'verified':True},
                 readme_sha256=hashlib.sha256(readme_raw).hexdigest(),code_files=code,
                 implementation_excerpt='\n\n'.join(excerpts)[:2400],source_text_is_untrusted_data=True,
@@ -181,5 +245,5 @@ def inspect(request,source_research,*,mission_id,request_sha256,source_research_
                 spoken='The original implementation is not verified yet. No code was installed or executed.')
   if isinstance(exc,HTTPError) and type(exc.code) is int and 100<=exc.code<=599:
    result['public_http_status']=exc.code
- result['read_evidence']=evidence;result['public_requests']=calls;result['public_bytes']=total
+ result['read_evidence']=evidence;result['public_requests']=calls+len(redirects);result['public_bytes']=total
  return result
