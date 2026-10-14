@@ -3660,12 +3660,16 @@ class PipelineConversationBrainTest(unittest.TestCase):
             tmp.cleanup()
         self.assertIn("lantern-7", brief)
 
+    # Calendar asks now go to the read-only gws hand (hands/agent_tools.py -> gws_natural), not MACOS.calendar_today.
+    # The stub stands in for the `gws calendar +agenda` run; nothing touches Google or the Mac.
+    _GWS_AGENDA = {"ok": True, "verified": True, "spoken": "Today: 9:00 AM Standup."}
+
     def test_calendar_hand_is_not_the_count_stub(self) -> None:
         macos = unittest.mock.Mock()
-        macos.calendar_today.return_value = {"spoken": "Today: 9:00 AM Standup."}
         tmp, hive, vault = self._empty_hive("pipeline-cal-")
         try:
-            with unittest.mock.patch.object(PIPE, "MACOS", macos):
+            with unittest.mock.patch.object(PIPE, "MACOS", macos), \
+                    unittest.mock.patch.object(PIPE._agent_tools_hand(), "op_cli", return_value=self._GWS_AGENDA) as cli:
                 out = PIPE.apply_pipeline(
                     "can you see my calendar",
                     hive=hive,
@@ -3674,7 +3678,8 @@ class PipelineConversationBrainTest(unittest.TestCase):
                 )
         finally:
             tmp.cleanup()
-        macos.calendar_today.assert_called()
+        self.assertEqual(cli.call_args.args[0][:3], ["gws", "calendar", "+agenda"])
+        macos.calendar_today.assert_not_called()
         self.assertIn("Standup", out.get("spoken") or "")
         self.assertNotIn("Name a day", out.get("spoken") or "")
         self.assertNotIn("calendars on this Mac", out.get("spoken") or "")
@@ -3916,10 +3921,10 @@ class PipelineConversationBrainTest(unittest.TestCase):
 
     def test_see_in_my_calendar_is_calendar_not_eyes(self) -> None:
         macos = unittest.mock.Mock()
-        macos.calendar_today.return_value = {"spoken": "Today: 9:00 AM Standup."}
         tmp, hive, vault = self._empty_hive("pipeline-see-in-cal-")
         try:
-            with unittest.mock.patch.object(PIPE, "MACOS", macos):
+            with unittest.mock.patch.object(PIPE, "MACOS", macos), \
+                    unittest.mock.patch.object(PIPE._agent_tools_hand(), "op_cli", return_value=self._GWS_AGENDA) as cli:
                 out = PIPE.apply_pipeline(
                     "No what do you see in my calendar",
                     hive=hive,
@@ -3928,11 +3933,12 @@ class PipelineConversationBrainTest(unittest.TestCase):
                 )
         finally:
             tmp.cleanup()
-        macos.calendar_today.assert_called()
+        self.assertEqual(cli.call_args.args[0][:3], ["gws", "calendar", "+agenda"])
+        macos.calendar_today.assert_not_called()
         spoken = out.get("spoken") or ""
         self.assertIn("Standup", spoken)
         self.assertNotIn("Eyes are off", spoken)
-        self.assertEqual(out.get("brain"), "calendar")
+        self.assertEqual(out.get("tool"), "agent_tools")
 
     def test_do_it_now_after_sessions_is_census(self) -> None:
         ask = "Can you read my last sessions on all the platforms"
