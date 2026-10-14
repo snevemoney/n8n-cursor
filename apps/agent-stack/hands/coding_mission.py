@@ -520,13 +520,22 @@ class WorkflowMissionHandle:
         with (root/'steering.lock').open('a') as lock:
             fcntl.flock(lock,fcntl.LOCK_EX)
             current=self.workflow_status(mission_id)
-            if current['status']!='CANCELLED':
+            source=read_json(root/'source_research.json')
+            selected=source.get('selected') if isinstance(source.get('selected'),dict) else {}
+            # Repair old intake checkpoints without repeating completed source discovery.
+            reconciling=current['status']=='WAITING_SOURCE' and bool(selected)
+            if current['status']!='CANCELLED' and not reconciling:
                 return current
             binding=read_json(root/'binding.json')
-            write_json(root/'control.json',{'cancel':False})
-            status='WAITING_PROJECT' if not binding else ('WAITING_SOURCE' if self.project_approval(mission_id) else 'WAITING_APPROVAL')
-            question=WORKFLOW_QUESTION if not binding else 'The project is preserved. Which saved YouTube source should I use? No implementation has run.'
-            write_json(root/'control.json',{'cancel':False})
+            if current['status']=='CANCELLED':
+                write_json(root/'control.json',{'cancel':False})
+            approved=bool(binding and self.project_approval(mission_id))
+            status=('WAITING_PROJECT' if not binding else 'WAITING_APPROVAL' if not approved
+                    else 'WAITING_ORIGINAL_IMPLEMENTATION' if selected else 'WAITING_SOURCE')
+            question=(WORKFLOW_QUESTION if not binding else
+                      'The project and selected saved source are preserved. The original implementation still needs verification; no build has run.' if approved and selected else
+                      'The project is preserved. Which saved YouTube source should I use? No implementation has run.' if approved else
+                      'The project and saved source are preserved. Your approval for the bound project branch is still needed before implementation.')
             current.update(status=status,question=question,spoken=question)
             write_json(root/'state.json',current)
             write_json(root/'checkpoint.json',{'worker_kind':'research_build','phase':'explicit_intake_continuation',

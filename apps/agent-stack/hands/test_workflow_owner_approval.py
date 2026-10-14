@@ -17,7 +17,11 @@ class WorkflowOwnerApprovalTests(unittest.TestCase):
    self.assertEqual((root/'request.json').read_bytes(),original);self.assertEqual((repo/'human.txt').read_text(),'preserve')
    for wrong in ('approve',f'Approve workflow edits for "{repo}-other" on branch codex/owner',f'Approve workflow edits for "{repo}" on branch main'):
     with self.assertRaises(ValueError):h.approve_project(ident,wrong)
-   h.cancel(ident);self.assertIsNone(h.project_approval(ident));h.continue_workflow(ident,'continue workflow')
+   source={'selected':{'source_url':'https://www.youtube.com/watch?v=abcdefghijk','implementation_verified':False}}
+   M.write_json(root/'source_research.json',source);source_bytes=(root/'source_research.json').read_bytes()
+   h.cancel(ident);self.assertIsNone(h.project_approval(ident));resumed=h.continue_workflow(ident,'continue workflow')
+   self.assertEqual(resumed['status'],'WAITING_ORIGINAL_IMPLEMENTATION');self.assertNotIn('Which saved',resumed['spoken'])
+   self.assertEqual((root/'source_research.json').read_bytes(),source_bytes)
    self.assertIsNotNone(h.project_approval(ident))
    binding=M.read_json(root/'binding.json');binding['branch']='codex/changed';M.write_json(root/'binding.json',binding)
    self.assertIsNone(h.project_approval(ident))
