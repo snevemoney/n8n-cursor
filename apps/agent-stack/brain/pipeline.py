@@ -5973,8 +5973,28 @@ def _run_tool_inner(
             try:
                 return controller.MissionController(adapter).nominate_saved_source(hive,str(args['mission_id']),str(args['source_record']),
                     owner_utterance=utterance,gen=gen,primary_metadata_fn=publisher)
-            except (ValueError,RuntimeError,OSError):
-                return {'ok':False,'tool':tool,'spoken':'That source could not be bound to this assignment from an actual current read. The original task is preserved.','task_verified':False,'wires':[tool],'cites':[],'sent':False}
+            except (ValueError,RuntimeError,OSError) as exc:
+                reason={
+                    'saved record must belong to this task bound source folder':'source_outside_bound_roots',
+                    'source must have an actual read in this owner request':'actual_read_required',
+                    'actual saved record read is stale':'source_read_stale',
+                    'source nomination was stopped':'source_nomination_stopped',
+                    'current owner request must identify the retained mission':'mission_not_named',
+                    'safe actual saved source required':'unsafe_source_path',
+                    'read snapshot lacks safe technical source evidence':'technical_source_evidence_missing',
+                    'nominate one actual saved video record':'single_saved_video_required',
+                    'prepared or terminal workflow cannot replace its source':'workflow_source_pinned',
+                    'workflow phase already owned':'workflow_already_owned',
+                }.get(str(exc),'source_nomination_unavailable')
+                explanation={
+                    'source_outside_bound_roots':"That saved record is outside this task's bound source folders.",
+                    'source_read_stale':'The saved-record read changed or expired; read it again before selection.',
+                    'actual_read_required':'Read that saved record in this request before selecting it.',
+                    'workflow_source_pinned':'The prepared or completed workflow already pins its source.',
+                }.get(reason,'The saved source could not be selected. Its assignment and prior evidence are preserved.')
+                BUS_IO.commit_response(hive,gen,lambda bus:dict(bus,source_nomination_meta={'gen':gen,'reason':reason}),terminal=False)
+                return {'ok':False,'tool':tool,'spoken':explanation,'source_nomination_error':reason,
+                        'task_verified':False,'wires':[tool],'cites':[],'sent':False}
         if args.get("action") in {"research_build_bind", "research_build_continue", "research_build_sources", "research_build_approve", "research_build_read_access", "research_build_permission_info", "research_build_repo_context", "research_build_repo_sources"}:
             owner_pick = _workflow_followup_route(utterance, hive)
             if not owner_pick or owner_pick["args"]["action"] != args.get("action"):
@@ -7137,6 +7157,7 @@ def _pipeline_event(
     tool_ms: int | None = None,
     hand_loop_meta: dict | None = None,
     snapshot_response_meta: dict | None = None,
+    source_nomination_error: str | None = None,
 ) -> dict:
     available = bool(brain) if model_available is None else bool(model_available)
     ev = {
@@ -7168,6 +7189,8 @@ def _pipeline_event(
         ev['hand_loop_meta']=hand_loop_meta
     if snapshot_response_meta is not None:
         ev['snapshot_response_meta']=snapshot_response_meta
+    if source_nomination_error is not None:
+        ev['source_nomination_error']=source_nomination_error
     if mission is not None:
         ev["mission_id"] = mission.get("mission_id")
         ev["task_verified"] = bool(mission.get("task_verified"))
@@ -8390,6 +8413,7 @@ def apply_pipeline_iter(
             "finish_reason": (got or {}).get("finish_reason"),
             "hand_loop_meta": (ran or {}).get("hand_loop_meta"),
             "snapshot_response_meta": (ran or {}).get("snapshot_response_meta"),
+            "source_nomination_error": (ran or {}).get("source_nomination_error"),
         },
     )
     extra = ""
@@ -8423,6 +8447,7 @@ def apply_pipeline_iter(
             tool_ms=(ran or {}).get("tool_ms"),
         hand_loop_meta=(ran or {}).get("hand_loop_meta"),
         snapshot_response_meta=(ran or {}).get("snapshot_response_meta"),
+        source_nomination_error=(ran or {}).get("source_nomination_error"),
         tool=tool,
         see=ran.get("see"),
         mission=ran if tool == "browser_mission" or (ran or {}).get("mission_id") else None,

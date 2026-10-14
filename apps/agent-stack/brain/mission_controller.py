@@ -110,7 +110,8 @@ class MissionController:
         doc=self.adapter._load('workflow_nomination_documents',self.adapter.STACK/'memory/document_context.py')
         phase=self.adapter._load('workflow_research_adapter',self.adapter.STACK/'hands/workflow_research.py')
         requested=Path(source_record).expanduser()
-        if not requested.is_absolute() or requested.is_symlink() or doc._blocked_path(requested):
+        if (not requested.is_absolute() or any(p.is_symlink() for p in (requested,*requested.parents))
+                or doc._blocked_path(requested)):
             raise ValueError('safe actual saved source required')
         path=requested.resolve(strict=True)
         if doc._blocked_path(path):raise ValueError('safe actual saved source required')
@@ -118,7 +119,8 @@ class MissionController:
         roots_raw=(root/'source_roots.json').read_bytes();roots=json.loads(roots_raw)
         if (request.get('worker_kind')!='research_build' or request.get('mission_id')!=mission_id
             or roots.get('mission_id')!=mission_id or roots.get('request_scope')!='transient_task'
-            or not any(path.parent==Path(p).resolve(strict=True) for p in roots.get('roots',[]))):
+            or not any(not Path(p).is_symlink() and Path(p).resolve(strict=True) in path.parents
+                       for p in roots.get('roots',[]))):
             raise ValueError('saved record must belong to this task bound source folder')
         def current_entry():
             bus=busmod.load_json(Path(hive)/'bus/state.json')

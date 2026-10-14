@@ -10,7 +10,7 @@ OBJECTIVE='Research a technical idea from my saved YouTube videos, build a worki
 
 class Nomination(unittest.TestCase):
  def setUp(self):
-  self.tmp=tempfile.TemporaryDirectory();self.root=Path(self.tmp.name).resolve();self.hive=self.root/'hive';self.folder=self.root/'watch';self.folder.mkdir()
+  self.tmp=tempfile.TemporaryDirectory();self.root=Path(self.tmp.name).resolve();self.hive=self.root/'hive';self.packet=self.root/'packet';self.packet.mkdir();self.folder=self.packet/'watch';self.folder.mkdir()
   self.path=self.folder/'abcdefghijk.md';self.path.write_text('# abcdefghijk\nTechnical agent workflow implementation with checkpoint recovery.\nhttps://www.youtube.com/watch?v=abcdefghijk\nOriginal code: https://github.com/publisher/implementation\n')
   self.handle=D.WorkflowMissionHandle(self.hive);self.ack=self.handle.start_workflow(OBJECTIVE);self.ident=self.ack['mission_id'];self.task=D.mission_path(self.hive,self.ident)
   self.mc=D._load('coding_mission_controller',ROOT/'brain/mission_controller.py').MissionController(D)
@@ -31,6 +31,27 @@ class Nomination(unittest.TestCase):
   self.assertEqual(proof['read_request_sha256'],hashlib.sha256(self.ask.encode()).hexdigest());self.assertEqual(proof['request_sha256'],hashlib.sha256(original).hexdigest())
   self.assertEqual((self.task/'request.json').read_bytes(),original);self.assertEqual((self.task/'source-research-history'/(hashlib.sha256(old).hexdigest()+'.json')).read_bytes(),old)
   self.assertFalse(result['task_verified']);self.assertFalse((self.task/'original_implementation.json').exists())
+ def test_actual_packet_root_watch_descendant_with_filename_video_id(self):
+  self.mc.bind_saved_source_root(self.hive,self.ident,str(self.packet),'Use '+str(self.packet),default_roots=[self.root])
+  self.path.write_text('# abcdefghijk\nTechnical agent workflow implementation with checkpoint recovery.\n')
+  self.read();result=self.nominate();selected=D.read_json(self.task/'source_research.json')['selected']
+  self.assertTrue(result['source_bound']);self.assertEqual(selected['saved_youtube_url'],'https://www.youtube.com/watch?v=abcdefghijk')
+  self.assertEqual(selected['video_url_provenance'],'matching_saved_watch_record_id');self.assertFalse(selected['origin_association_verified'])
+ def test_sibling_prefix_and_symlink_are_not_descendant_authority_and_error_is_safe(self):
+  self.mc.bind_saved_source_root(self.hive,self.ident,str(self.packet),'Use '+str(self.packet),default_roots=[self.root])
+  original=self.path;other=self.root/'packet-other'/'watch';other.mkdir(parents=True);self.path=other/original.name;self.path.write_bytes(original.read_bytes())
+  self.ask=f'Inspect {self.path} for assignment {self.ident} and select its useful technical method.';self.read()
+  args={'action':'research_build_select_source','mission_id':self.ident,'source_record':str(self.path)}
+  with patch.object(P,'_coding_mission_hand',return_value=D):
+   result=P._run_tool_inner({'tool':'agent_tools','args':args},self.ask,hive=self.hive,retrieve_roots=[self.root],gen=self.gen)
+  self.assertEqual(result['source_nomination_error'],'source_outside_bound_roots')
+  meta=P.BUS_IO.load_json(self.hive/'bus/state.json')['source_nomination_meta'];self.assertEqual(meta,{'gen':self.gen,'reason':'source_outside_bound_roots'})
+  self.assertNotIn(str(self.path),json.dumps(meta));self.assertFalse((self.task/'source_research.json').exists())
+  self.path=original;self.ask=f'Inspect {self.path} for assignment {self.ident} and select its useful technical method.';self.read()
+  alias=self.root/'alias';alias.symlink_to(self.packet,target_is_directory=True)
+  with self.assertRaisesRegex(ValueError,'safe actual saved source required'):
+   self.mc.nominate_saved_source(self.hive,self.ident,str(alias/'watch'/original.name),owner_utterance=self.ask,gen=self.gen)
+
  def test_unread_changed_cancelled_wrong_request_or_prepared_task_reject(self):
   with self.assertRaises(ValueError):self.nominate()
   self.read();originalask=self.ask;self.ask='Select a method';
