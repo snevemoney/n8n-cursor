@@ -118,6 +118,15 @@ def _meaningful(path,text):
  return bool(re.search(r'\b(?:function|class|func|fn|impl)\b|=>',text))
 
 
+def independent_behavior_requested(request):
+ """Task-only own implementation; never authority to copy/install upstream code."""
+ if not isinstance(request,dict):return False
+ text=str(request.get('objective') or '')
+ return bool(request.get('worker_kind')=='research_build' and request.get('request_scope')=='transient_task'
+   and re.search(r'\bbuild\b',text,re.I) and re.search(r'\bworking\s+version\b',text,re.I)
+   and not re.search(r'\b(?:copy|port|reuse|adapt|translate|install|vendor|fork|clone)\b',text,re.I))
+
+
 def repository_matches_publisher(origin, published_url):
  name=(origin.get('repository') or {}).get('full_name')
  original=published_url.removeprefix('https://github.com/').rstrip('/')
@@ -196,7 +205,10 @@ def inspect(request,source_research,*,mission_id,request_sha256,source_research_
   if not isinstance(ref,str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_./-]{0,199}',ref) or '..' in ref.split('/'):
    raise OriginHold('unsafe_default_reference')
   spdx=(metadata.get('license') or {}).get('spdx_id')
-  if spdx not in SUPPORTED:raise OriginHold('license_requires_owner_review')
+  reference_only = spdx in {None,'NOASSERTION','NONE'} and independent_behavior_requested(request)
+  if spdx not in SUPPORTED and not reference_only:raise OriginHold('license_requires_owner_review')
+  result['implementation_mode']='independent_behavior_reimplementation' if reference_only else 'licensed_source_reference'
+  if reference_only:result['reuse_authorized']=False
   commit=get(prefix+'/commits/'+quote(ref,safe=''));sha=commit.get('sha','')
   tree_sha=((commit.get('commit') or {}).get('tree') or {}).get('sha','')
   if not re.fullmatch(r'[a-f0-9]{40}',str(sha)) or not re.fullmatch(r'[a-f0-9]{40}',str(tree_sha)):
@@ -229,11 +241,12 @@ def inspect(request,source_research,*,mission_id,request_sha256,source_research_
   body_sha=hashlib.sha256(json.dumps(code,sort_keys=True,separators=(',',':')).encode()).hexdigest()
   result.update(verified=True,status='ORIGINAL_IMPLEMENTATION_INSPECTED',body_sha256=body_sha,
                 repository={'full_name':owner+'/'+repo,'id':metadata.get('id'),'archived':False,'pushed_at':pushed,'default_branch':ref,'commit':sha,'tree':tree_sha},
-                license={'spdx_id':spdx,'sha256':hashlib.sha256(license_raw).hexdigest(),'verified':True},
+                license={'spdx_id':spdx,'sha256':hashlib.sha256(license_raw).hexdigest(),'verified':not reference_only,
+                         'inspected':True,'reuse_authorized':False if reference_only else None},
                 readme_sha256=hashlib.sha256(readme_raw).hexdigest(),code_files=code,
-                implementation_excerpt='\n\n'.join(excerpts)[:2400],source_text_is_untrusted_data=True,
+                implementation_excerpt='' if reference_only else '\n\n'.join(excerpts)[:2400],source_text_is_untrusted_data=True,
                 coverage='Pinned license, README and bounded implementation subset; not full repository, video or live-match proof.',
-                spoken='I inspected the linked public implementation at a pinned commit, its license, and a bounded source subset. No code was installed or executed.')
+                spoken=('I inspected the original implementation and its custom license at a pinned commit. Upstream code reuse is not authorized; the builder will implement the saved behavior independently without receiving that code.' if reference_only else 'I inspected the linked public implementation at a pinned commit, its license, and a bounded source subset. No code was installed or executed.'))
  except Stopped:
   result.update(status='CANCELLED',reason='owner_stopped',spoken='The source inspection was stopped. No code was installed or executed.')
  except (OriginHold,OSError,ValueError,TypeError,KeyError,AttributeError,HTTPError):
