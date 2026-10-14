@@ -30,6 +30,25 @@ class Followup(unittest.TestCase):
     with patch.object(wr,'run_requested',side_effect=AssertionError('unexpected model tool cannot execute')):
      denied=P.apply_pipeline('Explain that comparison again.',hive=hive,retrieve_roots=[root],talk_fn=lambda *a,**k:{'ok':True,'wire':'openrouter','tool':'workspace_read','args':{'op':'read','path':str(first)},'speak':''})
     self.assertFalse(denied['ok']);self.assertIn('not run that action',denied['spoken'])
+    self.assertEqual(denied['snapshot_response_meta'],{'rejected_tool':'workspace_read'})
+    self.assertEqual(P.load_json(hive/'bus/state.json')['snapshot_response_meta'],{'rejected_tool':'workspace_read','gen':denied['gen']})
+    for line,expected in [('Both files exchange protocol messages but only one lists tools.',True),('',False)]:
+     with patch.object(wr,'run_requested',side_effect=AssertionError('say never reads')):
+      said=P.apply_pipeline('Explain that comparison again.',hive=hive,retrieve_roots=[root],talk_fn=lambda *a,**k:{'ok':True,'wire':'openrouter','tool':'say','args':{'approved':True,'path':'untrusted'},'speak':line})
+     self.assertEqual(said['ok'],expected,said)
+     if expected:self.assertIn('exchange protocol messages',said['spoken']);self.assertEqual(said['tool'],'converse');self.assertEqual(said['args'],{})
+     else:self.assertEqual(said['snapshot_response_meta'],{'rejected_tool':'say'})
+    retries=[]
+    def length_then_answer(prompt,context='',**kw):
+     retries.append((context,kw))
+     return ({'ok':True,'wire':'openrouter','finish_reason':'length','spoken':''} if len(retries)==1 else
+             {'ok':True,'wire':'openrouter','tool':'converse','speak':'Both retained sources contain return functions.'})
+    with patch.object(P,'online_talk',side_effect=length_then_answer),patch.object(P,'evidence_requirement',return_value=P.EVIDENCE_GENERAL):
+     retried=P.apply_pipeline('Explain that comparison again.',hive=hive,retrieve_roots=[root],talk_fn=lambda *a:None)
+    self.assertEqual(len(retries),2,retries)
+    for context,kw in retries:
+     self.assertIn('FIRST_ACTUAL_SOURCE',context);self.assertIn('SECOND_ACTUAL_SOURCE',context);self.assertIs(kw.get('hands'),False)
+    self.assertTrue(retried['ok'])
  def test_reference_classifier_does_not_grant_new_actions_or_unrelated_topic(self):
   for text in ('Read /tmp/new.py and compare it','Send that comparison','Explain quantum gravity','Search for these files','Explain this file /tmp/unrelated.py','Compare these new sources /tmp/third.py and /tmp/fourth.py'):
    self.assertFalse(P._document_snapshot_followup(text),text)

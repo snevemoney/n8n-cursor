@@ -5151,13 +5151,14 @@ def _talk_speak(talked) -> str:
     return str(talked or "")
 
 
-def _compose_mixed_spoken(utterance: str, talk_fn, images=None) -> tuple[dict | None, str]:
+def _compose_mixed_spoken(utterance: str, talk_fn, images=None, *, context="", hands=True) -> tuple[dict | None, str]:
     """General model prose plus the named gap. Not a canned lecture."""
     talked = online_talk(
         mixed_general_stem(utterance),
-        MIXED_GENERAL_BRIEF,
+        (context + "\n\n" if context else "") + MIXED_GENERAL_BRIEF,
         talk_fn=talk_fn,
         images=images,
+        **({"hands": False} if not hands else {}),
     )
     speak = _talk_speak(talked)
     if not _mixed_has_reason(speak):
@@ -7064,6 +7065,7 @@ def _pipeline_event(
     mission: dict | None = None,
     tool_ms: int | None = None,
     hand_loop_meta: dict | None = None,
+    snapshot_response_meta: dict | None = None,
 ) -> dict:
     available = bool(brain) if model_available is None else bool(model_available)
     ev = {
@@ -7093,6 +7095,8 @@ def _pipeline_event(
     }
     if hand_loop_meta is not None:
         ev['hand_loop_meta']=hand_loop_meta
+    if snapshot_response_meta is not None:
+        ev['snapshot_response_meta']=snapshot_response_meta
     if mission is not None:
         ev["mission_id"] = mission.get("mission_id")
         ev["task_verified"] = bool(mission.get("task_verified"))
@@ -7882,7 +7886,8 @@ def apply_pipeline_iter(
             and not private_hit
             and not (token and turn_cancelled(hive, token))
         ):
-            talked = online_talk(spoken_in, "", talk_fn=talk_fn, images=_vision_urls(hive))
+            talked = online_talk(spoken_in, brief if document_followup else "", talk_fn=talk_fn, images=_vision_urls(hive),
+                                 **({"hands": False} if document_followup else {}))
             if isinstance(talked, dict):
                 got = talked
             pick = extract_pick(talked) if talked else None
@@ -7901,6 +7906,7 @@ def apply_pipeline_iter(
                 f"{brief}\n\n{MIXED_MISS_RETRY}",
                 talk_fn=talk_fn,
                 images=_vision_urls(hive),
+                **({"hands": False} if document_followup else {}),
             )
             if isinstance(talked, dict):
                 got = talked
@@ -7918,6 +7924,7 @@ def apply_pipeline_iter(
                 spoken_in,
                 talk_fn,
                 images=_vision_urls(hive),
+                **({"context": brief, "hands": False} if document_followup else {}),
             )
             if composed:
                 talked = composed_got
@@ -7936,6 +7943,7 @@ def apply_pipeline_iter(
                 f"{brief}\n\nAnswer the immediately prior reply. Do not say you lack disk.",
                 talk_fn=talk_fn,
                 images=_vision_urls(hive),
+                **({"hands": False} if document_followup else {}),
             )
             if isinstance(talked, dict):
                 got = talked
@@ -7945,12 +7953,23 @@ def apply_pipeline_iter(
         if pick is not None:
             brain = str((talked or {}).get("engine") or (talked or {}).get("wire") or "openrouter")
 
+    if document_followup and early is None and pick is None and str((got or {}).get('tool') or '') == 'say':
+        pick = {'tool': 'say', 'args': {}, 'speak': ''}
     # Reference-only questions are read-snapshot consumers, not a fresh hand
     # authorization. A tool-shaped model reply cannot escape that host boundary.
+    if (document_followup and early is None and pick is not None
+            and pick.get('tool') == 'say' and str(pick.get('speak') or '').strip()):
+        pick = {'tool': 'converse', 'args': {}, 'speak': str(pick['speak']).strip()}
+    if document_followup and early is None and pick is not None and pick.get('tool') == 'converse':
+        pick = {**pick, 'args': {}}
     if document_followup and early is None and pick is not None and pick.get('tool') != 'converse':
         line = "The answer requested another action instead of using the retained reads. I have not run that action. Please ask me to explain the retained sources again."
         ran = {"ok": False, "tool": "converse", "spoken": line, "wires": [], "cites": [],
-               "sent": False, "task_verified": False, "outcome": "snapshot_answer_required"}
+               "sent": False, "task_verified": False, "outcome": "snapshot_answer_required",
+               "snapshot_response_meta": {"rejected_tool": re.sub(r"[^a-zA-Z0-9_-]", "", str(pick.get('tool') or ''))[:64]}}
+        if token:
+            metadata = {**ran['snapshot_response_meta'], 'gen': token}
+            BUS_IO.commit_response(hive, token, lambda bus: dict(bus, snapshot_response_meta=metadata), terminal=False)
         pick = {"tool": "converse", "args": {}, "speak": line}
 
     if pick is None and wants_safari(spoken_in):
@@ -8299,6 +8318,7 @@ def apply_pipeline_iter(
             "tool": tool,
             "finish_reason": (got or {}).get("finish_reason"),
             "hand_loop_meta": (ran or {}).get("hand_loop_meta"),
+            "snapshot_response_meta": (ran or {}).get("snapshot_response_meta"),
         },
     )
     extra = ""
@@ -8331,6 +8351,7 @@ def apply_pipeline_iter(
         ok=_turn_ok(ran, brain, tool),
             tool_ms=(ran or {}).get("tool_ms"),
         hand_loop_meta=(ran or {}).get("hand_loop_meta"),
+        snapshot_response_meta=(ran or {}).get("snapshot_response_meta"),
         tool=tool,
         see=ran.get("see"),
         mission=ran if tool == "browser_mission" or (ran or {}).get("mission_id") else None,
