@@ -5752,8 +5752,16 @@ def _run_tool_inner(
             return {**viewed,"tool":tool,"task_verified":False,"outcome":HONEST_UNKNOWN,"wires":["files"],"cites":[],"sent":False}
         def vision(prompt, images=None):
             if not active(): return None
-            got=online_talk(prompt,"",images=images or [],hands=False)
-            return str((got or {}).get("spoken") or "") if (got or {}).get("ok") else None
+            # Read-only formatter data. No returned function is executed.
+            schema={"type":"function","function":{"name":"saved_image_description","description":"Return one short description of directly visible screenshot facts. This does not perform an action.",
+                    "parameters":{"type":"object","properties":{"description":{"type":"string","maxLength":140}},"required":["description"],"additionalProperties":False}}}
+            got=online_talk(prompt+" Use the saved_image_description function to return that JSON data; do not narrate an action.","",images=images or [],hands=False,extra_tools=[schema])
+            if not isinstance(got,dict) or not got.get("ok"): return None
+            if got.get("tool"):
+                values=got.get("args") or {}
+                if got["tool"] != "saved_image_description" or not isinstance(values,dict) or set(values)!={"description"}: return None
+                return json.dumps(values,ensure_ascii=False)
+            return str(got.get("spoken") or "")
         if (viewed.get("view_evidence") or {}).get("file_unchanged") and active():
             act_if_current(hive,gen,lambda b:{**b,"screenshot_reference":{"gen":gen,"artifact":viewed.get("artifact") or artifact}})
         described=_screen_see_hand().run_file(artifact,hive=hive,vision_fn=vision,active_fn=active,follow_up=True)

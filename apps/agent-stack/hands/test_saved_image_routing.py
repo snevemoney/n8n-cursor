@@ -14,14 +14,42 @@ class SavedImageRouting(unittest.TestCase):
             P.mutate_bus(h,lambda b:{**b,'turns':[{'user':'can you open it in finder for me?','jarvis':'Finder selected it.'}]})
         return P.begin_turn(h)
     def test_actual_original_workflow_routes_to_saved_image_not_fullscreen(self):
-        with tempfile.TemporaryDirectory() as d, mock.patch.object(P.MACOS,'open_screenshot',return_value={'ok':True,'opened':True,'spoken':'The screenshot is open in Preview.'}) as view, mock.patch.object(P,'_screen_see_hand') as screen, mock.patch.object(P,'online_talk',return_value={'ok':True,'spoken':'A settings window. What should we do with it?'}) as online:
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(P.MACOS,'open_screenshot',return_value={'ok':True,'opened':True,'spoken':'The screenshot is open in Preview.'}) as view, mock.patch.object(P,'_screen_see_hand') as screen, mock.patch.object(P,'online_talk',return_value={'ok':True,'tool':'saved_image_description','args':{'description':'A settings window is visible.'}}) as online:
             h=Path(d);g=self.setup_reference(h,finder=True)
             def describe(artifact,**kw):
                 self.assertTrue(kw['active_fn']());self.assertTrue(kw['follow_up']);return {'ok':True,'spoken':kw['vision_fn']('Caption actual image',images=['data:image/png;base64,fixture'])}
             screen.return_value.run_file.side_effect=describe
             got=P._run_tool_inner(P.model_free_route(REQUEST),REQUEST,hive=h,gen=g,retrieve_roots=[])
-            view.assert_called_once();screen.return_value.run.assert_not_called();online.assert_called_once_with('Caption actual image','',images=['data:image/png;base64,fixture'],hands=False)
-            self.assertTrue(got['ok']);self.assertIn('What should we do',got['spoken'])
+            view.assert_called_once();screen.return_value.run.assert_not_called();online.assert_called_once();self.assertFalse(online.call_args.kwargs['hands']);self.assertEqual(online.call_args.kwargs['images'],['data:image/png;base64,fixture']);self.assertEqual([x['function']['name'] for x in online.call_args.kwargs['extra_tools']],['saved_image_description'])
+            self.assertTrue(got['ok']);self.assertIn('settings window',got['spoken'])
+    def test_existing_sdk_formatter_transport_preserves_data_without_executing_functions(self):
+        with tempfile.TemporaryDirectory() as d,mock.patch.object(P.MACOS,'open_screenshot',return_value={'ok':True,'opened':True,'spoken':'The screenshot is open in Preview.'}),mock.patch.object(P,'_screen_see_hand') as screen:
+            h=Path(d);g=self.setup_reference(h)
+            def adapter(prompt,context,**kwargs):
+                with mock.patch.object(P.ONLINE,'system_for',return_value='fixture system'):
+                    payload=P.ONLINE._openrouter_payload('configured-vision-fixture',prompt,max_tokens=P.ONLINE.OPENROUTER_MAX_TOKENS,with_tools=True,stream=False,images=kwargs['images'],extra_tools=kwargs['extra_tools'],hands=kwargs['hands'])
+                self.assertEqual([x['function']['name'] for x in payload['tools']],['saved_image_description'])
+                self.assertEqual(payload['max_tokens'],P.ONLINE.OPENROUTER_MAX_TOKENS)
+                self.assertEqual(payload['messages'][1]['content'][1]['image_url']['url'],'data:image/png;base64,fixture')
+                pick=P.ONLINE._tool_pick_from_message({'tool_calls':[{'function':{'name':'saved_image_description','arguments':'{"description":"DeckCraft shows a format error."}'}}]})
+                return {'ok':True,**pick}
+            def describe(a,**kw):
+                result=kw['vision_fn']('Only visible facts.',images=['data:image/png;base64,fixture'])
+                self.assertEqual(__import__('json').loads(result),{'description':'DeckCraft shows a format error.'})
+                return {'ok':True,'spoken':'DeckCraft shows a format error. What would you like to do with it?'}
+            screen.return_value.run_file.side_effect=describe
+            with mock.patch.object(P,'online_talk',side_effect=adapter):
+                got=P._run_tool_inner(P.model_free_route(REQUEST),REQUEST,hive=h,gen=g,retrieve_roots=[])
+            self.assertTrue(got['ok']);self.assertIn('format error',got['spoken'])
+    def test_unexpected_model_function_is_not_executed_or_rendered_as_a_caption(self):
+        with tempfile.TemporaryDirectory() as d,mock.patch.object(P.MACOS,'open_screenshot',return_value={'ok':True,'opened':True}),mock.patch.object(P,'_screen_see_hand') as screen,mock.patch.object(P,'online_talk',return_value={'ok':True,'tool':'send_mail','args':{'description':'I sent it.'}}):
+            h=Path(d);g=self.setup_reference(h)
+            def describe(a,**kw):
+                self.assertIsNone(kw['vision_fn']('Only visible facts.',images=['data:image/png;base64,fixture']))
+                return {'ok':False,'spoken':'No verified caption.'}
+            screen.return_value.run_file.side_effect=describe
+            got=P._run_tool_inner(P.model_free_route(REQUEST),REQUEST,hive=h,gen=g,retrieve_roots=[])
+            self.assertFalse(got['ok']);self.assertNotIn('I sent it',got['spoken'])
     def test_model_path_never_substitutes_for_missing_reference(self):
         with tempfile.TemporaryDirectory() as d,mock.patch.object(P.MACOS,'open_screenshot') as view,mock.patch.object(P,'online_talk') as online:
             h=Path(d);g=P.begin_turn(h)
