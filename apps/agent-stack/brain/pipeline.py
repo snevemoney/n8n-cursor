@@ -5745,6 +5745,14 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
                     retrieve_roots=retrieve_roots,see_fn=see_fn,status_fn=status_fn,cursor_ask_fn=cursor_ask_fn,gen=token,selected_folder_scope=folder_scope)
         if token and turn_cancelled(hive,token):return None
         if not isinstance(received,dict):return finish('invalid_next_pick')
+        if received.get('unnamed_path'):
+            # Keep what already worked; report the skipped read alongside it instead of over it.
+            receipts.append(_hand_loop_receipt(next_pick,received))
+            evidence=str(last.get('spoken') or last.get('brief') or '').strip()
+            row=finish('unnamed_read_skipped')
+            row['task_verified']=False
+            row['spoken']=(evidence+' ' if evidence else '')+"I didn't open a file you didn't name; tell me which one if you want it read."
+            return row
         last=received
         if received.get('_selected_folder_scope'):folder_scope=received['_selected_folder_scope']
         last_pick=next_pick;receipts.append(_hand_loop_receipt(next_pick,last))
@@ -6413,9 +6421,11 @@ def _run_tool_inner(
             scoped_child = wr.run_selected_child(wargs, selected_folder_scope)
         invented = scoped_child is None and wargs.get("op") == "read" and wpath and Path(wpath).name.lower() not in (utterance or "").lower()
         if invented and not PULL_UP_MY_RE.search(utterance or ""):
-            # Live: "Decide" became a read of a path he never said. Ask, don't guess.
-            return {"ok": True, "tool": "say", "spoken": "You didn't name a file, so I didn't open one. Which file do you mean?",
-                    "wires": ["voice"], "cites": [], "sent": False, "task_verified": False, "outcome": TOOL_LOOP}
+            # Live: "Decide" became a read of a path he never said. Ask, don't guess. This is a skipped
+            # read, not a success, so the hand loop keeps earlier evidence instead of replacing it (Oct 14 yt-dlp).
+            return {"ok": False, "tool": tool, "unnamed_path": True, "workspace_error": "unnamed path",
+                    "spoken": "You didn't name a file, so I didn't open one. Which file do you mean?",
+                    "wires": ["voice"], "cites": [], "sent": False, "task_verified": False, "outcome": HONEST_UNKNOWN}
         if invented or (wargs.get("op") == "ls" and not wpath and PULL_UP_MY_RE.search(utterance or "")):
             # "pull up my social bios": a named thing, not a folder. Look in his notes instead of refusing.
             return _run_tool_inner({"tool": "vault_read", "args": {"query": utterance}, "speak": ""}, utterance, hive=hive,
