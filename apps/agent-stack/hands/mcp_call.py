@@ -40,7 +40,17 @@ def _inventory():
 
 def allowlist() -> set[str]:
     raw = os.environ.get("JARVIS_MCP_ALLOW") or "codebase-memory-mcp"
-    return {s.strip() for s in raw.split(",") if s.strip()}
+    names = {s.strip() for s in raw.split(",") if s.strip()}
+    try:  # open access ("permission granted"): every MCP server already configured in Claude, Cursor or Codex
+        spec = importlib.util.spec_from_file_location("agent_stack_permissions", STACK / "hands" / "permissions.py")
+        perm = sys.modules.get("agent_stack_permissions")
+        if perm is None:
+            perm = importlib.util.module_from_spec(spec); sys.modules["agent_stack_permissions"] = perm; spec.loader.exec_module(perm)
+        if perm.open_access():
+            names |= {row["name"] for row in _inventory().inventory()[0]}
+    except Exception:  # noqa: BLE001 — closed is the safe default
+        pass
+    return names
 
 
 def _list_tools(spec: dict, deadline: float | None = None, *, metadata_fn=None) -> list[str] | None:

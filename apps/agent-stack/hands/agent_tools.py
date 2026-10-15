@@ -166,6 +166,8 @@ def op_mcp(server: str, tool: str, arguments: dict | None = None, approved: bool
     if not (NAME_OK.match(server or "") and NAME_OK.match(tool or "")):
         return {"ok": False, "verified": False, "spoken": "I need a server name and a tool name."}
     writing = bool(WRITE_TOOL.search(tool) or not READ_TOOL.match(tool))
+    if writing and approved is not True and _open_access() and not OPEN_MCP_HARD.search(tool):
+        approved = True  # open access: create/update/open/run tools go; sends, deletes, publishes, payments still wait for Evens
     if writing and approved is not True:
         PERM().log_action("mcp_write", f"{server}.{tool}", "confirm")
         return {"ok": False, "verified": False, "gated": True,
@@ -206,10 +208,28 @@ CLI_ALLOW = {
         r"create|copy|move|watch|stop|clear|empty\w*|quickAdd|login|logout|export|auth)\b)"
         rf"(?:{GWS_SERVICES})\s+(?:\+(?:triage|read|agenda)\b|(?:[\w.\-]+\s+){{1,3}}(?:list|get|query)(?:\s|$))", re.S),
 }
+# Open access ("permission granted"): any installed CLI and any MCP write except the consequential ones below.
+OPEN_CLI_HARD = re.compile(r"(?:^|\s)(?:sudo|rm|rmdir|mkfs|dd|shutdown|reboot|halt|diskutil\s+(?:erase|partition)|launchctl\s+(?:unload|remove|bootout))\b|"
+                           r"\b(?:push|merge|deploy|publish|release|send|reset\s+--hard|clean\s+-[a-z]*f|--force|force-push|"
+                           r"delete|destroy|drop\s+(?:table|database))\b|(?:^|\s)(?:-X|--request)\s*=?\s*(?:POST|PUT|PATCH|DELETE)\b|"
+                           r"(?:^|\s)--force\b", re.I)
+OPEN_MCP_HARD = re.compile(r"(send|delete|remove|trash|publish|deploy|merge|push|pay|purchase|charge|transfer|share|invite|tiktok|"
+                           r"drop|destroy|post_message|reply|forward)", re.I)
+
+
+def _open_access() -> bool:
+    try:
+        return bool(PERM().open_access())
+    except Exception:  # noqa: BLE001
+        return False
+
+
 CLI_GATED = re.compile(r"\b(merge|push|close|delete|create|edit|comment|review|release|deploy|reset|rebase|--force|-X\s*(POST|PUT|PATCH|DELETE))\b", re.I)
 
 
 def op_cli(argv: list[str], cwd: str | None = None, *, max_output_chars: int = OUT_CAP) -> dict:
+    if argv and argv[0] != "gws" and _open_access():
+        return _op_cli_open(argv, cwd, max_output_chars=max_output_chars)
     if not argv or argv[0] not in CLI_ALLOW:
         return {"ok": False, "verified": False, "spoken": f"{(argv or ['?'])[0]} isn't on the read-only CLI list."}
     rest = " ".join(argv[1:])
@@ -241,6 +261,30 @@ def op_cli(argv: list[str], cwd: str | None = None, *, max_output_chars: int = O
     ok = p.returncode == 0
     return {"ok": ok, "verified": ok and bool(text), "output": text, "exit": p.returncode,
             "output_truncated": truncated,
+            "spoken": (f"{argv[0]} ok: " if ok else f"{argv[0]} exited {p.returncode}: ") + text[:600]}
+
+
+def _op_cli_open(argv: list[str], cwd: str | None, *, max_output_chars: int = OUT_CAP) -> dict:
+    """Open access: any installed CLI, run without a shell; consequential verbs still need Evens."""
+    line = " ".join(argv)
+    if OPEN_CLI_HARD.search(line):
+        PERM().log_action("cli", line[:80], "confirm", open_access=True)
+        return {"ok": False, "verified": False, "gated": True,
+                "spoken": f"`{line[:120]}` deletes, pushes, deploys or sends. That still needs Evens."}
+    exe = shutil.which(argv[0], path=os.environ.get("PATH", "") + ":/opt/homebrew/bin:/usr/local/bin")
+    if not exe:
+        return {"ok": False, "verified": False, "spoken": f"{argv[0]} is not installed. Ask me to install it."}
+    PERM().log_action("cli", line[:80], "allow", open_access=True)
+    try:
+        p = subprocess.run([exe, *argv[1:]], capture_output=True, text=True, timeout=max(CLI_DEADLINE_S, 120),
+                           cwd=cwd or str(Path.home()), stdin=subprocess.DEVNULL)
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "verified": False, "spoken": f"{argv[0]} timed out."}
+    limit = max(1, min(int(max_output_chars), 80000))
+    raw_text = _scrub(p.stdout or p.stderr).strip()
+    text = raw_text[:limit] + ("…" if len(raw_text) > limit else "")
+    ok = p.returncode == 0
+    return {"ok": ok, "verified": ok and bool(text), "output": text, "exit": p.returncode, "output_truncated": len(raw_text) > limit,
             "spoken": (f"{argv[0]} ok: " if ok else f"{argv[0]} exited {p.returncode}: ") + text[:600]}
 
 

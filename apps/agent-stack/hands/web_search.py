@@ -16,7 +16,12 @@ import urllib.request
 from typing import Any, Callable
 
 TIMEOUT_S = 6.0
-MAX_CITES = 3
+MAX_CITES = 8          # multi-source research (Evens 2026-10-15): several sources, not one link
+SPOKEN_CITES = 5
+PER_DOMAIN = 2
+READ_PAGES = 4         # top pages actually opened and read, in parallel
+READ_TIMEOUT_S = 6.0
+PAGE_CHARS = 1500
 ENDPOINT = "https://html.duckduckgo.com/html/?q="
 INJECTION = re.compile(
     r"ignore\s+(all\s+|any\s+)?(previous|prior|above)|disregard|system\s+prompt|you\s+are\s+now|"
@@ -159,35 +164,105 @@ def _openrouter_web(query: str, timeout: float) -> list[dict[str, str]]:
 ENGINES = [_ddg, _brave, _openrouter_web]
 
 
-def _default_fetch(query: str, timeout: float) -> list[dict[str, str]]:
-    """Ask every engine in ENGINES at once inside one time budget; the earliest engine in ENGINES order
-    with relevant results wins once it is in (a bot-checked HTML engine no longer eats the others' time)."""
+def _gather(query: str, timeout: float) -> list[dict[str, str]]:
+    """Every engine at once inside one budget; all relevant answers are merged round-robin (engine order breaks ties)."""
     import time as _t
     end = _t.time() + timeout
     box: dict[int, list] = {}
-    done = threading.Event()
+    lock = threading.Lock()
 
     def one(i, eng):
         try:
             rows = eng(query, max(0.5, end - _t.time() - 0.2)) or []
         except Exception:
             rows = []
-        box[i] = rows if rows and _relevant(query, rows) else []
-        done.set()
+        with lock:
+            box[i] = rows if rows and _relevant(query, rows) else []
 
-    for i, eng in enumerate(ENGINES):
-        threading.Thread(target=one, args=(i, eng), daemon=True).start()
-    while _t.time() < end:
-        for i in sorted(box):  # first relevant answer to land wins (lowest engine index on a tie)
-            if box[i]:
-                return box[i]
-        if len(box) == len(ENGINES):
-            return []
-        done.wait(max(0.0, min(0.1, end - _t.time()))); done.clear()
-    for i in range(len(ENGINES)):
-        if box.get(i):
-            return box[i]
-    return []
+    threads = [threading.Thread(target=one, args=(i, eng), daemon=True) for i, eng in enumerate(ENGINES)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(max(0.0, end - _t.time()))
+    with lock:
+        lists = [box.get(i) or [] for i in range(len(ENGINES))]
+    merged, n = [], max((len(x) for x in lists), default=0)
+    for k in range(n):
+        for rows in lists:
+            if k < len(rows):
+                merged.append(rows[k])
+    return merged
+
+
+def _diverse(rows: list[dict[str, str]], limit: int = MAX_CITES) -> list[dict[str, str]]:
+    seen, per, out = set(), {}, []
+    for r in rows:
+        url = str(r.get("url") or "")
+        if not url.startswith(("http://", "https://")) or url in seen:
+            continue
+        host = (urllib.parse.urlsplit(url).hostname or "").removeprefix("www.")
+        if per.get(host, 0) >= PER_DOMAIN:
+            continue
+        seen.add(url); per[host] = per.get(host, 0) + 1; out.append(r)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _page_text(url: str, timeout: float) -> str:
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh) JarvisResearch/1.0",
+                                               "Accept": "text/html,application/xhtml+xml,text/plain"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        kind = r.headers.get("Content-Type", "")
+        if "html" not in kind and "text" not in kind:
+            return ""
+        raw = r.read(600_000).decode(r.headers.get_content_charset() or "utf-8", "replace")
+    raw = re.sub(r"(?is)<(script|style|noscript|svg|nav|footer|header|form)[^>]*>.*?</\1>", " ", raw)
+    text = html.unescape(re.sub(r"(?s)<[^>]+>", " ", raw))
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _excerpt(text: str, query: str, limit: int = PAGE_CHARS) -> str:
+    """Sentences that mention the query's words, as untrusted data (instruction-like lines dropped)."""
+    words = {w.lower() for w in re.findall(r"[\w.#+-]{3,}", query)}
+    keep, used = [], 0
+    for sent in re.split(r"(?<=[.!?])\s+", text):
+        if len(sent) < 40 or INJECTION.search(sent):
+            continue
+        if words and not any(w in sent.lower() for w in words):
+            continue
+        keep.append(sent.strip()); used += len(sent)
+        if used >= limit:
+            break
+    return " ".join(keep)[:limit]
+
+
+def read_pages(rows: list[dict[str, str]], query: str, *, n: int = READ_PAGES, timeout: float = READ_TIMEOUT_S,
+               getter: Callable | None = None) -> dict[str, str]:
+    getter = getter or _page_text
+    out: dict[str, str] = {}
+    lock = threading.Lock()
+
+    def one(url):
+        try:
+            got = _excerpt(getter(url, timeout), query)
+        except Exception:
+            got = ""
+        if got:
+            with lock:
+                out[url] = got
+
+    threads = [threading.Thread(target=one, args=(r["url"],), daemon=True) for r in rows[:n]]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(timeout + 0.5)
+    return out
+
+
+def _default_fetch(query: str, timeout: float) -> list[dict[str, str]]:
+    """Every engine at once inside one budget; all relevant answers merged (multi-source research)."""
+    return _gather(query, timeout)
 
 
 def _relevant(query: str, rows: list[dict[str, str]]) -> bool:
@@ -210,10 +285,11 @@ def _fail(query: str, why: str) -> dict[str, Any]:
             "spoken": f"I couldn't find sources for that just now ({why}), so I won't guess."}
 
 
-def run(args: dict[str, Any], fetch: Callable | None = None) -> dict[str, Any]:
+def run(args: dict[str, Any], fetch: Callable | None = None, page_getter: Callable | None = None) -> dict[str, Any]:
     query = str((args or {}).get("query") or "").strip()[:300]
     if not query:
         return _fail(query, "no query")
+    deep = fetch is None or page_getter is not None
     fetch = fetch or _default_fetch
     box: dict[str, Any] = {}
 
@@ -230,23 +306,20 @@ def run(args: dict[str, Any], fetch: Callable | None = None) -> dict[str, Any]:
         return _fail(query, "search timed out")
     if "err" in box:
         return _fail(query, "search failed")
-    seen, rows = set(), []
-    for r in box.get("rows") or []:
-        url = str(r.get("url") or "")
-        if not url.startswith(("http://", "https://")) or url in seen:
-            continue
-        seen.add(url)
-        rows.append(r)
+    rows = _diverse(box.get("rows") or [])
     if not rows:
         return _fail(query, "no results")
-    rows = rows[:MAX_CITES]
+    pages = read_pages(rows, query, getter=page_getter) if deep else {}
     lines = []
-    for i, r in enumerate(rows, 1):
+    for i, r in enumerate(rows[:SPOKEN_CITES], 1):
         title, snip = _clean(r.get("title")), _clean(r.get("snippet"))
         lines.append(f"[{i}] {title or 'source'}" + (f": {snip}" if snip else ""))
     cites = [r["url"] for r in rows]
-    return {"ok": True, "query": query, "cites": cites, "results": len(rows), "sent": False,
-            "spoken": "From the web: " + " ".join(lines) + " Sources: " + ", ".join(cites)}
+    sources = [{"n": i, "url": r["url"], "title": _clean(r.get("title")), "snippet": _clean(r.get("snippet")),
+                "page_excerpt": pages.get(r["url"], ""), "read": r["url"] in pages} for i, r in enumerate(rows, 1)]
+    return {"ok": True, "query": query, "cites": cites, "results": len(rows), "pages_read": len(pages), "sent": False,
+            "sources": sources,
+            "spoken": f"From {len(rows)} web sources ({len(pages)} read in full): " + " ".join(lines) + " Sources: " + ", ".join(cites[:SPOKEN_CITES])}
 
 
 def log_meta(got: dict[str, Any]) -> dict[str, Any]:

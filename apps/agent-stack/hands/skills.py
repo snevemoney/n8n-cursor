@@ -26,7 +26,20 @@ def default_roots() -> list[Path]:
     candidates = [home / ".claude" / "skills", home / ".codex" / "skills", home / ".cursor" / "skills-cursor"]
     candidates += [base / suffix for base in (repo, STACK)
                    for suffix in ("skills", ".claude/skills", ".codex/skills", ".cursor/skills", ".cursor/skills-cursor")]
-    return [root for root in candidates if root.is_dir()]
+    # Same capabilities as the other platforms (Evens 2026-10-15): the Hive shared skill library every desk uses,
+    # other agents' skill folders, and every installed Claude plugin's skills.
+    candidates += [repo / "docs" / "hive" / "outer-heaven" / "CONTENT" / "os" / "shared" / "skills",
+                   home / ".agents" / "skills", home / ".grok" / "skills", home / ".grok-shared" / "skills",
+                   home / ".gemini" / "skills", home / ".config" / "opencode" / "skills"]
+    plugins = home / ".claude" / "plugins"
+    if plugins.is_dir():
+        for pattern in ("*/skills", "*/*/skills", "*/*/*/skills", "*/*/*/*/skills"):
+            candidates += sorted(plugins.glob(pattern))[:200]
+    seen, out = set(), []
+    for root in candidates:
+        if root.is_dir() and root.resolve() not in seen:
+            seen.add(root.resolve()); out.append(root)
+    return out
 
 
 def _frontmatter(path: Path) -> dict[str, str]:
