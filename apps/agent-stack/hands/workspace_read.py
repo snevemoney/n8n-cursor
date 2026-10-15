@@ -10,6 +10,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+import threading
 import time
 from pathlib import Path
 from typing import Any
@@ -429,6 +430,9 @@ def _find_documents(args, rs):
 
 
 REPO_DEPTH = 3  # ~/tools/<repo> and ~/projects/<repo> sit two levels down (live 2026-10-15)
+NO_REPO_DIRS = {"Library", "Pictures", "Music", "Movies", "Applications"}  # Photos library blocked the walk (live 18:2x)
+BUNDLE_SUFFIXES = (".app", ".photoslibrary", ".musiclibrary", ".fcpbundle", ".imovielibrary", ".lrdata", ".bundle", ".tvlibrary")
+AGENT_WORKTREES = {"jarvis-cowork", "jarvis-scratch", "worktrees"}
 REPO_BUDGET_S = 8.0  # a cold first walk on a loaded Mac took 94 s; answer with what was found by then
 
 
@@ -436,13 +440,16 @@ def _repos_under(root: Path, depth: int, deadline: float = float("inf")) -> list
     """Real checkouts (a .git folder); worktrees (.git file), hidden folders and Library are skipped."""
     if time.monotonic() > deadline:
         return []
-    if (root / ".git").is_dir():
+    git = root / ".git"
+    # a .git file is a worktree: ~/jarvis-main counts; agent scratch worktrees do not
+    if git.is_dir() or (git.is_file() and not AGENT_WORKTREES.intersection(root.parts) and not root.name.startswith("workflow-")):
         return [root.name]
     if depth <= 0:
         return []
     try:
-        kids = sorted(c for c in root.iterdir() if c.is_dir() and not c.is_symlink()
-                      and not c.name.startswith(".") and c.name != "Library")
+        kids = sorted((c for c in root.iterdir() if c.is_dir() and not c.is_symlink() and not c.name.startswith(".")
+                       and c.name not in NO_REPO_DIRS and not c.name.endswith(BUNDLE_SUFFIXES)),
+                      key=lambda c: (c.name == "Documents", c.name))  # iCloud Documents last: it can block (live 18:2x)
     except OSError:
         return []
     return [n for c in kids for n in _repos_under(c, depth - 1, deadline)]
@@ -475,7 +482,13 @@ def run(args: dict, roots=None) -> dict[str, Any]:
         deadline = time.monotonic() + REPO_BUDGET_S
         # never walk / or external drives for repos (live 18:09: READ_ROOTS=/ made this 66 s and timed out the turn)
         scan = [r for r in _scan_order(rs) if r not in (VOLUMES, Path("/")) and VOLUMES not in r.parents]
-        found = list(dict.fromkeys(n for r in scan for n in _repos_under(r, REPO_DEPTH, deadline)))
+        got: list[str] = []
+        def walk():
+            for r in scan:
+                got.extend(_repos_under(r, REPO_DEPTH, deadline))
+        # one folder can block inside a single listing (iCloud, privacy prompts): answer at the deadline anyway
+        worker = threading.Thread(target=walk, daemon=True); worker.start(); worker.join(REPO_BUDGET_S)
+        found = list(dict.fromkeys(list(got)))
         names = found[:_max_names()]
         more = f" and {len(found) - len(names)} more" if len(found) > len(names) else ""
         sp = (f"{len(found)} local repos: " + ", ".join(names) + more + ".") if found else "I found no git repos in my allowed folders."

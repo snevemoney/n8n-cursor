@@ -39,6 +39,21 @@ class RepoDepth(unittest.TestCase):
             W.run({"op": "repos"}, roots=[Path("/"), Path.home()])
         self.assertNotIn(Path("/"), [c.args[0] for c in walk.call_args_list])
 
+    def test_a_hanging_folder_cannot_hold_the_answer(self):
+        # live 18:2x: one folder blocked for minutes; the per-folder budget check never ran (163 s, 1 repo)
+        import time as _t
+        real = W._repos_under
+        def slow(root, depth, deadline=float("inf")):
+            if root.name == "hang":
+                _t.sleep(5); return []
+            return real(root, depth, deadline)
+        with tempfile.TemporaryDirectory() as t:
+            home = Path(t); (home / "a" / ".git").mkdir(parents=True); (home / "hang").mkdir()
+            with mock.patch.object(W, "_repos_under", side_effect=slow), mock.patch.object(W, "REPO_BUDGET_S", 1.0), \
+                    mock.patch.object(W, "open_access", return_value=True):
+                t0 = _t.monotonic(); out = W.run({"op": "repos"}, roots=[home / "a", home / "hang"]); took = _t.monotonic() - t0
+        self.assertLess(took, 2.5); self.assertIn("a", out["names"]); self.assertIn("partial", out["spoken"])
+
 
 if __name__ == "__main__":
     unittest.main()
