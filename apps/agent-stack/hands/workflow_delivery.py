@@ -152,6 +152,9 @@ print(json.dumps(out))
         return {'ok':True,'action_executed':True,'outcome_verified':False}
 
 
+LIVENESS_KEYS=frozenset({'active','worker_liveness','worker_started_at','worker_heartbeat_at'})
+
+
 class Delivery:
     def __init__(self,adapter,hive,mission_id,*,active_fn,artifact_base=None,runtime=None):
         self.a=adapter;self.hive=Path(hive);self.ident=mission_id;self.root=adapter.mission_path(hive,mission_id)
@@ -171,7 +174,9 @@ class Delivery:
         child_request=self.a.read_json(child_root/'request.json')
         self.a._validate_workflow_context(child_request.get('workflow_context'),child_request.get('code_args') or {})
         actual=self.a.read_json(child_root/'result.json')
-        if actual!=coding or actual.get('status')!='COMPLETED' or actual.get('builder_verified') is not True:raise ValueError('actual_completed_coding_receipt_required')
+        # status() adds live-observation keys (active, worker_liveness...) that result.json never has (01e8079, 10:24 ET).
+        observed={k:v for k,v in (coding or {}).items() if k not in LIVENESS_KEYS}
+        if actual!=observed or actual.get('status')!='COMPLETED' or actual.get('builder_verified') is not True:raise ValueError('actual_completed_coding_receipt_required')
         owner=self.a.read_json(self.root/'execution_owner.json');origin=self.a.read_json(self.root/'original_implementation.json')
         hand=self.a._load('delivery_agent_tools',self.a.STACK/'hands/agent_tools.py')
         wrapped=self.a.read_json(child_root/'checkpoint.json');checkpoint=wrapped.get('checkpoint') or {}

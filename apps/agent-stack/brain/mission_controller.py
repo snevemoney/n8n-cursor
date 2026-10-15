@@ -262,7 +262,7 @@ class MissionController:
                 self.adapter.write_json(root/"state.json",state)
                 token=uuid.uuid4().hex
                 process=self.adapter._spawn_worker(root,token)
-                self.adapter.write_json(root/"owner.json",{"pid":process.pid,"token":token,"identity":self.adapter._identity(process.pid),"created":time.time()})
+                self.adapter.write_json(root/"owner.json",{"pid":process.pid,"token":token,"identity":self.adapter._identity(process.pid),"worker_entrypoint":str(self.adapter._worker_entrypoint(root)),"created":time.time()})
         return handle.workflow_status(mission_id)
 
     async def _execute_research_build(self,root):
