@@ -414,8 +414,11 @@ def run(args: dict, roots=None) -> dict[str, Any]:
                         names.append(c.name)
             except OSError:
                 continue
-        names = names[:_max_names()]
+        names = list(dict.fromkeys(names))[:_max_names()]
         sp = ("Local repos: " + ", ".join(names) + ".") if names else "I found no git repos in my allowed folders."
+        if not open_access():  # a closed look is not the whole Mac; say so (live 2026-10-15)
+            sp += ' I only looked in my own folders; say "permission granted" and I\'ll look across your Mac.'
+
         return {"ok": True, "op": op, "names": names, "spoken": sp}
     path, err = _resolve(str((args or {}).get("path") or ""), rs)
     if path is None:
