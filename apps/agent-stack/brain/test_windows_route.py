@@ -17,7 +17,9 @@ class WindowsRoute(unittest.TestCase):
 
     def test_routes_to_windows_hand(self):
         fake = {"ok": True, "spoken": "You have 2 displays: DELL P2422H (main); Color LCD.", "wires": ["windows"]}
-        with patch.object(P.MACWIN, "run", return_value=fake) as run:
+        open_apps = [{"app": "Cursor", "title": ""}]
+        with patch.object(P.MACWIN, "windows", return_value=open_apps), \
+                patch.object(P.MACWIN, "run", return_value=fake) as run:
             for u in ("how many displays do I have", "what windows are open", "switch to Cursor"):
                 got = self.route(u)
                 self.assertIsNotNone(got, u)

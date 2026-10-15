@@ -28,8 +28,10 @@ _TERMINAL_AS = ('tell application "Terminal" to if (count of windows) > 0 then '
                 'get contents of selected tab of front window')
 
 _WINDOWS_RE = re.compile(r"\b(?:what|which|list|show)\b.{0,20}\b(?:windows?|apps?|applications?)\b.{0,20}\b(?:open|running|up)\b", re.I)
-_DISPLAYS_RE = re.compile(r"\b(?:how many|which|what|list)\b.{0,25}\b(?:displays?|screens?|monitors?)\b(?!\s+work)", re.I)
-_TERMINAL_RE = re.compile(r"\b(?:what(?:'s| is)|show|read)\b.{0,15}\bin my terminal\b|\bmy terminal (?:say|show)", re.I)
+_DISPLAYS_RE = re.compile(r"\b(?:how many|which|what)\s+(?:displays?|screens?|monitors?)\s+(?:do i have|have i got|"
+                          r"am i using|are (?:connected|plugged in|attached|hooked up|on))\b|"
+                          r"\b(?:list|show)\s+(?:me\s+)?my\s+(?:displays|screens|monitors)\b", re.I)
+_TERMINAL_RE = re.compile(r"\b(?:what(?:'s| is)|show|read)\b.{0,15}\bin my terminal\b(?!\s+history)|\bmy terminal (?:say|show)", re.I)
 _SWITCH_RE = re.compile(r"^\s*(?:jarvis[,\s]+)?(?:switch to|bring up|focus|go to)\s+(?:the\s+)?([A-Za-z0-9][\w .\-]{0,40}?)\s*(?:app|window)?\s*[.!?]?\s*$", re.I)
 
 
@@ -44,10 +46,29 @@ def _scan():
     return mod
 
 
-def wants(utterance: str) -> bool:
+def _pick_app(want: str, apps: list[str]) -> str | None:
+    """Exact name first, else a unique prefix of 3+ letters; never guess between apps."""
+    want = want.strip().lower()
+    exact = [a for a in apps if a.lower() == want]
+    if exact:
+        return exact[0]
+    if len(want) < 3:
+        return None
+    hits = [a for a in apps if a.lower().startswith(want)]
+    return hits[0] if len(hits) == 1 else None
+
+
+def wants(utterance: str, run=_run) -> bool:
     u = (utterance or "").strip()
-    return bool(_WINDOWS_RE.search(u) or _DISPLAYS_RE.search(u) or _TERMINAL_RE.search(u) or _SWITCH_RE.match(u)
-                or re.search(r"\bon my (?:second|other|main) (?:screen|display|monitor)\b", u, re.I))
+    if _WINDOWS_RE.search(u) or _DISPLAYS_RE.search(u) or _TERMINAL_RE.search(u):
+        return True
+    m = _SWITCH_RE.match(u)
+    if not m:
+        return False
+    try:  # "go to sleep" / "switch to dark mode" are not apps; only claim names of apps already open
+        return _pick_app(m.group(1), _apps(windows(run))) is not None
+    except (subprocess.TimeoutExpired, OSError, ValueError):
+        return False
 
 
 def displays(run=_run) -> list[dict]:
@@ -71,7 +92,7 @@ def windows(run=_run) -> list[dict]:
 def terminal_text(run=_run) -> str:
     got = run(["osascript", "-e", _TERMINAL_AS], timeout=8.0)
     text = (got.stdout or "").rstrip()
-    return _scan().redact(text[-TERMINAL_CHARS:])
+    return _scan().redact(text)[-TERMINAL_CHARS:]  # redact first so a cut can't split a key past the scanner
 
 
 def _apps(rows: list[dict]) -> list[str]:
@@ -84,12 +105,11 @@ def run(utterance: str, run=_run) -> dict:
     try:
         m = _SWITCH_RE.match(u)
         if m:
-            want = m.group(1).strip().lower()
             apps = _apps(windows(run))
-            match = next((a for a in apps if a.lower() == want or a.lower().startswith(want)), None)
+            match = _pick_app(m.group(1), apps)
             if not match:
                 return {**base, "ok": False,
-                        "spoken": f"{m.group(1).strip()} isn't open, so I didn't launch it. Open apps: {', '.join(apps[:8]) or 'none found'}."}
+                        "spoken": f"{m.group(1).strip()} isn't an open app I can name exactly, so I didn't switch or launch anything. Open apps: {', '.join(apps[:8]) or 'none found'}."}
             run(["open", "-a", match], timeout=8.0)
             return {**base, "ok": True, "spoken": f"Brought {match} to the front."}
         if _TERMINAL_RE.search(u):
@@ -100,7 +120,7 @@ def run(utterance: str, run=_run) -> dict:
                 return {**base, "ok": False, "spoken": "I couldn't read Terminal. macOS may need to allow Jarvis to control Terminal."}
             tail = " / ".join(line.strip() for line in text.splitlines()[-8:] if line.strip())
             return {**base, "ok": True, "spoken": f"Your front Terminal tab ends with: {tail}"}
-        if _DISPLAYS_RE.search(u) or re.search(r"\b(?:second|other|main) (?:screen|display|monitor)\b", u, re.I):
+        if _DISPLAYS_RE.search(u):
             rows = displays(run)
             if not rows:
                 return {**base, "ok": False, "spoken": "I couldn't read the display list."}

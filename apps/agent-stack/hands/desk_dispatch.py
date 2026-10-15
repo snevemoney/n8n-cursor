@@ -28,11 +28,9 @@ def _spoken_name(slug: str) -> str:
 
 # Spoken form → slug. "money desk", "HITL operator", "comms manager" all resolve to one slug.
 _ALIASES = {_spoken_name(s): s for s in DESKS}
-_ALIASES.update({"comms manager": "communications-manager", "comms": "communications-manager",
-                 "cfo": "personal-cfo", "gtm": "product-gtm", "hitl": "hitl-operator", "boss": "big-boss",
-                 "creative": "creative-studio", "planner": "day-planner", "publishing": "publishing-engine",
-                 "wealth": "wealth-manager", "career": "career-strategist", "money": "money-desk",
-                 "claude code": "claude"})
+# Full names and unambiguous acronyms only: "ask the boss" / "ask the planner" are ordinary English.
+_ALIASES.update({"comms manager": "communications-manager", "cfo": "personal-cfo", "gtm": "product-gtm",
+                 "hitl": "hitl-operator", "claude code": "claude"})
 
 
 def canonical(name: str) -> str:

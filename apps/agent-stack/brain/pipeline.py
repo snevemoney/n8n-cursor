@@ -5651,7 +5651,8 @@ def _hand_loop_receipt(pick,ran):
 def _hand_loop_pause(ran):
     if ran.get('awaiting_confirm') or ran.get('gated') or ran.get('auth_missing') or ran.get('cancelled'):
         return 'authority_or_stop'
-    if ran.get('tool') in {'refuse_hard_step','say'} or ran.get('outcome') in {'AWAITING_APPROVAL','NEEDS_ACTION_DETAILS'}:
+    if (ran.get('tool') in {'refuse_hard_step','say'} or ran.get('unnamed_path')
+            or ran.get('outcome') in {'AWAITING_APPROVAL','NEEDS_ACTION_DETAILS'}):
         return 'owner_input_required'
     if str(ran.get('workspace_error') or '').lower() in {
             'outside the allowed folders','no allowed folder','that looks like a secret','permission denied'}:
