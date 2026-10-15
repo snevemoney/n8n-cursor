@@ -591,7 +591,8 @@ def dock_hint(kws: list[str]) -> dict | None:
 # Text OCR can't see icon-only controls ("+", Dock icons) and grabbed wrong words ("NEW" for "create a reel"). Evens asked
 # (15:23) for a vision model on a silent capture of the display under his cursor: it returns the target's box, or "not found"
 # and Jarvis says so. OCR is only a fallback when the vision call itself is unavailable, and then only for an exact word.
-VISION_MODEL = os.environ.get("JARVIS_POINTER_VISION_MODEL", "google/gemini-2.0-flash-001")
+# gemini-2.0-flash-001 was retired on OpenRouter (every pointer ask paid a failed call first).
+VISION_MODEL = os.environ.get("JARVIS_POINTER_VISION_MODEL", "google/gemini-2.5-flash")
 
 
 class _R(__import__("ctypes").Structure):
@@ -685,7 +686,7 @@ def locate_vision(utterance: str, *, key: str = "", call_fn=None, disp=None) -> 
             raw, errs = G.ask_models(lambda m, t: call_fn(url, prompt), [None], VISION_BUDGET_SEC, VISION_BUDGET_SEC, _t.time)
         else:
             raw, errs = G.ask_models(lambda m, t: _vision_call(url, prompt, key, m, t),
-                                     [VISION_MODEL, "google/gemini-2.5-flash-lite", "google/gemini-2.5-flash"],
+                                     list(dict.fromkeys([VISION_MODEL, "google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"])),
                                      VISION_BUDGET_SEC, 8.0, _t.time)
         if raw is None:
             try:

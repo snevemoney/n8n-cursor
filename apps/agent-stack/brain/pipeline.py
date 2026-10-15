@@ -5562,6 +5562,9 @@ def gen_rules(u: str) -> str:
 TOOL_HEARTBEAT = "Still checking, sir; the wires are being fashionably slow."
 
 HAND_LOOP_MAX_HANDS = 4
+# Screen-overlay hands finish the turn themselves: a second model pass replaced "The red arrow is on it" with its own
+# line, and a repeat pointer pick re-captured the screen (hide_overlays) or ended the turn as a failed duplicate.
+TERMINAL_HANDS = frozenset({"pointer", "pointer_click", "pointer_demo"})
 HAND_LOOP_SECONDS = 45
 
 
@@ -5661,6 +5664,8 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
             for n,receipt in enumerate(receipts)]}
         row['wires']=list(dict.fromkeys(wires));row['cites']=cites[:16]
         if len(receipts)>1:row['task_verified']=False
+        if reason=='provider_unavailable' and len(receipts)==1:
+            return row  # the one hand ran; no follow-up from the model is not a failure of what already happened
         if reason in {'duplicate_action','hand_limit','time_limit','invalid_next_pick','provider_unavailable'}:
             row.update(ok=False,task_verified=False,partial=True)
             evidence=str(last.get('spoken') or '').strip()
@@ -8339,7 +8344,7 @@ def apply_pipeline_iter(
         if not str(ran.get("spoken") or "").strip() and not brain:
             ran = no_model_reply(spoken_in, hive=hive, see_fn=see_fn, retrieve_roots=retrieve_roots, turns=prior_turns)
     pick_tool = str((pick or {}).get("tool") or "")
-    if (isinstance(ran,dict) and pick_tool in HANDS and pick_tool != "browser_mission"
+    if (isinstance(ran,dict) and pick_tool in HANDS and pick_tool != "browser_mission" and pick_tool not in TERMINAL_HANDS
         and not (token and turn_cancelled(hive,token))):
         loop_brief=provider_brief or sitting_brief(prior_turns,bus_now,retrieve_roots,spoken_in)
         ran=yield from _continue_hand_loop(pick,ran,spoken_in,hive=hive,token=token,brain=brain,
