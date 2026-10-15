@@ -6,8 +6,8 @@ from wake_word import WakeGate, split_wake
 class SplitWake(unittest.TestCase):
     def test_path_kept(self):
         self.assertEqual(
-            split_wake("Hey Jarvis open /Users/Evens/Report.pdf"),
-            (True, "open /Users/Evens/Report.pdf"),
+            split_wake("Hey Jarvis open /workspace/Report.pdf"),
+            (True, "open /workspace/Report.pdf"),
         )
 
     def test_case_and_math_kept(self):

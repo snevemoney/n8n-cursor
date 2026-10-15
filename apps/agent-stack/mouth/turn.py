@@ -573,8 +573,9 @@ def _apply_turn_iter_inner(
             gen=token,
         ):
             text = str(out.get("spoken") or PIPELINE.PROPOSAL)
-            yield _turn_event(
+            event = _turn_event(
                 spoken=text,
+                ok=bool(out.get("ok", True)),
                 verb="refuse_hard_step",
                 host="pipeline",
                 cites=out.get("cites") or [],
@@ -583,8 +584,14 @@ def _apply_turn_iter_inner(
                 done=bool(out.get("done", True)),
                 spoken_delta=str(out.get("spoken_delta") or ""),
                 partial=bool(out.get("partial")),
+                outcome=out.get("outcome") or out.get("status"),
+                source=out.get("source"),
                 gen=out.get("gen") or out.get("turn_gen") or token,
             )
+            for key in ("execution", "task_verified", "mission_id"):
+                if key in out:
+                    event[key] = out[key]
+            yield event
         return
     bus_armed = load_json(hive / "bus" / "state.json")
     already_armed = isinstance(bus_armed.get("watch"), dict) and bool(bus_armed["watch"].get("armed"))
@@ -1213,6 +1220,12 @@ def self_test() -> dict:
 
     def fake_cursor(prompt: str, mode: str = "ask", **kw):
         _ = (mode, kw)
+        if prompt.strip().lower() == "send this email":
+            return {
+                "tool": "refuse_hard_step",
+                "args": {},
+                "speak": "I will send it now.",
+            }
         return {
             "tool": "vault_read",
             "args": {"query": prompt[:80]},
@@ -1234,11 +1247,14 @@ def self_test() -> dict:
         stopped = apply_turn("stop", hive=hive)
         if stopped.get("verb") != "stop" or "Stopped" not in (stopped.get("spoken") or ""):
             return {"ok": False, "errors": ["stop must stop"], "got": stopped}
-        refused = apply_turn("send this email", hive=hive)
+        refused = apply_turn("send this email", hive=hive, cursor_fn=fake_cursor)
         if refused.get("verb") != "refuse_hard_step" or refused.get("ask"):
             return {"ok": False, "errors": ["send this email must propose, not send"], "got": refused}
-        if "Proposal only" not in (refused.get("spoken") or ""):
-            return {"ok": False, "errors": ["hard step must speak a proposal"], "got": refused}
+        refused_spoken = refused.get("spoken") or ""
+        if "exact action, target and content" not in refused_spoken:
+            return {"ok": False, "errors": ["hard step must request the missing action details"], "got": refused}
+        if "talk wire is dark" in refused_spoken.lower():
+            return {"ok": False, "errors": ["hard step must not hide behind a provider failure"], "got": refused}
         can = apply_turn("What can you do?", hive=hive, retrieve_roots=[vault], cursor_fn=fake_cursor)
         if can.get("verb") == "can" or canned_can in (can.get("spoken") or ""):
             return {"ok": False, "errors": ["what can you do must not use canned can"], "got": can}

@@ -45,7 +45,7 @@ ORDINARY = [
     "what is the capital of France", "open the project launch plan", "can you set up a meeting with Sam",
     "I need a new prompt for my character", "please remember to buy milk", "search the web for pasta recipes",
     "write a python function that adds two numbers", "def shorten(text): return text[:10]",
-    "https://example.com/vault/search?q=kitchen", "/Users/evens/vault/index.md", "git push origin main",
+    "https://example.com/vault/search?q=kitchen", "/opt/example/vault/index.md", "git push origin main",
     "quelle heure est-il maintenant", "peux-tu chercher mon fichier dans le coffre", "rappelle-moi d'appeler ma mère",
     "enable the new feature on my phone", "make a plugin for my site", "what is a voice setting on iPhone",
     "predict the weather for tomorrow", "set up the wizard hat for the party", "route me to the airport",

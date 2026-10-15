@@ -109,9 +109,9 @@ class CraftInspect(unittest.TestCase):
         self.assertNotIn("9", got["spoken"])
 
     def test_unreadable_inspect_text_is_not_read_out(self):
-        a._mcp_session = Session(text({"doc": 1}), (True, "Binary garbage \x00\x01 sk-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123"))
+        a._mcp_session = Session(text({"doc": 1}), (True, "Binary garbage \x00\x01 CREDENTIAL_FIXTURE_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123"))
         got = a.op_craft_inspect("pdfcraft", str(self.pdf))
-        self.assertNotIn("sk-ABC", got["spoken"])
+        self.assertNotIn("CREDENTIAL_FIXTURE", got["spoken"])
 
     def test_summary_names_counts_not_dumps(self):
         sm = a.craft_summary("gridcraft", json.dumps({"title": "parts.csv", "sheets": [{"name": "parts", "cells": 6}, {"name": "b"}],

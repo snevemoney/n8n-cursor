@@ -33,7 +33,7 @@ class EmbeddedPaths(unittest.TestCase):
             self.assertEqual(W.requested_path(utterance),file)
             self.assertEqual(W.run_requested({},utterance,roots=[])['text'],'literal spaced filename')
     def test_preserves_home_absolute_and_parent_prefixes(self):
-        for path in ['/Users/example/project/main.py','~/project/main.py','../project/main.py','apps/main.py','./main.py']:
+        for path in ['/opt/example/project/main.py','~/project/main.py','../project/main.py','apps/main.py','./main.py']:
             with self.subTest(path=path):
                 self.assertEqual(W.args_from_utterance(f'Compare {path} with other.py')['path'],path)
     def test_embedding_path_does_not_grant_outside_root(self):

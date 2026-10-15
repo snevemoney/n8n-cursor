@@ -31,7 +31,7 @@ def worker(statuses, seen=None, delay=0.0):
                 seen.append((ask, repo))
         st = statuses.get(ask, "ok") if isinstance(statuses, dict) else statuses
         if st == "boom":
-            raise RuntimeError("secret sk-ABCDEFGHIJKLMNOPQRSTUVWX")
+            raise RuntimeError("secret CREDENTIAL_FIXTURE_ABCDEFGHIJKLMNOPQRSTUVWX")
         return {"ok": st == "ok", "verified": st == "ok", "gated": st == "gated", "spoken": f"worker said {st} for {ask}"}
     w.state = state
     return w
