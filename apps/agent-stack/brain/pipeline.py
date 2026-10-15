@@ -525,6 +525,7 @@ PERSONA = _load("agent_stack_persona", STACK / "mouth" / "persona.py")
 SEE = _load("agent_stack_see", STACK / "hands" / "see.py")
 FRAME = _load("agent_stack_watch_frame", STACK / "hands" / "watch_frame.py")
 MACOS = _load("agent_stack_macos_read", STACK / "hands" / "macos_read.py")
+MACWIN = _load("agent_stack_macos_windows", STACK / "hands" / "macos_windows.py")
 SENSES = _load("agent_stack_face_senses", STACK / "face" / "senses.py")
 PRO = _load("agent_stack_pro", STACK / "hands" / "pro.py")
 CRAFT = _load("agent_stack_craft", STACK / "hands" / "craft.py")
@@ -4598,6 +4599,15 @@ def harness_route(
                 brain="humour",
                 wires=["sitting"],
             )
+    if MACWIN is not None and MACWIN.wants(spoken_in):
+        # Goal §4: windows, displays, Terminal. Read-only except bringing an already-open app forward.
+        got = MACWIN.run(spoken_in) or {}
+        return _harness_hit(
+            tool="converse",
+            speak=str(got.get("spoken") or "I couldn't check your windows; nothing was changed."),
+            brain="windows",
+            wires=list(got.get("wires") or ["windows"]),
+        )
     if CURRENT_VISIBILITY_RE.match(spoken_in):
         line = _safe_store_mouth(roots)
         return _harness_hit(
