@@ -650,6 +650,8 @@ def wants_workflow(utterance):
 def _owner_path_matches(answer, selected):
     """Only complete owner path tokens resolve authority; prefixes never match."""
     import shlex
+    if re.search(r"\b(?:do\s+not|don['’]?t|never)\s+(?:bind|use|authorize|approve)\b|\b(?:only\s+an?\s+example|example\s+only)\b", answer or '', re.I):
+        return False
     try:
         tokens=shlex.split(answer or '')
     except ValueError:
@@ -661,6 +663,20 @@ def _owner_path_matches(answer, selected):
     lead=re.fullmatch(r"\s*(?:use|the project is|my project is|project(?: path)?[: ]|repository(?: path)?[: ])\s+(.+?)\s*",answer or '',re.I)
     if lead:
         candidates.append(lead.group(1).strip().strip('"\''))
+    # A retained workflow answer may include the mission and isolated branch.
+    # Keep the grammar positive and anchored so negated or quoted discussion
+    # cannot become owner authority.
+    retained=re.match(
+        r"^\s*(?:for\s+workflow\s+[a-f0-9]{32},?\s*)?(?:please\s+)?"
+        r"use\s+(?:the\s+)?(?:project\s+)?folder\s+"
+        r"(?P<repo>\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+?)\s+"
+        r"on\s+(?:an?\s+)?(?:isolated\s+)?branch\s+[\w/-](?:[\w./-]*[\w/-])?"
+        r"(?=$|[.!](?:\s|$))",
+        answer or '',
+        re.I,
+    )
+    if retained:
+        candidates.append(retained.group('repo').strip('"\''))
     candidates.append((answer or '').strip().strip('"\''))
     try:
         expected=selected.resolve(strict=True)

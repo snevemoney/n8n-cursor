@@ -41,6 +41,35 @@ class ResearchBuildContinuation(unittest.TestCase):
    self.assertEqual(got['mission_id'],initial['mission_id']);self.assertFalse(got['task_verified'])
    self.assertEqual(adapter.read_json(root/'binding.json')['repo'],str(repo));self.assertEqual((root/'request.json').read_bytes(),original)
    self.assertFalse((repo/'.git').exists());self.assertEqual(P.BUS_IO.load_json(h/'bus'/'state.json')['workflow_mission_id'],initial['mission_id'])
+ def test_conversational_named_workflow_binding_uses_the_named_mission(self):
+  with tempfile.TemporaryDirectory() as d:
+   h=Path(d)/'hive';repo=Path(d).resolve()/'chosen';repo.mkdir()
+   adapter=P._coding_mission_hand();handle=adapter.WorkflowMissionHandle(h);named=handle.start_workflow(REQUEST)
+   newer=handle.start_workflow(REQUEST+' Use a different saved source for this separate workflow.')
+   self.assertNotEqual(newer['mission_id'],named['mission_id'])
+   utterance=(f'For workflow {named["mission_id"]}, use the project folder {repo} on isolated branch '
+              f'jarvis/workflow-{named["mission_id"]}. This is my literal owner project answer.')
+   pick=P._workflow_followup_route(utterance,h)
+   self.assertEqual(pick['args'],{'action':'research_build_bind','mission_id':named['mission_id'],
+                    'repo':str(repo),'branch':'jarvis/workflow-'+named['mission_id']})
+   got=P._run_tool_inner(pick,utterance,hive=h,retrieve_roots=[])
+   self.assertEqual(got['mission_id'],named['mission_id'])
+   self.assertEqual(adapter.read_json(adapter.mission_path(h,named['mission_id'])/'binding.json')['repo'],str(repo))
+   self.assertFalse((adapter.mission_path(h,newer['mission_id'])/'binding.json').exists())
+ def test_conversational_binding_rejects_negation_and_ambiguous_missions(self):
+  with tempfile.TemporaryDirectory() as d:
+   h=Path(d);repo=Path(d).resolve()/'chosen';repo.mkdir();adapter=P._coding_mission_hand()
+   first=adapter.WorkflowMissionHandle(h).start_workflow(REQUEST)['mission_id']
+   second=adapter.WorkflowMissionHandle(h).start_workflow(REQUEST+' Use another saved source.')['mission_id']
+   self.assertIsNone(P._workflow_followup_route(
+    f'Do not use folder "{repo}" on branch jarvis/fix.',h))
+   self.assertIsNone(P._workflow_followup_route(
+    f'For workflow {first}, use the project folder {repo} on isolated branch jarvis/workflow-{second}.',h))
+   denied=(f'For workflow {first}, use the project folder {repo} on isolated branch jarvis/fix. '
+           'Do not bind it yet; this is only an example.')
+   self.assertIsNone(P._workflow_followup_route(denied,h))
+   self.assertFalse(adapter._owner_path_matches(denied,repo))
+   self.assertFalse((adapter.mission_path(h,first)/'binding.json').exists())
  def test_unasked_model_binding_cannot_attach_guessed_project(self):
   with tempfile.TemporaryDirectory() as d:
    h=Path(d);adapter=P._coding_mission_hand();initial=adapter.WorkflowMissionHandle(h).start_workflow(REQUEST)

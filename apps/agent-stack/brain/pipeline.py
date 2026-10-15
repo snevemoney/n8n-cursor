@@ -1358,10 +1358,12 @@ def _workflow_followup_route(utterance, hive):
         return None
     adapter = _coding_mission_hand()
     text = str(utterance or "").strip()
-    named = re.findall(r"(?<![a-f0-9])[a-f0-9]{32}(?![a-f0-9])",text,re.I)
+    named = list(dict.fromkeys(match.lower() for match in re.findall(r"(?<![a-f0-9])[a-f0-9]{32}(?![a-f0-9])",text,re.I)))
+    if len(named) > 1:
+        return None
     status_query = bool(re.search(r"\b(status|progress|blocker|completed actions)\b",text,re.I)
                         and re.search(r"\b(workflow|assignment|mission|retained task)\b",text,re.I))
-    ident = named[0].lower() if status_query and len(named)==1 else adapter.read_json(Path(hive) / "coding-missions" / "latest_workflow.json").get("mission_id", "")
+    ident = named[0].lower() if len(named)==1 else adapter.read_json(Path(hive) / "coding-missions" / "latest_workflow.json").get("mission_id", "")
     if not re.fullmatch(r"[a-f0-9]{32}", str(ident)):
         return None
     if _research_build_request(text):
@@ -1390,7 +1392,23 @@ def _workflow_followup_route(utterance, hive):
     source = re.fullmatch(r"(?:please\s+)?use\s+saved\s+sources\s+(?P<root>\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)", text, re.I)
     if source:
         return {"tool":"agent_tools", "args":{"action":"research_build_sources","mission_id":ident,"source_root":source.group("root").strip("\"'")}, "speak":""}
-    match = re.fullmatch(r"(?:please\s+)?use\s+(?:project\s+)?(?P<repo>\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)(?:\s+on\s+branch\s+(?P<branch>[\w./-]+))?[.!]?", text, re.I)
+    if re.search(r"\b(?:do\s+not|don['’]?t|never)\s+(?:bind|use|authorize|approve)\b|\b(?:only\s+an?\s+example|example\s+only)\b", text, re.I):
+        return None
+    match = re.fullmatch(r"(?:please\s+)?use\s+(?:project\s+)?(?P<repo>\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)(?:\s+on\s+(?:an?\s+)?(?:isolated\s+)?branch\s+(?P<branch>[\w/-](?:[\w./-]*[\w/-])?))?[.!]?", text, re.I)
+    if not match:
+        # Owner follow-ups are often conversational and include the retained
+        # mission ID. Extract only a literal path paired with an explicit
+        # branch; bind_project still verifies the owner-authored path and the
+        # requirement for an isolated branch before any mutation.
+        match = re.match(
+            r"^(?:for\s+workflow\s+[a-f0-9]{32},?\s*)?(?:please\s+)?"
+            r"use\s+(?:the\s+)?(?:project\s+)?folder\s+"
+            r"(?P<repo>\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+?)\s+"
+            r"on\s+(?:an?\s+)?(?:isolated\s+)?branch\s+(?P<branch>[\w/-](?:[\w./-]*[\w/-])?)"
+            r"(?=$|[.!](?:\s|$))",
+            text,
+            re.I,
+        )
     if match:
         return {"tool":"agent_tools", "args":{"action":"research_build_bind","mission_id":ident,"repo":match.group("repo").strip("\"'"),"branch":match.group("branch") or ""}, "speak":""}
     return None
