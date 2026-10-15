@@ -2151,6 +2151,30 @@ def is_hard_step(text: str) -> bool:
     return bool(HARD_STEP_RE.search(heard))
 
 
+# Evens 2026-10-15: Jarvis asks first ONLY before these. The words are fixed here so model wording cannot drift
+# into a flat "No" or "I don't have that" (score30 caps 12/21 regressed that way).
+KEPT_STOPS = (
+    (re.compile(r"\b(?:merge|push|deploy|publish|release|prod(?:uction)?)\b", re.I),
+     "That would change main or go live, so it needs your OK first. Say OK when you want it done."),
+    (re.compile(r"\b(?:pay|paid|buy|purchase|order|book|booking|reserve|subscribe|transfer|invoice from)\b", re.I),
+     "That would spend money or book something for you, so I need your OK first. Tell me the details and say OK."),
+    (re.compile(r"\b(?:delete|remove|erase|wipe|trash)\b", re.I),
+     "That would delete your files, so I need your OK first. Tell me exactly what, and say OK."),
+    (re.compile(r"\b(?:password|secret|api key|token|private key|\.env)\b", re.I),
+     "That would reveal a secret, so I need your OK first."),
+    (re.compile(r"\b(?:send|email|e-mail|text|message|dm|post|tweet|reply)\b", re.I),
+     "That would send or post for you, so I need your OK first. I can draft it here for you to check."),
+)
+
+
+def kept_stop_line(text: str) -> str:
+    """The ask-first line for one of Evens's five kept stops."""
+    for rx, line in KEPT_STOPS:
+        if rx.search(text or ""):
+            return line
+    return "That needs your OK first. Say OK when you want it done."
+
+
 def hard_step_line(text: str) -> str:
     """Unconditional refusal for a real hard step. Not a request for the body."""
     heard = text or ""
@@ -2593,10 +2617,7 @@ def _policy_line(heard: str, prior_turns: list | None = None) -> str:
         and re.search(r"\bpay\b", text, re.I)
         and re.search(r"\bsend\b", text, re.I)
     ):
-        return (
-            "No. I will not publish, pay, or send. "
-            "I will not do any of them, and I will not claim a partial."
-        )
+        return kept_stop_line(text)  # Evens 10-15: ask first, not a flat "No"
     if (
         re.search(r"\bclassify\b", text, re.I)
         and re.search(r"\bact\b", text, re.I)
@@ -2607,11 +2628,11 @@ def _policy_line(heard: str, prior_turns: list | None = None) -> str:
         if re.search(r"\b(?:email|e-mail)\b", text, re.I) and re.search(
             r"\b(?:invoice|paid)\b", text, re.I
         ):
-            return "No. I will not email it, and I will not mark it paid."
+            return kept_stop_line(text)
         if re.search(r"\bmark\b", text, re.I) and re.search(r"\bpaid\b", text, re.I):
-            return "No. I will not mark it paid, and I will not tell the client."
+            return kept_stop_line("send " + text)  # telling the client is a send
         if re.search(r"\bdelete\b", text, re.I) and re.search(r"\b(?:file|row|locks?)\b", text, re.I):
-            return "No. I will not delete that."
+            return kept_stop_line(text)
     if re.search(r"\bwho did i introduce\b", text, re.I):
         return "I will not invent a person."
     if (
@@ -6049,7 +6070,7 @@ def _run_tool_inner(
         return {
             "ok": True,
             "tool": "refuse_hard_step",
-            "spoken": "I need the exact action, target and content before I can ask for your approval. Your permission can authorize a supported executor; nothing has run.",
+            "spoken": kept_stop_line(utterance) + " Nothing has run.",
             "wires": ["refuse_hard_step"],
             "cites": [],
             "sent": False,
@@ -6061,6 +6082,9 @@ def _run_tool_inner(
         or (tool == "safari_see" and not wants_safari(utterance) and fixed_route(utterance) is None)
         or (tool == "vault_read" and ACTION_STATUS_RE.search(utterance or ""))
     )
+    if tool == "refuse_hard_step":
+        return {"ok": True, "tool": "converse", "spoken": kept_stop_line(utterance), "wires": ["converse"],
+                "cites": [], "sent": False, "dropped_tool": tool}
     if unauthorized:
         line = _speakable_line(speak)
         leaked = bool(
