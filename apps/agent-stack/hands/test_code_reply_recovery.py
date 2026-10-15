@@ -32,5 +32,5 @@ def test_invalid_reply_exhaustion_preserves_no_generated_files_or_default_tests(
  got=hand.run(args,checkpoint=save) if durable else hand.run(args)
  assert not got['ok'] and calls['tests']==0 and calls['commits']==0
  assert not (root/'a.py').exists()
- assert len([r for r in got['steps'] if r['what'].endswith('model response')])==hand.MAX_ITERS
+ assert len([r for r in got["steps"] if r["what"].endswith("model response")])==hand.MAX_ITERS+hand.REPLY_RETRIES
  if durable:assert saved[-1]['phase']=='model' and saved[-1]['model_response_error']

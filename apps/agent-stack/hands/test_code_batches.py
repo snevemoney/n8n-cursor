@@ -1,4 +1,5 @@
 """Actual temporary writes/tests/commits; injected model replies, no live providers."""
+import itertools
 import json
 import pytest
 from hands.test_coding_resume import coding,Crash
@@ -23,7 +24,7 @@ def test_continuing_batch_retains_file_without_test_or_commit_and_final_batch_ve
 @pytest.mark.parametrize('durable',[True,False])
 def test_unfinished_batches_never_self_pass_or_fall_back_to_default_tests(coding,monkeypatch,durable):
  hand,root,args,calls,saved,save,repo=coding
- replies=iter([{'files':{'a.py':'def value(): return 7\n'},'continue':True}]+[{'files':{'b.py':'pass\n'}}]*3)
+ replies=itertools.chain([{'files':{'a.py':'def value(): return 7\n'},'continue':True}],itertools.repeat({'files':{'b.py':'pass\n'}}))
  monkeypatch.setattr(hand,'llm',lambda *a:(json.dumps(next(replies)),'configured-model'))
  result=hand.run(args,checkpoint=save) if durable else hand.run(args)
  assert not result['ok'] and calls['tests']==0 and calls['commits']==0
@@ -78,7 +79,7 @@ def test_done_false_exhaustion_never_commits_or_claims_success(coding,monkeypatc
 @pytest.mark.parametrize('durable',[True,False])
 def test_passed_partial_then_malformed_exhaustion_cannot_reuse_stale_success(coding,monkeypatch,durable):
  hand,root,args,calls,saved,save,repo=coding
- replies=iter([json.dumps({'files':{'test_check.py':'import unittest\nclass Check(unittest.TestCase):\n def test_value(self):self.assertTrue(True)\n'},'test_cmd':'python3 -m unittest discover -v','done':False})]+['{"files":{"broken.py":"incomplete']*3)
+ replies=itertools.chain([json.dumps({'files':{'test_check.py':'import unittest\nclass Check(unittest.TestCase):\n def test_value(self):self.assertTrue(True)\n'},'test_cmd':'python3 -m unittest discover -v','done':False})],itertools.repeat('{"files":{"broken.py":"incomplete'))
  monkeypatch.setattr(hand,'llm',lambda *a:(next(replies),'configured-model'))
  got=hand.run(args,checkpoint=save) if durable else hand.run(args)
  assert not got['ok'] and calls['tests']==1 and calls['commits']==0 and not (root/'broken.py').exists()
