@@ -34,3 +34,17 @@ class CapabilityLine(unittest.TestCase):
         self.assertIn('if tool in {"screen_see", "repo"} and _open_access():',self.SRC)
         for kept in ('merge','push','delete','send','post','purchase'):self.assertIn(kept,self.SRC[self.SRC.index('OPEN_CLI_HARD = re.compile('):][:300])
 if __name__=='__main__':unittest.main()
+
+
+
+class ExactPhraseRouting(unittest.TestCase):
+    def test_change_your_code_is_honest_yes(self):
+        import re
+        src=(STACK/'brain/pipeline.py').read_text()
+        rx=re.compile(re.search(r'SELF_CHANGE_RE = re.compile\(r"(.+?)", re.I\)',src).group(1),re.I)
+        self.assertTrue(rx.search("Could you change your code so you can give yourself access"))
+        self.assertFalse(rx.search("change the code in my repo"))
+        self.assertIn("I can change my own code",src)
+    def test_open_a_book_reaches_document_find(self):
+        WR=load('wr_obd','hands/workspace_read.py')
+        self.assertTrue(WR.DOCUMENT_FIND_RE.search("Can you open a book on my Mac about AI"))

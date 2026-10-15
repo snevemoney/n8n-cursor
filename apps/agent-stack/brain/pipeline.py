@@ -1294,6 +1294,8 @@ def model_free_route(spoken_in: str) -> dict | None:
             early = {"tool": "mcp_inventory", "args": {}, "speak": ""}
         elif wants_skills(spoken_in):
             early = {"tool": "skills", "args": {}, "speak": ""}
+        elif SELF_CHANGE_RE.search(spoken_in):  # Evens 14:22Z "Could you change your code so you can give yourself access" hit workspace_read
+            early = {"tool": "say", "args": {}, "speak": SELF_CHANGE_LINE}
         elif wants_workspace_read(spoken_in):
             early = {"tool": "workspace_read", "args": {}, "speak": ""}
         elif wants_web_search(spoken_in):
@@ -1529,6 +1531,10 @@ OPEN_CLI_HARD = re.compile(r"\b(?:merge|push|delete|rm|release|deploy|publish|se
                            # revealing secrets / uploading data still asks
                            r"^(?:security|printenv|env|op|pass|keychain)\b|\bauth\s+token\b|\bdump-keychain\b|"
                            r"\s(?:-F|-d|-T|--data\S*|--upload-file|--form)\b", re.I)
+SELF_CHANGE_RE = re.compile(r"\b(?:change|fix|edit|improve|update|rewrite|modify|upgrade)\s+(?:your\s+(?:own\s+)?(?:code|self)|yourself)\b", re.I)
+SELF_CHANGE_LINE = ("Yes. I can change my own code: my coding worker edits Jarvis on its own branch, runs the tests, and a safe restart "
+                    "loads it. My access is already open by default, so nothing needs granting. Tell me what to change and I'll start; "
+                    "nothing merges to main without you.")
 CODE_DANGER_RE = re.compile(
     r"\brm\s+-|\brmtree\b|os\.(?:remove|unlink|rmdir)|\.unlink\(|\bshutil\.move\b|\bsmtplib\b|"
     r"(?:requests|httpx|session|client)\.(?:post|put|patch|delete)\b|method\s*=\s*['\"](?:POST|PUT|PATCH|DELETE)['\"]|"
