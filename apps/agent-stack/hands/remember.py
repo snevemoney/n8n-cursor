@@ -12,6 +12,14 @@ INTENT_RE = re.compile(
     r"^\s*what\s+do\s+you\s+remember\b", re.I)
 
 
+def _secret_scan():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("jarvis_secret_scan", Path(__file__).with_name("secret_scan.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def default_path() -> Path:
     return Path.home() / ".grok-private" / "jarvis-memory.json"
 
@@ -73,6 +81,10 @@ def run(args: dict, *, utterance: str | None = None) -> dict:
             items = []
         if not isinstance(items, list) or any(not isinstance(item, str) for item in items):
             raise ValueError("invalid store")
+        if op == "remember" and _secret_scan().looks_secret(text):
+            result = {"op": op, "ok": False, "count": 0, "secret_refused": True, "spoken": _secret_scan().REFUSAL}
+            result["log"] = {key: result[key] for key in ("op", "ok", "count")}
+            return result
         if op == "remember":
             items.append(text)
             _write(path, items)

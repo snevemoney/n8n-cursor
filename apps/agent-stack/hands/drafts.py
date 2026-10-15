@@ -118,6 +118,11 @@ def run(utterance: str, *, chat=None) -> dict:
     text = (text or "").strip()
     if not text:
         return {"ok": False, "spoken": "The writing model gave no draft this turn, so nothing was saved and nothing was sent."}
+    scan = _mod("secret_scan")
+    if scan.looks_secret(text) or scan.looks_secret(utterance):
+        _mod("permissions").log_action("draft", f"{ch}:secret-refused", "deny", chars=0)
+        return {"ok": False, "sent": False, "secret_refused": True,
+                "spoken": scan.REFUSAL + " Nothing was saved and nothing was sent."}
     if dry:
         _mod("permissions").log_action("draft", f"{ch}:dry-run", "allow", chars=len(text))
         short = " ".join(text.split())[:400]
