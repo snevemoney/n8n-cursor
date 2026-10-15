@@ -1487,7 +1487,9 @@ def _open_access() -> bool:
 # Open access still confirms code that deletes, sends, pushes or touches the network for writes.
 CODE_DANGER_RE = re.compile(
     r"\brm\s+-|\brmtree\b|os\.(?:remove|unlink|rmdir)|\.unlink\(|\bshutil\.move\b|\bsmtplib\b|"
-    r"requests\.(?:post|put|patch|delete)|\bcurl\b[^\n]*\s-X\s*(?:POST|PUT|DELETE|PATCH)|\bgit\s+push\b|"
+    r"(?:requests|httpx|session|client)\.(?:post|put|patch|delete)\b|method\s*=\s*['\"](?:POST|PUT|PATCH|DELETE)['\"]|"
+    r"\b(?:npm|pnpm|yarn|twine|cargo)(?:\s+|['\"]\s*,\s*['\"])publish\b|"
+    r"\bgh(?:\s+|['\"]\s*,\s*['\"])(?:pr(?:\s+|['\"]\s*,\s*['\"])merge|release(?:\s+|['\"]\s*,\s*['\"])create|repo(?:\s+|['\"]\s*,\s*['\"])delete)\b|\bcurl\b[^\n]*\s-X\s*(?:POST|PUT|DELETE|PATCH)|\bgit\s+push\b|"
     r"\bdrop\s+(?:table|database)\b|\btruncate\s+table\b|\bsudo\b|\bmkfs\b|\bdd\s+if=", re.I)
 OPEN_ON_LINE = ("Open access is on until you say \"lock it down\": any folder on your Mac, any public website, "
                 "your screen and Safari, edits in your home folder, read-only code runs and site logins with details you give me. "

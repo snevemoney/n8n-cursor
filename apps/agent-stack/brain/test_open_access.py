@@ -158,6 +158,11 @@ class Pipeline(OpenAccessBase):
         self.assertIsNone(P._needs_confirm("code_run", {"code": "print(sum(range(10)))"}, "run it"))
         self.assertIsNotNone(P._needs_confirm("code_run", {"code": "import shutil; shutil.rmtree('/tmp/x')"}, "run it"))
         self.assertIsNotNone(P._needs_confirm("code_run", {"code": "import requests; requests.post('https://x')"}, "run it"))
+        for code in ("import httpx; httpx.post('https://x', json={})",
+                     "urllib.request.urlopen(urllib.request.Request(u, data=b, method='POST'))",
+                     "subprocess.run(['npm', 'publish'])", "os.system('npm publish')", "os.system('gh pr merge 1')"):
+            self.assertIsNotNone(P._needs_confirm("code_run", {"code": code}, "run it"), code)
+        self.assertIsNone(P._needs_confirm("code_run", {"code": "import httpx; print(httpx.get('https://x').status_code)"}, "run it"))
 
     def test_code_run_still_confirms_when_closed(self):
         self.assertIsNotNone(P._needs_confirm("code_run", {"code": "print(1)"}, "run it"))
