@@ -5,6 +5,30 @@ from unittest.mock import patch
 from hands import test_workflow_execution as F
 E,W,R=F.E,F.W,F.R
 class Recovery(unittest.TestCase):
+ def test_reviewed_secret_overlay_block_before_copy_archives_contract_and_repin_succeeds(self):
+  import subprocess
+  with tempfile.TemporaryDirectory() as tmp:
+   f=F.ExecutionTests();h,root,repo,runtime,scratch,hand=f.fixture(tmp)
+   relative='apps/agent-stack/test_public_tokens.py';path=repo/relative;path.write_text('CODE_MODEL = "preserved"\n')
+   for args in [('add','--',relative),('commit','-qm','public recovery fixture')]:subprocess.run(['/usr/bin/git','-c','core.hooksPath=/dev/null','-c','core.fsmonitor=false','-C',str(repo),*args],check=True,capture_output=True)
+   perm=hand.PERM();old=perm.is_secret_path;perm.is_secret_path=lambda p:old(p) or Path(p).name=='test_public_tokens.py';hand.PERM=lambda:perm;a,b=f.context(hand)
+   with a,b:
+    (root/'source_revision_review.json').unlink();revision=R._git(repo)['head'];files,_=W.revision_source(repo,revision)
+    E.approve_source_revision(h,F.ID,revision,{rel:row for rel,(_,row) in files.items()},authority=E.source_review_authority(),evidence={'offline':'pre-exception pin'})
+    runtime_path=runtime/relative;runtime_path.parent.mkdir(parents=True,exist_ok=True);runtime_path.write_bytes(path.read_bytes())
+    baseline=E.capture_runtime_baseline(runtime,R._git(runtime))
+    receipt=E.make_receipt(h,F.ID,runtime_baseline=baseline)
+    with patch.object(W,'prepare',return_value={'ok':False,'reason':'runtime_secret_overlay_requires_review'}):
+     blocked=E.prepare_execution(h,F.ID,source_receipt=receipt,runtime_baseline=baseline,scratch_root=scratch,active_fn=lambda:True)
+    self.assertFalse(blocked['ok']);self.assertFalse((scratch/('workflow-'+F.ID)).exists())
+    state=json.loads((root/'state.json').read_text());state.update(status='PREPARATION_BLOCKED',preparation=blocked);(root/'state.json').write_text(json.dumps(state))
+    raw=path.read_bytes();E.approve_source_exception(h,F.ID,relative,hashlib.sha256(raw).hexdigest(),authority=E.source_review_authority(),evidence={'offline_independent_review':True})
+    blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest();E._source_exceptions(h,F.ID,fetch_public=True,fetch_fn=lambda *a,**k:json.dumps({'sha':blob,'encoding':'base64','content':base64.b64encode(raw).decode()}).encode())
+    recovered=E.recover_preparation(h,F.ID,active_fn=lambda:True);self.assertTrue(recovered['recovered']);self.assertIsNone(recovered['preserved_copy'])
+    self.assertFalse((root/'execution_contract.json').exists());self.assertFalse((root/'source_revision_review.json').exists())
+    E.host_review_source_revision(h,F.ID);fresh=E.make_receipt(h,F.ID,runtime_baseline=baseline)
+    ready=E.prepare_execution(h,F.ID,source_receipt=fresh,runtime_baseline=baseline,scratch_root=scratch,active_fn=lambda:True)
+    self.assertTrue(ready['ok'],ready);self.assertTrue((Path(ready['working_copy'])/relative).exists())
  def test_exact_public_exception_keeps_sensitive_test_and_rejects_forged_or_changed_source(self):
   with tempfile.TemporaryDirectory() as tmp:
    f=F.ExecutionTests();h,root,repo,runtime,scratch,hand=f.fixture(tmp)

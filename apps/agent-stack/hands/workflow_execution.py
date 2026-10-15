@@ -403,10 +403,35 @@ def recover_preparation(hive,mission_id,*,active_fn):
         if history.is_symlink():raise ValueError('unsafe_preparation_history')
         pending=[p for p in history.iterdir() if p.is_dir() and (p/'plan.json').exists() and not (p/'completed.json').exists()]
         if len(pending)>1:raise ValueError('ambiguous_preparation_recovery')
+    def finish_no_copy(archive,plan):
+        contract=plan['contract'];canonical=root/'execution_contract.json';review=root/'source_revision_review.json'
+        unsigned=dict(contract);signature=unsigned.pop('digest',None)
+        if (plan.get('mode')!='blocked_before_copy' or plan.get('task_provenance')!=task
+            or signature!=archive.name or _digest(unsigned)!=signature or plan.get('contract_sha256')!=_sha(json.dumps(contract,sort_keys=True,separators=(',',':')).encode())
+            or any(contract.get(k)!=v for k,v in task.items())):
+            raise ValueError('preparation_no_copy_plan_changed')
+        active();archived_contract=archive/'execution_contract.json';archived_review=archive/'source_revision_review.json'
+        if canonical.exists():
+            raw,_=W._regular_bytes(canonical,2_000_000)
+            if _sha(raw)!=plan['contract_file_sha256']:raise ValueError('preparation_contract_changed')
+            _rename_exclusive(canonical,archived_contract)
+        elif _sha(W._regular_bytes(archived_contract,2_000_000)[0])!=plan['contract_file_sha256']:
+            raise ValueError('archived_contract_changed')
+        active()
+        if review.exists():
+            raw,_=W._regular_bytes(review,2_000_000)
+            if _sha(raw)!=plan['source_review_sha256']:raise ValueError('source_review_changed')
+            _rename_exclusive(review,archived_review)
+        elif _sha(W._regular_bytes(archived_review,2_000_000)[0])!=plan['source_review_sha256']:
+            raise ValueError('archived_source_review_changed')
+        active();_new_json(archive/'completed.json',{'task_provenance':task,'mode':'blocked_before_copy',
+            'original_contract_digest':contract['digest'],'approved_exception_paths':plan['approved_exception_paths']})
+        return {'recovered':True,'archive':str(archive),'preserved_copy':None,'reason':'blocked_before_copy'}
     if pending:
         archive=pending[0];plan=json.loads(W._regular_bytes(archive/'plan.json',2_000_000)[0]);contract=plan['contract']
         unsigned_plan=dict(plan);signature=unsigned_plan.pop('digest',None)
         if _digest(unsigned_plan)!=signature:raise ValueError('preparation_archive_plan_changed')
+        if plan.get('mode')=='blocked_before_copy':return finish_no_copy(archive,plan)
     elif canonical.exists():
         raw,_=W._regular_bytes(canonical,2_000_000);contract=json.loads(raw);unsigned=dict(contract);signature=unsigned.pop('digest',None)
         if _digest(unsigned)!=signature or any(contract.get(k)!=v for k,v in task.items()):raise ValueError('preparation_contract_changed')
@@ -415,6 +440,21 @@ def recover_preparation(hive,mission_id,*,active_fn):
         if original.name!='workflow-'+mission_id or original.parent not in hand.PERM().scratch_roots():raise ValueError('unowned_preparation_copy')
         archive=history/signature
         if archive.exists():raise ValueError('preparation_archive_already_completed')
+        if not original.exists():
+            state=json.loads(W._regular_bytes(root/'state.json',2_000_000)[0]);blocked=state.get('preparation') or {}
+            exceptions=_source_exceptions(hive,mission_id)
+            runtime=Path(contract['runtime_baseline']['source_repo'])
+            sensitive={rel:row for rel,row in contract['runtime_baseline']['files'].items() if hand.PERM().is_secret_path(runtime/rel)}
+            if (state.get('status')!='PREPARATION_BLOCKED' or blocked.get('reason')!='runtime_secret_overlay_requires_review'
+                or not sensitive or any(exceptions.get(rel,{}).get('file')!=row for rel,row in sensitive.items())):
+                raise ValueError('unproved_preparation_without_copy')
+            review=root/'source_revision_review.json';review_raw,_=W._regular_bytes(review,2_000_000)
+            active();history.mkdir(exist_ok=True,mode=0o700);archive.mkdir(mode=0o700)
+            plan={'version':1,'mode':'blocked_before_copy','mission_id':mission_id,'task_provenance':task,
+                  'contract':contract,'contract_sha256':_digest(contract),'contract_file_sha256':_sha(raw),
+                  'source_review_sha256':_sha(review_raw),'approved_exception_paths':sorted(sensitive)}
+            plan['digest']=_digest(plan);_new_json(archive/'plan.json',plan)
+            return finish_no_copy(archive,plan)
         source=contract['source_receipt'];expected={**source['app_manifest'],**source.get('dependencies',{}),**contract['runtime_baseline']['files']}
         expected={rel:{'sha256':row['sha256'],'mode':row['mode']} for rel,row in expected.items()}
         snapshot=reviewed_snapshot(original)
