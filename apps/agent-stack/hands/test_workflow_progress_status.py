@@ -8,7 +8,7 @@ class ProgressStatusTests(unittest.TestCase):
    h=M.WorkflowMissionHandle(Path(tmp)/'hive');ack=h.start_workflow('Research saved YouTube technical idea, build tests, ArtCraft and Obsidian.')
    root=M.mission_path(h.hive,ack['mission_id']);r=M.read_json(root/'state.json');r.update(status='PREPARATION_BLOCKED',spoken='Everything ready MATCH',execution_error='OLD_ERROR',preparation={'reason':'working_copy_selector_review_required'});M.write_json(root/'state.json',r)
    before=(root/'state.json').read_bytes();got=h.progress_status(ack['mission_id'])
-   self.assertIn('coding phase has not started',got['spoken']);self.assertIn('No ArtCraft',got['spoken']);self.assertIn('No Obsidian',got['spoken']);self.assertIn('working_copy_selector_review_required',got['spoken']);self.assertNotIn('OLD_ERROR',got['spoken']);self.assertNotIn('MATCH',got['spoken']);self.assertFalse(got['task_verified']);self.assertEqual(before,(root/'state.json').read_bytes())
+   self.assertIn('blocked',got['spoken']);self.assertIn('demonstration and Obsidian note are not ready',got['spoken']);self.assertNotIn('working_copy_selector_review_required',got['spoken']);self.assertEqual(got['status'],'PREPARATION_BLOCKED');self.assertNotIn('OLD_ERROR',got['spoken']);self.assertNotIn('MATCH',got['spoken']);self.assertFalse(got['task_verified']);self.assertEqual(before,(root/'state.json').read_bytes())
 
  def test_actual_2276_wording_routes_to_named_receipt_before_conversation(self):
   text='What is the actual status of retained assignment '+'a'*32+'? Report completed actions, current blocker, and whether any coding, ArtCraft demonstration, or Obsidian note actually exists. Do not claim completion.'
@@ -37,4 +37,4 @@ class ProgressStatusTests(unittest.TestCase):
     M.write_json(root/'result.json',{'status':terminal,'builder_verified':terminal=='COMPLETED'})
     M.write_json(parent/'coding_child.json',{'mission_id':child})
     got=h.progress_status(ack['mission_id'])
-    self.assertIn('Coding phase: '+terminal,got['spoken']);self.assertNotIn('Coding phase: RUNNING',got['spoken']);self.assertFalse(got['task_verified'])
+    self.assertEqual(got['status_evidence']['coding_status'],terminal);self.assertNotIn('RUNNING',got['spoken']);self.assertNotIn(terminal,got['spoken']);self.assertFalse(got['task_verified'])

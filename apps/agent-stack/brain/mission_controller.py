@@ -488,7 +488,7 @@ class MissionController:
             state.update(status='CANCELLED' if stopped else ('COMPLETED' if got.get('ok') else ('BLOCKED' if got.get('blocked') else 'FAILED')),
                          verified=False, builder_verified=bool(got.get('verified')) and not stopped,
                          coding_result=got, coding_evidence={'repo':repo, 'branch':branch, 'builder_test_steps':tests, 'commit_receipt':receipt},
-                         spoken=('The coding task was stopped. Its outcome is not verified.' if stopped else (completion if got.get('ok') else f'The coding task in {repo} ended without verified results.')),
+                         spoken=('The coding task was stopped. Its outcome is not verified.' if stopped else (completion if got.get('ok') else 'The build stopped before it finished. Your partial work is saved.')),
                          terminal_reason='user_cancel' if stopped else ('independent_acceptance_required' if got.get('ok') else ('coding_resume_blocked' if got.get('blocked') else 'coding_execution_failed')))
         except Exception as exc:
             state.update(status='FAILED', verified=False, builder_verified=False,

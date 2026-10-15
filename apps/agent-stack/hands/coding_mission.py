@@ -594,15 +594,26 @@ class WorkflowMissionHandle:
         try:child_state=CodingMissionHandle(self.hive).status(child) if child_bound else {}
         except ValueError:child_state={'status':'UNAVAILABLE'}
         delivery=read_json(root/'delivery.json');completed=delivery.get('completed') or {}
-        pieces=['Workflow phase: '+status+'.']
-        if read_json(root/'source_exception_public.json').get('verification_method')=='independent_public_git_blob':pieces.append('The public source-file check is recorded.')
-        pieces.append('Coding phase: '+str(child_state.get('status') or 'UNKNOWN')+'.' if child_bound else 'The coding phase has not started.')
-        pieces.append('An ArtCraft artifact receipt is recorded; delivery acceptance is separate.' if any(k in completed for k in ('native','export','preview')) else 'No ArtCraft demonstration receipt is recorded.')
-        pieces.append('An Obsidian note readback receipt is recorded.' if completed.get('note',{}).get('readback_verified') is True else 'No Obsidian note readback receipt is recorded.')
-        reason=(result.get('preparation') or {}).get('reason') if status=='PREPARATION_BLOCKED' else result.get('execution_error') if status=='EXECUTION_BLOCKED' else None
-        if reason:pieces.append('Current blocker: '+str(reason)[:180]+'.')
-        if result.get('task_verified') is not True:pieces.append('The complete requested outcome is not verified.')
-        return {**result,'spoken':' '.join(pieces),'question':'','status_evidence':{'coding_child_bound':child_bound,'artcraft_receipt_present':any(k in completed for k in ('native','export','preview')),'note_readback_recorded':completed.get('note',{}).get('readback_verified') is True},'actions':[]}
+        child_phase=str(child_state.get('status') or '')
+        if result.get('task_verified') is True:
+            pieces=['The work is complete and independently checked.']
+        elif status=='CANCELLED':pieces=['The assignment is stopped. Your work is saved.']
+        elif child_phase in {'BLOCKED','FAILED','UNAVAILABLE','CANCELLED'} or status in {'PREPARATION_BLOCKED','EXECUTION_BLOCKED','CODING_RECOVERY_REQUIRED','DELIVERY_RECOVERY_REQUIRED'}:
+            pieces=['I’m blocked. Your assignment and partial work are saved.']
+        elif child_state.get('active') is True:pieces=['The coding worker is working. The result has not been checked yet.']
+        elif child_phase=='QUEUED':pieces=['The coding job is waiting to start.']
+        elif child_phase=='COMPLETED':pieces=['The coding worker has finished. Its result still needs review.']
+        elif status in {'WAITING_INDEPENDENT_REVIEW','WAITING_FINAL_REVIEW'}:pieces=['The work is waiting for an independent check.']
+        else:pieces=['The assignment is saved. The coding work has not started.']
+        if result.get('task_verified') is not True:
+            demo=any(k in completed for k in ('native','export','preview'))
+            note=completed.get('note',{}).get('readback_verified') is True
+            if not demo and not note:pieces.append('The demonstration and Obsidian note are not ready. The full assignment is unfinished.')
+            else:
+                if demo:pieces.append('Demonstration files are saved; final review is still needed.')
+                if note:pieces.append('The Obsidian note is saved and has been read back.')
+                pieces.append('The full assignment is unfinished.')
+        return {**result,'spoken':' '.join(pieces),'question':'','status_evidence':{'coding_status':child_phase or 'NOT_STARTED','coding_active':child_state.get('active') is True,'coding_child_bound':child_bound,'artcraft_receipt_present':any(k in completed for k in ('native','export','preview')),'note_readback_recorded':completed.get('note',{}).get('readback_verified') is True},'actions':[]}
 
     def bind_project(self, mission_id, repo, branch, answer, verified_contract=None):
         import fcntl

@@ -134,7 +134,7 @@
       text-shadow: none;
     }
     html.widget body, html.widget button, html.widget input, html.widget #spoken {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
       letter-spacing: 0 !important;
       text-shadow: none !important;
       -webkit-text-stroke: 0 !important;
@@ -176,6 +176,10 @@
       -webkit-user-select: text;
       user-select: text;
     }
+    html.widget .chip { text-align: left; font-size: 13px; line-height: 1.45; color: #f4f6f8; }
+    html.widget .chip .line, html.widget #browserResults p { color: #f4f6f8; font: inherit; overflow-wrap: anywhere; }
+    #resultHistory { margin-top: 8px; font-size: 12px; text-align: left; }
+    #resultHistory summary { cursor: pointer; }
     html.widget body.speak .chip,
     html.widget body.think .chip,
     html.widget body.listen .chip {
@@ -413,7 +417,7 @@
     <div class="mark" id="mark">J.A.R.V.I.S.</div>
     <div class="line" id="heard" style="opacity:.6;font-size:.8em"></div>
     <div class="line" id="spoken"></div>
-      <div id="browserResults" aria-live="polite"></div>
+      <details id="resultHistory"><summary>Earlier updates</summary><div id="browserResults"></div></details>
   </div>
   <div class="controls" id="controls">
     <button type="button" id="mic">Mic</button>
@@ -2003,28 +2007,32 @@
         const line = productLine(bus.spoken);
         const now = ($("spoken").textContent || "").trim();
         const newerReply = Number(bus.turn_gen || 0) > Number(state.renderedBusGen || 0);
-        if (line && !bus.mission_delivery_pending && !(bus.tool === "browser_mission" && bus.browser_mission_id && Array.from($("browserResults").children).some(el => el.dataset.missionId === bus.browser_mission_id)) && (newerReply || !now || isStatusLine(now) || isFallbackLine(now) || /^listening\.?$/i.test(now))) {
+        if (line && !bus.mission_delivery_pending && (newerReply || !now || isStatusLine(now) || isFallbackLine(now) || /^listening\.?$/i.test(now))) {
           $("spoken").textContent = line;
           state.renderedBusGen = Number(bus.turn_gen || 0);
           if (newerReply) showCurrentResponse();
           if (bus.utterance && $("heard") && $("heard") !== $("spoken")) $("heard").textContent = "› " + String(bus.utterance).slice(0, 160);
           if (bus.watch && bus.watch.armed && bus.watch.narration && $("heard") && $("heard") !== $("spoken")) $("heard").textContent = "▶ " + String(bus.watch.narration).slice(0, 160);
         }
-        if (bus.tool === "browser_mission" && bus.browser_mission_id &&
-            Array.from($("browserResults").children).some(el => el.dataset.missionId === bus.browser_mission_id) &&
-            $("spoken").textContent === line) $("spoken").textContent = "";
         const pending = bus.mission_delivery_pending;
         if (pending && pending.spoken) {
           const results = $("browserResults");
-          if (results && !Array.from(results.children).some(el => el.dataset.missionId === pending.mission_id)) {
-            const answer = document.createElement("p");
-            answer.dataset.missionId = pending.mission_id;
-            answer.textContent = pending.spoken;
-            results.appendChild(answer);
+          const seen = state.displayedMissionDeliveries || (state.displayedMissionDeliveries = Object.create(null));
+          if (results && !seen[pending.mission_id] && !Array.from(results.children).some(el => el.dataset.missionId === pending.mission_id)) {
+            seen[pending.mission_id] = true;
+            if (!Array.from(results.children).some(el => el.textContent === pending.spoken)) {
+              const answer = document.createElement("p");
+              answer.dataset.missionId = pending.mission_id;
+              answer.textContent = pending.spoken;
+              results.appendChild(answer);
+            }
+            const freshDelivery = Number(pending.gen || 0) >= Number(state.renderedBusGen || 0);
             state.renderedBusGen = Math.max(Number(state.renderedBusGen || 0), Number(pending.gen || 0));
-            showCurrentResponse(answer);
-            if (bus.browser_mission_id === pending.mission_id) $("spoken").textContent = "";
-            if (state.armed) { enqueueSpeak(pending.spoken); return; }
+            if (freshDelivery) {
+              $("spoken").textContent = productLine(pending.spoken);
+              showCurrentResponse();
+            }
+            if (state.armed && freshDelivery) { enqueueSpeak(pending.spoken); return; }
           }
           api("/api/browser-mission/ack", {mission_id: pending.mission_id, gen: pending.gen}).catch(() => {});
         }
