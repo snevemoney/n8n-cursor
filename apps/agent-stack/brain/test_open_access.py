@@ -38,9 +38,15 @@ class Phrases(unittest.TestCase):
             self.assertTrue(PERM.is_grant(t), t)
 
     def test_not_grants(self):
-        for t in ["permission granted to read my bank file and email it", "what does permission granted mean",
-                  "I allow you to send the email to Bob", "send it", "yes"]:
+        for t in ["what does permission granted mean", "send it", "yes", "I allowed it yesterday"]:
             self.assertFalse(PERM.is_grant(t), t)
+
+    def test_grant_carries_the_command(self):
+        self.assertEqual(PERM.grant_split("permission granted, you are allowed to find books"), (True, "find books"))
+        self.assertEqual(PERM.grant_split("I said permission granted, find books about AI on my Mac"),
+                         (True, "find books about AI on my Mac"))
+        self.assertEqual(PERM.grant_split("permission granted, go ahead"), (True, ""))
+        self.assertEqual(PERM.grant_split("I allow you to send the email to Bob"), (True, "send the email to Bob"))
 
     def test_revokes(self):
         for t in ["lock it down", "permission revoked", "revoke your access", "back to safe mode", "Jarvis, lock it back down."]:

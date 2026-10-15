@@ -78,7 +78,38 @@ REVOKE_RE = re.compile(
 
 
 def is_grant(text: str) -> bool:
-    return bool(GRANT_RE.fullmatch(text or ""))
+    return bool(GRANT_RE.fullmatch(text or "") or grant_split(text)[0])
+
+
+# A grant that leads the line, then whatever he wants done: "permission granted, you are allowed to find books"
+# -> grant + "find books". Several grant phrases in a row are all consumed.
+_GRANT_HEAD = re.compile(
+    r"^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:(?:ok(?:ay)?|yes|yeah|i\s+said)[,.!]?\s*)?(?:"
+    r"(?:full\s+)?(?:permission|permissions|access)\s+(?:is\s+)?granted|"
+    r"i\s+(?:grant|give)\s+you\s+(?:full\s+)?(?:permission|access)|"
+    r"(?:you\s+have|you've\s+got)\s+(?:my\s+)?(?:full\s+)?(?:permission|access)|"
+    r"i\s+(?:allow|authori[sz]e|permit)\s+(?:you|it|this|that)|"
+    r"you(?:\s+are|'re)\s+(?:now\s+)?(?:allowed|authori[sz]ed|cleared|permitted)"
+    r")(?:\s+to\b)?[\s,.:;!-]*", re.I)
+_FILLER = re.compile(r"^(?:(?:so|now|please|sir|jarvis|go\s+ahead|and|then)[\s,.:;!-]*)+", re.I)
+
+
+def grant_split(text: str) -> tuple[bool, str]:
+    """(True, remaining command) when the line opens with a grant; (False, "") otherwise."""
+    line = str(text or "")
+    found = False
+    while True:
+        m = _GRANT_HEAD.match(line)
+        if not m or not m.group(0).strip():
+            break
+        found, line = True, line[m.end():]
+        line = _FILLER.sub("", line)
+    if not found:
+        return False, ""
+    rest = line.strip(" .!?,;:-")
+    if re.fullmatch(r"(?:do\s+(?:it|this|that)|proceed|continue|go\s+ahead|now)?", rest, re.I):
+        rest = ""
+    return True, rest
 
 
 def is_revoke(text: str) -> bool:

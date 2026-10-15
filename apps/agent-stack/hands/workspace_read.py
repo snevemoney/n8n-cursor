@@ -275,6 +275,29 @@ DOCUMENT_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?
 FILE_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|search for|look for)\s+"
                           r"(?:my\s+|the\s+|a\s+|any\s+)?(?:files?|documents?|docs?|notes?|folders?)\s+(?:about|named|called|with|containing|matching|for)\s+"
                           r"[\"']?(.{1,80}?)[\"']?(?:\s+(?:in|from|on)\s+(?:my\s+)?(?:downloads|desktop|documents|mac|computer))?[.?!]*$", re.I)
+# "books about AI", "pdfs on machine learning", "books related to marketing"
+TOPIC_RE = re.compile(r"\b(?:about|on|related\s+to|regarding|covering)\s+(?!my\s+(?:mac|computer|pc)\b)(.{1,60}?)"
+                      r"(?=\s+(?:on|in|from|across)\s+(?:my|this|the)\s+(?:mac|computer|pc|downloads|desktop|documents|drive)\b|[.?!]*$)", re.I)
+TOPIC_SYNONYMS = {
+    "ai": ["ai", "artificial", "intelligence", "machine", "learning", "ml", "llm", "llms", "gpt", "neural", "deep", "agents", "agentic"],
+    "artificial intelligence": ["ai", "artificial", "intelligence", "machine", "learning", "llm", "neural"],
+    "machine learning": ["machine", "learning", "ml", "ai", "neural", "deep"],
+}
+
+
+def topic_words(topic: str) -> list[str]:
+    t = re.sub(r"\s+", " ", str(topic or "").lower()).strip()
+    if t in TOPIC_SYNONYMS:
+        return TOPIC_SYNONYMS[t]
+    return [w for w in re.findall(r"[a-z0-9]+", t) if w not in {"the", "a", "an", "of", "and", "or", "books", "book", "pdfs", "pdf"}]
+
+
+def _name_tokens(name: str) -> set[str]:
+    stem = Path(name).stem
+    stem = re.sub(r"([a-z])([A-Z])", r"\1 \2", stem)  # MachineLearning -> Machine Learning
+    return set(re.findall(r"[a-z0-9]+", stem.lower()))
+
+
 FIND_MAX_ENTRIES = 100000
 FIND_MAX_RESULTS = 2000
 FIND_SECONDS = 5.0
@@ -282,6 +305,7 @@ FIND_SECONDS = 5.0
 
 def _find_documents(args, rs):
     query = str(args.get("name") or "").strip().lower()
+    topic = topic_words(args.get("topic") or "")
     anytype = open_access() and (bool(query) or args.get("extensions") == [])
     suffixes = args.get("extensions") or [".epub", ".pdf"]
     if anytype:
@@ -323,6 +347,8 @@ def _find_documents(args, rs):
                     continue
                 if query and not all(w in name.lower() for w in query.split()):
                     continue
+                if topic and not (_name_tokens(name) & set(topic)):
+                    continue
                 path = Path(directory) / name
                 if path.is_symlink():
                     continue
@@ -341,6 +367,8 @@ def _find_documents(args, rs):
     found.sort(key=str.casefold)
     scope = args.get('scope_label') or ("the requested allowed folder" if raw else "my currently allowed folders")
     kind = ("files matching " + repr(query)) if query else ("files" if anytype else "EPUB/PDF documents")
+    if topic:
+        kind += f" about {args.get('topic')} (matched by title)"
     spoken = f"Found {len(found)} {kind} in {scope}. "
     if found:
         spoken += "Candidates: " + "; ".join(found[:12]) + ". "
@@ -482,8 +510,10 @@ def args_from_utterance(u: str) -> dict:
     if DOCUMENT_FIND_RE.search(s):
         suffixes = ([".epub"] if re.search(r"\bepubs?\b", s, re.I) else []) + ([".pdf"] if re.search(r"\bpdfs?\b", s, re.I) else [])
         folder = _FOLDER.search(s)
+        topic = TOPIC_RE.search(s)
         return {"op": "find", "extensions": suffixes or [".epub", ".pdf"],
-                "path": str(Path.home() / folder.group(1).capitalize()) if folder else ""}
+                "path": str(Path.home() / folder.group(1).capitalize()) if folder else "",
+                **({"topic": topic.group(1).strip(" .?!\"'")} if topic else {})}
     if _words().STATUS_ASK.search(s) and not _FILE.search(s):
         return {"op": "status", "path": ""}
     sec = _SECRET_ASK.search(s)

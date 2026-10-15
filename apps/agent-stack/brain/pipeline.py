@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("repo", "vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -1218,6 +1218,9 @@ def model_free_route(spoken_in: str) -> dict | None:
         return {"tool": "handback", "args": {}, "speak": ""}
     if len(split_steps(spoken_in)) >= 2 and not is_hard_step(spoken_in):
         return {"tool": "multistep", "args": {}, "speak": ""}
+    if (not is_hard_step(spoken_in) and not re.match(r"\s*(?:gh|git)\s", spoken_in or "")
+            and _repo_hand().wants(spoken_in)):
+        return {"tool": "repo", "args": {}, "speak": ""}  # look at / search / install public GitHub repos
     early = fixed_route(spoken_in)
     if early is not None and early.get("tool") == "safari_see" and (early.get("args") or {}).get("act") == "grab":
         # Rank 16: a screen ask is the whole display (screen_see), not the Safari tab.
@@ -1496,6 +1499,16 @@ def _code_run_hand():
     name = "agent_stack_code_run"
     if name not in sys.modules:
         spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "code_run.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _repo_hand():
+    name = "agent_stack_repo"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "repo.py")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
@@ -3510,9 +3523,9 @@ def assemble_pack(
         lines.append("")
     lines.append(
         "Put the answer in speak after the hand runs. "
-        "Hands: vault_read, workspace_read, skills, web_search, safari_see, cursor_ask, craft, status, refuse_hard_step. mac_act only while Watch is armed. "
+        "Hands: vault_read, workspace_read, skills, web_search, repo (look at, search or install a public GitHub repo or tool), safari_see, cursor_ask, craft, status, refuse_hard_step. mac_act only while Watch is armed. "
         "craft drives a Craft app: args {app, task}. "
-        'JSON: {"tool":"converse"|"vault_read"|"workspace_read"|"memory"|"skills"|"mcp_inventory"|"code_run"|"web_search"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
+        'JSON: {"tool":"converse"|"vault_read"|"workspace_read"|"memory"|"skills"|"mcp_inventory"|"code_run"|"web_search"|"repo"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
     )
     return "\n".join(lines).rstrip() + "\n"
 
@@ -5565,6 +5578,13 @@ HAND_LOOP_MAX_HANDS = 4
 # Screen-overlay hands finish the turn themselves: a second model pass replaced "The red arrow is on it" with its own
 # line, and a repeat pointer pick re-captured the screen (hide_overlays) or ended the turn as a failed duplicate.
 TERMINAL_HANDS = frozenset({"pointer", "pointer_click", "pointer_demo"})
+# A model-free (fixed) route already answered a single ask; only a compound ask ("read A and B and compare")
+# earns the follow-up model pass. Without this the loop re-talked over Obsidian reads, stack as-of, calendar,
+# Safari navigation, harness cards and store recalls (7bffe3301 regressions).
+LOOP_READ_HANDS = frozenset({"workspace_read", "web_search"})  # a folder listing or a search result is a step, not the answer
+COMPOUND_ASK_RE = re.compile(
+    r"\b(?:and(?:\s+then)?\s+(?:compare|summari[sz]e|explain|tell|answer|fix|write|check|find|open|read|run|use|make|show)|"
+    r"then\b|after\s+that|compare|summari[sz]e|what\s+does\s+it|based\s+on\s+(?:that|it|the))\b", re.I)
 HAND_LOOP_SECONDS = 45
 
 
@@ -5958,6 +5978,12 @@ def _run_tool_inner(
         _today = re.search(r"\b(?:we|today|my\s+day|the\s+day)\b", utterance or "", re.I)
         return {"ok": True, "tool": tool, "spoken": _rm.spoken_today() if _today else _rm.spoken_recent(), "wires": ["results"], "cites": [],
                 "sent": False, "task_verified": True, "outcome": TOOL_LOOP}
+    if tool == "repo":
+        got = _repo_hand().run(utterance)
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["repo"],
+                "cites": [c for c in (got.get("cites") or []) if c], "sent": False, "task_verified": bool(got.get("task_verified")),
+                "repo_meta": {k: got.get(k) for k in ("op", "repo", "path", "installed", "failed", "license")},
+                "outcome": got.get("outcome") or (TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN)}
     if tool == "cost_card":
         got = _cost_hand().run(utterance)
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["cost_card"],
@@ -7111,7 +7137,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief")
+DETERMINISTIC_HANDS = ("repo", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
@@ -7524,9 +7550,11 @@ def apply_pipeline_iter(
     prior_turns = load_turns(bus_now)
     # Owner grant (Evens 2026-10-15): only his own line flips open access; a grant redoes the request just blocked.
     _perm = _permissions_hand()
-    if _perm.is_grant(spoken_in) or _perm.is_revoke(spoken_in):
-        granted = _perm.is_grant(spoken_in)
-        redo = _blocked_request(prior_turns) if granted else ""
+    _granted, _rest = _perm.grant_split(spoken_in)
+    if _granted or _perm.is_revoke(spoken_in):
+        granted = bool(_granted)
+        # "permission granted, find books about AI" runs the rest now; a bare grant redoes the request just refused.
+        redo = (_rest or _blocked_request(prior_turns)) if granted else ""
         _perm.set_open_access(granted)
         if redo:
             spoken_in = redo
@@ -7674,6 +7702,9 @@ def apply_pipeline_iter(
     document_followup = _document_snapshot_followup(spoken_in)
     retained_context = (_document_context_hand().for_followup(hive, token, is_followup=True)
                         if document_followup else {})
+    if document_followup and retained_context.get("status") == "MISSING":
+        # Nothing was ever read: "compare pricing across these websites" is a new ask, not a follow-up on retained reads.
+        document_followup, retained_context = False, {}
     early = confirm_take(hive, spoken_in) or live_chat_route(spoken_in, had_pending) or _workflow_followup_route(spoken_in, hive)
     if early is None and not document_followup:
         early = model_free_route(spoken_in)
@@ -7711,8 +7742,10 @@ def apply_pipeline_iter(
             brain = "store"
         except RuntimeError:
             ran = None
+    fixed_pick = False
     if early is not None and pick is None and ran is None:
         pick = early
+        fixed_pick = True
         t_tool = time.monotonic()
         ran = yield from _run_tool_heartbeat(pick, spoken_in, hive=hive, token=token, brain=None, retrieve_roots=retrieve_roots,
                                              see_fn=see_fn, status_fn=status_fn, gen=token)
@@ -7882,6 +7915,7 @@ def apply_pipeline_iter(
         if routed:
             pick = routed.get("pick")
             brain = routed.get("brain")
+            fixed_pick = True
             if routed.get("ran") is not None:
                 ran = routed.get("ran")
 
@@ -8345,6 +8379,7 @@ def apply_pipeline_iter(
             ran = no_model_reply(spoken_in, hive=hive, see_fn=see_fn, retrieve_roots=retrieve_roots, turns=prior_turns)
     pick_tool = str((pick or {}).get("tool") or "")
     if (isinstance(ran,dict) and pick_tool in HANDS and pick_tool != "browser_mission" and pick_tool not in TERMINAL_HANDS
+        and not (fixed_pick and pick_tool not in LOOP_READ_HANDS and not COMPOUND_ASK_RE.search(spoken_in or ""))
         and not (token and turn_cancelled(hive,token))):
         loop_brief=provider_brief or sitting_brief(prior_turns,bus_now,retrieve_roots,spoken_in)
         ran=yield from _continue_hand_loop(pick,ran,spoken_in,hive=hive,token=token,brain=brain,
