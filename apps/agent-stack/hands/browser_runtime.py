@@ -18,7 +18,7 @@ import sys
 import threading
 import time
 import uuid
-from dataclasses import dataclass, field, asdict, replace
+from dataclasses import dataclass, field, asdict, replace, fields
 from pathlib import Path
 from urllib.parse import urlsplit, urljoin, parse_qsl
 import urllib.request
@@ -1163,7 +1163,10 @@ class BrowserRuntime:
                                 verification_recipe=current_flow.verification_recipe,stop_conditions=list(current_flow.stop_conditions),artifact_expectations=list(current_flow.artifact_expectations),
                                 action_budget=ledger['action_budget']-ledger['used_actions'],retry_budget=retry_remaining,
                                 time_budget=max(1,ledger['time_budget']-(time.monotonic()-ledger['started'])))
-                            proposed['objective']=current_flow.objective+' Recovery guidance: '+str(proposed.get('objective',''))
+                            # The prompt asks for recovery guidance; models return it as its own key (live 8476865 crashed on it).
+                            guidance=str(proposed.pop('recovery_guidance','') or proposed.get('objective',''))
+                            proposed={k:v for k,v in proposed.items() if k in {f.name for f in fields(BrowserFlow)}}
+                            proposed['objective']=current_flow.objective+' Recovery guidance: '+guidance
                             repaired=BrowserFlow.from_dict(proposed,local=self.local)
                             if ledger['time_budget']-(time.monotonic()-ledger['started'])<1:raise TimeoutError('replan_time_budget')
                             autonomous_attempts.append(result);current_flow=repaired
