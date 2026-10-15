@@ -70,6 +70,21 @@ class ResearchBuildContinuation(unittest.TestCase):
    self.assertIsNone(P._workflow_followup_route(denied,h))
    self.assertFalse(adapter._owner_path_matches(denied,repo))
    self.assertFalse((adapter.mission_path(h,first)/'binding.json').exists())
+ def test_exact_orb_approval_routes_and_writes_bound_receipt(self):
+  with tempfile.TemporaryDirectory() as d:
+   h=Path(d)/'hive';repo=Path(d).resolve()/'chosen';repo.mkdir()
+   adapter=P._coding_mission_hand();handle=adapter.WorkflowMissionHandle(h);task=handle.start_workflow(REQUEST)
+   branch='jarvis/workflow-'+task['mission_id']
+   permissions=adapter._load('agent_stack_permissions',adapter.STACK/'hands'/'permissions.py')
+   with mock.patch.object(permissions,'decide',return_value='confirm'):
+    handle.bind_project(task['mission_id'],str(repo),branch,f'Use project folder {repo} on isolated branch {branch}.')
+   utterance=f'Approve workflow edits for {repo} on branch {branch}.'
+   pick=P._workflow_followup_route(utterance,h)
+   self.assertEqual(pick['args'],{'action':'research_build_approve','mission_id':task['mission_id']})
+   got=P._run_tool_inner(pick,utterance,hive=h,retrieve_roots=[])
+   receipt=adapter.read_json(adapter.mission_path(h,task['mission_id'])/'owner_approval.json')
+   self.assertEqual(got['status'],'WAITING_SOURCE')
+   self.assertEqual(receipt['target'],str(repo));self.assertEqual(receipt['branch'],branch)
  def test_unasked_model_binding_cannot_attach_guessed_project(self):
   with tempfile.TemporaryDirectory() as d:
    h=Path(d);adapter=P._coding_mission_hand();initial=adapter.WorkflowMissionHandle(h).start_workflow(REQUEST)

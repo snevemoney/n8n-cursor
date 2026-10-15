@@ -677,6 +677,19 @@ def _owner_path_matches(answer, selected):
     )
     if retained:
         candidates.append(retained.group('repo').strip('"\''))
+    # Approval is a separate owner-authored grammar from project binding.  The
+    # path is followed by the exact isolated branch, so it is never the final
+    # token and must be extracted explicitly before path equality is checked.
+    approval=re.fullmatch(
+        r"\s*(?:please\s+)?(?:approve|authorize|allow)\s+(?:the\s+)?"
+        r"workflow\s+edits\s+for\s+"
+        r"(?P<repo>\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)\s+"
+        r"on\s+branch\s+[\w/-](?:[\w./-]*[\w/-])?[.!]?\s*",
+        answer or '',
+        re.I,
+    )
+    if approval:
+        candidates.append(approval.group('repo').strip('"\''))
     candidates.append((answer or '').strip().strip('"\''))
     try:
         expected=selected.resolve(strict=True)
@@ -871,7 +884,7 @@ class WorkflowMissionHandle:
             if current['status']=='CANCELLED':
                 raise ValueError('stopped workflow requires explicit continuation')
             binding=read_json(root/'binding.json')
-            match=re.fullmatch(r'\s*(?:please\s+)?(?:approve|authorize|allow)\s+(?:the\s+)?workflow\s+edits\s+for\s+("[^"\n]+"|\'[^\'\n]+\'|(?:/|~/)[^\s]+)\s+on\s+branch\s+([\w./-]+)[.!]?\s*',answer or '',re.I)
+            match=re.fullmatch(r'\s*(?:please\s+)?(?:approve|authorize|allow)\s+(?:the\s+)?workflow\s+edits\s+for\s+("[^"\n]+"|\'[^\'\n]+\'|(?:/|~/)[^\s]+)\s+on\s+branch\s+([\w/-](?:[\w./-]*[\w/-])?)[.!]?\s*',answer or '',re.I)
             if not match or not binding or not _owner_path_matches(answer,Path(binding.get('repo',''))) or match.group(2)!=binding.get('branch'):
                 raise ValueError('explicit approval for the bound project and branch required')
             branch=binding['branch']

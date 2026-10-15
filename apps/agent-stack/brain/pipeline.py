@@ -1386,7 +1386,7 @@ def _workflow_followup_route(utterance, hive):
         return {"tool":"agent_tools", "args":{"action":"research_build_read_access","mission_id":ident}, "speak":""}
     if re.fullmatch(r"(?:you are permitted[.!]?\s*change the permission to authorize yourself|i[’']?m telling you you are allowed)[.!]?", text, re.I):
         return {"tool":"agent_tools", "args":{"action":"research_build_permission_info","mission_id":ident}, "speak":""}
-    approval = re.fullmatch(r"(?:please\s+)?(?:approve|authorize|allow)\s+(?:the\s+)?workflow\s+edits\s+for\s+(\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)\s+on\s+branch\s+([\w./-]+)[.!]?", text, re.I)
+    approval = re.fullmatch(r"(?:please\s+)?(?:approve|authorize|allow)\s+(?:the\s+)?workflow\s+edits\s+for\s+(\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)\s+on\s+branch\s+([\w/-](?:[\w./-]*[\w/-])?)[.!]?", text, re.I)
     if approval:
         return {"tool":"agent_tools", "args":{"action":"research_build_approve","mission_id":ident}, "speak":""}
     source = re.fullmatch(r"(?:please\s+)?use\s+saved\s+sources\s+(?P<root>\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)", text, re.I)
