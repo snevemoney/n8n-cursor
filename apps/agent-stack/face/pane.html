@@ -417,7 +417,7 @@
     <div class="mark" id="mark">J.A.R.V.I.S.</div>
     <div class="line" id="heard" style="opacity:.6;font-size:.8em"></div>
     <div class="line" id="spoken"></div>
-      <details id="resultHistory"><summary>Earlier updates</summary><div id="browserResults"></div></details>
+      <details id="resultHistory" hidden><summary>Earlier updates</summary><div id="conversationHistory"></div><div id="browserResults"></div></details>
   </div>
   <div class="controls" id="controls">
     <button type="button" id="mic">Mic</button>
@@ -2000,6 +2000,25 @@
         if (bus.turn_gen < busGen) return;
         busGen = bus.turn_gen;
       }
+      const conversation = $("conversationHistory");
+      if (conversation && Array.isArray(bus.turns)) {
+        const turns = bus.turns.filter(t => t && typeof t.user === "string" && typeof t.jarvis === "string")
+          .slice(-24).map(t => [t.user.slice(0, 8000), t.jarvis.slice(0, 16000)]);
+        const signature = JSON.stringify(turns);
+        if (conversation.dataset.signature !== signature) {
+          const rows = turns.map(([user, answer]) => {
+            const row = document.createElement("p");
+            row.style.whiteSpace = "pre-wrap";
+            row.textContent = "You: " + user + "\nJarvis: " + answer;
+            return row;
+          });
+          conversation.replaceChildren(...rows);
+          conversation.dataset.signature = signature;
+        }
+        const history = $("resultHistory");
+        const results = $("browserResults");
+        if (history) history.hidden = !conversation.children.length && !(results && results.children.length);
+      }
       const done = bus.job_status !== "working";
       if (done) {
         if (state.turning || ttsSpeaking()) return;
@@ -2026,6 +2045,8 @@
               answer.textContent = pending.spoken;
               results.appendChild(answer);
             }
+            const history = $("resultHistory");
+            if (history) history.hidden = results.children.length === 0 && !(conversation && conversation.children.length);
             const freshDelivery = Number(pending.gen || 0) >= Number(state.renderedBusGen || 0);
             state.renderedBusGen = Math.max(Number(state.renderedBusGen || 0), Number(pending.gen || 0));
             if (freshDelivery) {

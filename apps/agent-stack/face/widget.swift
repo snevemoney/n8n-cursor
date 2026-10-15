@@ -57,7 +57,7 @@ final class DragCatcher: NSView {
         if !inset.contains(point) { return nil }
         let hole = Self.passThroughHeight(boundsHeight: bounds.height, holeHeight: holeHeight)
         let ev = NSApp.currentEvent
-        if point.y <= holeHeight, ev?.type == .scrollWheel { return nil }
+        if ev?.type == .scrollWheel { return nil }
         let clickish: Set<NSEvent.EventType> = [
             .leftMouseDown, .leftMouseUp, .rightMouseDown, .rightMouseUp,
             .otherMouseDown, .otherMouseUp,
