@@ -723,11 +723,10 @@ def locate_vision(utterance: str, *, key: str = "", call_fn=None, disp=None) -> 
         return {"found": False, "why": str(got.get("why") or "not clearly on your screen")}
     g = G.box_to_global(box, d)
     x, y = g["x"], g["y"]
-    ref = got.get("refine")
-    if isinstance(ref, dict):
-        if not ref.get("on_control"):
-            return {"found": False, "why": "a closer look didn't confirm the control is there"}
-        x, y = ref["x"], ref["y"]
+    pt = refined_point((x, y), got.get("refine"), float(got.get("confidence") or 0))
+    if pt is None:
+        return {"found": False, "why": "a closer look didn't confirm the control is there"}
+    x, y = pt
     return {"found": True, "x": x, "y": y, "w": g["w"], "h": g["h"], "label": str(got.get("label") or ""),
             "where": str(got.get("where") or ""), "role": "vision", "source": "vision", "display": d,
             "confidence": float(got.get("confidence") or 0)}
@@ -796,6 +795,18 @@ REFINE_PT = 240  # second look: a 240x240 pt crop around the first box, re-asked
 REFINE_PROMPT = ("This is a zoomed crop of the user's screen. Find the {label} (what the user wants: \"{ask}\"). Reply JSON only: "
                  "{{\"found\": true|false, \"box_2d\": [ymin, xmin, ymax, xmax] normalized 0-1000 within THIS crop, tight around the "
                  "clickable control itself}}. If that control is not in this crop, reply {{\"found\": false}}.")
+
+
+REFINE_VETO_BELOW = 0.9  # a sure first look (live 11:26: conf 1.0) is not overruled by the cheap zoomed look
+
+
+def refined_point(first_xy: tuple, ref: dict | None, confidence: float) -> tuple | None:
+    """The zoomed second look tightens the point; it may only veto a first look that was itself unsure."""
+    if not isinstance(ref, dict):
+        return first_xy
+    if ref.get("on_control"):
+        return (ref["x"], ref["y"])
+    return first_xy if confidence >= REFINE_VETO_BELOW else None
 
 
 def refine_box(first: dict, crop_png: str, crop_origin: tuple, crop_pts: float, ask: str, call) -> dict:
