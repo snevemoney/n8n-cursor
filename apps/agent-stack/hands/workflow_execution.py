@@ -238,6 +238,48 @@ def guard(hive,mission_id,*,expected_contract_digest,expected_configuration_dige
         return C.validate_candidate(receipt['configuration_lock'],Path(row['working_copy'])/'apps/agent-stack',proposedwrites or {},expected_digest=receipt['configuration_digest'])
     except (OSError,ValueError,TypeError,KeyError):return {'ok':False,'reason':'execution_authority_or_configuration_changed'}
 
+def runtime_drift_reason(hive,mission_id):
+    """Why the loaded runtime no longer matches this preparation's frozen baseline, else None.
+    Read-only; mirrors the runtime half of guard()."""
+    W=_load('workflow_workspace');C=_load('workflow_config_lock')
+    root=Path(hive)/'coding-missions'/mission_id
+    try:row=json.loads(W._regular_bytes(root/'execution_contract.json',2_000_000)[0])
+    except (OSError,ValueError):return None
+    baseline=row.get('runtime_baseline') or {}
+    if (row.get('source_receipt') or {}).get('verification_method')!='owner_verified_immutable_revision':return None
+    locked={'apps/agent-stack/'+name for name in set(C.WHOLE_FILES+W.LOCKED)}
+    try:
+        for rel,expected in baseline['files'].items():
+            if rel in locked and W._regular_bytes(Path(baseline['source_repo'])/rel)[1]!=expected:return 'runtime_preimage_changed'
+        check=C.validate_candidate(baseline['configuration_lock'],Path(baseline['source_repo'])/'apps/agent-stack',{},expected_digest=baseline['configuration_digest'])
+    except (OSError,ValueError,TypeError,KeyError):return 'runtime_baseline_unreadable'
+    return None if check.get('ok') else str(check.get('reason') or 'runtime_configuration_changed')
+
+
+def retire_runtime_drift_preparation(hive,mission_id,*,reason,now=None):
+    """Owner continue after a runtime update: move (never delete) the stale preparation and its
+    untouched working copy aside so canonical preparation re-runs against the current runtime."""
+    import time
+    root=Path(hive)/'coding-missions'/mission_id
+    if not reason:raise ValueError('runtime_drift_unproven')
+    stamp=time.strftime('%Y%m%d-%H%M%S',time.localtime(now or time.time()))
+    history=root/'preparation-history'
+    if history.is_symlink():raise ValueError('unsafe_preparation_history')
+    archive=history/('runtime-drift-'+stamp);archive.mkdir(parents=True,exist_ok=False)
+    contract=json.loads((root/'execution_contract.json').read_text()) if (root/'execution_contract.json').exists() else {}
+    copy=Path(str(contract.get('working_copy') or ''))
+    moved_copy=None
+    if contract.get('working_copy') and copy.is_dir():
+        if copy.name!='workflow-'+mission_id or copy.is_symlink():raise ValueError('unowned_preparation_copy')
+        moved_copy=copy.with_name(copy.name+'-runtime-drift-'+stamp);os.rename(copy,moved_copy)
+    moved=[]
+    for name in ('execution_owner.json','execution_guard.json','execution_contract.json','coding_child.json'):
+        if (root/name).exists():os.rename(root/name,archive/name);moved.append(name)
+    (archive/'retired.json').write_text(json.dumps({'reason':reason,'at':time.time(),'files':moved,
+        'working_copy':str(copy) if moved_copy else None,'moved_working_copy':str(moved_copy) if moved_copy else None},sort_keys=True))
+    return {'archive':str(archive),'files':moved,'moved_working_copy':str(moved_copy) if moved_copy else None}
+
+
 EXECUTOR_FILES=('hands/coding_mission.py','hands/agent_tools.py','hands/permissions.py',
                 'brain/mission_controller.py','memory/bus_io.py','hands/workflow_execution.py',
                 'hands/workflow_workspace.py','hands/workflow_config_lock.py','hands/workflow_repo_context.py',

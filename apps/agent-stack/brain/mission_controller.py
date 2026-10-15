@@ -324,6 +324,16 @@ class MissionController:
                     return persist("WAITING_ORIGINAL_IMPLEMENTATION",str(proof.get("spoken") or "The original implementation could not be verified; the task is preserved."))
             phase=self.adapter._load("workflow_execution",self.adapter.STACK/"hands/workflow_execution.py")
             owner=self.adapter.read_json(root/"execution_owner.json")
+            drift=phase.runtime_drift_reason(hive,ident) if owner else None
+            if drift:
+                # Jarvis's own code changed since this job was prepared (e.g. a restart after a fix).
+                # The frozen guard would reject every builder step forever; re-prepare instead.
+                prior_child=self.adapter.read_json(root/"coding_child.json").get("mission_id")
+                if prior_child and self.adapter.CodingMissionHandle(hive).status(prior_child).get("active") is True:
+                    raise ValueError("coding worker still active")
+                persist("PREPARING","My runtime changed since this job was prepared; I’m re-preparing its isolated working copy. Research and evidence are preserved.")
+                phase.retire_runtime_drift_preparation(hive,ident,reason=drift)
+                owner={}
             if not owner:
                 if not (root/'execution_guard.json').exists():
                     persist('PREPARING','I’m checking the preserved preparation before continuing in an isolated working copy.')
