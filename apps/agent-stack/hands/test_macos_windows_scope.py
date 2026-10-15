@@ -13,9 +13,9 @@ HIJACKS = ("go to sleep", "go to the store", "go to bed", "go to work", "go to s
            "switch to dark mode", "switch to the next song", "switch to my other task", "focus on the report",
            "focus mode", "bring up my calendar", "bring up the issue", "what's the best monitor for coding",
            "what monitor should I buy", "what screen resolution should I use", "what is in my terminal history",
-           "open the doc on my second screen")
+           "open the doc on my second screen", "go to terminal", "bring up the terminal", "go to cursor")
 OWNED = ("how many displays do I have", "which screens are connected", "what windows are open",
-         "what's in my terminal", "switch to Cursor", "bring up terminal", "focus the Jarvis Orb window")
+         "what's in my terminal", "switch to Cursor", "switch to terminal", "focus the Jarvis Orb window")
 
 
 class Scope(unittest.TestCase):
@@ -28,7 +28,7 @@ class Scope(unittest.TestCase):
             self.assertTrue(W.wants(u, run=FakeRun()), u)
 
     def test_short_or_ambiguous_prefix_does_not_focus(self):
-        for u in ("switch to c", "go to t", "switch to j"):
+        for u in ("switch to c", "focus t", "switch to j"):
             fake = FakeRun()
             got = W.run(u, run=fake)
             self.assertFalse(got["ok"], u)

@@ -41,7 +41,7 @@ class FakeRun:
 class Intent(unittest.TestCase):
     def test_wants_window_and_display_questions(self):
         for u in ("what windows are open", "which apps are open right now", "how many displays do I have",
-                  "what's in my terminal", "switch to Cursor", "bring up Terminal"):
+                  "what's in my terminal", "switch to Cursor", "focus Terminal"):
             self.assertTrue(W.wants(u, run=FakeRun()), u)  # screen *content* is a vision question, not this hand
 
     def test_ignores_unrelated_talk(self):

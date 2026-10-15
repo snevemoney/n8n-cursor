@@ -32,7 +32,7 @@ _DISPLAYS_RE = re.compile(r"\b(?:how many|which|what)\s+(?:displays?|screens?|mo
                           r"am i using|are (?:connected|plugged in|attached|hooked up|on))\b|"
                           r"\b(?:list|show)\s+(?:me\s+)?my\s+(?:displays|screens|monitors)\b", re.I)
 _TERMINAL_RE = re.compile(r"\b(?:what(?:'s| is)|show|read)\b.{0,15}\bin my terminal\b(?!\s+history)|\bmy terminal (?:say|show)", re.I)
-_SWITCH_RE = re.compile(r"^\s*(?:jarvis[,\s]+)?(?:switch to|bring up|focus|go to)\s+(?:the\s+)?([A-Za-z0-9][\w .\-]{0,40}?)\s*(?:app|window)?\s*[.!?]?\s*$", re.I)
+_SWITCH_RE = re.compile(r"^\s*(?:jarvis[,\s]+)?(?:switch to|focus)\s+(?:the\s+)?([A-Za-z0-9][\w .\-]{0,40}?)\s*(?:app|window)?\s*[.!?]?\s*$", re.I)
 
 
 def _run(argv: list[str], timeout: float = 12.0) -> subprocess.CompletedProcess:
