@@ -1,9 +1,11 @@
 """Review 2026-10-15: the windows hand only claims utterances that are really about windows, displays or Terminal."""
 import importlib.util
 import unittest
+import sys
 from pathlib import Path
 
-from test_macos_windows import FakeRun
+sys.path.insert(0, str(Path(__file__).parent))
+from test_macos_windows import FakeRun  # noqa: E402
 
 spec = importlib.util.spec_from_file_location("macos_windows_scope", Path(__file__).with_name("macos_windows.py"))
 W = importlib.util.module_from_spec(spec)

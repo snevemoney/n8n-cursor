@@ -163,8 +163,21 @@ def _inside(path: Path, roots: list[Path]) -> bool:
     return any(p == r or r in p.parents for r in roots)
 
 
+# Name-only words ("token", "secret", "credentials") also appear in ordinary test modules such as
+# tests/test_literal_tokens_and_budget.py. A test source file is code, not a credential store, so the
+# word alone does not make it secret. Strong shapes (.env, .pem, .key, id_*, .ssh, Keychains...) still match.
+_TEST_SOURCE_RE = re.compile(r"^(test_[\w.-]*\.(py|cjs|mjs|js|ts)|[\w.-]*_test\.py|[\w.-]*\.(test|spec)\.(cjs|mjs|js|ts))$", re.I)
+
+
 def is_secret_path(path: str | Path) -> bool:
-    return bool(SECRET_RE.search(str(path)))
+    text = str(path)
+    if not SECRET_RE.search(text):
+        return False
+    parts = [p for p in text.split("/") if p]
+    if parts and _TEST_SOURCE_RE.match(parts[-1]):
+        # a test module's own name never makes it secret; its folders still can (secrets/, .ssh/ ...)
+        return bool(SECRET_RE.search("/".join(parts[:-1])))
+    return True
 
 
 def decide(kind: str, target: str = "") -> str:
