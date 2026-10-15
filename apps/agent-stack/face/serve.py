@@ -504,6 +504,16 @@ def mark_pieces_wired() -> None:
     stack_path.write_text(json.dumps(stack, indent=2) + "\n", encoding="utf-8")
 
 
+
+def trusted_request(headers, port: int) -> bool:
+    """POSTs only from this server's own page (Orb/pane) or local scripts (no Origin). A page on another site, or a
+    DNS-rebinding host, must not be able to say "permission granted" (security review 2026-10-15, H4)."""
+    host = str(headers.get("Host") or "").strip().lower()
+    if host not in {f"127.0.0.1:{port}", f"localhost:{port}"}:
+        return False
+    origin = headers.get("Origin")
+    return origin is None or str(origin).strip().lower() in {f"http://127.0.0.1:{port}", f"http://localhost:{port}"}
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt: str, *args) -> None:  # noqa: A003
         sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
@@ -655,6 +665,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
+        if not trusted_request(self.headers, self.server.server_address[1]):
+            self._json(403, {"ok": False, "error": "untrusted origin"}); return
         data = self._read_json()
         live_mouth = mouth()
         if path == "/api/browser-mission/ack":
