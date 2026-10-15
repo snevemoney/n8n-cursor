@@ -4,6 +4,7 @@ No scheduler, model configuration, acceptance grader or terminal bus writer here
 """
 from __future__ import annotations
 import asyncio
+import ctypes
 import hashlib
 import importlib.util
 import json
@@ -57,7 +58,7 @@ def mission_source_manifest():
 
 def run_coding(args, *, workflow_context=None, **kw):
     _load('agent_stack_permissions', STACK/'hands'/'permissions.py')
-    if isinstance(args,dict) and any(key in args for key in ('workflow_context','approved','execution_contract_digest','configuration_digest')):
+    if isinstance(args,dict) and any(key in args for key in ('workflow_context','approved','execution_contract_digest','configuration_digest','executor')):
         raise ValueError('model arguments cannot confer workflow authority')
     if workflow_context is not None:
         hive, owner = _validate_workflow_context(workflow_context, args)
@@ -98,7 +99,9 @@ def record_workflow_execution(hive,mission_id,preparation):
     contract,_=_private_row(root/'execution_contract.json')
     if preparation.get('working_copy')!=contract.get('working_copy'):
         raise ValueError('working-copy receipt mismatch')
-    owner={'version':1,'authority':'host_workflow_preparation','parent_mission_id':mission_id,**provenance,
+    executor=phase.prepared_executor(hive,mission_id,contract_digest=contract_digest,configuration_digest=configuration_digest)
+    if phase.validate_executor(executor) is not True:raise ValueError('frozen executor validation failed')
+    owner={'executor':executor,'version':1,'authority':'host_workflow_preparation','parent_mission_id':mission_id,**provenance,
            'execution_contract_digest':contract_digest,'configuration_digest':configuration_digest,
            'working_copy':contract['working_copy'],'working_branch':'jarvis/workflow-'+mission_id}
     raw=json.dumps(owner,sort_keys=True,separators=(',',':')).encode()
@@ -194,22 +197,69 @@ def _identity(pid):
     try:
         result = subprocess.run(['/bin/ps', '-ww', '-p', str(pid), '-o', 'lstart=', '-o', 'command='],
                                 capture_output=True, text=True, timeout=2)
-        if result.returncode or not result.stdout.strip():
-            return None
-        return result.stdout.strip()
+        if not result.returncode and result.stdout.strip():
+            return result.stdout.strip()
     except (OSError, subprocess.TimeoutExpired):
-        return None
+        pass
+    # Sandboxed macOS workers can be healthy while /bin/ps is denied. libproc
+    # still exposes the kernel-owned process start time, PID and process group.
+    # The worker's private startup receipt binds this identity to its random
+    # owner token and frozen entrypoint before it can be treated as active.
+    if sys.platform == 'darwin':
+        class ProcBsdInfo(ctypes.Structure):
+            _fields_ = [
+                ('pbi_flags', ctypes.c_uint32), ('pbi_status', ctypes.c_uint32),
+                ('pbi_xstatus', ctypes.c_uint32), ('pbi_pid', ctypes.c_uint32),
+                ('pbi_ppid', ctypes.c_uint32), ('pbi_uid', ctypes.c_uint32),
+                ('pbi_gid', ctypes.c_uint32), ('pbi_ruid', ctypes.c_uint32),
+                ('pbi_rgid', ctypes.c_uint32), ('pbi_svuid', ctypes.c_uint32),
+                ('pbi_svgid', ctypes.c_uint32), ('rfu_1', ctypes.c_uint32),
+                ('pbi_comm', ctypes.c_char * 16), ('pbi_name', ctypes.c_char * 32),
+                ('pbi_nfiles', ctypes.c_uint32), ('pbi_pgid', ctypes.c_uint32),
+                ('pbi_pjobc', ctypes.c_uint32), ('e_tdev', ctypes.c_uint32),
+                ('e_tpgid', ctypes.c_uint32), ('pbi_nice', ctypes.c_int32),
+                ('pbi_start_tvsec', ctypes.c_uint64),
+                ('pbi_start_tvusec', ctypes.c_uint64),
+            ]
+        try:
+            library = ctypes.CDLL('/usr/lib/libproc.dylib', use_errno=True)
+            info = ProcBsdInfo()
+            read = library.proc_pidinfo(pid, 3, 0, ctypes.byref(info), ctypes.sizeof(info))
+            if read == ctypes.sizeof(info) and info.pbi_pid == pid and info.pbi_start_tvsec:
+                return f'libproc:{pid}:{info.pbi_start_tvsec}:{info.pbi_start_tvusec}:{info.pbi_pgid}'
+        except (OSError, AttributeError, ValueError):
+            pass
+    return None
 
 
 def _owned(owner, root):
     pid = owner.get('pid')
     token = owner.get('token')
     identity = _identity(pid)
-    if not identity or not isinstance(owner.get('identity'), str) or identity.split()[:5] != owner['identity'].split()[:5]:
+    owner_identity = owner.get('identity')
+    if not identity or not isinstance(owner_identity, str):
         return False
     if not isinstance(token, str) or not re.fullmatch(r'[a-f0-9]{32}', token):
         return False
-    expected = f'{Path(__file__).resolve()} worker {root.resolve()} {token}'
+    try:
+        entrypoint = _worker_entrypoint(root)
+    except (OSError, ValueError, KeyError):
+        return False
+    if read_json(root/'request.json').get('executor') and owner.get('worker_entrypoint') != str(entrypoint):
+        return False
+    if identity.startswith('libproc:') or owner_identity.startswith('libproc:'):
+        startup = read_json(root/'worker_startup.json')
+        if (identity != owner_identity or startup.get('process_identity') != identity
+            or startup.get('pid') != pid or startup.get('token') != token
+            or startup.get('worker_entrypoint') != str(entrypoint)):
+            return False
+        try:
+            return os.getpgid(pid) == pid
+        except (OSError, TypeError):
+            return False
+    if identity.split()[:5] != owner_identity.split()[:5]:
+        return False
+    expected = f'{entrypoint} worker {root.resolve()} {token}'
     if not identity.endswith(expected):
         return False
     try:
@@ -218,9 +268,118 @@ def _owned(owner, root):
         return False
 
 
+
+ACTIVE_PHASES = {'RUNNING', 'RESEARCHING', 'PREPARING', 'BUILDING', 'WAITING_CODING_START'}
+HEARTBEAT_MAX_AGE = 30.0
+STARTUP_MAX_AGE = 10.0
+
+
+def _spawn_pending(owner, root):
+    """A just-spawned process may be alive before its private startup receipt exists."""
+    pid=owner.get('pid');token=owner.get('token');created=owner.get('created')
+    identity=_identity(pid);owner_identity=owner.get('identity')
+    if (not isinstance(pid,int) or pid<=0 or not isinstance(token,str)
+        or not re.fullmatch(r'[a-f0-9]{32}',token) or not isinstance(created,(int,float))
+        or not 0<=time.time()-created<=STARTUP_MAX_AGE or not identity
+        or not isinstance(owner_identity,str)):
+        return False
+    try:entrypoint=_worker_entrypoint(root)
+    except (OSError,ValueError,KeyError):return False
+    if owner.get('worker_entrypoint')!=str(entrypoint):return False
+    if identity.startswith('libproc:') or owner_identity.startswith('libproc:'):
+        same_process=identity==owner_identity
+    else:
+        same_process=(identity.split()[:5]==owner_identity.split()[:5]
+                      and identity.endswith(f'{entrypoint} worker {root.resolve()} {token}'))
+    if not same_process:return False
+    try:return os.getpgid(pid)==pid
+    except (OSError,TypeError):return False
+
+
+def worker_status(root, state):
+    """Activity is a fresh owned process observation, never a queue acknowledgement."""
+    state = dict(state)
+    phase = state.get('status')
+    state['active'] = False
+    if read_json(root/'control.json').get('cancel') and phase not in TERMINAL:
+        state.update(status='CANCELLED' if _owned(read_json(root/'owner.json'),root) else 'UNAVAILABLE', verified=False, task_verified=False,
+                     spoken='The task was stopped. Its request, completed work and checkpoints are preserved; the outcome is unverified.')
+        return state
+    if phase not in ACTIVE_PHASES | {'QUEUED'}:
+        return state
+    owner = read_json(root/'owner.json')
+    startup = read_json(root/'worker_startup.json')
+    heartbeat = read_json(root/'worker_heartbeat.json')
+    request_sha = hashlib.sha256((root/'request.json').read_bytes()).hexdigest()
+    owned = _owned(owner, root)
+    pending = _spawn_pending(owner,root)
+    started = (owned and startup.get('pid') == owner.get('pid')
+               and startup.get('token') == owner.get('token')
+               and startup.get('request_sha256') == request_sha)
+    fresh = (started and heartbeat.get('startup_id') == startup.get('startup_id')
+             and isinstance(heartbeat.get('at'), (int, float))
+             and 0 <= time.time() - heartbeat['at'] <= HEARTBEAT_MAX_AGE)
+    state['worker_liveness'] = 'alive' if fresh else ('starting' if pending and not fresh else 'unavailable')
+    if phase == 'QUEUED' and pending and not fresh:
+        return state
+    if not fresh:
+        state.update(status='UNAVAILABLE', verified=False, task_verified=False,
+                     terminal_reason='worker_heartbeat_stale' if started else 'worker_identity_or_startup_unproven',
+                     spoken='The worker is not confirmed active. Its task and completed evidence are preserved; recovery is required.')
+        return state
+    state['active'] = True
+    state['worker_started_at'] = startup.get('at')
+    state['worker_heartbeat_at'] = heartbeat['at']
+    if phase == 'QUEUED':
+        state['status'] = 'RUNNING'
+    return state
+
+
+from contextlib import contextmanager
+@contextmanager
+def worker_lifecycle(root):
+    """Called only inside the worker lock; heartbeat remains live during blocking hands."""
+    import threading
+    root = Path(root)
+    token = sys.argv[-1] if len(sys.argv) >= 4 and sys.argv[-3] == 'worker' else None
+    # Tests/in-process browser owners do not acquire detached-worker authority.
+    if not isinstance(token, str) or not re.fullmatch(r'[a-f0-9]{32}', token):
+        yield
+        return
+    startup = {'startup_id':uuid.uuid4().hex, 'pid':os.getpid(), 'token':token,
+               'process_identity':_identity(os.getpid()), 'worker_entrypoint':str(_worker_entrypoint(root)),
+               'request_sha256':hashlib.sha256((root/'request.json').read_bytes()).hexdigest(), 'at':time.time()}
+    write_json(root/'worker_startup.json', startup)
+    stopped = threading.Event()
+    def beat():
+        write_json(root/'worker_heartbeat.json', {'startup_id':startup['startup_id'], 'at':time.time()})
+    beat()
+    def pulse():
+        while not stopped.wait(5):
+            try:beat()
+            except (OSError, ValueError):return
+    thread = threading.Thread(target=pulse, daemon=True)
+    thread.start()
+    try:yield
+    finally:
+        stopped.set()
+        thread.join(timeout=1)
+
+
+def _worker_entrypoint(root):
+    request = read_json(root/'request.json')
+    executor = request.get('executor')
+    if executor is None:
+        return Path(__file__).resolve()
+    phase = _load('coding_workflow_execution', STACK/'hands/workflow_execution.py')
+    if phase.validate_executor(executor) is not True:
+        raise ValueError('frozen executor validation failed')
+    return Path(executor['entrypoint'])
+
+
 def _spawn_worker(root, token):
     with (root/'worker.log').open('ab') as log:
-        return subprocess.Popen([sys.executable, str(Path(__file__).resolve()), 'worker', str(root.resolve()), token],
+        return subprocess.Popen([sys.executable, str(_worker_entrypoint(root)), 'worker', str(root.resolve()), token],
                                 stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
 
 
@@ -286,17 +445,26 @@ class CodingMissionHandle:
             if (not any(r in repo.resolve().parents for r in hand.PERM().scratch_roots()) or
                 hand._repo_ok(repo)!='allow' or hand.PERM().decide('git_branch',args['branch'])!='allow'):
                 raise ValueError('owned working copy permission required')
-            ack=self._queue(args,read_json(root/'request.json')['objective'],workflow_context=context)
+            ack=self._queue(args,read_json(root/'request.json')['objective'],workflow_context=context,executor=owner.get('executor'))
             return {**ack,'parent_mission_id':parent_mission_id}
 
-    def _queue(self, args, objective, *, resume_of=None, resume_checkpoint=None, workflow_context=None):
+    def _queue(self, args, objective, *, resume_of=None, resume_checkpoint=None, workflow_context=None, executor=None):
         hand = _load('coding_agent_tools', STACK/'hands'/'agent_tools.py')
+        if workflow_context is not None and executor is None:
+            raise ValueError('workflow requires a host frozen executor')
+        if executor is not None:
+            phase=_load('coding_workflow_execution',STACK/'hands/workflow_execution.py')
+            if workflow_context is None or phase.validate_executor(executor) is not True:
+                raise ValueError('host frozen executor required')
+            _, owner = _validate_workflow_context(workflow_context,args)
+            if owner.get('executor') != executor:raise ValueError('frozen executor owner mismatch')
         mission_id = uuid.uuid4().hex
         root = mission_path(self.hive, mission_id)
         root.mkdir(parents=True)
         # Only the narrow explicit code arguments cross into unattended execution.
         request = {'mission_id':mission_id, 'worker_kind':'coding', 'objective':objective,
-                   'code_args':args, 'source_manifest':mission_source_manifest(), 'created':time.time()}
+                   'code_args':args, 'source_manifest':executor['source_manifest'] if executor is not None else mission_source_manifest(), 'created':time.time()}
+        if executor is not None:request['executor']=executor
         if resume_of:
             request.update(resume_of=resume_of, resume_checkpoint=resume_checkpoint,
                            resume_checkpoint_digest=hand.checkpoint_digest(resume_checkpoint))
@@ -316,14 +484,14 @@ class CodingMissionHandle:
         token = uuid.uuid4().hex
         try:
             process = _spawn_worker(root, token)
-            write_json(root/'owner.json', {'pid':process.pid, 'token':token, 'identity':_identity(process.pid), 'created':time.time()})
+            write_json(root/'owner.json', {'pid':process.pid, 'token':token, 'identity':_identity(process.pid), 'worker_entrypoint':str(_worker_entrypoint(root)), 'created':time.time()})
         except OSError:
             self._finish_unavailable(root, 'worker_start_failed')
             raise RuntimeError('coding worker could not start')
         write_json(self.hive/'coding-missions'/'latest.json', {'mission_id':mission_id})
         return {'ok':True, 'tool':'agent_tools', 'mission_id':mission_id, 'task_verified':False,
-                'resume_of':resume_of,
-                'spoken':'I’ve resumed the scratch coding task from its checked checkpoint.' if resume_of else 'I’ve started the scratch coding task. I’ll report its tests and commit when it finishes.',
+                'resume_of':resume_of, 'status':'QUEUED', 'active':False,
+                'spoken':'I’ve queued the checked coding continuation; worker startup is not yet confirmed.' if resume_of else 'I’ve queued the scratch coding task; worker startup is not yet confirmed.',
                 'wires':['agent_tools','coding_mission'], 'cites':[], 'sent':False}
 
     def resume(self, mission_id):
@@ -364,7 +532,9 @@ class CodingMissionHandle:
                     else:
                         raise ValueError('worker identity is unproven but process still exists')
                 envelope = read_json(root/'checkpoint.json')
-                current_manifest = mission_source_manifest()
+                executor=request.get('executor')
+                if executor is not None:_worker_entrypoint(root)
+                current_manifest = executor['source_manifest'] if executor is not None else mission_source_manifest()
                 if not envelope or envelope.get('source_manifest') != current_manifest or request.get('source_manifest') != current_manifest:
                     raise ValueError('checkpoint missing or coding source changed')
                 _load('agent_stack_permissions', STACK/'hands'/'permissions.py')
@@ -388,7 +558,7 @@ class CodingMissionHandle:
                 if request.get('workflow_context') is not None:
                     _validate_workflow_context(request['workflow_context'],args)
                 child_ack = self._queue(args, request['objective'], resume_of=mission_id, resume_checkpoint=cp,
-                                        workflow_context=request.get('workflow_context'))
+                                        workflow_context=request.get('workflow_context'),executor=request.get('executor'))
                 write_json(root/'resume_child.json', {'mission_id':child_ack['mission_id']})
                 return child_ack
 
@@ -415,9 +585,7 @@ class CodingMissionHandle:
         state = read_json(root/'result.json') or read_json(root/'state.json')
         if not state:
             raise ValueError('unknown coding mission')
-        if state.get('status') not in TERMINAL and not _owned(read_json(root/'owner.json'), root):
-            # An alive process with unproven identity is not silently killed or replayed.
-            return dict(state, status='UNAVAILABLE', verified=False, terminal_reason='worker_identity_unproven')
+        state = worker_status(root, state)
         return state
 
     def steer(self, mission_id, *, cancel=False):
@@ -580,6 +748,7 @@ class WorkflowMissionHandle:
         state=read_json(root/'state.json')
         if read_json(root/'control.json').get('cancel'):
             state={**state,'status':'CANCELLED','spoken':'The workflow was stopped. Its full request, completed work and checkpoints are preserved; the outcome is unverified.', 'question':''}
+        state = worker_status(root, state)
         return self._reply(request,state)
 
     def progress_status(self, mission_id):

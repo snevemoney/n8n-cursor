@@ -539,9 +539,9 @@ def _step(s: dict, approved: bool, *, cancel_check=None, progress=None) -> dict:
     return {"ok": False, "verified": False, "spoken": f"unknown op {op}"}
 
 
-def _cancelled(steps=None) -> dict:
+def _cancelled(steps=None, results=None) -> dict:
     return {"ok": False, "verified": False, "cancelled": True, "status": "CANCELLED",
-            "steps": list(steps or []), "spoken": "The task was stopped. Its requested outcome is not verified."}
+            "steps": list(steps or []), "results": list(results or []), "partial": bool(results), "spoken": "The task was stopped. Its requested outcome is not verified."}
 
 
 def _stopped(cancel_check) -> bool:
@@ -599,31 +599,40 @@ def _run(args: dict | None = None, approved: bool = False, *, cancel_check=None,
     results = []
     for item, s in zip(todo, steps[:12]):
         if _stopped(cancel_check):
-            return _cancelled(todo)
+            return _cancelled(todo, results)
         _progress(progress, dict(item, status="running"))
         if _stopped(cancel_check):
-            return _cancelled(todo)
-        got = _step(s, approved, cancel_check=cancel_check, progress=progress)  # act
-        if _stopped(cancel_check) or got.get("cancelled"):
-            return _cancelled(todo)
-        item["status"] = "verified" if got.get("verified") else ("needs Evens" if got.get("gated") else "failed")  # verify
+            return _cancelled(todo, results)
+        try:
+            got = _step(s, approved, cancel_check=cancel_check, progress=progress)
+            if not isinstance(got, dict):
+                raise ValueError("invalid executor receipt")
+        except Exception as exc:
+            # Preserve preceding receipts; an uncertain executor failure is not retried.
+            got = {"ok": False, "verified": False, "error": type(exc).__name__,
+                   "spoken": "The step failed without a verified outcome."}
+        item["status"] = "verified" if got.get("verified") else ("needs Evens" if got.get("gated") else "failed")
         item["result"] = str(got.get("spoken") or "")[:400]
         if got.get("cites"):
             item["cites"] = got["cites"][:5]
         results.append(got)
         _progress(progress, item)
-        if _stopped(cancel_check):
-            return _cancelled(todo)
+        if _stopped(cancel_check) or got.get("cancelled"):
+            return _cancelled(todo, results)
         if item["status"] != "verified" and not args.get("keep_going"):
             break
     done = sum(1 for t in todo if t["status"] == "verified")
-    all_ok = done == len(todo)
+    all_ok = done == len(todo) and len(steps) <= 12
     lines = [f"{t['n']}. [{t['status']}] {t['op']} {t['what']}: {t.get('result', 'not run')}" for t in todo]
-    head = (f"Skill read first: {skill}. " if skill else "") + f"{done}/{len(todo)} steps verified."
+    head = (f"Skill read first: {skill}. " if skill else "") + f"{done}/{len(steps)} steps verified."
     if not all_ok:
-        head += " Not done: I stopped at the first unverified step."
-    return {"ok": all_ok, "verified": all_ok, "steps": todo, "skill": skill,
+        head += " The complete requested outcome is not verified; completed step receipts are preserved."
+    gated = any(row.get('gated') for row in results)
+    return {"ok": all_ok, "verified": all_ok, "steps": todo, "results": results, "skill": skill,
+            "partial": bool(done) and not all_ok, "gated": gated,
+            "status": "COMPLETED" if all_ok else ("WAITING_APPROVAL" if gated else "PARTIAL" if done else "FAILED"),
             "spoken": head + " " + " ".join(lines), "cites": [c for t in todo for c in t.get("cites", [])]}
+
 
 
 # ---------------------------------------------------------------- routing

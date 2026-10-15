@@ -10,13 +10,10 @@ class WorkflowExecutionController(unittest.TestCase):
  def test_prepared_copy_reused_child_queued_and_full_task_remains_unverified(self):
   fixture=CodingWorkflowGuardTests()
   with tempfile.TemporaryDirectory() as tmp:
-   h,root,repo,runtime,scratch,hand=fixture.fixture(tmp);a,b=T.ExecutionTests().context(hand)
+   h,root,repo,runtime,scratch,hand=fixture.fixture(tmp,objective='Original technical build with ArtCraft demonstration and one Obsidian implementation note.');a,b=T.ExecutionTests().context(hand)
    # This controller case requests delivery explicitly; its offline worker
    # persists a terminal receipt, rather than status prose standing in for IO.
-   request=D.read_json(root/'request.json');request['objective']='Original technical build with ArtCraft demonstration and one Obsidian implementation note.';D.write_json(root/'request.json',request)
-   sha=hashlib.sha256((root/'request.json').read_bytes()).hexdigest()
-   for name in ('owner_approval.json','original_implementation.json'):
-    row=D.read_json(root/name);row['request_sha256']=sha;D.write_json(root/name,row)
+
    def completed(child):
     child_root=D.mission_path(h,child);request=D.read_json(child_root/'request.json');owned=Path(request['code_args']['repo']);source=owned/'offline_delivery_feature.py'
     if not source.exists():

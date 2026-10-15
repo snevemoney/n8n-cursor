@@ -64,14 +64,74 @@ def _contains_config(node):
     return False
 
 
-def _semantics(text,rel):
+def _regex_shadow_module(relative):
+    path=Path(relative)
+    return path.name.casefold()=='re.py' or (path.name.casefold()=='__init__.py' and path.parent.name.casefold()=='re')
+
+
+def _standard_regex_calls(tree):
+    """Conservative syntactic proof for direct, unaliased stdlib re.compile.
+
+    Any local/module rebinding or escape of the module/function disables the
+    exemption for this source. Other configuration detectors remain independent.
+    """
+    parents={child:parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
+    imports=[node for node in ast.walk(tree) if isinstance(node,ast.Import) and any(alias.name=='re' for alias in node.names)]
+    if len(imports)!=1 or imports[0] not in tree.body:return set()
+    imported=imports[0]
+    if any(alias.name=='re' and alias.asname is not None for alias in imported.names):return set()
+    constants={'A','ASCII','I','IGNORECASE','L','LOCALE','M','MULTILINE','S','DOTALL','U','UNICODE','X','VERBOSE','NOFLAG'}
+    functions={'compile','search','match','fullmatch','findall','finditer','split','sub','subn','escape'}
+    calls=set()
+    for node in ast.walk(tree):
+        if isinstance(node,ast.Import):
+            # Other imports may mutate Python's import/module registry. This
+            # deliberately small proof accepts only re plus future annotations.
+            if any(alias.name!='re' for alias in node.names):return set()
+            if any((alias.asname or alias.name.split('.')[0])=='re' for alias in node.names) and node is not imported:return set()
+            if any(alias.name=='re' and alias.asname for alias in node.names):return set()
+        if isinstance(node,ast.ImportFrom):
+            if node.module!='__future__' or node.level or any(alias.name!='annotations' or alias.asname for alias in node.names):return set()
+            if node.module=='re' or any((alias.asname or alias.name)=='re' or alias.name=='*' for alias in node.names):return set()
+        if isinstance(node,ast.Attribute) and node.attr in {'modules','path','meta_path','path_hooks','path_importer_cache','__import__','find_spec','find_module','__dict__','__globals__'}:return set()
+        if isinstance(node,ast.Name) and node.id in {'__builtins__','builtins','__loader__','__spec__'}:return set()
+        if isinstance(node,ast.arg) and node.arg=='re':return set()
+        if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)) and node.name=='re':return set()
+        if isinstance(node,(ast.Global,ast.Nonlocal)) and 're' in node.names:return set()
+        if isinstance(node,ast.ExceptHandler) and node.name=='re':return set()
+        if isinstance(node,(ast.MatchAs,ast.MatchStar)) and node.name=='re':return set()
+        if isinstance(node,ast.MatchMapping) and node.rest=='re':return set()
+        if isinstance(node,ast.Name) and node.id=='re':
+            if not isinstance(node.ctx,ast.Load):return set()
+            attribute=parents.get(node)
+            if not isinstance(attribute,ast.Attribute) or attribute.value is not node or not isinstance(attribute.ctx,ast.Load):return set()
+            if attribute.attr not in constants|functions:return set()
+            if attribute.attr in functions:
+                call=parents.get(attribute)
+                if not isinstance(call,ast.Call) or call.func is not attribute:return set()
+                if attribute.attr=='compile':
+                    if call.lineno<=imported.lineno:return set()
+                    calls.add(call)
+        if isinstance(node,ast.Call):
+            name=_name(node.func);tail=name.rsplit('.',1)[-1]
+            if tail in {'setattr','delattr','exec','eval','__import__','globals','locals','vars','exec_module','import_module','__setattr__','__delattr__','__getattribute__','__getattr__'}:return set()
+            if tail=='compile' and not (isinstance(node.func,ast.Attribute) and isinstance(node.func.value,ast.Name) and node.func.value.id=='re'):return set()
+    return calls
+
+
+def _semantics(text,rel,*,regex_namespace_safe=True):
     try:tree=ast.parse(text)
     except (SyntaxError,ValueError):raise ConfigLockError('configuration_python_invalid')
     anchors={}
     for node in tree.body:
         if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)) and node.name in ANCHORS.get(rel,()):
             anchors[node.name]=_digest(ast.dump(node,include_attributes=False))
+    regex_calls=_standard_regex_calls(tree) if regex_namespace_safe and not _regex_shadow_module(rel) else set()
+    parents={child:parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
     sensitive=[];env=set();imports=[];selector_functions={};selector_controls=[]
+    regex_modules={alias.asname or alias.name for node in ast.walk(tree) if isinstance(node,ast.Import) for alias in node.names if alias.name=='re'}
+    regex_functions={'compile','search','match','fullmatch','findall','finditer','split','sub','subn','escape'}
+    regex_constants={'A','ASCII','I','IGNORECASE','L','LOCALE','M','MULTILINE','S','DOTALL','U','UNICODE','X','VERBOSE','NOFLAG'}
     for node in ast.walk(tree):
         if isinstance(node,(ast.If,ast.IfExp,ast.For,ast.AsyncFor,ast.While,ast.Try,ast.With,ast.AsyncWith,ast.Match)):
             selector=(_contains_config(node) or any(isinstance(child,ast.keyword) and child.arg and CONFIG_FIELD.fullmatch(child.arg+':') for child in ast.walk(node)))
@@ -89,6 +149,30 @@ def _semantics(text,rel):
                 # branches/conditions: call multisets cannot prove routing parity.
                 selector_functions.setdefault(node.name,[]).append(_digest(ast.dump(node,include_attributes=False)))
     for node in ast.walk(tree):
+        parent=parents.get(node)
+        if isinstance(node,ast.ImportFrom) and (node.module=='re' or (node.module in {'sys','builtins','operator'} and any(alias.name in {'modules','path','meta_path','path_hooks','path_importer_cache','__dict__','__import__','getattr','setattr','delattr','vars','globals','locals','eval','exec','compile','attrgetter','methodcaller'} for alias in node.names))):
+            sensitive.append(('dynamic_configuration',_digest(ast.dump(node,include_attributes=False))))
+        if isinstance(node,(ast.Assign,ast.AnnAssign,ast.AugAssign,ast.Delete)):
+            targets=node.targets if isinstance(node,(ast.Assign,ast.Delete)) else [node.target]
+            if any(isinstance(child,ast.Name) and child.id in regex_modules for target in targets for child in ast.walk(target)):
+                sensitive.append(('dynamic_configuration',_digest(ast.dump(node,include_attributes=False))))
+        if isinstance(node,ast.Name) and node.id in regex_modules:
+            direct=parents.get(node)
+            safe=(isinstance(node.ctx,ast.Load) and isinstance(direct,ast.Attribute)
+                  and direct.value is node and isinstance(direct.ctx,ast.Load)
+                  and direct.attr in regex_functions|regex_constants)
+            if safe and direct.attr in regex_functions:
+                call=parents.get(direct);safe=isinstance(call,ast.Call) and call.func is direct
+            if not safe:sensitive.append(('dynamic_configuration',_digest(ast.dump(direct or node,include_attributes=False))))
+        # Namespace mutation in one helper can change re.compile in another.
+        # Keep these accesses bound even when that helper never calls compile.
+        if ((isinstance(node,ast.Attribute) and node.attr in {'modules','meta_path','path_hooks','path_importer_cache','__import__','__dict__','__globals__','__setattr__','__delattr__','__getattribute__','__getattr__'})
+            or (isinstance(node,ast.Name) and node.id=='__builtins__')):
+            sensitive.append(('dynamic_configuration',_digest(ast.dump(node,include_attributes=False))))
+        if ((isinstance(node,ast.ImportFrom) and node.module=='re' and any(alias.name=='compile' for alias in node.names))
+            or (isinstance(node,ast.Attribute) and node.attr=='compile' and not (isinstance(parent,ast.Call) and parent.func is node))
+            or (isinstance(node,ast.Name) and node.id=='compile' and isinstance(node.ctx,ast.Load) and not (isinstance(parent,ast.Call) and parent.func is node))):
+            sensitive.append(('dynamic_configuration',_digest(ast.dump(node,include_attributes=False))))
         if isinstance(node,(ast.Assign,ast.AnnAssign,ast.AugAssign,ast.Delete)) and _contains_config(node):
             sensitive.append(('assignment',_digest(ast.dump(node,include_attributes=False))))
         if isinstance(node,ast.Constant) and isinstance(node.value,str) and CONFIG_LITERAL.search(node.value):
@@ -101,7 +185,9 @@ def _semantics(text,rel):
                     sensitive.append(('model_mapping',_digest((key.value,ast.dump(value,include_attributes=False)))))
         if isinstance(node,ast.Call):
             name=_name(node.func);tail=name.rsplit('.',1)[-1]
-            if tail in {'setattr','delattr','exec','eval','compile','__import__','globals','locals','vars','exec_module','import_module'}:
+            if tail=='getattr' and any(isinstance(child,ast.Name) and child.id=='re' for arg in node.args for child in ast.walk(arg)):
+                sensitive.append(('dynamic_configuration',_digest(ast.dump(node,include_attributes=False))))
+            if tail in {'setattr','delattr','exec','eval','compile','__import__','globals','locals','vars','exec_module','import_module','attrgetter','methodcaller'} and node not in regex_calls:
                 sensitive.append(('dynamic_configuration',_digest(ast.dump(node,include_attributes=False))))
             if 'environ' in name or tail in {'getenv','putenv','unsetenv'}:
                 for arg in node.args[:1]:
@@ -144,7 +230,7 @@ def _inventory(app):
     semantic={}
     for rel,raw in raws.items():
         if rel.endswith('.py'):
-            result=_semantics(raw.decode('utf-8'),rel)
+            result=_semantics(raw.decode('utf-8'),rel,regex_namespace_safe=not any(_regex_shadow_module(path) for path in rows))
             if set(ANCHORS.get(rel,()))!=set(result['anchors']):raise ConfigLockError('required_configuration_anchor_missing')
             semantic[rel]=result
     return rows,raws,semantic
@@ -228,6 +314,7 @@ def validate_candidate(lock,source_app,proposedwrites,*,expected_digest=None):
             for destination in (Path(source_app)/rel,Path(source_app).parents[1]/rel):
                 if any(path.is_symlink() for path in (destination,*destination.parents)):
                     raise ConfigLockError('symlink_proposed_path')
+            if _regex_shadow_module(rel):raise ConfigLockError('regex_import_shadow_write_refused')
             if rel in seen:raise ConfigLockError('duplicate_proposed_path')
             seen.add(rel)
             if rel=='hands/workflow_config_lock.py':raise ConfigLockError('configuration_guard_write_refused')
@@ -243,7 +330,7 @@ def validate_candidate(lock,source_app,proposedwrites,*,expected_digest=None):
                     raise ConfigLockError('configuration_data_write_refused')
                 if sensitive and recorded is None:raise ConfigLockError('new_configuration_data_refused')
             if rel.lower().endswith('.py'):
-                proposed=_semantics(body,rel);baseline=lock['semantic_files'].get(rel)
+                proposed=_semantics(body,rel,regex_namespace_safe=not any(_regex_shadow_module(path) for path in rows));baseline=lock['semantic_files'].get(rel)
                 if baseline is None:
                     if proposed['sensitive'] or proposed['anchors']:raise ConfigLockError('new_configuration_surface_refused')
                 elif _digest({k:v for k,v in proposed.items() if k!='imports'})!=_digest({k:v for k,v in baseline.items() if k!='imports'}):raise ConfigLockError('selector_configuration_write_refused')

@@ -393,13 +393,17 @@ class Runtime:
         return actual
     def visible(self,path):
         self.artifact_scope(path)
-        self.check();mac=self.load('macos_read');front=mac.frontmost_app(timeout=3);self.check()
-        if not front.get('ok') or 'deckcraft' not in str(front.get('app','')).lower():return {'verified':False}
-        script='tell application "System Events"\ntell process "DeckCraft"\nif (count of windows) is 0 then return ""\nreturn value of attribute "AXDocument" of front window\nend tell\nend tell'
+        self.check();mac=self.load('macos_read');before=file_receipt(path)
+        # Orb may regain focus after opening the artifact. Observe the exact
+        # application's non-minimized document without activating another app.
+        script='tell application "System Events"\ntell process "DeckCraft"\nif bundle identifier is not "ai.storyteller.deckcraft" then return ""\nif (count of windows) is 0 then return ""\nif value of attribute "AXMinimized" of front window then return ""\nreturn value of attribute "AXDocument" of front window\nend tell\nend tell'
         read=mac._run(['/usr/bin/osascript','-e',script],timeout=3);self.check()
         raw=str(read.stdout or '').strip();observed=unquote(urlparse(raw).path) if raw.startswith('file:') else raw
         matches=bool(observed and Path(observed).resolve()==path.resolve())
-        return {'verified':read.returncode==0 and matches,'app':'DeckCraft','document_matches':matches}
+        unchanged=file_receipt(path)==before
+        return {'verified':read.returncode==0 and matches and unchanged,'app':'DeckCraft',
+                'bundle_identifier':'ai.storyteller.deckcraft','document_matches':matches,
+                'artifact_unchanged':unchanged,'file_sha256':before['sha256']}
     def note_contract(self):
         owner=getattr(self.check,'__self__',None)
         if isinstance(owner,Delivery) and (owner.root/'delivery_backend.json').exists():return HeadlessNote(self).contract()

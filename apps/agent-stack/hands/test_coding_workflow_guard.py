@@ -17,8 +17,24 @@ D=importlib.util.module_from_spec(spec);sys.modules[spec.name]=D;spec.loader.exe
 ID=T.ID
 
 class CodingWorkflowGuardTests(unittest.TestCase):
- def fixture(self,tmp):
-  h,root,repo,runtime,scratch,hand=T.ExecutionTests().fixture(tmp)
+ def fixture(self,tmp,*,objective="Original technical build"):
+  h,root,repo,runtime,scratch,hand=T.ExecutionTests().fixture(tmp,objective=objective)
+  # A sealed executor is an actual complete dependency stack, not placeholder
+  # model files. Keep the source's existing dirty feature separate from this commit.
+  for name in T.E.EXECUTOR_FILES:
+   raw=(Path(__file__).resolve().parents[1]/name).read_bytes()
+   for checkout in (repo,runtime):
+    target=checkout/'apps/agent-stack'/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(raw)
+  env={'PATH':'/usr/bin:/bin','HOME':str(Path(tmp).resolve()),'GIT_CONFIG_GLOBAL':'/dev/null','GIT_CONFIG_NOSYSTEM':'1'}
+  command=['/usr/bin/git','-c','core.hooksPath=/dev/null','-c','core.fsmonitor=false','-C',str(repo)]
+  subprocess.run(command+['add','--']+['apps/agent-stack/'+name for name in T.E.EXECUTOR_FILES],env=env,check=True,capture_output=True)
+  subprocess.run(command+['commit','-qm','fixture actual bounded executor stack'],env=env,check=True,capture_output=True)
+  # Explicitly review the new committed fixture revision before any contract.
+  (root/'source_revision_review.json').unlink()
+  a,b=T.ExecutionTests().context(hand)
+  with a,b:
+   revision=T.R._git(repo)['head'];files,_=T.W.revision_source(repo,revision)
+   T.E.approve_source_revision(h,ID,revision,{rel:row for rel,(_,row) in files.items()},authority=T.E.source_review_authority(),evidence={'fixture':'reviewed full bounded executor revision; source dirty feature remains separate'})
   source={'selected':{'source_record_verified':True,'origin_association_verified':True,
                      'original_implementation_url':'https://github.com/owner/original','method_excerpt':'Implement a bounded pure function and tests.'}}
   D.write_json(root/'source_research.json',source)

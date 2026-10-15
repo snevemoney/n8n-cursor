@@ -17,12 +17,15 @@ E=load('workflow_execution');W=load('workflow_workspace');C=load('workflow_confi
 ID='a'*32
 
 class ExecutionTests(unittest.TestCase):
- def fixture(self,tmp):
+ def fixture(self,tmp,*,objective="Original technical build"):
   base=Path(tmp).resolve();repo=base/'source';app=repo/'apps/agent-stack';app.mkdir(parents=True)
   for rel in set(W.CRITICAL+W.LOCKED+C.WHOLE_FILES):
    p=app/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('# preserved project source\n')
   for rel,anchors in C.ANCHORS.items():
    p=app/rel;p.write_text('CODE_MODEL="anthropic/claude-opus"\n'+''.join('def '+name+'(*args):\n    return None\n' if name!='ModelGateway' else 'class ModelGateway:\n    pass\n' for name in anchors))
+  for rel in E.EXECUTOR_FILES+('hands/workflow_delivery.py','hands/workflow_research.py','hands/project_methods.py'):
+   if not (app/rel).exists():
+    p=app/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('# fixture host executor dependency\n')
   (app/'feature.py').write_text('def value():\n    return 1\n')
   event=repo/'fixtures/events/actual-source-event.json';event.parent.mkdir(parents=True);event.write_text('{"actual":"fixture"}')
   env={'PATH':'/usr/bin:/bin','HOME':str(base),'GIT_CONFIG_GLOBAL':'/dev/null','GIT_CONFIG_NOSYSTEM':'1'}
@@ -41,11 +44,15 @@ class ExecutionTests(unittest.TestCase):
    def log_action(self,*a,**k):pass
   hand.PERM=lambda:Perm()
   hive=base/'hive';root=hive/'coding-missions'/ID;root.mkdir(parents=True)
-  request={'mission_id':ID,'worker_kind':'research_build','request_scope':'transient_task','objective':'Original technical build'}
+  request={'mission_id':ID,'worker_kind':'research_build','request_scope':'transient_task','objective':objective}
   binding={'repo':str(repo),'branch':'owned/source','authority':'literal_owner_answer'}
   for name,row in [('request',request),('binding',binding),('state',{'status':'WAITING_SOURCE','mission_id':ID,'worker_kind':'research_build'}),('control',{'cancel':False})]:(root/(name+'.json')).write_text(json.dumps(row))
   approval={'mission_id':ID,'kind':'workflow_edits','scope':'transient_task','authority':'explicit_owner_answer','target':str(repo),'branch':'owned/source','configuration_changes_authorized':False,'request_sha256':hashlib.sha256((root/'request.json').read_bytes()).hexdigest(),'binding_sha256':hashlib.sha256((root/'binding.json').read_bytes()).hexdigest()}
   (root/'owner_approval.json').write_text(json.dumps(approval))
+  a,b=self.context(hand)
+  with a,b:
+   revision=R._git(repo)['head'];files,_=W.revision_source(repo,revision)
+   E.approve_source_revision(hive,ID,revision,{rel:row for rel,(_,row) in files.items()},authority=E.source_review_authority(),evidence={'fixture':'explicit committed baseline; dirty feature preserved separately'})
   return hive,root,repo,runtime,scratch,hand
 
  def context(self,hand):
@@ -70,7 +77,8 @@ class ExecutionTests(unittest.TestCase):
     baseline,receipt,result=self.prepare(hive,repo,runtime,scratch)
     self.assertTrue(result['ok'],result);copy=Path(result['working_copy'])
     self.assertEqual((copy/'apps/agent-stack/brain/online.py').read_bytes(),runtime_before)
-    self.assertEqual((copy/'apps/agent-stack/feature.py').read_bytes(),(repo/'apps/agent-stack/feature.py').read_bytes())
+    self.assertEqual((copy/'apps/agent-stack/feature.py').read_text(),'def value():\n    return 1\n')
+    self.assertIn('preserve source dirty work',(repo/'apps/agent-stack/feature.py').read_text())
     self.assertEqual(W._snapshot(repo,'apps/agent-stack',hand,{}),source_before)
     self.assertEqual((runtime/'apps/agent-stack/brain/online.py').read_bytes(),runtime_before)
     self.assertIn('fixtures/events/actual-source-event.json',receipt['dependencies'])
@@ -89,17 +97,20 @@ class ExecutionTests(unittest.TestCase):
    perm.is_secret_path=lambda path:old_secret(path) or Path(path).name=='test_literal_tokens_and_budget.py';hand.PERM=lambda:perm
    a,b=self.context(hand)
    with a,b:
+    (root/'source_revision_review.json').unlink() # fixture-only replacement before execution contract
+    revision=R._git(repo)['head'];files,_=W.revision_source(repo,revision)
+    E.approve_source_revision(hive,ID,revision,{rel:row for rel,(_,row) in files.items()},authority=E.source_review_authority(),evidence={'fixture':'new reviewed source excludes public policy path'})
     baseline,receipt,result=self.prepare(hive,repo,runtime,scratch)
     rel='apps/agent-stack/tests/test_literal_tokens_and_budget.py'
     self.assertEqual(receipt['excluded_tracked_app_paths'],[rel]);self.assertNotIn(rel,receipt['tracked_app_paths']);self.assertNotIn(rel,receipt['app_manifest']);self.assertTrue(result['ok'],result)
     self.assertFalse((Path(result['working_copy'])/rel).exists());self.assertTrue(secret.exists());self.assertTrue(perm.is_secret_path(secret))
- def test_missing_normal_tracked_file_still_blocks_receipt(self):
+ def test_deleted_checkout_body_does_not_change_reviewed_immutable_revision(self):
   with tempfile.TemporaryDirectory() as tmp:
    hive,root,repo,runtime,scratch,hand=self.fixture(tmp);(repo/'apps/agent-stack/feature.py').unlink();a,b=self.context(hand)
    with a,b:
-    baseline=E.capture_runtime_baseline(runtime,R._git(runtime))
-    with self.assertRaisesRegex(ValueError,'tracked_source_missing'):E.make_receipt(hive,ID,runtime_baseline=baseline)
-    self.assertFalse((root/'execution_contract.json').exists());self.assertEqual(list(scratch.iterdir()),[])
+    baseline,receipt,result=self.prepare(hive,repo,runtime,scratch)
+    self.assertTrue(result['ok'],result);self.assertTrue((Path(result['working_copy'])/'apps/agent-stack/feature.py').exists())
+    self.assertFalse((repo/'apps/agent-stack/feature.py').exists())
  def test_runtime_only_and_different_selector_files_copy_exact_current_bytes_without_source_changes(self):
   with tempfile.TemporaryDirectory() as tmp:
    hive,root,repo,runtime,scratch,hand=self.fixture(tmp);app=runtime/'apps/agent-stack'
@@ -132,7 +143,7 @@ class ExecutionTests(unittest.TestCase):
     self.assertEqual(contract['runtime_configuration_digest'],baseline['configuration_digest'])
 
  def test_cancellation_source_fixture_runtime_or_approval_change_stops_callback(self):
-  for change in ('cancel','source','fixture','runtime','runtime_preimage','runtime_head','approval'):
+  for change in ('cancel','runtime','runtime_preimage','runtime_head','approval'):
    with self.subTest(change=change),tempfile.TemporaryDirectory() as tmp:
     hive,root,repo,runtime,scratch,hand=self.fixture(tmp);a,b=self.context(hand)
     with a,b:
@@ -164,5 +175,46 @@ class ExecutionTests(unittest.TestCase):
     result=E.prepare_execution(hive,ID,source_receipt=receipt,runtime_baseline=baseline,scratch_root=scratch,active_fn=lambda:True)
     self.assertFalse(result['ok']);self.assertEqual(result['reason'],'incomplete_runtime_configuration_overlay')
     self.assertFalse((scratch/('workflow-'+ID)).exists())
+
+ def test_frozen_executor_uses_host_harness_separate_from_project_source(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   hive,root,repo,runtime,scratch,hand=self.fixture(tmp);a,b=self.context(hand)
+   live=runtime/'apps/agent-stack/hands/coding_mission.py';live.write_text('# current reviewed host harness\n')
+   with a,b:
+    baseline,receipt,result=self.prepare(hive,repo,runtime,scratch);self.assertTrue(result['ok'],result)
+    executor=E.prepared_executor(hive,ID,contract_digest=result['execution_contract_digest'],configuration_digest=result['configuration_digest'])
+    self.assertEqual(Path(executor['entrypoint']).read_text(),'# current reviewed host harness\n')
+    self.assertNotEqual((Path(result['working_copy'])/'apps/agent-stack/hands/coding_mission.py').read_text(),live.read_text())
+    live.write_text('# subsequent engineering change\n')
+    self.assertTrue(E.validate_executor(executor));self.assertEqual(Path(executor['entrypoint']).read_text(),'# current reviewed host harness\n')
+
+ def test_source_review_required_before_copy(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   hive,root,repo,runtime,scratch,hand=self.fixture(tmp);(root/'source_revision_review.json').unlink();a,b=self.context(hand)
+   with a,b:
+    baseline=E.capture_runtime_baseline(runtime,R._git(runtime))
+    with self.assertRaises(OSError):E.make_receipt(hive,ID,runtime_baseline=baseline)
+    self.assertFalse((root/'execution_contract.json').exists());self.assertEqual(list(scratch.iterdir()),[])
+ def test_reviewed_pin_survives_source_changes_but_review_tampering_blocks(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   hive,root,repo,runtime,scratch,hand=self.fixture(tmp);a,b=self.context(hand)
+   with a,b:
+    baseline,receipt,result=self.prepare(hive,repo,runtime,scratch);self.assertTrue(result['ok'],result)
+    (repo/'apps/agent-stack/feature.py').write_text('later owner work')
+    (repo/'fixtures/events/actual-source-event.json').write_text('later fixture work')
+    self.assertTrue(self.guard(hive,result)['ok'])
+    original=(root/'source_revision_review.json').read_bytes();review=json.loads(original);review['source_revision']='f'*40
+    (root/'source_revision_review.json').write_text(json.dumps(review))
+    with self.assertRaises(ValueError):E.make_receipt(hive,ID,runtime_baseline=baseline)
+ def test_stop_during_source_review_does_not_mint_approval(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   hive,root,repo,runtime,scratch,hand=self.fixture(tmp);(root/'source_revision_review.json').unlink();a,b=self.context(hand)
+   with a,b:
+    revision=R._git(repo)['head'];files,meta=W.revision_source(repo,revision);original=W.revision_source
+    def cancelled(*args,**kwargs):
+     (root/'control.json').write_text('{"cancel":true}');return files,meta
+    with patch.object(W,'revision_source',side_effect=cancelled),self.assertRaises(ValueError):
+     E.approve_source_revision(hive,ID,revision,{rel:row for rel,(_,row) in files.items()},authority=E.source_review_authority(),evidence={'fixture':'stop race'})
+    self.assertFalse((root/'source_revision_review.json').exists())
 
 if __name__=='__main__':unittest.main()

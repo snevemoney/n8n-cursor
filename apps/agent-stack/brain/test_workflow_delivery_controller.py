@@ -15,11 +15,8 @@ class ConnectedOwner(unittest.TestCase):
  def test_actual_owner_from_builder_receipt_through_all_delivery_phases_and_terminal_dedupe(self):
   fixture=F.CodingWorkflowGuardTests();D=F.D;T=F.T;ID=F.ID
   with tempfile.TemporaryDirectory() as tmp:
-   h,root,repo,runtime,scratch,hand=fixture.fixture(tmp);a,b=T.ExecutionTests().context(hand)
-   request=D.read_json(root/'request.json');request['objective']='Implement the requested behavior with tests, a professional ArtCraft demonstration and one Obsidian implementation note.';D.write_json(root/'request.json',request)
-   sha=hashlib.sha256((root/'request.json').read_bytes()).hexdigest()
-   for name in ('owner_approval.json','original_implementation.json'):
-    row=D.read_json(root/name);row['request_sha256']=sha;D.write_json(root/name,row)
+   h,root,repo,runtime,scratch,hand=fixture.fixture(tmp,objective='Implement the requested behavior with tests, a professional ArtCraft demonstration and one Obsidian implementation note.');a,b=T.ExecutionTests().context(hand)
+
    connector=DEL.ConnectorFixture();original_loader=D._load
    def load(name,path):
     if path.name=='workflow_delivery.py':

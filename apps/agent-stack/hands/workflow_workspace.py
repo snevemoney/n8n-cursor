@@ -6,6 +6,9 @@ import json
 import os
 import re
 import stat
+import subprocess
+import tempfile
+import time
 from pathlib import Path
 
 STACK=Path(__file__).resolve().parents[1]
@@ -36,6 +39,8 @@ def _configuration_guard():
 
 def _regular_bytes(path,limit=MAX_FILE):
     if any(p.is_symlink() for p in (path,*path.parents)):raise WorkspaceBlocked('symlink_source')
+    if getattr(path.stat(),'st_flags',0)&getattr(stat,'SF_DATALESS',0x40000000):
+        raise WorkspaceBlocked('source_contents_unavailable')
     with os.fdopen(os.open(path,os.O_RDONLY|os.O_NOFOLLOW),'rb') as stream:
         before=os.fstat(stream.fileno())
         if not stat.S_ISREG(before.st_mode) or before.st_size>limit:raise WorkspaceBlocked('source_file_budget')
@@ -45,6 +50,159 @@ def _regular_bytes(path,limit=MAX_FILE):
     if len(raw)>limit or identity(before)!=identity(after) or identity(after)!=identity(current):
         raise WorkspaceBlocked('source_changed_during_read')
     return raw,{'sha256':hashlib.sha256(raw).hexdigest(),'mode':stat.S_IMODE(before.st_mode),'size':len(raw)}
+
+
+def _bundle_digest(row):
+    return hashlib.sha256(json.dumps(row,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+
+
+def _source_relative(value):
+    if not isinstance(value,str):raise WorkspaceBlocked('unsafe_immutable_source_path')
+    path=Path(value)
+    if (not isinstance(value,str) or not value or path.is_absolute() or '..' in path.parts
+        or any(part in EXCLUDED for part in path.parts) or str(path)!=value):
+        raise WorkspaceBlocked('unsafe_immutable_source_path')
+    return path
+
+
+def revision_source(repo,revision,*,dependencies=(),source_exceptions=None,active_fn=lambda:True):
+    """Read a pinned Git object tree, never bodies or dirty state of its checkout."""
+    if not re.fullmatch(r'[a-f0-9]{40}(?:[a-f0-9]{24})?',str(revision)):
+        raise WorkspaceBlocked('immutable_revision_required')
+    repo=Path(repo);hand=_hand();reviewed=source_exceptions() if source_exceptions else {}
+    paths=['apps/agent-stack','fixtures/events']+[str(_source_relative(rel)) for rel in dependencies]
+    env={'PATH':'/usr/bin:/bin','HOME':'/nonexistent','GIT_CONFIG_NOSYSTEM':'1','GIT_CONFIG_GLOBAL':'/dev/null','GIT_PAGER':'cat','GIT_OPTIONAL_LOCKS':'0'}
+    command=['/usr/bin/git','--no-replace-objects','-c','core.hooksPath=/dev/null','-c','core.fsmonitor=false','-C',str(repo)]
+    def git(*args):
+        if not active_fn():raise WorkspaceBlocked('cancelled')
+        result=subprocess.run(command+list(args),capture_output=True,env=env,timeout=10)
+        if result.returncode:raise WorkspaceBlocked('immutable_git_object_unavailable')
+        return result.stdout
+    if git('rev-parse','--verify',revision+'^{commit}').decode().strip()!=revision:
+        raise WorkspaceBlocked('immutable_commit_mismatch')
+    tree=git('rev-parse',revision+':apps/agent-stack').decode().strip()
+    listing=git('ls-tree','-r','-l','-z',revision,'--',*paths)
+    if len(listing)>2_000_000:raise WorkspaceBlocked('source_snapshot_budget_exceeded')
+    files={};excluded=[];total=0;started=time.monotonic()
+    for entry in filter(None,listing.split(b'\0')):
+        meta,name=entry.split(b'\t',1);mode,kind,oid,size=meta.decode().split();rel=name.decode('utf-8')
+        if any(part in EXCLUDED for part in Path(rel).parts):continue
+        _source_relative(rel)
+        if kind!='blob' or mode not in {'100644','100755'}:raise WorkspaceBlocked('unsupported_immutable_source_entry')
+        if any(part in EXCLUDED for part in Path(rel).parts):continue
+        if not size.isdigit() or int(size)>MAX_FILE:raise WorkspaceBlocked('source_file_budget')
+        exception=reviewed.get(rel)
+        if hand.PERM().is_secret_path(repo/rel) and not exception:excluded.append(rel);continue
+        if len(files)>=MAX_FILES or total+int(size)>MAX_BYTES or time.monotonic()-started>90:
+            raise WorkspaceBlocked('source_snapshot_budget_exceeded')
+        raw=git('cat-file','blob',oid)
+        row={'sha256':hashlib.sha256(raw).hexdigest(),'mode':0o755 if mode=='100755' else 0o644,'size':len(raw)}
+        if row['size']!=int(size):raise WorkspaceBlocked('immutable_blob_size_mismatch')
+        if exception and (exception.get('file')!=row or hand._SECRETISH.search(raw.decode())
+                          or exception.get('public_proof',{}).get('verification_method')!='independent_public_git_blob'):
+            raise WorkspaceBlocked('source_exception_changed')
+        files[rel]=(raw,row);total+=len(raw)
+    if any('apps/agent-stack/'+rel not in files for rel in set(CRITICAL+LOCKED)):
+        raise WorkspaceBlocked('incomplete_app_source')
+    if any(rel not in files for rel in dependencies):raise WorkspaceBlocked('immutable_dependency_missing')
+    return files,{'source_revision':revision,'source_tree':tree,'excluded':sorted(excluded)}
+
+
+def seal_source(files,*,store_root,source_revision,source_tree,active_fn=lambda:True):
+    """Content-addressed, sealed input for the existing executor and owned copy."""
+    if not isinstance(files,dict) or not files or len(files)>MAX_FILES:raise WorkspaceBlocked('invalid_source_bundle')
+    rows={};total=0
+    for rel,(raw,row) in files.items():
+        _source_relative(rel)
+        if (not isinstance(raw,bytes) or row.get('mode') not in {0o644,0o755}
+            or row.get('sha256')!=hashlib.sha256(raw).hexdigest() or row.get('size')!=len(raw)
+            or len(raw)>MAX_FILE):raise WorkspaceBlocked('source_bundle_preimage_mismatch')
+        rows[rel]=row;total+=len(raw)
+    if total>MAX_BYTES:raise WorkspaceBlocked('source_snapshot_budget_exceeded')
+    manifest={'version':1,'source_revision':source_revision,'source_tree':source_tree,'files':rows}
+    digest=_bundle_digest(manifest);manifest['digest']=digest
+    store=Path(store_root)
+    if not store.is_absolute() or any(p.is_symlink() for p in (store,*store.parents)):
+        raise WorkspaceBlocked('unsafe_source_store')
+    store.mkdir(parents=True,exist_ok=True,mode=0o700);target=store/digest
+    receipt={'root':str(target),'digest':digest,'source_revision':source_revision,'source_tree':source_tree}
+    if target.exists():verify_source_bundle(receipt);return receipt
+    temporary=Path(tempfile.mkdtemp(prefix='.pending-source-',dir=store))
+    for rel,(raw,row) in files.items():
+        if not active_fn():raise WorkspaceBlocked('cancelled')
+        dest=temporary/rel;dest.parent.mkdir(parents=True,exist_ok=True)
+        with os.fdopen(os.open(dest,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600),'wb') as out:
+            out.write(raw);out.flush();os.fsync(out.fileno())
+        dest.chmod(row['mode']&0o555)
+    with (temporary/'.source-manifest.json').open('x') as out:
+        json.dump(manifest,out,sort_keys=True,separators=(',',':'));out.flush();os.fsync(out.fileno())
+    (temporary/'.source-manifest.json').chmod(0o444)
+    for directory,_,_ in os.walk(temporary,topdown=False):Path(directory).chmod(0o555)
+    # Same no-replace primitive used by existing preparation recovery.
+    import ctypes
+    library=ctypes.CDLL(None,use_errno=True);rename=getattr(library,'renamex_np',None)
+    if rename is None:raise WorkspaceBlocked('exclusive_source_seal_unavailable')
+    rename.argtypes=[ctypes.c_char_p,ctypes.c_char_p,ctypes.c_uint];rename.restype=ctypes.c_int
+    if rename(os.fsencode(temporary),os.fsencode(target),4)!=0:
+        if target.exists():verify_source_bundle(receipt);return receipt
+        raise WorkspaceBlocked('source_seal_failed')
+    verify_source_bundle(receipt);return receipt
+
+
+def verify_source_bundle(receipt):
+    if not isinstance(receipt,dict) or set(receipt)!={'root','digest','source_revision','source_tree'}:
+        raise WorkspaceBlocked('immutable_source_receipt_required')
+    if (not isinstance(receipt['root'],str) or not Path(receipt['root']).is_absolute()
+        or not re.fullmatch(r'[a-f0-9]{64}',str(receipt['digest']))
+        or any(not re.fullmatch(r'[a-f0-9]{40}(?:[a-f0-9]{24})?',str(receipt[key])) for key in ('source_revision','source_tree'))):
+        raise WorkspaceBlocked('invalid_source_bundle')
+    root=Path(receipt['root'])
+    raw,manifest_row=_regular_bytes(root/'.source-manifest.json')
+    try:manifest=json.loads(raw)
+    except (ValueError,UnicodeError):raise WorkspaceBlocked('invalid_source_bundle')
+    if (not isinstance(manifest,dict) or set(manifest)!={'version','source_revision','source_tree','files','digest'}
+        or type(manifest['version']) is not int or manifest['version']!=1 or manifest_row['mode']!=0o444):
+        raise WorkspaceBlocked('invalid_source_bundle')
+    unsigned=dict(manifest);digest=unsigned.pop('digest',None)
+    if (digest!=receipt['digest'] or _bundle_digest(unsigned)!=digest or root.name!=digest
+        or any(manifest.get(key)!=receipt[key] for key in ('source_revision','source_tree'))):
+        raise WorkspaceBlocked('immutable_source_manifest_changed')
+    rows=manifest['files'];actual=set();total=0
+    if not isinstance(rows,dict) or not rows or len(rows)>MAX_FILES:raise WorkspaceBlocked('invalid_source_bundle')
+    expected_dirs={'.'}
+    for rel,row in rows.items():
+        path=_source_relative(rel)
+        if (not isinstance(row,dict) or set(row)!={'sha256','mode','size'}
+            or not re.fullmatch(r'[a-f0-9]{64}',str(row['sha256']))
+            or type(row['mode']) is not int or row['mode'] not in {0o644,0o755}
+            or type(row['size']) is not int or not 0<=row['size']<=MAX_FILE):
+            raise WorkspaceBlocked('invalid_source_bundle')
+        expected_dirs.update(str(parent) for parent in path.parents)
+    actual_dirs=set()
+    for directory,dirs,names in os.walk(root,followlinks=False):
+        directory=Path(directory);actual_dirs.add(str(directory.relative_to(root)))
+        if stat.S_IMODE(directory.stat().st_mode)!=0o555:raise WorkspaceBlocked('immutable_source_directory_changed')
+        if any((directory/name).is_symlink() for name in dirs+names):raise WorkspaceBlocked('symlink_source')
+        actual.update(str((directory/name).relative_to(root)) for name in names)
+    if actual!=set(rows)|{'.source-manifest.json'} or actual_dirs!=expected_dirs:
+        raise WorkspaceBlocked('immutable_source_inventory_changed')
+    for rel,row in rows.items():
+        body,physical=_regular_bytes(root/rel);total+=len(body)
+        if physical!={**row,'mode':row['mode']&0o555} or total>MAX_BYTES:
+            raise WorkspaceBlocked('immutable_source_contents_changed')
+    return manifest
+
+
+def frozen_source_bytes(receipt,relative,manifest=None):
+    manifest=verify_source_bundle(receipt) if manifest is None else manifest
+    unsigned=dict(manifest);digest=unsigned.pop('digest',None)
+    if digest!=receipt['digest'] or _bundle_digest(unsigned)!=digest:raise WorkspaceBlocked('immutable_source_manifest_changed')
+    _source_relative(relative)
+    if relative not in manifest['files']:raise WorkspaceBlocked('immutable_source_path_missing')
+    raw,physical=_regular_bytes(Path(receipt['root'])/relative)
+    row=manifest['files'][relative]
+    if physical!={**row,'mode':row['mode']&0o555}:raise WorkspaceBlocked('immutable_source_contents_changed')
+    return raw,manifest['files'][relative]
 
 
 def _git_identity(repo,receipt,perm):
@@ -62,6 +220,10 @@ def _git_identity(repo,receipt,perm):
         raw,_=_regular_bytes(git_dir/'commondir',4096);common=(git_dir/raw.decode().strip()).resolve()
     if perm.is_secret_path(common):raise WorkspaceBlocked('secret_git_metadata')
     if str(common)!=receipt.get('git_common_dir'):raise WorkspaceBlocked('source_git_common_dir_mismatch')
+    if receipt.get('verification_method')=='owner_verified_immutable_revision':
+        manifest=verify_source_bundle(receipt.get('source_bundle'))
+        if manifest['source_revision']!=receipt.get('source_head'):raise WorkspaceBlocked('immutable_commit_mismatch')
+        return {'head':receipt['source_head'],'branch':receipt['source_branch']}
     raw,_=_regular_bytes(git_dir/'HEAD',4096);head=raw.decode().strip();branch=''
     if head.startswith('ref: '):
         ref=head[5:]
@@ -146,7 +308,7 @@ def prepare(mission_id,*,source_receipt,scratch_root,active_fn,runtime_baseline=
     try:
         if not active():raise WorkspaceBlocked('cancelled')
         if not re.fullmatch(r'[a-f0-9]{32}',str(mission_id)):raise WorkspaceBlocked('invalid_mission_id')
-        if not isinstance(source_receipt,dict) or source_receipt.get('verified') is not True or source_receipt.get('verification_method')!='owner_verified_current_checkout':
+        if not isinstance(source_receipt,dict) or source_receipt.get('verified') is not True or source_receipt.get('verification_method') not in {'owner_verified_current_checkout','owner_verified_immutable_revision'}:
             raise WorkspaceBlocked('source_authority_unresolved')
         repo=Path(str(source_receipt.get('source_repo') or '')).expanduser()
         if not repo.is_absolute() or any(p.is_symlink() for p in (repo,*repo.parents)):
@@ -160,7 +322,11 @@ def prepare(mission_id,*,source_receipt,scratch_root,active_fn,runtime_baseline=
         _git_identity(repo,source_receipt,hand.PERM())
         dependencies=source_receipt.get('dependencies') or {}
         if not isinstance(dependencies,dict):raise WorkspaceBlocked('invalid_dependency_manifest')
-        files,excluded=_snapshot(repo,subtree,hand,dependencies,source_exceptions)
+        frozen=source_receipt.get('verification_method')=='owner_verified_immutable_revision'
+        frozen_manifest=verify_source_bundle(source_receipt.get('source_bundle')) if frozen else None
+        if frozen:
+            files=dict(frozen_manifest['files']);excluded=list(source_receipt.get('source_excluded_paths',[]))
+        else:files,excluded=_snapshot(repo,subtree,hand,dependencies,source_exceptions)
         expected=source_receipt.get('app_manifest')
         app_files={rel:row for rel,row in files.items() if rel.startswith(subtree+'/')}
         if expected!=app_files or any(files.get(rel)!=row for rel,row in dependencies.items()):
@@ -209,12 +375,13 @@ def prepare(mission_id,*,source_receipt,scratch_root,active_fn,runtime_baseline=
         target.mkdir(parents=True,mode=0o700)
         for rel,row in files.items():
             if not active():raise WorkspaceBlocked('cancelled')
-            raw,now=_regular_bytes((runtime_repo if rel in overlay else repo)/rel)
+            raw,now=(_regular_bytes(runtime_repo/rel) if rel in overlay else
+                     frozen_source_bytes(source_receipt['source_bundle'],rel,frozen_manifest) if frozen else _regular_bytes(repo/rel))
             if now!=row:raise WorkspaceBlocked('source_changed_during_copy')
             destination=target/rel;destination.parent.mkdir(parents=True,exist_ok=True)
             with os.fdopen(os.open(destination,os.O_WRONLY|os.O_CREAT|os.O_EXCL,row['mode']),'wb') as out:out.write(raw)
             destination.chmod(row['mode'])
-        after,_=_snapshot(repo,subtree,hand,dependencies,source_exceptions)
+        after=verify_source_bundle(source_receipt['source_bundle'])['files'] if frozen else _snapshot(repo,subtree,hand,dependencies,source_exceptions)[0]
         if after!=source_files:raise WorkspaceBlocked('source_changed_during_copy')
         _git_identity(repo,source_receipt,hand.PERM())
         if runtime_repo is not None:

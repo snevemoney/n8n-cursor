@@ -262,11 +262,19 @@ class MissionController:
                         and dispatch.get("request_sha256")==hashlib.sha256((root/"request.json").read_bytes()).hexdigest())
             except (OSError,ValueError):
                 return False
-        def persist(status,spoken,**fields):
+        def persist(status,spoken,*,resolved_errors=False,**fields):
             with (root/"steering.lock").open("a") as lock:
                 fcntl.flock(lock,fcntl.LOCK_EX)
                 if not active():return handle.workflow_status(ident)
                 state=self.adapter.read_json(root/"state.json")
+                if resolved_errors:
+                    old={key:state[key] for key in ('execution_error','coding_failure') if key in state}
+                    if isinstance(state.get('preparation'),dict) and state['preparation'].get('ok') is False:
+                        old['preparation']=state['preparation']
+                    if old:
+                        state['prior_errors']=[*state.get('prior_errors',[]),
+                                               {'resolved_at':time.time(),'replacement_stage':status,**old}]
+                        for key in old:state.pop(key,None)
                 state.update(status=status,spoken=spoken,question="",verified=False,task_verified=False,**fields)
                 self.adapter.write_json(root/"state.json",state)
                 return handle.workflow_status(ident)
@@ -331,17 +339,21 @@ class MissionController:
                 if (child_root/"checkpoint.json").is_file():
                     resumed=coding.resume(child)
                     child=resumed["mission_id"]
-            persist("BUILDING","The original source is verified. The coding worker is implementing and testing the selected method in the isolated working copy.",coding_mission_id=child,working_copy=owner["working_copy"])
+            persist("WAITING_CODING_START","The coding phase is queued. Its worker has not yet confirmed that it started.",resolved_errors=True,coding_mission_id=child,working_copy=owner["working_copy"])
             deadline=time.monotonic()+1800
             while active() and time.monotonic()<deadline:
                 result=coding.status(child)
                 if result.get("status") in {"COMPLETED","FAILED","CANCELLED","BLOCKED","UNAVAILABLE"}:break
+                if result.get('active') is True:
+                    persist("BUILDING", "The owned coding worker has started; its outcome remains unverified.",
+                            coding_mission_id=child, coding_progress=result.get('progress'),
+                            coding_worker_heartbeat_at=result.get('worker_heartbeat_at'))
                 await asyncio.sleep(1)
             else:
                 if not active():
                     coding.steer(child,cancel=True)
                     return handle.workflow_status(ident)
-                return persist("BUILDING","The coding worker is still active. Its work and progress are preserved.")
+                return persist("CODING_RECOVERY_REQUIRED","The workflow wait ended without a terminal coding receipt. Its work and progress are preserved; check the coding worker before recovery.",coding_mission_id=child)
             if result.get("status")=="COMPLETED" and result.get("builder_verified"):
                 delivery=self.adapter._load('workflow_delivery',self.adapter.STACK/'hands/workflow_delivery.py')
                 outcome=delivery.Delivery(self.adapter,hive,ident,active_fn=active).advance(result)
@@ -377,10 +389,12 @@ class MissionController:
                 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except BlockingIOError:
                 return {'status': 'ALREADY_RUNNING', 'verified': False}
-            if self.adapter.read_json(root / 'request.json').get('worker_kind') == 'coding':
-                return await self._execute_coding_locked(root)
-            if self.adapter.read_json(root / 'request.json').get('worker_kind') == 'research_build':
-                return await self._execute_research_build(root)
+            kind = self.adapter.read_json(root / 'request.json').get('worker_kind')
+            if kind in {'coding', 'research_build'}:
+                with self.adapter.worker_lifecycle(root):
+                    if kind == 'coding':
+                        return await self._execute_coding_locked(root)
+                    return await self._execute_research_build(root)
             return await self._execute_owned_mission(root)
 
     async def _execute_coding_locked(self, root):

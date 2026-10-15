@@ -15,5 +15,5 @@ class QueueLock(unittest.TestCase):
     child=subprocess.Popen([sys.executable,'-I','-S','-c',code,str(root/'worker.lock'),str(root/'steering.lock')],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
     out,err=child.communicate(timeout=4);self.assertEqual(child.returncode,0,err);self.assertEqual(out.strip(),'worker-acquired');return child
    with a,b,fixture.setup(hand),patch.object(D,'_spawn_worker',side_effect=spawn),patch.object(D,'_identity',return_value='offline exited child'):
-    got=MissionController(D).queue_research_build(h,ID);self.assertEqual(got['status'],'QUEUED')
+    got=MissionController(D).queue_research_build(h,ID);self.assertEqual(got['status'],'UNAVAILABLE');self.assertFalse(got['active'])  # the probe child already exited
 if __name__=='__main__':unittest.main()
