@@ -50,9 +50,13 @@ OPERATIONS = ('CLICK', 'OPEN_TAB', 'INPUT', 'SELECT', 'SWITCH_TAB', 'SCROLL', 'N
 TARGET_OPS = {'CLICK', 'OPEN_TAB', 'INPUT', 'SELECT', 'SWITCH_TAB'}
 PACK_VERSION = 'browser.reflex.v1'
 JEV_MODEL = 'typesafe/jev-1.13'
-HARD = re.compile(r'\b(send|post|publish|pay|buy|purchase|checkout|book|delete|remove|accept|agree|deploy|unsubscribe|confirm order|sign in|log in|password)\b', re.I)
-# Open access ("permission granted" from Evens): logins are allowed, the rest of HARD stays refused on targets/URLs.
-HARD_OPEN = re.compile(r'\b(send|publish|pay|buy|purchase|checkout|book|delete|deploy|unsubscribe|confirm order)\b', re.I)
+_HARD_WORDS = ('send|post|publish|pay|buy|purchase|checkout|book|delete|remove|accept|agree|deploy|unsubscribe|confirm order|'
+               r'submit|place (?:the |an |my )?order|order now|transfer|tweet|donate')
+_LOGIN_WORDS = 'sign in|log in|password'
+HARD = re.compile(r'\b(' + _HARD_WORDS + '|' + _LOGIN_WORDS + r')\b', re.I)
+# Open access ("permission granted" from Evens): logins are allowed; every consequential action in HARD stays refused
+# on targets/URLs (security review 2026-10-15, H6 — post/remove/accept/agree had been dropped).
+HARD_OPEN = re.compile(r'\b(' + _HARD_WORDS + r')\b', re.I)
 OPEN_ACTION_BUDGET, OPEN_TIME_BUDGET = 100, 600
 
 
@@ -1253,7 +1257,7 @@ class BrowserMissionHandle:
         if not isinstance(objective, str) or not objective.strip() or len(objective) > 10000:
             raise ValueError('bounded objective required')
         opened = owner_open_access()
-        if unsafe_mission_intent(objective) and not opened: raise ValueError('read_only_mission_required')
+        if unsafe_mission_intent(objective): raise ValueError('read_only_mission_required')  # open access never waives this
         python = os.environ.get('JARVIS_BROWSER_PYTHON') or str(Path(__file__).resolve().parents[3] / '.venv-browser' / 'bin' / 'python')
         if not python or not Path(python).is_file():
             raise RuntimeError('JARVIS_BROWSER_PYTHON must point to the pinned Browser Use environment')
