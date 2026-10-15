@@ -967,7 +967,7 @@ ACK_SKIP = frozenset({"say"})
 # Confirm-before-act (verify round): screen_see sends the screen off the Mac, desk_dispatch acts as a send, and a
 # model-chosen code_run runs code Evens never typed. Gated agent actions use the same host-owned proposal.
 # An explicit owner approval executes the exact pending action; unrelated chat preserves it.
-CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run", "pointer_click", "agent_tools")
+CONFIRM_TOOLS = ("screen_see", "desk_dispatch", "code_run", "pointer_click", "agent_tools", "repo")
 CONFIRM_TTL_SEC = 120
 CONFIRM_YES_RE = re.compile(
     r"^\s*(?:yes|yep|yeah|sure|confirm(?:ed)?|go\s+ahead|go\s+for\s+it|allow(?:\s+it)?|approve(?:\s+it)?|proceed|do\s+it|send\s+it|ok(?:ay)?)\b(?:[\s,]*(?:please|jarvis|sir|do\s+it|go\s+ahead))*[\s.!]*$",
@@ -979,6 +979,7 @@ CONFIRM_LINES = {
     "agent_tools": "I need your approval for this exact action: {action}. Say confirm to execute it; the task remains saved.",
     "code_run": "I picked code to run that you didn't type. Say \"confirm\" to run it in the sandbox; anything else drops it.",
     "pointer_click": "The arrow is on the {label}. Say \"confirm\" and I click it once; anything else drops it.",
+    "repo": "Installing runs setup code from the internet on this Mac: {action}. Say \"confirm\" to install it; anything else drops it.",
 }
 
 
@@ -1071,6 +1072,14 @@ def confirm_take(hive: Path | None, utterance: str) -> dict | None:
             "_owner_approval": _OwnerApproval(row["tool"], args, original)}
 
 
+def _cli_read_only(hd, argv) -> bool:
+    """The same read-only allowlist op_cli enforces when access is closed (security review 2026-10-15, H5)."""
+    if not isinstance(argv, list) or not argv or argv[0] not in hd.CLI_ALLOW:
+        return False
+    rest = " ".join(str(a) for a in argv[1:])
+    return not hd.CLI_GATED.search(rest) and bool(hd.CLI_ALLOW[argv[0]].search(rest))
+
+
 def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
     """The effective args to arm, or None when the call may run now."""
     if tool not in CONFIRM_TOOLS or args.get("_confirmed"):
@@ -1081,7 +1090,9 @@ def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
         steps = eff.get("steps") or ([eff] if eff.get("op") else [])
         gated = any(step.get("op") == "fanout" or (step.get("op") == "mcp" and
                     (hd.WRITE_TOOL.search(str(step.get("tool") or "")) or
-                     not hd.READ_TOOL.match(str(step.get("tool") or "")))) for step in steps if isinstance(step, dict))
+                     not hd.READ_TOOL.match(str(step.get("tool") or "")))) or
+                    (step.get("op") == "cli" and not _cli_read_only(hd, step.get("argv")))
+                    for step in steps if isinstance(step, dict))
         return eff if gated else None
     if tool == "code_run":
         hd = _code_run_hand()
@@ -1096,8 +1107,10 @@ def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
         return eff
     if tool == "desk_dispatch":
         return dict(args) if args else _desk_dispatch_hand().args_from_utterance(utterance)
-    if tool == "screen_see" and _open_access():
-        return None  # open access: a screen look needs no extra confirm
+    if tool == "repo":  # installs run third-party setup code: always the owner's per-action yes, open access or not
+        ask = str(args.get("ask") or utterance or "")
+        kind = _repo_hand().wants(ask)
+        return {"op": kind, "ask": ask[:300]} if kind in {"install", "tool"} else None
     if tool == "pointer_click":  # Z02 click: resolve + draw the arrow now; a miss runs unarmed and just says why
         got = _pointer_hand().click_arm(utterance)
         return {k: got[k] for k in ("x", "y", "label", "destructive")} if got.get("found") else None
@@ -5855,7 +5868,7 @@ def _run_tool_inner(
         args = {k:v for k,v in args.items() if k not in {"_confirmed", "strict_ok", "approved"}}
     if tool == "safari_see" and str(args.get("act") or "") in {"grab", "screenshot", "share"} and ROUTE_SCREEN_RE.search(utterance or ""):
         tool = "screen_see"  # rank 16: the model's tab grab for a my-screen ask becomes the whole screen
-    if tool == "screen_see" and not args.get("_confirmed") and not SCREEN_WORD_RE.search(utterance or "") and not _open_access():
+    if tool == "screen_see" and not args.get("_confirmed") and not SCREEN_WORD_RE.search(utterance or ""):
         # A model pick of screen_see for an ask that never mentions the screen (live chat: "Decide").
         return {"ok": True, "tool": "say", "spoken": "I won't look at your screen for that. What would you like me to do?",
                 "wires": ["voice"], "cites": [], "sent": False, "task_verified": False, "outcome": TOOL_LOOP}
@@ -5884,7 +5897,7 @@ def _run_tool_inner(
         }
     unauthorized = (
         tool == "refuse_hard_step"
-        or (tool == "safari_see" and not wants_safari(utterance) and fixed_route(utterance) is None and not _open_access())
+        or (tool == "safari_see" and not wants_safari(utterance) and fixed_route(utterance) is None)
         or (tool == "vault_read" and ACTION_STATUS_RE.search(utterance or ""))
     )
     if unauthorized:
@@ -6015,7 +6028,7 @@ def _run_tool_inner(
                 "sent": False, "task_verified": bool(got.get("task_verified")), "apps_meta": {"app": got.get("app")},
                 "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "repo":
-        got = _repo_hand().run(utterance)
+        got = _repo_hand().run(str(args.get("ask") or utterance))
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["repo"],
                 "cites": [c for c in (got.get("cites") or []) if c], "sent": False, "task_verified": bool(got.get("task_verified")),
                 "repo_meta": {k: got.get(k) for k in ("op", "repo", "path", "installed", "failed", "license")},

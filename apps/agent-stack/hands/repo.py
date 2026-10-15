@@ -146,11 +146,19 @@ def search(query: str, *, get=_get, limit: int = 5) -> dict:
             "cites": [r["url"] for r in rows if r["url"]]}
 
 
+def _setup_env() -> dict:
+    """Third-party setup code (pip/npm/cargo/build scripts) gets no API keys or tokens (security review 2026-10-15, H3)."""
+    keep = ("PATH", "HOME", "LANG", "LC_ALL", "TMPDIR", "USER", "SHELL")
+    env = {k: os.environ[k] for k in keep if k in os.environ}
+    env.update({"GIT_TERMINAL_PROMPT": "0", "PIP_DISABLE_PIP_VERSION_CHECK": "1"})
+    return env
+
+
 def _run(cmd: list[str], cwd: Path, log: list[str], timeout: int = STEP_TIMEOUT) -> bool:
     log.append("$ " + " ".join(cmd))
     try:
         cp = subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True, timeout=timeout,
-                            env={**os.environ, "GIT_TERMINAL_PROMPT": "0", "PIP_DISABLE_PIP_VERSION_CHECK": "1"})
+                            env=_setup_env())
     except FileNotFoundError:
         log.append(f"{cmd[0]}: not installed on this Mac")
         return False
