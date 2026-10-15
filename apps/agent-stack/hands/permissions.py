@@ -53,7 +53,7 @@ def set_auto_accept(on: bool) -> dict:
 
 
 # Open access (Evens 2026-10-15): "permission granted" lifts the false-positive limits on files, folders, the
-# browser, screen/Safari looks, edits and read-only code runs. It lasts one hour (OPEN_ACCESS_TTL_SECONDS) or until he says "lock it down".
+# browser, screen/Safari looks, edits and read-only code runs. Since 2026-10-15 10:25 it is ON by default with no expiry, until he says "lock it down".
 # Only the owner's own spoken/typed line flips it (pipeline turn start); model output, page text and tool args
 # never can, and the file lives in ~/.grok-private, which no hand can read or write.
 # Still gated while open: sends, payments, bookings, publishing, deletes outside scratch, pushes, merges,
@@ -77,7 +77,7 @@ REVOKE_RE = re.compile(
     r"(?:go\s+)?back\s+to\s+(?:safe|normal|restricted)\s+mode|"
     r"close\s+(?:open\s+)?access"
     r")(?:[,.!]?\s*(?:please|sir|now|thanks|thank\s+you|jarvis))*[.!]*\s*$", re.I)
-OPEN_ACCESS_TTL_SECONDS = 3600  # a grant lasts one hour, then closes on its own
+OPEN_ACCESS_TTL_SECONDS = None  # Evens 2026-10-15 10:25: no expiry; open by default until he revokes
 
 
 def is_grant(text: str) -> bool:
@@ -125,33 +125,25 @@ def is_revoke(text: str) -> bool:
 
 
 def open_access() -> bool:
-    """True from the owner's grant until his revoke. Tests never see the real owner file."""
+    """On by default (Evens 2026-10-15 10:25: same reach as Claude Code/Codex/Cursor, no grant, no expiry).
+    Off only after his explicit revoke ("lock it down"). Tests never see the real owner file."""
     import sys
     if not (os.environ.get("JARVIS_MODE_FILE") or "").strip() and ("_pytest" in sys.modules or "unittest" in sys.modules):
         return False
-    data = mode()
-    if not data.get("open_access"):
-        return False
-    try:  # no expiry recorded (pre-2026-10-15 grant) or past it -> closed
-        return datetime.now() < datetime.fromisoformat(str(data.get("expires") or ""))
-    except ValueError:
-        return False
+    return not mode().get("revoked_by_owner")
 
 
 def set_open_access(on: bool) -> dict:
     f = _mode_file()
     f.parent.mkdir(parents=True, exist_ok=True)
     now = datetime.now()
-    data = {**mode(), "open_access": bool(on), "updated": now.isoformat(timespec="seconds")}
-    if on:
-        data["expires"] = (now + timedelta(seconds=OPEN_ACCESS_TTL_SECONDS)).isoformat(timespec="seconds")
-    else:
-        data.pop("expires", None)
+    data = {**mode(), "open_access": bool(on), "revoked_by_owner": not on, "updated": now.isoformat(timespec="seconds")}
+    data.pop("expires", None)
     tmp = f.with_name(f.name + ".tmp")
     tmp.write_text(json.dumps(data, indent=1), encoding="utf-8")
     os.chmod(tmp, 0o600)
     os.replace(tmp, f)
-    if bool(mode().get("open_access")) != bool(on):  # a revoke that did not land must not pass silently
+    if bool(mode().get("revoked_by_owner")) == bool(on):  # a revoke that did not land must not pass silently
         raise OSError("open access mode file did not take the change")
     log_action("mode", "open_access", "on" if on else "off")
     return data

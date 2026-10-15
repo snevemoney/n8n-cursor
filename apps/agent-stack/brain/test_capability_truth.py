@@ -21,7 +21,7 @@ class ModelKnowsItsHands(unittest.TestCase):
         with tempfile.TemporaryDirectory() as t:
             hive = Path(t); (hive / "bus").mkdir()
             pack = P.assemble_pack("Don't you have a red arrow you can use", hive=hive, retrieve_roots=[], turns=[]).lower()
-        for phrase in ("red arrow", "blue cursor", "open, quit or switch", "permission granted", "except secrets"):
+        for phrase in ("red arrow", "blue cursor", "open, quit or switch", "on by", "except secret files"):
             self.assertIn(phrase, pack, phrase)
 
 

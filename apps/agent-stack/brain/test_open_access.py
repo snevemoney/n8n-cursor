@@ -28,6 +28,7 @@ class OpenAccessBase(unittest.TestCase):
         self.mode = self.root / "mode.json"
         env = mock.patch.dict(os.environ, {"JARVIS_MODE_FILE": str(self.mode), "JARVIS_ACTION_LOG": "off"})
         env.start(); self.addCleanup(env.stop)
+        PERM.set_open_access(False)  # since 2026-10-15 10:25 access is open by default; these cases test the owner-revoked state
 
 
 class Phrases(unittest.TestCase):

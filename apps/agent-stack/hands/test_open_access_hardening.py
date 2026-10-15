@@ -52,18 +52,17 @@ class Expiry(unittest.TestCase):
     def tearDown(self):
         self.env.stop(); self.tmp.cleanup()
 
-    def test_grant_records_expiry_and_expires(self):
+    def test_no_expiry(self):  # Evens 2026-10-15 10:25: open by default, no 1h timer
         data = PERM.set_open_access(True)
-        self.assertIn("expires", data)
-        self.assertTrue(PERM.open_access())
+        self.assertNotIn("expires", data)
         past = (datetime.now() - timedelta(seconds=1)).isoformat(timespec="seconds")
         f = Path(os.environ["JARVIS_MODE_FILE"]); d = json.loads(f.read_text()); d["expires"] = past
         f.write_text(json.dumps(d))
-        self.assertFalse(PERM.open_access())
+        self.assertTrue(PERM.open_access())
 
-    def test_legacy_grant_without_expiry_is_closed(self):
+    def test_legacy_grant_without_expiry_is_open(self):
         Path(os.environ["JARVIS_MODE_FILE"]).write_text(json.dumps({"open_access": True}))
-        self.assertFalse(PERM.open_access())
+        self.assertTrue(PERM.open_access())
 
     def test_revoke_clears(self):
         PERM.set_open_access(True); PERM.set_open_access(False)

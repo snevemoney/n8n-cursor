@@ -1100,6 +1100,10 @@ def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
     """The effective args to arm, or None when the call may run now."""
     if tool not in CONFIRM_TOOLS or args.get("_confirmed"):
         return None
+    # Evens 2026-10-15 10:25: no per-action confirm for screen capture or installs while access is open (default).
+    # Confirms stay for sends (desk_dispatch, write MCP), deletes/publish in code, merges/pushes and clicks.
+    if tool in {"screen_see", "repo"} and _open_access():
+        return None
     if tool == "agent_tools":
         hd = _agent_tools_hand()
         eff = dict(args) if args.get("op") or args.get("steps") else hd.args_from_utterance(utterance)
@@ -1107,7 +1111,8 @@ def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
         gated = any(step.get("op") == "fanout" or (step.get("op") == "mcp" and
                     (hd.WRITE_TOOL.search(str(step.get("tool") or "")) or
                      not hd.READ_TOOL.match(str(step.get("tool") or "")))) or
-                    (step.get("op") == "cli" and not _cli_read_only(hd, step.get("argv")))
+                    (step.get("op") == "cli" and not _cli_read_only(hd, step.get("argv"))
+                     and not (_open_access() and not OPEN_CLI_HARD.search(" ".join(str(a) for a in (step.get("argv") or [])))))
                     for step in steps if isinstance(step, dict))
         return eff if gated else None
     if tool == "code_run":
@@ -1519,6 +1524,11 @@ def _open_access() -> bool:
 
 
 # Open access still confirms code that deletes, sends, pushes or touches the network for writes.
+# With open access (default) shell runs without a confirm except: deletes, sends/posts, merges/pushes, releases, deploys, spend.
+OPEN_CLI_HARD = re.compile(r"\b(?:merge|push|delete|rm|release|deploy|publish|send|post|purchase|buy|--force)\b|"
+                           # revealing secrets / uploading data still asks
+                           r"^(?:security|printenv|env|op|pass|keychain)\b|\bauth\s+token\b|\bdump-keychain\b|"
+                           r"\s(?:-F|-d|-T|--data\S*|--upload-file|--form)\b", re.I)
 CODE_DANGER_RE = re.compile(
     r"\brm\s+-|\brmtree\b|os\.(?:remove|unlink|rmdir)|\.unlink\(|\bshutil\.move\b|\bsmtplib\b|"
     r"(?:requests|httpx|session|client)\.(?:post|put|patch|delete)\b|method\s*=\s*['\"](?:POST|PUT|PATCH|DELETE)['\"]|"
@@ -3632,11 +3642,13 @@ def assemble_pack(
         f"Registered hand choices: {routing_catalogue()}. Names describe dispatch, not permission or readiness. mac_act only while Watch is armed. "
         "craft drives a Craft app: args {app, task}. "
         # live 2026-10-15: the model denied hands it has ("I do not have a red arrow", "I cannot open files")
-        "On screen you DO have a red arrow and a blue cursor: when Evens asks where to click or says 'point to <thing>', "
-        "the arrow goes to that control when you can find it; a click always needs his confirm. You can open, quit or switch "
-        "installed Mac apps ('open Safari'). Wider file access starts when Evens says 'permission granted' as its own line "
-        "(lasts one hour); then you can find and read files and folders across his Mac, except secrets. You find and read "
-        "files; say so rather than claiming to open one in an app. Never say these abilities do not exist; say how to use them. "
+        "Your real abilities (never deny them): a red arrow and a blue cursor on screen (say 'point to <thing>' or 'where do I click'; "
+        "you click after his confirm); open, quit or switch any Mac app and open any file or book with it; read and write anywhere in "
+        "his home folder except secret files and keychains; run shell commands and code; install repos, tools and skills; capture the "
+        "screen when he asks; browse and log in; list repos across his home (jarvis-main, ~/tools clones and others). Access is on by "
+        "default with no grant needed. You CAN change your own code: your coding worker edits Jarvis on its own branch with tests, "
+        "and a safe restart loads it; offer to do that, never claim rules forbid it. Ask first only before sending messages or posts, "
+        "spending money, deleting his files, merging to main or public pushes, or revealing secrets. "
         f'JSON: {{"tool":{routing_catalogue()},"args":{{}},"speak":""}}'
     )
     return "\n".join(lines).rstrip() + "\n"
