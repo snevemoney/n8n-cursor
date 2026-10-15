@@ -59,6 +59,9 @@ class WorkflowIntakeTests(unittest.TestCase):
             continued=h.continue_workflow(ack['mission_id'],'Continue my saved-video build.')
             self.assertEqual(continued['status'],'WAITING_PROJECT')
             self.assertEqual(continued['objective'],OBJECTIVE)
+            h.cancel(ack['mission_id'])
+            continued=h.continue_workflow(ack['mission_id'],'Continue my assignment.')
+            self.assertEqual(continued['status'],'WAITING_PROJECT')
 
     def test_existing_permissions_and_isolation_are_not_bypassed(self):
         with tempfile.TemporaryDirectory() as tmp:
