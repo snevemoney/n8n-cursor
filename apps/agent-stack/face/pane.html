@@ -485,10 +485,10 @@
     let busGen = 0;
     const ECHO_RE = /adopted path missing|agentic os|i already said cursor|i heard you:|before that you said:|structured long-term memory/i;
     // Self-echo guard (15:12 runaway loop: the mic heard Jarvis's own voice and kept taking turns):
-    // mic is gated while TTS plays + a tail, recent Jarvis lines are fuzzy-matched, and a turn needs the wake word
-    // unless it is a short follow-up inside the window right after Jarvis spoke.
+    // mic is gated while TTS plays + a tail, and recent Jarvis lines are fuzzy-matched.
+    // No wake word needed: the owner talks to Jarvis directly; the echo checks above catch the loop.
     let lastTtsBusyAt = 0;
-    const ECHO_TAIL_MS = 1800, FOLLOW_UP_MS = 12000;
+    const ECHO_TAIL_MS = 1800;
     const recentSpoken = [];
     const ttsSpeaking = () => {
       const busy = ttsBusy || !!(synth && synth.speaking) || !!(ttsSource) || !!(ttsAudio && !ttsAudio.paused && !ttsAudio.ended);
@@ -1152,8 +1152,6 @@
       if (!said) return;
       if (isMouthEcho(said)) return;
       const woke = WAKE_RE.test(said);
-      const followUp = lastTtsBusyAt && Date.now() - lastTtsBusyAt < FOLLOW_UP_MS;
-      if (!STOP_RE.test(said) && !woke && !followUp && !(state.pending && YES_RE.test(said))) return;  // not addressed: no wake word, no live exchange
       said = said.replace(WAKE_RE, "").trim() || (woke ? "" : said);
       if (!said) { greet(); return; }
       if (state.pending && YES_RE.test(said)) turn(state.pending, true, true);

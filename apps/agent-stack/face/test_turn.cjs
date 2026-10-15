@@ -116,8 +116,9 @@ function inputRoutes() {
   assert.deepEqual(calls.shift(),['explain',false,true],'mic path must pass voice=true');
   c.handleHeard('yes');
   assert.deepEqual(calls.shift(),['Pending question',true,true]);
-  c.handleHeard('The Routines section in the middle of your screen');  // no wake word, no live exchange: ignored
-  assert.equal(calls.length,0,'unaddressed speech must not start a turn (self-echo loop)');
+  c.handleHeard('Open the Routines section');  // plain speech, no wake word: still a turn
+  assert.deepEqual(calls.shift(),['Open the Routines section',false,true],'speech without a wake word must start a turn');
+  assert.equal(calls.length,0);
 }
 function watchNoticeTypedSilent() {
   // BUS300-P0-002: Watch push notice paints text always; TTS only when mic armed.
