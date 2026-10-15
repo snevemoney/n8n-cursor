@@ -234,7 +234,7 @@ def op_cli(argv: list[str], cwd: str | None = None, *, max_output_chars: int = O
                 "spoken": _scrub(res["spoken"])}
     # Fixed host metadata probes need complete bounded JSON, not a speech-sized
     # prefix with a missing closing delimiter. Default CLI output stays unchanged.
-    limit = max(1, min(int(max_output_chars), 12000))
+    limit = max(1, min(int(max_output_chars), 80000))
     raw_text = _scrub(p.stdout or p.stderr).strip()
     truncated = len(raw_text) > limit
     text = raw_text[:limit] + ("…" if truncated else "")

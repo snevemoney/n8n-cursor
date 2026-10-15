@@ -6102,7 +6102,7 @@ def _run_tool_inner(
                         expected = phase.primary_origin_probe(probe.get("url", ""))
                         if probe != expected:
                             return {"ok":False,"output":""}
-                        return hd.op_cli(expected["argv"])
+                        return hd.op_cli(expected["argv"], max_output_chars=phase.MAX_READ)
                     result = controller.MissionController(_coding_mission_hand()).research_saved_sources(
                         hive, owned["mission_id"], roots=research_roots, retrieve_fn=RETRIEVE.search,
                         read_fn=RETRIEVE.read_local_text,

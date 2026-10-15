@@ -14,7 +14,7 @@ R=load('metadata_research',ROOT/'hands/workflow_research.py')
 class MetadataOutput(unittest.TestCase):
  def setUp(self):
   self.video='https://www.youtube.com/watch?v=K_cha25S4Qo'
-  self.raw=json.dumps({'id':'K_cha25S4Qo','description':'context '*450+'\nSource code: https://github.com/example/original'})
+  self.raw=json.dumps({'id':'K_cha25S4Qo','description':'context '*2500+'\nSource code: https://github.com/example/original'})
  def call(self,**kw):
   with patch.object(A,'PERM',return_value=SimpleNamespace(log_action=lambda *a:None)),patch.object(A.shutil,'which',return_value='/fixture/yt-dlp'),patch.object(A.subprocess,'run',return_value=SimpleNamespace(stdout=self.raw,stderr='',returncode=0)):
    return A.op_cli(R.primary_origin_probe(self.video)['argv'],**kw)
