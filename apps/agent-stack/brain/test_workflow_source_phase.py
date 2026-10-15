@@ -26,6 +26,32 @@ class WorkflowSourcePhase(unittest.TestCase):
    got=MissionController(adapter).research_saved_sources(h,task['mission_id'],roots=[source],retrieve_fn=retrieve,read_fn=lambda *a:('',None),active_fn=lambda:True)
    self.assertEqual(got['status'],'CANCELLED');self.assertFalse((root/'source_research.json').exists());self.assertEqual((root/'request.json').read_bytes(),original)
 class WorkflowSourceBinding(unittest.TestCase):
+ def test_task_read_grant_allows_external_source_without_widening_writes(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d).resolve();project=root/'project';project.mkdir();outside=root/'external sources';outside.mkdir()
+   h=root/'hive';adapter=P._coding_mission_hand();handle=adapter.WorkflowMissionHandle(h);task=handle.start_workflow(REQUEST)
+   handle.bind_project(task['mission_id'],str(project),'jarvis/source','Use "'+str(project)+'"')
+   access=adapter._load('workflow_read_access',adapter.STACK/'hands'/'workflow_read_access.py')
+   grant=access.grant(h,task['mission_id'],'Allow read access to my whole filesystem for this workflow.')
+   self.assertTrue(grant['ok']);self.assertFalse(grant['writes_allowed'])
+   mc=MissionController(adapter)
+   mc.bind_saved_source_root(h,task['mission_id'],str(outside),'Use saved sources "'+str(outside)+'"',default_roots=[])
+   receipt=adapter.read_json(adapter.mission_path(h,task['mission_id'])/'source_roots.json')
+   self.assertEqual(receipt['roots'],[str(outside)])
+   self.assertFalse(receipt['global_read_roots_changed'])
+
+ def test_changed_read_grant_cannot_bind_external_source_after_lock_wait(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d).resolve();project=root/'project';project.mkdir();outside=root/'external';outside.mkdir()
+   h=root/'hive';adapter=P._coding_mission_hand();handle=adapter.WorkflowMissionHandle(h);task=handle.start_workflow(REQUEST)
+   handle.bind_project(task['mission_id'],str(project),'jarvis/source','Use "'+str(project)+'"')
+   access=adapter._load('workflow_read_access',adapter.STACK/'hands'/'workflow_read_access.py')
+   mc=MissionController(adapter)
+   with mock.patch.object(access,'roots',side_effect=[['/'],[]]):
+    with self.assertRaisesRegex(ValueError,'outside this task'):
+     mc.bind_saved_source_root(h,task['mission_id'],str(outside),'Use saved sources "'+str(outside)+'"',default_roots=[])
+   self.assertFalse((adapter.mission_path(h,task['mission_id'])/'source_roots.json').exists())
+
  def test_explicit_packet_is_bound_only_inside_current_job_or_existing_source_roots(self):
   with tempfile.TemporaryDirectory() as d:
    root=Path(d).resolve();job=root/'job'/'work';project=job/'project';project.mkdir(parents=True);packet=job/'source packet';packet.mkdir()

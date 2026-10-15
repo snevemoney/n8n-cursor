@@ -41,14 +41,33 @@ class MissionController:
             raise ValueError("saved-source folder unavailable")
         binding = self.adapter.read_json(root / "binding.json")
         project = Path(str(binding.get("repo") or ""))
-        approved = [Path(p).resolve() for p in default_roots]
+        base_approved = [Path(p).resolve() for p in default_roots]
+        # A task-scoped, receipt-validated filesystem read grant may widen
+        # where evidence is read from without widening the project write root.
+        # workflow_read_access revalidates the immutable request and control
+        # identity and never authorizes writes or secret paths.
+        read_access = self.adapter._load(
+            "workflow_read_access", self.adapter.STACK / "hands" / "workflow_read_access.py"
+        )
+        approved = base_approved + [Path(p).resolve() for p in read_access.roots(hive, mission_id)]
         # Recovered packets in this isolated job's work folder are task resources.
+        job_root = None
         if project.is_absolute() and project.parent.name == "work":
-            approved.append(project.parent.resolve())
+            job_root = project.parent.resolve()
+            approved.append(job_root)
         if not any(path == allowed or allowed in path.parents for allowed in approved):
             raise ValueError("source folder is outside this task's approved project context")
         with (root / "steering.lock").open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
+            # The task or its read grant may have changed while waiting for the
+            # lock. Revalidate authorization at the persistence boundary.
+            current_approved = base_approved + [
+                Path(p).resolve() for p in read_access.roots(hive, mission_id)
+            ]
+            if job_root is not None:
+                current_approved.append(job_root)
+            if not any(path == allowed or allowed in path.parents for allowed in current_approved):
+                raise ValueError("source folder is outside this task's approved project context")
             request = self.adapter.read_json(root / "request.json")
             if request.get("worker_kind") != "research_build" or self.adapter.read_json(root / "control.json").get("cancel"):
                 raise ValueError("active research assignment required")
