@@ -1629,9 +1629,19 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
                 mode = 0o666 & ~mask
             else:
                 mode = prior["mode"]
+            try:
+                guard("before_write", {name:content})
+            except _CheckpointBlocked as exc:
+                # Refused before any byte was written: let the builder re-plan instead of
+                # replaying the same refused write on every resume (mission 01e8079, 10:09 ET).
+                if str(exc) != "host_configuration_guard_rejected_before_write" or int(state.get("guard_refusals") or 0) >= 3:
+                    raise
+                state["guard_refusals"] = int(state.get("guard_refusals") or 0) + 1
+                state["history"].append({"role":"user","content":CODE_GUARD_REFUSAL.format(name=name)})
+                done(f"iter {state['iteration']} write {name}",{"verified":False,"spoken":"Host configuration guard refused "+name+" before writing; nothing from this batch was written."})
+                state.update(files=[],edit_preimages={},file_cursor=0,pending=None,phase="model");state["iteration"] += 1;save();continue
             state["pending"] = {"path":name,"new_sha256":hashlib.sha256(content.encode()).hexdigest(),"mode":mode}
             state["phase"] = "pending_write";save()
-            guard("before_write", {name:content})
             got = op_repo(str(root),"write",path=name,content=content)
             guard("after_write")
             state["file_cursor"] += 1
@@ -1674,6 +1684,12 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
             return _code_report(state["todo"],state["skills"],state["model"],ok,state["plan"])
         else:
             raise _CheckpointBlocked("unreconciled_checkpoint_phase")
+
+
+CODE_GUARD_REFUSAL=("The host configuration guard refused writing {name} before any byte was written: new Python that loads code dynamically "
+    "(importlib, exec_module, exec/eval, __import__, sys.modules, setattr/getattr on modules) or selects models/providers/env keys "
+    "counts as a protected configuration surface. Nothing from this batch was written. Re-plan the same goal without that pattern "
+    "(explicit static imports, a plain dict registry of functions, or data files) and resend the batch.")
 
 
 def op_code(repo: str, goal: str, branch: str = "jarvis/code", *, cancel_check=None, progress=None, checkpoint=None, resume_checkpoint=None, mutation_guard=None) -> dict:

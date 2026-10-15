@@ -25,6 +25,24 @@ class RuntimeDrift(unittest.TestCase):
         self.ptr.write_text('new\n')
         self.assertEqual(wx.runtime_drift_reason(self.hive,MID),'runtime_preimage_changed')
 
+    def test_executor_change_is_drift(self):
+        frozen=self.tmp/'bundle';(frozen/'apps/agent-stack/hands').mkdir(parents=True);(frozen/'apps/agent-stack/brain').mkdir(parents=True)
+        (self.runtime/'apps/agent-stack/brain').mkdir(parents=True,exist_ok=True)
+        for n in wx.EXECUTOR_FILES:
+            for b in (frozen,self.runtime):(b/'apps/agent-stack'/n).parent.mkdir(parents=True,exist_ok=True)
+            (frozen/'apps/agent-stack'/n).write_text('same');(self.runtime/'apps/agent-stack'/n).write_text('same')
+        c=json.loads((self.root/'execution_contract.json').read_text());c['executor_bundle']={'root':str(frozen)}
+        (self.root/'execution_contract.json').write_text(json.dumps(c))
+        wx_C=wx._load;orig=wx._load
+        class OkLock:
+            WHOLE_FILES=();validate_candidate=staticmethod(lambda *a,**k:{'ok':True})
+        wx._load=lambda name:OkLock if name=='workflow_config_lock' else orig(name)
+        try:
+            self.assertIsNone(wx.runtime_drift_reason(self.hive,MID))
+            (self.runtime/'apps/agent-stack/hands/agent_tools.py').write_text('fixed')
+            self.assertEqual(wx.runtime_drift_reason(self.hive,MID),'executor_changed')
+        finally:wx._load=orig
+
     def test_retire_moves_never_deletes(self):
         out=wx.retire_runtime_drift_preparation(self.hive,MID,reason='runtime_preimage_changed',now=1792072910)
         arch=Path(out['archive'])

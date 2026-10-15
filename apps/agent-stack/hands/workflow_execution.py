@@ -253,7 +253,15 @@ def runtime_drift_reason(hive,mission_id):
             if rel in locked and W._regular_bytes(Path(baseline['source_repo'])/rel)[1]!=expected:return 'runtime_preimage_changed'
         check=C.validate_candidate(baseline['configuration_lock'],Path(baseline['source_repo'])/'apps/agent-stack',{},expected_digest=baseline['configuration_digest'])
     except (OSError,ValueError,TypeError,KeyError):return 'runtime_baseline_unreadable'
-    return None if check.get('ok') else str(check.get('reason') or 'runtime_configuration_changed')
+    if not check.get('ok'):return str(check.get('reason') or 'runtime_configuration_changed')
+    bundle=row.get('executor_bundle') or {}
+    if bundle.get('root'):
+        frozen_stack=Path(bundle['root'])/'apps/agent-stack';live_stack=Path(baseline['source_repo'])/'apps/agent-stack'
+        for name in EXECUTOR_FILES:
+            try:
+                if _sha((frozen_stack/name).read_bytes())!=_sha((live_stack/name).read_bytes()):return 'executor_changed'
+            except OSError:return 'executor_changed'
+    return None
 
 
 def retire_runtime_drift_preparation(hive,mission_id,*,reason,now=None):
