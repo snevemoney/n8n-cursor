@@ -90,6 +90,14 @@ class RecoveredWatchRecords(unittest.TestCase):
    got=M.run('goal',retrieve_fn=lambda *a,**k:{'hits':[{'abs':str(file)}]},read_fn=lambda p,cap:(p.read_text(),None),roots=[root],active_fn=lambda:True)
    self.assertFalse(got['ok'])
 class ActualVaultPacketBridge(unittest.TestCase):
+ def test_packet_directory_can_be_the_approved_source_root(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d).resolve()/'watch';root.mkdir();file=root/'abcdefghijk.md'
+   file.write_text('# abcdefghijk — saved assistant video\nThe Python agent harness uses memory checkpoints and browser observation.\n')
+   got=M.run('goal',retrieve_fn=lambda *a,**k:{'hits':[]},read_fn=lambda p,cap:(p.read_text(),None),roots=[root],active_fn=lambda:True)
+   self.assertTrue(got['ok']);self.assertEqual(got['selected']['source_record'],str(file))
+   self.assertEqual(got['coverage']['discovered_records'],1)
+
  def test_watch_later_videos_layout_is_discovered_without_content_index_hit(self):
   with tempfile.TemporaryDirectory() as d:
    root=Path(d).resolve();videos=root/'videos';videos.mkdir();file=videos/'abcdefghijk.md'

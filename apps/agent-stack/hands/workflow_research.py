@@ -203,7 +203,10 @@ def run(objective, *, retrieve_fn, read_fn, roots, active_fn, web_fn=None,
         # only those finite packet layouts.
         import itertools
         for approved_root in approved:
-            for packet_dir in (approved_root / "watch", approved_root / "videos"):
+            packet_dirs = [approved_root / "watch", approved_root / "videos"]
+            if approved_root.name in {"watch", "videos"}:
+                packet_dirs.insert(0, approved_root)
+            for packet_dir in packet_dirs:
                 if not packet_dir.is_dir() or packet_dir.is_symlink():
                     continue
                 entries=list(itertools.islice(packet_dir.iterdir(), MAX_DIRECTORY_ENTRIES))
