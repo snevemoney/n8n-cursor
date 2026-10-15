@@ -126,7 +126,7 @@ def look(owner: str, name: str, *, get=_get) -> dict:
     return {"ok": True, "op": "look", "tool": "repo", "repo": slug, "url": meta.get("html_url") or f"https://github.com/{slug}",
             "description": desc, "stars": stars, "license": lic, "language": lang, "files": files,
             "readme": readme[:README_CHARS], "readme_truncated": len(readme) > README_CHARS,
-            "archived": bool(meta.get("archived")), "spoken": spoken, "task_verified": True, "cites": [meta.get("html_url") or ""]}
+            "archived": bool(meta.get("archived")), "pushed_at": meta.get("pushed_at") or "", "spoken": spoken, "task_verified": True, "cites": [meta.get("html_url") or ""]}
 
 
 def search(query: str, *, get=_get, limit: int = 5) -> dict:
@@ -191,7 +191,66 @@ def plan_install(path: Path) -> list[tuple[str, list[list[str]]]]:
     return steps
 
 
-def install(owner: str, name: str, *, run=_run, get=_get, opened=None) -> dict:
+def _years_since(iso: str, now=None) -> float | None:
+    import datetime as _dt
+    try:
+        then = _dt.datetime.fromisoformat(str(iso).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    now = now or _dt.datetime.now(_dt.timezone.utc)
+    return (now - then).days / 365.25
+
+
+def gate(info: dict, *, now=None) -> tuple[str, list[str]]:
+    """AGENT_RULES §18 repo gate before any clone: ('hold', why) or ('ok', warnings).
+
+    Holds copyleft network licenses (AGPL) until the owner says to install anyway. Warns on archived,
+    stale (no push in 2+ years), missing license, and README install steps that pipe a download into a shell
+    (those are never run by this hand)."""
+    lic = str(info.get("license") or "")
+    if "AGPL" in lic.upper():
+        return "hold", [f"its license is {lic}, which the Hive rules hold before install"]
+    warn: list[str] = []
+    if info.get("archived"):
+        warn.append("it is archived, so nobody maintains it")
+    age = _years_since(info.get("pushed_at") or "", now) if info.get("pushed_at") else None
+    if age is not None and age >= 2:
+        warn.append(f"the last push was about {int(age)} years ago")
+    if not lic or lic in ("no license file", "NOASSERTION", "unknown"):
+        warn.append("it has no clear license")
+    if CURL_PIPE_RE.search(info.get("readme") or ""):
+        warn.append("its README pipes a download straight into a shell; I did not run that")
+    return "ok", warn
+
+
+CURL_PIPE_RE = re.compile(r"\b(?:curl|wget)\b[^\n|]{0,200}\|\s*(?:sudo\s+)?(?:ba|z)?sh\b", re.I)
+FORCE_RE = re.compile(r"\b(?:anyway|regardless|override|even\s+though|despite)\b", re.I)
+
+
+def _head_sha(dest: Path) -> str:
+    """The checked-out commit, read from .git without running git (pins what was installed)."""
+    git = dest / ".git"
+    try:
+        head = (git / "HEAD").read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
+    if not head.startswith("ref:"):
+        return head[:40]
+    ref = head.split(None, 1)[1].strip()
+    try:
+        return (git / ref).read_text(encoding="utf-8").strip()[:40]
+    except OSError:
+        pass
+    try:
+        for line in (git / "packed-refs").read_text(encoding="utf-8").splitlines():
+            if line.endswith(" " + ref):
+                return line.split()[0][:40]
+    except OSError:
+        pass
+    return ""
+
+
+def install(owner: str, name: str, *, run=_run, get=_get, opened=None, force: bool = False) -> dict:
     slug = f"{owner}/{name}"
     opened = _permissions().open_access() if opened is None else opened
     if not opened:
@@ -200,6 +259,11 @@ def install(owner: str, name: str, *, run=_run, get=_get, opened=None) -> dict:
     info = look(owner, name, get=get)
     if not info.get("ok"):
         return {**info, "op": "install"}
+    verdict, notes = gate(info)
+    if verdict == "hold" and not force:
+        return {"ok": True, "op": "install", "tool": "repo", "repo": slug, "task_verified": False, "outcome": "HELD",
+                "license": info.get("license"),
+                "spoken": f"I held {slug}: {notes[0]}. Say \"install {slug} anyway\" if you still want it."}
     root = install_root(); root.mkdir(parents=True, exist_ok=True)
     dest = root / f"{owner}__{name}"
     log: list[str] = []
@@ -219,10 +283,15 @@ def install(owner: str, name: str, *, run=_run, get=_get, opened=None) -> dict:
     if failed:
         how += " These steps failed: " + ", ".join(failed) + f"; the log is in {dest / '.jarvis-install.log'}."
     lic = info.get("license") or "no license file"
-    spoken = (f"Cloned {slug} to {dest}. {how} License: {lic}."
+    sha = _head_sha(dest)
+    if sha:
+        (dest / ".jarvis-pin").write_text(f"{slug} {sha}\n", encoding="utf-8")
+    spoken = (f"Cloned {slug} to {dest}" + (f" at commit {sha[:12]}" if sha else "") + f". {how} License: {lic}."
+              + (" Heads up: " + "; ".join(notes) + "." if notes else "")
               + (" The README has its own usage steps; ask me to read them." if info.get("readme") else ""))
     return {"ok": not failed, "op": "install", "tool": "repo", "repo": slug, "path": str(dest), "installed": done, "failed": failed,
-            "license": lic, "spoken": spoken, "task_verified": bool(done) and not failed, "cites": [str(dest)]}
+            "license": lic, "commit": sha, "warnings": notes, "spoken": spoken,
+            "task_verified": bool(done) and not failed, "cites": [str(dest)]}
 
 
 def install_tool(name: str, manager: str = "", *, run=_run, opened=None, which=shutil.which) -> dict:
@@ -267,5 +336,5 @@ def run(utterance: str, *, get=_get, runner=_run) -> dict:
     if not spec:
         return _fail("look", "Tell me the repo as owner/name or paste its GitHub link.")
     if kind == "install":
-        return install(*spec, run=runner, get=get)
+        return install(*spec, run=runner, get=get, force=bool(FORCE_RE.search(utterance or "")))
     return look(*spec, get=get)
