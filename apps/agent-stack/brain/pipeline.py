@@ -6434,7 +6434,7 @@ def _run_tool_inner(
         if invented and not PULL_UP_MY_RE.search(utterance or ""):
             # Live: "Decide" became a read of a path he never said. Ask, don't guess. This is a skipped
             # read, not a success, so the hand loop keeps earlier evidence instead of replacing it (Oct 14 yt-dlp).
-            return {"ok": False, "tool": tool, "unnamed_path": True, "workspace_error": "unnamed path",
+            return {"ok": False, "tool": "say", "unnamed_path": True, "workspace_error": "unnamed path",
                     "spoken": "You didn't name a file, so I didn't open one. Which file do you mean?",
                     "wires": ["voice"], "cites": [], "sent": False, "task_verified": False, "outcome": HONEST_UNKNOWN}
         if invented or (wargs.get("op") == "ls" and not wpath and PULL_UP_MY_RE.search(utterance or "")):

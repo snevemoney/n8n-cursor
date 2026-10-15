@@ -37,7 +37,7 @@ class UnnamedPathGuardTests(unittest.TestCase):
                                     hive=hive, retrieve_roots=[], gen=gen)
         self.assertIs(got["ok"], False)
         self.assertTrue(got.get("unnamed_path"))
-        self.assertEqual(got["tool"], "workspace_read")
+        self.assertEqual(got["tool"], "say")  # an ask, not a read; unnamed_path carries the skip
         self.assertFalse(got["task_verified"])
         self.assertIn("didn't name", got["spoken"])
 
