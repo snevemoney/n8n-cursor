@@ -34,5 +34,15 @@ class EvensPrompts(unittest.TestCase):
             self.assertNotIn(tool(u), ("pointer", "screen_see"), u)
 
 
+class SandboxOutputIsFinal(unittest.TestCase):
+    def test_model_does_not_narrate_over_real_output(self):
+        # live 18:08: sandbox printed 45; the model then said "extra parenthesis, syntax error"
+        import tempfile
+        h = Path(tempfile.mkdtemp()); (h / "bus").mkdir()
+        out = P.apply_pipeline("Run this python and tell me the output: print(sum(range(10)))", hive=h, retrieve_roots=[],
+                               talk_fn=lambda *a, **k: {"ok": True, "spoken": "There is an extra parenthesis."})
+        self.assertIn("45", out["spoken"]); self.assertNotIn("parenthesis", out["spoken"])
+
+
 if __name__ == "__main__":
     unittest.main()

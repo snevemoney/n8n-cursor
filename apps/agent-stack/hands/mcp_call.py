@@ -38,9 +38,14 @@ def _inventory():
     return sys.modules[name]
 
 
-def allowlist() -> set[str]:
+def base_allowlist() -> set[str]:
+    """The owner's designated read-only servers; open access adds others on top."""
     raw = os.environ.get("JARVIS_MCP_ALLOW") or "codebase-memory-mcp"
-    names = {s.strip() for s in raw.split(",") if s.strip()}
+    return {s.strip() for s in raw.split(",") if s.strip()}
+
+
+def allowlist() -> set[str]:
+    names = base_allowlist()
     try:  # open access ("permission granted"): every MCP server already configured in Claude, Cursor or Codex
         spec = importlib.util.spec_from_file_location("agent_stack_permissions", STACK / "hands" / "permissions.py")
         perm = sys.modules.get("agent_stack_permissions")
@@ -173,8 +178,8 @@ def args_from_utterance(u: str) -> dict:
     if not m:
         return {}
     name = m.group(1).lower().removeprefix("read-only ").strip()
-    if name in _GENERIC:
-        allowed = sorted(allowlist())
+    if name in _GENERIC:  # "your read-only MCP server": the designated one (open access added ~20 others, score30 cap 13)
+        allowed = sorted(base_allowlist()) if len(base_allowlist()) == 1 else sorted(allowlist())
         return {"server": allowed[0]} if len(allowed) == 1 else {}
     return {"server": m.group(1)}
 

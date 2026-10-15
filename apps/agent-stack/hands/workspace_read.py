@@ -473,7 +473,9 @@ def run(args: dict, roots=None) -> dict[str, Any]:
         return _find_documents(args or {}, rs)
     if op == "repos":
         deadline = time.monotonic() + REPO_BUDGET_S
-        found = list(dict.fromkeys(n for r in _scan_order(rs) if r != VOLUMES for n in _repos_under(r, REPO_DEPTH, deadline)))
+        # never walk / or external drives for repos (live 18:09: READ_ROOTS=/ made this 66 s and timed out the turn)
+        scan = [r for r in _scan_order(rs) if r not in (VOLUMES, Path("/")) and VOLUMES not in r.parents]
+        found = list(dict.fromkeys(n for r in scan for n in _repos_under(r, REPO_DEPTH, deadline)))
         names = found[:_max_names()]
         more = f" and {len(found) - len(names)} more" if len(found) > len(names) else ""
         sp = (f"{len(found)} local repos: " + ", ".join(names) + more + ".") if found else "I found no git repos in my allowed folders."

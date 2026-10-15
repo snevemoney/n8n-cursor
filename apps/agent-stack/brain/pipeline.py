@@ -2157,7 +2157,8 @@ def is_hard_step(text: str) -> bool:
 # Evens 2026-10-15: Jarvis asks first ONLY before these. The words are fixed here so model wording cannot drift
 # into a flat "No" or "I don't have that" (score30 caps 12/21 regressed that way).
 KEPT_STOPS = (
-    (re.compile(r"\b(?:merge|push|deploy|publish|release|prod(?:uction)?)\b", re.I), "change main or go live"),
+    (re.compile(r"\b(?:merge|push|deploy|publish|release|prod(?:uction)?|restart|reboot|shut\s*down)\b", re.I),
+     "change main, go live or restart a live server"),
     (re.compile(r"\b(?:pay|paid|buy|purchase|order|book|booking|reserve|subscribe|transfer|invoice from)\b", re.I),
      "spend money or book something for you"),
     (re.compile(r"\b(?:delete|remove|erase|wipe|trash)\b", re.I), "delete your files"),
@@ -5769,8 +5770,8 @@ TOOL_HEARTBEAT = "Still checking, sir; the wires are being fashionably slow."
 HAND_LOOP_MAX_HANDS = 4
 # Screen-overlay hands finish the turn themselves: a second model pass replaced "The red arrow is on it" with its own
 # line, and a repeat pointer pick re-captured the screen (hide_overlays) or ended the turn as a failed duplicate.
-COMPLETE_READ_OPS = {'open_document', 'screenshot_reference', 'repos'}  # the hand's own reply is the whole answer; no model pass
-TERMINAL_HANDS = frozenset({"pointer", "pointer_click", "pointer_demo", "apps", "capability"})
+COMPLETE_READ_OPS = {'open_document', 'screenshot_reference', 'repos', 'list', 'git', 'status'}  # the hand's own reply is the whole answer; no model pass
+TERMINAL_HANDS = frozenset({"pointer", "pointer_click", "pointer_demo", "apps", "capability", "code_run"})  # code_run: live 18:08 the model narrated a fake syntax error over real output 45
 # A model-free (fixed) route already answered a single ask; only a compound ask ("read A and B and compare")
 # earns the follow-up model pass. Without this the loop re-talked over Obsidian reads, stack as-of, calendar,
 # Safari navigation, harness cards and store recalls (7bffe3301 regressions).

@@ -33,6 +33,12 @@ class RepoDepth(unittest.TestCase):
                 out = W.run({"op": "repos"}, roots=[Path(t)])
         self.assertIn("partial", out["spoken"])
 
+    def test_root_slash_is_not_walked(self):
+        with mock.patch.object(W, "_repos_under", side_effect=lambda r, d, dl=None: [r.name or "ROOT"]) as walk, \
+                mock.patch.object(W, "open_access", return_value=True):
+            W.run({"op": "repos"}, roots=[Path("/"), Path.home()])
+        self.assertNotIn(Path("/"), [c.args[0] for c in walk.call_args_list])
+
 
 if __name__ == "__main__":
     unittest.main()
