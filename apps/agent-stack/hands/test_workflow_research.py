@@ -90,6 +90,15 @@ class RecoveredWatchRecords(unittest.TestCase):
    got=M.run('goal',retrieve_fn=lambda *a,**k:{'hits':[{'abs':str(file)}]},read_fn=lambda p,cap:(p.read_text(),None),roots=[root],active_fn=lambda:True)
    self.assertFalse(got['ok'])
 class ActualVaultPacketBridge(unittest.TestCase):
+ def test_watch_later_videos_layout_is_discovered_without_content_index_hit(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d).resolve();videos=root/'videos';videos.mkdir();file=videos/'abcdefghijk.md'
+   file.write_text('# abcdefghijk — saved assistant video\nThe Python agent harness uses memory checkpoints and browser observation.\n')
+   got=M.run('goal',retrieve_fn=lambda *a,**k:{'hits':[]},read_fn=lambda p,cap:(p.read_text(),None),roots=[root],active_fn=lambda:True)
+   self.assertTrue(got['ok']);self.assertEqual(got['selected']['source_record'],str(file))
+   self.assertEqual(got['selected']['saved_youtube_url'],'https://www.youtube.com/watch?v=abcdefghijk')
+   self.assertEqual(got['coverage']['discovered_records'],1)
+
  def test_real_content_only_vault_retriever_does_not_hide_explicit_watch_packet(self):
   from brain import pipeline as P
   with tempfile.TemporaryDirectory() as d:

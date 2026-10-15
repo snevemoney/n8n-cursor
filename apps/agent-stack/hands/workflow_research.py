@@ -199,16 +199,18 @@ def run(objective, *, retrieve_fn, read_fn, roots, active_fn, web_fn=None,
         coverage['unavailable_records']+=len(found.get('unavailable') or []) if isinstance(found,dict) else 0
         hits = list(found.get('hits') or []) if isinstance(found,dict) else []
         # The vault retriever intentionally scans CONTENT. Recovered saved-video
-        # packets use watch/<id>.md, so discover only that finite packet layout.
+        # packets use watch/<id>.md or watch-later/videos/<id>.md, so discover
+        # only those finite packet layouts.
         import itertools
         for approved_root in approved:
-            watch = approved_root / "watch"
-            if watch.is_dir() and not watch.is_symlink():
-                entries=list(itertools.islice(watch.iterdir(), MAX_DIRECTORY_ENTRIES))
+            for packet_dir in (approved_root / "watch", approved_root / "videos"):
+                if not packet_dir.is_dir() or packet_dir.is_symlink():
+                    continue
+                entries=list(itertools.islice(packet_dir.iterdir(), MAX_DIRECTORY_ENTRIES))
                 if len(entries)>=MAX_DIRECTORY_ENTRIES:coverage['directory_limit_reached']=True
                 for record in sorted(entries):
                     if record.suffix == ".md" and re.fullmatch(r"[A-Za-z0-9_-]{11}", record.stem):
-                        hits.append({"abs":str(record), "source":"owner_bound_watch_packet"})
+                        hits.append({"abs":str(record), "source":"owner_bound_saved_video_packet"})
         for hit in hits:
             if len(discovered)>=MAX_DISCOVERED_RECORDS:
                 coverage['discovery_limit_reached']=True;break
@@ -264,7 +266,7 @@ def run(objective, *, retrieve_fn, read_fn, roots, active_fn, web_fn=None,
         urls=URL.findall(text)
         videos=list(dict.fromkeys(u for raw_url in urls if (u:=_video_url(raw_url))))
         video_provenance = "explicit_record_url"
-        if not videos and real.parent.name == "watch" and re.fullmatch(r"[A-Za-z0-9_-]{11}", real.stem):
+        if not videos and real.parent.name in {"watch", "videos"} and re.fullmatch(r"[A-Za-z0-9_-]{11}", real.stem):
             if re.match(r"^#\s+" + re.escape(real.stem) + r"(?:\s|$)", text):
                 videos = ["https://www.youtube.com/watch?v=" + real.stem]
                 video_provenance = "matching_saved_watch_record_id"
