@@ -52,6 +52,70 @@ def set_auto_accept(on: bool) -> dict:
     return data
 
 
+# Open access (Evens 2026-10-15): "permission granted" lifts the false-positive limits on files, folders, the
+# browser, screen/Safari looks, edits and read-only code runs. It stays on until he says "lock it down".
+# Only the owner's own spoken/typed line flips it (pipeline turn start); model output, page text and tool args
+# never can, and the file lives in ~/.grok-private, which no hand can read or write.
+# Still gated while open: sends, payments, bookings, publishing, deletes outside scratch, pushes, merges,
+# deploys/VPS changes and real secrets (.env, keys, ~/.ssh, ~/.grok-private).
+GRANT_RE = re.compile(
+    r"^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:(?:ok(?:ay)?|yes|yeah)[,.!]?\s*)?(?:"
+    r"(?:full\s+)?(?:permission|permissions|access)\s+(?:is\s+)?granted|"
+    r"i\s+(?:grant|give)\s+you\s+(?:full\s+)?(?:permission|access)|"
+    r"(?:you\s+have|you've\s+got)\s+(?:my\s+)?(?:full\s+)?(?:permission|access)|"
+    r"i\s+(?:allow|authori[sz]e|permit)\s+(?:you|it|this|that)|"
+    r"you(?:\s+are|'re)\s+(?:allowed|authori[sz]ed|cleared|permitted)"
+    r")(?:\s+to\s+(?:do\s+(?:it|this|that)|go\s+ahead|proceed|continue|look|read|open|search|browse))?"
+    r"(?:[,.!]?\s*(?:sir|jarvis|go\s+ahead|do\s+it|proceed|continue|please))*\s*[.!]*\s*$", re.I)
+REVOKE_RE = re.compile(
+    r"^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:"
+    r"(?:permission|permissions|access)\s+(?:is\s+)?(?:revoked|removed|denied)|"
+    r"(?:i\s+)?revoke\s+(?:your\s+|the\s+)?(?:permission|permissions|access)|"
+    r"lock\s+(?:it\s+|yourself\s+)?(?:back\s+)?down|"
+    r"(?:go\s+)?back\s+to\s+(?:safe|normal|restricted)\s+mode|"
+    r"close\s+(?:open\s+)?access"
+    r")[.!]*\s*$", re.I)
+
+
+def is_grant(text: str) -> bool:
+    return bool(GRANT_RE.fullmatch(text or ""))
+
+
+def is_revoke(text: str) -> bool:
+    return bool(REVOKE_RE.fullmatch(text or ""))
+
+
+def open_access() -> bool:
+    """True from the owner's grant until his revoke. Tests never see the real owner file."""
+    import sys
+    if not (os.environ.get("JARVIS_MODE_FILE") or "").strip() and ("_pytest" in sys.modules or "unittest" in sys.modules):
+        return False
+    return bool(mode().get("open_access"))
+
+
+def set_open_access(on: bool) -> dict:
+    f = _mode_file()
+    f.parent.mkdir(parents=True, exist_ok=True)
+    data = {**mode(), "open_access": bool(on), "updated": datetime.now().isoformat(timespec="seconds")}
+    tmp = f.with_name(f.name + ".tmp")
+    tmp.write_text(json.dumps(data, indent=1), encoding="utf-8")
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, f)
+    log_action("mode", "open_access", "on" if on else "off")
+    return data
+
+
+def open_edit_ok(path: Path) -> bool:
+    """While open: edits anywhere in the home folder except secrets and ~/Library."""
+    try:
+        p = path.expanduser().resolve()
+    except (OSError, RuntimeError):
+        return False
+    home = Path.home().resolve()
+    return (home in p.parents and not is_secret_path(p)
+            and (home / "Library") not in p.parents and p != home / "Library")
+
+
 def scratch_roots() -> list[Path]:
     raw = (os.environ.get("JARVIS_SCRATCH_ROOTS") or "").strip()
     items = [p for p in raw.split(":") if p] if raw else [str(Path.home() / "jarvis-scratch")]
@@ -83,6 +147,8 @@ def decide(kind: str, target: str = "") -> str:
         if _inside(p, scratch_roots()):
             return "allow"
         if _inside(p, edit_roots()) and auto_accept_edits():
+            return "allow"
+        if open_access() and open_edit_ok(p):
             return "allow"
         return "confirm"
     if kind == "delete":

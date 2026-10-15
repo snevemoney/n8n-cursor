@@ -1090,9 +1090,13 @@ def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
             return None  # nothing to run: the hand says so, no confirm needed
         if typed and str(eff.get("code")).strip() == typed.strip():
             return None  # Evens typed this exact code: his ask is the confirmation
+        if _open_access() and not CODE_DANGER_RE.search(str(eff.get("code") or "")):
+            return None  # open access: read-only code runs without a confirm
         return eff
     if tool == "desk_dispatch":
         return dict(args) if args else _desk_dispatch_hand().args_from_utterance(utterance)
+    if tool == "screen_see" and _open_access():
+        return None  # open access: a screen look needs no extra confirm
     if tool == "pointer_click":  # Z02 click: resolve + draw the arrow now; a miss runs unarmed and just says why
         got = _pointer_hand().click_arm(utterance)
         return {k: got[k] for k in ("x", "y", "label", "destructive")} if got.get("found") else None
@@ -1442,6 +1446,50 @@ def _coding_mission_hand():
         spec.loader.exec_module(mod)
         mod._source_stamp = stamp
     return sys.modules[name]
+
+
+def _permissions_hand():
+    name = "agent_stack_permissions"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "permissions.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _open_access() -> bool:
+    try:
+        return bool(_permissions_hand().open_access())
+    except Exception:  # noqa: BLE001
+        return False
+
+
+# Open access still confirms code that deletes, sends, pushes or touches the network for writes.
+CODE_DANGER_RE = re.compile(
+    r"\brm\s+-|\brmtree\b|os\.(?:remove|unlink|rmdir)|\.unlink\(|\bshutil\.move\b|\bsmtplib\b|"
+    r"requests\.(?:post|put|patch|delete)|\bcurl\b[^\n]*\s-X\s*(?:POST|PUT|DELETE|PATCH)|\bgit\s+push\b|"
+    r"\bdrop\s+(?:table|database)\b|\btruncate\s+table\b|\bsudo\b|\bmkfs\b|\bdd\s+if=", re.I)
+OPEN_ON_LINE = ("Open access is on until you say \"lock it down\": any folder on your Mac, any public website, "
+                "your screen and Safari, edits in your home folder, read-only code runs and site logins with details you give me. "
+                "Sends, payments, bookings, publishing, deletes, pushes, deploys and real secrets still need you.")
+OPEN_OFF_LINE = "Open access is off. I'm back to the normal limits."
+_BLOCKED_REPLY_RE = re.compile(
+    r"can(?:'|no)?t\b|cannot|unable|unavailable|outside the allowed|not allowed|blocked|denied|refus|won't|"
+    r"need (?:your|the exact)|permission|policy|read[_ ]only|not (?:able|permitted)|no allowed", re.I)
+
+
+def _blocked_request(prior_turns: list) -> str:
+    """The owner's last request, when Jarvis's reply to it was a block. A grant then redoes it."""
+    for row in reversed(prior_turns or []):
+        user = str(row.get("user") or "").strip()
+        if not user:
+            continue
+        perm = _permissions_hand()
+        if perm.is_grant(user) or perm.is_revoke(user):
+            return ""
+        return user if _BLOCKED_REPLY_RE.search(str(row.get("jarvis") or "")) else ""
+    return ""
 
 
 def _code_run_hand():
@@ -5751,7 +5799,7 @@ def _run_tool_inner(
         args = {k:v for k,v in args.items() if k not in {"_confirmed", "strict_ok", "approved"}}
     if tool == "safari_see" and str(args.get("act") or "") in {"grab", "screenshot", "share"} and ROUTE_SCREEN_RE.search(utterance or ""):
         tool = "screen_see"  # rank 16: the model's tab grab for a my-screen ask becomes the whole screen
-    if tool == "screen_see" and not args.get("_confirmed") and not SCREEN_WORD_RE.search(utterance or ""):
+    if tool == "screen_see" and not args.get("_confirmed") and not SCREEN_WORD_RE.search(utterance or "") and not _open_access():
         # A model pick of screen_see for an ask that never mentions the screen (live chat: "Decide").
         return {"ok": True, "tool": "say", "spoken": "I won't look at your screen for that. What would you like me to do?",
                 "wires": ["voice"], "cites": [], "sent": False, "task_verified": False, "outcome": TOOL_LOOP}
@@ -5780,7 +5828,7 @@ def _run_tool_inner(
         }
     unauthorized = (
         tool == "refuse_hard_step"
-        or (tool == "safari_see" and not wants_safari(utterance) and fixed_route(utterance) is None)
+        or (tool == "safari_see" and not wants_safari(utterance) and fixed_route(utterance) is None and not _open_access())
         or (tool == "vault_read" and ACTION_STATUS_RE.search(utterance or ""))
     )
     if unauthorized:
@@ -7469,6 +7517,22 @@ def apply_pipeline_iter(
         return
     bus_now = load_json(hive / "bus" / "state.json")
     prior_turns = load_turns(bus_now)
+    # Owner grant (Evens 2026-10-15): only his own line flips open access; a grant redoes the request just blocked.
+    _perm = _permissions_hand()
+    if _perm.is_grant(spoken_in) or _perm.is_revoke(spoken_in):
+        granted = _perm.is_grant(spoken_in)
+        redo = _blocked_request(prior_turns) if granted else ""
+        _perm.set_open_access(granted)
+        if redo:
+            spoken_in = redo
+        else:
+            text, first, rest = _commit_spoken(
+                hive, spoken_in=spoken_in, prior_turns=prior_turns, tool="converse",
+                raw=OPEN_ON_LINE if granted else OPEN_OFF_LINE, wires=["permissions"], cites=[], ok=True,
+                pack=None, retrieve_roots=retrieve_roots, gen=token)
+            yield _pipeline_event(ok=True, tool="converse", spoken=text, spoken_delta=rest if first and rest else text,
+                                  wires=["permissions"], cites=[], pack=None, gen=token)
+            return
     if RESUME is not None and RESUME.enabled():
         _rkey = _resume_key(hive)
         if RESUME.is_continue(spoken_in):

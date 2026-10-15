@@ -20,9 +20,49 @@ SECRET_NAME = re.compile(
     r"(^\.env(\..*)?$|^id_(rsa|dsa|ecdsa|ed25519)(\.pub)?$|\.(pem|key|p12|pfx|keystore|kdbx)$|"
     r"^\.netrc$|^\.npmrc$|^\.pypirc$|credential|secret|token)", re.I)
 SECRET_DIR = {".grok-private", ".ssh", ".gnupg", ".aws", ".git"}
+# Open access ("permission granted"): only real secret files stay refused; a name that merely contains
+# "token", "secret" or "credential" (tokenomics.pdf, secret-sauce-notes.md) becomes readable.
+STRICT_SECRET_NAME = re.compile(
+    r"(^\.env(\..*)?$|^id_(rsa|dsa|ecdsa|ed25519)(\.pub)?$|\.(pem|key|p12|pfx|keystore|kdbx|keychain(-db)?)$|"
+    r"^\.netrc$|^\.npmrc$|^\.pypirc$|^credentials(\.json)?$|^client_secret.*\.json$|^\.git-credentials$)", re.I)
+OPEN_MAX_BYTES = 200000
+OPEN_MAX_NAMES = 500
+
+
+def open_access() -> bool:
+    import importlib.util, sys
+    name = "agent_stack_permissions"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name("permissions.py"))
+        module = importlib.util.module_from_spec(spec); sys.modules[name] = module; spec.loader.exec_module(module)
+    try:
+        return bool(sys.modules[name].open_access())
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def _secret_name(name: str) -> bool:
+    return bool((STRICT_SECRET_NAME if open_access() else SECRET_NAME).search(name or ""))
+
+
+def _max_bytes() -> int:
+    return OPEN_MAX_BYTES if open_access() else MAX_BYTES
+
+
+def _max_names() -> int:
+    return OPEN_MAX_NAMES if open_access() else MAX_NAMES
 
 
 def default_roots() -> list[Path]:
+    base = _base_roots()
+    if not open_access():
+        return base
+    home = Path.home()
+    extra = [home] + ([Path("/Volumes")] if Path("/Volumes").is_dir() else [])
+    return base + [r for r in extra if r not in base]
+
+
+def _base_roots() -> list[Path]:
     env = os.environ.get("JARVIS_READ_ROOTS", "")
     if env:
         return [Path(p).expanduser() for p in env.split(os.pathsep) if p.strip()]
@@ -45,7 +85,10 @@ def _roots(roots) -> list[Path]:
 
 
 def _deny(msg: str, op: str) -> dict[str, Any]:
-    return {"ok": False, "op": op, "error": msg, "spoken": f"I can't read that: {msg}."}
+    spoken = f"I can't read that: {msg}."
+    if msg in ("outside the allowed folders", "no allowed folder") and not open_access():
+        spoken += ' Say "permission granted" and I will open up your folders.'
+    return {"ok": False, "op": op, "error": msg, "spoken": spoken}
 
 
 def _resolve(raw: str, roots: list[Path]) -> tuple[Path | None, str]:
@@ -57,13 +100,13 @@ def _resolve(raw: str, roots: list[Path]) -> tuple[Path | None, str]:
             return None, "no allowed folder"
         p = roots[0] / p
     parts = p.parts
-    if any(SECRET_DIR.__contains__(x) for x in parts) or SECRET_NAME.search(p.name):
+    if any(SECRET_DIR.__contains__(x) for x in parts) or _secret_name(p.name):
         return None, "that looks like a secret"
     try:
         real = p.resolve(strict=True)
     except (OSError, RuntimeError):
         return None, "not found"
-    if any(x in SECRET_DIR for x in real.parts) or SECRET_NAME.search(real.name):
+    if any(x in SECRET_DIR for x in real.parts) or _secret_name(real.name):
         return None, "that looks like a secret"
     if not any(real == r or r in real.parents for r in roots):
         return None, "outside the allowed folders"
@@ -163,7 +206,7 @@ def selected_folder_receipt(utterance, result):
     if not isinstance(result, dict) or not result.get('ok') or result.get('op') != 'ls':
         return None
     names = result.get('names')
-    if not isinstance(names, list) or len(names)>MAX_NAMES or any(not isinstance(n,str) or Path(n).name != n or n in {'.','..'} for n in names):
+    if not isinstance(names, list) or len(names)>_max_names() or any(not isinstance(n,str) or Path(n).name != n or n in {'.','..'} for n in names):
         return None
     try:
         actual=Path(result['path']).resolve(strict=True)
@@ -174,7 +217,7 @@ def selected_folder_receipt(utterance, result):
             path=Path(raw).expanduser()
             if not path.exists():path=Path(raw.rstrip(',;.!?')).expanduser()
             if path.is_symlink() or not path.is_dir() or path.resolve(strict=True)!=actual:continue
-            if any(part in SECRET_DIR for part in path.parts) or SECRET_NAME.search(path.name):continue
+            if any(part in SECRET_DIR for part in path.parts) or _secret_name(path.name):continue
             observed=result.get('fingerprint')
             current=fingerprint(actual)
             if observed is None or current!=observed:return None
@@ -229,14 +272,23 @@ def run_requested(args, utterance, roots=None):
 
 # File-type discovery reads directory entries only, never document contents.
 DOCUMENT_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|list|search|show)\b.{0,100}\b(?:books?|ebooks?|epubs?|pdfs?)\b", re.I)
+FILE_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|search for|look for)\s+"
+                          r"(?:my\s+|the\s+|a\s+|any\s+)?(?:files?|documents?|docs?|notes?|folders?)\s+(?:about|named|called|with|containing|matching|for)\s+"
+                          r"[\"']?(.{1,80}?)[\"']?(?:\s+(?:in|from|on)\s+(?:my\s+)?(?:downloads|desktop|documents|mac|computer))?[.?!]*$", re.I)
 FIND_MAX_ENTRIES = 100000
 FIND_MAX_RESULTS = 2000
 FIND_SECONDS = 5.0
 
 
 def _find_documents(args, rs):
+    query = str(args.get("name") or "").strip().lower()
+    anytype = open_access() and (bool(query) or args.get("extensions") == [])
     suffixes = args.get("extensions") or [".epub", ".pdf"]
-    if not isinstance(suffixes, list) or not suffixes or any(x not in (".epub", ".pdf") for x in suffixes):
+    if anytype:
+        suffixes = [str(x).lower() for x in (args.get("extensions") or [])]
+    elif query:
+        return _deny('searching any file by name needs open access; say "permission granted"', "find")
+    elif not isinstance(suffixes, list) or not suffixes or any(x not in (".epub", ".pdf") for x in suffixes):
         return _deny("document search supports EPUB and PDF", "find")
     if not rs:
         return _deny("no allowed folders", "find")
@@ -258,7 +310,7 @@ def _find_documents(args, rs):
         def onerror(exc):
             errors.append(f"{Path(exc.filename or root).name}: inaccessible")
         for directory, dirs, files in os.walk(root, followlinks=False, onerror=onerror):
-            dirs[:] = sorted((d for d in dirs if not d.startswith(".") and not SECRET_NAME.search(d) and not (Path(directory) / d).is_symlink()), key=lambda d: (d not in {'Downloads', 'Documents', 'Desktop', 'Books'}, d))
+            dirs[:] = sorted((d for d in dirs if not d.startswith(".") and not _secret_name(d) and not (Path(directory) / d).is_symlink()), key=lambda d: (d not in {'Downloads', 'Documents', 'Desktop', 'Books'}, d))
             count += len(dirs) + len(files)
             if count > FIND_MAX_ENTRIES or time.monotonic() >= deadline:
                 complete = False
@@ -267,7 +319,9 @@ def _find_documents(args, rs):
                 if time.monotonic() >= deadline:
                     complete = False
                     break
-                if Path(name).suffix.lower() not in suffixes or SECRET_NAME.search(name):
+                if (suffixes and Path(name).suffix.lower() not in suffixes) or _secret_name(name):
+                    continue
+                if query and not all(w in name.lower() for w in query.split()):
                     continue
                 path = Path(directory) / name
                 if path.is_symlink():
@@ -286,13 +340,15 @@ def _find_documents(args, rs):
     complete = complete and not errors
     found.sort(key=str.casefold)
     scope = args.get('scope_label') or ("the requested allowed folder" if raw else "my currently allowed folders")
-    spoken = f"Found {len(found)} EPUB/PDF documents in {scope}. "
+    kind = ("files matching " + repr(query)) if query else ("files" if anytype else "EPUB/PDF documents")
+    spoken = f"Found {len(found)} {kind} in {scope}. "
     if found:
         spoken += "Candidates: " + "; ".join(found[:12]) + ". "
         if len(found) > 12:
             spoken += f"The inventory contains all {len(found)} paths; only the first 12 are spoken. "
-    spoken += "PDFs may be articles or other documents, so these are not all confirmed books. "
-    spoken += "This is not a whole-Mac search."
+    if not anytype:
+        spoken += "PDFs may be articles or other documents, so these are not all confirmed books. "
+        spoken += "This is not a whole-Mac search."
     if not complete:
         spoken += " The inventory is incomplete: some folders were inaccessible or the search limit was reached."
     return {"ok": True, "op": "find", "files": found, "count": len(found), "complete": complete,
@@ -315,7 +371,7 @@ def run(args: dict, roots=None) -> dict[str, Any]:
                         names.append(c.name)
             except OSError:
                 continue
-        names = names[:MAX_NAMES]
+        names = names[:_max_names()]
         sp = ("Local repos: " + ", ".join(names) + ".") if names else "I found no git repos in my allowed folders."
         return {"ok": True, "op": op, "names": names, "spoken": sp}
     path, err = _resolve(str((args or {}).get("path") or ""), rs)
@@ -332,7 +388,7 @@ def run(args: dict, roots=None) -> dict[str, Any]:
             module = importlib.util.module_from_spec(spec); sys.modules[name] = module; spec.loader.exec_module(module)
         reader = sys.modules[name]
         if path.suffix.lower() in reader.FORMATS:
-            converted = reader.read(path, MAX_BYTES)
+            converted = reader.read(path, _max_bytes())
             if not converted['ok']:
                 return _deny(converted['error'], op)
             text, truncated = scrub_text(converted['text']), converted['truncated']
@@ -344,17 +400,18 @@ def run(args: dict, roots=None) -> dict[str, Any]:
                     'spoken': f"Read text from {path.name}: {text[:600]}" + (' This is a partial extract.' if truncated else '')}
         try:
             with open(path, "rb") as fh:
-                data = fh.read(MAX_BYTES + 1)
+                limit = _max_bytes()
+                data = fh.read(limit + 1)
         except PermissionError:
             return _deny(f"macOS has not given me access to {path.name} yet", op)
         except OSError:
             return _deny("that file can't be opened", op)
-        truncated = len(data) > MAX_BYTES
+        truncated = len(data) > limit
         if fingerprint(path) != before:
             return _deny('the source changed while it was being read; read it again', op)
         if b'\x00' in data:
             return _deny('this is a binary file, not readable text', op)
-        text = scrub_text(data[:MAX_BYTES].decode("utf-8", "replace"))
+        text = scrub_text(data[:limit].decode("utf-8", "replace"))
         first = text.splitlines()[0] if text else ""
         return {"ok": True, "op": op, "path": str(path), "text": text, "truncated": truncated,
                 'fingerprint': before,
@@ -364,13 +421,13 @@ def run(args: dict, roots=None) -> dict[str, Any]:
             return _deny("not a folder", op)
         before = fingerprint(path)
         try:
-            allnames = sorted(n.name for n in path.iterdir() if not n.name.startswith(".") and not SECRET_NAME.search(n.name))
+            allnames = sorted(n.name for n in path.iterdir() if not n.name.startswith(".") and not _secret_name(n.name))
         except PermissionError:
             return _deny(f"macOS has not given me access to {path.name} yet (System Settings > Privacy & Security > Files and Folders)", op)
         except OSError:
             return _deny("that folder can't be listed", op)
-        names = allnames[:MAX_NAMES]
-        more = len(allnames) > MAX_NAMES
+        names = allnames[:_max_names()]
+        more = len(allnames) > _max_names()
         sp = f"{path.name} has {len(allnames)} items" + (": " + ", ".join(names[:10]) if names else "") + ("…" if len(allnames) > 10 else ".")
         if fingerprint(path) != before:
             return _deny('folder changed during listing', op)
@@ -417,6 +474,11 @@ def args_from_utterance(u: str) -> dict:
     selected = requested_path(s)
     if selected is not None:
         return {'op': 'auto', 'path': str(selected)}
+    named = FILE_FIND_RE.search(s)
+    if named and open_access():
+        folder = _FOLDER.search(s)
+        return {"op": "find", "extensions": [], "name": named.group(1).strip(" .?!\"'"),
+                "path": str(Path.home() / folder.group(1).capitalize()) if folder else ""}
     if DOCUMENT_FIND_RE.search(s):
         suffixes = ([".epub"] if re.search(r"\bepubs?\b", s, re.I) else []) + ([".pdf"] if re.search(r"\bpdfs?\b", s, re.I) else [])
         folder = _FOLDER.search(s)

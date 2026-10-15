@@ -51,6 +51,30 @@ TARGET_OPS = {'CLICK', 'OPEN_TAB', 'INPUT', 'SELECT', 'SWITCH_TAB'}
 PACK_VERSION = 'browser.reflex.v1'
 JEV_MODEL = 'typesafe/jev-1.13'
 HARD = re.compile(r'\b(send|post|publish|pay|buy|purchase|checkout|book|delete|remove|accept|agree|deploy|unsubscribe|confirm order|sign in|log in|password)\b', re.I)
+# Open access ("permission granted" from Evens): logins are allowed, the rest of HARD stays refused on targets/URLs.
+HARD_OPEN = re.compile(r'\b(send|publish|pay|buy|purchase|checkout|book|delete|deploy|unsubscribe|confirm order)\b', re.I)
+OPEN_ACTION_BUDGET, OPEN_TIME_BUDGET = 100, 600
+
+
+def open_access():
+    """Worker side: the owner's grant is snapshotted into the worker env at mission start; models and pages cannot set it."""
+    return os.environ.get('JARVIS_OPEN_ACCESS') == '1'
+
+
+def hard():
+    return HARD_OPEN if open_access() else HARD
+
+
+def owner_open_access():
+    """Parent side: read the owner's live grant from hands/permissions.py."""
+    name = 'agent_stack_permissions'
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name('permissions.py'))
+        module = importlib.util.module_from_spec(spec); sys.modules[name] = module; spec.loader.exec_module(module)
+    try:
+        return bool(sys.modules[name].open_access())
+    except Exception:
+        return False
 
 
 def unsafe_mission_intent(objective):
@@ -89,7 +113,9 @@ def allowed_url(url, domains, *, local=False):
         private = host == 'localhost' or host.endswith(('.local', '.internal'))
     if private and not local:
         return False
-    return any(host == d.lower() for d in domains)
+    if open_access() and not private:
+        return True
+    return any(host == d.lower().removeprefix('www.') or host.endswith('.' + d.lower().removeprefix('www.')) for d in domains)
 
 
 @dataclass(frozen=True)
@@ -132,11 +158,14 @@ class BrowserFlow:
         if 'artifact_expectations' in value:
             if not isinstance(value['artifact_expectations'],(list,tuple)) or any(not isinstance(x,dict) for x in value['artifact_expectations']): raise ValueError('invalid artifact expectations')
             value['artifact_expectations'] = tuple(value['artifact_expectations'])
+        if open_access():
+            value['action_budget'], value['time_budget'] = OPEN_ACTION_BUDGET, OPEN_TIME_BUDGET
+            value['forbidden_actions'] = tuple(x for x in value.get('forbidden_actions', cls.forbidden_actions) if x.lower() != 'authenticate')
         flow = cls(**value)
         if not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9_.-]{0,99}',flow.flow_id): raise ValueError('invalid flow ID')
         if not flow.flow_id or not flow.objective or not flow.mission_id or not flow.stop_conditions:
             raise ValueError('flow identity, objective and stop conditions required')
-        if HARD.search(flow.starting_route): raise ValueError('policy_denied_starting_route')
+        if hard().search(flow.starting_route): raise ValueError('policy_denied_starting_route')
         if not allowed_url(flow.starting_route, flow.allowed_domains, local=local):
             raise ValueError('starting route outside allowed domains')
         if type(flow.action_budget) is not int or not 1 <= flow.action_budget <= 100:
@@ -148,7 +177,7 @@ class BrowserFlow:
         if flow.text_generation_policy not in ('known_values_only', 'small_model'):
             raise ValueError('invalid text policy')
         validate_recipe(flow.verification_recipe)
-        if flow.verification_recipe.get('kind') == 'provider' and (not allowed_url(flow.verification_recipe['url'],flow.allowed_domains,local=local) or HARD.search(flow.verification_recipe['url'])): raise ValueError('provider endpoint outside read-only scope')
+        if flow.verification_recipe.get('kind') == 'provider' and (not allowed_url(flow.verification_recipe['url'],flow.allowed_domains,local=local) or hard().search(flow.verification_recipe['url'])): raise ValueError('provider endpoint outside read-only scope')
         if flow.artifact_expectations and (flow.verification_recipe.get('kind') != 'artifact' or list(flow.artifact_expectations) != flow.verification_recipe.get('files')):
             raise ValueError('artifact expectations must be independently verified by the artifact recipe')
         if not isinstance(flow.inputs, dict) or any(not isinstance(v, str) for v in flow.inputs.values()):
@@ -276,25 +305,26 @@ def validate_decision(decision, observation, flow, *, policy=True):
         target_text = str(target.get('name','')) + ' ' + str(target.get('href',''))
         if any(re.search(r'\b'+re.escape(str(x))+r'\b', target_text, re.I) for x in flow.forbidden_actions):
             raise ValueError('policy_forbidden_target')
-        if HARD.search(target['name']) or not target.get('visible') or target.get('disabled'):
+        if hard().search(target['name']) or not target.get('visible') or target.get('disabled'):
             raise ValueError('policy_denied_target')
         href = urljoin(observation.url, target.get('href', ''))
         navigation_link = (decision.operation in ('CLICK','OPEN_TAB','SWITCH_TAB') and target.get('role') in ('link','tab')
             and bool(target.get('href')) and urlsplit(href).scheme in ('http', 'https')
-            and urlsplit(href).hostname in flow.allowed_domains and not HARD.search(href)
+            and (urlsplit(href).hostname in flow.allowed_domains or allowed_url(href, flow.allowed_domains)) and not hard().search(href)
             and not urlsplit(href).username and not urlsplit(href).password)
         if decision.operation == 'OPEN_TAB' and target.get('role') != 'link': raise ValueError('policy_open_tab_requires_link')
         if decision.operation == 'SWITCH_TAB' and target.get('role') != 'tab': raise ValueError('policy_switch_requires_current_tab')
         # Links are followed as bounded navigation, never by executing page click handlers.
         local_fixture = urlsplit(observation.url).hostname in ('127.0.0.1','localhost')
         contract = site_action_contract(decision, observation)
-        if not navigation_link and not local_fixture and not contract:
+        if not navigation_link and not local_fixture and not contract and not open_access():
             raise ValueError('policy_requires_site_action_contract')
         # Local test fixtures are explicitly compiled with local=True; they exercise event contracts without external authority.
-        required_readonly = 0 if local_fixture else (.90 if navigation_link or contract else .99)
+        required_readonly = 0 if local_fixture else (.90 if navigation_link or contract or open_access() else .99)
         if not math.isfinite(decision.readonly_probability) or not 0 <= decision.readonly_probability <= 1 or decision.readonly_probability < required_readonly:
             raise ValueError('policy_escalation')
-        if decision.operation == 'INPUT' and target.get('type') == 'password':
+        # While open, a password may be typed only from a value the owner gave in this request (inputs), never generated.
+        if decision.operation == 'INPUT' and target.get('type') == 'password' and not (open_access() and decision.input_key in flow.inputs):
             raise ValueError('credential_input_denied')
     if decision.operation in ('INPUT', 'SELECT') and decision.input_key not in flow.inputs:
         if not (decision.input_key == 'generate' and flow.text_generation_policy == 'small_model'):
@@ -600,7 +630,7 @@ class BrowserUseDriver:
                 target = next(c for c in fresh.candidates if c['id'] == decision.target_id)
                 if target.get('role') == 'link' and target.get('href'):
                     destination = urljoin(fresh.url, target['href'])
-                    if not allowed_url(destination, self.flow.allowed_domains, local=self.local) or HARD.search(destination):
+                    if not allowed_url(destination, self.flow.allowed_domains, local=self.local) or hard().search(destination):
                         raise ValueError('policy_denied_navigation')
                     event = ev.NavigateToUrlEvent(url=destination,new_tab=op=='OPEN_TAB')
                 else:
@@ -651,7 +681,7 @@ class BrowserVerifier:
     async def verify_provider(self, driver, flow):
         recipe=flow.verification_recipe
         url=recipe['url']
-        if not allowed_url(url,flow.allowed_domains,local=driver.local) or HARD.search(url): return {'verified':False,'reason':'provider_outside_scope'}
+        if not allowed_url(url,flow.allowed_domains,local=driver.local) or hard().search(url): return {'verified':False,'reason':'provider_outside_scope'}
         box={}
         cancelled=threading.Event();deadline=time.monotonic()+15
         def fetch():
@@ -667,7 +697,7 @@ class BrowserVerifier:
                 current=url
                 for hop in range(4):
                     if cancelled.is_set() or time.monotonic()>=deadline:raise TimeoutError('provider_deadline')
-                    if not allowed_url(current,flow.allowed_domains,local=driver.local) or HARD.search(current): raise ValueError('provider_redirect_outside_scope')
+                    if not allowed_url(current,flow.allowed_domains,local=driver.local) or hard().search(current): raise ValueError('provider_redirect_outside_scope')
                     parsed=urlsplit(current);port=parsed.port or (443 if parsed.scheme=='https' else 80)
                     addresses=socket.getaddrinfo(parsed.hostname,port,type=socket.SOCK_STREAM)
                     if not addresses or (not driver.local and any(not ipaddress.ip_address(row[4][0]).is_global for row in addresses)):
@@ -1222,7 +1252,8 @@ class BrowserMissionHandle:
     def start(self, objective, *, domains=(), local=False, flows=None):
         if not isinstance(objective, str) or not objective.strip() or len(objective) > 10000:
             raise ValueError('bounded objective required')
-        if unsafe_mission_intent(objective): raise ValueError('read_only_mission_required')
+        opened = owner_open_access()
+        if unsafe_mission_intent(objective) and not opened: raise ValueError('read_only_mission_required')
         python = os.environ.get('JARVIS_BROWSER_PYTHON') or str(Path(__file__).resolve().parents[3] / '.venv-browser' / 'bin' / 'python')
         if not python or not Path(python).is_file():
             raise RuntimeError('JARVIS_BROWSER_PYTHON must point to the pinned Browser Use environment')
@@ -1230,13 +1261,14 @@ class BrowserMissionHandle:
         root = mission_path(self.hive, mission_id)
         root.mkdir(parents=True)
         request = {'mission_id': mission_id, 'objective': objective, 'domains': list(domains),
-                   'local': local, 'flows': flows, 'authority': asdict(profiles().AuthorityEnvelope.browser_read(mission_id, domains)), 'created': time.time(), 'runtime_source_hash':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), 'source_manifest':mission_source_manifest()}
+                   'local': local, 'flows': flows, 'authority': asdict(profiles().AuthorityEnvelope.browser_read(mission_id, domains)), 'created': time.time(), 'open_access': opened, 'runtime_source_hash':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), 'source_manifest':mission_source_manifest()}
         write_json(root / 'request.json', request)
         write_json(root / 'control.json', {'revision': 0, 'cancel': False, 'cancel_flows': []})
         write_json(root / 'state.json', {'mission_id': mission_id, 'status': 'QUEUED', 'verified': False, 'flows': []})
         with (root / 'worker.log').open('ab') as log:
             process = subprocess.Popen([python, str(Path(__file__).resolve()), 'mission', str(root)],
-                stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
+                stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True,
+                env={**os.environ, 'JARVIS_OPEN_ACCESS': '1' if opened else '0'})
         write_json(root / 'owner.json', {'pid': process.pid, 'created': time.time()})
         write_json(self.hive / 'browser-missions' / 'latest.json', {'mission_id': mission_id})
         return {'ok': True, 'tool': 'browser_mission', 'mission_id': mission_id, 'task_verified': False,
@@ -1402,7 +1434,9 @@ def pipeline_tool(args, utterance, hive):
         return {'ok': True, 'tool':'browser_mission', 'spoken':spoken, 'mission_id':mission_id,
                 'task_verified':bool(state.get('verified')) and state.get('status')=='VERIFIED', 'evidence':state, 'sent':False, 'wires':['browser_mission'], 'cites':[]}
     except (ValueError, RuntimeError, OSError, KeyError) as exc:
-        return {'ok': False, 'tool':'browser_mission', 'spoken':'Browser research is unavailable: ' + str(exc),
+        hint = (' Say "permission granted" and I will try again without that limit.'
+                if not owner_open_access() and re.search(r'read_only_mission_required|policy_|outside', str(exc)) else '')
+        return {'ok': False, 'tool':'browser_mission', 'spoken':'Browser research is unavailable: ' + str(exc) + hint,
                 'task_verified':False, 'sent':False, 'wires':['browser_mission'], 'cites':[]}
 
 
