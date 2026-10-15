@@ -53,6 +53,15 @@ def _task(root,mission_id):
         or not request['objective'].strip() or state.get('mission_id')!=mission_id
         or state.get('worker_kind')!='research_build' or not isinstance(state.get('status'),str)
         or state['status'] in TERMINAL or control.get('cancel') is not False):raise ValueError('inactive_workflow')
+    linked_path=root/'mixed_parent.json'
+    if linked_path.exists():
+        linked,_,_=_read(linked_path)
+        child=_path(root.parent.parent,linked.get('mission_id'))
+        if (child/'result.json').exists():
+            contract,_,_=_read(child/'request.json');result,_,_=_read(child/'result.json')
+            if ((contract.get('project_scope') or {}).get('request_sha256')==_digest(raw)
+                and result.get('status')=='COMPLETED' and result.get('verified') is True and result.get('independent_acceptance') is True):
+                raise ValueError('terminal_workflow')
     return _digest(raw),identity
 
 
@@ -146,3 +155,67 @@ def resume(hive,mission_id,owner_answer):
                 'task_verified':False,'writes_allowed':False,'secret_access_allowed':False}
     except (OSError,ValueError,TypeError):
         return {'ok':False,'reason':'prior_workflow_read_grant_unavailable','task_verified':False}
+
+
+def delivery_targets(owner_request,mission_id):
+    """Only literal current-owner paths may select fresh output names."""
+    folder=Path.home()/'ArtCraft Studio'/'00 Private'/'Projects'/('JARVIS-'+mission_id)
+    default={'native':str(folder/'source/Implementation.deckcraft'),'export':str(folder/'exports/Implementation.pdf'),
+        'preview':str(folder/'previews/Implementation.png'),
+        'note':str(Path.home()/'Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/shared/inbox'/('Jarvis-implementation-'+mission_id+'.md'))}
+    literals=[m.group(2) for m in re.finditer(r"([\"'])(/[^\"'\n]+)\1",owner_request or '')]
+    chosen={}
+    suffix={'.deckcraft':'native','.pdf':'export','.png':'preview','.md':'note'}
+    for raw in literals:
+        path=Path(raw);kind=suffix.get(path.suffix.lower())
+        if kind:
+            if kind in chosen:raise ValueError('one exact path per delivery output required')
+            chosen[kind]=path
+    if not chosen:return default
+    if set(chosen)!=set(default):raise ValueError('all four exact delivery targets required')
+    project=chosen['native'].parent.parent
+    private=Path.home()/'ArtCraft Studio'/'00 Private'/'Projects'
+    if (project.parent!=private or not re.fullmatch(r'JARVIS-[a-f0-9]{32}',project.name)
+        or chosen['native']!=project/'source/Implementation-Jarvis-native.deckcraft'
+        or chosen['export']!=project/'exports/Implementation-Jarvis-native.pdf'
+        or chosen['preview']!=project/'previews/Implementation-Jarvis-native.png'
+        or chosen['note']!=Path.home()/'Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/shared/inbox'/('Jarvis-implementation-'+project.name[7:]+'-Jarvis-native.md')):
+        raise ValueError('fresh private delivery targets outside exact owner scope')
+    if any(p.is_symlink() for target in chosen.values() for p in (target,*target.parents)):
+        raise ValueError('linked delivery target requires review')
+    return {k:str(v) for k,v in chosen.items()}
+
+
+def delivery_scope(hive,mission_id):
+    """Validate exact output intent from current owner intake; no permission mint."""
+    try:
+        root=_path(hive,mission_id);request_sha,control=_task(root,mission_id)
+        row,_,_=_read(root/'delivery_scope.json');check=dict(row);proof=check.pop('digest',None)
+        request,_,_=_read(root/'request.json')
+        expected=delivery_targets(request['objective'],mission_id)
+        if (proof!=_digest(json.dumps(check,sort_keys=True,separators=(',',':')).encode())
+            or row.get('request_sha256')!=request_sha or row.get('mission_id')!=mission_id
+            or row.get('authority')!='original_owner_requested_private_deliverables' or row.get('create_only') is not True
+            or row.get('artifact_ids')!={phase:mission_id+':'+phase for phase in ('native','export','preview','note')}
+            or any(row.get(k)!=v for k,v in expected.items()) or _task(root,mission_id)!=(request_sha,control)):
+            return {}
+        return row
+    except (OSError,ValueError,TypeError):return {}
+
+
+def files(hive,mission_id):
+    """Read only exact task outputs with actual completed readback receipts."""
+    scope=delivery_scope(hive,mission_id)
+    if not scope:return []
+    try:
+        root=_path(hive,mission_id);state,_,_=_read(root/'delivery.json');completed=state.get('completed') or {};found=[]
+        for phase in ('native','export','preview','note'):
+            proof=completed.get(phase) or {};path=Path(scope[phase])
+            if any(p.is_symlink() for p in (path,*path.parents)):continue
+            if phase=='note':
+                sha=proof.get('sha256') if proof.get('readback_verified') is True and proof.get('path')=='00_Outer_Heaven/shared/inbox/'+path.name else None
+            else:
+                receipt=proof.get('file') or {};sha=receipt.get('sha256') if receipt.get('path')==str(path) else None
+            if isinstance(sha,str) and path.is_file() and path.stat().st_size<=5_000_000 and _digest(path.read_bytes())==sha:found.append(str(path))
+        return found if delivery_scope(hive,mission_id)==scope else []
+    except (OSError,ValueError,TypeError):return []

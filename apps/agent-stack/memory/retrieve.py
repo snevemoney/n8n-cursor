@@ -124,7 +124,7 @@ LEAK_RE = re.compile(
     r"watch later funnels|"
     r"catalog bump|"
     r"one-person-marketing|"
-    r"`[a-z0-9-]{8,}`|"
+    r"`(?!(?:gev|jev|gods-eye|artcraft)-|[a-z]+craft-cli)[a-z0-9-]{8,}`|"
     r"\[\[+|"
     r"\bno-skill\b|"
     r"\*\*source:\*\*|"

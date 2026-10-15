@@ -49,6 +49,14 @@ def capture_args(d: dict) -> list[str]:
     return ["-R", f"{int(round(d['x']))},{int(round(d['y']))},{int(round(d['w']))},{int(round(d['h']))}"]
 
 
+def valid_box(box):
+    """Vision coordinates must form a finite nonempty normalized rectangle."""
+    if not isinstance(box,list) or len(box)!=4 or any(type(v) not in (int,float) for v in box):return False
+    if not all(math.isfinite(v) and 0<=v<=1000 for v in box):return False
+    y0,x0,y1,x1=box
+    return y0<y1 and x0<x1
+
+
 def box_to_global(box: list, d: dict) -> dict:
     """Vision box [ymin, xmin, ymax, xmax] normalized 0-1000 over display d -> global centre and size in points."""
     y0, x0, y1, x1 = [min(max(float(v), 0.0), 1000.0) / 1000.0 for v in box]

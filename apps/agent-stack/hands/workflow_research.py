@@ -240,6 +240,12 @@ def run(objective, *, retrieve_fn, read_fn, roots, active_fn, web_fn=None,
                 return None, None
             before=real.stat()
             text,error=read_fn(real,cap)
+            for _ in range(2):
+                if error!='timeout' or not active():break
+                text,error=read_fn(real,cap)
+            if error:
+                errors=coverage.setdefault('read_errors',{})
+                errors[str(error)]=errors.get(str(error),0)+1
             after=real.stat()
         except Exception:
             return None, None
@@ -320,3 +326,33 @@ def run(objective, *, retrieve_fn, read_fn, roots, active_fn, web_fn=None,
             if selected['origin_association_verified'] else
             'I selected a technical method from a readable saved YouTube record. Its original implementation still needs primary-source verification; no code or demo has run.')
     return {**base,'ok':True,'status':'SOURCE_CANDIDATE','selected':selected,'coverage':coverage,'cites':cites,'spoken':line}
+
+
+def retained_saved_record_roots(hive, allowed_roots):
+    """Reuse bounded source locators as untrusted discovery data, never old grants.
+
+    Each source file must independently fit today's baseline read capability.
+    Cancellation/results/approval receipts are never copied or resumed.
+    """
+    import itertools
+    allowed=[Path(p).expanduser().resolve() for p in allowed_roots]
+    parents=[];missions=Path(hive)/'coding-missions'
+    if not missions.is_dir() or missions.is_symlink():return parents
+    entries=list(itertools.islice(missions.iterdir(),2048))
+    entries=sorted((p for p in entries if p.is_dir() and not p.is_symlink() and re.fullmatch(r'[a-f0-9]{32}',p.name)),key=lambda p:p.stat().st_mtime,reverse=True)[:64]
+    for mission in entries:
+        record=mission/'source_research.json'
+        try:
+            if record.is_symlink() or record.stat().st_size>160000:continue
+            locator=(json.loads(record.read_text()).get('selected') or {}).get('source_record')
+            if not isinstance(locator,str):continue
+            path=Path(locator).expanduser()
+            if (not path.is_absolute() or any(p.is_symlink() for p in (path,*path.parents))
+                or path.parent.name not in {'watch','videos'} or not re.fullmatch(r'[A-Za-z0-9_-]{11}',path.stem)
+                or path.suffix!='.md' or _permissions().is_secret_path(path) or 'Library' in path.parts
+                or any(p.startswith('.') for p in path.parts)):continue
+            real=path.resolve(strict=True)
+            if not real.is_file() or not any(real==root or root in real.parents for root in allowed):continue
+            if real.parent not in parents:parents.append(real.parent)
+        except (OSError,ValueError,TypeError):continue
+    return parents

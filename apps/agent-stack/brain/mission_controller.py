@@ -24,7 +24,22 @@ class MissionController:
 
     def start_research_build(self, hive, objective):
         """Same mission owner retains the task while its project is unresolved."""
-        return self.adapter.WorkflowMissionHandle(hive).start_workflow(objective)
+        import re
+        handle=self.adapter.WorkflowMissionHandle(hive)
+        result=handle.start_workflow(objective)
+        if result.get('status')=='CANCELLED':return result
+        # Consume only a literal positive owner clause accepted by the existing
+        # project/branch approval API. Never synthesize it from planner args.
+        pattern=r"(?:^|[.;]\s+)(?P<clause>(?:please\s+)?(?:approve|authorize|allow)\s+(?:the\s+)?workflow\s+edits\s+for\s+(?P<repo>\"[^\"\n]+\"|'[^'\n]+'|(?:/|~/)[^\s]+)\s+on\s+branch\s+(?P<branch>[\w/-](?:[\w./-]*[\w/-])?))(?=$|[.;])"
+        clause=re.search(pattern,objective,re.I)
+        if not clause:return result
+        ident=result['mission_id'];answer=clause['clause']
+        handle.bind_project(ident,clause['repo'].strip('\"\''),clause['branch'],answer)
+        handle.approve_project(ident,answer)
+        if re.search(r'\buse\b.{0,30}\bobsidian\b.{0,20}\bheadless\b|\buse\b.{0,30}\bheadless\b.{0,20}\bobsidian\b',objective,re.I):
+            delivery=self.adapter._load('intake_headless_delivery',self.adapter.STACK/'hands/workflow_delivery.py')
+            delivery.enable_headless_notes(self.adapter,hive,ident,owner_answer=objective)
+        return self.queue_research_build(hive,ident)
 
     def bind_saved_source_root(self, hive, mission_id, source, answer, *, default_roots):
         """One explicit source packet belongs to this task, not a global read rule."""
@@ -83,41 +98,47 @@ class MissionController:
                 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except BlockingIOError:
                 raise RuntimeError("workflow phase already owned")
-            request = self.adapter.read_json(root / "request.json")
-            if request.get("worker_kind") != "research_build":
-                raise ValueError("research workflow required")
-            def active():
-                return bool(active_fn() and not self.adapter.read_json(root / "control.json").get("cancel"))
-            if not active():
-                return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
-            phase = self.adapter._load("workflow_research_adapter", self.adapter.STACK / "hands" / "workflow_research.py")
-            result = phase.run(request["objective"], roots=roots, retrieve_fn=retrieve_fn, read_fn=read_fn, active_fn=active, web_fn=web_fn, project_context=project_context, primary_metadata_fn=primary_metadata_fn)
-            if not active():
-                return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
-            with (root / "steering.lock").open("a") as steering:
-                fcntl.flock(steering, fcntl.LOCK_EX)
-                if not active():
-                    return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
-                previous = root / "source_research.json"
-                if previous.is_file():
-                    raw = previous.read_bytes()
-                    history = root / "source-research-history"
-                    history.mkdir(exist_ok=True)
-                    target = history / (hashlib.sha256(raw).hexdigest()+".json")
-                    if not target.exists():
-                        pm=self.adapter._load("workflow_project_methods",self.adapter.STACK/"hands"/"project_methods.py")
-                        pm.write_new(target,raw.decode("utf-8"))
-                self.adapter.write_json(root / "source_research.json", result)
-                state = self.adapter.read_json(root / "state.json")
-                # Source discovery never clears the independent edit/branch gate.
-                state.update(source_research_status=result["status"], source_bound=bool(result.get("selected")),
-                             progress={"phase":"saved_source_research", "coverage":result.get("coverage")},
-                             task_verified=False, verified=False, spoken=result["spoken"])
-                self.adapter.write_json(root / "state.json", state)
-                self.adapter.write_json(root / "checkpoint.json", {"worker_kind":"research_build", "mission_id":mission_id,
-                    "phase":"source_research", "original_request_sha256":hashlib.sha256((root / "request.json").read_bytes()).hexdigest(),
-                    "source_result":"source_research.json", "implementation_verified":False})
+            return self._research_saved_sources_locked(hive, mission_id, roots=roots, retrieve_fn=retrieve_fn, read_fn=read_fn, active_fn=active_fn, web_fn=web_fn, project_context=project_context, primary_metadata_fn=primary_metadata_fn)
+
+    def _research_saved_sources_locked(self, hive, mission_id, *, roots, retrieve_fn, read_fn, active_fn, web_fn=None, project_context=None, primary_metadata_fn=None):
+        """Internal phase: caller owns this mission worker lock."""
+        import fcntl
+        root = self.adapter.mission_path(hive, mission_id)
+        request = self.adapter.read_json(root / "request.json")
+        if request.get("worker_kind") != "research_build":
+            raise ValueError("research workflow required")
+        def active():
+            return bool(active_fn() and not self.adapter.read_json(root / "control.json").get("cancel"))
+        if not active():
             return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
+        phase = self.adapter._load("workflow_research_adapter", self.adapter.STACK / "hands" / "workflow_research.py")
+        result = phase.run(request["objective"], roots=roots, retrieve_fn=retrieve_fn, read_fn=read_fn, active_fn=active, web_fn=web_fn, project_context=project_context, primary_metadata_fn=primary_metadata_fn)
+        if not active():
+            return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
+        with (root / "steering.lock").open("a") as steering:
+            fcntl.flock(steering, fcntl.LOCK_EX)
+            if not active():
+                return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
+            previous = root / "source_research.json"
+            if previous.is_file():
+                raw = previous.read_bytes()
+                history = root / "source-research-history"
+                history.mkdir(exist_ok=True)
+                target = history / (hashlib.sha256(raw).hexdigest()+".json")
+                if not target.exists():
+                    pm=self.adapter._load("workflow_project_methods",self.adapter.STACK/"hands"/"project_methods.py")
+                    pm.write_new(target,raw.decode("utf-8"))
+            self.adapter.write_json(root / "source_research.json", result)
+            state = self.adapter.read_json(root / "state.json")
+            # Source discovery never clears the independent edit/branch gate.
+            state.update(source_research_status=result["status"], source_bound=bool(result.get("selected")),
+                         progress={"phase":"saved_source_research", "coverage":result.get("coverage")},
+                         task_verified=False, verified=False, spoken=result["spoken"])
+            self.adapter.write_json(root / "state.json", state)
+            self.adapter.write_json(root / "checkpoint.json", {"worker_kind":"research_build", "mission_id":mission_id,
+                "phase":"source_research", "original_request_sha256":hashlib.sha256((root / "request.json").read_bytes()).hexdigest(),
+                "source_result":"source_research.json", "implementation_verified":False})
+        return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
 
     def nominate_saved_source(self,hive,mission_id,source_record,*,owner_utterance,gen,primary_metadata_fn=None):
         """Bind a model-nominated path only to a current actual saved-record read."""
@@ -220,7 +241,7 @@ class MissionController:
 
     def _workflow_manifest(self):
         files=dict(self.adapter.mission_source_manifest())
-        for name in ("hands/workflow_origin.py","hands/workflow_research.py","hands/workflow_delivery.py","hands/craft.py","brain/online.py","hands/macos_read.py","hands/mcp_call.py"):
+        for name in ("hands/workflow_origin.py","hands/workflow_research.py","hands/workflow_delivery.py","hands/workflow_read_access.py","hands/craft.py","brain/online.py","hands/macos_read.py","hands/mcp_call.py","memory/retrieve.py","hands/web_search.py"):
             files[name]=hashlib.sha256((self.adapter.STACK/name).read_bytes()).hexdigest()
         return files
 
@@ -229,6 +250,13 @@ class MissionController:
         state=self.adapter.WorkflowMissionHandle(hive).continue_workflow(mission_id,owner_answer)
         if state.get('status')=='CANCELLED':
             return state
+        root=self.adapter.mission_path(hive,mission_id)
+        linked=self.adapter.read_json(root/'mixed_parent.json').get('mission_id')
+        if linked:
+            handle=self.adapter.CodingMissionHandle(hive)
+            if hasattr(handle,'request_review_rework'):handle.request_review_rework(linked,owner_answer)
+            handle.recover_mixed(linked)
+            return self.adapter.WorkflowMissionHandle(hive).workflow_status(mission_id)
         # queue_research_build rechecks project approval, retained source,
         # process identity and ownership under its existing locks.
         return self.queue_research_build(hive,mission_id)
@@ -243,14 +271,15 @@ class MissionController:
             state=handle.workflow_status(mission_id)
             if state.get("status") in {"CANCELLED","COMPLETED","DONE","SUCCEEDED","VERIFIED"} or not handle.project_approval(mission_id):return state
             source=self.adapter.read_json(root/"source_research.json")
-            if not source.get("selected"):return state
+            if not source.get("selected") and self.adapter.read_json(root/"request.json").get("execution_mode")!="scoped_mixed_parent":return state
             owner=self.adapter.read_json(root/"owner.json")
             if self.adapter._owned(owner,root):return state
             pid=owner.get("pid")
             if isinstance(pid,int):
                 try:os.kill(pid,0)
                 except ProcessLookupError:pass
-                else:raise ValueError("prior workflow worker identity is unresolved")
+                else:
+                    if not self.adapter._pid_reused(owner):raise ValueError("prior workflow worker identity is unresolved")
             with (root/"worker.lock").open("a") as worker_lock:
                 try:fcntl.flock(worker_lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
                 except BlockingIOError:return state
@@ -301,6 +330,23 @@ class MissionController:
             if not active():return handle.workflow_status(ident)
             if not handle.project_approval(ident):return persist("WAITING_APPROVAL","The task is retained; project edit approval is required before continuing.")
             request=self.adapter.read_json(root/"request.json")
+            if not self.adapter.read_json(root/'source_research.json').get('selected') and request.get('execution_mode')=='scoped_mixed_parent':
+                retrieval=self.adapter._load('workflow_native_retrieval',self.adapter.STACK/'memory/retrieve.py')
+                research=self.adapter._load('workflow_native_research',self.adapter.STACK/'hands/workflow_research.py')
+                hand=self.adapter._load('workflow_native_agent_tools',self.adapter.STACK/'hands/agent_tools.py')
+                web=self.adapter._load('workflow_native_web',self.adapter.STACK/'hands/web_search.py')
+                roots=retrieval.resolve_roots(None)
+                reader=self.adapter._load('workflow_native_workspace',self.adapter.STACK/'hands/workspace_read.py')
+                roots+=research.retained_saved_record_roots(hive,reader.default_roots())
+                binding=self.adapter.read_json(root/'binding.json')
+                def metadata(probe):
+                    expected=research.primary_origin_probe(probe.get('url',''))
+                    return hand.op_cli(expected['argv'],max_output_chars=research.MAX_READ) if probe==expected else {'ok':False,'output':''}
+                self._research_saved_sources_locked(hive,ident,roots=roots,retrieve_fn=retrieval.search,read_fn=retrieval.read_local_text,
+                    active_fn=active,web_fn=web.run,primary_metadata_fn=metadata,
+                    project_context={'verified':True,'source':'owner_project_binding','name':Path(binding['repo']).name,'summary':'Existing owner selected project','capabilities':['assistant','agent','coding']})
+                if not self.adapter.read_json(root/'source_research.json').get('selected'):
+                    return persist('WAITING_SOURCE','No readable saved source was verified. The full assignment and output scope are retained.')
             source_raw=(root/"source_research.json").read_bytes();source=json.loads(source_raw)
             selected=source.get("selected") or {}
             if not selected.get("origin_association_verified"):
@@ -361,6 +407,9 @@ class MissionController:
                         return persist("PREPARATION_BLOCKED",preparation.get("spoken","Working-copy preparation needs recovery."),preparation=preparation)
                     owner=self.adapter.record_workflow_execution(hive,ident,preparation)
             if not active():return handle.workflow_status(ident)
+            if request.get('execution_mode')=='scoped_mixed_parent':
+                queued=handle.queue_mixed_after_preparation(ident)
+                return persist('WAITING_MIXED_PARENT','The prepared assignment is queued on the existing controller; execution has not started yet.',mixed_mission_id=queued['mixed_mission_id'])
             coding=self.adapter.CodingMissionHandle(hive)
             ack=coding.queue_workflow_code(ident)
             child=ack["mission_id"]
@@ -421,12 +470,121 @@ class MissionController:
             except BlockingIOError:
                 return {'status': 'ALREADY_RUNNING', 'verified': False}
             kind = self.adapter.read_json(root / 'request.json').get('worker_kind')
+            if kind == 'mixed':
+                if hasattr(self.adapter,'mixed_generation_current') and not self.adapter.mixed_generation_current(root):
+                    return {'status':'STALE_PARENT_WORKER','verified':False}
+                from contextlib import nullcontext
+                with self.adapter.worker_lifecycle(root) if hasattr(self.adapter,'worker_lifecycle') else nullcontext():
+                    return await self._execute_mixed_parent(root)
+            if kind not in {None, 'browser', 'coding', 'research_build'}:
+                # A typed mission must never silently become browser-only work.
+                # Keep the request and completed evidence for a supported owner.
+                state=self.adapter.read_json(root/'state.json')
+                cancelled=self.adapter.read_json(root/'control.json').get('cancel') is True
+                state.update(status='CANCELLED' if cancelled else 'BLOCKED',verified=False,task_verified=False,
+                             terminal_reason='user_cancel' if cancelled else 'unsupported_mission_executor',
+                             spoken='The requested mission needs an executor that is not registered. Its request and existing evidence are preserved; no replacement browser task was started.')
+                self.adapter.write_json(root/'state.json',state)
+                return state
             if kind in {'coding', 'research_build'}:
                 with self.adapter.worker_lifecycle(root):
                     if kind == 'coding':
                         return await self._execute_coding_locked(root)
                     return await self._execute_research_build(root)
             return await self._execute_owned_mission(root)
+
+    async def _execute_mixed_parent(self,root):
+        """Use the existing parent worker/locks; child receipts advance its cursor.
+
+        Browser authority does not imply local-file or coding authority. Those
+        steps remain retained until their existing scoped executor is bound.
+        """
+        import asyncio,fcntl,importlib.util,sys
+        root=Path(root);hive=root.parent.parent
+        stack=Path(__file__).resolve().parents[1]
+        name='mission_parent_browser_adapter'
+        if name not in sys.modules:
+            spec=importlib.util.spec_from_file_location(name,stack/'hands/browser_runtime.py')
+            module=importlib.util.module_from_spec(spec);sys.modules[name]=module;spec.loader.exec_module(module)
+        browser=sys.modules[name];handle=browser.BrowserMissionHandle(hive)
+        while True:
+            if hasattr(self.adapter,'mixed_generation_current') and not self.adapter.mixed_generation_current(root):
+                return {'status':'STALE_PARENT_WORKER','verified':False}
+            request,state=browser.validate_parent_contract(root)
+            steps=request.get('required_steps')
+            if not isinstance(steps,list) or not steps:raise ValueError('host required-step contract required')
+            remaining=[s for s in steps if s.get('id') not in state.get('step_receipts',{})]
+            if not remaining:
+                delivered=[s for s in steps if s.get('executor')=='delivery']
+                if not delivered:return state
+                outcome=self.adapter.read_json(root/'step_results'/f"{delivered[-1]['id']}.json")
+                if outcome.get('verified') is not True or outcome.get('independent_acceptance') is not True:return state
+                with (root/'steering.lock').open('a') as lock:
+                    fcntl.flock(lock,fcntl.LOCK_EX)
+                    request,state=browser.validate_parent_contract(root)
+                    if self.adapter.read_json(root/'control.json').get('cancel'):return state
+                    if (root/'result.json').exists():state=self.adapter.read_json(root/'result.json')
+                    else:
+                        state.update(status='COMPLETED',verified=True,task_verified=True,independent_acceptance=True,
+                            spoken=outcome['spoken'],mission_id=root.name,
+                            terminal_commit_id=browser.digest({'request':browser.digest(request),'receipts':state['step_receipts']}))
+                        browser.durable_parent_json(root/'result.json',state)
+                        browser.durable_parent_json(root/'state.json',state)
+                return self._publish_mixed_origin(root,request,state,outcome)
+            step=remaining[0]
+            if step.get('executor')!='browser':
+                name='mission_parent_coding_adapter'
+                if name not in sys.modules:
+                    spec=importlib.util.spec_from_file_location(name,stack/'hands/coding_mission.py')
+                    module=importlib.util.module_from_spec(spec);sys.modules[name]=module;spec.loader.exec_module(module)
+                state=sys.modules[name].CodingMissionHandle(hive).continue_mixed_project_step(root.name,step['id'])
+            else:state=handle.continue_parent_step(root.name,step['id'])
+            if state.get('status')=='READY':continue
+            if state.get('status') not in {'WAITING_CHILD','WAITING_CODING_CHILD'}:return state
+            with (root/'steering.lock').open('a') as lock:
+                fcntl.flock(lock,fcntl.LOCK_EX)
+                state=self.adapter.read_json(root/'state.json')
+                deadlines=state.setdefault('child_wait_deadlines',{})
+                deadline=deadlines.setdefault(step['id'],time.time()+600)
+                if time.time()>=deadline:
+                    state.update(status='RECONCILIATION_REQUIRED',verified=False,task_verified=False)
+                    self.adapter.write_json(root/'state.json',state);return state
+                self.adapter.write_json(root/'state.json',state)
+            await asyncio.sleep(1)
+
+    def _publish_mixed_origin(self,root,request,result,outcome):
+        """One canonical terminal owner; replay repairs an interrupted handoff."""
+        import fcntl
+        scope=request.get('project_scope')
+        if not scope:return result
+        original=self.adapter.mission_path(root.parent.parent,scope['mission_id'])
+        with (original/'steering.lock').open('a') as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX)
+            if self.adapter.read_json(original/'control.json').get('cancel') or self.adapter.read_json(root/'control.json').get('cancel'):return result
+            raw=(original/'request.json').read_bytes();owner=(original/'execution_owner.json').read_bytes()
+            if (hashlib.sha256(raw).hexdigest()!=scope['request_sha256'] or hashlib.sha256(owner).hexdigest()!=scope['owner_receipt_sha256']
+                or json.loads(raw).get('objective')!=request.get('objective')):raise ValueError('original terminal owner lineage changed')
+            prior=self.adapter.read_json(original/'result.json')
+            if prior:
+                if prior.get('mixed_terminal_commit_id')!=result['terminal_commit_id']:raise ValueError('original terminal result conflict')
+                return result
+            state=self.adapter.read_json(original/'state.json')
+            manifest={}
+            for phase,proof in (outcome.get('delivery_artifacts') or {}).items():
+                file=proof.get('file') or proof
+                if isinstance(file.get('sha256'),str):
+                    manifest[phase]={'artifact_id':original.name+':'+phase,'version_sha256':file['sha256'],
+                        'path':file.get('path'),'source_mission_id':original.name,'execution_mission_id':root.name,
+                        'verification':'readback_and_independent_review','preview_artifact_id':original.name+':preview'}
+            state.update(artifact_manifest=manifest)
+            state.update(status='COMPLETED',verified=True,task_verified=True,independent_acceptance=True,
+                mission_id=original.name,request_sha256=scope['request_sha256'],spoken=outcome['spoken'],
+                delivery_artifacts=outcome.get('delivery_artifacts') or {},mixed_mission_id=root.name,
+                mixed_terminal_commit_id=result['terminal_commit_id'],terminal_commit_id=result['terminal_commit_id'])
+            pm=self.adapter._load('mixed_terminal_methods',self.adapter.STACK/'hands/project_methods.py')
+            pm.write_new(original/'result.json',json.dumps(state))
+            self.adapter.write_json(original/'state.json',state)
+            return result
 
     async def _execute_coding_locked(self, root):
         """Bound coding resources and serialize every mutation of a scratch repo."""
@@ -528,7 +686,7 @@ class MissionController:
             commit = next((row for row in got.get('steps', []) if row.get('what') == 'commit' and row.get('status') == 'verified'), None)
             tests = [row for row in got.get('steps', []) if str(row.get('what', '')).endswith(' test') and row.get('status') == 'verified']
             receipt = str((commit or {}).get('result') or '')[:300]
-            completion = (f'Coding files are in {repo}. ' + ('Builder tests passed. ' if tests else 'Builder test evidence is missing. ')
+            completion = ('The coding worker finished and saved its files. ' + ('Builder tests passed. ' if tests else 'Builder test evidence is missing. ')
                           + (receipt + '. ' if receipt else 'A commit receipt is missing. ') + 'Independent acceptance pending.')
             state.update(status='CANCELLED' if stopped else ('COMPLETED' if got.get('ok') else ('BLOCKED' if got.get('blocked') else 'FAILED')),
                          verified=False, builder_verified=bool(got.get('verified')) and not stopped,
@@ -646,6 +804,9 @@ class MissionController:
             else:
                 raise RuntimeError('steering_revision_budget')
         except Exception as exc:
+            if state.get('status')=='PLANNING' and isinstance(exc,(TimeoutError,ConnectionError)):
+                state['effect_receipt']={'authority':'host_pre_browser_failure','request_sha256':self.adapter.digest(request),
+                                         'attempted_browser_effects':0,'retryable':True}
             state.update(status='FAILED', verified=False, terminal_reason=type(exc).__name__ + ': ' + str(exc)[:500], spoken='The browser mission did not complete. Its requested result is not verified.')
         state.update(duration=time.monotonic() - started, calls=gateway.calls if gateway else [], terminal_commit_id=uuid.uuid4().hex, finished=time.time())
         import fcntl

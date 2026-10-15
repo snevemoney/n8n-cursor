@@ -125,7 +125,7 @@ def _grab(shot: str, wall: float = 6.0, d: dict | None = None) -> _Grab:
     return _Grab(-9, "screencapture wall")
 
 
-def locate(kws: list[str]) -> dict:
+def locate(kws: list[str], *, disp=None) -> dict:
     if not live():
         return {"found": False, "why": "pointer is off outside the live Face"}
     loc = _bin("jarvis_locate")
@@ -138,7 +138,7 @@ def locate(kws: list[str]) -> dict:
         hide_overlays()  # our own arrow/cursor would hide the text from OCR
         _t.sleep(0.12)
         try:
-            d = cursor_display()
+            d = disp or cursor_display()
         except Exception:  # noqa: BLE001
             d = None
         t0 = _t.time()
@@ -718,7 +718,7 @@ def locate_vision(utterance: str, *, key: str = "", call_fn=None, disp=None) -> 
     except OSError:
         pass
     box = got.get("box_2d") if isinstance(got, dict) else None
-    if not (got.get("found") and isinstance(box, list) and len(box) == 4) or float(got.get("confidence") or 0) < 0.7 \
+    if not (got.get("found") and G.valid_box(box)) or float(got.get("confidence") or 0) < 0.7 \
             or got.get("app_visible") is False:
         return {"found": False, "why": str(got.get("why") or "not clearly on your screen")}
     g = G.box_to_global(box, d)
@@ -747,6 +747,17 @@ def locate_ax(kws: list[str]) -> dict:
 _ANYWHERE = {"x": -1e6, "y": -1e6, "w": 2e6, "h": 2e6}
 
 
+def target_agrees(candidate,kws):
+    words=[k for k in kws if k not in {'menu','button','icon','control','widget','screen','locate'}]
+    label=str(candidate.get('label') or '').lower()
+    if not label or len(label)>100:return False
+    # OCR prose and quoted requests are not controls.
+    if candidate.get('source')=='ocr' and (len(label.split())>8 or ':' in label):return False
+    if not words:return any(k in label for k in kws)
+    return all(any(re.search(r'(?<![a-z0-9])'+re.escape(alias)+r'(?![a-z0-9])',label)
+                   for alias in SYN.get(word,[word])) for word in words)
+
+
 def locate_smart(utterance: str, kws: list[str], *, ax_fn=None, vision_fn=None, ocr_fn=None, disp=None) -> dict:
     """Accessibility (exact hit) > vision box on the display Evens is on > OCR (only if vision is down, exact word only).
     A target that is not on that display is refused: an arrow he cannot see is worse than 'I can't find it'."""
@@ -757,19 +768,21 @@ def locate_smart(utterance: str, kws: list[str], *, ax_fn=None, vision_fn=None, 
             disp = _ANYWHERE
     cands: list[dict] = []
     ax = (ax_fn or locate_ax)(kws)
-    if ax.get("found"):
+    if ax.get("found") and target_agrees(dict(ax,source="ax"),kws):
         cands.append(dict(ax, source="ax"))
         best = G.rank_candidates(cands, kws, disp)
         if best and float(best.get("score") or 0) >= G.AX_STRONG_SCORE:
             return dict(best, found=True)
-    v = (vision_fn or locate_vision)(utterance)
+    v = vision_fn(utterance) if vision_fn else locate_vision(utterance,disp=disp)
+    if v.get("found") and not target_agrees(v,kws):
+        return {"found":False,"why":"the detected control does not match your requested target"}
     if v.get("found"):
         cands.append(dict(v, source="vision"))
     elif not v.get("error"):
         return v  # the model looked and says it is not there: that is final
     else:
-        o = (ocr_fn or locate)(kws)
-        if o.get("found"):
+        o = ocr_fn(kws) if ocr_fn else locate(kws,disp=disp)
+        if o.get("found") and target_agrees(dict(o,source="ocr"),kws):
             cands.append(dict(o, source="ocr"))
     best = G.rank_candidates(cands, kws, disp)
     if best:
@@ -793,7 +806,7 @@ def refine_box(first: dict, crop_png: str, crop_origin: tuple, crop_pts: float, 
     m = re.search(r"\{.*\}", raw or "", re.S)
     got = json.loads(m.group(0)) if m else {}
     box = got.get("box_2d")
-    if not (got.get("found") and isinstance(box, list) and len(box) == 4):
+    if not (got.get("found") and G.valid_box(box)):
         return {"on_control": False}
     y0, x0, y1, x1 = [float(v) / 1000.0 for v in box]
     return {"on_control": True, "x": crop_origin[0] + (x0 + x1) / 2 * crop_pts, "y": crop_origin[1] + (y0 + y1) / 2 * crop_pts,
@@ -804,6 +817,7 @@ def _refine(got: dict, shot: str, d: dict, *, call_fn=None, key: str = "") -> di
     box = got.get("box_2d")
     if not (isinstance(box, list) and len(box) == 4):
         return None
+    if not G.valid_box(box):return {'on_control':False}
     g = G.box_to_global(box, d)
     cx, cy = g["x"] - d["x"], g["y"] - d["y"]  # display-local points
     ox, oy = G.crop_origin(cx, cy, d["w"], d["h"], REFINE_PT)

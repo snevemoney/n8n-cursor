@@ -26,7 +26,7 @@ PRIMARY = "JARVIS_CONTEXT.md"
 OPTIONAL = ("AGENT_RULES.md",)
 DEFAULT_MAX_CHARS = 14000
 DEFAULT_FILE_MAX_CHARS = 9000
-RETRIEVE_FILES = ("MAC_SHARED_MEMORY.md", "SHARED_MEMORY.md", "ACTIVE_TASKS.md")
+RETRIEVE_FILES = ("MAC_SHARED_MEMORY.md", "SHARED_MEMORY.md", "ACTIVE_TASKS.md", "DESK_KNOWLEDGE.md")
 PREFERENCE_RE = re.compile(r"(?:operator|preference|prefs)", re.I)
 # Never read: leaked-key / backup-gap notes must never be spoken.
 DENY_FILES = {"CURRENT_STATE.md", "SECURITY_TODO.md"}
@@ -78,7 +78,7 @@ def stale_hours() -> float:
 
 # Durable rule/profile/index files change rarely; live-state files (ACTIVE_TASKS, FLEET_STATUS) go stale fast.
 DURABLE_FILES = frozenset({
-    "AGENT_RULES.md", "JARVIS_CONTEXT.md", "SHARED_MEMORY.md", "MAC_SHARED_MEMORY.md",
+    "AGENT_RULES.md", "JARVIS_CONTEXT.md", "SHARED_MEMORY.md", "MAC_SHARED_MEMORY.md", "DESK_KNOWLEDGE.md",
     "OPERATOR_PROFILE.md", "TOOLS_AND_REPOS.md", "SKILLS_INDEX.md", "LEARNINGS.md",
 })
 
@@ -209,8 +209,13 @@ def load_shared_context(*, use_cache: bool = True) -> dict:
 
 
 def _terms(text: str) -> set[str]:
-    words = re.findall(r"[a-z0-9][a-z0-9_-]{3,}", (text or "").lower())
-    return {w for w in words if w not in STOP}
+    low = (text or "").lower()
+    words = re.findall(r"[a-z0-9][a-z0-9_-]{3,}", low)
+    # Short decision codes (D1, D2, P1) are the subject of the ask; keep them.
+    codes = re.findall(r"\b[a-z][0-9]{1,2}\b", low)
+    # Bare numbers of 3+ digits (PR 603, port 4018) are often the whole subject; keep them.
+    nums = re.findall(r"\b[0-9]{3,}\b", low)
+    return {w for w in words if w not in STOP} | set(codes) | set(nums)
 
 
 def retrieval_files(root: Path) -> list[Path]:

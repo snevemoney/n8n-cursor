@@ -238,11 +238,19 @@ def bus_write(
                 bus["response_ok_gen"] = int(gen)
         # Receipt belongs to the same atomic terminal claim as the spoken result.
         if execution is not None:
+            summary=PIPELINE.execution_summary(execution)
+            bus['tool']=summary['executor']
+            bus['execution_summary']=summary
+            bus['execution_summary_gen']=gen
+            bus['task_verified']=summary['task_verified']
+            bus['task_verified_gen']=gen
             bus["execution"] = execution
             bus["execution_gen"] = gen
         else:
             bus.pop("execution", None)
             bus.pop("execution_gen", None)
+            for key in ('execution_summary','execution_summary_gen','task_verified','task_verified_gen'):
+                bus.pop(key,None)
         if jarvis_chat_id == "":
             bus.pop("jarvis_chat_id", None)
         elif jarvis_chat_id:
@@ -360,6 +368,12 @@ def apply_execution_receipt(event: dict, receipt: dict) -> dict:
     """One terminal interpretation of operational and task evidence."""
     event["execution"] = receipt
     event["ok"] = bool(receipt.get("ok"))
+    summary=PIPELINE.execution_summary(receipt)
+    event['execution_summary']=summary
+    event['task_verified']=summary['task_verified']
+    if event.get('verb') != 'watch':
+        event['outcome']=receipt.get('outcome') or summary['outcome']
+        event['status']=event['outcome']
     # The current Watch executor proves transitions only. No independent
     # task-proof producer is wired here, so a receipt cannot self-certify.
     if "stroke" in receipt:
@@ -845,7 +859,7 @@ def _apply_turn_iter_inner(
     except Exception:  # noqa: BLE001
         pass
     # Z02: "where do I click to X" is tutor mode: on-device locate + native arrow, never a Watch click, never a screenshot.
-    if hasattr(PIPELINE, "_pointer_hand") and PIPELINE._pointer_hand().wants_pointer(spoken) and not PIPELINE.is_hard_step(spoken):
+    if hasattr(PIPELINE, "_pointer_hand") and (PIPELINE._pointer_request(spoken) or PIPELINE._pointer_hand().wants_pointer(spoken) or PIPELINE._pointer_followup(spoken,hive)) and not PIPELINE.is_hard_step(spoken):
         # demo 2:04.1: the ack is spoken at once, before the look (storyboards/Z02)
         yield _turn_event(spoken="Let me have a look, sir.", verb="pointer", host="local", wires=["pointer"],
                           spoken_delta="Let me have a look, sir.", done=False, partial=True, gen=token)

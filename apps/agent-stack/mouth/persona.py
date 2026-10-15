@@ -74,7 +74,7 @@ PACK_LEAK_RE = re.compile(
     r"a hand only when you need one|"
     r"thinking process|"
     r"(?:^|\n)\s*(?:here'?s a |my |hidden )?scratchpad\s*:|"
-    r"`[a-z0-9-]{8,}`"
+    r"`(?!(?:gev|jev|gods-eye|artcraft)-|[a-z]+craft-cli)[a-z0-9-]{8,}`"
     r")",
     re.I,
 )
@@ -175,7 +175,7 @@ FACTORY_PHRASE = (
     (
         re.compile(
             # HOME-relative user folders (~/Documents, ~/Movies, ...) are where Evens looks; keep them.
-            r"(?:(?:/Users|/home|/tmp|/var|/opt|~/(?!(?:Documents|Movies|Desktop|Downloads|Pictures|Music)\b)|[A-Za-z]:\\)[\w./\\-]+|"
+            r"(?:(?:/Users|/home|/tmp|/var|/opt|~/(?!(?:Documents|Movies|Desktop|Downloads|Pictures|Music|ArtCraft|Applications|\.local/bin|\.grok-shared)\b)|[A-Za-z]:\\)[\w./\\-]+|"
             r"(?:apps|scripts|docs|CONTENT|packages)/[\w./-]+)"
         ),
         "",

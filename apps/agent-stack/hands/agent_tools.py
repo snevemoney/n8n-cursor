@@ -533,6 +533,20 @@ def op_repo(repo: str, action: str, **kw) -> dict:
         # Resolve the installed runner before test discovery adds the repo: a
         # local unittest.py/pytest.py must not impersonate the test framework.
         runner_args = (["-P"] if cmd[0] == "python3" else []) + cmd[1:]
+        if cmd[:3]==['python3','-m','pytest']:
+            probe="import importlib.util,sys;sys.exit(0 if importlib.util.find_spec('pytest') else 3)"
+            try:
+                available=subprocess.run([sb,'-p',_sandbox_profile(root),exe,'-P','-c',probe],cwd=str(root),capture_output=True,text=True,timeout=5,
+                    env={"PATH":"/usr/bin:/bin:/opt/homebrew/bin","HOME":"/private/tmp","PYTHONDONTWRITEBYTECODE":"1"})
+            except subprocess.TimeoutExpired:
+                return {"ok":False,"verified":False,"failure_kind":"test_setup_timeout","tests_passed":0,"spoken":"Test runner preflight timed out; no tests ran."}
+            if available.returncode==3:
+                return {"ok":False,"verified":False,"failure_kind":"test_runner_unavailable","test_setup_failure":True,
+                    "output":"No module named pytest in the isolated interpreter. Standard-library unittest is available; no installation attempted.",
+                    "exit_code":1,"tests_passed":0,"spoken":"pytest is unavailable in the isolated interpreter; no implementation tests ran."}
+            if available.returncode:
+                return {"ok":False,"verified":False,"failure_kind":"test_setup_error","tests_passed":0,"exit_code":available.returncode,
+                    "spoken":"Test runner preflight failed; no implementation tests ran."}
         try:
             p = subprocess.run([sb, "-p", _sandbox_profile(root), exe, *runner_args], cwd=str(root), capture_output=True,
                                text=True, timeout=TEST_DEADLINE_S, env={"PATH": "/usr/bin:/bin:/opt/homebrew/bin", "HOME": "/private/tmp", "PYTHONDONTWRITEBYTECODE": "1"})
@@ -1024,6 +1038,7 @@ CODE_SYS = ("You are Jarvis's coding agent working in a git repo. Reply with ONE
             "no network, no secrets, never touch .env or credentials; set done=true only when the last test run passed and nothing "
             "else is needed. Keep it small.")
 MAX_ITERS = int(os.environ.get("JARVIS_CODE_ITERS") or 4)
+REPLY_RETRIES = 3  # rejected replies / guard refusals get free rounds; one each used up 01e8079's budget (10-15)
 
 
 def _json_obj(text: str) -> dict:
@@ -1040,7 +1055,7 @@ CODE_REPLY_RECOVERY = (
     'Return one complete JSON object only. Keep the response bounded: inspect with read_paths first, '
     'prefer compact exact edits for large existing files, and include only small necessary new files. '
     'For partial work use one small file/exact edit with continue:true and no test_cmd, then a final explicit meaningful test_cmd. Complete only the work authorized by the current goal. '
-    'Do not resend whole large files.')
+    'Use at most one exact edit per path; combine multiple changes to the same file into a single old/new edit. Do not resend whole large files.')
 
 def _code_reply(text,*,require_test_command=False):
     """A rejected response is feedback, never an empty default test action."""
@@ -1049,7 +1064,18 @@ def _code_reply(text,*,require_test_command=False):
     except (ValueError,TypeError):return None,'malformed_or_truncated_json'
     if not isinstance(data,dict) or not data:return None,'nonempty_object_required'
     if 'done' in data and type(data['done']) is not bool:return None,'done_must_be_boolean'
-    if data.get('read_paths'):return data,None
+    files=data.get('files') or {};edits=data.get('edits') or []
+    if not isinstance(files,dict) or not isinstance(edits,list) or len(files)+len(edits)>10:return None,'bounded_code_changes_required'
+    edit_paths=set(files)
+    for edit in edits:
+        if (not isinstance(edit,dict) or set(edit)!={'path','old','new'} or
+            not all(isinstance(edit[k],str) for k in ('path','old','new')) or not edit['old'] or edit['path'] in files):
+            return None,'invalid_exact_edit'
+        if edit['path'] in edit_paths:return None,'duplicate_exact_edit_path'
+        edit_paths.add(edit['path'])
+    if data.get('read_paths'):
+        if files or edits:return None,'inspection_and_write_must_be_separate'
+        return data,None
     if data.get('continue') is True:
         if data.get('test_cmd'):return None,'continuing_batch_cannot_test_or_commit'
         files=data.get('files') or {};edits=data.get('edits') or []
@@ -1343,7 +1369,7 @@ def reconcile_code_checkpoint(checkpoint, args):
         raise _CheckpointBlocked("checkpoint_task_mismatch")
     if _SECRETISH.search(json.dumps(cp)):
         raise _CheckpointBlocked("checkpoint_contains_secret")
-    if (type(cp.get("iteration")) is not int or not 1 <= cp["iteration"] <= MAX_ITERS+1 or
+    if (type(cp.get("iteration")) is not int or not 1 <= cp["iteration"] <= MAX_ITERS+1+REPLY_RETRIES or
         type(cp.get("file_cursor")) is not int or not isinstance(cp.get("files"),list) or
         not 0 <= cp["file_cursor"] <= len(cp["files"]) or len(cp["files"]) > 10 or
         not all(isinstance(row,(tuple,list)) and len(row)==2 for row in cp["files"]) or
@@ -1578,7 +1604,7 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
                 done("baseline test", got)
             state["phase"] = "model";save()
         elif phase == "model":
-            if state["iteration"] > MAX_ITERS:
+            if state["iteration"] > MAX_ITERS + int(state.get("free_retries") or 0):
                 return _code_report(state["todo"],state["skills"],state["model"],False,state["plan"])
             # An interrupted in-flight request has no model output to recover;
             # retry only this next uncommitted step, retaining prior history.
@@ -1597,7 +1623,8 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
                 state['history'].append({'role':'assistant','content':text[:8000]})
                 state['history'].append({'role':'user','content':CODE_REPLY_RECOVERY+' Rejection reason: '+error+'.'})
                 done(f"iter {state['iteration']} model response",{'verified':False,'spoken':'Coding response rejected: '+error+'; no operations from this reply ran.'})
-                state['model_response_error']=error;state['iteration']+=1;state['phase']='model';save();continue
+                state['model_response_error']=error;state['iteration']+=1;state['phase']='model'
+                state['free_retries']=min(REPLY_RETRIES,int(state.get('free_retries') or 0)+1);save();continue
             state.pop('model_response_error',None)
             state.update(model=model, model_output=text, model_data=data, model_request_pending=False)
             if data.get('read_paths'):
@@ -1606,7 +1633,15 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
                 state['history'].append({'role':'user','content':'Actual repository inspection results: '+json.dumps(rows)})
                 done(f"iter {state['iteration']} inspect", {'verified':all('error' not in row for row in rows),'spoken':'Bounded source inspection completed; no files changed.'})
                 state['iteration'] += 1; state['phase']='model'; save(); continue
-            files, preimages = _code_files(root,data)
+            try:
+                files, preimages = _code_files(root,data)
+            except _CheckpointBlocked as exc:
+                if str(exc) not in {'invalid_exact_edit','exact_edit_anchor_not_unique','bounded_code_changes_required'}:raise
+                state['history'].append({'role':'assistant','content':text[:8000]})
+                state['history'].append({'role':'user','content':CODE_REPLY_RECOVERY+' Rejection reason: '+str(exc)+'. Use at most one combined exact edit per file and a unique old anchor. No writes ran.'})
+                done(f"iter {state['iteration']} model response",{'verified':False,'spoken':'Coding exact edit rejected before writing: '+str(exc)+'. No operations from this reply ran.'})
+                state.update(files=[],edit_preimages={},file_cursor=0,model_request_pending=False,phase='model')
+                state['iteration']+=1;state['free_retries']=min(REPLY_RETRIES,int(state.get('free_retries') or 0)+1);save();continue
             state.update(files=files,edit_preimages=preimages,file_cursor=0)
             state["plan"] = state["plan"] or [str(x)[:120] for x in data.get("plan",[])][:7]
             state["history"].append({"role":"assistant","content":text[:8000]})
@@ -1639,7 +1674,8 @@ def _durable_code(repo, goal, branch, *, cancel_check, progress, checkpoint, res
                 state["guard_refusals"] = int(state.get("guard_refusals") or 0) + 1
                 state["history"].append({"role":"user","content":CODE_GUARD_REFUSAL.format(name=name)})
                 done(f"iter {state['iteration']} write {name}",{"verified":False,"spoken":"Host configuration guard refused "+name+" before writing; nothing from this batch was written."})
-                state.update(files=[],edit_preimages={},file_cursor=0,pending=None,phase="model");state["iteration"] += 1;save();continue
+                state.update(files=[],edit_preimages={},file_cursor=0,pending=None,phase="model");state["iteration"] += 1
+                state["free_retries"]=min(REPLY_RETRIES,int(state.get("free_retries") or 0)+1);save();continue
             state["pending"] = {"path":name,"new_sha256":hashlib.sha256(content.encode()).hexdigest(),"mode":mode}
             state["phase"] = "pending_write";save()
             got = op_repo(str(root),"write",path=name,content=content)
@@ -1750,7 +1786,9 @@ def _op_code_owned(repo, goal, branch, *, todo, check, publish, operate) -> dict
         got0 = operate(str(root), "test")  # read the current failures before the model edits anything
         last_test = "(baseline before edits) " + str(got0.get("output") or got0.get("spoken"))[-2500:]
         step("baseline test", {"verified": True, "spoken": got0.get("spoken")})
-    for it in range(1, MAX_ITERS + 1):
+    it, retries = 0, 0
+    while it < MAX_ITERS + retries:
+        it += 1
         check()
         history.append({"role": "user", "content": f"Goal: {goal}{CODE_INSPECTION_HINT}\n\nRelevant skills:\n{guide or '(none)'}\n\nRepo now:\n{_tree(root)}\n\n"
                         f"Last test output (iteration {it - 1}):\n{last_test or '(none yet)'}"})
@@ -1765,6 +1803,7 @@ def _op_code_owned(repo, goal, branch, *, todo, check, publish, operate) -> dict
         if error:
             history.append({'role':'user','content':CODE_REPLY_RECOVERY+' Rejection reason: '+error+'.'})
             step(f"iter {it} model response",{'verified':False,'spoken':'Coding response rejected: '+error+'; no operations from this reply ran.'})
+            retries = min(REPLY_RETRIES, retries + 1)
             continue
         plan = plan or [str(x)[:120] for x in (d.get("plan") or [])][:7]
         if d.get('read_paths'):
@@ -1772,7 +1811,13 @@ def _op_code_owned(repo, goal, branch, *, todo, check, publish, operate) -> dict
             history.append({'role':'user','content':'Actual repository inspection results: '+json.dumps(rows)})
             step(f"iter {it} inspect",{'verified':all('error' not in row for row in rows),'spoken':'Bounded source inspection completed; no files changed.'})
             continue
-        files, preimages = _code_files(root,d)
+        try:
+            files, preimages = _code_files(root,d)
+        except _CheckpointBlocked as exc:
+            if str(exc) not in {'invalid_exact_edit','exact_edit_anchor_not_unique','bounded_code_changes_required'}:raise
+            history.append({'role':'user','content':CODE_REPLY_RECOVERY+' Rejection reason: '+str(exc)+'. Use at most one combined exact edit per file and a unique old anchor. No writes ran.'})
+            step(f"iter {it} model response",{'verified':False,'spoken':'Coding exact edit rejected before writing: '+str(exc)+'. No operations from this reply ran.'})
+            retries=min(REPLY_RETRIES,retries+1);continue
         for path, content in files:
             _check_edit_preimage(root,str(path),preimages.get(str(path)))
             if not step(f"iter {it} write {path}", operate(str(root), "write", path=str(path), content=str(content))):
@@ -1794,6 +1839,32 @@ def _op_code_owned(repo, goal, branch, *, todo, check, publish, operate) -> dict
             break
     return _code_report(todo, skills, model_used, passed and todo[-1]["status"] == "verified", plan)
 
+
+
+def recoverable_test_setup(result):
+    """Setup is not failed implementation evidence. Never infer from model text."""
+    if not isinstance(result,dict) or result.get('verified') is True:return None
+    output=str(result.get('output') or '')
+    if (result.get('exit_code') in {1,127} and not result.get('tests_passed')
+        and re.search(r'(?:No module named [\"\']?pytest|(?:pytest|python3): (?:command )?not found)',output)):
+        return 'test_runner_unavailable'
+    return None
+
+
+def setup_recovery_checkpoint(checkpoint,result):
+    """Return a checked resume copy with one existing bounded recovery credit.
+
+    Original attempts and snapshots remain immutable. No runner is installed,
+    tests are never relabelled, and at most the existing three credits apply.
+    """
+    cp=json.loads(json.dumps(checkpoint))
+    if recoverable_test_setup(cp.get('test_result'))!='test_runner_unavailable':return cp
+    if result.get('status')!='FAILED' or cp.get('phase')!='model':return cp
+    used=cp.get('free_retries',0)
+    if type(used) is not int or not 0<=used<REPLY_RETRIES or cp.get('setup_recovery_applied'):return cp
+    cp['free_retries']=used+1;cp['setup_recovery_applied']=True
+    cp['history'].append({'role':'user','content':'The actual isolated test runner reported that pytest is unavailable. No implementation test passed or failed, and no installation ran. Standard-library unittest is available. Select an available compatible runner for the existing tests; do not replace tests with print output or install a dependency.'})
+    return cp
 
 def _code_report(todo, skills, model, ok, plan=None) -> dict:
     done = sum(1 for t in todo if t["status"] == "verified")

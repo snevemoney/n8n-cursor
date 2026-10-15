@@ -123,7 +123,8 @@ def independent_behavior_requested(request):
  if not isinstance(request,dict):return False
  text=str(request.get('objective') or '')
  return bool(request.get('worker_kind')=='research_build' and request.get('request_scope')=='transient_task'
-   and re.search(r'\bbuild\b',text,re.I) and re.search(r'\bworking\s+version\b',text,re.I)
+   and (re.search(r'\b(?:reimplement|re-implement)\b|\bimplement\b.{0,40}\bbehavio[ur]\b|\bindependent\s+(?:behavior\s+)?implementation\b',text,re.I)
+        or (re.search(r'\bbuild\b',text,re.I) and re.search(r'\bworking\s+version\b',text,re.I)))
    and not re.search(r'\b(?:copy|port|reuse|adapt|translate|install|vendor|fork|clone)\b',text,re.I))
 
 

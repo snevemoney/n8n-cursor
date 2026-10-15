@@ -34,7 +34,23 @@ APPS = (
 )
 BIN = Path(os.environ.get("CRAFT_BIN_DIR") or Path.home() / ".local" / "bin")
 # Relative save paths land here, not in the repo.
-WORKDIR = Path(os.environ.get("CRAFT_WORKDIR") or Path.home() / "Documents" / "Craft")
+# ArtCraft Studio tiers: 00 Private (default job work), 01 Internal (methods/WIP), 02 Public (sanitised drafts).
+STUDIO = Path.home() / "ArtCraft Studio"
+WORKDIR = Path(os.environ.get("CRAFT_WORKDIR") or STUDIO / "00 Private" / "Projects" / "Jarvis")
+RECENTS = Path.home() / ".local" / "bin" / "artcraft-recents-sync.py"
+
+
+def add_to_recents(path: str) -> None:
+    """After a save/export, put the file in the app's recents (Evens's rule). Best effort, never raises."""
+    try:
+        full = Path(path).expanduser()
+        if not full.is_absolute():
+            full = WORKDIR / full
+        if full.exists() and RECENTS.is_file():
+            subprocess.run(["python3", str(RECENTS), "--add", str(full)], stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=30, check=False)
+    except Exception:  # noqa: BLE001
+        pass
 MAX_STEPS = 8
 CALL_TIMEOUT = 60.0
 # Face holds its wall while craft is open, so the hand owns the ceiling.
@@ -182,7 +198,13 @@ class _Session:
                 parts.append(str(block.get("text") or ""))
             elif isinstance(block, dict):
                 parts.append(f"[{block.get('type')}]")
-        return {"ok": not res.get("isError"), "answered": True, "text": "\n".join(parts).strip()}
+        ok = not res.get("isError")
+        if ok and SAVE_RE.search(name or ""):
+            for v in (params or {}).values():
+                if isinstance(v, str) and "." in v:
+                    add_to_recents(v)
+                    break
+        return {"ok": ok, "answered": True, "text": "\n".join(parts).strip()}
 
     def observe(self) -> dict:
         if not self.inspect_tool:

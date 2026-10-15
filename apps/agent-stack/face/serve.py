@@ -6,6 +6,8 @@ Bind 127.0.0.1 only. Not evenslouis.ca. Not a second hive.
 from __future__ import annotations
 
 import importlib.util
+import hashlib
+import subprocess
 import json
 import os
 import queue
@@ -35,7 +37,7 @@ def _watch_event_path() -> Path | None:
 
 def _controls():
     return getattr(mouth(), "CONTROLS", None)
-TURN_WALL_SEC = 25.0
+TURN_WALL_SEC = float(os.environ.get("JARVIS_FACE_TURN_WALL_SEC") or 25.0)
 # One provider attempt after the pre-talk partial. Not a longer campaign clock.
 # The standing line waits this long only while that call is still open.
 PROVIDER_TEXT_GRACE_SEC = 10.0
@@ -180,6 +182,45 @@ def think_heartbeat(utterance: str = "") -> dict:
     }
 
 
+_LOADED_SOURCE = {}
+_PROCESS_STARTED = time.time()
+_BOOT_SOURCE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+try:
+    _BOOT_CHECKOUT_REVISION=subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True,timeout=2).stdout.strip()
+except (OSError,subprocess.TimeoutExpired):_BOOT_CHECKOUT_REVISION='unavailable'
+def _source_manifest():
+    stack=HERE.parent
+    paths=[*stack.glob('brain/*.py'),*stack.glob('hands/*.py'),*stack.glob('mouth/*.py'),*stack.glob('memory/*.py'),HERE/'serve.py']
+    return {str(p.relative_to(stack)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths if not p.name.startswith('test_')}
+
+
+def runtime_evidence():
+    current=_source_manifest()
+    pipeline=getattr(globals().get('_MOUTH'),'PIPELINE',None)
+    online=getattr(pipeline,'ONLINE',None)
+    loaded={}
+    for name,module in list(sys.modules.items()):
+        filename=getattr(module,'__file__',None)
+        if filename:
+            try:loaded[name]=str(Path(filename).resolve().relative_to(HERE.parent))
+            except (ValueError,OSError):pass
+    coding=sys.modules.get('agent_stack_agent_tools') or sys.modules.get('coding_agent_tools')
+    pointer=sys.modules.get('agent_stack_pointer')
+    models={'configured_chat':online.openrouter_model() if online else None,
+            'last_observed_chat':(getattr(online,'LAST_TALK',{}) or {}).get('model') if online else None,
+            'loaded_coding':getattr(coding,'CODE_MODEL',None),
+            'loaded_pointer':getattr(pointer,'VISION_MODEL',None)}
+    try:revision=subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True,timeout=2).stdout.strip()
+    except (OSError,subprocess.TimeoutExpired):revision='unavailable'
+    return {'pid':os.getpid(),'started_at':_PROCESS_STARTED,'checkout_revision':revision,'boot_checkout_revision':_BOOT_CHECKOUT_REVISION,
+            'boot_source_sha256':_BOOT_SOURCE_SHA256,'loaded_modules':loaded,'model_roles':models,
+            'model_scope':'configured or last observed role; worker processes have separate request/source receipts',
+            'mouth_generation_id':hashlib.sha256(json.dumps(_LOADED_SOURCE,sort_keys=True).encode()).hexdigest(),
+            'mouth_generation_manifest':dict(_LOADED_SOURCE),'disk_matches_generation':current==_LOADED_SOURCE,
+            'revision_scope':'checkout revision and generation baseline; not proof that every lazy hand was imported'
+}
+
+
 def _load_mouth():
     for name in (
         "agent_stack_mouth",
@@ -197,6 +238,8 @@ def _load_mouth():
         raise RuntimeError(f"cannot load {path}")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    _LOADED_SOURCE.clear()
+    _LOADED_SOURCE.update(_source_manifest())
     return mod
 
 
@@ -534,6 +577,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
+        if path == "/api/runtime":
+            self._json(200,runtime_evidence())
+            return
         if path == "/healthz":
             self._json(200, {"ok": True, "online": True, "bind": f"{HOST}:{PORT}", "kind": "agent-stack-face"})
             return

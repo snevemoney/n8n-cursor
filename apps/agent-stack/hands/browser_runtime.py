@@ -460,7 +460,12 @@ class BrowserFlowCompiler:
 class BrowserPlanner:
     def __init__(self, gateway): self.gateway = gateway
 
-    async def plan(self, objective, mission_id, *, domains=(), local=False):
+    async def plan(self, objective, mission_id, *, domains=(), local=False, required_executors=('browser',)):
+        # Host-owned requirement coverage must not be reduced by a browser plan.
+        # This planner cannot authorize or execute local reads or coding nodes.
+        if (not isinstance(required_executors,(list,tuple)) or not required_executors
+            or any(name!='browser' for name in required_executors)):
+            raise ValueError('mixed_mission_owner_required: browser plan cannot cover required non-browser executors')
         example = asdict(BrowserFlow('site-one', mission_id, 'Read requested information',
             'https://example.com/', ('example.com',), ('Requested text is visible',),
             {'kind': 'dom', 'checks': [{'selector': 'h1', 'exists': True}]}))
@@ -1247,6 +1252,147 @@ def mission_path(hive, mission_id):
     return Path(hive) / 'browser-missions' / mission_id
 
 
+def durable_parent_json(path,value):
+    """Persist intent before effect, including its rename in the task directory."""
+    missing=[];ancestor=Path(path).parent
+    while not ancestor.exists():missing.append(ancestor);ancestor=ancestor.parent
+    write_json(path,value)
+    with Path(path).open('rb') as stream:os.fsync(stream.fileno())
+    for folder in dict.fromkeys([Path(path).parent,*[p.parent for p in missing]]):
+        directory=os.open(str(folder),os.O_RDONLY|getattr(os,'O_DIRECTORY',0))
+        try:os.fsync(directory)
+        finally:os.close(directory)
+
+
+
+_PARENT_SOURCE_REVIEW_KEY=object()
+class ParentSourceReviewAuthority:
+    def __init__(self,key):
+        if key is not _PARENT_SOURCE_REVIEW_KEY:raise ValueError('independent_source_review_required')
+def parent_source_review_authority():
+    """Host independent reviewer only; never exposed as a model tool."""
+    return ParentSourceReviewAuthority(_PARENT_SOURCE_REVIEW_KEY)
+
+
+def review_parent_source_transition(root, *, authority, evidence):
+    """Independent host maintenance review, never a model tool or step receipt."""
+    import fcntl
+    stack=Path(__file__).resolve().parents[1]
+    if not isinstance(authority,ParentSourceReviewAuthority) or not isinstance(evidence,dict) or not evidence:
+        raise ValueError('independent_source_review_required')
+    root=Path(root)
+    with (root/'worker.lock').open('a') as lock:
+        fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+        request=read_json(root/'request.json')
+        if request.get('worker_kind')!='mixed' or read_json(root/'control.json').get('cancel') or (root/'result.json').exists():raise ValueError('active mixed project required')
+        scope=request.get('project_scope') or {};project=root.parent/str(scope.get('mission_id',''))
+        if read_json(project/'control.json').get('cancel'):raise ValueError('original owner cancelled')
+        old=reviewed_parent_manifest(root,request,request.get('source_manifest') or {});current={name:hashlib.sha256((stack/name).read_bytes()).hexdigest() for name in old}
+        changed={name for name in old if old[name]!=current[name]}
+        allowed={'hands/coding_mission.py','hands/browser_runtime.py','brain/mission_controller.py','brain/pipeline.py','hands/workflow_delivery.py'}
+        if not changed or not changed<=allowed:raise ValueError('source transition outside reviewed control plane')
+        row={'version':1,'authority':'independent_host_source_review','request_sha256':digest(request),'previous':old,'current':current,
+             'reviewed_step_receipts':read_json(root/'state.json').get('step_receipts',{}), 'evidence':evidence}
+        row['digest']=digest(row)
+        path=root/'parent_source_review.json'
+        if path.exists():
+            chain=root/'parent_source_reviews'
+            if chain.is_symlink():raise ValueError('linked source review chain')
+            existing=sorted(chain.glob('*.json')) if chain.exists() else []
+            if len(existing)>=16:raise ValueError('source review chain limit')
+            previous=read_json(existing[-1] if existing else path)
+            row['previous_review_digest']=previous['digest'];row['version']=2
+            row.pop('digest',None);row['digest']=digest(row)
+            path=chain/f'{len(existing)+1:03d}.json'
+            if path.exists():raise ValueError('source review sequence conflict')
+        durable_parent_json(path,row);return row
+
+
+def reviewed_parent_manifest(root,request,manifest):
+    """A task-bound reviewed transition changes executable hashes, never intent/effects."""
+    path=Path(root)/'parent_source_review.json'
+    if not path.exists():return manifest
+    if path.is_symlink():raise ValueError('linked source review')
+    chain=Path(root)/'parent_source_reviews'
+    if chain.is_symlink():raise ValueError('linked source review chain')
+    additions=sorted(chain.glob('*.json')) if chain.exists() else []
+    if len(additions)>16 or [p.name for p in additions]!=[f'{i:03d}.json' for i in range(1,len(additions)+1)]:
+        raise ValueError('invalid source review sequence')
+    previous_digest=None
+    receipts=read_json(Path(root)/'state.json').get('step_receipts',{})
+    allowed={'hands/coding_mission.py','hands/browser_runtime.py','brain/mission_controller.py','brain/pipeline.py','hands/workflow_delivery.py'}
+    for index,item in enumerate([path,*additions]):
+        if item.is_symlink():raise ValueError('linked source review')
+        row=read_json(item);unsigned=dict(row);signature=unsigned.pop('digest',None)
+        current=row.get('current') or {};reviewed=row.get('reviewed_step_receipts')
+        if (signature!=digest(unsigned) or row.get('version')!=(1 if index==0 else 2)
+            or (index>0 and row.get('previous_review_digest')!=previous_digest)
+            or row.get('authority')!='independent_host_source_review' or row.get('request_sha256')!=digest(request)
+            or row.get('previous')!=manifest or set(current)!=set(manifest)
+            or not {name for name in manifest if current[name]!=manifest[name]}<=allowed or not row.get('evidence')):
+            raise ValueError('parent source review changed')
+        if not isinstance(reviewed,dict) or any(receipts.get(key)!=value for key,value in reviewed.items()):
+            raise ValueError('reviewed completed receipts changed')
+        manifest=current;previous_digest=signature
+    return manifest
+
+
+def validate_parent_contract(root):
+    """Validate the host's complete immutable requirements before skipping work."""
+    root=Path(root)
+    if root.is_symlink() or any((root/name).is_symlink() for name in ('request.json','state.json','control.json')):
+        raise ValueError('linked parent state requires review')
+    request=read_json(root/'request.json');state=read_json(root/'state.json')
+    if request.get('mission_id')!=root.name or request.get('worker_kind') not in {'mixed','research_build'}:
+        raise ValueError('workflow parent identity required')
+    steps=request.get('required_steps');outputs=request.get('required_outputs')
+    if not isinstance(steps,list) or not 1<=len(steps)<=64 or not isinstance(outputs,list) or not outputs:
+        raise ValueError('bounded host required-step/output contract required')
+    ids=[s.get('id') for s in steps if isinstance(s,dict)]
+    if len(ids)!=len(steps) or any(not isinstance(n,str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,80}',n) for n in ids) or len(set(ids))!=len(ids):
+        raise ValueError('unique required step IDs required')
+    declared=[];visited=set()
+    for s in steps:
+        if s.get('executor') not in {'browser','workspace_read','coding','delivery','retained_source'} or not isinstance(s.get('outputs'),list) or not s['outputs']:
+            raise ValueError('registered executor and required outputs needed')
+        if any(not isinstance(o,str) or not o for o in s['outputs']):raise ValueError('invalid output identity')
+        declared+=s['outputs']
+        dependencies=s.get('dependencies',[])
+        if not isinstance(dependencies,list) or not set(dependencies)<=visited:
+            raise ValueError('required steps must follow their dependencies')
+        visited.add(s['id'])
+    if any(not isinstance(o,str) or not o for o in outputs) or len(set(outputs))!=len(outputs) or len(set(declared))!=len(declared) or set(declared)!=set(outputs):
+        raise ValueError('required outputs must be covered exactly once')
+    manifest=request.get('source_manifest');stack=Path(__file__).resolve().parents[1]
+    manifest=reviewed_parent_manifest(root,request,manifest) if isinstance(manifest,dict) else manifest
+    if not isinstance(manifest,dict) or any(manifest.get(n)!=sha for n,sha in mission_source_manifest().items()):
+        raise ValueError('parent must freeze browser and controller sources')
+    for name,sha in manifest.items():
+        path=stack/name
+        if Path(name).is_absolute() or '..' in Path(name).parts or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest()!=sha:
+            raise ValueError('parent source changed')
+    receipts=state.get('step_receipts',{})
+    if not isinstance(receipts,dict) or not set(receipts)<=set(ids):raise ValueError('unknown completed parent step')
+    for ident,receipt in receipts.items():
+        step=next(s for s in steps if s['id']==ident)
+        if (not isinstance(receipt,dict) or receipt.get('request_sha256')!=digest(request)
+            or receipt.get('step_sha256')!=digest(step) or receipt.get('outputs')!=step['outputs']):
+            raise ValueError('completed step receipt contract changed')
+        if step['executor'] in {'workspace_read','delivery','retained_source'}:
+            result_path=root/'step_results'/f'{ident}.json'
+        else:
+            if step['executor']=='coding':
+                child=root.parent/str(receipt.get('child_id'))
+                if not re.fullmatch(r'[a-f0-9]{32}',str(receipt.get('child_id'))):raise ValueError('invalid coding child')
+            else:child=mission_path(root.parent.parent,receipt.get('child_id'))
+            result_path=child/'result.json'
+        if result_path.is_symlink() or not result_path.resolve().is_relative_to(root.parent.parent.resolve()):
+            raise ValueError('linked completed child requires review')
+        if digest(read_json(result_path))!=receipt.get('result_sha256'):
+            raise ValueError('completed child result changed')
+    return request,state
+
+
 class BrowserMissionHandle:
     """Process handle subordinate to Face. Durable state survives module reloads.
 
@@ -1254,6 +1400,184 @@ class BrowserMissionHandle:
     No worker can overwrite a newer conversation's terminal response.
     """
     def __init__(self, hive): self.hive = Path(hive)
+
+    def continue_parent_step(self, parent_id, step_id):
+        """Host-only continuation of an immutable parent step, never model authority.
+
+        Reserve before launch. A launch without a durable owner receipt is
+        uncertain and must be reconciled, never automatically repeated.
+        """
+        import fcntl
+        stack=Path(__file__).resolve().parents[1]
+        if not re.fullmatch(r'[a-f0-9]{32}',str(parent_id)) or not re.fullmatch(r'[A-Za-z0-9_-]{1,80}',str(step_id)):
+            raise ValueError('invalid parent step identity')
+        parent=self.hive/'coding-missions'/parent_id
+        if parent.is_symlink() or not parent.is_dir() or not parent.resolve().is_relative_to(self.hive.resolve()):raise ValueError('parent mission required')
+        with (parent/'steering.lock').open('a') as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX)
+            validate_parent_contract(parent)
+            request=read_json(parent/'request.json');control=read_json(parent/'control.json')
+            if request.get('mission_id')!=parent_id:raise ValueError('parent identity mismatch')
+            if request.get('worker_kind') not in {'mixed','research_build'}:raise ValueError('workflow parent required')
+            required=request.get('required_steps');outputs=request.get('required_outputs')
+            if not isinstance(required,list) or not required or not isinstance(outputs,list) or not outputs:
+                raise ValueError('host required-step/output contract required')
+            ids=[s.get('id') for s in required if isinstance(s,dict)]
+            if len(ids)!=len(required) or len(set(ids))!=len(ids) or any(not isinstance(n,str) for n in ids):
+                raise ValueError('unique required step IDs required')
+            if any(s.get('executor') not in {'browser','workspace_read','coding','delivery','retained_source'} for s in required):
+                raise ValueError('unregistered required executor')
+            declared=[o for s in required for o in s.get('outputs',[])]
+            if (any(not isinstance(o,str) or not o for o in declared) or len(set(declared))!=len(declared)
+                or set(declared)!=set(outputs)):
+                raise ValueError('required outputs must be covered exactly once')
+            step=next((s for s in required if s['id']==step_id),None)
+            if not step or step.get('executor')!='browser':raise ValueError('browser parent step required')
+            domains=step.get('domains');objective=step.get('objective')
+            if not isinstance(domains,list) or not domains or any(not isinstance(d,str) for d in domains):
+                raise ValueError('bounded browser domains required')
+            authority=profiles().AuthorityEnvelope.from_dict(request.get('authority'),parent_id)
+            if (not authority.permitted_domains or not set(domains)<=set(authority.permitted_domains)
+                or authority.decide('NAVIGATE','browser.read',domains)!='AUTO_EXECUTE'
+                or authority.decide('EXTRACT','browser.read',domains)!='AUTO_EXECUTE'):
+                raise ValueError('parent does not authorize this browser scope')
+            if not isinstance(objective,str) or not objective.strip() or len(objective)>10000 or unsafe_mission_intent(objective,False):
+                raise ValueError('read-only bounded browser step required')
+            if step.get('local'):raise ValueError('local browser scope requires a separate host contract')
+            expected=request.get('source_manifest')
+            if not isinstance(expected,dict) or not expected:raise ValueError('parent source manifest required')
+            if any(expected.get(name)!=sha for name,sha in mission_source_manifest().items()):
+                raise ValueError('parent must freeze browser and controller sources')
+            for name,sha in expected.items():
+                path=(stack/name)
+                if Path(name).is_absolute() or '..' in Path(name).parts or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest()!=sha:
+                    raise ValueError('parent source changed')
+            key={'parent_mission_id':parent_id,'step_id':step_id,'request_sha256':digest(request),'step_sha256':digest(step)}
+            dispatch_policy={'version':1,'effect':'browser.read','after_dispatch':'reconcile_only','retry_known_no_effect':True}
+            reservation_path=parent/'browser_children'/f'{step_id}.json'
+            if (reservation_path.is_symlink() or not reservation_path.resolve().is_relative_to(parent.resolve())):
+                raise ValueError('linked reservation requires review')
+            reservation=read_json(reservation_path);state=read_json(parent/'state.json')
+            state.setdefault('step_receipts',{})
+            state['required_steps']=ids;state['required_outputs']=outputs
+            def save(status,**fields):
+                state.update(status=status,verified=False,task_verified=False,**fields)
+                durable_parent_json(parent/'state.json',state);return dict(state)
+            if reservation and any(reservation.get(k)!=v for k,v in key.items()):
+                raise ValueError('parent step reservation contract changed')
+            if reservation and reservation.get('dispatch_policy')!=dispatch_policy:
+                raise ValueError('stored and current dispatch policy differ')
+            if control.get('cancel'):
+                if reservation:
+                    child=mission_path(self.hive,reservation['child_id'])
+                    if child.is_symlink() or not child.resolve().is_relative_to(self.hive.resolve()) or (child/'control.json').is_symlink():
+                        raise ValueError('linked child state requires review')
+                    if (child/'request.json').exists() and not (child/'result.json').exists():
+                        self.steer(reservation['child_id'],cancel=True)
+                return save('CANCELLED',next_step=step_id)
+            dependencies=step.get('dependencies',[])
+            if not isinstance(dependencies,list) or not set(dependencies)<=set(ids):raise ValueError('invalid parent dependencies')
+            if not set(dependencies)<=set(state['step_receipts']):return save('WAITING_DEPENDENCY',next_step=step_id)
+            prior=state['step_receipts'].get(step_id)
+            if prior:
+                if prior.get('step_sha256')!=key['step_sha256']:raise ValueError('completed step contract changed')
+                return dict(state)  # already advanced; never regress the parent on replay
+            if not reservation:
+                reservation={**key,'child_id':uuid.uuid4().hex,'launch_token':uuid.uuid4().hex,'phase':'RESERVED','dispatch_policy':dispatch_policy}
+                durable_parent_json(reservation_path,reservation)
+            child_id=reservation['child_id'];child=mission_path(self.hive,child_id)
+            if (child.is_symlink() or not child.resolve().is_relative_to(self.hive.resolve())
+                or any((child/name).is_symlink() for name in ('request.json','owner.json','result.json','state.json','control.json'))):
+                raise ValueError('linked child state requires review')
+            child_request=read_json(child/'request.json')
+            if child_request and child_request.get('parent_step')!=key:raise ValueError('reserved child identity mismatch')
+            if child_request and (child_request.get('objective')!=objective or child_request.get('domains')!=domains
+                or child_request.get('flows')!=step.get('flows') or child_request.get('local') is not False
+                or child_request.get('authority')!=json.loads(json.dumps(asdict(profiles().AuthorityEnvelope.browser_read(child_id,domains))))) :
+                raise ValueError('reserved child scope changed')
+            if child_request and (set(child_request)!={'mission_id','objective','domains','local','flows','authority','parent_step','created','open_access','source_manifest','runtime_source_hash'}
+                or child_request.get('mission_id')!=child_id or child_request.get('open_access') is not False
+                or child_request.get('source_manifest')!=mission_source_manifest()
+                or child_request.get('runtime_source_hash')!=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()):
+                raise ValueError('reserved child executor changed')
+            if reservation.get('child_request_sha256') and digest(child_request)!=reservation['child_request_sha256']:
+                raise ValueError('reserved child request changed')
+            result=read_json(child/'result.json')
+            if result:
+                if not child_request or result.get('mission_id')!=child_id:raise ValueError('child result identity mismatch')
+                verification=result.get('mission_verification') or {}
+                accepted_rows=verification.get('accepted',[])
+                accepted={r.get('task_id') for r in accepted_rows if isinstance(r,dict)}
+                required_ids=set(verification.get('required_task_ids') or [])
+                proofs_valid=False
+                try:
+                    raw_flows=result.get('flows')
+                    if not isinstance(raw_flows,list) or not 1<=len(raw_flows)<=20:raise ValueError('bounded result flows required')
+                    # Validate the recorded contract, without applying the
+                    # parent's current global open-mode defaults to child data.
+                    recorded=[BrowserFlow(**row) for row in raw_flows]
+                    flows={f.flow_id:f for f in recorded}
+                    proofs_valid=(len(flows)==len(recorded) and all(f.mission_id==child_id and set(f.allowed_domains)<=set(domains) for f in recorded)
+                        and len(accepted_rows)==len(accepted) and all(
+                        row.get('task_id') in flows and row.get('revision')==flows[row['task_id']].revision
+                        and isinstance(row.get('verifier_id'),str) and bool(row['verifier_id'])
+                        and row.get('contract_digest')==mission_contract().contract_digest(flows[row['task_id']])
+                        for row in accepted_rows))
+                except (ValueError,TypeError,KeyError):pass
+                if (result.get('status')!='VERIFIED' or result.get('verified') is not True
+                    or not result.get('terminal_commit_id') or not proofs_valid
+                    or verification.get('verified') is not True or not required_ids or required_ids!=accepted):
+                    retry=step.get('retry_policy',{'max_attempts':1,'safe_no_effect_only':True})
+                    effect=result.get('effect_receipt')
+                    history=reservation.get('prior_attempts',[])
+                    safe=(result.get('status')=='FAILED' and effect=={'authority':'host_pre_browser_failure',
+                        'request_sha256':digest(child_request),'attempted_browser_effects':0,'retryable':True})
+                    if (safe and isinstance(retry,dict) and set(retry)=={'max_attempts','safe_no_effect_only'}
+                        and retry.get('safe_no_effect_only') is True and type(retry.get('max_attempts')) is int
+                        and 1<=retry['max_attempts']<=3 and len(history)+1<retry['max_attempts']):
+                        history=[*history,{'child_id':child_id,'result_sha256':digest(result),'effect_receipt':effect}]
+                        reservation.update(child_id=uuid.uuid4().hex,launch_token=uuid.uuid4().hex,
+                                           phase='RESERVED',prior_attempts=history)
+                        reservation.pop('child_request_sha256',None)
+                        durable_parent_json(reservation_path,reservation)
+                        return save('READY',next_step=step_id,child_id=reservation['child_id'],
+                                    child_retry_count=len(history),child_failure_history=history)
+                    return save('CHILD_RECOVERY_REQUIRED',next_step=step_id,child_id=child_id,child_failure=result)
+                receipt={**key,'child_id':child_id,'result_sha256':digest(result),'outputs':step.get('outputs',[])}
+                state['step_receipts'][step_id]=receipt
+                remaining=[s['id'] for s in required if s['id'] not in state['step_receipts']]
+                reservation.update(phase='ACCEPTED',result_sha256=receipt['result_sha256']);durable_parent_json(reservation_path,reservation)
+                return save('READY' if remaining else 'AWAITING_PARENT_VERIFICATION',next_step=remaining[0] if remaining else None)
+            if reservation['phase']!='RESERVED':
+                owner=read_json(child/'owner.json')
+                acknowledged=owner.get('launch_token')==reservation['launch_token']
+                return save('WAITING_CHILD' if acknowledged else 'RECONCILIATION_REQUIRED',next_step=step_id,child_id=child_id)
+            python=os.environ.get('JARVIS_BROWSER_PYTHON') or str(Path(__file__).resolve().parents[3]/'.venv-browser/bin/python')
+            if not Path(python).is_file():raise RuntimeError('pinned browser Python unavailable')
+            child.mkdir(parents=True,exist_ok=True)
+            if not child_request:
+                child_request={'mission_id':child_id,'objective':objective,'domains':domains,'local':False,'flows':step.get('flows'),
+                    'authority':asdict(profiles().AuthorityEnvelope.browser_read(child_id,domains)), 'parent_step':key,
+                    'created':time.time(),'open_access':False,'source_manifest':mission_source_manifest(),
+                    'runtime_source_hash':hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+                durable_parent_json(child/'request.json',child_request)
+                durable_parent_json(child/'control.json',{'revision':0,'cancel':False,'cancel_flows':[]})
+                durable_parent_json(child/'state.json',{'mission_id':child_id,'status':'QUEUED','verified':False,'flows':[]})
+            # Preparation may have stopped after writing only request.json.
+            if not (child/'control.json').exists():durable_parent_json(child/'control.json',{'revision':0,'cancel':False,'cancel_flows':[]})
+            if not (child/'state.json').exists():durable_parent_json(child/'state.json',{'mission_id':child_id,'status':'QUEUED','verified':False,'flows':[]})
+            if read_json(child/'control.json').get('cancel'):
+                return save('CHILD_RECOVERY_REQUIRED',next_step=step_id,child_id=child_id,child_failure='child_cancelled_before_dispatch')
+            reservation.update(phase='DISPATCHING',child_request_sha256=digest(child_request));durable_parent_json(reservation_path,reservation)
+            # After this marker, even an exception may have created a worker.
+            # Recovery must reconcile; it cannot treat missing acknowledgement as no effect.
+            with (child/'worker.log').open('ab') as log:
+                process=subprocess.Popen([python,str(Path(__file__).resolve()),'mission',str(child)],
+                    stdin=subprocess.DEVNULL,stdout=log,stderr=log,start_new_session=True,
+                    env={**os.environ,'JARVIS_OPEN_ACCESS':'0'})
+            durable_parent_json(child/'owner.json',{'pid':process.pid,'created':time.time(),'launch_token':reservation['launch_token']})
+            reservation['phase']='DISPATCHED';durable_parent_json(reservation_path,reservation)
+            return save('WAITING_CHILD',next_step=step_id,child_id=child_id)
 
     def start(self, objective, *, domains=(), local=False, flows=None):
         if not isinstance(objective, str) or not objective.strip() or len(objective) > 10000:
@@ -1369,7 +1693,8 @@ def outcome_label(event):
 
 def mission_source_manifest():
     stack = Path(__file__).resolve().parents[1]
-    names = ('hands/browser_runtime.py', 'brain/mission_controller.py',
+    names = ('hands/browser_runtime.py', 'hands/coding_mission.py','hands/workspace_read.py','hands/workflow_execution.py',
+             'hands/workflow_delivery.py','hands/workflow_read_access.py','hands/permissions.py','brain/pipeline.py','brain/mission_controller.py',
              'brain/profiles.py', 'brain/mission_contract.py')
     return {name:hashlib.sha256((stack/name).read_bytes()).hexdigest() for name in names}
 

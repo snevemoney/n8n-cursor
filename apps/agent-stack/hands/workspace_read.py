@@ -19,7 +19,7 @@ MAX_NAMES = 50
 SECRET_NAME = re.compile(
     r"(^\.env(\..*)?$|^id_(rsa|dsa|ecdsa|ed25519)(\.pub)?$|\.(pem|key|p12|pfx|keystore|kdbx)$|"
     r"^\.netrc$|^\.npmrc$|^\.pypirc$|credential|secret|token)", re.I)
-SECRET_DIR = {".grok-private", ".ssh", ".gnupg", ".aws", ".git"}
+SECRET_DIR = {".grok-private", ".ssh", ".gnupg", ".aws", ".git", "secrets", "secret", "credentials", "tokens"}
 # Open access ("permission granted"): only real secret files stay refused; a name that merely contains
 # "token", "secret" or "credential" (tokenomics.pdf, secret-sauce-notes.md) becomes readable.
 STRICT_SECRET_NAME = re.compile(
@@ -47,6 +47,13 @@ def open_access() -> bool:
 
 
 def _secret_name(name: str) -> bool:
+    # Names of test source modules are not secret values. Every read still goes through scrub_text.
+    import importlib.util, sys
+    module=sys.modules.get('agent_stack_permissions')
+    if module is None:
+        spec=importlib.util.spec_from_file_location('agent_stack_permissions',Path(__file__).with_name('permissions.py'))
+        module=importlib.util.module_from_spec(spec);sys.modules['agent_stack_permissions']=module;spec.loader.exec_module(module)
+    if module._TEST_SOURCE_RE.fullmatch(name or '') and not module.is_secret_path(name):return False
     return bool((STRICT_SECRET_NAME if open_access() else SECRET_NAME).search(name or ""))
 
 
@@ -115,13 +122,13 @@ def _resolve(raw: str, roots: list[Path]) -> tuple[Path | None, str]:
             return None, "no allowed folder"
         p = roots[0] / p
     parts = p.parts
-    if any(SECRET_DIR.__contains__(x) for x in parts) or _secret_name(p.name):
+    if any(str(x).lower() in SECRET_DIR for x in parts) or _secret_name(p.name):
         return None, "that looks like a secret"
     try:
         real = p.resolve(strict=True)
     except (OSError, RuntimeError):
         return None, "not found"
-    if any(x in SECRET_DIR for x in real.parts) or _secret_name(real.name) or _home_dot_path(real):
+    if any(str(x).lower() in SECRET_DIR for x in real.parts) or _secret_name(real.name) or _home_dot_path(real):
         return None, "that looks like a secret"
     if not any(real == r or r in real.parents for r in roots):
         return None, "outside the allowed folders"
@@ -286,7 +293,7 @@ def run_requested(args, utterance, roots=None):
 
 
 # File-type discovery reads directory entries only, never document contents.
-DOCUMENT_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|list|search|show)\b.{0,100}\b(?:books?|ebooks?|epubs?|pdfs?)\b", re.I)
+DOCUMENT_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|list|search|show|open|get|pull up|bring up)\b.{0,100}\b(?:books?|ebooks?|epubs?|pdfs?)\b", re.I)
 FILE_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|search for|look for)\s+"
                           r"(?:my\s+|the\s+|a\s+|any\s+)?(?:files?|documents?|docs?|notes?|folders?)\s+(?:about|named|called|with|containing|matching|for)\s+"
                           r"[\"']?(.{1,80}?)[\"']?(?:\s+(?:in|from|on)\s+(?:my\s+)?(?:downloads|desktop|documents|mac|computer))?[.?!]*$", re.I)
@@ -418,24 +425,57 @@ def _find_documents(args, rs):
             "scope": [str(r) for r in scan_roots], "errors": errors, "spoken": spoken}
 
 
+REPO_DEPTH = 3  # ~/tools/<repo> and ~/projects/<repo> sit two levels down (live 2026-10-15)
+REPO_BUDGET_S = 8.0  # a cold first walk on a loaded Mac took 94 s; answer with what was found by then
+
+
+def _repos_under(root: Path, depth: int, deadline: float = float("inf")) -> list[str]:
+    """Real checkouts (a .git folder); worktrees (.git file), hidden folders and Library are skipped."""
+    if time.monotonic() > deadline:
+        return []
+    if (root / ".git").is_dir():
+        return [root.name]
+    if depth <= 0:
+        return []
+    try:
+        kids = sorted(c for c in root.iterdir() if c.is_dir() and not c.is_symlink()
+                      and not c.name.startswith(".") and c.name != "Library")
+    except OSError:
+        return []
+    return [n for c in kids for n in _repos_under(c, depth - 1, deadline)]
+
+
+def open_document(args,utterance,roots=None):
+    """Only open a literal owner-named document, never a model-supplied target or executable."""
+    literal=requested_path(utterance)
+    if literal is None or str(literal)!=str(Path(str(args.get('path') or '')).expanduser()):
+        return _deny('name one exact document path to open','open_document')
+    target,error=_resolve(str(literal),_roots(roots)+[literal.parent.resolve()])
+    if target is None:return _deny(error,'open_document')
+    if target.suffix.lower() not in {'.txt','.md','.pdf','.epub','.png','.jpg','.jpeg','.docx','.xlsx','.pptx'} or not target.is_file():
+        return _deny('this is not a supported document type','open_document')
+    before=fingerprint(target)
+    try:
+        result=subprocess.run(['/usr/bin/open',str(target)],capture_output=True,text=True,timeout=8)
+    except (OSError,subprocess.TimeoutExpired):return _deny('the document open request failed','open_document')
+    ok=result.returncode==0 and fingerprint(target)==before
+    return {'ok':ok,'op':'open_document','path':str(target),'task_verified':False,'open_requested':ok,
+            'spoken':('macOS accepted the document open request. I have not independently verified its visible window.' if ok else 'The document open request failed. No visible result is verified.')}
+
+
 def run(args: dict, roots=None) -> dict[str, Any]:
     op = str((args or {}).get("op") or "read")
     rs = _roots(roots)
     if op == "find":
         return _find_documents(args or {}, rs)
     if op == "repos":
-        names = []
-        for r in rs:
-            if (r / ".git").exists():
-                names.append(r.name)
-            try:
-                for c in sorted(r.iterdir()):
-                    if c.is_dir() and (c / ".git").exists():
-                        names.append(c.name)
-            except OSError:
-                continue
-        names = list(dict.fromkeys(names))[:_max_names()]
-        sp = ("Local repos: " + ", ".join(names) + ".") if names else "I found no git repos in my allowed folders."
+        deadline = time.monotonic() + REPO_BUDGET_S
+        found = list(dict.fromkeys(n for r in _scan_order(rs) if r != VOLUMES for n in _repos_under(r, REPO_DEPTH, deadline)))
+        names = found[:_max_names()]
+        more = f" and {len(found) - len(names)} more" if len(found) > len(names) else ""
+        sp = (f"{len(found)} local repos: " + ", ".join(names) + more + ".") if found else "I found no git repos in my allowed folders."
+        if time.monotonic() > deadline:
+            sp += " The Mac was slow, so that list may be partial; ask again for the rest."
         if not open_access():  # a closed look is not the whole Mac; say so (live 2026-10-15)
             sp += ' I only looked in my own folders; say "permission granted" and I\'ll look across your Mac.'
 

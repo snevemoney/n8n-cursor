@@ -52,10 +52,16 @@ def enable_headless_notes(adapter,hive,mission_id,*,owner_answer,vault_root=None
     if any(p.is_symlink() for p in (inbox,*inbox.parents)) or not inbox.is_dir() or not (vault/'.obsidian').is_dir():
         raise ValueError('headless_vault_identity_required')
     info=inbox.stat()
+    scope={}
+    if (root/'delivery_scope.json').exists():
+        access=adapter._load('headless_delivery_scope',adapter.STACK/'hands/workflow_read_access.py')
+        scope=access.delivery_scope(hive,mission_id)
+        if not scope:raise ValueError('current_delivery_scope_required')
+    note_path=str(Path(scope['note']).relative_to(vault)) if scope else '00_Outer_Heaven/shared/inbox/Jarvis-implementation-'+mission_id+'.md'
     row={'version':1,'mission_id':mission_id,'request_sha256':hashlib.sha256(raw).hexdigest(),
          'authority':'explicit_current_owner_headless_notes','owner_answer_sha256':hashlib.sha256(answer.encode()).hexdigest(),
          'vault_root':str(vault),'inbox':str(inbox),'directory_identity':[info.st_dev,info.st_ino],
-         'note_path':'00_Outer_Heaven/shared/inbox/Jarvis-implementation-'+mission_id+'.md'}
+         'note_path':note_path}
     row['digest']=digest(row)
     existing=adapter.read_json(root/'delivery_backend.json')
     if existing:
@@ -155,6 +161,37 @@ print(json.dumps(out))
 LIVENESS_KEYS=frozenset({'active','worker_liveness','worker_started_at','worker_heartbeat_at'})
 
 
+def verified_implementation_writes(checkpoint,coding):
+    """Only host-verified writes, including earlier batches retained in the checkpoint."""
+    steps=(coding.get('coding_result') or {}).get('steps')
+    if not isinstance(steps,list) or steps!=checkpoint.get('todo'):
+        raise ValueError('implementation_write_history_mismatch')
+    names={}
+    for step in steps:
+        match=re.fullmatch(r'iter [0-9]+ write (.+)',str(step.get('what') or ''))
+        if match and step.get('status')=='verified':names[match.group(1)]=step
+    return names
+
+
+def committed_implementation_excerpt(hand,working_copy,snapshot,relative,write_receipt):
+    path=Path(relative)
+    if path.is_absolute() or '..' in path.parts or hand.PERM().is_secret_path(path):raise ValueError('unsafe_implementation_evidence')
+    real=Path(working_copy)/path;proof=file_receipt(real)
+    recorded=snapshot.get('files',{}).get(str(path),{})
+    if proof['sha256']!=recorded.get('sha256'):raise ValueError('implementation_readback_changed')
+    tree=hand._git(Path(working_copy),'ls-tree','-z','HEAD','--',str(path))
+    expected_mode='100755' if recorded.get('mode',0)&0o111 else '100644'
+    if tree.returncode or not tree.stdout.startswith(expected_mode+' blob ') or tree.stdout.split('\t',1)[-1]!=str(path)+'\0':
+        raise ValueError('implementation_commit_entry_mismatch')
+    blob=hand._git(Path(working_copy),'show','HEAD:'+str(path),binary=True)
+    if blob.returncode or hashlib.sha256(blob.stdout).hexdigest()!=proof['sha256']:
+        raise ValueError('implementation_commit_blob_mismatch')
+    text=blob.stdout[:1400].decode('utf-8','replace')
+    if hand._SECRETISH.search(text):raise ValueError('secret_implementation_evidence')
+    return {'path':str(path),'text':text,'partial':proof['bytes']>1400,'sha256':proof['sha256'],
+            'write_receipt':write_receipt,'committed_head':snapshot['head'],'committed_mode':expected_mode}
+
+
 class Delivery:
     def __init__(self,adapter,hive,mission_id,*,active_fn,artifact_base=None,runtime=None):
         self.a=adapter;self.hive=Path(hive);self.ident=mission_id;self.root=adapter.mission_path(hive,mission_id)
@@ -189,22 +226,21 @@ class Delivery:
             or wrapped.get('checkpoint_digest')!=hand.checkpoint_digest(checkpoint) or checkpoint.get('snapshot')!=snapshot
             or not snapshot.get('head') or hand._git(Path(owner['working_copy']),'status','--porcelain').stdout.strip()):
             raise ValueError('verified_implementation_snapshot_required')
-        excerpts=[]
-        for relative,_body in checkpoint.get('files',[])[:10]:
-            path=Path(relative)
-            if path.is_absolute() or '..' in path.parts or hand.PERM().is_secret_path(path):raise ValueError('unsafe_implementation_evidence')
-            if path.suffix not in {'.py','.js','.ts','.tsx','.html','.css','.go','.rs','.swift','.sh','.json'}:continue
-            real=Path(owner['working_copy'])/path;proof=file_receipt(real)
-            if proof['sha256']!=snapshot.get('files',{}).get(str(path),{}).get('sha256'):raise ValueError('implementation_readback_changed')
-            text=real.read_bytes()[:1400].decode('utf-8','replace')
-            if hand._SECRETISH.search(text):raise ValueError('secret_implementation_evidence')
-            excerpts.append({'path':str(path),'text':text,'partial':proof['bytes']>1400,'sha256':proof['sha256']})
-            if len(excerpts)==3:break
+        receipt=(actual.get('coding_evidence') or {}).get('commit_receipt','')
+        commit=re.match(r'^committed ([a-f0-9]{7,40})(?: |$)',receipt)
+        if not commit or not snapshot['head'].startswith(commit.group(1)):raise ValueError('implementation_commit_receipt_mismatch')
+        excerpts=[];write_manifest=[]
+        for relative,write_receipt in verified_implementation_writes(checkpoint,actual).items():
+            if Path(relative).suffix not in {'.py','.js','.ts','.tsx','.html','.css','.go','.rs','.swift','.sh','.json'}:continue
+            verified=committed_implementation_excerpt(hand,owner['working_copy'],snapshot,relative,write_receipt)
+            write_manifest.append({key:value for key,value in verified.items() if key not in {'text','partial'}})
+            if len(excerpts)<3:excerpts.append(verified)
         if not excerpts:raise ValueError('implementation_source_evidence_missing')
         source=(self.a.read_json(self.root/'source_research.json').get('selected') or {})
         return {'mission_id':self.ident,'request_sha256':hashlib.sha256(request_raw).hexdigest(),'objective':request['objective'],
                 'coding_mission_id':child,'coding_result_sha256':digest(actual),'coding_evidence':actual.get('coding_evidence'),
                 'implementation_snapshot_sha256':digest(snapshot),'implementation_head':snapshot['head'],'implementation_excerpts':excerpts,
+                'implementation_write_manifest':write_manifest,
                 'saved_video_url':source.get('saved_youtube_url'),'selected_method':str(source.get('method_excerpt') or '')[:1000],
                 'working_copy':owner['working_copy'],'configuration_digest':owner['configuration_digest'],
                 'origin_url':origin.get('original_implementation_url'),'origin_commit':(origin.get('repository') or {}).get('commit'),
@@ -242,9 +278,17 @@ class Delivery:
         if not self.review('coding_delivery',evidence):
             return {'status':'WAITING_INDEPENDENT_REVIEW','spoken':'Builder tests are recorded. Independent coding review is required before the requested ArtCraft demonstration and Obsidian implementation note.','review_subject':evidence,'task_verified':False,'verified':False}
         folder=self.base/('JARVIS-'+self.ident)
+        scope={}
+        if (self.root/'delivery_scope.json').exists():
+            access=self.a._load('delivery_scoped_read_access',self.a.STACK/'hands/workflow_read_access.py')
+            scope=access.delivery_scope(self.hive,self.ident)
+            if not scope:raise ValueError('current_delivery_scope_required')
+            folder=Path(scope['native']).parent.parent
         if any(p.is_symlink() for p in (folder,*folder.parents)):raise ValueError('private_artifact_scope_unavailable')
-        native=folder/'source'/'Implementation.deckcraft';pdf=folder/'exports'/'Implementation.pdf';preview=folder/'previews'/'Implementation.png'
-        note='00_Outer_Heaven/shared/inbox/Jarvis-implementation-'+self.ident+'.md'
+        native=Path(scope['native']) if scope else folder/'source/Implementation.deckcraft'
+        pdf=Path(scope['export']) if scope else folder/'exports/Implementation.pdf'
+        preview=Path(scope['preview']) if scope else folder/'previews/Implementation.png'
+        note=str(Path(scope['note']).relative_to(Path.home()/'Documents/My_Billion_Dollar_Vault')) if scope else '00_Outer_Heaven/shared/inbox/Jarvis-implementation-'+self.ident+'.md'
         content=(evidence['implementation_document']['content']+'\n\n---\nProvenance\nSaved video: '+str(evidence['saved_video_url'])+'\nOriginal: '+str(evidence['origin_url'])+'\nOrigin commit: '+str(evidence['origin_commit'])+'\nImplementation mode: '+str(evidence['implementation_mode'])+'\nObserved license: '+str(evidence['observed_license'])+'\nUpstream reuse authorized: '+str(evidence['reuse_authorized'])+'\nImplementation commit: '+evidence['implementation_head']+'\nDocumentation SHA256: '+evidence['implementation_document']['sha256']+'\nNative: '+str(native)+'\nExport: '+str(pdf)+'\nPreview: '+str(preview)+'\n')
         if len(content.encode())>20000:raise ValueError('implementation_note_budget')
         pm=self.a._load('delivery_project_methods',self.a.STACK/'hands/project_methods.py');pm.clean_text(content)

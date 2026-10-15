@@ -85,17 +85,27 @@ def run(args: dict, roots=None) -> dict[str, Any]:
     found = _scan(roots)
     if op == "list":
         skills = [{"name": n, "description": d} for n, (_, d) in sorted(found.items())]
+        query=str((args or {}).get('query') or '')[:200]
+        terms=set(re.findall(r'[\w-]{3,}',query.casefold()))
+        if terms:
+            def score(row):
+                name=row['name'].casefold();description=row['description'].casefold()
+                return sum(3*(term in name)+(term in description) for term in terms)
+            skills=sorted((row for row in skills if score(row)),key=lambda row:(-score(row),row['name']))
         names = [s["name"] for s in skills]
         sp = (f"I have {len(names)} skills, for example: " + ", ".join(names[:MAX_SPOKEN]) + "."
-              if names else "I found no skills in my skill folders.")
-        return {"ok": True, "op": op, "skills": skills, "spoken": sp}
+              if names else "No installed skills matched those terms." if query else "I found no skills in my skill folders.")
+        return {"ok": True, "op": op, "skills": skills, "spoken": sp,
+                "inventory_total":len(found),"query":query}
     if op == "read":
         name = str((args or {}).get("name") or "").strip()
         if name == "#first" and found:
             name = sorted(found)[0]
-        hit = found.get(name) if "/" not in name and "\\" not in name and name not in (".", "..") else None
+        canonical = resolve_name(found,name)
+        hit = found.get(canonical)
         if hit is None:
             return {"ok": False, "op": op, "error": "unknown skill", "spoken": "I can't read that: I have no skill by that name."}
+        name=canonical
         try:
             with open(hit[0], "rb") as fh:
                 data = fh.read(MAX_BYTES + 1)
@@ -115,6 +125,18 @@ _NUMBERED = re.compile(r"^\s*(\d+)[.)]\s*(.{4,300})$", re.M)
 _CMD = re.compile(r"`([^`]{2,160})`")
 
 
+def resolve_name(found, name):
+    """Resolve only an unambiguous installed name or directory alias; never a path."""
+    if not name or '/' in name or '\\' in name or name in {'.','..'}:
+        return None
+    if name in found:
+        return name
+    normal=lambda value: re.sub(r'[\s_-]+',' ',str(value).casefold()).strip()
+    key=normal(name)
+    matches=[n for n,(path,_) in found.items() if key in {normal(n),normal(path.parent.name)}]
+    return matches[0] if len(matches)==1 else None
+
+
 def _agent_tools():
     import importlib.util as _u
     key = "agent_stack_agent_tools"
@@ -127,9 +149,11 @@ def _agent_tools():
 def run_step(found: dict, name: str, step: int = 1) -> dict[str, Any]:
     """Execute one numbered step of a skill. Only a backticked command on the read-only CLI allowlist
     (agent_tools.op_cli: git log/diff/status..., gh view/list...) is ever run; anything else is held, not run."""
-    hit = found.get(name) if name and "/" not in name and "\\" not in name and name not in (".", "..") else None
+    canonical=resolve_name(found,name)
+    hit = found.get(canonical)
     if hit is None:
         return {"ok": False, "op": "run", "verified": False, "spoken": "I can't run that: I have no skill by that name."}
+    name=canonical
     body = re.sub(r"\A---.*?\n---\s*\n", "", hit[0].read_text(errors="ignore")[:MAX_BYTES], flags=re.S)
     steps = {int(n): t.strip() for n, t in reversed(_NUMBERED.findall(body))}
     text = steps.get(step)
@@ -158,7 +182,7 @@ def run_step(found: dict, name: str, step: int = 1) -> dict[str, Any]:
             "spoken": f"Ran step {step} of the {name} skill: `{cmd}` (exit {got.get('exit')}). Output: " + (out[:700] or "(empty)")}
 
 
-_READ = re.compile(r"\b(?:read|open|show)\s+(?:me\s+)?(?:the\s+)?([\w.\-]+)\s+skill\b"
+_READ = re.compile(r"\b(?:read|open|show)\s+(?:me\s+)?(?:the\s+)?([\w][\w .\-]{0,100}?)\s+skill\b"
                    r"|\b(?:run|show|check)\s+(?:me\s+)?(?:the\s+)?([\w.\-]+)\s+workflow\b", re.I)
 
 
@@ -177,6 +201,10 @@ _ORD = {"first": 1, "1st": 1, "second": 2, "2nd": 2, "third": 3, "3rd": 3}
 
 
 def args_from_utterance(u: str) -> dict:
+    # Inventory requests are discovery, not an invented skill named "local".
+    # Preserve the requested first operation rather than matching a later clause.
+    if re.match(r'^\s*(?:please\s+)?list\b',u or '',re.I) and re.search(r'\bskills\b',u or '',re.I):
+        return {'op':'list'}
     r = _RUN.search(u or "")
     if r:
         return {"op": "run", "name": r.group(3), "step": int(r.group(2) or _ORD.get((r.group(1) or "first").lower(), 1))}
