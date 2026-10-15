@@ -1361,8 +1361,17 @@ def _workflow_followup_route(utterance, hive):
     named = list(dict.fromkeys(match.lower() for match in re.findall(r"(?<![a-f0-9])[a-f0-9]{32}(?![a-f0-9])",text,re.I)))
     if len(named) > 1:
         return None
-    status_query = bool(re.search(r"\b(status|progress|blocker|completed actions)\b",text,re.I)
-                        and re.search(r"\b(workflow|assignment|mission|retained task)\b",text,re.I))
+    task_reference = r"(?:workflow|assignment|mission|retained task|saved[- ]video build|research[- ]to[- ]delivery build)"
+    status_subject = r"(?:(?:my|the)\s+)?" + task_reference + r"(?:\s+[a-f0-9]{32})?"
+    status_query = bool(re.fullmatch(
+        r"(?:"
+        r"what(?:'s| is| are)\s+(?:the\s+)?(?:actual\s+)?(?:status|progress|blockers?|completed actions)\s+(?:of|on|for)\s+"
+        r"|(?:please\s+)?(?:show|tell|give)\s+(?:me\s+)?(?:the\s+)?(?:status|progress|blockers?|completed actions)\s+(?:of|on|for)\s+"
+        r"|(?:status|progress|blockers?|completed actions)\s+(?:of|on|for)\s+"
+        r")" + status_subject + r"[?!.]?",
+        text,
+        re.I,
+    ))
     ident = named[0].lower() if len(named)==1 else adapter.read_json(Path(hive) / "coding-missions" / "latest_workflow.json").get("mission_id", "")
     if not re.fullmatch(r"[a-f0-9]{32}", str(ident)):
         return None
@@ -1374,7 +1383,7 @@ def _workflow_followup_route(utterance, hive):
     # clarifications of an older task; exact repeated objectives dedupe at intake.
     if _research_build_request(text):
         return None
-    if re.fullmatch(r"(?:please\s+)?(?:resume|continue)\s+(?:the\s+)?workflow[.!]?", text, re.I):
+    if re.fullmatch(r"(?:please\s+)?(?:resume|continue)\s+(?:(?:the|my)\s+)?"+task_reference+r"[.!]?", text, re.I):
         return {"tool":"agent_tools", "args":{"action":"research_build_continue","mission_id":ident}, "speak":""}
     repository = adapter._load("workflow_repo_context", STACK / "hands" / "workflow_repo_context.py")
     if len(text)<=256 and repository.NAME.fullmatch(text) and re.search(r"\b(?:repo|repository)\b",text,re.I):

@@ -97,4 +97,22 @@ class ResearchBuildContinuation(unittest.TestCase):
    got=P._run_tool_inner({'tool':'agent_tools','args':{'action':'research_build_continue','mission_id':'f'*32}},'Continue the workflow',hive=h,gen=g,retrieve_roots=[])
    self.assertEqual(got['mission_id'],initial['mission_id']);self.assertEqual(got['status'],'WAITING_PROJECT');self.assertEqual(got['objective'],REQUEST)
    self.assertFalse(got['task_verified'])
+ def test_owner_style_saved_video_description_finds_latest_workflow(self):
+  with tempfile.TemporaryDirectory() as d:
+   h=Path(d);adapter=P._coding_mission_hand();task=adapter.WorkflowMissionHandle(h).start_workflow(REQUEST)
+   status=P._workflow_followup_route("What's the status of my saved-video build?",h)
+   resume=P._workflow_followup_route('Continue my saved-video build.',h)
+   self.assertEqual(status['args'],{'action':'research_build_status','mission_id':task['mission_id']})
+   self.assertEqual(resume['args'],{'action':'research_build_continue','mission_id':task['mission_id']})
+ def test_owner_style_description_does_not_hijack_related_requests(self):
+  with tempfile.TemporaryDirectory() as d:
+   h=Path(d);adapter=P._coding_mission_hand();adapter.WorkflowMissionHandle(h).start_workflow(REQUEST)
+   for utterance in (
+    'Create a status dashboard for my saved-video build.',
+    'Explain how a progress indicator for a saved-video build should work.',
+    'Continue my video.',
+    'Build a saved-video player.',
+   ):
+    with self.subTest(utterance=utterance):
+     self.assertIsNone(P._workflow_followup_route(utterance,h))
 if __name__=='__main__':unittest.main()
