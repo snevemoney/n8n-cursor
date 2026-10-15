@@ -7606,13 +7606,17 @@ def apply_pipeline_iter(
         granted = bool(_granted)
         # "permission granted, find books about AI" runs the rest now; a bare grant redoes the request just refused.
         redo = (_rest or _blocked_request(prior_turns)) if granted else ""
-        _perm.set_open_access(granted)
+        try:
+            _perm.set_open_access(granted)
+        except OSError:
+            granted, redo = None, ""  # the switch did not move; say so, never pretend
         if redo:
             spoken_in = redo
         else:
             text, first, rest = _commit_spoken(
                 hive, spoken_in=spoken_in, prior_turns=prior_turns, tool="converse",
-                raw=OPEN_ON_LINE if granted else OPEN_OFF_LINE, wires=["permissions"], cites=[], ok=True,
+                raw=(OPEN_ON_LINE if granted else OPEN_OFF_LINE) if granted is not None
+                    else "I couldn't change the access setting, so it stays as it was.", wires=["permissions"], cites=[], ok=granted is not None,
                 pack=None, retrieve_roots=retrieve_roots, gen=token)
             yield _pipeline_event(ok=True, tool="converse", spoken=text, spoken_delta=rest if first and rest else text,
                                   wires=["permissions"], cites=[], pack=None, gen=token)

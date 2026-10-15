@@ -93,6 +93,13 @@ _FILLER = re.compile(r"^(?:(?:so|now|please|sir|jarvis|go\s+ahead|and|then|"
                      r"you(?:'re|\s+are)\s+(?:now\s+)?(?:allowed|authori[sz]ed|permitted)\s+to)[\s,.:;!-]*)+", re.I)
 
 
+_COMMAND_START = re.compile(
+    r"(?:find|read|open|search|look|show|list|check|browse|fetch|get|download|install|run|use|scan|explore|go\s+through|"
+    r"play|watch|summari[sz]e|compare|fix|change|edit|write|make|create|build|start|continue|help|tell|give|access|do|"
+    # consequential verbs still meet their own confirm/hard-step gate downstream; the grant only opens folders/tools
+    r"send|email|message|reply|schedule|book|post|delete|move|copy|save|upload|share|print|organi[sz]e|clean)\b", re.I)
+
+
 def grant_split(text: str) -> tuple[bool, str]:
     """(True, remaining command) when the line opens with a grant; (False, "") otherwise."""
     line = str(text or "")
@@ -108,6 +115,8 @@ def grant_split(text: str) -> tuple[bool, str]:
     rest = line.strip(" .!?,;:-")
     if re.fullmatch(r"(?:do\s+(?:it|this|that)|proceed|continue|go\s+ahead|now)?", rest, re.I):
         rest = ""
+    if rest and not _COMMAND_START.match(rest):
+        return False, ""  # "permission granted, captain" / "I allow you to leave early" is talk, not a grant (re-review N1)
     return True, rest
 
 

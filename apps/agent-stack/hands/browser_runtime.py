@@ -51,7 +51,7 @@ TARGET_OPS = {'CLICK', 'OPEN_TAB', 'INPUT', 'SELECT', 'SWITCH_TAB'}
 PACK_VERSION = 'browser.reflex.v1'
 JEV_MODEL = 'typesafe/jev-1.13'
 _HARD_WORDS = ('send|post|publish|pay|buy|purchase|checkout|book|delete|remove|accept|agree|deploy|unsubscribe|confirm order|'
-               r'submit|place (?:the |an |my )?order|order now|transfer|tweet|donate')
+               r'submit|place (?:the |an |my |your )?order|order now|transfer|tweet|donate')
 _LOGIN_WORDS = 'sign in|log in|password'
 HARD = re.compile(r'\b(' + _HARD_WORDS + '|' + _LOGIN_WORDS + r')\b', re.I)
 # Open access ("permission granted" from Evens): logins are allowed; every consequential action in HARD stays refused
@@ -81,10 +81,12 @@ def owner_open_access():
         return False
 
 
-def unsafe_mission_intent(objective):
-    # Explicit prohibitions constrain authority; they are not requested actions.
-    constrained=re.sub(r"\b(?:do not|don't|never)\s+(?:"+HARD.pattern.removeprefix(r'\b(').removesuffix(r')\b')+r")\b",'',objective,flags=re.I)
-    return bool(HARD.search(constrained))
+def unsafe_mission_intent(objective, opened=False):
+    # Explicit prohibitions constrain authority; they are not requested actions. With the owner's grant, logging in is
+    # allowed (HARD_OPEN); every consequential verb still makes the mission unsafe.
+    policy = HARD_OPEN if opened else HARD
+    constrained=re.sub(r"\b(?:do not|don't|never)\s+(?:"+policy.pattern.removeprefix(r'\b(').removesuffix(r')\b')+r")\b",'',objective,flags=re.I)
+    return bool(policy.search(constrained))
 
 
 def digest(value):
@@ -1257,7 +1259,7 @@ class BrowserMissionHandle:
         if not isinstance(objective, str) or not objective.strip() or len(objective) > 10000:
             raise ValueError('bounded objective required')
         opened = owner_open_access()
-        if unsafe_mission_intent(objective): raise ValueError('read_only_mission_required')  # open access never waives this
+        if unsafe_mission_intent(objective, opened): raise ValueError('read_only_mission_required')  # grant relaxes logins only
         python = os.environ.get('JARVIS_BROWSER_PYTHON') or str(Path(__file__).resolve().parents[3] / '.venv-browser' / 'bin' / 'python')
         if not python or not Path(python).is_file():
             raise RuntimeError('JARVIS_BROWSER_PYTHON must point to the pinned Browser Use environment')
@@ -1439,7 +1441,7 @@ def pipeline_tool(args, utterance, hive):
                 'task_verified':bool(state.get('verified')) and state.get('status')=='VERIFIED', 'evidence':state, 'sent':False, 'wires':['browser_mission'], 'cites':[]}
     except (ValueError, RuntimeError, OSError, KeyError) as exc:
         hint = (' Say "permission granted" and I will try again without that limit.'
-                if not owner_open_access() and re.search(r'read_only_mission_required|policy_|outside', str(exc)) else '')
+                if not owner_open_access() and re.search(r'outside', str(exc)) else '')  # a grant never lifts post/buy/submit
         return {'ok': False, 'tool':'browser_mission', 'spoken':'Browser research is unavailable: ' + str(exc) + hint,
                 'task_verified':False, 'sent':False, 'wires':['browser_mission'], 'cites':[]}
 

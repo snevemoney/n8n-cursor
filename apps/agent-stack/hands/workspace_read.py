@@ -27,7 +27,9 @@ STRICT_SECRET_NAME = re.compile(
     r"^\.netrc$|^\.npmrc$|^\.pypirc$|^credentials(\.json)?$|^client_secret.*\.json$|^\.git-credentials$|"
     # security review 2026-10-15 (H7): real secret files whose names a plain list missed
     r"\.env$|^secrets?(\.[a-z0-9]+)?$|(api[_-]?keys?|access[_-]?keys?)|(^|[_.-])tokens?([_.-]|$)|"
-    r"^passwords?(\.[a-z0-9]+)?$|credentials|^\.pgpass$|cookies\.sqlite$|^login\.keychain)", re.I)
+    r"^passwords?(\.[a-z0-9]+)?$|credentials|^\.pgpass$|cookies\.sqlite$|^login\.keychain|"
+    r"(^|[_.-])keys?([_.-]|$)|service[-_]?account|adminsdk|\.tfstate$|^\.terraformrc$|seed[-_ ]?phrase|mnemonic|"
+    r"^wallet\.dat$|^keychains?$)", re.I)
 OPEN_MAX_BYTES = 200000
 OPEN_MAX_NAMES = 500
 

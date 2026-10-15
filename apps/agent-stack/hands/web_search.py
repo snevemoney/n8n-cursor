@@ -7,10 +7,13 @@ never spoken as commands, and nothing is ever sent. log_meta() keeps metadata on
 from __future__ import annotations
 
 import html
+import ipaddress
 import re
+import socket
 import shutil
 import subprocess
 import threading
+import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any, Callable
@@ -209,10 +212,38 @@ def _diverse(rows: list[dict[str, str]], limit: int = MAX_CITES) -> list[dict[st
     return out
 
 
+def public_url(url: str) -> bool:
+    """http(s) to a host whose every address is public internet — never this Mac, the LAN or cloud metadata
+    (re-review M5: a result URL or a redirect could otherwise read http://127.0.0.1:4018/api/*)."""
+    u = urllib.parse.urlsplit(url or "")
+    if u.scheme not in ("http", "https") or not u.hostname or u.username or u.password:
+        return False
+    try:
+        infos = socket.getaddrinfo(u.hostname, u.port or (443 if u.scheme == "https" else 80), proto=socket.IPPROTO_TCP)
+    except (OSError, UnicodeError):
+        return False
+    try:
+        return bool(infos) and all(ipaddress.ip_address(i[4][0].split("%")[0]).is_global for i in infos)
+    except ValueError:
+        return False
+
+
+class _PublicRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not public_url(newurl):
+            raise urllib.error.URLError("redirect to a non-public address refused")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+_OPENER = urllib.request.build_opener(_PublicRedirects)
+
+
 def _page_text(url: str, timeout: float) -> str:
+    if not public_url(url):
+        return ""
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Macintosh) JarvisResearch/1.0",
                                                "Accept": "text/html,application/xhtml+xml,text/plain"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    with _OPENER.open(req, timeout=timeout) as r:
         kind = r.headers.get("Content-Type", "")
         if "html" not in kind and "text" not in kind:
             return ""
