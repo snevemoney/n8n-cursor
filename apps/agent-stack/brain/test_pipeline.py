@@ -4187,7 +4187,8 @@ class UnauthorizedHandTest(unittest.TestCase):
             hive=hive,
             retrieve_roots=[],
         )
-        self.assertIn("Proposal only", hard.get("spoken") or "")
+        # bc30ceb88: a hard step is refused with the approval-ready wording; what matters is that nothing ran.
+        self.assertIn("nothing has run", hard.get("spoken") or "")
         self.assertNotIn("I will send it now", hard.get("spoken") or "")
 
         allowed = PIPE.run_tool(

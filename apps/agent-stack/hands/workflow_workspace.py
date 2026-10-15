@@ -139,14 +139,28 @@ def seal_source(files,*,store_root,source_revision,source_tree,active_fn=lambda:
     (temporary/'.source-manifest.json').chmod(0o444)
     for directory,_,_ in os.walk(temporary,topdown=False):Path(directory).chmod(0o555)
     # Same no-replace primitive used by existing preparation recovery.
-    import ctypes
-    library=ctypes.CDLL(None,use_errno=True);rename=getattr(library,'renamex_np',None)
+    rename=rename_noreplace_fn()
     if rename is None:raise WorkspaceBlocked('exclusive_source_seal_unavailable')
-    rename.argtypes=[ctypes.c_char_p,ctypes.c_char_p,ctypes.c_uint];rename.restype=ctypes.c_int
-    if rename(os.fsencode(temporary),os.fsencode(target),4)!=0:
+    if rename(temporary,target)!=0:
         if target.exists():verify_source_bundle(receipt);return receipt
         raise WorkspaceBlocked('source_seal_failed')
     verify_source_bundle(receipt);return receipt
+
+
+def rename_noreplace_fn():
+    """Atomic rename that fails instead of replacing: macOS renamex_np(RENAME_EXCL), Linux renameat2(RENAME_NOREPLACE).
+    Returns fn(src, dst) -> 0 on success / -1 with errno set, or None when the platform has neither."""
+    import ctypes
+    library=ctypes.CDLL(None,use_errno=True)
+    mac=getattr(library,'renamex_np',None)
+    if mac is not None:
+        mac.argtypes=[ctypes.c_char_p,ctypes.c_char_p,ctypes.c_uint];mac.restype=ctypes.c_int
+        return lambda src,dst:mac(os.fsencode(src),os.fsencode(dst),4)
+    linux=getattr(library,'renameat2',None)
+    if linux is not None:
+        linux.argtypes=[ctypes.c_int,ctypes.c_char_p,ctypes.c_int,ctypes.c_char_p,ctypes.c_uint];linux.restype=ctypes.c_int
+        return lambda src,dst:linux(-100,os.fsencode(src),-100,os.fsencode(dst),1)  # AT_FDCWD, RENAME_NOREPLACE
+    return None
 
 
 def verify_source_bundle(receipt):

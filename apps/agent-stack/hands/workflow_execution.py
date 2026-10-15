@@ -370,13 +370,11 @@ def _source_exceptions(hive,mission_id,*,fetch_public=False,fetch_fn=None,revisi
     return {relative:{'file':row,'public_proof':proof,'review_digest':review['digest']}}
 
 def _rename_exclusive(source,target):
-    """macOS atomic no-replace directory/file move, never os.rename overwrite."""
-    import ctypes,errno
-    library=ctypes.CDLL(None,use_errno=True)
-    rename=getattr(library,'renamex_np',None)
+    """Atomic no-replace directory/file move (macOS renamex_np, Linux renameat2), never os.rename overwrite."""
+    import ctypes
+    rename=_load('workflow_workspace').rename_noreplace_fn()
     if rename is None:raise ValueError('exclusive_archive_move_unavailable')
-    rename.argtypes=[ctypes.c_char_p,ctypes.c_char_p,ctypes.c_uint];rename.restype=ctypes.c_int
-    if rename(os.fsencode(source),os.fsencode(target),4)!=0:
+    if rename(source,target)!=0:
         raise OSError(ctypes.get_errno(),'exclusive preparation archive move failed')
 
 def recover_preparation(hive,mission_id,*,active_fn):
