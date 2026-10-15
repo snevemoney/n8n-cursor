@@ -21,18 +21,24 @@ class ModelKnowsItsHands(unittest.TestCase):
         with tempfile.TemporaryDirectory() as t:
             hive = Path(t); (hive / "bus").mkdir()
             pack = P.assemble_pack("Don't you have a red arrow you can use", hive=hive, retrieve_roots=[], turns=[]).lower()
-        for phrase in ("red arrow", "blue cursor", "open, quit or switch", "permission granted"):
+        for phrase in ("red arrow", "blue cursor", "open, quit or switch", "permission granted", "except secrets"):
             self.assertIn(phrase, pack, phrase)
 
 
 class ArrowPhrasings(unittest.TestCase):
     def test_arrow_requests_reach_pointer(self):
         for u in ["show me the red arrow on the Safari button", "use your red arrow to show me the share button",
-                  "put the arrow on the send button", "draw an arrow at the settings icon"]:
+                  "put your red arrow on the send button", "use your arrow to point at the settings icon"]:
             self.assertTrue(PT.wants_pointer(u), u)
 
     def test_capability_question_is_not_a_point_request(self):
         for u in ["don't you have a red arrow you can use", "what is a red arrow"]:
+            self.assertFalse(PT.wants_pointer(u), u)
+
+    def test_ordinary_arrow_speech_is_not_hijacked(self):  # review 2026-10-15
+        for u in ["use the arrow to scroll", "use the arrow to select text", "draw an arrow on my slide",
+                  "put an arrow at the end of the line", "draw an arrow on the diagram", "place the arrow to the left",
+                  "show me an arrow to the right"]:
             self.assertFalse(PT.wants_pointer(u), u)
 
 

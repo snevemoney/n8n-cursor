@@ -318,6 +318,25 @@ FIND_MAX_RESULTS = 2000
 FIND_SECONDS = 5.0
 
 
+VOLUMES = Path("/Volumes")
+_SYSTEM_VOLUME_DIRS = {"com.apple.TimeMachine.localsnapshots", "Recovery", "Backups.backupdb", "Macintosh HD"}
+_FIRST = {"Downloads", "Documents", "Desktop", "Books"}
+
+
+def _scan_order(roots: list[Path]) -> list[Path]:
+    """Owner folders first, external drives last: '/Volumes' sorts before '/Users', and walking a 700 GB drive first
+    used the whole time budget with zero results (live 2026-10-15)."""
+    def key(r: Path):
+        external = r == VOLUMES or VOLUMES in r.parents
+        return (external, r.name not in _FIRST, len(r.parts), str(r))
+    return sorted(roots, key=key)
+
+
+def _skip_dir(directory: Path, name: str) -> bool:
+    """System-only volumes (Recovery, Time Machine snapshots, the boot-disk alias) are never searched."""
+    return Path(directory) == VOLUMES and name in _SYSTEM_VOLUME_DIRS
+
+
 def _find_documents(args, rs):
     query = str(args.get("name") or "").strip().lower()
     topic = topic_words(args.get("topic") or "")
@@ -338,7 +357,7 @@ def _find_documents(args, rs):
             return _deny(err, "find")
         scan_roots = [root]
     else:
-        scan_roots = sorted(rs, key=lambda r: (r.name not in {'Downloads', 'Documents', 'Desktop'}, str(r)))
+        scan_roots = _scan_order(rs)
     found, seen, errors, count = [], set(), [], 0
     complete = True
     deadline = time.monotonic() + FIND_SECONDS
@@ -349,7 +368,8 @@ def _find_documents(args, rs):
         def onerror(exc):
             errors.append(f"{Path(exc.filename or root).name}: inaccessible")
         for directory, dirs, files in os.walk(root, followlinks=False, onerror=onerror):
-            dirs[:] = sorted((d for d in dirs if not d.startswith(".") and not _secret_name(d) and not (Path(directory) / d).is_symlink()), key=lambda d: (d not in {'Downloads', 'Documents', 'Desktop', 'Books'}, d))
+            dirs[:] = sorted((d for d in dirs if not d.startswith(".") and not _secret_name(d) and not _skip_dir(directory, d)
+                              and not (Path(directory) / d).is_symlink()), key=lambda d: (d not in _FIRST, d))
             count += len(dirs) + len(files)
             if count > FIND_MAX_ENTRIES or time.monotonic() >= deadline:
                 complete = False

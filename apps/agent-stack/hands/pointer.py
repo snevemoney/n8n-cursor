@@ -38,8 +38,10 @@ LOOK_LINE = "Let me have a look, sir."
 WANT_RE = re.compile(r"\b(?:where\s+(?:do|should|can)\s+i\s+(?:click|tap|press|go)|where(?:'s|\s+is)\s+(?:the\s+)?(?:button|[\w\s'-]{1,40}?"
                      r"\s+(?:button|menu|link|icon|tab|setting|toggle|field))|point\s+(?:to|at|me\s+to)|show\s+me\s+where|"
                      # live 2026-10-15: "show me the red arrow on the Safari button", "use your red arrow to show me…"
-                     r"(?:show|put|draw|place)\s+(?:me\s+)?(?:(?:the|an?|your)\s+)?(?:red\s+)?arrow\s+(?:on|at|over|to)|"
-                     r"use\s+(?:your|the)\s+(?:red\s+)?arrow\s+to)\b", re.I)
+                     # only "red arrow"/"your arrow": a bare arrow is a key, a glyph or a shape (review 2026-10-15)
+                     r"(?:show|put|draw|place)\s+(?:me\s+)?(?:the\s+|your\s+)?red\s+arrow\s+(?:on|at|over|to)|"
+                     r"(?:show|put|place)\s+(?:me\s+)?your\s+arrow\s+(?:on|at|over|to)|"
+                     r"use\s+your\s+(?:red\s+)?arrow\s+to)\b", re.I)
 STOP = set("a an the to on in of for my me i do can you could would should show where is are click tap press button "
            "find point at this that it please hey jarvis new go how which there here sir open turn get make use and or on with button icon".split())
 SYN = {"create": ["create", "new", "plus", "+"], "reel": ["reel", "reels"], "settings": ["settings", "preferences"],

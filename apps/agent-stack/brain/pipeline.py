@@ -3553,10 +3553,10 @@ def assemble_pack(
         "craft drives a Craft app: args {app, task}. "
         # live 2026-10-15: the model denied hands it has ("I do not have a red arrow", "I cannot open files")
         "On screen you DO have a red arrow and a blue cursor: when Evens asks where to click or says 'point to <thing>', "
-        "the arrow lands on that control; with Watch armed you click it after his confirm. You can open, quit or switch "
-        "Mac apps ('open Safari'). Files and folders outside Jarvis's own are closed until Evens says 'permission granted' "
-        "(lasts one hour); then you can search his whole Mac for books and documents. Never say these abilities do not exist; "
-        "say how to use them. "
+        "the arrow goes to that control when you can find it; a click always needs his confirm. You can open, quit or switch "
+        "installed Mac apps ('open Safari'). Wider file access starts when Evens says 'permission granted' as its own line "
+        "(lasts one hour); then you can find and read files and folders across his Mac, except secrets. You find and read "
+        "files; say so rather than claiming to open one in an app. Never say these abilities do not exist; say how to use them. "
         'JSON: {"tool":"converse"|"vault_read"|"workspace_read"|"memory"|"skills"|"mcp_inventory"|"code_run"|"web_search"|"repo"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
     )
     return "\n".join(lines).rstrip() + "\n"

@@ -53,7 +53,7 @@ def set_auto_accept(on: bool) -> dict:
 
 
 # Open access (Evens 2026-10-15): "permission granted" lifts the false-positive limits on files, folders, the
-# browser, screen/Safari looks, edits and read-only code runs. It stays on until he says "lock it down".
+# browser, screen/Safari looks, edits and read-only code runs. It lasts one hour (OPEN_ACCESS_TTL_SECONDS) or until he says "lock it down".
 # Only the owner's own spoken/typed line flips it (pipeline turn start); model output, page text and tool args
 # never can, and the file lives in ~/.grok-private, which no hand can read or write.
 # Still gated while open: sends, payments, bookings, publishing, deletes outside scratch, pushes, merges,
