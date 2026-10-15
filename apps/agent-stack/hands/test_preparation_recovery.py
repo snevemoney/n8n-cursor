@@ -29,6 +29,39 @@ class Recovery(unittest.TestCase):
     E.host_review_source_revision(h,F.ID);fresh=E.make_receipt(h,F.ID,runtime_baseline=baseline)
     ready=E.prepare_execution(h,F.ID,source_receipt=fresh,runtime_baseline=baseline,scratch_root=scratch,active_fn=lambda:True)
     self.assertTrue(ready['ok'],ready);self.assertTrue((Path(ready['working_copy'])/relative).exists())
+ def test_live_order_preparing_status_and_name_no_longer_secret_recovers_without_copy(self):
+  # Live 05:20 ET Oct 15: the controller persists PREPARING before recovery, and after the
+  # filename root-cause fix nothing in the overlay is sensitive. Recovery must still archive.
+  import subprocess
+  with tempfile.TemporaryDirectory() as tmp:
+   f=F.ExecutionTests();h,root,repo,runtime,scratch,hand=f.fixture(tmp)
+   relative='apps/agent-stack/tests/test_literal_tokens_and_budget.py';path=repo/relative;path.parent.mkdir(parents=True,exist_ok=True);path.write_text('CODE_MODEL = "preserved"\n')
+   for args in [('add','--',relative),('commit','-qm','public recovery fixture')]:subprocess.run(['/usr/bin/git','-c','core.hooksPath=/dev/null','-c','core.fsmonitor=false','-C',str(repo),*args],check=True,capture_output=True)
+   a,b=f.context(hand)
+   with a,b:
+    (root/'source_revision_review.json').unlink();revision=R._git(repo)['head'];files,_=W.revision_source(repo,revision)
+    E.approve_source_revision(h,F.ID,revision,{rel:row for rel,(_,row) in files.items()},authority=E.source_review_authority(),evidence={'offline':'pre-fix pin'})
+    runtime_path=runtime/relative;runtime_path.parent.mkdir(parents=True,exist_ok=True);runtime_path.write_bytes(path.read_bytes())
+    baseline=E.capture_runtime_baseline(runtime,R._git(runtime));receipt=E.make_receipt(h,F.ID,runtime_baseline=baseline)
+    with patch.object(W,'prepare',return_value={'ok':False,'reason':'runtime_secret_overlay_requires_review','partial_working_copy':None}):
+     blocked=E.prepare_execution(h,F.ID,source_receipt=receipt,runtime_baseline=baseline,scratch_root=scratch,active_fn=lambda:True)
+    self.assertFalse(blocked['ok'])
+    state=json.loads((root/'state.json').read_text());state.update(status='PREPARING',preparation=blocked);(root/'state.json').write_text(json.dumps(state))
+    recovered=E.recover_preparation(h,F.ID,active_fn=lambda:True);self.assertTrue(recovered['recovered']);self.assertIsNone(recovered['preserved_copy'])
+    self.assertFalse((root/'execution_contract.json').exists())
+    E.host_review_source_revision(h,F.ID);fresh=E.make_receipt(h,F.ID,runtime_baseline=baseline)
+    ready=E.prepare_execution(h,F.ID,source_receipt=fresh,runtime_baseline=baseline,scratch_root=scratch,active_fn=lambda:True)
+    self.assertTrue(ready['ok'],ready);self.assertTrue((Path(ready['working_copy'])/relative).exists())
+ def test_no_copy_recovery_refuses_other_block_reasons(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   f=F.ExecutionTests();h,root,repo,runtime,scratch,hand=f.fixture(tmp);a,b=f.context(hand)
+   with a,b:
+    baseline=E.capture_runtime_baseline(runtime,R._git(runtime));receipt=E.make_receipt(h,F.ID,runtime_baseline=baseline)
+    with patch.object(W,'prepare',return_value={'ok':False,'reason':'something_else'}):
+     blocked=E.prepare_execution(h,F.ID,source_receipt=receipt,runtime_baseline=baseline,scratch_root=scratch,active_fn=lambda:True)
+    if not (root/'execution_contract.json').exists():self.skipTest('no contract retained for this block')
+    state=json.loads((root/'state.json').read_text());state.update(status='PREPARING',preparation=blocked);(root/'state.json').write_text(json.dumps(state))
+    with self.assertRaises(ValueError):E.recover_preparation(h,F.ID,active_fn=lambda:True)
  def test_exact_public_exception_keeps_sensitive_test_and_rejects_forged_or_changed_source(self):
   with tempfile.TemporaryDirectory() as tmp:
    f=F.ExecutionTests();h,root,repo,runtime,scratch,hand=f.fixture(tmp)

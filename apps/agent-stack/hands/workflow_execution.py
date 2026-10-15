@@ -445,8 +445,12 @@ def recover_preparation(hive,mission_id,*,active_fn):
             exceptions=_source_exceptions(hive,mission_id)
             runtime=Path(contract['runtime_baseline']['source_repo'])
             sensitive={rel:row for rel,row in contract['runtime_baseline']['files'].items() if hand.PERM().is_secret_path(runtime/rel)}
-            if (state.get('status')!='PREPARATION_BLOCKED' or blocked.get('reason')!='runtime_secret_overlay_requires_review'
-                or not sensitive or any(exceptions.get(rel,{}).get('file')!=row for rel,row in sensitive.items())):
+            # The controller persists PREPARING before it calls recovery, so the retained blocked
+            # preparation receipt (not the live status) proves why no copy exists. An empty sensitive
+            # set means the current policy no longer flags the overlay; prepare_execution re-checks it.
+            if (state.get('status') not in {'PREPARATION_BLOCKED','PREPARING','EXECUTION_BLOCKED','QUEUED'}
+                or blocked.get('reason')!='runtime_secret_overlay_requires_review' or blocked.get('partial_working_copy')
+                or any(exceptions.get(rel,{}).get('file')!=row for rel,row in sensitive.items())):
                 raise ValueError('unproved_preparation_without_copy')
             review=root/'source_revision_review.json';review_raw,_=W._regular_bytes(review,2_000_000)
             active();history.mkdir(exist_ok=True,mode=0o700);archive.mkdir(mode=0o700)
