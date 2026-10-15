@@ -391,6 +391,9 @@ def op_sent_check(to: str, subject: str, days: int = 3) -> dict:
 
 
 # ---------------------------------------------------------------- repo (sandboxed coding)
+_GIT_READ_ONLY = frozenset({"rev-parse", "symbolic-ref", "ls-files", "status", "log", "diff", "show", "cat-file", "rev-list"})
+
+
 def _git(repo: Path, *a, binary=False) -> subprocess.CompletedProcess:
     # Validate metadata without asking Git: even `status` may launch fsmonitor.
     _code_git_metadata(Path(repo))
@@ -399,9 +402,15 @@ def _git(repo: Path, *a, binary=False) -> subprocess.CompletedProcess:
     env = {"PATH":"/usr/bin:/bin:/usr/sbin:/sbin", "HOME":os.environ.get("HOME", ""), "LANG":"C.UTF-8"}
     env.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_SYSTEM="/dev/null", GIT_CONFIG_GLOBAL="/dev/null",
                GIT_ATTR_NOSYSTEM="1", GIT_TERMINAL_PROMPT="0", GIT_PAGER="cat")
-    return subprocess.run(["/usr/bin/git", "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false", "-c", "core.attributesFile=/dev/null",
-                           "-C", str(repo), *a], capture_output=True, text=not binary,
-                          timeout=CLI_DEADLINE_S, env=env)
+    argv = ["/usr/bin/git", "-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false", "-c", "core.attributesFile=/dev/null",
+            "-C", str(repo), *a]
+    tries = 2 if a and a[0] in _GIT_READ_ONLY else 1  # one stall (busy/full Mac) must not end a long coding run
+    for attempt in range(tries):
+        try:
+            return subprocess.run(argv, capture_output=True, text=not binary, timeout=CLI_DEADLINE_S, env=env)
+        except subprocess.TimeoutExpired:
+            if attempt + 1 >= tries:
+                raise
 
 
 def _sandbox_profile(repo: Path) -> str:
