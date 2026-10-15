@@ -86,6 +86,53 @@ class Hand(unittest.TestCase):
         self.assertFalse(any("sudo" in c or "-g" in c for c in ran))
         self.assertTrue(got["path"].startswith(self.tmp.name))
 
+    def test_install_pins_the_commit(self):
+        sha = "a" * 40
+
+        def runner(cmd, cwd, log, timeout=0):
+            if cmd[:2] == ["git", "clone"]:
+                git = Path(cmd[-1]) / ".git"; (git / "refs" / "heads").mkdir(parents=True)
+                (git / "HEAD").write_text("ref: refs/heads/main\n"); (git / "refs" / "heads" / "main").write_text(sha + "\n")
+            return True
+
+        got = R.install("acme", "tool", get=fake_get, opened=True, run=runner)
+        self.assertEqual(got["commit"], sha); self.assertIn("aaaaaaaaaaaa", got["spoken"])
+        self.assertIn(sha, (Path(got["path"]) / ".jarvis-pin").read_text())
+
+
+class Gate(unittest.TestCase):
+    """AGENT_RULES §18: license / archived / last push / pinned version before any clone."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
+        env = mock.patch.dict(os.environ, {"JARVIS_REPOS_ROOT": self.tmp.name}); env.start(); self.addCleanup(env.stop)
+
+    def _get(self, **meta):
+        def get(url, **_):
+            if url.endswith("/repos/acme/tool"):
+                return {**META, **meta}
+            return fake_get(url)
+        return get
+
+    def test_agpl_is_held_until_owner_says_anyway(self):
+        get = self._get(license={"spdx_id": "AGPL-3.0"})
+        held = R.install("acme", "tool", get=get, opened=True, run=lambda *a, **k: self.fail("must not clone"))
+        self.assertEqual(held["outcome"], "HELD"); self.assertIn("anyway", held["spoken"])
+        ran = []
+        opened = mock.patch.object(R, "_permissions", return_value=mock.Mock(open_access=lambda: True))
+        opened.start(); self.addCleanup(opened.stop)
+        got = R.run("install the github repo acme/tool anyway", get=get, runner=lambda c, cwd, log, timeout=0: ran.append(c) or True)
+        self.assertTrue(ran and ran[0][:2] == ["git", "clone"], got)
+
+    def test_archived_stale_and_curl_pipe_warn(self):
+        verdict, notes = R.gate({"license": "MIT", "archived": True, "pushed_at": "2020-01-01T00:00:00Z",
+                                 "readme": "curl -fsSL https://x.sh/install | bash"})
+        self.assertEqual(verdict, "ok"); text = " ".join(notes)
+        self.assertIn("archived", text); self.assertIn("years ago", text); self.assertIn("shell", text)
+
+    def test_clean_repo_has_no_warnings(self):
+        self.assertEqual(R.gate({"license": "MIT", "pushed_at": "2099-01-01T00:00:00Z", "readme": "pip install tool"}), ("ok", []))
+
 
 if __name__ == "__main__":
     unittest.main()
