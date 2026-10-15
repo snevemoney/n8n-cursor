@@ -293,7 +293,7 @@ def run_requested(args, utterance, roots=None):
 
 
 # File-type discovery reads directory entries only, never document contents.
-DOCUMENT_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|list|search|show|open|get|pull up|bring up)\b.{0,100}\b(?:books?|ebooks?|epubs?|pdfs?)\b", re.I)
+DOCUMENT_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|list|search|show|open|get|pull up|bring up|look\s+(?:for|through)|go\s+through)\b.{0,100}\b(?:books?|ebooks?|epubs?|pdfs?)\b", re.I)
 FILE_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|search for|look for)\s+"
                           r"(?:my\s+|the\s+|a\s+|any\s+)?(?:files?|documents?|docs?|notes?|folders?)\s+(?:about|named|called|with|containing|matching|for)\s+"
                           r"[\"']?(.{1,80}?)[\"']?(?:\s+(?:in|from|on)\s+(?:my\s+)?(?:downloads|desktop|documents|mac|computer))?[.?!]*$", re.I)

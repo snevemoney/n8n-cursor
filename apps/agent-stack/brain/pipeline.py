@@ -854,7 +854,8 @@ def wants_voice_engine(utterance: str) -> bool:
 
 
 SCREEN_SEE_RE = re.compile(
-    r"\b(?:describe|grab|look\s+at)\s+my\s+screen\b|\bwhat(?:\x27s|s|\s+is)\s+on\s+my\s+screen\b|\bscreenshot\s+of\s+my\s+screen\b",
+    r"\b(?:describe|grab|look\s+at)\s+my\s+screen\b|\bwhat(?:\x27s|s|\s+is)\s+on\s+my\s+screen\b|\bscreenshot\s+of\s+my\s+screen\b|"
+    r"\bwhere\b.{0,80}\bon\s+my\s+(?:\w+\s+)?screen\b",
     re.I,
 )
 
@@ -1231,6 +1232,9 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
     return None
 
 
+ARROW_MISHEARD_RE = re.compile(r"(?<=\bshow me )a\s+narrow(?=\s+(?:on|at|over)\s+(?:the|my|this)\b)", re.I)
+
+
 def model_free_route(spoken_in: str) -> dict | None:
     """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
     if MACOS is not None and (MACOS.LATEST_SCREENSHOT_RE.fullmatch(spoken_in.strip()) or MACOS.FINDER_REFERENCE_RE.fullmatch(spoken_in.strip()) or MACOS.SAVED_IMAGE_RE.fullmatch(spoken_in.strip())):
@@ -1247,6 +1251,7 @@ def model_free_route(spoken_in: str) -> dict | None:
         return {"tool": "results_recall", "args": {}, "speak": ""}
     if _cost_hand().wants_cost(spoken_in):
         return {"tool": "cost_card", "args": {}, "speak": ""}
+    spoken_in = ARROW_MISHEARD_RE.sub("your red arrow", spoken_in)  # speech-to-text hears "an arrow on" as "a narrow on"
     if _capability_hand().wants(spoken_in):  # "don't you have a red arrow?", "can you change your code?"
         return {"tool": "capability", "args": {}, "speak": ""}
     if (_pointer_request(spoken_in) or _pointer_hand().wants_pointer(spoken_in)) and not is_hard_step(spoken_in):
