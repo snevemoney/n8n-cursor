@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("apps", "repo", "vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("capability", "apps", "repo", "vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -1212,6 +1212,8 @@ def model_free_route(spoken_in: str) -> dict | None:
         return {"tool": "results_recall", "args": {}, "speak": ""}
     if _cost_hand().wants_cost(spoken_in):
         return {"tool": "cost_card", "args": {}, "speak": ""}
+    if _capability_hand().wants(spoken_in):  # "don't you have a red arrow?", "can you change your code?"
+        return {"tool": "capability", "args": {}, "speak": ""}
     if _pointer_hand().wants_pointer(spoken_in) and not is_hard_step(spoken_in):
         return {"tool": "pointer", "args": {}, "speak": ""}
     if wants_handback(spoken_in):
@@ -1513,6 +1515,16 @@ def _apps_hand():
     name = "agent_stack_apps"
     if name not in sys.modules:
         spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "apps.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _capability_hand():
+    name = "agent_stack_capability"
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "capability.py")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[name] = mod
         spec.loader.exec_module(mod)
@@ -5591,7 +5603,7 @@ TOOL_HEARTBEAT = "Still checking, sir; the wires are being fashionably slow."
 HAND_LOOP_MAX_HANDS = 4
 # Screen-overlay hands finish the turn themselves: a second model pass replaced "The red arrow is on it" with its own
 # line, and a repeat pointer pick re-captured the screen (hide_overlays) or ended the turn as a failed duplicate.
-TERMINAL_HANDS = frozenset({"pointer", "pointer_click", "pointer_demo", "apps"})
+TERMINAL_HANDS = frozenset({"pointer", "pointer_click", "pointer_demo", "apps", "capability"})
 # A model-free (fixed) route already answered a single ask; only a compound ask ("read A and B and compare")
 # earns the follow-up model pass. Without this the loop re-talked over Obsidian reads, stack as-of, calendar,
 # Safari navigation, harness cards and store recalls (7bffe3301 regressions).
@@ -5992,6 +6004,11 @@ def _run_tool_inner(
         _today = re.search(r"\b(?:we|today|my\s+day|the\s+day)\b", utterance or "", re.I)
         return {"ok": True, "tool": tool, "spoken": _rm.spoken_today() if _today else _rm.spoken_recent(), "wires": ["results"], "cites": [],
                 "sent": False, "task_verified": True, "outcome": TOOL_LOOP}
+    if tool == "capability":
+        got = _capability_hand().run(utterance)
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["capability"],
+                "cites": [], "sent": False, "task_verified": bool(got.get("task_verified")),
+                "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "apps":
         got = _apps_hand().run(utterance)
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["apps"], "cites": [],
@@ -7156,7 +7173,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("apps", "repo", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief")
+DETERMINISTIC_HANDS = ("capability", "apps", "repo", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:

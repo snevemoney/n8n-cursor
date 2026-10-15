@@ -271,7 +271,7 @@ def run_requested(args, utterance, roots=None):
 
 
 # File-type discovery reads directory entries only, never document contents.
-DOCUMENT_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|list|search|show)\b.{0,100}\b(?:books?|ebooks?|epubs?|pdfs?)\b", re.I)
+DOCUMENT_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|list|search|show|open|get|pull up|bring up)\b.{0,100}\b(?:books?|ebooks?|epubs?|pdfs?)\b", re.I)
 FILE_FIND_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would) you )?(?:please )?(?:find|locate|search for|look for)\s+"
                           r"(?:my\s+|the\s+|a\s+|any\s+)?(?:files?|documents?|docs?|notes?|folders?)\s+(?:about|named|called|with|containing|matching|for)\s+"
                           r"[\"']?(.{1,80}?)[\"']?(?:\s+(?:in|from|on)\s+(?:my\s+)?(?:downloads|desktop|documents|mac|computer))?[.?!]*$", re.I)
@@ -383,25 +383,69 @@ def _find_documents(args, rs):
             "scope": [str(r) for r in scan_roots], "errors": errors, "spoken": spoken}
 
 
+REPO_SKIP = {"Library", "Applications", "Music", "Movies", "Pictures", "node_modules", "Public"}
+
+
+def _short(p: Path) -> str:
+    try:
+        return "~/" + str(p.relative_to(Path.home()))
+    except ValueError:
+        return str(p)
+
+
+def _list_repos(rs: list[Path], default: bool) -> dict[str, Any]:
+    """Git clones by folder name only (no contents). Closed access says where it looked and how to widen.
+
+    Jarvis's own installs (~/jarvis-repos) always count. Open access also walks home two levels deep,
+    which covers ~/tools/<clone> and ~/Projects/<clone> (Grok bad-turn 14:16Z: ~45 clones in ~/tools were missed)."""
+    home = Path.home()
+    opened = open_access()
+    roots = list(rs)
+    if default:
+        roots += [home / "jarvis-repos"] + ([home] if opened else [])
+    seen: set[Path] = set()
+    found: list[Path] = []
+    looked: list[str] = []
+
+    def visit(d: Path, depth: int) -> None:
+        if len(found) >= _max_names() or d in seen:
+            return
+        seen.add(d)
+        if (d / ".git").exists():
+            found.append(d)
+            return
+        if depth <= 0:
+            return
+        try:
+            kids = sorted(c for c in d.iterdir() if c.is_dir() and not c.name.startswith(".") and c.name not in REPO_SKIP)
+        except OSError:
+            return
+        for c in kids:
+            visit(c, depth - 1)
+
+    for r in dict.fromkeys(roots):
+        if not r.is_dir():
+            continue
+        looked.append(_short(r))
+        visit(r, 2 if (opened and r == home) else 1)
+    names = [_short(p) for p in found]
+    if names:
+        sp = f"I found {len(names)} git repos: " + ", ".join(names[:25]) + ("" if len(names) <= 25 else f", and {len(names) - 25} more") + "."
+    else:
+        sp = "I found no git repos."
+    sp += " I looked in " + (", ".join(looked) if looked else "no folders") + "."
+    if not opened:
+        sp += ' Say "permission granted" and I will look across your Mac, including ~/tools.'
+    return {"ok": True, "op": "repos", "names": names, "looked": looked, "spoken": sp}
+
+
 def run(args: dict, roots=None) -> dict[str, Any]:
     op = str((args or {}).get("op") or "read")
     rs = _roots(roots)
     if op == "find":
         return _find_documents(args or {}, rs)
     if op == "repos":
-        names = []
-        for r in rs:
-            if (r / ".git").exists():
-                names.append(r.name)
-            try:
-                for c in sorted(r.iterdir()):
-                    if c.is_dir() and (c / ".git").exists():
-                        names.append(c.name)
-            except OSError:
-                continue
-        names = names[:_max_names()]
-        sp = ("Local repos: " + ", ".join(names) + ".") if names else "I found no git repos in my allowed folders."
-        return {"ok": True, "op": op, "names": names, "spoken": sp}
+        return _list_repos(rs, roots is None)
     path, err = _resolve(str((args or {}).get("path") or ""), rs)
     if path is None:
         return _deny(err or "not found", op)
