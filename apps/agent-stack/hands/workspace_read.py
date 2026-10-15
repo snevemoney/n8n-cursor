@@ -396,8 +396,8 @@ def _short(p: Path) -> str:
 def _list_repos(rs: list[Path], default: bool) -> dict[str, Any]:
     """Git clones by folder name only (no contents). Closed access says where it looked and how to widen.
 
-    Jarvis's own installs (~/jarvis-repos) always count. Open access also walks home two levels deep,
-    which covers ~/tools/<clone> and ~/Projects/<clone> (Grok bad-turn 14:16Z: ~45 clones in ~/tools were missed)."""
+    Jarvis's own installs (~/jarvis-repos) always count. Open access also walks home three levels deep,
+    which covers ~/tools/<clone>, ~/tools/<group>/<clone> and ~/Projects/<clone> (Grok bad-turn 14:16Z: ~45 clones in ~/tools were missed)."""
     home = Path.home()
     opened = open_access()
     roots = list(rs)
@@ -427,7 +427,7 @@ def _list_repos(rs: list[Path], default: bool) -> dict[str, Any]:
         if not r.is_dir():
             continue
         looked.append(_short(r))
-        visit(r, 2 if (opened and r == home) else 1)
+        visit(r, 3 if (opened and r == home) else 1)  # ~/tools/<group>/<clone>
     names = [_short(p) for p in found]
     if names:
         sp = f"I found {len(names)} git repos: " + ", ".join(names[:25]) + ("" if len(names) <= 25 else f", and {len(names) - 25} more") + "."

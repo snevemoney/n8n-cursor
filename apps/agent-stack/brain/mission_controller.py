@@ -250,7 +250,8 @@ class MissionController:
             if isinstance(pid,int):
                 try:os.kill(pid,0)
                 except ProcessLookupError:pass
-                else:raise ValueError("prior workflow worker identity is unresolved")
+                else:
+                    if not self.adapter._pid_reused(owner):raise ValueError("prior workflow worker identity is unresolved")
             with (root/"worker.lock").open("a") as worker_lock:
                 try:fcntl.flock(worker_lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
                 except BlockingIOError:return state

@@ -959,7 +959,7 @@ ROUTE_SEARCH_LEAD_RE = re.compile(
 
 
 ACK_LINE = "On it."
-ACK_SKIP = frozenset({"say"})
+ACK_SKIP = frozenset({"say", "capability"})
 
 
 
@@ -6005,7 +6005,7 @@ def _run_tool_inner(
         return {"ok": True, "tool": tool, "spoken": _rm.spoken_today() if _today else _rm.spoken_recent(), "wires": ["results"], "cites": [],
                 "sent": False, "task_verified": True, "outcome": TOOL_LOOP}
     if tool == "capability":
-        got = _capability_hand().run(utterance)
+        got = _capability_hand().run(utterance, prior=args.get("prior"))
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["capability"],
                 "cites": [], "sent": False, "task_verified": bool(got.get("task_verified")),
                 "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
@@ -7744,6 +7744,8 @@ def apply_pipeline_iter(
     early = confirm_take(hive, spoken_in) or live_chat_route(spoken_in, had_pending) or _workflow_followup_route(spoken_in, hive)
     if early is None and not document_followup:
         early = model_free_route(spoken_in)
+    if early is not None and early.get("tool") == "capability" and prior_turns:
+        early = {**early, "args": {**(early.get("args") or {}), "prior": dict(prior_turns[-1])}}  # "fix it" names what failed
     ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""
     yield _pipeline_event(
         ok=True,

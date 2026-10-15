@@ -7,7 +7,10 @@ and no mission starts from this hand.
 """
 from __future__ import annotations
 
+import importlib.util
 import re
+import sys
+from pathlib import Path
 
 _ASK = r"(?:do|don't|dont|do\s+not|can|can't|cant|cannot|could|couldn't|are|aren't|is\s+there|have)\s+(?:you|jarvis)\b"
 ARROW_RE = re.compile(_ASK + r".{0,50}\b(?:red\s+arrow|arrow|pointer|point(?:\s+at|\s+to)?\s+(?:things|stuff|controls?))\b", re.I)
@@ -21,8 +24,27 @@ QUESTION_RE = re.compile(r"\?\s*$|^(?:jarvis[, ]+)?(?:do|don't|dont|can|can't|co
 
 ARROW_LINE = ("Yes. I can put a red arrow on a control: say \"point to\" and the thing, or \"where do I click to\" "
               "and what you want to do. I'm not drawing one now.")
-ACCESS_LINE = ("Access: say \"permission granted\" and open access stays on until you say \"lock it down\". "
-               "Sends, payments, deploys, merges and real secrets still ask you first.")
+HARD_LINE = "Sends, payments, deploys, merges, deletes and real secrets still ask you first."
+
+
+def _open_access() -> bool:
+    name = "agent_stack_permissions"
+    try:
+        if name not in sys.modules:
+            spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name("permissions.py"))
+            mod = importlib.util.module_from_spec(spec); sys.modules[name] = mod; spec.loader.exec_module(mod)
+        return bool(sys.modules[name].open_access())
+    except Exception:  # noqa: BLE001 — unknown state reads as closed, the safer claim
+        return False
+
+
+def access_line() -> str:
+    """The real current state, never a promise: open by default on live, closed after "lock it down"."""
+    if _open_access():
+        return "Access: open access is on, so I can use your folders, browser, screen, shell and installs; \"lock it down\" closes it. " + HARD_LINE
+    return "Access: open access is off. Say \"permission granted\" and it stays on until you say \"lock it down\". " + HARD_LINE
+
+
 CODE_LINE = ("Code: my coding worker builds in a scratch repo on its own branch; say \"in scratch repo\", the name, "
              "and the goal. My own code in jarvis-main is changed on a branch by Claude, Cursor or Grok, and runs "
              "after you approve it and restart me. I don't edit my live self.")
@@ -42,15 +64,19 @@ def wants(utterance: str) -> str:
     return ""
 
 
-def run(utterance: str) -> dict:
+def run(utterance: str, prior: dict | None = None) -> dict:
     kind = wants(utterance)
     if kind == "arrow":
         spoken = ARROW_LINE
     elif kind == "self_code":
-        spoken = "Yes, within limits. " + ACCESS_LINE + " " + CODE_LINE
+        spoken = "Yes, within limits. " + access_line() + " " + CODE_LINE
     elif kind == "fix_it":
-        spoken = ("I can't patch my live self mid-conversation. " + CODE_LINE
-                  + " Tell me what went wrong and I'll write it down for that fix.")
+        last = str((prior or {}).get("user") or "").strip()
+        said = re.sub(r"\s+", " ", str((prior or {}).get("jarvis") or "")).strip()
+        about = (f"The last thing you asked was \"{last[:120]}\"" + (f", and I answered \"{said[:140]}\"." if said else ".")
+                 if last else "I don't have the last turn to point at.")
+        spoken = (about + " I can't patch my live self mid-conversation. " + CODE_LINE
+                  + (" Say \"permission granted\" if it was blocked by access." if not _open_access() else ""))
     else:
         return {"ok": False, "tool": "capability", "spoken": "", "task_verified": False}
     return {"ok": True, "tool": "capability", "kind": kind, "spoken": spoken, "task_verified": True}

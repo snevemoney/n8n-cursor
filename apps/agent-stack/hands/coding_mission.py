@@ -232,6 +232,21 @@ def _identity(pid):
     return None
 
 
+def _pid_reused(owner):
+    """True when the recorded worker PID now belongs to a different process.
+
+    A dead worker's PID can be handed to an unrelated program; os.kill(pid, 0) then succeeds and resume used to
+    refuse forever ("identity is unproven but process still exists"). Only a same-scheme identity that differs
+    (ps start time + argv, or libproc start time) proves reuse; an unreadable identity proves nothing."""
+    recorded = owner.get('identity') if isinstance(owner, dict) else None
+    current = _identity(owner.get('pid')) if isinstance(owner, dict) else None
+    if not isinstance(recorded, str) or not recorded or not current:
+        return False
+    if recorded.startswith('libproc:') != current.startswith('libproc:'):
+        return False
+    return current != recorded
+
+
 def _owned(owner, root):
     pid = owner.get('pid')
     token = owner.get('token')
@@ -531,9 +546,11 @@ class CodingMissionHandle:
                     except ProcessLookupError:
                         pass
                     except PermissionError:
-                        raise ValueError('worker liveness cannot be proven')
+                        if not _pid_reused(owner):
+                            raise ValueError('worker liveness cannot be proven')
                     else:
-                        raise ValueError('worker identity is unproven but process still exists')
+                        if not _pid_reused(owner):
+                            raise ValueError('worker identity is unproven but process still exists')
                 envelope = read_json(root/'checkpoint.json')
                 executor=request.get('executor')
                 if executor is not None:_worker_entrypoint(root)
