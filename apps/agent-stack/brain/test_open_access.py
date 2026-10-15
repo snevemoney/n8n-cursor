@@ -173,3 +173,16 @@ class Pipeline(OpenAccessBase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SecretNames(unittest.TestCase):
+    def test_real_secrets_stay_secret(self):
+        for p in [".env", "repo/.env.local", "~/.ssh/id_rsa", "a/server.pem", "x/.grok-private/m.json",
+                  "vault/secrets/jarvis-bite2-secret.md", "github_token", "config/tokens.json", "notes/secret-notes.md",
+                  "a/credentials.json", "a/.git-credentials", "client_secret.json", "proj/tokens/x.py"]:
+            self.assertTrue(PERM.is_secret_path(p), p)
+
+    def test_code_named_for_tokens_is_code(self):
+        for p in ["apps/agent-stack/hands/test_tokens.py", "src/tokenizer.py", "lib/tokenizers/bpe.py",
+                  "tools/secret_scanner.ts", "brain/test_literal_tokens_and_budget.py"]:
+            self.assertFalse(PERM.is_secret_path(p), p)

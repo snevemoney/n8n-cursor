@@ -24,6 +24,15 @@ GATED = ("send", "purchase", "delete_outside_scratch", "merge_main", "push", "de
          "read_secret", "global_rule_edit")
 SECRET_RE = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.grok-private|id_[a-z0-9]+|[^/]*\.pem|[^/]*\.key|"
                        r"credentials[^/]*|secrets?[^/]*|[^/]*token[^/]*|Keychains?)(/|$)", re.I)
+# Always secret wherever they sit: key material, dot-config stores, and folders named for secrets.
+STRONG_SECRET_RE = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.grok-private|id_[a-z0-9]+|[^/]*\.pem|[^/]*\.key|"
+                              r"[^/]*\.p12|[^/]*\.pfx|[^/]*\.kdbx|\.git-credentials|Keychains?|"
+                              r"\.?secrets?|credentials|\.?tokens?)(/|$)", re.I)
+WEAK_SECRET_WORD = re.compile(r"credential|secret|token", re.I)
+# Source code is never a secret store by its name alone: test_tokens.py, tokenizer.py, secret_scanner.ts.
+# (2026-10-15: the saved-video build stopped at preparation because a test file had "tokens" in its name.)
+CODE_SUFFIXES = frozenset({".py", ".pyi", ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".swift", ".rs", ".go", ".java",
+                           ".kt", ".rb", ".c", ".h", ".cc", ".cpp", ".hpp", ".m", ".mm", ".cs", ".php", ".lua", ".scala"})
 
 
 def _mode_file() -> Path:
@@ -164,7 +173,21 @@ def _inside(path: Path, roots: list[Path]) -> bool:
 
 
 def is_secret_path(path: str | Path) -> bool:
-    return bool(SECRET_RE.search(str(path)))
+    text = str(path)
+    if STRONG_SECRET_RE.search(text):
+        return True
+    parts = [p for p in re.split(r"/+", text) if p and p not in (".", "..")]
+    for i, part in enumerate(parts):
+        if not WEAK_SECRET_WORD.search(part):
+            continue
+        last = i == len(parts) - 1
+        suffix = Path(part).suffix.lower()
+        if last and suffix in CODE_SUFFIXES:
+            continue  # a code file named for tokens/secrets is code, not a credential
+        if not last and not suffix and re.search(r"(?:^|[._-])(?:tokens?|secrets?|credentials?)(?:[._-]|$)", part, re.I) is None:
+            continue  # a folder like "tokenizer" or "secret_scanner" is not a secret store
+        return True
+    return False
 
 
 def decide(kind: str, target: str = "") -> str:
