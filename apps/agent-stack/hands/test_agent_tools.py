@@ -1,5 +1,6 @@
 import importlib.util, os, tempfile, unittest
 from pathlib import Path
+from unittest import mock
 spec = importlib.util.spec_from_file_location("agent_tools_t", Path(__file__).with_name("agent_tools.py"))
 a = importlib.util.module_from_spec(spec); spec.loader.exec_module(a)
 
@@ -44,8 +45,10 @@ class Round2(unittest.TestCase):
 
 class ReadOnlyByName(unittest.TestCase):
     def test_gui_and_exec_tools_gated(self):
-        for t in ("click", "drag", "js", "command_run", "execute", "batch", "browser_click", "add_slide"):
-            self.assertTrue(a.op_mcp("x", t, {}).get("gated"), t)
+        # Evens 10-15: open by default runs GUI/exec MCP tools without a confirm; only an owner-revoked mode gates them.
+        with mock.patch.object(a, "_open_access", return_value=False):
+            for t in ("click", "drag", "js", "command_run", "execute", "batch", "browser_click", "add_slide"):
+                self.assertTrue(a.op_mcp("x", t, {}).get("gated"), t)
 
     def test_lookups_pass_gate(self):
         for t in ("resolve-library-id", "convert_to_markdown", "query-docs", "list_items_in_registries", "get_item_examples_from_registries"):

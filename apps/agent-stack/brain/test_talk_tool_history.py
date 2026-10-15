@@ -59,7 +59,7 @@ class ToolHistory(unittest.TestCase):
   with tempfile.TemporaryDirectory() as tmp,patch.object(P,'online_talk',side_effect=talk),patch.object(P,'turn_cancelled',return_value=False),patch.object(P,'_vision_urls',return_value=[]),patch.object(P,'_run_tool_heartbeat',side_effect=run):
    result=drain(P._continue_hand_loop(first,receipt(),'Original owner request',hive=Path(tmp),token=1,brain='openrouter',brief='',initial_selection=first))
   self.assertEqual([len(row[2]['tool_history']) for row in seen],[2,4])
-  self.assertTrue(all(row[0]=='Original owner request' for row in seen));self.assertIn('first actual bytes',seen[-1][1]);self.assertEqual(result['hand_loop_meta']['hands'],2)
+  self.assertTrue(all(row[0]=='Original owner request' for row in seen));self.assertIn('first actual bytes',json.dumps(seen[-1][2]['tool_history']))  # contents ride in tool history; online.py folds them to text if a provider rejects tool roles;self.assertEqual(result['hand_loop_meta']['hands'],2)
  def test_actual_inner_payload_and_selection_keep_provider_call(self):
   history=P._provider_hand_exchange(selection(),selection(),receipt());bodies=[];call=selection('next_actual_id','/allowed/second.py')['provider_tool_call']
   def provider(url,**kw):

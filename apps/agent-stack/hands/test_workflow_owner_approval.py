@@ -1,5 +1,6 @@
-import hashlib,tempfile,unittest
+import hashlib,sys,tempfile,unittest
 from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parent))  # bare 'import coding_mission' needs its own folder
 from unittest import mock
 import coding_mission as M
 from test_workflow_intake import OBJECTIVE

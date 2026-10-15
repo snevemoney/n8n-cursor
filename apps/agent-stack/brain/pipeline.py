@@ -1237,6 +1237,7 @@ ARROW_MISHEARD_RE = re.compile(r"(?<=\bshow me )a\s+narrow(?=\s+(?:on|at|over)\s
 
 def model_free_route(spoken_in: str) -> dict | None:
     """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
+    spoken_in = ARROW_MISHEARD_RE.sub("your red arrow", spoken_in)  # speech-to-text hears "an arrow on" as "a narrow on"
     if MACOS is not None and (MACOS.LATEST_SCREENSHOT_RE.fullmatch(spoken_in.strip()) or MACOS.FINDER_REFERENCE_RE.fullmatch(spoken_in.strip()) or MACOS.SAVED_IMAGE_RE.fullmatch(spoken_in.strip())):
         return {"tool": "workspace_read", "args": {"op": "screenshot_reference"}, "speak": ""}
     if _research_build_request(spoken_in):
@@ -1251,7 +1252,6 @@ def model_free_route(spoken_in: str) -> dict | None:
         return {"tool": "results_recall", "args": {}, "speak": ""}
     if _cost_hand().wants_cost(spoken_in):
         return {"tool": "cost_card", "args": {}, "speak": ""}
-    spoken_in = ARROW_MISHEARD_RE.sub("your red arrow", spoken_in)  # speech-to-text hears "an arrow on" as "a narrow on"
     if _capability_hand().wants(spoken_in):  # "don't you have a red arrow?", "can you change your code?"
         return {"tool": "capability", "args": {}, "speak": ""}
     if (_pointer_request(spoken_in) or _pointer_hand().wants_pointer(spoken_in)) and not is_hard_step(spoken_in):
@@ -1307,6 +1307,9 @@ def model_free_route(spoken_in: str) -> dict | None:
             early = {"tool": "web_search", "args": {}, "speak": ""}
         elif _apps_hand().wants(spoken_in):  # "open Spotify", "switch to Final Cut", "quit Notes"
             early = {"tool": "apps", "args": {}, "speak": ""}
+    # A real hard step answers in fixed words without the model (its wording drifted: score30 caps 12/21).
+    if early is None and is_hard_step(spoken_in) and any(rx.search(spoken_in) for rx, _ in KEPT_STOPS):
+        early = {"tool": "refuse_hard_step", "args": {}, "speak": ""}
     return early
 
 
@@ -2154,25 +2157,21 @@ def is_hard_step(text: str) -> bool:
 # Evens 2026-10-15: Jarvis asks first ONLY before these. The words are fixed here so model wording cannot drift
 # into a flat "No" or "I don't have that" (score30 caps 12/21 regressed that way).
 KEPT_STOPS = (
-    (re.compile(r"\b(?:merge|push|deploy|publish|release|prod(?:uction)?)\b", re.I),
-     "That would change main or go live, so it needs your OK first. Say OK when you want it done."),
+    (re.compile(r"\b(?:merge|push|deploy|publish|release|prod(?:uction)?)\b", re.I), "change main or go live"),
     (re.compile(r"\b(?:pay|paid|buy|purchase|order|book|booking|reserve|subscribe|transfer|invoice from)\b", re.I),
-     "That would spend money or book something for you, so I need your OK first. Tell me the details and say OK."),
-    (re.compile(r"\b(?:delete|remove|erase|wipe|trash)\b", re.I),
-     "That would delete your files, so I need your OK first. Tell me exactly what, and say OK."),
-    (re.compile(r"\b(?:password|secret|api key|token|private key|\.env)\b", re.I),
-     "That would reveal a secret, so I need your OK first."),
-    (re.compile(r"\b(?:send|email|e-mail|text|message|dm|post|tweet|reply)\b", re.I),
-     "That would send or post for you, so I need your OK first. I can draft it here for you to check."),
+     "spend money or book something for you"),
+    (re.compile(r"\b(?:delete|remove|erase|wipe|trash)\b", re.I), "delete your files"),
+    (re.compile(r"\b(?:password|secret|api key|token|private key|\.env)\b", re.I), "reveal a secret"),
+    (re.compile(r"\b(?:send|email|e-mail|text|message|dm|post|tweet|reply|fan-?out)\b", re.I), "send or post for you"),
 )
 
 
 def kept_stop_line(text: str) -> str:
-    """The ask-first line for one of Evens's five kept stops."""
-    for rx, line in KEPT_STOPS:
-        if rx.search(text or ""):
-            return line
-    return "That needs your OK first. Say OK when you want it done."
+    """The ask-first line naming every one of Evens's kept stops the request touches."""
+    what = [why for rx, why in KEPT_STOPS if rx.search(text or "")]
+    if not what:
+        return "That needs your OK first. Say OK when you want it done."
+    return f"That would {' and '.join(what)}, so I need your OK first. Tell me the details and say OK."
 
 
 def hard_step_line(text: str) -> str:
@@ -5770,6 +5769,7 @@ TOOL_HEARTBEAT = "Still checking, sir; the wires are being fashionably slow."
 HAND_LOOP_MAX_HANDS = 4
 # Screen-overlay hands finish the turn themselves: a second model pass replaced "The red arrow is on it" with its own
 # line, and a repeat pointer pick re-captured the screen (hide_overlays) or ended the turn as a failed duplicate.
+COMPLETE_READ_OPS = {'open_document', 'screenshot_reference', 'repos'}  # the hand's own reply is the whole answer; no model pass
 TERMINAL_HANDS = frozenset({"pointer", "pointer_click", "pointer_demo", "apps", "capability"})
 # A model-free (fixed) route already answered a single ask; only a compound ask ("read A and B and compare")
 # earns the follow-up model pass. Without this the loop re-talked over Obsidian reads, stack as-of, calendar,
@@ -5884,7 +5884,9 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
         if provider_failure:row['hand_loop_meta']['provider_failure']=provider_failure
         row['wires']=list(dict.fromkeys(wires));row['cites']=cites[:16]
         if len(receipts)>1:row['task_verified']=False
-        if reason in {'duplicate_action','hand_limit','time_limit','invalid_next_pick','provider_unavailable'}:
+        # One hand already answered and only the "what next?" pick failed: the answer stands (live 02:50 repos reply).
+        answered=len(receipts)==1 and last.get('ok') is True and reason in {'invalid_next_pick','provider_unavailable'}
+        if not answered and reason in {'duplicate_action','hand_limit','time_limit','invalid_next_pick','provider_unavailable'}:
             row.update(ok=False,task_verified=False,partial=True)
             evidence=str(last.get('spoken') or '').strip()
             row['spoken']=(evidence+' ' if evidence else '')+'I stopped before another action; the remaining request is not verified.'
@@ -6070,7 +6072,7 @@ def _run_tool_inner(
         return {
             "ok": True,
             "tool": "refuse_hard_step",
-            "spoken": kept_stop_line(utterance) + " Nothing has run.",
+            "spoken": kept_stop_line(utterance) + " So far nothing has run.",
             "wires": ["refuse_hard_step"],
             "cites": [],
             "sent": False,
@@ -6082,7 +6084,7 @@ def _run_tool_inner(
         or (tool == "safari_see" and not wants_safari(utterance) and fixed_route(utterance) is None)
         or (tool == "vault_read" and ACTION_STATUS_RE.search(utterance or ""))
     )
-    if tool == "refuse_hard_step":
+    if tool == "refuse_hard_step" and any(rx.search(utterance or "") for rx, _ in KEPT_STOPS):
         return {"ok": True, "tool": "converse", "spoken": kept_stop_line(utterance), "wires": ["converse"],
                 "cites": [], "sent": False, "dropped_tool": tool}
     if unauthorized:
@@ -6245,6 +6247,8 @@ def _run_tool_inner(
     if tool == "pointer":
         retained=_pointer_followup(utterance,hive)
         request=(retained.get('args') or {}).get('retained_request') if retained else _pointer_request(utterance)
+        if not request and _pointer_hand().wants_pointer(utterance):
+            request=utterance  # "where do I click to …", "show me where …": the pointer hand reads its own phrasings
         if not request:
             return {"ok": False, "tool": tool, "spoken": "Tell me what you want me to point to.",
                     "wires": [], "cites": [], "sent": False, "task_verified": False, "outcome": HONEST_UNKNOWN}
@@ -7943,11 +7947,12 @@ def apply_pipeline_iter(
         return
     local = standing_reply(spoken_in, prior_turns)
     if local:
+        stop = "so I need your OK first" in local  # a kept stop was asked for: archive it as not done
         text, first, rest = _commit_spoken(
             hive,
             spoken_in=spoken_in,
             prior_turns=prior_turns,
-            tool="converse",
+            tool="refuse_hard_step" if stop else "converse",
             raw=local,
             wires=["converse"],
             cites=[],
@@ -7955,7 +7960,8 @@ def apply_pipeline_iter(
             pack=None,
             retrieve_roots=retrieve_roots,
             gen=token,
-            wire={"path": "converse", "tool": "converse", "outcome": STORE_DIRECT},
+            wire={"path": "converse", "tool": "refuse_hard_step" if stop else "converse",
+                  "outcome": "REFUSED" if stop else STORE_DIRECT},
         )
         yield _pipeline_event(
             ok=True,
@@ -8680,7 +8686,7 @@ def apply_pipeline_iter(
     if (isinstance(ran,dict) and pick_tool in HANDS and pick_tool != "browser_mission" and pick_tool not in TERMINAL_HANDS
         and not (pick_tool=='skills' and (ran.get('skills_meta') or {}).get('op')=='run')
         and not (fixed_pick and pick_tool=='skills' and not COMPOUND_ASK_RE.search(spoken_in or ''))
-        and not (fixed_pick and (pick_tool not in LOOP_READ_HANDS or str((ran or {}).get('workspace_meta',{}).get('op'))=='open_document') and not COMPOUND_ASK_RE.search(spoken_in or ""))
+        and not (fixed_pick and (pick_tool not in LOOP_READ_HANDS or str((ran or {}).get('workspace_meta',{}).get('op') or (ran or {}).get('op') or ((pick or {}).get('args') or {}).get('op')) in COMPLETE_READ_OPS) and not COMPOUND_ASK_RE.search(spoken_in or ""))
         and not (token and turn_cancelled(hive,token))):
         loop_brief=provider_brief or sitting_brief(prior_turns,bus_now,retrieve_roots,spoken_in)
         ran=yield from _continue_hand_loop(pick,ran,spoken_in,hive=hive,token=token,brain=brain,

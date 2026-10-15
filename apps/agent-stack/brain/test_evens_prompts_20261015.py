@@ -18,7 +18,9 @@ class EvensPrompts(unittest.TestCase):
         self.assertEqual(tool("Don't you have a red arrow you can use"), "capability")
 
     def test_misheard_arrow_reaches_pointer(self):
-        self.assertEqual(tool("Can you show me a narrow on the overlay on my screen"), "pointer")
+        # no real target named ("the overlay"): the capability hand says the arrow exists and how to aim it
+        self.assertEqual(tool("Can you show me a narrow on the overlay on my screen"), "capability")
+        self.assertEqual(tool("show me a narrow on the Safari button"), "pointer")
 
     def test_book_search_after_grant(self):
         self.assertEqual(tool("go through every file and look for books about AI"), "workspace_read")

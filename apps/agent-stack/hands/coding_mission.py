@@ -803,8 +803,10 @@ class CodingMissionHandle:
             raise ValueError('unknown coding mission')
         with (root/'resume.lock').open('a') as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
-            if read_json(root/'control.json').get('cancel') or read_json(root/'result.json').get('status')=='CANCELLED':
-                raise ValueError('cancelled coding missions cannot be resumed')
+            # An explicit resume after a finished cancel is the owner's new instruction (work survives interruption);
+            # only a cancel that has not reached a terminal result yet blocks it.
+            if read_json(root/'control.json').get('cancel') and not read_json(root/'result.json').get('status'):
+                raise ValueError('the cancel is still stopping this mission; resume after it has stopped')
             child = read_json(root/'resume_child.json').get('mission_id')
             if child:
                 if not read_json(mission_path(self.hive,child)/'request.json'):
@@ -1391,8 +1393,8 @@ class WorkflowMissionHandle:
         if (any(ident.lower()!=mission_id for ident in named)
             or not wants_workflow_continuation(answer,request.get('objective',''))):
             raise ValueError('explicit workflow continuation required')
-        if not named and read_json(root/'control.json').get('cancel'):
-            raise ValueError('the referenced project was cancelled; fresh specific authorization is required')
+        # Plain "continue the workflow" resumes after a cancel (Evens: no workflow numbers needed). The cancel already
+        # dropped the project approval, so nothing is edited until it is approved again.
 
         with (root/'steering.lock').open('a') as lock:
             fcntl.flock(lock,fcntl.LOCK_EX)
