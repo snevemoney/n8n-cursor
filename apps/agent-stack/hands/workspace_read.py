@@ -24,7 +24,10 @@ SECRET_DIR = {".grok-private", ".ssh", ".gnupg", ".aws", ".git"}
 # "token", "secret" or "credential" (tokenomics.pdf, secret-sauce-notes.md) becomes readable.
 STRICT_SECRET_NAME = re.compile(
     r"(^\.env(\..*)?$|^id_(rsa|dsa|ecdsa|ed25519)(\.pub)?$|\.(pem|key|p12|pfx|keystore|kdbx|keychain(-db)?)$|"
-    r"^\.netrc$|^\.npmrc$|^\.pypirc$|^credentials(\.json)?$|^client_secret.*\.json$|^\.git-credentials$)", re.I)
+    r"^\.netrc$|^\.npmrc$|^\.pypirc$|^credentials(\.json)?$|^client_secret.*\.json$|^\.git-credentials$|"
+    # security review 2026-10-15 (H7): real secret files whose names a plain list missed
+    r"\.env$|^secrets?(\.[a-z0-9]+)?$|(api[_-]?keys?|access[_-]?keys?)|(^|[_.-])tokens?([_.-]|$)|"
+    r"^passwords?(\.[a-z0-9]+)?$|credentials|^\.pgpass$|cookies\.sqlite$|^login\.keychain)", re.I)
 OPEN_MAX_BYTES = 200000
 OPEN_MAX_NAMES = 500
 
@@ -43,6 +46,16 @@ def open_access() -> bool:
 
 def _secret_name(name: str) -> bool:
     return bool((STRICT_SECRET_NAME if open_access() else SECRET_NAME).search(name or ""))
+
+
+def _home_dot_path(p: Path) -> bool:
+    """~/.config, ~/.docker, ~/.claude, ~/.zsh_history, ~/.mcp.json … hold tokens and agent config; ~/Library holds
+    cookies and keychains. Dot folders inside projects (repo/.github) are not this."""
+    try:
+        rel = p.relative_to(Path.home().resolve())
+    except ValueError:
+        return False
+    return bool(rel.parts) and (rel.parts[0].startswith(".") or rel.parts[0] == "Library")
 
 
 def _max_bytes() -> int:
@@ -106,7 +119,7 @@ def _resolve(raw: str, roots: list[Path]) -> tuple[Path | None, str]:
         real = p.resolve(strict=True)
     except (OSError, RuntimeError):
         return None, "not found"
-    if any(x in SECRET_DIR for x in real.parts) or _secret_name(real.name):
+    if any(x in SECRET_DIR for x in real.parts) or _secret_name(real.name) or _home_dot_path(real):
         return None, "that looks like a secret"
     if not any(real == r or r in real.parents for r in roots):
         return None, "outside the allowed folders"
