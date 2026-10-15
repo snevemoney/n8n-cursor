@@ -379,8 +379,11 @@ def _worker_entrypoint(root):
 
 def _spawn_worker(root, token):
     with (root/'worker.log').open('ab') as log:
-        return subprocess.Popen([sys.executable, str(_worker_entrypoint(root)), 'worker', str(root.resolve()), token],
-                                stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
+        # A frozen source bundle must stay byte-identical: never let Python write __pycache__ into it
+        # (a root or permissive process ignores the bundle's 0555 dirs and trips immutable_source_directory_changed).
+        return subprocess.Popen([sys.executable, '-B', str(_worker_entrypoint(root)), 'worker', str(root.resolve()), token],
+                                stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True,
+                                env={**os.environ, 'PYTHONDONTWRITEBYTECODE': '1'})
 
 
 class CodingMissionHandle:
