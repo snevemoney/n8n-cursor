@@ -13,7 +13,7 @@ import json
 import os
 import re
 import threading
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -58,13 +58,15 @@ def set_auto_accept(on: bool) -> dict:
 # never can, and the file lives in ~/.grok-private, which no hand can read or write.
 # Still gated while open: sends, payments, bookings, publishing, deletes outside scratch, pushes, merges,
 # deploys/VPS changes and real secrets (.env, keys, ~/.ssh, ~/.grok-private).
+# Grant phrases (security review 2026-10-15): only first-person lines addressed to Jarvis. Bare "access granted",
+# "you're cleared/allowed/permitted", "you have access", "I allow it" are everyday/TV speech and never grant.
+_GRANT_CORE = (
+    r"(?:full\s+)?(?:permission|permissions)\s+(?:is\s+)?granted|"
+    r"full\s+access\s+(?:is\s+)?granted|"
+    r"i\s+(?:grant|give)\s+you\s+(?:full\s+)?(?:permission|permissions|access)|"
+    r"i\s+(?:allow|authori[sz]e|permit)\s+you")
 GRANT_RE = re.compile(
-    r"^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:(?:ok(?:ay)?|yes|yeah)[,.!]?\s*)?(?:"
-    r"(?:full\s+)?(?:permission|permissions|access)\s+(?:is\s+)?granted|"
-    r"i\s+(?:grant|give)\s+you\s+(?:full\s+)?(?:permission|access)|"
-    r"(?:you\s+have|you've\s+got)\s+(?:my\s+)?(?:full\s+)?(?:permission|access)|"
-    r"i\s+(?:allow|authori[sz]e|permit)\s+(?:you|it|this|that)|"
-    r"you(?:\s+are|'re)\s+(?:allowed|authori[sz]ed|cleared|permitted)"
+    r"^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:(?:ok(?:ay)?|yes|yeah)[,.!]?\s*)?(?:" + _GRANT_CORE +
     r")(?:\s+to\s+(?:do\s+(?:it|this|that)|go\s+ahead|proceed|continue|look|read|open|search|browse))?"
     r"(?:[,.!]?\s*(?:sir|jarvis|go\s+ahead|do\s+it|proceed|continue|please))*\s*[.!]*\s*$", re.I)
 REVOKE_RE = re.compile(
@@ -74,7 +76,8 @@ REVOKE_RE = re.compile(
     r"lock\s+(?:it\s+|yourself\s+)?(?:back\s+)?down|"
     r"(?:go\s+)?back\s+to\s+(?:safe|normal|restricted)\s+mode|"
     r"close\s+(?:open\s+)?access"
-    r")[.!]*\s*$", re.I)
+    r")(?:[,.!]?\s*(?:please|sir|now|thanks|thank\s+you|jarvis))*[.!]*\s*$", re.I)
+OPEN_ACCESS_TTL_SECONDS = 3600  # a grant lasts one hour, then closes on its own
 
 
 def is_grant(text: str) -> bool:
@@ -84,14 +87,10 @@ def is_grant(text: str) -> bool:
 # A grant that leads the line, then whatever he wants done: "permission granted, you are allowed to find books"
 # -> grant + "find books". Several grant phrases in a row are all consumed.
 _GRANT_HEAD = re.compile(
-    r"^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:(?:ok(?:ay)?|yes|yeah|i\s+said)[,.!]?\s*)?(?:"
-    r"(?:full\s+)?(?:permission|permissions|access)\s+(?:is\s+)?granted|"
-    r"i\s+(?:grant|give)\s+you\s+(?:full\s+)?(?:permission|access)|"
-    r"(?:you\s+have|you've\s+got)\s+(?:my\s+)?(?:full\s+)?(?:permission|access)|"
-    r"i\s+(?:allow|authori[sz]e|permit)\s+(?:you|it|this|that)|"
-    r"you(?:\s+are|'re)\s+(?:now\s+)?(?:allowed|authori[sz]ed|cleared|permitted)"
+    r"^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:(?:ok(?:ay)?|yes|yeah|i\s+said)[,.!]?\s*)?(?:" + _GRANT_CORE +
     r")(?:\s+to\b)?[\s,.:;!-]*", re.I)
-_FILLER = re.compile(r"^(?:(?:so|now|please|sir|jarvis|go\s+ahead|and|then)[\s,.:;!-]*)+", re.I)
+_FILLER = re.compile(r"^(?:(?:so|now|please|sir|jarvis|go\s+ahead|and|then|"
+                     r"you(?:'re|\s+are)\s+(?:now\s+)?(?:allowed|authori[sz]ed|permitted)\s+to)[\s,.:;!-]*)+", re.I)
 
 
 def grant_split(text: str) -> tuple[bool, str]:
@@ -121,17 +120,30 @@ def open_access() -> bool:
     import sys
     if not (os.environ.get("JARVIS_MODE_FILE") or "").strip() and ("_pytest" in sys.modules or "unittest" in sys.modules):
         return False
-    return bool(mode().get("open_access"))
+    data = mode()
+    if not data.get("open_access"):
+        return False
+    try:  # no expiry recorded (pre-2026-10-15 grant) or past it -> closed
+        return datetime.now() < datetime.fromisoformat(str(data.get("expires") or ""))
+    except ValueError:
+        return False
 
 
 def set_open_access(on: bool) -> dict:
     f = _mode_file()
     f.parent.mkdir(parents=True, exist_ok=True)
-    data = {**mode(), "open_access": bool(on), "updated": datetime.now().isoformat(timespec="seconds")}
+    now = datetime.now()
+    data = {**mode(), "open_access": bool(on), "updated": now.isoformat(timespec="seconds")}
+    if on:
+        data["expires"] = (now + timedelta(seconds=OPEN_ACCESS_TTL_SECONDS)).isoformat(timespec="seconds")
+    else:
+        data.pop("expires", None)
     tmp = f.with_name(f.name + ".tmp")
     tmp.write_text(json.dumps(data, indent=1), encoding="utf-8")
     os.chmod(tmp, 0o600)
     os.replace(tmp, f)
+    if bool(mode().get("open_access")) != bool(on):  # a revoke that did not land must not pass silently
+        raise OSError("open access mode file did not take the change")
     log_action("mode", "open_access", "on" if on else "off")
     return data
 
@@ -143,8 +155,11 @@ def open_edit_ok(path: Path) -> bool:
     except (OSError, RuntimeError):
         return False
     home = Path.home().resolve()
-    return (home in p.parents and not is_secret_path(p)
-            and (home / "Library") not in p.parents and p != home / "Library")
+    if home not in p.parents or is_secret_path(p):
+        return False
+    first = p.relative_to(home).parts[0]
+    # shell/agent/tool config (~/.zshrc, ~/.claude, ~/.config, ~/.mcp.json …) and ~/Library run code on next start
+    return not first.startswith(".") and first != "Library"
 
 
 def scratch_roots() -> list[Path]:

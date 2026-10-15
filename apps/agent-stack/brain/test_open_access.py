@@ -33,12 +33,13 @@ class OpenAccessBase(unittest.TestCase):
 class Phrases(unittest.TestCase):
     def test_grants(self):
         for t in ["permission granted", "Permission granted.", "Jarvis, permission granted, go ahead",
-                  "I allow you to do this", "I allow you", "you're allowed to do that", "access granted",
-                  "ok I give you full access"]:
+                  "I allow you to do this", "I allow you", "ok I give you full access"]:
             self.assertTrue(PERM.is_grant(t), t)
 
     def test_not_grants(self):
-        for t in ["what does permission granted mean", "send it", "yes", "I allowed it yesterday"]:
+        # 2026-10-15 security review: TV/ambient phrases no longer grant
+        for t in ["what does permission granted mean", "send it", "yes", "I allowed it yesterday",
+                  "access granted", "you're allowed to do that"]:
             self.assertFalse(PERM.is_grant(t), t)
 
     def test_grant_carries_the_command(self):
