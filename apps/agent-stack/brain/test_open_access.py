@@ -93,6 +93,7 @@ class Files(OpenAccessBase):
         (self.other / "big.txt").write_text("x" * 50000)
         p = mock.patch.dict(os.environ, {"JARVIS_READ_ROOTS": str(self.base)}); p.start(); self.addCleanup(p.stop)
         h = mock.patch.object(Path, "home", return_value=self.home); h.start(); self.addCleanup(h.stop)
+        r = mock.patch.object(_wr(), "RUNNING_TREE", self.base); r.start(); self.addCleanup(r.stop)  # hermetic: no real repo
 
     def test_closed_refuses_outside_and_hints(self):
         got = _wr().run({"op": "read", "path": str(self.other / "plan.md")})

@@ -84,16 +84,19 @@ def default_roots() -> list[Path]:
     return base + [r for r in extra if r not in base]
 
 
+RUNNING_TREE = Path(__file__).resolve().parents[3]
+
+
 def _base_roots() -> list[Path]:
-    env = os.environ.get("JARVIS_READ_ROOTS", "")
-    if env:
-        return [Path(p).expanduser() for p in env.split(os.pathsep) if p.strip()]
     home = Path.home()
     # The running working tree comes first, so "what branch/head" reports the code that is actually serving
     # (fix: :4019 ran from ~/jarvis-honesty but answered with ~/jarvis-main's head).
-    running = Path(__file__).resolve().parents[3]
+    running = RUNNING_TREE
     out = [running] if (running / ".git").exists() else []
-    return out + [r for r in (home / "jarvis-main", home / "Downloads", home / "code") if r != running]
+    out += [r for r in (home / "jarvis-main", home / "Downloads", home / "code") if r != running]
+    # JARVIS_READ_ROOTS adds folders; it replaced the repo once and 'README.md in your repo' resolved under / (10-15).
+    env = os.environ.get("JARVIS_READ_ROOTS", "")
+    return list(dict.fromkeys(out + [Path(p).expanduser() for p in env.split(os.pathsep) if p.strip()]))
 
 
 def _roots(roots) -> list[Path]:
