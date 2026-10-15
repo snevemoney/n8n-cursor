@@ -3551,6 +3551,12 @@ def assemble_pack(
         "Put the answer in speak after the hand runs. "
         "Hands: vault_read, workspace_read, skills, web_search, repo (look at, search or install a public GitHub repo or tool), safari_see, cursor_ask, craft, status, refuse_hard_step. mac_act only while Watch is armed. "
         "craft drives a Craft app: args {app, task}. "
+        # live 2026-10-15: the model denied hands it has ("I do not have a red arrow", "I cannot open files")
+        "On screen you DO have a red arrow and a blue cursor: when Evens asks where to click or says 'point to <thing>', "
+        "the arrow lands on that control; with Watch armed you click it after his confirm. You can open, quit or switch "
+        "Mac apps ('open Safari'). Files and folders outside Jarvis's own are closed until Evens says 'permission granted' "
+        "(lasts one hour); then you can search his whole Mac for books and documents. Never say these abilities do not exist; "
+        "say how to use them. "
         'JSON: {"tool":"converse"|"vault_read"|"workspace_read"|"memory"|"skills"|"mcp_inventory"|"code_run"|"web_search"|"repo"|"safari_see"|"cursor_ask"|"craft"|"status"|"refuse_hard_step","args":{},"speak":""}'
     )
     return "\n".join(lines).rstrip() + "\n"
