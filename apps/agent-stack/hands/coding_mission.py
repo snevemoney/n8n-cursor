@@ -924,7 +924,7 @@ class WorkflowMissionHandle:
 
     def continue_workflow(self, mission_id, answer):
         import fcntl
-        if not re.fullmatch(r'\s*(?:please\s+)?(?:resume|continue)\s+(?:the\s+)?(?:workflow|task|mission)\s*[.!]?\s*', answer or '', re.I):
+        if not re.fullmatch(r'\s*(?:please\s+)?(?:resume|continue)\s+(?:(?:the|my)\s+)?(?:workflow|task|mission|retained task|saved[- ]video build|research[- ]to[- ]delivery build)\s*[.!]?\s*', answer or '', re.I):
             raise ValueError('explicit workflow continuation required')
         root=mission_path(self.hive,mission_id)
         with (root/'steering.lock').open('a') as lock:

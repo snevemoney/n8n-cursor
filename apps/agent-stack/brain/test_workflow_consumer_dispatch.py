@@ -17,8 +17,8 @@ class Consumer(unittest.TestCase):
    root=D.mission_path(hive,ack['mission_id']);original=(root/'request.json').read_bytes()
    controller=D._load('coding_mission_controller',ROOT/'brain/mission_controller.py');actual=controller.MissionController.queue_research_build
    with patch.object(P,'_coding_mission_hand',return_value=D),patch.object(controller.MissionController,'queue_research_build',autospec=True,side_effect=actual) as queue,patch.object(D,'_spawn_worker',side_effect=AssertionError('unbound project cannot spawn')):
-    owner_pick=P._workflow_followup_route('continue workflow',hive)
-    result=P._run_tool_inner(owner_pick,'continue workflow',hive=hive,retrieve_roots=[])
+    owner_pick=P._workflow_followup_route('Continue my saved-video build.',hive)
+    result=P._run_tool_inner(owner_pick,'Continue my saved-video build.',hive=hive,retrieve_roots=[])
    self.assertEqual(queue.call_count,1)
    self.assertEqual(queue.call_args.args[1:],(hive,ack['mission_id']))
    self.assertEqual(result['status'],'WAITING_PROJECT');self.assertFalse(result['task_verified'])

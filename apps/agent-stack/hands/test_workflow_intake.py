@@ -52,6 +52,14 @@ class WorkflowIntakeTests(unittest.TestCase):
             self.assertEqual(continued['status'],'WAITING_PROJECT');self.assertEqual(continued['objective'],OBJECTIVE)
             self.assertEqual((root/'request.json').read_bytes(),before);self.assertFalse((root/'result.json').exists())
 
+    def test_owner_style_description_is_explicit_continuation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            hive=Path(tmp);h=M.WorkflowMissionHandle(hive);ack=h.start_workflow(OBJECTIVE)
+            h.cancel(ack['mission_id'])
+            continued=h.continue_workflow(ack['mission_id'],'Continue my saved-video build.')
+            self.assertEqual(continued['status'],'WAITING_PROJECT')
+            self.assertEqual(continued['objective'],OBJECTIVE)
+
     def test_existing_permissions_and_isolation_are_not_bypassed(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo=Path(tmp).resolve()/'repo';repo.mkdir();h=M.WorkflowMissionHandle(Path(tmp)/'hive');ack=h.start_workflow(OBJECTIVE)
