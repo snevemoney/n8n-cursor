@@ -16,7 +16,8 @@ class ProgressStatusTests(unittest.TestCase):
   class Adapter:
    @staticmethod
    def read_json(path):return {'mission_id':'b'*32}
-  ns={'re':re,'Path':Path,'_coding_mission_hand':lambda:Adapter(),'_research_build_request':lambda text:False}
+  ns={'re':re,'Path':Path,'_coding_mission_hand':lambda:Adapter(),'_research_build_request':lambda text:False,
+      '_coding_resume_match':lambda text:False}  # helper the route now consults first
   exec(compile(ast.Module(body=[node],type_ignores=[]),'route','exec'),ns)
   got=ns['_workflow_followup_route'](text,Path('/test/hive'))
   self.assertEqual(got['args'],{'action':'research_build_status','mission_id':'a'*32})

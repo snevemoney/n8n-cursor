@@ -5,6 +5,7 @@ The browser adapter still supplies planning, specialized execution and proof.
 Other worker adapters must extend this owner rather than create terminal writers.
 """
 import json
+import re
 import hashlib
 import threading
 import time
@@ -687,7 +688,9 @@ class MissionController:
             tests = [row for row in got.get('steps', []) if str(row.get('what', '')).endswith(' test') and row.get('status') == 'verified']
             receipt = str((commit or {}).get('result') or '')[:300]
             completion = ('The coding worker finished and saved its files. ' + ('Builder tests passed. ' if tests else 'Builder test evidence is missing. ')
-                          + (receipt + '. ' if receipt else 'A commit receipt is missing. ') + 'Independent acceptance pending.')
+                          + ('It committed ' + re.match(r'committed ([a-f0-9]{7,40})', receipt).group(1) + '. '
+                             if re.match(r'committed ([a-f0-9]{7,40})', receipt) else 'A commit receipt is missing. ')
+                          + 'Independent acceptance is still pending.')  # same words as coding_mission.progress_line
             state.update(status='CANCELLED' if stopped else ('COMPLETED' if got.get('ok') else ('BLOCKED' if got.get('blocked') else 'FAILED')),
                          verified=False, builder_verified=bool(got.get('verified')) and not stopped,
                          coding_result=got, coding_evidence={'repo':repo, 'branch':branch, 'builder_test_steps':tests, 'commit_receipt':receipt},

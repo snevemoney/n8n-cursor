@@ -19,9 +19,11 @@ class WorkflowExecutionController(unittest.TestCase):
     if not source.exists():
      source.write_text('def actual_fixture_behavior(value):\n    return value + 1\n');hand._git(owned,'add','--','offline_delivery_feature.py');hand._git(owned,'commit','-q','-m','offline delivery fixture')
     docs=owned/'docs';docs.mkdir(exist_ok=True);(docs/('IMPLEMENTATION-'+root.name+'.md')).write_text('# Offline fixture implementation\n\nMethod, usage, meaningful fixture tests and limitations.\n');hand._git(owned,'add','--','docs');hand._git(owned,'commit','-q','-m','offline documentation fixture')
-    cp={'phase':'complete','snapshot':hand.code_repo_snapshot(owned),'files':[['offline_delivery_feature.py',source.read_text()]]}
+    steps=[{'n':1,'what':'iter 1 write offline_delivery_feature.py','status':'verified','result':'wrote, read back matches'}]  # 10-15 delivery contract
+    cp={'phase':'complete','snapshot':hand.code_repo_snapshot(owned),'files':[['offline_delivery_feature.py',source.read_text()]],'todo':steps}
     D.write_json(child_root/'checkpoint.json',{'checkpoint':cp,'checkpoint_digest':hand.checkpoint_digest(cp),'code_args':request['code_args'],'source_manifest':request['source_manifest']})
-    result={'mission_id':child,'status':'COMPLETED','builder_verified':True,'coding_evidence':{'offline_fixture':True}}
+    result={'mission_id':child,'status':'COMPLETED','builder_verified':True,'coding_result':{'steps':steps},
+            'coding_evidence':{'offline_fixture':True,'commit_receipt':'committed '+hand._git(owned,'rev-parse','HEAD').stdout.strip()[:12]+' offline documentation fixture'}}
     D.write_json(D.mission_path(h,child)/'result.json',result);return result
    with a,b,fixture.setup(hand),patch.object(D,'_spawn_worker',return_value=Mock(pid=876543)),patch.object(D,'_identity',return_value='offline fixture'):
     fixture.prepare(h,repo,runtime,scratch);mc=MissionController(D)
@@ -40,6 +42,7 @@ class WorkflowExecutionController(unittest.TestCase):
 
  def test_explicit_continue_reaches_existing_owned_queue_not_status_only(self):
   adapter=Mock();adapter.WorkflowMissionHandle.return_value.continue_workflow.return_value={'status':'WAITING_ORIGINAL_IMPLEMENTATION'}
+  adapter.mission_path.return_value=Path('/offline/hive/coding-missions')/ID;adapter.read_json.return_value={}  # no linked coding mission
   mc=MissionController(adapter)
   with patch.object(mc,'queue_research_build',return_value={'status':'QUEUED','task_verified':False}) as queue:
    result=mc.continue_research_build(Path('/offline/hive'),ID,'continue workflow')

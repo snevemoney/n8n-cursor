@@ -993,8 +993,10 @@ def progress_line(state):
     if state.get('status')=='BLOCKED' and 'invalid_exact_edit' in detail:
         return 'The coding reply used an invalid edit format. No writes ran from that reply. The task and partial work are saved; executor recovery is required.'
     if state.get('status')=='COMPLETED':
+        commit=re.match(r'committed ([a-f0-9]{7,40})',str((state.get('coding_evidence') or {}).get('commit_receipt') or ''))
         return ('The coding worker finished and saved its files. '+
-                ('Its tests passed. ' if state.get('builder_verified') is True else 'Passing tests are not verified. ')+
+                ('Builder tests passed. ' if state.get('builder_verified') is True else 'Passing tests are not verified. ')+
+                (f'It committed {commit.group(1)}. ' if commit else '')+
                 'Independent acceptance is still pending.')
     if state.get('status') in TERMINAL and state.get('spoken'):
         return str(state['spoken'])
@@ -1029,7 +1031,8 @@ def wants_workflow_continuation(utterance, objective=''):
     if re.search(r"\b(?:do not|don't|never)\s+(?:continue|resume|finish|start)\b",text,re.I):return False
     if not re.match(r'^(?:please\s+)?(?:continue|resume|finish|pick up|keep going)(?:\s|$)',text,re.I):return False
     if re.search(r'\b(?:install|delete|send|pay|buy|publish|deploy)\b',text,re.I):return False
-    if not re.search(r'\b(?:workflow|project|assignment|task|mission|where we left off|what we were working on)\b',text,re.I):return False
+    # Evens's own words (10-15, nine times): "Continue my saved-video build."
+    if not re.search(r'\b(?:workflow|project|assignment|task|mission|build|job|work|where we left off|what we were working on)\b',text,re.I):return False
     for domain in ('video','spreadsheet','presentation','report','website'):
         if re.search(r'\b'+domain+r's?\b',text,re.I) and objective and not re.search(r'\b'+domain+r's?\b',objective,re.I):return False
     return True
@@ -1273,8 +1276,9 @@ class WorkflowMissionHandle:
                 pieces.append('The full assignment is unfinished.')
         reason=(result.get('preparation') or {}).get('reason') if status=='PREPARATION_BLOCKED' else child_state.get('terminal_reason') if child_bound else result.get('execution_error') if status=='EXECUTION_BLOCKED' else None
         if reason and result.get('task_verified') is not True:
-            pieces.append('Recorded blocker: '+re.sub(r'[^a-zA-Z0-9_ .:-]','',str(reason))[:160]+'.')
-        return {**result,'spoken':' '.join(pieces),'question':'','status_evidence':{'coding_status':child_phase or 'NOT_STARTED','coding_active':child_state.get('active') is True,'coding_child_bound':child_bound,'artcraft_receipt_present':any(k in completed for k in ('native','export','preview')),'note_readback_recorded':completed.get('note',{}).get('readback_verified') is True},'actions':[]}
+            # spoken in words; the exact code stays in status_evidence for engineers
+            pieces.append('What stopped it: '+re.sub(r'[^a-zA-Z0-9 .:-]','',str(reason).replace('_',' '))[:160]+'.')
+        return {**result,'spoken':' '.join(pieces),'question':'','status_evidence':{'coding_status':child_phase or 'NOT_STARTED','coding_active':child_state.get('active') is True,'coding_child_bound':child_bound,'artcraft_receipt_present':any(k in completed for k in ('native','export','preview')),'note_readback_recorded':completed.get('note',{}).get('readback_verified') is True,'blocker_code':reason or ''},'actions':[]}
 
     def bind_project(self, mission_id, repo, branch, answer, verified_contract=None):
         import fcntl

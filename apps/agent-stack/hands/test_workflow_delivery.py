@@ -57,7 +57,12 @@ class Connected(unittest.TestCase):
   for args in (('init','-q'),('config','user.name','Offline Fixture'),('config','user.email','fixture@invalid'),('add','--','implementation.py','docs'),('commit','-q','-m','offline implementation fixture')):
    result=H._git(repo,*args);self.assertEqual(result.returncode,0,result.stderr)
   request=self.a.read_json(self.child/'request.json');request['source_manifest']={'offline_fixture':'pinned'};self.a.write_json(self.child/'request.json',request)
-  checkpoint={'phase':'complete','snapshot':H.code_repo_snapshot(repo),'files':[['implementation.py',source.read_text()]]}
+  # fixture follows the 10-15 delivery contract: a real commit receipt and a write history matching the checkpoint
+  steps=[{'n':1,'what':'iter 1 write implementation.py','status':'verified','result':'wrote implementation.py, read back matches'}]
+  head=H._git(repo,'rev-parse','HEAD').stdout.strip()
+  self.coding['coding_evidence']['commit_receipt']='committed '+head[:12]+' offline implementation fixture';self.coding['coding_result']={'steps':steps}
+  self.a.write_json(self.child/'result.json',self.coding)
+  checkpoint={'phase':'complete','snapshot':H.code_repo_snapshot(repo),'files':[['implementation.py',source.read_text()]],'todo':steps}
   self.a.write_json(self.child/'checkpoint.json',{'checkpoint':checkpoint,'checkpoint_digest':H.checkpoint_digest(checkpoint),'code_args':request['code_args'],'source_manifest':request['source_manifest']})
   self.live=True;self.r=ConnectorFixture();self.d=M.Delivery(self.a,self.hive,ID,active_fn=lambda:self.live,artifact_base=self.root/'private',runtime=self.r)
   self.auth=M.host_review_authority('independent_reviewer')
@@ -88,6 +93,7 @@ class Connected(unittest.TestCase):
   # document requirement is separate from the general repository proof.
   H._git(self.root/'owned-copy','add','-u');H._git(self.root/'owned-copy','commit','-q','-m','offline removed docs')
   wrapped=self.a.read_json(self.child/'checkpoint.json');wrapped['checkpoint']['snapshot']=H.code_repo_snapshot(self.root/'owned-copy');wrapped['checkpoint_digest']=H.checkpoint_digest(wrapped['checkpoint']);self.a.write_json(self.child/'checkpoint.json',wrapped)
+  self.coding['coding_evidence']['commit_receipt']='committed '+H._git(self.root/'owned-copy','rev-parse','HEAD').stdout.strip()[:12]+' offline removed docs';self.a.write_json(self.child/'result.json',self.coding)
   result=self.d.advance(self.coding);self.assertEqual(result['delivery_reason'],'implementation_document_required');self.assertEqual(self.r.calls,[]);self.assertEqual(self.r.writes,0)
  def test_model_review_flags_and_unrequested_deliverables_cannot_grant_authority(self):
   waiting=self.d.advance(self.coding)

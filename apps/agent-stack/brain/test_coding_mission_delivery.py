@@ -60,7 +60,8 @@ class CodingDelivery(unittest.TestCase):
 
     def test_status_never_calls_model_or_starts_work(self):
         with tempfile.TemporaryDirectory() as d, mock.patch.object(P,'_coding_mission_hand') as adapter:
-            adapter.return_value.read_json.return_value={'mission_id':'e'*32}
+            # only a coding task exists; a blanket mock also invented a workflow, which owns status first
+            adapter.return_value.read_json.side_effect=lambda p:{'mission_id':'e'*32} if 'coding-missions' in str(p) and str(p).endswith('latest.json') else {}
             adapter.return_value.CodingMissionHandle.return_value.status.return_value={'status':'RUNNING'}
             adapter.return_value.progress_line.return_value='Coding task is running.'
             talk=mock.Mock(side_effect=AssertionError('Status must not call a model'))

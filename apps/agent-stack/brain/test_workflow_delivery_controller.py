@@ -29,9 +29,12 @@ class ConnectedOwner(unittest.TestCase):
      source.write_text('def actual_fixture_behavior(value):\n    return value + 1\n')
      hand._git(owned,'add','--','offline_delivery_feature.py');hand._git(owned,'commit','-q','-m','offline delivery feature fixture')
     docs=owned/'docs';docs.mkdir(exist_ok=True);(docs/('IMPLEMENTATION-'+root.name+'.md')).write_text('# Offline fixture implementation\n\nMethod, usage, meaningful fixture tests and limitations.\n');hand._git(owned,'add','--','docs');hand._git(owned,'commit','-q','-m','offline documentation fixture')
-    checkpoint={'phase':'complete','snapshot':hand.code_repo_snapshot(owned),'files':[['offline_delivery_feature.py',source.read_text()]]}
+    steps=[{'n':1,'what':'iter 1 write offline_delivery_feature.py','status':'verified','result':'wrote, read back matches'}]  # 10-15 delivery contract
+    checkpoint={'phase':'complete','snapshot':hand.code_repo_snapshot(owned),'files':[['offline_delivery_feature.py',source.read_text()]],'todo':steps}
     D.write_json(child_root/'checkpoint.json',{'checkpoint':checkpoint,'checkpoint_digest':hand.checkpoint_digest(checkpoint),'code_args':request['code_args'],'source_manifest':request['source_manifest']})
-    receipt={'mission_id':child,'status':'COMPLETED','builder_verified':True,'coding_evidence':{'commit':'d'*40,'tests_passed':7,'offline_fixture':True}}
+    receipt={'mission_id':child,'status':'COMPLETED','builder_verified':True,'coding_result':{'steps':steps},
+             'coding_evidence':{'commit':'d'*40,'tests_passed':7,'offline_fixture':True,
+                                'commit_receipt':'committed '+hand._git(owned,'rev-parse','HEAD').stdout.strip()[:12]+' offline documentation fixture'}}
     D.write_json(D.mission_path(h,child)/'result.json',receipt);return receipt
    with a,b,fixture.setup(hand),patch.object(D,'_spawn_worker',return_value=Mock(pid=876543)),patch.object(D,'_identity',return_value='offline fixture'):
     fixture.prepare(h,repo,runtime,scratch);mc=MissionController(D);original=(root/'request.json').read_bytes()
