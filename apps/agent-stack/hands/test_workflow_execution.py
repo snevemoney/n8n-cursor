@@ -17,7 +17,7 @@ E=load('workflow_execution');W=load('workflow_workspace');C=load('workflow_confi
 ID='a'*32
 
 class ExecutionTests(unittest.TestCase):
- def fixture(self,tmp,*,objective="Original technical build"):
+ def fixture(self,tmp,*,objective="Original technical build",target_branch='owned/source'):
   base=Path(tmp).resolve();repo=base/'source';app=repo/'apps/agent-stack';app.mkdir(parents=True)
   for rel in set(W.CRITICAL+W.LOCKED+C.WHOLE_FILES):
    p=app/rel;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('# preserved project source\n')
@@ -45,9 +45,9 @@ class ExecutionTests(unittest.TestCase):
   hand.PERM=lambda:Perm()
   hive=base/'hive';root=hive/'coding-missions'/ID;root.mkdir(parents=True)
   request={'mission_id':ID,'worker_kind':'research_build','request_scope':'transient_task','objective':objective}
-  binding={'repo':str(repo),'branch':'owned/source','authority':'literal_owner_answer'}
+  binding={'repo':str(repo),'branch':target_branch,'authority':'literal_owner_answer'}
   for name,row in [('request',request),('binding',binding),('state',{'status':'WAITING_SOURCE','mission_id':ID,'worker_kind':'research_build'}),('control',{'cancel':False})]:(root/(name+'.json')).write_text(json.dumps(row))
-  approval={'mission_id':ID,'kind':'workflow_edits','scope':'transient_task','authority':'explicit_owner_answer','target':str(repo),'branch':'owned/source','configuration_changes_authorized':False,'request_sha256':hashlib.sha256((root/'request.json').read_bytes()).hexdigest(),'binding_sha256':hashlib.sha256((root/'binding.json').read_bytes()).hexdigest()}
+  approval={'mission_id':ID,'kind':'workflow_edits','scope':'transient_task','authority':'explicit_owner_answer','target':str(repo),'branch':target_branch,'configuration_changes_authorized':False,'request_sha256':hashlib.sha256((root/'request.json').read_bytes()).hexdigest(),'binding_sha256':hashlib.sha256((root/'binding.json').read_bytes()).hexdigest()}
   (root/'owner_approval.json').write_text(json.dumps(approval))
   a,b=self.context(hand)
   with a,b:
@@ -86,6 +86,25 @@ class ExecutionTests(unittest.TestCase):
     self.assertTrue(self.guard(hive,result,{'hands/new_feature.py':'def feature():\n    return 7\n'})['ok'])
     self.assertFalse(self.guard(hive,result,{'brain/online.py':'MODEL="unapproved"\n'})['ok'])
     self.assertFalse(result['task_verified'])
+
+ def test_destination_branch_is_distinct_from_frozen_source_branch(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   target='jarvis/workflow-'+ID
+   hive,root,repo,runtime,scratch,hand=self.fixture(tmp,target_branch=target);a,b=self.context(hand)
+   with a,b:
+    baseline,receipt,result=self.prepare(hive,repo,runtime,scratch)
+    self.assertEqual(receipt['source_branch'],'owned/source')
+    self.assertEqual(result['branch'],target)
+
+ def test_parent_host_reviewer_pins_current_commit_before_builder(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   hive,root,repo,runtime,scratch,hand=self.fixture(tmp);(root/'source_revision_review.json').unlink();a,b=self.context(hand)
+   with a,b:
+    review=E.host_review_source_revision(hive,ID)
+    self.assertEqual(review['authority'],'independent_immutable_source_review')
+    self.assertEqual(review['evidence']['verification_method'],'deterministic_parent_immutable_source_review')
+    self.assertEqual(review['source_revision'],R._git(repo)['head'])
+    self.assertFalse((repo/'.git/index.lock').exists())
 
  def test_actual_tracked_policy_exclusion_recorded_without_copy_or_policy_change(self):
   with tempfile.TemporaryDirectory() as tmp:

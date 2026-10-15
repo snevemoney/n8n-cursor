@@ -89,11 +89,31 @@ def approve_source_revision(hive,mission_id,revision,expected_manifest,*,authori
     row['digest']=_digest(row);_new_json(root/'source_revision_review.json',row);return row
 
 
+def host_review_source_revision(hive, mission_id, *, dependencies=()):
+    """Deterministically pin and double-read the immutable builder source.
+
+    This parent-mission verifier runs before a separate coding worker exists.
+    It accepts no model-selected revision or manifest and never checks out or
+    mutates the owner repository.
+    """
+    W=_load('workflow_workspace');R=_load('workflow_repo_context')
+    root,_,binding,task=_task(hive,mission_id);repo=Path(binding['repo'])
+    identity=R._git(repo);revision=identity['head']
+    files,metadata=W.revision_source(repo,revision,dependencies=dependencies,
+        source_exceptions=lambda:_source_exceptions(hive,mission_id,fetch_public=True,revision=revision),
+        active_fn=lambda:_task(hive,mission_id)[3]==task)
+    manifest={rel:row for rel,(_,row) in files.items()}
+    evidence={'verification_method':'deterministic_parent_immutable_source_review',
+              'source_revision':revision,'source_tree':metadata['source_tree'],
+              'manifest_sha256':_digest(manifest),'source_checkout_unchanged':True}
+    return approve_source_revision(hive,mission_id,revision,manifest,
+        authority=source_review_authority(),evidence=evidence,dependencies=dependencies)
+
+
 def make_receipt(hive,mission_id,*,runtime_baseline,dependencies=()):
     """Resolve the approved revision once; freeze Git objects rather than checkout bodies."""
     W=_load('workflow_workspace');R=_load('workflow_repo_context')
     root,request,binding,task=_task(hive,mission_id);repo=Path(binding['repo']);identity=R._git(repo)
-    if identity['branch']!=binding['branch']:raise ValueError('bound_source_branch_changed')
     if runtime_baseline.get('git_common_dir')!=identity['git_common_dir']:raise ValueError('runtime_project_mismatch')
     review=json.loads(W._regular_bytes(root/'source_revision_review.json',2_000_000)[0]);unsigned=dict(review);signature=unsigned.pop('digest',None)
     if (_digest(unsigned)!=signature or review.get('authority')!='independent_immutable_source_review'

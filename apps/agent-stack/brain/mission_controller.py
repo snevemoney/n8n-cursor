@@ -341,6 +341,8 @@ class MissionController:
                     repository=self.adapter._load("workflow_repo_context",self.adapter.STACK/"hands/workflow_repo_context.py")
                     runtime=self.adapter.STACK.parents[1]
                     baseline=phase.capture_runtime_baseline(runtime,repository._git(runtime))
+                    if not (root/'source_revision_review.json').exists():
+                        phase.host_review_source_revision(hive,ident)
                     receipt=phase.make_receipt(hive,ident,runtime_baseline=baseline)
                     perm=self.adapter._load("agent_stack_permissions",self.adapter.STACK/"hands/permissions.py")
                     preparation=phase.prepare_execution(hive,ident,source_receipt=receipt,runtime_baseline=baseline,
