@@ -1112,7 +1112,7 @@ def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
                     (hd.WRITE_TOOL.search(str(step.get("tool") or "")) or
                      not hd.READ_TOOL.match(str(step.get("tool") or "")))) or
                     (step.get("op") == "cli" and not _cli_read_only(hd, step.get("argv"))
-                     and not (_open_access() and not OPEN_CLI_HARD.search(" ".join(str(a) for a in (step.get("argv") or [])))))
+                     and not (_open_access() and not _open_cli_needs_owner(step.get("argv"))))
                     for step in steps if isinstance(step, dict))
         return eff if gated else None
     if tool == "code_run":
@@ -1531,6 +1531,25 @@ OPEN_CLI_HARD = re.compile(r"\b(?:merge|push|delete|rm|release|deploy|publish|se
                            # revealing secrets / uploading data still asks
                            r"^(?:security|printenv|env|op|pass|keychain)\b|\bauth\s+token\b|\bdump-keychain\b|"
                            r"\s(?:-F|-d|-T|--data\S*|--upload-file|--form)\b", re.I)
+# The five stops Evens kept (sends/posts, spend, deletes, merges/pushes, revealing secrets) also apply to the shell,
+# which bypasses workspace_read's secret-file rules (independent check 2026-10-15).
+_OPEN_CLI_MORE = re.compile(
+    r"^gh\s+(?:issue|pr|gist|repo|release)\b.*\b(?:create|comment|edit|close|delete|merge)\b|^gh\s+api\b.*(?:-X|--method)\s*(?:POST|PUT|PATCH|DELETE)|"
+    r"^(?:mail|mailx|sendmail|osascript)\b|(?:^|\s)-X\s*(?:POST|PUT|PATCH|DELETE)\b|"
+    r"^(?:rmdir|trash|unlink|shred|srm)\b|\s-delete\b", re.I)
+_SECRET_ARG = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.pgpass|\.docker|\.kube|\.git-credentials|"
+                         r"id_(?:rsa|dsa|ecdsa|ed25519)[^/]*|[^/]*\.(?:pem|key|p12|kdbx)|credentials[^/]*|secrets?(?:\.[a-z0-9]+)?|"
+                         r"[^/]*(?:_token|api[_-]?key)[^/]*|Keychains?)(/|$)|/\.config/gh/", re.I)
+
+
+def _open_cli_needs_owner(argv) -> bool:
+    """True when a shell step touches one of Evens's kept stops; everything else runs without asking."""
+    args = [str(a) for a in (argv or [])]
+    line = " ".join(args)
+    return bool(OPEN_CLI_HARD.search(line) or _OPEN_CLI_MORE.search(line)
+                or any(_SECRET_ARG.search(os.path.expanduser(a)) for a in args[1:]))
+
+
 SELF_CHANGE_RE = re.compile(r"\b(?:change|fix|edit|improve|update|rewrite|modify|upgrade)\s+(?:your\s+(?:own\s+)?(?:code|self)|yourself)\b", re.I)
 SELF_CHANGE_LINE = ("Yes. I can change my own code: my coding worker edits Jarvis on its own branch, runs the tests, and a safe restart "
                     "loads it. My access is already open by default, so nothing needs granting. Tell me what to change and I'll start; "
