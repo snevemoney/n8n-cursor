@@ -28,10 +28,22 @@ def pre_tool(tool: str, utterance: str = "") -> dict:
     return {"allow": True, "reason": "", "tool": tool}
 
 
+def _secret_patterns():
+    """The shared detector (brain/secret_patterns.py), loaded by path like every other module here."""
+    import importlib.util as _u
+    import sys as _sys
+    from pathlib import Path as _P
+    name = "agent_stack_secret_patterns"
+    if name not in _sys.modules:
+        spec = _u.spec_from_file_location(name, _P(__file__).resolve().parents[1] / "brain" / "secret_patterns.py")
+        mod = _u.module_from_spec(spec); _sys.modules[name] = mod; spec.loader.exec_module(mod)
+    return _sys.modules[name]
+
+
 def redact(text):
     if not isinstance(text, str):
         return text
-    return SECRET_RE.sub("[redacted]", text)
+    return _secret_patterns().redact(SECRET_RE.sub("[redacted]", text))
 
 
 def _scrub(value):

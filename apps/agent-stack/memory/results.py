@@ -48,11 +48,24 @@ def wants_results(u: str) -> bool:
     return bool(WANT_RE.search(u or ""))
 
 
+def _secret_patterns():
+    """The shared detector (brain/secret_patterns.py), loaded by path like every other module here."""
+    import importlib.util as _u
+    import sys as _sys
+    from pathlib import Path as _P
+    name = "agent_stack_secret_patterns"
+    if name not in _sys.modules:
+        spec = _u.spec_from_file_location(name, _P(__file__).resolve().parents[1] / "brain" / "secret_patterns.py")
+        mod = _u.module_from_spec(spec); _sys.modules[name] = mod; spec.loader.exec_module(mod)
+    return _sys.modules[name]
+
+
 def write_back(hand: str, ask: str, got: dict) -> bool:
     if hand not in PRODUCERS or not isinstance(got, dict) or got.get("read_only_summary"):
         return False
     spoken = " ".join(str(got.get("spoken") or "").split())
-    if not spoken or SECRET_RE.search(spoken) or SECRET_RE.search(ask or ""):
+    sp = _secret_patterns()
+    if not spoken or SECRET_RE.search(spoken) or SECRET_RE.search(ask or "") or sp.has_secret(spoken) or sp.has_secret(ask or ""):
         return False
     if re.search(r'say "confirm"', spoken, re.I):
         return False  # only an offer, not a result

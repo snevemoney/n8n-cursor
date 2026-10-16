@@ -522,10 +522,31 @@ class Handler(BaseHTTPRequestHandler):
     def _json(self, code: int, payload: dict) -> None:
         self._send(code, (json.dumps(payload, indent=2) + "\n").encode("utf-8"), "application/json")
 
+    def _trusted_request(self) -> bool:
+        """Privacy audit 2026-10-16: any website could POST /api/turn ("permission granted ...", then "confirm") and a
+        DNS-rebinding page could read /api/bus. Only this machine's own clients may talk to the Face: the Host header
+        must name the loopback port, and a browser Origin / Sec-Fetch-Site must be this same origin. The native Orb,
+        pane.html and orb_probe already send exactly that, so nothing they do changes."""
+        port = self.server.server_address[1] if getattr(self, "server", None) else PORT
+        hosts = {f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"}
+        if (self.headers.get("Host") or "").strip().lower() not in hosts:
+            return False
+        origin = (self.headers.get("Origin") or "").strip().lower()
+        if origin and origin not in {f"http://{h}" for h in hosts}:
+            return False
+        site = (self.headers.get("Sec-Fetch-Site") or "").strip().lower()
+        return site in ("", "same-origin", "none")
+
+    def _refuse_untrusted(self) -> None:
+        self._json(403, {"ok": False, "error": "forbidden: only this Mac's Jarvis clients may call the Face"})
+
     def do_GET(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
         if path == "/healthz":
             self._json(200, {"ok": True, "online": True, "bind": f"{HOST}:{PORT}", "kind": "agent-stack-face"})
+            return
+        if not self._trusted_request():
+            self._refuse_untrusted()
             return
         if path == "/api/bus":
             pipe = getattr(mouth(), "PIPELINE", None)
@@ -655,6 +676,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
+        if not self._trusted_request():
+            self._refuse_untrusted()
+            return
         data = self._read_json()
         live_mouth = mouth()
         if path == "/api/browser-mission/ack":

@@ -23,11 +23,26 @@ TOKEN = re.compile(r"\b(?:sk-|xai-|ghp_|gho_|github_pat_|xox[abp]-)[A-Za-z0-9_-]
 
 
 # ---- Z99: secrets go to .env.local, never into chat -------------------------------
+def _secret_patterns():
+    """The shared detector (brain/secret_patterns.py), loaded by path like every other module here."""
+    import importlib.util as _u
+    import sys as _sys
+    from pathlib import Path as _P
+    name = "agent_stack_secret_patterns"
+    if name not in _sys.modules:
+        spec = _u.spec_from_file_location(name, _P(__file__).resolve().parents[1] / "brain" / "secret_patterns.py")
+        mod = _u.module_from_spec(spec); _sys.modules[name] = mod; spec.loader.exec_module(mod)
+    return _sys.modules[name]
+
+
 def find_secret(text):
     """Return (name_hint, value) for the first secret-looking value, or None."""
     t = TOKEN.search(text)
     if t:
         return None, t.group(0)
+    shared = _secret_patterns().first_secret(text)  # PEM keys, JWTs, URL passwords, sk_live_, hf_ ... (audit 2026-10-16)
+    if shared:
+        return shared
     if pm.SECRET.search(text):
         for m in ASSIGN.finditer(text):
             if re.search(r"key|token|secret|password", m.group(1), re.I):

@@ -26,7 +26,8 @@ SECRET_RE = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.grok-pri
                        r"credentials[^/]*|secrets?[^/]*|[^/]*token[^/]*|Keychains?)(/|$)", re.I)
 # Always secret wherever they sit: key material, dot-config stores, and folders named for secrets.
 STRONG_SECRET_RE = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.grok-private|id_[a-z0-9]+|[^/]*\.pem|[^/]*\.key|"
-                              r"[^/]*\.p12|[^/]*\.pfx|[^/]*\.kdbx|\.git-credentials|Keychains?|"
+                              r"[^/]*\.p12|[^/]*\.pfx|[^/]*\.kdbx|\.git-credentials|Keychains?|\.docker|\.kube|\.npmrc|\.pypirc|\.gh|"
+                              r"\.config/gh|\.config/gcloud|\.azure|\.terraform\.d|\.vercel|\.stripe|\.password-store|1Password[^/]*|"
                               r"\.?secrets?|credentials|\.?tokens?)(/|$)", re.I)
 WEAK_SECRET_WORD = re.compile(r"credential|secret|token", re.I)
 # Source code is never a secret store by its name alone: test_tokens.py, tokenizer.py, secret_scanner.ts.

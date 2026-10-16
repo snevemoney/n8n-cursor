@@ -67,6 +67,31 @@ _SECRETISH = re.compile(r"(?i)(gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9\-_]{20,}
                         r"(?:api[_-]?key|token|secret|password)\s*[:=]\s*\S+)")
 
 
+def _secret_patterns():
+    """The shared detector (brain/secret_patterns.py), loaded by path like every other module here."""
+    import importlib.util as _u
+    import sys as _sys
+    from pathlib import Path as _P
+    name = "agent_stack_secret_patterns"
+    if name not in _sys.modules:
+        spec = _u.spec_from_file_location(name, _P(__file__).resolve().parents[1] / "brain" / "secret_patterns.py")
+        mod = _u.module_from_spec(spec); _sys.modules[name] = mod; spec.loader.exec_module(mod)
+    return _sys.modules[name]
+
+
+class _SharedSecretish:
+    """_SECRETISH.search/.sub keep working for every caller, now backed by the shared detector."""
+    def search(self, text):
+        return _SECRETISH_OLD.search(text or "") or (_secret_patterns().has_secret(text or "") or None)
+
+    def sub(self, repl, text):
+        return _secret_patterns().redact(_SECRETISH_OLD.sub(repl, text or ""))
+
+
+_SECRETISH_OLD = _SECRETISH
+_SECRETISH = _SharedSecretish()
+
+
 def _scrub(t: str) -> str:
     return _SECRETISH.sub("[redacted]", t or "")
 
