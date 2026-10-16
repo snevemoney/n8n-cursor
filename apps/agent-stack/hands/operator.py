@@ -204,8 +204,10 @@ TOOLS = [
         "X post or page end to end (transcript, frame contact sheets, linked pages, every method) and writes a packet to "
         "his repo; scan source=youtube|x|all [ingest=N] reads his Watch Later and X bookmarks in Safari and lists new "
         "signals (and ingests the first N); status; push (sends the packets to GitHub, needs his OK). ingest and scan "
-        "run in the background: say you started, then check them with job. again=true re-learns a signal already ingested.",
-        {"action": {"type": "string", "enum": ["ingest", "scan", "status", "push"]}, "url": S, "source": S, "ingest": I,
+        "run in the background: say you started, then check them with job. again=true re-learns a signal already ingested. "
+        "watch_later returns his WHOLE Watch Later (every video's title, channel, length, link) as a JSON file in about a "
+        "minute, read in his signed-in Safari in the background; use it for any question about his Watch Later.",
+        {"action": {"type": "string", "enum": ["ingest", "scan", "status", "push", "watch_later"]}, "url": S, "source": S, "ingest": I,
          "again": B},
         ["action"]),
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
@@ -606,6 +608,7 @@ class Tools:
             n = int(a.get("ingest") or 0)
             cmd = f"{sys.executable} {shlex.quote(str(script))} scan {shlex.quote(str(a.get('source') or 'all'))}" + (f" --ingest {n}" if n else "")
         else:
+            act = "watchlater" if act == "watch_later" else act
             cp = subprocess.run([sys.executable, str(script), act], capture_output=True, text=True, timeout=900)
             return {"text": _clip((cp.stdout or cp.stderr or "").strip())}
         return self.shell({"command": cmd, "background": True})
@@ -1319,10 +1322,10 @@ def _done_gate(task, name: str, args: dict) -> str:
     return why
 
 
-NEEDS_HIM_RE = re.compile(r"\b(ok(?:ay)?\s+to|okay\?|ok\?|approve|permission|go ahead|confirm|log\s*in|sign\s*in|password|"
-                          r"two.?factor|code\s+(?:sent|on your phone)|which\s+(?:one|of)|what\s+(?:do|did|would)\s+you\s+(?:want|mean)|"
-                          r"do\s+you\s+want|would\s+you\s+like|prefer|should\s+i\s+(?:send|post|pay|buy|delete|push|merge|publish|"
-                          r"message|email|reply)|your\s+(?:number|email|address))", re.I)
+NEEDS_HIM_RE = re.compile(  # bench 10-16 W02: "OK to run a read-only script?" reached him; only real needs pass now
+    r"\b(log\s*in|sign\s*in|password|two.?factor|verification code|code\s+(?:sent|on your phone)|captcha|"
+    r"send|post|publish|pay|buy|purchase|delete|remove|push|merge|transfer|subscribe|book|"
+    r"which\s+(?:one|of|do you)|what\s+do\s+you\s+mean|did\s+you\s+mean)\b|\bor\b[^?]{0,80}\?", re.I)
 
 
 def _ask_gate(task, args: dict) -> str:

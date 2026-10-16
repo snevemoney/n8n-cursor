@@ -420,7 +420,9 @@ def _ingest(url: str, force: bool = False) -> dict:
 WL_ALL_JS = r"""const cfg=(window.ytcfg&&ytcfg.data_)||{};const key=cfg.INNERTUBE_API_KEY,ctx=cfg.INNERTUBE_CONTEXT;
 if(!key||!ctx)return JSON.stringify({error:'no innertube config on this page'});
 const ids=new Set();let tok=null;let lastStatus=0;
-function walk(o){if(!o||typeof o!=='object')return;if(o.playlistVideoRenderer&&o.playlistVideoRenderer.videoId)ids.add(o.playlistVideoRenderer.videoId);
+const info={};const txt=(t)=>t?(t.simpleText||(t.runs||[]).map(r=>r.text).join('')):'';
+function walk(o){if(!o||typeof o!=='object')return;if(o.playlistVideoRenderer&&o.playlistVideoRenderer.videoId){const v=o.playlistVideoRenderer;ids.add(v.videoId);
+ info[v.videoId]={title:txt(v.title),channel:txt(v.shortBylineText),length:txt(v.lengthText)};}
  if(o.continuationCommand&&o.continuationCommand.token)tok=o.continuationCommand.token;for(const k in o)walk(o[k]);}
 walk(window.ytInitialData);let pages=0;
 while(tok&&pages<60){const t=tok;tok=null;pages++;
@@ -430,7 +432,7 @@ while(tok&&pages<60){const t=tok;tok=null;pages++;
   h['Authorization']='SAPISIDHASH '+ts+'_'+[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');}
  const r=await fetch('/youtubei/v1/browse?key='+key+'&prettyPrint=false',{method:'POST',credentials:'include',headers:h,body:JSON.stringify({context:ctx,continuation:t})});
  if(!r.ok){lastStatus=r.status;break;}walk(await r.json());}
-return JSON.stringify({ids:[...ids],pages:pages,http:lastStatus,signin:!!document.querySelector('a[href*="ServiceLogin"]')})"""
+return JSON.stringify({ids:[...ids],videos:[...ids].map(i=>Object.assign({id:i,link:'https://www.youtube.com/watch?v='+i},info[i]||{})),pages:pages,http:lastStatus,signin:!!document.querySelector('a[href*="ServiceLogin"]')})"""
 WL_JS = r"""return JSON.stringify({ids:[...new Set([...document.querySelectorAll('a[href*="watch?v="]')].map(a=>(a.href.match(/v=([A-Za-z0-9_-]{11})/)||[])[1]).filter(Boolean))],
  signin:!!document.querySelector('a[href*="ServiceLogin"]')})"""
 XB_JS = r"""return JSON.stringify({ids:[...new Set([...document.querySelectorAll('article a[href*="/status/"]')].map(a=>(a.href.match(/(?:x|twitter)\.com\/[^/]+\/status\/\d+/)||[])[0]).filter(Boolean))],
@@ -460,6 +462,8 @@ def scan(source: str = "all", scrolls: int = 12) -> dict:
                         break
                 if got.get("ids"):
                     seen |= set(got["ids"])
+                    CACHE.mkdir(parents=True, exist_ok=True)
+                    (CACHE / "watch-later.json").write_text(json.dumps(got.get("videos") or [], indent=0))
                     notes.append(f"youtube: whole list, {got.get('pages')} pages" + (f" (stopped on HTTP {got['http']})" if got.get("http") else ""))
                     scrolls = 0  # done; the scroll pass below is the fallback
             for _ in range(scrolls):
@@ -518,6 +522,12 @@ def main(argv: list) -> int:
         out = scan(argv[1] if len(argv) > 1 and not argv[1].startswith("--") else "all")
         n = int(argv[argv.index("--ingest") + 1]) if "--ingest" in argv else 0
         out["ingested"] = [ingest(u) for u in out["new"][:n]]
+    elif cmd == "watchlater":
+        sc = scan("youtube")
+        vids = json.loads((CACHE / "watch-later.json").read_text()) if (CACHE / "watch-later.json").exists() else []
+        out = {"count": len(vids), "path": str(CACHE / "watch-later.json"), "notes": sc.get("notes"),
+               "sample": vids[:3], "text": f"{len(vids)} Watch Later videos with title, channel, length and link in "
+                                          f"{CACHE / 'watch-later.json'} (JSON list)"}
     elif cmd == "push":
         out = push()
     else:
