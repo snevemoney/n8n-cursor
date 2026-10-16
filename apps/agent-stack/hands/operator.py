@@ -134,8 +134,9 @@ TOOLS = [
         "X post or page end to end (transcript, frame contact sheets, linked pages, every method) and writes a packet to "
         "his repo; scan source=youtube|x|all [ingest=N] reads his Watch Later and X bookmarks in Safari and lists new "
         "signals (and ingests the first N); status; push (sends the packets to GitHub, needs his OK). ingest and scan "
-        "run in the background: say you started, then check them with job.",
-        {"action": {"type": "string", "enum": ["ingest", "scan", "status", "push"]}, "url": S, "source": S, "ingest": I},
+        "run in the background: say you started, then check them with job. again=true re-learns a signal already ingested.",
+        {"action": {"type": "string", "enum": ["ingest", "scan", "status", "push"]}, "url": S, "source": S, "ingest": I,
+         "again": B},
         ["action"]),
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
     _fn("mcp", "Call a tool on a connected MCP server.", {"server": S, "tool": S, "arguments": {"type": "object"}},
@@ -449,7 +450,7 @@ class Tools:
         if act == "ingest":
             if not str(a.get("url") or "").strip():
                 return {"text": "ingest needs url"}
-            cmd = f"{sys.executable} {shlex.quote(str(script))} ingest {shlex.quote(str(a['url']).strip())}"
+            cmd = f"{sys.executable} {shlex.quote(str(script))} ingest {shlex.quote(str(a['url']).strip())}" + (" --force" if a.get("again") else "")
         elif act == "scan":
             n = int(a.get("ingest") or 0)
             cmd = f"{sys.executable} {shlex.quote(str(script))} scan {shlex.quote(str(a.get('source') or 'all'))}" + (f" --ingest {n}" if n else "")
