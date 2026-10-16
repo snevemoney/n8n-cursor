@@ -1671,6 +1671,7 @@ def call_openrouter_messages(
     model_chain: tuple | list,
     attempt_sec: float = 25.0,
     max_tokens: int | None = None,
+    allow_reasoning: bool = False,
 ) -> dict:
     """Worker tool loop turn: real chat messages, real tool roles. Not the talk mouth.
 
@@ -1690,8 +1691,9 @@ def call_openrouter_messages(
             "tool_choice": "auto",
             "parallel_tool_calls": True,
             "max_tokens": max_tokens or WORKER_MAX_TOKENS,  # the operator writes whole files (10-15)
-            "reasoning": {"enabled": False},
         }
+        if not allow_reasoning:
+            body["reasoning"] = {"enabled": False}  # Opus 5.5 refuses this ("reasoning is mandatory"): operator opts out
         try:
             data = _http_json(OPENROUTER_URL, data=body, headers=headers, timeout=attempt_sec)
         except urllib.error.HTTPError as exc:

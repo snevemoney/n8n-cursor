@@ -320,7 +320,8 @@ def _model_fn():
         online.load_existing_env()
     agent = _load("agent_tools", "agent_tools.py")  # the coding chain Jarvis already uses (models unchanged)
     chain = (agent.CODE_MODEL, agent.CODE_MODEL_BACKUP)
-    return lambda messages, tools: online.call_openrouter_messages(messages, tools, model_chain=chain, max_tokens=4000)
+    return lambda messages, tools: online.call_openrouter_messages(messages, tools, model_chain=chain, max_tokens=12000,
+                                                                   allow_reasoning=True, attempt_sec=120.0)
 
 
 def step_once(task: Task, tools: Tools, model_fn) -> str | None:
