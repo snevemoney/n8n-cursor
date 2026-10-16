@@ -1,0 +1,376 @@
+[00:00] So, if you're anything like me, you
+[00:02] probably always wanted your own Jarvis
+[00:04] AI assistant. And I've made one in the
+[00:06] past, and her name is Ada. And even
+[00:08] though Ada could do a whole bunch of
+[00:10] cool things, honestly, she really just
+[00:13] doesn't stack up to the real thing. So,
+[00:15] I've decided I'm going to scrap
+[00:16] everything and completely build ADA from
+[00:18] scratch, adding features like hand
+[00:20] tracking, smart home control, and many,
+[00:23] many more with the one goal of making
+[00:25] the closest thing that we have to real
+[00:27] life Jarvis. So when building our AI
+[00:30] assistant, the first thing that we care
+[00:31] about is communication because it needs
+[00:33] to do three things. It needs to be able
+[00:35] to hear us, needs to be able to think
+[00:36] for itself, and then it needs to be able
+[00:37] to speak back. So in the past, the way
+[00:39] that we handle this was having three
+[00:41] separate models. One for the hearing,
+[00:43] one for the thinking, and one for the
+[00:44] speaking. And even though this did work,
+[00:46] it made the logic overly complex. But
+[00:48] the biggest problem was latency. It took
+[00:50] forever for me to ask a question and had
+[00:52] to wait a few seconds in order to get an
+[00:54] answer. So, the way that we're going to
+[00:55] fix this is by using a new model called
+[00:58] Gemini 2.5 native audio because the
+[01:01] model could natively hear us, think, and
+[01:04] speak. So, if I run a quick test and ask
+[01:06] Aydah, "Hey, Ada, how are you today?"
+[01:08] >> I'm simply delightful. Thank you for
+[01:10] asking. Always ready to assist with any
+[01:13] design or 3D printing escapades. What
+[01:16] marvelous endeavor are we embarking on
+[01:18] today?
+[01:18] >> And another cool thing about this model
+[01:20] is interruptions. As you can see,
+[01:22] sometimes AI likes to give a little bit
+[01:24] of a long-witted answer. So, you could
+[01:26] just interrupt her and she'll stop
+[01:28] talking. Ayah, tell me a short story.
+[01:31] >> Once upon a time.
+[01:32] >> Okay, you can stop now. What is 5 plus
+[01:33] 5?
+[01:34] >> Filled with the scent of
+[01:37] 5 + 5 equals 10. Did you want me to
+[01:40] continue with the story or
+[01:42] >> No, it's fine.
+[01:43] >> But this model's last superpower is that
+[01:45] it's multimodal. And all multimodal
+[01:48] means is that the model could take in
+[01:50] multiple different inputs of data and it
+[01:52] could use that to get an answer. So we
+[01:54] have to do is turn on the camera and if
+[01:56] I ask a hey what am I holding in my
+[01:58] hand?
+[01:59] >> You are holding a boxed diecast model
+[02:02] car. It appears to be a white Honda
+[02:04] Civic Type R.
+[02:09] >> Okay, last one. What am I holding in my
+[02:11] hand now?
+[02:13] In your left hand, you are holding a
+[02:16] large figurine of Katsuki Bakugo from My
+[02:19] Hero Academia. And in your right hand, a
+[02:21] small orange and yellow toy.
+[02:25] >> Who is this orange and yellow toy?
+[02:28] >> Ah, that is Goku in Super Saiyan form
+[02:32] from Dragon Ball. A formidable character
+[02:34] to add to your collection.
+[02:35] >> So, as you can see, off the bat, AA has
+[02:37] a lot of cool capabilities because now
+[02:40] you want to get to the good stuff. What
+[02:41] is the point of having a personal
+[02:43] assistant if they only can do things
+[02:44] digitally and can't control anything in
+[02:46] the physical world? So, that's what
+[02:48] we're going to do. And this is
+[02:49] surprisingly easy because it's already
+[02:51] been done before. If you say, "Alexa,
+[02:54] can you turn off the lights in the
+[02:55] office?"
+[02:58] >> Got it.
+[02:59] >> Nice. Lights is turned off. But there's
+[03:01] only so many things that you can do with
+[03:02] Alexa. So, we're going to give Ada this
+[03:04] capability of controlling our home. And
+[03:05] we're going to do this using these Casa
+[03:07] smart bulbs. And Kasa makes it very easy
+[03:10] to use Python in order to find all the
+[03:12] networks on your Wi-Fi. So I could
+[03:14] control the lights by, you know,
+[03:16] pressing this power button, turning each
+[03:18] one off, turning each one on. I can even
+[03:22] change the color, I believe. But
+[03:24] controlling these lights manually kind
+[03:25] of defeat the purpose. So we're going to
+[03:27] need Aiden to control the lights for us.
+[03:29] And we're going to do that by doing
+[03:30] something very important, and it's
+[03:32] called tool calling. So when you build a
+[03:34] AI assistant, it has a toolbox. But what
+[03:36] you could do is design specific tools so
+[03:38] the AI can use in specific use cases.
+[03:40] But what this also does is give AI
+[03:43] complete autonomy on when to run the
+[03:44] code and when not to run the code. So if
+[03:46] I use this same logic with Ada and I ask
+[03:48] her, Ada, can you turn off both of the
+[03:50] office lights for me?
+[03:56] [laughter]
+[03:58] >> Consider it done, sir. Both office
+[04:00] lights are now turned off.
+[04:01] >> But that is not all. We can also ask
+[04:03] Aida to do a lot of other things. Ada,
+[04:06] can you turn both office lights on and
+[04:08] off three times?
+[04:13] >> A bit of a light show, is it? I'll cycle
+[04:15] both office lights on and off for you
+[04:18] three times, sir. [laughter]
+[04:23] >> Lights cycled successfully. Is there
+[04:25] anything else you need?
+[04:26] >> So, I would like to see Alexa try to do
+[04:28] that. So now the next thing that I want
+[04:30] to add is probably one of the coolest
+[04:31] things from the Iron Man movie and that
+[04:33] is hand tracking and gesture control.
+[04:35] And so if we use a vision model to track
+[04:37] our hand to also track the gestures that
+[04:39] we're doing, all we have to do is match
+[04:41] the mouse with the movement of our hand.
+[04:43] Have a couple of gestures, one for
+[04:45] clicking, one for dragging and dropping
+[04:46] things. And we basically have something
+[04:48] similar to what Tony does. So now what
+[04:51] we should be able to do is move our hand
+[04:55] with the mouse and we should be able to
+[04:58] drag
+[05:01] that module over there.
+[05:04] All right,
+[05:06] there we go. Nice. And then if I pinch
+[05:10] the light turns off. No, not Oh yeah,
+[05:13] right off his light. Come on. I have it
+[05:16] to where it snaps. This is a lot harder
+[05:18] THAN I THOUGHT. LIGHT TURNED ON WITH THE
+[05:20] PITCH. SO, it is kind of hard. So, I
+[05:22] made sure to add a feature to where you
+[05:24] can control cursor sensitivity. So, it
+[05:26] can either move faster or slower,
+[05:27] however you prefer. And also, before I
+[05:29] forget, if you've been watching the
+[05:31] channel for a while now, you should
+[05:32] already know that all my code for my
+[05:34] projects are free. So, you can make sure
+[05:35] you can check out the code and build
+[05:37] this out yourself in the link in the
+[05:39] description. And if you want to support
+[05:40] the channel, make sure you like the
+[05:41] video, subscribe to the channel, or if
+[05:43] you want to go the extra mile, think
+[05:44] about becoming a channel member. All
+[05:46] right, so now is where we try to get
+[05:47] into everyday usefulness. Jarvis or
+[05:49] Friday can do complete tasks for Tony by
+[05:52] just him asking. So even though Aida
+[05:54] could do simple tasks like turn on and
+[05:55] off the lights or do a quick Google
+[05:57] search for us, she can't really carry
+[05:59] out her own actions. So to do this, it's
+[06:02] going to sound a little bit scary, but
+[06:04] we're going to give Ada complete control
+[06:05] of our web browser. So the way we're
+[06:07] going to do this is use a specialized
+[06:09] model called Gemini computer use. And in
+[06:11] this models toolbox, it already comes
+[06:13] with tools like scroll the mouse, click
+[06:15] here, search this web page. So it can
+[06:18] already do everything that you need to
+[06:19] search the web. But what we're also
+[06:21] going to do, we'll send the model a
+[06:22] screenshot of what's on our web browser.
+[06:24] So when I ask the model to do something,
+[06:26] it can see the web page, click around,
+[06:28] scroll around to see what it could do.
+[06:30] Ada, can you do me a favor and go to
+[06:32] amazon.com and add a 25 kg servo motor
+[06:35] to my cart?
+[06:37] >> Consider it done. I'll have that servo
+[06:39] motor in your cart faster than a 3D
+[06:41] printer finishes a beni.
+[06:44] Just a moment. I'm currently navigating
+[06:47] the digital aisles for that servo.
+[07:03] And voila, the highly rated 25 kg servo
+[07:07] is safely in your cart. Sir, anything
+[07:09] else I can assist you with?
+[07:11] >> So, as you can see, Ada took full
+[07:13] control of our browser and did exactly
+[07:14] what we asked for. But also, what's very
+[07:17] cool about this is since we're running
+[07:18] this on a completely different process,
+[07:20] we can still communicate and ask Aida to
+[07:22] do other things as she's doing that.
+[07:24] Aydah, can you do a search with the web
+[07:27] agent and let me know what movies are
+[07:28] showing in Atlanta, Georgia?
+[07:30] >> Right away. fetching the latest movie
+[07:32] listings for Atlanta for you.
+[07:36] The web agent is still compiling the
+[07:37] Showtimes. Just a moment longer.
+[07:41] No worries. While that is running, can
+[07:43] you turn on both of the office lights on
+[07:46] and off five times?
+[07:53] >> Certainly. A little light show for
+[07:55] Atlanta Showtimes. I'll just toggle
+[07:57] those lights for you right now, sir.
+[07:59] >> Okay. Okay, so we did run into a little
+[08:00] problem. The problem is the AI capture.
+[08:05] So also, yes, sometimes this will
+[08:07] happen. The AI will not be able to solve
+[08:08] this. There is probably some workarounds
+[08:11] you could call, but I'm pretty sure this
+[08:12] is illegal and you're not supposed to do
+[08:14] this. So don't do that. If the capture
+[08:16] comes up, just stop the process. And
+[08:18] also, before I forget, I did add a
+[08:20] confirmation box for some of Ada's
+[08:22] tools. Just just for the ones that kind
+[08:23] of have control over our computer, I
+[08:25] want the user to be able to confirm
+[08:27] whether the AI made the right choice. in
+[08:29] order to confirm it or not. All right,
+[08:31] so now we're going to add the features
+[08:32] that you guys have been asking for the
+[08:34] most, which has been project management
+[08:36] and long-term memory. And we're going to
+[08:38] do this the same way we've been doing
+[08:39] everything else, which is adding tools
+[08:41] to Adah's toolbox. So, this is going to
+[08:42] be a couple of different tools. We're
+[08:44] going to give Ada to where she can write
+[08:45] to a file, she can read a folder, create
+[08:48] a folder, read the contents in a folder.
+[08:50] And then we're going to add all of these
+[08:51] tools to Ada's toolbox. So, we first
+[08:53] open up Ada. She is in a project called
+[08:55] temp. And this is just a standard folder
+[08:58] that she's going to create when a
+[08:59] conversation starts. But if I tell Ada
+[09:01] to create a new project for something
+[09:03] that I'm working on, Ada, I'm working on
+[09:05] a robot arm. Can you create a new
+[09:07] project for me?
+[09:10] >> Certainly. A robot arm sounds quite
+[09:13] ambitious. Sir, what shall I name the
+[09:16] project?
+[09:17] >> Name the project robot arm.
+[09:19] >> Done, sir. The project robot arm has
+[09:21] been created and you are now
+[09:23] contextually working within it. So just
+[09:25] like that, as you can see, we have a new
+[09:26] folder called project robot arm. So just
+[09:28] to show you how Aya could write to
+[09:30] documents, I could say, "Adya, I never
+[09:32] made a robot arm before. Can you make me
+[09:34] a new file in the project called plan
+[09:36] and give me a brief overview on things I
+[09:41] should consider when making a robot
+[09:42] arm?"
+[09:43] >> A superb idea, sir. Planning is crucial.
+[09:46] I'll create the plan file and populate
+[09:49] it with some key considerations for your
+[09:51] project.
+[09:52] >> Great. Ada, can you read what's in that
+[09:54] plan file for me?
+[09:58] >> Certainly. Reading the plan file now.
+[10:01] Robot arm project plan. A robot arm is a
+[10:04] fantastic challenge that integrates
+[10:06] mechanical design, electronics, and
+[10:08] programming. A clear plan is essential
+[10:10] for success.
+[10:11] >> But also, while we're having this
+[10:12] conversation with Ada, we're also saving
+[10:15] our chat history as we go. If I tell her
+[10:17] to switch to the robot arm project, she
+[10:19] should switch to that project and
+[10:20] automatically read the chat history as
+[10:22] well as any important files that we have
+[10:24] in there. Aydah, can you switch to the
+[10:26] robot arm project for me?
+[10:28] >> Done, sir. We're now in the robot arm
+[10:30] project. What's the plan for today?
+[10:33] >> Can you give me a summary of what we
+[10:35] talked about as well as any important
+[10:36] files that are in that folder?
+[10:38] >> Certainly, sir. We've successfully
+[10:40] established the robot arm project, a
+[10:43] truly noble endeavor. The key
+[10:45] discussions focused on project planning.
+[10:47] >> Just like that, we have set up long-term
+[10:49] memory and project management. But for
+[10:52] those of you that don't know, ADA stands
+[10:54] for advanced design assistant and she is
+[10:58] kind of advanced and she is an
+[11:00] assistant, but she currently can't
+[11:01] design anything. So now it's time to
+[11:03] pick the D in Ada. So our next goal is
+[11:06] to have Ada design things for us in CAD.
+[11:08] And the way we're going to do this is
+[11:10] have some type of hierarchy for AI
+[11:12] models. So we have our main AI model
+[11:14] which we're speaking to and
+[11:15] communicating with. Then we have a
+[11:16] separate model whose only job is to
+[11:18] search the web and to carry out tasks
+[11:19] for us. So now we're going to give ADA
+[11:21] control of another model whose only job
+[11:24] is to design CAD. So So the way that
+[11:26] this is going to work is we're going to
+[11:27] ask ADA, hey, can you design this for
+[11:28] us? And our main model is going to take
+[11:31] that prompt and use it to prompt the
+[11:33] second model which is going to do the
+[11:34] actual CAD generation. So since we're
+[11:36] building a robot arm, let's start with
+[11:38] asking Ada to design us a gripper. Can
+[11:41] you generate a CAD of a very simple
+[11:44] robotic gripper?
+[11:45] >> Generating a very simple robotic gripper
+[11:48] for you, sir. A touch of elegant
+[11:50] practicality.
+[11:51] >> And one of the super things cool things
+[11:53] that we added, since these are all
+[11:54] thinking models, I made sure to add what
+[11:57] our Gemini 3.0 model is thinking as it's
+[12:00] designed this for us. We have a design
+[12:02] of a simple robotic gripper, but this
+[12:05] looks like a just a prototype. I want to
+[12:07] get more of a finished project. So, we
+[12:10] can do a couple of things. We can ask
+[12:11] Ada to iterate on the design to make it
+[12:13] a little bit better. Ada, this is a
+[12:15] great prototype. You could go ahead and
+[12:16] make a final design for this. So, Ayda
+[12:19] should go ahead and generate a final
+[12:21] design. And we'll see what she comes up
+[12:23] with. And here it is, our final design.
+[12:26] As you can see, everything's connected.
+[12:28] Everything is one piece. And now we get
+[12:30] to the good part where we're going to
+[12:31] make Ada print this design for us. And
+[12:33] this is going to work in the same way
+[12:35] that we set up our smart lights. Ada,
+[12:37] can you print the STL file that I have
+[12:39] in the project?
+[12:40] >> Certainly, sir. I will print the
+[12:42] CAD.output.stl
+[12:44] to the Creity K1 printer. Attempting to
+[12:47] slice and print now, sir.
+[12:49] >> And now all we have to do is authorize
+[12:52] the print. And now to show you that the
+[12:54] print started, if we open up our print
+[12:56] files and we go here, we can see the
+[12:59] output G-code print has started.
+[13:10] And just like that,
+[13:12] [music]
+[13:13] it has made her first design. And it
+[13:17] looks like supports are automatically
+[13:19] enabled. So this is
+[13:22] pretty cool. And that's it for Ada, my
+[13:25] drivers like AI assistant. If you want
+[13:27] to see another video about my robot arm
+[13:29] assistant named Ali over here, make sure
+[13:32] you click this video right
