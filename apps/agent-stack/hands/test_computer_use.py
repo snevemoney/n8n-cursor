@@ -50,7 +50,7 @@ class ComputerTool(unittest.TestCase):
         with mock.patch.object(O, "_jev_tier", return_value={"tier": "mid", "conf": 0.9}):
             task = O.Task.create(hive, "look")
         shots = [{"ok": True, "calls": [{"tool": "computer", "args": {"action": "screenshot"}, "call_id": f"c{i}"}]} for i in range(6)]
-        rounds = iter(shots + [{"ok": True, "calls": [{"tool": "done", "args": {"summary": "seen"}, "call_id": "z"}]}])
+        rounds = iter(shots + [{"ok": True, "calls": [{"tool": "done", "args": {"summary": "seen", "evidence": "screenshot"}, "call_id": "z"}]}])
         with mock.patch.object(O.Tools, "computer", return_value={"text": "shot", "image": "data:x"}):
             st = O.run(task.path, model_fn=lambda m, tools: next(rounds))
         self.assertEqual(st["status"], "DONE")

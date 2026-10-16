@@ -95,7 +95,7 @@ else{const proto=e.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:(e.tagName
 let sent=false;if(%s){const k={key:'Enter',code:'Enter',keyCode:13,which:13,bubbles:true,cancelable:true,composed:true};
  const go=e.dispatchEvent(new KeyboardEvent('keydown',k));e.dispatchEvent(new KeyboardEvent('keypress',k));e.dispatchEvent(new KeyboardEvent('keyup',k));
  if(go&&e.form){e.form.requestSubmit?e.form.requestSubmit():e.form.submit();sent=true}}
-return JSON.stringify(Object.assign(pt(e),{ok:1,submitted:sent,dialogs:dialogs()}))""" % (
+return JSON.stringify(Object.assign(pt(e),{ok:1,submitted:sent,value:String(e.isContentEditable?e.innerText:(e.value||'')).slice(0,300),dialogs:dialogs()}))""" % (
         t, "true" if replace else "false", "true" if replace else "false", "true" if submit else "false"))
 
 

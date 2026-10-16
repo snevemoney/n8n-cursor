@@ -1309,6 +1309,11 @@ HEARD_AS = (
     (re.compile(r"\bkodex\b|\bcode\s+x\b", re.I), "Codex"),
     (re.compile(r"\bopen\s*router\b", re.I), "OpenRouter"),
     (re.compile(r"\bdeep\s+seek\b", re.I), "DeepSeek"),
+    # his ArtCraft suite (live: "Open the PDF craft", "the MCP for art craft")
+    *[(re.compile(rf"\b{w}\s*craft\b", re.I), f"{n}Craft") for w, n in (
+        ("art", "Art"), ("pdf", "Pdf"), ("film", "Film"), ("effects?", "Effect"), ("photo", "Photo"), ("vector", "Vector"),
+        ("design", "Design"), ("deck", "Deck"), ("word", "Word"), ("grid", "Grid"), ("light", "Light"), ("sound", "Sound"),
+        ("cad", "CAD"))],
 )
 
 

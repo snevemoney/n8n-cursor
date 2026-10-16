@@ -106,3 +106,34 @@ class PrivateApps(unittest.TestCase):
 
     def test_it_is_told_to_stay_on_the_named_channel(self):
         self.assertIn("Stay on the app or site he named", O.SYSTEM)
+
+
+class NotStuck(unittest.TestCase):
+    """Evens 10-16: figure out when it is stuck or lacks evidence and keep going; tell him only when it needs him."""
+
+    def setUp(self):
+        self.hive = Path(tempfile.mkdtemp())
+
+    def test_cant_is_sent_back_and_unproven_actions_too(self):
+        t = O.Task.create(self.hive, "message Juliana on Facebook")
+        model = scripted([("done", {"summary": "I can't send messages on Facebook."})],
+                         [("done", {"summary": "I can't, there is no tool for that."})],
+                         [("done", {"summary": "Still can't."})])
+        st = O.run(t.path, model_fn=model)
+        self.assertEqual(st["status"], "DONE")
+        notes = [m["content"] for m in t.read("messages.json") if m.get("role") == "tool"]
+        self.assertTrue(any("about to tell him you can't" in n for n in notes))
+        self.assertTrue(any("second time" in n for n in notes))
+
+    def test_a_technical_snag_is_not_asked(self):
+        t = O.Task.create(self.hive, "open my Notion page")
+        model = scripted([("ask_owner", {"question": "The page has no open window and I can't find the button."})],
+                         [("done", {"summary": "Opened it.", "evidence": "snapshot shows the page"})])
+        st = O.run(t.path, model_fn=model)
+        self.assertEqual(st["status"], "DONE")
+
+    def test_a_real_need_is_asked(self):
+        t = O.Task.create(self.hive, "message Juliana hi")
+        model = scripted([("ask_owner", {"question": "Facebook wants you to log in. Please sign in and tell me."})])
+        st = O.run(t.path, model_fn=model)
+        self.assertEqual(st["status"], "WAITING_OWNER")

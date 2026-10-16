@@ -53,7 +53,7 @@ class Procedures(unittest.TestCase):
             t = O.Task.create(hive, "Open Spotify and play Today's Top Hits")
         rounds = iter([
             {"ok": True, "calls": [{"tool": "open", "args": {"target": "Spotify"}, "call_id": "a"}]},
-            {"ok": True, "calls": [{"tool": "done", "args": {"summary": "Playing in the Spotify app; the web page wanted a login."}, "call_id": "b"}]}])
+            {"ok": True, "calls": [{"tool": "done", "args": {"summary": "Playing in the Spotify app; the web page wanted a login.", "evidence": "player state: playing"}, "call_id": "b"}]}])
         with mock.patch.object(O.Tools, "open", return_value={"text": "exit 0"}):
             O.run(t.path, model_fn=lambda m, tools: next(rounds))
         # fixed model_fn = test mode: write the note the way a live run would

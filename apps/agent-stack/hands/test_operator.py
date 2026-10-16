@@ -77,7 +77,7 @@ class OperatorLoop(unittest.TestCase):
 
     def test_cd_persists_like_a_terminal(self):
         model = scripted([("shell", {"command": f"cd {self.home}/proj"})], [("shell", {"command": "ls"})],
-                         [("done", {"summary": "ok"})])
+                         [("done", {"summary": "ok", "evidence": "ls shows a.py"})])
         O.run(O.Task.create(self.hive, "look").path, model_fn=model)
         self.assertIn("a.py", [m for m in model.seen[2] if m["role"] == "tool"][1]["content"])
 

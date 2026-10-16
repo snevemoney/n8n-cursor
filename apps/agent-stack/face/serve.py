@@ -1265,6 +1265,19 @@ class Handler(BaseHTTPRequestHandler):
             self.close_connection = True
 
 
+def _recover_operator_jobs() -> None:
+    """A job cut off by a restart or reboot carries on by itself (best effort; never blocks the Face)."""
+    try:
+        import importlib.util as _u
+        spec = _u.spec_from_file_location("agent_stack_operator_recover", ROOT / "apps/agent-stack/hands/operator.py")
+        op = _u.module_from_spec(spec); spec.loader.exec_module(op)
+        got = op.recover(HIVE)
+        if got:
+            print(json.dumps({"recovered_operator_jobs": got}))
+    except Exception as exc:  # noqa: BLE001
+        print(json.dumps({"recover_error": str(exc)[:200]}))
+
+
 def serve(port: int = PORT) -> None:
     if os.environ.get("VOICE_OS_BIND") == "0.0.0.0":
         raise SystemExit("0.0.0.0 refused")
@@ -1298,6 +1311,7 @@ def serve(port: int = PORT) -> None:
         voice().warm()
     threading.Thread(target=_warm_cursor_chats, daemon=True).start()
     threading.Thread(target=_focus_pump, daemon=True).start()
+    threading.Thread(target=_recover_operator_jobs, daemon=True).start()
     httpd = ThreadingHTTPServer((HOST, port), Handler)
     print(json.dumps({"ok": True, "url": f"http://{HOST}:{port}/", "bind": HOST}, indent=2))
     try:

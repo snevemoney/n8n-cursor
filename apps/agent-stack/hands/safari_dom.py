@@ -145,13 +145,27 @@ class SafariDOM:
         ref = int(a.get("ref") or 0)
         if not ref:
             return {"text": f"{a.get('action')} needs ref=N from a snapshot"}
+        before = self._signature()
         got = self.js(J.element_script(ref, body))
         if got.get("error"):
             return {"text": got["error"]}
         self._glide(got)
         time.sleep(settle)
         extra = (" The page showed: " + "; ".join(got["dialogs"]) + ".") if got.get("dialogs") else ""
+        want = str(a.get("text") or "") if a.get("action") == "type" else ""
+        if want and want.strip().lower() not in str(got.get("value") or "").lower() and not got.get("submitted"):
+            extra += (f" CHECK: the field did not take the text (it shows {str(got.get('value') or '')[:60]!r}); "
+                      "try type with real=true.")
+        elif a.get("action") in ("click", "double_click", "check") and before and before == self._signature():
+            extra += " CHECK: nothing changed on the page after that; it may need real=true, or a different element."
         return self.snapshot(f"{lead}{extra} ")
+
+    def _signature(self) -> tuple:
+        try:
+            d = self.js(J.STATE)
+            return (d.get("url"), len(str(d.get("text") or "")), hash(str(d.get("text") or "")[:20000]))
+        except (RuntimeError, ValueError):
+            return ()
 
     def _snapshot(self, a):
         return self.snapshot()

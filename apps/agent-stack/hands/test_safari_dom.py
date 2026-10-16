@@ -81,6 +81,10 @@ class Background(unittest.TestCase):
         self.assertIn("set current tab of window id 77 to tab 15", script)
         self.assertIn("set index of window id 77 to 1", script); self.assertIn("activate", script)
 
+    def test_typing_that_did_not_take_is_reported(self):  # live 10-16: Facebook's friends search ignored the text
+        got = FakeSafari().driver({"safari_tab": [77, 15]}).act({"action": "type", "ref": 1, "text": "Juliana"})
+        self.assertIn("did not take the text", got["text"]); self.assertIn("real=true", got["text"])
+
     def test_his_tabs_are_never_closed(self):
         f = FakeSafari()
         got = f.driver({"safari_tab": [77, 3]}).act({"action": "close_tab"})
