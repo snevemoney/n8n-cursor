@@ -24,6 +24,10 @@ guard let i = args.firstIndex(of: "--do"), i + 1 < args.count,
 
 let trusted = AXIsProcessTrusted()
 if op == "check" { out(["ok": true, "trusted": trusted]) }
+if op == "request" {  // macOS shows its own prompt; only the owner can grant it
+  let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+  out(["ok": true, "trusted": AXIsProcessTrustedWithOptions(opts)])
+}
 if !trusted { out(["ok": false, "why": "Jarvis Hands needs Accessibility permission (System Settings > Privacy & Security > Accessibility)"], 3) }
 
 let src = CGEventSource(stateID: .hidSystemState)
