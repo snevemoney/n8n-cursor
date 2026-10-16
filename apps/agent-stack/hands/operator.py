@@ -205,10 +205,13 @@ TOOLS = [
         "his repo; scan source=youtube|x|all [ingest=N] reads his Watch Later and X bookmarks in Safari and lists new "
         "signals (and ingests the first N); status; push (sends the packets to GitHub, needs his OK). ingest and scan "
         "run in the background: say you started, then check them with job. again=true re-learns a signal already ingested. "
+        "lens=studio watches a motion-graphics / design / edit video for studio inspiration (shot-by-shot design log: "
+        "palette, type, motion, easing, timing, transitions, plus EffectCraft/FilmCraft recreate recipes); default picks "
+        "it from the title. "
         "watch_later returns his WHOLE Watch Later (every video's title, channel, length, link) as a JSON file in about a "
         "minute, read in his signed-in Safari in the background; use it for any question about his Watch Later.",
         {"action": {"type": "string", "enum": ["ingest", "scan", "status", "push", "watch_later"]}, "url": S, "source": S, "ingest": I,
-         "again": B},
+         "again": B, "lens": {"type": "string", "enum": ["auto", "learn", "studio"]}},
         ["action"]),
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
     _fn("mcp", "Call a tool on a connected MCP server.", {"server": S, "tool": S, "arguments": {"type": "object"}},
@@ -603,7 +606,8 @@ class Tools:
         if act == "ingest":
             if not str(a.get("url") or "").strip():
                 return {"text": "ingest needs url"}
-            cmd = f"{sys.executable} {shlex.quote(str(script))} ingest {shlex.quote(str(a['url']).strip())}" + (" --force" if a.get("again") else "")
+            cmd = f"{sys.executable} {shlex.quote(str(script))} ingest {shlex.quote(str(a['url']).strip())}" + (" --force" if a.get("again") else "") \
+                + (f" --lens {a['lens']}" if a.get("lens") in ("learn", "studio") else "")
         elif act == "scan":
             n = int(a.get("ingest") or 0)
             cmd = f"{sys.executable} {shlex.quote(str(script))} scan {shlex.quote(str(a.get('source') or 'all'))}" + (f" --ingest {n}" if n else "")

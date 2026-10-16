@@ -122,17 +122,30 @@ def youtube(sig: dict, work: Path) -> dict:
     caps = sorted(work.glob("cap*.json3"), key=lambda p: ("orig" not in p.name, p.name))
     transcript = json3_to_text(json.loads(caps[0].read_text())) if caps else ""
     log(f"{vid}: transcript {len(transcript.split())} words from {caps[0].name if caps else 'no captions'}")
-    sheets, keyframes = [], []
+    # Evens 10-16: no download; Gemini watches the video itself from the link (frames + audio). The frame path below
+    # is only for videos Google will not open (private or unlisted).
+    return {"title": meta.get("title"), "channel": meta.get("channel") or meta.get("uploader"),
+            "duration": meta.get("duration"), "upload_date": meta.get("upload_date"), "description": meta.get("description"),
+            "chapters": meta.get("chapters"), "transcript": transcript, "sheets": [], "keyframes": [], "watch": True,
+            "work": str(work), "links": _links(meta.get("description") or "")}
+
+
+def watch_fallback(sig: dict, got: dict) -> dict:
+    """Google could not open the link: download a <=720p copy, read EVERY kept frame, delete the copy."""
+    if free_gb() < MIN_FREE_GB:
+        raise RuntimeError(f"Google could not open this video and his disk has only {free_gb():.1f} GB free for the "
+                           f"frame route (needs {MIN_FREE_GB:.0f} GB)")
+    work = Path(got.get("work") or CACHE / "work" / sig["id"])
+    work.mkdir(parents=True, exist_ok=True)
     try:
-        video = download(sig["url"], work, meta.get("duration") or 0)
+        video = download(sig["url"], work, got.get("duration") or 0)
         sheets, keyframes = contact_sheets(video, work / "sheets")
     finally:
         for v in work.glob("video.*"):
             v.unlink()  # Evens: downloads do not stay on the Mac
-    log(f"{vid}: {len(sheets)} contact sheets, video deleted")
-    return {"title": meta.get("title"), "channel": meta.get("channel") or meta.get("uploader"),
-            "duration": meta.get("duration"), "upload_date": meta.get("upload_date"), "description": meta.get("description"),
-            "chapters": meta.get("chapters"), "transcript": transcript, "sheets": sheets, "keyframes": keyframes, "links": _links(meta.get("description") or "")}
+    log(f"{sig['id']}: fallback frame route, {len(keyframes)} frames, video deleted")
+    got.update({"sheets": sheets, "keyframes": keyframes})
+    return _extract_frames(sig, got)
 
 
 CLIENTS = ("default", "mweb", "tv", "ios")  # live 10-16: the default client got HTTP 403, mweb worked
@@ -333,66 +346,415 @@ def _openrouter(messages: list, max_tokens: int = 32000) -> str:
     raise RuntimeError(f"no model answered ({last})")
 
 
-SEGMENT_S = 1200  # long videos (1-2 h) are read in 20-minute parts so no frame, line or method is cut off
-LINE_T = re.compile(r"^\[(\d+):(\d\d)\]")
+WATCH_MODELS = ("google/gemini-3.6-flash", "google/gemini-3.7-flash", "google/gemini-3.8-flash")
+WATCH_PROVIDER = {"order": ["google-ai-studio"], "allow_fallbacks": False}  # the only route that opens YouTube links
+WATCH_FULL_FPS_S = 9000      # up to 2.5 h: 1 frame per second + audio fits the 1M context in one watch
+WATCH_TOKENS_PER_FRAME = 70  # Gemini low media resolution (66) plus margin
+WATCH_CONTEXT = 900_000      # leave room for the transcript and the answer
+MAX_CONTINUE = 8             # a long answer is continued, never cut
 
 
-def _segments(got: dict) -> list:
-    """Split a long video by time: each part gets its own transcript lines and frames, each exactly once."""
-    dur = int(got.get("duration") or 0)
-    keys = got.get("keyframes") or []
-    if keys:
-        dur = max(dur, int(keys[-1][1]) + 1)
-    if dur <= SEGMENT_S * 1.25:
-        return [(got, "")]
-    lines = (got.get("transcript") or "").splitlines()
+STUDIO_MAX_FPS = 10  # motion graphics: fast moves need more than 1 frame/s
 
-    def when(line: str) -> int:
-        m = LINE_T.match(line)
-        return int(m.group(1)) * 60 + int(m.group(2)) if m else -1
 
-    parts, last = [], -1
-    for a in range(0, dur, SEGMENT_S):
-        b = a + SEGMENT_S
-        mine = []
-        for ln in lines:
-            t = when(ln)
-            t = last if t < 0 else t  # an untimed line stays with the line before it
-            last = t
-            if a <= max(t, 0) < b:
-                mine.append(ln)
-        seg = {**got, "transcript": "\n".join(mine), "keyframes": [(k, t) for k, t in keys if a <= t < b],
-               "sheets": [] if keys else got.get("sheets")}
-        parts.append((seg, f"part {_mmss(a)}-{_mmss(min(b, dur))}"))
-    return parts
+def video_part(url: str, duration: float, lens: str = "learn") -> dict:
+    """The whole video as one input. Studio lens: up to 10 frames/s for motion. Anything too long for that (or a
+    learn video over 2.5 h) gets fewer frames per second so it still fits ONE watch."""
+    part = {"type": "video_url", "video_url": {"url": url}}
+    dur = max(1.0, float(duration or 0))
+    fit = WATCH_CONTEXT / (dur * (WATCH_TOKENS_PER_FRAME + 32))
+    if lens == "studio":
+        part["video_url"]["processing"] = {"type": "static", "fps": max(0.1, round(min(STUDIO_MAX_FPS, fit), 2))}
+    elif dur > WATCH_FULL_FPS_S:
+        part["video_url"]["processing"] = {"type": "static", "fps": max(0.1, min(1.0, round(fit, 2)))}
+    return part
+
+
+STUDIO_WORDS = re.compile(r"(?i)motion graphic|mograph|after effects|kinetic typ|logo (?:reveal|animation)|title sequence|"
+                          r"showreel|\breel\b|animation|animated|vfx|\bcgi\b|transition|cinematic|color grad|"
+                          r"music video|\bcommercial\b|\bad\b|design inspiration|ui animation|lottie|rive\b|"
+                          r"houdini|cinema ?4d|\bc4d\b|blender (?:render|animation)|typography|editing style|edit like")
+
+
+def pick_lens(got: dict, asked: str = "") -> str:
+    """learn = methods, capabilities, click-by-click log; studio = design shot log, style, recreate recipes."""
+    if asked in ("learn", "studio"):
+        return asked
+    hay = " ".join(str(got.get(k) or "") for k in ("title", "channel")) + " " + str(got.get("description") or "")[:600]
+    return "studio" if STUDIO_WORDS.search(hay) else "learn"
+
+
+def _post(body: dict) -> dict:
+    online = _load("agent_stack_online_signals", "../brain/online.py")
+    key = online.openrouter_api_key()
+    if not key:
+        raise RuntimeError("the OpenRouter key is not available")
+    return online._http_json(online.OPENROUTER_URL, data=body,
+                             headers={"Authorization": f"Bearer {key}", "X-Title": "Jarvis signals"}, timeout=1800)
+
+
+def _watch(messages: list, max_tokens: int = 65000) -> str:
+    """Gemini on Google AI Studio watches the video. An answer that hits the output limit is continued from where it
+    stopped (the model still has the whole video), so a 2 h video's 100+ methods are never truncated."""
+    last = ""
+    for model in WATCH_MODELS:
+        convo, text = list(messages), ""
+        try:
+            for _ in range(MAX_CONTINUE):
+                data = _post({"model": model, "provider": WATCH_PROVIDER, "messages": convo, "max_tokens": max_tokens,
+                              "usage": {"include": True}})
+                if data.get("error"):
+                    raise RuntimeError(str(data["error"])[:300])
+                choice = (data.get("choices") or [{}])[0]
+                piece = str((choice.get("message") or {}).get("content") or "")
+                ledger({"event": "model", "model": model, "usage": data.get("usage"), "watch": True,
+                        "finish": choice.get("finish_reason"), "chars": len(piece)})
+                text += piece
+                if choice.get("finish_reason") != "length":
+                    break
+                convo = convo + [{"role": "assistant", "content": piece},
+                                 {"role": "user", "content": "Continue exactly where you stopped, mid-JSON if needed. Do not repeat anything."}]
+            if text.strip():
+                return text
+            last = f"{model}: empty"
+        except Exception as exc:  # noqa: BLE001 - next model; the caller falls back to the frame route
+            last = f"{model}: {str(exc)[:200]}"
+    raise RuntimeError(f"Gemini could not watch the video ({last})")
+
+
+WATCH_PROMPT_HEAD = """You are WATCHING the video itself (every frame and the audio), not reading a summary. Recover
+everything shown and said, start to end. The transcript below is only an aid for exact wording; what is SHOWN on screen
+(UI, text, code, prompts, settings, results) comes from your own watching. Give mm:ss for everything.
+
+"""
+
+
+VISUAL_FIELDS = ("start", "end", "scene", "app_or_ui", "on_screen_text", "action", "code_or_command", "result_shown", "said")
+VISUAL_PROMPT = """Write the VISUAL LOG of this video: a shot-by-shot record of everything that happens on screen, so
+someone who never sees the video knows exactly what was shown, in order. One row every time anything visible changes
+(new screen, scene, window, tab, slide, panel, typed text, click, menu, terminal output, generated result, overlay),
+and at least one row every 30 s even when nothing changes. Never merge two changes into one row, never skip a part.
+Copy on-screen text, code, commands, prompts, file names, URLs, settings and numbers VERBATIM. Say UNCLEAR rather
+than guess.
+Output ONLY JSON Lines: one JSON object per line, no array, no prose, fields:
+{"start":"mm:ss","end":"mm:ss","scene":"short name","app_or_ui":"app / site / window","on_screen_text":"verbatim",
+"action":"what the person or the software does (clicks X, types Y, opens Z)","code_or_command":"verbatim code, command
+or prompt shown, else empty","result_shown":"what appears as a result","said":"what is being said at that moment, short"}
+Use h:mm:ss when the video is longer than an hour."""
+
+
+STUDIO_FIELDS = ("start", "end", "shot", "composition", "palette", "typography", "motion", "transition", "camera",
+                 "effects_layers", "sound_sync", "on_screen_text", "recreate")
+STUDIO_PROMPT = """You are a motion designer studying this video shot by shot for studio inspiration. Write the STUDIO LOG:
+one row per shot or distinct animated beat (a new move, element, transition or cut), never two beats in one row, no gaps.
+Be concrete and measurable: palette as approximate hex values, typography (style, weight, case, size relative to frame,
+kinetic behaviour), motion (what moves, from where to where, easing such as ease-out/overshoot/linear, speed and
+duration in seconds or frames, stagger), transition (cut, wipe, morph, match cut, whip...), camera (push, pan, orbit,
+parallax, depth), effects and layers (glow, blur, grain, particles, masks, 3D, shape layers), sound sync (hits on beat,
+whooshes), on-screen text verbatim, and "recreate": short concrete steps to rebuild the beat in EffectCraft (After
+Effects-class: comps, layers, keyframes, effects) or FilmCraft (editing). Say UNCLEAR rather than guess.
+Output ONLY JSON Lines, one object per line, fields:
+{"start","end","shot","composition","palette","typography","motion","transition","camera","effects_layers","sound_sync",
+"on_screen_text","recreate"}  (times as m:ss.s when beats are under a second, else mm:ss)"""
+STUDIO_EXTRACT = """From your watch and the STUDIO LOG below, write the studio takeaways.
+learned_md sections: A. Style guide (palette with hex, type system, grid/composition rules, motion rules: easing,
+timing, stagger, pacing) · B. Signature techniques (what makes it look like this) · C. Shot list summary with times ·
+D. How to recreate the whole piece in EffectCraft / FilmCraft (comp setup, layer structure, order of work) ·
+E. What to steal for Evens's studio and what to avoid · F. Open questions.
+methods: one per reusable technique ({"name","family":"content-creative","summary","steps":[EffectCraft/FilmCraft steps],
+"at":"time","evidence":"shown","tools":[...],"jarvis_use":"how Jarvis could rebuild it with ArtCraft"}).
+capabilities: one per technique the piece demonstrates ({"name","what_it_does","evidence":"shown working","at",
+"built_with":[...],"jarvis_has":"yes|partly|no|unknown" — can Jarvis already produce it with ArtCraft?}).
+
+Also write ONE line {"kind":"studio_type","value":"..."} naming the studio content type this inspires, exactly one of:
+Video Editing · Explainer Videos · Brand & Identity · Marketing & Social · Product Launch · Slides & Decks ·
+Photo & Retouching · Print & 3D (CAD) · Audio & Podcast · Info Products & Templates · Client Deliverables.
+
+SOURCE: {title} ({meta})"""
+
+
+def parse_visual_rows(text: str, fields: tuple = None) -> list:
+    """JSON Lines from the model; a row split by a continuation or a stray newline is still read."""
+    dec, rows, at = json.JSONDecoder(), [], 0
+    while True:
+        at = text.find("{", at)
+        if at < 0:
+            return rows
+        try:
+            obj, end = dec.raw_decode(text, at)
+        except ValueError:
+            at += 1
+            continue
+        if isinstance(obj, dict) and obj.get("start") is not None:
+            rows.append({k: str(obj.get(k) or "") for k in (fields or VISUAL_FIELDS)})
+        at = end
+
+
+MAX_VISUAL_GAP_S = 30
+SPOT_CHECKS = 10
+SPOT_PROMPT = """You are CHECKING someone else's visual log against the video. For each row below, look at the video
+at that time range and say whether the row is right: the app/UI, the action, the on-screen text and any code are
+really there at that time. Be strict: wrong time, wrong text or invented detail = false.
+Return JSON only: {"checks": [{"start": "...", "matches": true|false, "actual": "what is really on screen, short"}]}
+
+ROWS TO CHECK:
+"""
+
+
+def _secs(t: str) -> int:
+    parts = str(t or "").strip().split(":")
+    if not parts or not all(p.isdigit() for p in parts):
+        return -1
+    n = 0
+    for p in parts:
+        n = n * 60 + int(p)
+    return n
+
+
+def _clock(t: int) -> str:
+    return f"{t // 3600}:{t % 3600 // 60:02d}:{t % 60:02d}" if t >= 3600 else _mmss(t)
+
+
+def add_links(rows: list, url: str) -> list:
+    """Every row gets a link that opens the video at that second (any agent or person can check it)."""
+    sep = "&" if "?" in url else "?"
+    return [{**r, "link": f"{url}{sep}t={max(0, _secs(r['start']))}s"} for r in rows]
+
+
+def coverage_gaps(rows: list, duration: float, max_gap: int = MAX_VISUAL_GAP_S) -> list:
+    """Stretches of the video no row describes (a skim shows up instead of hiding)."""
+    spans = sorted((a, max(a, b)) for a, b in ((_secs(r["start"]), _secs(r["end"])) for r in rows) if a >= 0)
+    gaps, covered = [], 0
+    for a, b in spans:
+        if a - covered > max_gap:
+            gaps.append(f"{_clock(covered)}-{_clock(a)}")
+        covered = max(covered, b)
+    end = int(float(duration or 0))
+    if end and end - covered > max_gap:
+        gaps.append(f"{_clock(covered)}-{_clock(end)}")
+    return gaps
+
+
+def spot_check(url: str, duration: float, rows: list, n: int = SPOT_CHECKS, lens: str = "learn") -> dict:
+    """A separate watch grades n rows spread over the whole video (critic is not the writer, AGENT_RULES 8)."""
+    if not rows:
+        return {"checked": 0, "matched": 0, "details": []}
+    step = max(1, len(rows) // n)
+    pick = rows[::step][:n]
+    keys = ("start", "end", "shot", "motion", "palette", "on_screen_text") if lens == "studio" else \
+        ("start", "end", "app_or_ui", "action", "on_screen_text", "code_or_command")
+    ask = "\n".join(json.dumps({k: r.get(k, "") for k in keys})
+                    for r in pick)
+    got = _json(_watch([{"role": "user", "content": [video_part(url, duration, lens), {"type": "text", "text": SPOT_PROMPT + ask}]}],
+                       max_tokens=8000))
+    checks = [c for c in got.get("checks") or [] if isinstance(c, dict)]
+    return {"checked": len(checks), "matched": sum(1 for c in checks if c.get("matches") is True), "details": checks}
+
+
+def _studio_text(rows: list) -> str:
+    return "\n".join(" | ".join(f"{k}: {r[k]}" for k in STUDIO_FIELDS if r.get(k)) for r in rows)
+
+
+def _visual_text(rows: list) -> str:
+    return "\n".join(f"{r['start']}-{r['end']} | {r['app_or_ui']} | {r['scene']} | did: {r['action']} | text: {r['on_screen_text']}"
+                     + (f" | code: {r['code_or_command']}" if r["code_or_command"] else "")
+                     + f" | result: {r['result_shown']}" + (f" | said: {r['said']}" if r["said"] else "") for r in rows)
+
+
+def write_visual_log(d: Path, rows: list, lens: str = "learn") -> None:
+    """VISUAL-LOG.csv (any agent, any spreadsheet), visual-log.jsonl (programs), SCRIPT.md (read like a script).
+    Studio lens: STUDIO-LOG.csv / studio-log.jsonl and a shot list with recreate recipes."""
+    import csv
+    if lens == "studio":
+        _write_studio_log(d, rows)
+        return
+    with (d / "VISUAL-LOG.csv").open("w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(VISUAL_FIELDS) + ["link"], restval="", extrasaction="ignore")
+        w.writeheader(); w.writerows(rows)
+    (d / "visual-log.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    lines = ["# SCRIPT — what happens on screen, in order", "",
+             "Written by Jarvis from watching the whole video (Gemini, 1 frame/s + audio). Columns are in VISUAL-LOG.csv.", ""]
+    for r in rows:
+        when = f"[{r['start']}–{r['end']}]({r['link']})" if r.get("link") else f"{r['start']}–{r['end']}"
+        lines.append(f"**{when}** · [{r['app_or_ui'] or r['scene']}] {r['action']}".rstrip())
+        if r["on_screen_text"]:
+            lines.append(f"  - On screen: {r['on_screen_text']}")
+        if r["code_or_command"]:
+            lines.append(f"  - Code / command / prompt: `{r['code_or_command']}`")
+        if r["result_shown"]:
+            lines.append(f"  - Result: {r['result_shown']}")
+        if r["said"]:
+            lines.append(f"  - Said: \"{r['said']}\"")
+    (d / "SCRIPT.md").write_text("\n".join(lines) + "\n")
+
+
+ROWS_FORMAT = """
+
+OUTPUT FORMAT (this replaces the JSON shape above): JSON Lines, one JSON object per line, never an array or a wrapper:
+{"kind":"learned_md","text":"one section (or part of one) of the markdown analysis"}  -- sections A..K in order
+{"kind":"method", ...the method fields above...}  -- one line per method
+{"kind":"capability", ...the capability fields above...}  -- one line per capability
+A long answer may be continued in another message: just keep writing lines."""
+
+
+def parse_extract_rows(text: str) -> dict:
+    """learned_md / methods / capabilities from JSON Lines; a row cut by the output limit loses only that row."""
+    dec, at, learned, methods, caps, stype = json.JSONDecoder(), 0, [], [], [], ""
+    while True:
+        at = text.find("{", at)
+        if at < 0:
+            break
+        try:
+            obj, end = dec.raw_decode(text, at)
+        except ValueError:
+            at += 1
+            continue
+        at = end
+        if not isinstance(obj, dict):
+            continue
+        kind = obj.pop("kind", "")
+        if kind == "learned_md":
+            learned.append(str(obj.get("text") or ""))
+        elif kind == "method" and obj.get("name"):
+            methods.append(obj)
+        elif kind == "capability" and obj.get("name"):
+            caps.append(obj)
+        elif kind == "studio_type" and obj.get("value"):
+            stype = str(obj["value"])
+    out = {"learned_md": "\n\n".join(learned), "methods": methods, "capabilities": caps}
+    if stype:
+        out["studio_type"] = stype
+    return out
+
+
+BLOCKED = re.compile(r"(?i)private|unavailable|not available|permission|forbidden|\b40[34]\b|cannot (?:access|open)|"
+                     r"unsupported (?:url|video)|age[- ]restrict|members[- ]only|sign in to confirm")
+
+
+def watch_blocked(exc: Exception) -> bool:
+    """Only Google refusing the video sends it to the frame route; a bad answer is retried as a watch."""
+    return bool(BLOCKED.search(str(exc)))
+
+
+def _write_studio_log(d: Path, rows: list) -> None:
+    import csv
+    with (d / "STUDIO-LOG.csv").open("w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(STUDIO_FIELDS) + ["link"], restval="", extrasaction="ignore")
+        w.writeheader(); w.writerows(rows)
+    (d / "studio-log.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    lines = ["# SCRIPT — shot list for studio work", "",
+             "Written by Jarvis from watching the whole video (Gemini, high frame rate + audio). Columns are in STUDIO-LOG.csv.", ""]
+    labels = (("composition", "Composition"), ("palette", "Palette"), ("typography", "Type"), ("motion", "Motion"),
+              ("transition", "Transition"), ("camera", "Camera"), ("effects_layers", "Effects / layers"),
+              ("sound_sync", "Sound sync"), ("on_screen_text", "On screen"), ("recreate", "Recreate"))
+    for r in rows:
+        when = f"[{r['start']}–{r['end']}]({r['link']})" if r.get("link") else f"{r['start']}–{r['end']}"
+        lines.append(f"**{when}** · {r.get('shot') or 'shot'}")
+        lines += [f"  - {lab}: {r[k]}" for k, lab in labels if r.get(k)]
+    (d / "SCRIPT.md").write_text("\n".join(lines) + "\n")
+
+
+STUDIO_ROOT = Path(os.environ.get("ARTCRAFT_STUDIO") or Path.home() / "ArtCraft Studio")
+STUDIO_FILES = ("STYLE.md", "SCRIPT.md", "STUDIO-LOG.csv", "VISUAL-CHECK.md")
+
+
+def file_in_studio(sig: dict, got: dict, ext: dict, packet: Path) -> Path:
+    """Evens 10-16: studio-lens notes live where the studio works: 01 Internal/Playbooks/<type>/refs/<id> - <title>/
+    (the existing "techniques to study, then change (never copy assets)" slot), plus one appended line in REFS.md.
+    Studio rule 5: the source is cited, no transcript is copied in."""
+    books = STUDIO_ROOT / "01 Internal" / "Playbooks"
+    types = {p.name for p in books.iterdir() if p.is_dir()} if books.exists() else set()
+    stype = ext.get("studio_type") if ext.get("studio_type") in types else "Video Editing"
+    title = re.sub(r"[^\w &().,'-]+", " ", str(got.get("title") or sig["id"])).strip()[:80] or sig["id"]
+    d = books / stype / "refs" / f"{sig['id']} - {title}"
+    d.mkdir(parents=True, exist_ok=True)
+    os.chmod(d, 0o755)
+    for name in STUDIO_FILES:
+        if (packet / name).exists():
+            shutil.copy2(packet / name, d / name)
+            os.chmod(d / name, 0o644)
+    (d / "README.md").write_text(
+        f"# {got.get('title')}\n\n- Source: {sig['url']}\n- Channel: {got.get('channel') or 'unknown'}"
+        f" · {got.get('duration') or '?'} s\n- Watched by Jarvis: {(ext.get('coverage') or {}).get('watched', 'whole video')}\n"
+        f"- Repo packet: docs/hive/outer-heaven/CONTENT/watch-later/packets/{sig['id']}/\n- Techniques: {len(ext.get('methods') or [])}\n\n"
+        "Techniques to study, then change. Never copy the source's assets. STYLE.md = style guide and recreate plan; "
+        "SCRIPT.md = shot list with EffectCraft/FilmCraft recipes; STUDIO-LOG.csv = every beat, with links to the second.\n")
+    os.chmod(d / "README.md", 0o644)
+    refs = books / stype / "refs" / "REFS.md"
+    line = f"- {sig['id']} - [{title}]({sig['url']}) — Jarvis studio watch, {len(ext.get('methods') or [])} techniques: `refs/{d.name}/`\n"
+    old = refs.read_text() if refs.exists() else f"# {stype} — references\n\n"
+    if f"- {sig['id']} -" not in old:
+        refs.write_text(old.rstrip("\n") + "\n" + line)
+    return d
 
 
 def extract(sig: dict, got: dict) -> dict:
-    """Whole source, every frame. Long videos go part by part and the parts are joined."""
-    parts = _segments(got)
-    if len(parts) == 1:
-        return _extract_one(sig, got, "")
-    learned, methods, caps, kept, read = [], [], [], 0, 0
-    for seg, label in parts:
-        r = _extract_one(sig, seg, label)
-        learned.append(f"## {label}\n\n{r.get('learned_md') or ''}")
-        methods += r.get("methods") or []
-        caps += r.get("capabilities") or []
-        kept += (r.get("coverage") or {}).get("frames_kept", 0)
-        read += (r.get("coverage") or {}).get("frames_read", 0)
-    return {"learned_md": "\n\n".join(learned), "methods": methods, "capabilities": caps,
-            "coverage": {"frames_kept": kept, "frames_read": read}}
+    """YouTube: Gemini watches the whole video from the link, in one context (no download, no parts). Other sources and
+    videos Google cannot open: text + every kept frame."""
+    if not got.get("watch"):
+        return _extract_frames(sig, got)
+    try:
+        return _extract_watch(sig, got)
+    except Exception as exc:  # noqa: BLE001
+        if not watch_blocked(exc):
+            raise  # a bad answer is not a reason to download; the operator retries the watch
+        log(f"{sig['id']}: Google would not open the video ({str(exc)[:160]}); frame route")
+        return watch_fallback(sig, got)
 
 
-def _extract_one(sig: dict, got: dict, label: str) -> dict:
+def _extract_watch(sig: dict, got: dict) -> dict:
+    lens = pick_lens(got, got.get("lens") or "")
+    video = video_part(sig["url"], got.get("duration") or 0, lens)
+    body = got.get("transcript") or "(no captions)"
+    if got.get("description"):
+        body = f"DESCRIPTION:\n{got['description'][:4000]}\n\nTRANSCRIPT (aid only):\n{body}"
+    meta = f"channel {got.get('channel')}, {got.get('duration')} s"
+    # 1. the log of everything shown, timestamped (Evens 10-16: any agent reads what happened on screen)
+    head = STUDIO_PROMPT if lens == "studio" else VISUAL_PROMPT
+    rows = parse_visual_rows(_watch([{"role": "user", "content": [video, {"type": "text", "text": head
+                                      + "\n\nTRANSCRIPT (aid only):\n" + body[:300000]}]}]),
+                             STUDIO_FIELDS if lens == "studio" else VISUAL_FIELDS)
+    if not rows:
+        raise RuntimeError("the watch returned no visual log")  # never a packet that is blind to the screen
+    rows = add_links(rows, sig["url"])
+    gaps = coverage_gaps(rows, got.get("duration") or 0)
+    log(f"{sig['id']}: {lens} log {len(rows)} rows, gaps {gaps or 'none'}")
+    vis = _studio_text(rows) if lens == "studio" else _visual_text(rows)
+    # 2. methods + capabilities (or style + techniques), watching again with the log beside it
+    if lens == "studio":
+        prompt = WATCH_PROMPT_HEAD + STUDIO_EXTRACT.replace("{title}", str(got.get("title"))).replace("{meta}", meta)
+    else:
+        prompt = WATCH_PROMPT_HEAD + EXTRACT_PROMPT.format(every=1, title=got.get("title"), kind="youtube video", meta=meta,
+                                                           body=body[:600000])
+    prompt += "\n\nLOG (your own shot-by-shot watch, cite its times):\n" + vis[:1500000]
+    out = parse_extract_rows(_watch([{"role": "user", "content": [video, {"type": "text", "text": prompt + ROWS_FORMAT}]}]))
+    if not out["methods"]:
+        raise RuntimeError("the watch returned no methods")
+    out["visual_log"], out["lens"] = rows, lens
+    try:
+        spot = spot_check(sig["url"], got.get("duration") or 0, rows, lens=lens)
+    except Exception as exc:  # noqa: BLE001 - recorded, never hidden
+        spot = {"checked": 0, "matched": 0, "error": str(exc)[:200]}
+    out["visual_check"] = {"rows": len(rows), "gaps": gaps, "spot_check": spot}
+    # 3. atomic sweep from the written record (no extra watch)
+    sweep = parse_extract_rows(_watch([{"role": "user", "content": SWEEP_PROMPT.format(
+        learned=str(out.get("learned_md") or "")[:200000], first=json.dumps(out["methods"])[:100000],
+        body=("LOG:\n" + vis + "\n\nTRANSCRIPT:\n" + body)[:900000])
+        + "\n\nOUTPUT FORMAT (replaces the JSON shape above): JSON Lines, one {\"kind\":\"method\", ...fields} per line."}]))
+    if isinstance(sweep.get("methods"), list) and len(sweep["methods"]) >= len(out["methods"]):
+        out["methods"] = sweep["methods"]
+    fps = (video["video_url"].get("processing") or {}).get("fps", 1)
+    out["coverage"] = {"watched": f"whole video by Gemini from the YouTube link, {fps} frame/s + audio, {lens} lens, no download"}
+    return out
+
+
+def _extract_frames(sig: dict, got: dict) -> dict:
     body = got.get("transcript") or "(no transcript)"
     for p in got.get("pages") or []:
         body += f"\n\n=== LINKED PAGE {p.get('final') or p.get('url')} — {p.get('title')} ===\n{p.get('text')}"
     if got.get("description"):
         body = f"DESCRIPTION:\n{got['description'][:4000]}\n\nTRANSCRIPT:\n{body}"
     meta = f"channel {got.get('channel')}, {got.get('duration')} s" if sig["kind"] == "youtube" else sig["url"]
-    if label:
-        meta += f"; THIS CALL COVERS ONLY {label} of the video (other parts are read separately)"
     content = [{"type": "text", "text": EXTRACT_PROMPT.format(every=FRAME_EVERY_S, title=got.get("title"), kind=sig["kind"],
                                                               meta=meta, body=body[:600000])}]
     sheets = got.get("sheets") or []
@@ -402,7 +764,7 @@ def _extract_one(sig: dict, got: dict, label: str) -> dict:
     read = 0
     if keys:  # every kept frame is read first; the notes go into the extraction with an even spread of the images
         notes, read = frame_notes(keys)
-        content[0]["text"] += "\n\nFRAME NOTES (every kept frame, in order):\n" + notes[:200000]
+        content[0]["text"] += "\n\nFRAME NOTES (every kept frame, in order):\n" + notes[:2000000]
     if keys:
         step = max(1, -(-len(keys) // KEYFRAMES_TO_MODEL))
         for k, t in keys[::step]:
@@ -428,6 +790,8 @@ def _extract_one(sig: dict, got: dict, label: str) -> dict:
 
 def _coverage_line(ext: dict) -> str:
     c = ext.get("coverage") or {}
+    if c.get("watched"):
+        return f"Watched: {c['watched']}\n"
     if not c.get("frames_kept"):
         return "Frames: none (text only)\n"
     return f"Frames: read {c.get('frames_read')} of {c.get('frames_kept')} kept (one frame every {FRAME_EVERY_S} s, identical frames dropped)\n"
@@ -519,6 +883,17 @@ def write_packet(sig: dict, got: dict, ext: dict, work: Path) -> Path:
           f"(one frame every {FRAME_EVERY_S} s, {SHEET_COLS}x{SHEET_ROWS} per sheet)\n**Methods:** {n} (methods.jsonl)\n"
           f"**Links:** {', '.join(got.get('links') or []) or 'none'}\n")
     (d / "LEARNED.md").write_text(f"# LEARNED — {sig['id']}\nProtocol: jarvis-signal-engine\n" + _coverage_line(ext) + "\n" + str(ext.get("learned_md") or ""))
+    if ext.get("visual_log"):
+        write_visual_log(d, ext["visual_log"], ext.get("lens") or "learn")
+    if ext.get("lens") == "studio":
+        (d / "STYLE.md").write_text(f"# STYLE — {got.get('title')}\n\n" + str(ext.get("learned_md") or ""))
+    if ext.get("visual_check"):
+        vc = ext["visual_check"]; sp = vc.get("spot_check") or {}
+        (d / "VISUAL-CHECK.md").write_text(
+            f"# Visual log check — {sig['id']}\n\n- Rows: {vc.get('rows')}\n- Gaps over {MAX_VISUAL_GAP_S} s with no row: "
+            f"{', '.join(vc.get('gaps') or []) or 'none'}\n- Independent spot-check (separate watch): {sp.get('matched')}/{sp.get('checked')} "
+            f"rows match the video{(' · error: ' + sp['error']) if sp.get('error') else ''}\n\n"
+            + "".join(f"- {c.get('start')}: {'MATCH' if c.get('matches') else 'MISMATCH'} — {c.get('actual', '')}\n" for c in sp.get("details") or []))
     (d / "capabilities.jsonl").write_text("".join(json.dumps({**c, "source_id": sig["id"]}) + "\n" for c in ext.get("capabilities") or []))
     (d / "methods.jsonl").write_text("\n".join(json.dumps({**m, "source_id": sig["id"]}) for m in ext["methods"]) + "\n")
     subprocess.run(["git", "-C", str(root), "add", str(d.relative_to(root))], check=True)
@@ -534,20 +909,17 @@ def free_gb(path: Path = Path.home()) -> float:
     return shutil.disk_usage(path).free / 1e9
 
 
-def ingest(url: str, force: bool = False) -> dict:
+def ingest(url: str, force: bool = False, lens: str = "") -> dict:
     """One signal at a time (a lock queues parallel asks), so downloads never pile up on his disk."""
     import fcntl
     CACHE.mkdir(parents=True, exist_ok=True)
     with open(CACHE / "ingest.lock", "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        return _ingest(url, force)
+        return _ingest(url, force, lens)
 
 
-def _ingest(url: str, force: bool = False) -> dict:
+def _ingest(url: str, force: bool = False, lens: str = "") -> dict:
     sig = classify(url.strip())
-    if free_gb() < MIN_FREE_GB:
-        return {"id": sig["id"], "status": "FAILED", "text": f"his disk has only {free_gb():.1f} GB free; I will not download "
-                f"until there is at least {MIN_FREE_GB:.0f} GB"}
     if sig["id"] in known_ids() and not force:
         return {"id": sig["id"], "status": "ALREADY", "text": f"{sig['id']} is already a packet; nothing to do"}
     work = CACHE / "work" / sig["id"]
@@ -555,12 +927,19 @@ def _ingest(url: str, force: bool = False) -> dict:
     ledger({"event": "start", **sig})
     try:
         got = youtube(sig, work) if sig["kind"] == "youtube" else x_post(sig, work) if sig["kind"] == "x" else web_page(sig, work)
+        got["lens"] = lens
         log(f"{sig['id']}: extracting methods")
         ext = extract(sig, got)
         d = write_packet(sig, got, ext, work)
+        if ext.get("lens") == "studio":
+            try:
+                ext["studio_path"] = str(file_in_studio(sig, got, ext, d))
+            except Exception as exc:  # noqa: BLE001 - the packet is saved; the filing failure is reported
+                ext["studio_path"] = f"not filed in ArtCraft Studio: {exc}"
         ledger({"event": "packet", "id": sig["id"], "methods": len(ext["methods"]), "path": str(d), "coverage": ext.get("coverage")})
         extra = [classify(u)["url"] for u in got.get("links") or [] if classify(u)["kind"] == "youtube"]
         return {"id": sig["id"], "status": "DONE", "methods": len(ext["methods"]), "packet": str(d), "also_signals": extra,
+                "studio": ext.get("studio_path"),
                 "text": f"{got.get('title')}: {len(ext['methods'])} methods, packet {d}"}
     except Exception as exc:  # noqa: BLE001 - the operator reads the reason and tries another way
         ledger({"event": "failed", "id": sig["id"], "error": str(exc)[:500]})
@@ -689,6 +1068,13 @@ def family_of(name) -> str:
     return next((std for word, std in FAMILY_WORDS if word in low), "business-other")
 
 
+def _visual_rows(d: Path) -> int:
+    for f in (d / "jarvis-pass" / "visual-log.jsonl", d / "visual-log.jsonl"):
+        if f.exists():
+            return sum(1 for l in f.read_text().splitlines() if l.strip())
+    return 0
+
+
 def build_index() -> dict:
     """Machine-readable index of every signal, next to the packets (Evens 10-16: store signals properly, CSV and more):
     videos.csv (every Watch Later video + whether and how it was learned), methods.csv (every method: the recovered
@@ -733,7 +1119,7 @@ def build_index() -> dict:
     with (out / "videos.csv").open("w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["video_id", "title", "channel", "duration", "duration_seconds", "link", "packet", "researcher_notes",
-                    "jarvis_frames", "frames_read", "methods"])
+                    "jarvis_frames", "frames_read", "visual_rows", "methods"])
         for v in vids:
             d = packets / v["id"]
             lrn = (d / "LEARNED.md").read_text(errors="ignore")[:300] if (d / "LEARNED.md").exists() else ""
@@ -746,7 +1132,8 @@ def build_index() -> dict:
             dur = (f"{secs // 3600}h {secs % 3600 // 60}m {secs % 60}s" if secs >= 3600 else f"{secs // 60}m {secs % 60}s") if secs else ""
             w.writerow([v["id"], v.get("title"), v.get("channel"), dur, secs or "", v.get("link"),
                         "yes" if d.exists() else "no", "yes" if lrn and "jarvis-signal-engine" not in lrn else "no",
-                        "yes" if jarvis else "no", f"{cov.group(1)}/{cov.group(2)}" if cov else "", per_packet.get(v["id"], 0)])
+                        "yes" if jarvis else "no", f"{cov.group(1)}/{cov.group(2)}" if cov else ("watched" if mine.exists() and "Watched:" in mine.read_text(errors="ignore")[:600] else ""),
+                        _visual_rows(d), per_packet.get(v["id"], 0)])
     with (out / "capabilities.csv").open("w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=["signal_id", "name", "what_it_does", "evidence", "at", "built_with", "jarvis_has"])
         w.writeheader(); w.writerows(caps)
@@ -791,7 +1178,7 @@ def main(argv: list) -> int:
         return 2
     cmd = argv[0]
     if cmd == "ingest" and len(argv) > 1:
-        out = ingest(argv[1], force="--force" in argv)
+        out = ingest(argv[1], force="--force" in argv, lens=argv[argv.index("--lens") + 1] if "--lens" in argv else "")
     elif cmd == "scan":
         out = scan(argv[1] if len(argv) > 1 and not argv[1].startswith("--") else "all")
         n = int(argv[argv.index("--ingest") + 1]) if "--ingest" in argv else 0

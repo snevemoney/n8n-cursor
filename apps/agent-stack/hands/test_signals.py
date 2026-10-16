@@ -1,6 +1,7 @@
 """Evens 10-16: give Jarvis a link (or say look for new signals) and it ingests the signal like the Researcher desk:
 transcript, frame contact sheets, linked pages, every method, packet to the repo; downloads never stay on the Mac."""
 import importlib.util
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -26,9 +27,11 @@ class Classify(unittest.TestCase):
 
 class Safety(unittest.TestCase):
     def test_no_download_when_the_disk_is_full(self):
-        with mock.patch.object(S, "free_gb", return_value=1.0), mock.patch.object(S, "CACHE", Path(tempfile.mkdtemp())):
-            got = S.ingest("https://youtu.be/-6yUeJ3rkvg", force=True)
-        self.assertEqual(got["status"], "FAILED"); self.assertIn("GB free", got["text"])
+        # only the fallback frame route downloads; watching from the link needs no disk
+        with mock.patch.object(S, "free_gb", return_value=1.0), mock.patch.object(S, "download") as dl:
+            with self.assertRaises(RuntimeError) as err:
+                S.watch_fallback({"id": "x", "url": "u", "kind": "youtube"}, {"work": tempfile.mkdtemp()})
+        dl.assert_not_called(); self.assertIn("GB free", str(err.exception))
 
     def test_the_video_is_deleted_even_when_sheets_fail(self):
         work = Path(tempfile.mkdtemp())
@@ -36,11 +39,10 @@ class Safety(unittest.TestCase):
 
         def dl(url, w, duration=0):
             p = w / "video.mp4"; p.write_bytes(b"x"); return p
-        with mock.patch.object(S.subprocess, "run", return_value=mock.Mock(stdout='{"title": "t"}', returncode=0)), \
-             mock.patch.object(S, "download", side_effect=dl), \
+        with mock.patch.object(S, "download", side_effect=dl), mock.patch.object(S, "free_gb", return_value=50), \
              mock.patch.object(S, "contact_sheets", side_effect=RuntimeError("ffmpeg")):
-            with self.assertRaises(RuntimeError):
-                S.youtube({"id": "abc", "url": "u", "kind": "youtube"}, work)
+            with self.assertRaises(RuntimeError):  # the fallback frame route (private/unlisted videos)
+                S.watch_fallback({"id": "abc", "url": "u", "kind": "youtube"}, {"work": str(work), "duration": 60})
         self.assertEqual(list(work.glob("video.*")), [])
 
     def test_push_is_his_kept_stop(self):
@@ -96,40 +98,243 @@ class EveryFrame(unittest.TestCase):  # Evens 10-16 "so jarvis skimmed nothing?"
         self.assertNotIn("400", S.KEEP_FILTER)
 
 
-class LongVideos(unittest.TestCase):  # Evens 10-16: "what if jarvis encounters videos over 1h-2h?"
-    def _got(self, seconds):
-        d = Path(tempfile.mkdtemp()); keys = []
-        for i in range(0, seconds, 2):
-            f = d / f"k_{i:06d}.jpg"; f.write_bytes(b"j"); keys.append((f, float(i)))
-        lines = "\n".join(f"[{t // 60:02d}:{t % 60:02d}] line {t}" for t in range(0, seconds, 30))
-        return {"title": "t", "duration": seconds, "transcript": lines, "keyframes": keys, "sheets": []}
+class WatchTheVideo(unittest.TestCase):  # Evens 10-16: no download, watch the actual video, 1-2 h must not fail
+    SIG = {"kind": "youtube", "id": "abcdefghijk", "url": "https://www.youtube.com/watch?v=abcdefghijk"}
 
-    def test_two_hour_video_is_read_in_segments_with_nothing_dropped(self):
-        got = self._got(7200)
+    def test_youtube_is_watched_from_the_link_without_download(self):
+        sent = []
+        def fake(messages, **k):
+            sent.append(messages)
+            if len(sent) == 1:
+                return '{"start": "00:00", "end": "00:09", "action": "opens the app"}\n'
+            return '{"kind": "learned_md", "text": "x"}\n{"kind": "method", "name": "m"}\n{"kind": "capability", "name": "c"}\n'
+        with mock.patch.object(S, "_watch", side_effect=fake), mock.patch.object(S, "download") as dl:
+            out = S.extract(self.SIG, {"title": "t", "duration": 7200, "transcript": "[00:01] hi", "watch": True})
+        dl.assert_not_called()
+        watched = [c for c in sent if isinstance(c[0]["content"], list) and c[0]["content"][0].get("type") == "video_url"]
+        for call in watched:  # visual log, methods, spot-check: each watches the WHOLE video from the link
+            self.assertEqual(call[0]["content"][0]["video_url"]["url"], self.SIG["url"])
+        self.assertEqual(len(watched), 3); self.assertEqual(len(sent), 4)
+        self.assertIn("whole video", out["coverage"]["watched"])
+        self.assertEqual(out["capabilities"], [{"name": "c"}])
+
+    def test_an_empty_visual_log_is_a_failure_not_a_blind_packet(self):
+        with mock.patch.object(S, "_watch", return_value="I cannot see the video."):
+            with self.assertRaises(RuntimeError):
+                S.extract(self.SIG, {"title": "t", "duration": 60, "transcript": "", "watch": True})
+
+    def test_two_hours_is_one_watch_at_one_frame_per_second(self):
+        part = S.video_part(self.SIG["url"], 7200)
+        self.assertNotIn("processing", part["video_url"])  # Gemini default: 1 frame per second + audio
+
+    def test_very_long_videos_still_fit_one_watch(self):
+        part = S.video_part(self.SIG["url"], 6 * 3600)
+        fps = part["video_url"]["processing"]["fps"]
+        self.assertLess(fps * 6 * 3600 * 70, 1_000_000)
+
+    def test_long_answers_are_continued_not_cut(self):
+        replies = [("{\"methods\": [{\"name\": \"a\"},", "length"), (" {\"name\": \"b\"}]}", "stop")]
         calls = []
-        def fake_one(sig, seg, label):
-            calls.append(seg)
-            return {"learned_md": label, "methods": [{"name": label}], "capabilities": [{"name": label}],
-                    "coverage": {"frames_kept": len(seg["keyframes"]), "frames_read": len(seg["keyframes"])}}
-        with mock.patch.object(S, "_extract_one", side_effect=fake_one):
-            out = S.extract({"kind": "youtube", "id": "x", "url": "u"}, got)
-        self.assertEqual(len(calls), 7200 // S.SEGMENT_S)
-        self.assertEqual(sum(len(c["keyframes"]) for c in calls), 3600)            # every frame, once
-        self.assertEqual(sum(c["transcript"].count("\n") + 1 for c in calls), 240)  # every transcript line, once
-        self.assertEqual(out["coverage"], {"frames_kept": 3600, "frames_read": 3600})
-        self.assertEqual(len(out["methods"]), len(calls)); self.assertEqual(len(out["capabilities"]), len(calls))
+        def post(body):
+            calls.append(body)
+            text, fin = replies[len(calls) - 1]
+            return {"choices": [{"message": {"content": text}, "finish_reason": fin}], "usage": {}}
+        with mock.patch.object(S, "_post", side_effect=post):
+            got = S._watch([{"role": "user", "content": [{"type": "text", "text": "go"}]}])
+        self.assertEqual(S._json(got)["methods"], [{"name": "a"}, {"name": "b"}])
+        self.assertEqual(calls[1]["messages"][-1]["role"], "user")
+        self.assertEqual(calls[0]["provider"]["order"], ["google-ai-studio"])
 
-    def test_short_video_is_one_segment(self):
-        with mock.patch.object(S, "_extract_one", return_value={"methods": [], "coverage": {}}) as one:
-            S.extract({"kind": "youtube", "id": "x", "url": "u"}, self._got(600))
-        self.assertEqual(one.call_count, 1)
+    def test_a_video_google_cannot_open_falls_back_to_every_frame(self):
+        with mock.patch.object(S, "_watch", side_effect=RuntimeError("private video")), \
+             mock.patch.object(S, "watch_fallback", return_value={"methods": [], "coverage": {"frames_kept": 9, "frames_read": 9}}) as fb:
+            out = S.extract(self.SIG, {"title": "t", "duration": 60, "transcript": "", "watch": True})
+        fb.assert_called_once()
+        self.assertEqual(out["coverage"]["frames_read"], 9)
 
-    def test_download_timeout_grows_with_length(self):
+    def test_no_disk_needed_to_watch(self):
+        with mock.patch.object(S, "free_gb", return_value=0.5), \
+             mock.patch.object(S, "youtube", return_value={"title": "t", "watch": True}), \
+             mock.patch.object(S, "extract", return_value={"methods": [], "capabilities": []}), \
+             mock.patch.object(S, "write_packet", return_value=Path("/x")), mock.patch.object(S, "ledger"), \
+             mock.patch.object(S, "known_ids", return_value=set()):
+            got = S._ingest(self.SIG["url"], force=True)
+        self.assertEqual(got["status"], "DONE")
+
+    def test_download_timeout_grows_with_length(self):  # fallback path only
         self.assertGreaterEqual(S.download_timeout(7200), 7200)
-        self.assertEqual(S.download_timeout(300), 1800)
 
     def test_capabilities_are_asked_for(self):
         self.assertIn("capabilities", S.EXTRACT_PROMPT)
+
+
+class VisualLog(unittest.TestCase):  # Evens 10-16: any agent can read what happened on screen, timestamped
+    SIG = {"kind": "youtube", "id": "abcdefghijk", "url": "https://www.youtube.com/watch?v=abcdefghijk"}
+    ROWS = ('{"start": "00:00", "end": "00:05", "scene": "intro", "app_or_ui": "terminal", "on_screen_text": "hi",'
+            ' "action": "types", "code_or_command": "npm i", "result_shown": "ok", "said": "hello"}\n'
+            '{"start": "00:05", "end": "00:09", "scene": "demo", "app_or_ui": "browser",\n'
+            ' "on_screen_text": "x", "action": "clicks Run", "code_or_command": "", "result_shown": "page", "said": ""}\n')
+
+    def test_rows_are_parsed_even_when_a_row_is_split_by_a_continuation(self):
+        rows = S.parse_visual_rows(self.ROWS)
+        self.assertEqual([r["start"] for r in rows], ["00:00", "00:05"])
+        self.assertEqual(rows[1]["action"], "clicks Run")
+
+    def test_the_visual_log_is_its_own_watch_and_feeds_the_methods(self):
+        sent = []
+        def fake(messages, **k):
+            sent.append(messages)
+            if len(sent) == 1:
+                return self.ROWS
+            return '{"kind": "learned_md", "text": "x"}\n{"kind": "method", "name": "m"}\n'
+        with mock.patch.object(S, "_watch", side_effect=fake):
+            out = S.extract(self.SIG, {"title": "t", "duration": 600, "transcript": "", "watch": True})
+        self.assertEqual(sent[0][0]["content"][0]["type"], "video_url")          # 1: watch -> visual log
+        self.assertIn("clicks Run", sent[1][0]["content"][1]["text"])            # 2: methods see the log
+        self.assertIn("CHECKING", json.dumps(sent[2]))                           # 3: independent spot-check watch
+        self.assertNotIn("video_url", json.dumps(sent[-1]))                      # 4: sweep reads, no re-watch
+        self.assertEqual(len(sent), 4)
+        self.assertEqual(len(out["visual_log"]), 2)
+
+    def test_packet_has_csv_jsonl_and_script(self):
+        d = Path(tempfile.mkdtemp())
+        rows = S.parse_visual_rows(self.ROWS)
+        S.write_visual_log(d, rows)
+        import csv as _csv
+        got = list(_csv.DictReader((d / "VISUAL-LOG.csv").open()))
+        self.assertEqual(got[0]["code_or_command"], "npm i")
+        self.assertEqual(len((d / "visual-log.jsonl").read_text().splitlines()), 2)
+        script = (d / "SCRIPT.md").read_text()
+        self.assertIn("00:05", script); self.assertIn("clicks Run", script)
+
+
+class VisualChecks(unittest.TestCase):  # links to the moment, gaps flagged, independent spot-check
+    def _rows(self, spans):
+        return [{**{k: "" for k in S.VISUAL_FIELDS}, "start": a, "end": b, "action": f"row {a}"} for a, b in spans]
+
+    def test_every_row_links_to_its_second(self):
+        rows = S.add_links(self._rows([("1:02:05", "1:02:09")]), "https://www.youtube.com/watch?v=abcdefghijk")
+        self.assertEqual(rows[0]["link"], "https://www.youtube.com/watch?v=abcdefghijk&t=3725s")
+
+    def test_gaps_and_a_short_ending_are_flagged(self):
+        gaps = S.coverage_gaps(self._rows([("00:00", "00:20"), ("01:30", "02:00")]), duration=300)
+        self.assertIn("00:20-01:30", gaps); self.assertIn("02:00-05:00", gaps)
+        self.assertEqual(S.coverage_gaps(self._rows([("00:00", "04:50")]), duration=300), [])
+
+    def test_spot_check_is_a_separate_watch_and_scores_rows(self):
+        rows = self._rows([(f"00:{i:02d}", f"00:{i + 1:02d}") for i in range(20)])
+        seen = []
+        def fake(messages, **k):
+            seen.append(messages)
+            return '{"checks": [' + ",".join('{"start": "00:%02d", "matches": %s}' % (i, "true" if i % 5 else "false") for i in range(10)) + ']}'
+        with mock.patch.object(S, "_watch", side_effect=fake):
+            got = S.spot_check("https://www.youtube.com/watch?v=abcdefghijk", 60, rows, n=10)
+        self.assertEqual(seen[0][0]["content"][0]["type"], "video_url")
+        self.assertEqual(got["checked"], 10); self.assertEqual(got["matched"], 8)
+
+
+class RobustLongOutput(unittest.TestCase):  # live 10-16: the 2h22m watch fit (861k tokens) but one big JSON broke
+    def test_jsonl_output_survives_a_broken_row(self):
+        text = ('{"kind": "learned_md", "text": "## A. Source map\\n- 00:00 intro"}\n'
+                '{"kind": "method", "name": "m1", "family": "skills"}\n'
+                '{"kind": "method", "name": "m2", "fam\n'            # cut mid-row by the output limit
+                '{"kind": "capability", "name": "c1"}\n'
+                '{"kind": "learned_md", "text": "## B. Atomic"}\n')
+        out = S.parse_extract_rows(text)
+        self.assertEqual([m["name"] for m in out["methods"]], ["m1"])
+        self.assertEqual([c["name"] for c in out["capabilities"]], ["c1"])
+        self.assertIn("## B. Atomic", out["learned_md"]); self.assertIn("00:00 intro", out["learned_md"])
+
+    def test_only_access_errors_fall_back_to_the_frame_route(self):
+        self.assertTrue(S.watch_blocked(RuntimeError("Gemini could not watch the video (403 PERMISSION_DENIED: Video is private)")))
+        self.assertTrue(S.watch_blocked(RuntimeError("This video is unavailable")))
+        self.assertFalse(S.watch_blocked(ValueError("Expecting value: line 4 column 12")))
+        sig = {"kind": "youtube", "id": "abcdefghijk", "url": "https://www.youtube.com/watch?v=abcdefghijk"}
+        with mock.patch.object(S, "_extract_watch", side_effect=ValueError("Expecting value")), \
+             mock.patch.object(S, "watch_fallback") as fb:
+            with self.assertRaises(ValueError):
+                S.extract(sig, {"watch": True})
+        fb.assert_not_called()
+
+    def test_each_watch_call_records_why_it_stopped(self):
+        rows = []
+        with mock.patch.object(S, "_post", return_value={"choices": [{"message": {"content": "x"}, "finish_reason": "stop"}], "usage": {}}), \
+             mock.patch.object(S, "ledger", side_effect=rows.append):
+            S._watch([{"role": "user", "content": "go"}])
+        self.assertEqual(rows[0]["finish"], "stop"); self.assertEqual(rows[0]["chars"], 1)
+
+
+class StudioLens(unittest.TestCase):  # Evens 10-16: motion-graphics / design videos watched for studio work
+    SIG = {"kind": "youtube", "id": "abcdefghijk", "url": "https://www.youtube.com/watch?v=abcdefghijk"}
+
+    def test_motion_videos_pick_the_studio_lens(self):
+        self.assertEqual(S.pick_lens({"title": "Kinetic typography in After Effects"}), "studio")
+        self.assertEqual(S.pick_lens({"title": "Logo reveal | motion graphics showreel"}), "studio")
+        self.assertEqual(S.pick_lens({"title": "Build an n8n agent in 20 minutes"}), "learn")
+        self.assertEqual(S.pick_lens({"title": "Build an n8n agent"}, asked="studio"), "studio")
+
+    def test_studio_watches_more_frames_per_second_and_still_fits(self):
+        fps = S.video_part(self.SIG["url"], 180, lens="studio")["video_url"]["processing"]["fps"]
+        self.assertGreaterEqual(fps, 5)
+        long = S.video_part(self.SIG["url"], 3600, lens="studio")["video_url"]["processing"]["fps"]
+        self.assertLess(long * 3600 * 102, 1_000_000); self.assertGreaterEqual(long, 0.2)
+
+    def test_studio_packet_has_shot_log_style_and_recipes(self):
+        sent = []
+        def fake(messages, **k):
+            sent.append(messages)
+            if len(sent) == 1:
+                return ('{"start": "00:00", "end": "00:02", "shot": "logo hit", "palette": "#0A0A0A, #00E5FF",'
+                        ' "motion": "scale 0->100% overshoot, 12 frames", "recreate": "EffectCraft: text layer, scale keyframes"}\n')
+            if "CHECKING" in json.dumps(messages):
+                return '{"checks": [{"start": "00:00", "matches": true}]}'
+            return '{"kind": "learned_md", "text": "## Palette"}\n{"kind": "method", "name": "overshoot logo hit", "family": "content-creative"}\n'
+        with mock.patch.object(S, "_watch", side_effect=fake):
+            out = S.extract(self.SIG, {"title": "Logo animation", "duration": 120, "transcript": "", "watch": True, "lens": "studio"})
+        self.assertIn("motion", S.STUDIO_FIELDS); self.assertIn("recreate", S.STUDIO_FIELDS)
+        self.assertIn("shot by shot", json.dumps(sent[0]).lower())
+        self.assertEqual(out["lens"], "studio"); self.assertEqual(out["visual_log"][0]["palette"], "#0A0A0A, #00E5FF")
+        d = Path(tempfile.mkdtemp())
+        S.write_visual_log(d, out["visual_log"], lens="studio")
+        self.assertTrue((d / "STUDIO-LOG.csv").exists()); self.assertIn("EffectCraft", (d / "SCRIPT.md").read_text())
+
+    def test_the_operator_can_ask_for_the_studio_lens(self):
+        t = next(t for t in O.TOOLS if t["function"]["name"] == "signal")
+        self.assertIn("lens", t["function"]["parameters"]["properties"])
+
+
+class StudioFiling(unittest.TestCase):  # Evens 10-16: studio notes stored in ArtCraft Studio to help do work
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp())
+        for t in ("Video Editing", "Brand & Identity"):
+            (self.root / "01 Internal" / "Playbooks" / t / "refs").mkdir(parents=True)
+        (self.root / "01 Internal/Playbooks/Video Editing/refs/REFS.md").write_text("# refs\n- old line\n")
+        self.packet = Path(tempfile.mkdtemp())
+        for f in ("STYLE.md", "SCRIPT.md", "STUDIO-LOG.csv", "full.txt"):
+            (self.packet / f).write_text(f)
+
+    def test_studio_notes_go_to_the_playbook_refs_and_the_list_is_appended(self):
+        sig = {"id": "abcdefghijk", "url": "https://www.youtube.com/watch?v=abcdefghijk", "kind": "youtube"}
+        with mock.patch.object(S, "STUDIO_ROOT", self.root):
+            d = S.file_in_studio(sig, {"title": "Logo: reveal/2"}, {"studio_type": "Video Editing", "methods": [1, 2]}, self.packet)
+            S.file_in_studio(sig, {"title": "Logo: reveal/2"}, {"studio_type": "Video Editing", "methods": [1, 2]}, self.packet)
+        self.assertEqual(d.parent, self.root / "01 Internal/Playbooks/Video Editing/refs")
+        self.assertNotIn("/", d.name.replace(" - ", ""))   # title made safe for a folder name
+        self.assertTrue((d / "STYLE.md").exists()); self.assertTrue((d / "STUDIO-LOG.csv").exists())
+        self.assertFalse((d / "full.txt").exists())        # no transcript dump (Studio rule 5)
+        self.assertIn(sig["url"], (d / "README.md").read_text())
+        refs = (self.root / "01 Internal/Playbooks/Video Editing/refs/REFS.md").read_text()
+        self.assertIn("- old line", refs); self.assertEqual(sum(l.startswith("- abcdefghijk -") for l in refs.splitlines()), 1)  # appended once, old kept
+
+    def test_unknown_type_falls_back_to_video_editing(self):
+        with mock.patch.object(S, "STUDIO_ROOT", self.root):
+            d = S.file_in_studio({"id": "x1", "url": "u", "kind": "youtube"}, {"title": "t"}, {"studio_type": "Made Up"}, self.packet)
+        self.assertEqual(d.parent.parent.name, "Video Editing")
+
+    def test_the_model_names_the_content_type(self):
+        out = S.parse_extract_rows('{"kind": "studio_type", "value": "Brand & Identity"}\n{"kind": "method", "name": "m"}\n')
+        self.assertEqual(out["studio_type"], "Brand & Identity")
+        self.assertIn("studio_type", S.STUDIO_EXTRACT)
 
 
 if __name__ == "__main__":
