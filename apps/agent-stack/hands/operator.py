@@ -27,8 +27,9 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 STACK = HERE.parent
-MAX_STEPS = int(os.environ.get("JARVIS_OPERATOR_STEPS") or 80)
-TIME_BUDGET_S = float(os.environ.get("JARVIS_OPERATOR_SECONDS") or 1800)
+MAX_STEPS = int(os.environ.get("JARVIS_OPERATOR_STEPS") or 400)          # Evens 10-16: jobs can run for hours
+TIME_BUDGET_S = float(os.environ.get("JARVIS_OPERATOR_SECONDS") or 21600)  # 6 h; brakes, gates and the cost cap still apply
+QUIET_S = 600  # a long job says one line of progress at least every 10 minutes
 OUT_CHARS = 8000
 HANDS_APP = Path.home() / "Applications" / "Jarvis Hands.app"
 TERMINAL = {"done", "ask_owner"}
@@ -78,6 +79,9 @@ SYSTEM = (
     "continues the request before it. When he asks for several things, do every one and report each. A half sentence "
     "('open YouTube and...'): do the clear part and ask for the rest in one line. Do exactly what he asked: no extra "
     "side effects, no bonus actions he did not ask for.\n"
+    "Research: search results are only leads. Open the real source pages (for a GitHub project, its repo page) "
+    "and take every number, date and fact from what you read in THIS job; put the source links in what you deliver; never "
+    "fill gaps from memory. "
     "Truth: never claim a step you did not verify with a real result. If you could not do something, say exactly what "
     "stopped you.\n"
     "His stops (ask first, then continue another way): sending or posting, spending, deleting his files, merging or "
@@ -122,7 +126,9 @@ def brain_context() -> str:
 
 def system_prompt() -> str:
     prof = profile_lines()
-    base = SYSTEM + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "") + brain_context()
+    today = time.strftime("%A %Y-%m-%d, %H:%M") + " Eastern"
+    base = (SYSTEM + f"\nToday is {today}. Anything you know from training may be out of date; for anything current, check it now.\n"
+            + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "") + brain_context())
     return base + ("\nHis coding agents are Claude Code, Codex and Cursor; 'Claude Code's changes' means their commits "
                    "and PRs on HIS repo snevemoney/n8n-cursor (Jarvis lives in apps/agent-stack), never Anthropic's repos.")
 
@@ -911,12 +917,20 @@ def _model_fn(tier: str = "mid", chain: list | None = None):
 def step_once(task: Task, tools: Tools, model_fn) -> str | None:
     """One model turn plus its tool calls. Returns a terminal status or None to continue."""
     messages = task.read("messages.json")
+    if len(messages) > HX.COMPACT_AT:
+        messages = HX.compact(messages, task.rows("trace.jsonl"))
+        task.write("messages.json", messages)
+    spoke = [float(r.get("at") or 0) for r in task.rows("speech.jsonl")]
+    st0 = task.read("state.json")
+    if time.time() - max(spoke + [float(st0.get("turn_at") or time.time())]) > QUIET_S and \
+            not (messages[-1].get("role") == "user" and "one line" in str(messages[-1].get("content"))):
+        messages.append({"role": "user", "content": "(It has been over 10 minutes. Give Evens one line of progress with say, then continue.)"})
     got = model_fn(HX.context_view(messages), TOOLS)
     metered = HX.add_usage(task.read("state.json"), got.get("usage"))
     task.write("state.json", metered)
     if HX.over_cap(metered):
         task.speak(f"This job has cost {metered['cost_usd']:.2f} dollars so far, so I paused it. Say go on and I'll continue.")
-        task.write("state.json", {**metered, "status": "WAITING_OWNER", "question": "cost ceiling reached"})
+        task.write("state.json", {**metered, "status": "WAITING_OWNER", "question": "cost ceiling reached", "pending_cap": True})
         return "WAITING_OWNER"
     if not got.get("ok"):
         task.trace({"event": "model_error", "error": got.get("error")})
@@ -1228,6 +1242,8 @@ def _his_last_words(messages: list) -> str:
 
 HELPER_FENCED = {"computer", "safari", "open", "write_file", "edit_file", "mcp", "signal", "delegate", "say", "ask_owner"}
 
+RESEARCH_RE = re.compile(r"\b(research|look up|latest|current(?:ly)?|right now|this week|compare|comparison|"
+                         r"most popular|top \d+|stars|price|prices|news|what'?s new|review of)\b", re.I)
 CANT_RE = re.compile(r"\b(i\s+can(?:'|no)?t|cannot|i\s+don'?t\s+have\s+(?:access|a\s+way|the\s+ability)|unable\s+to|"
                      r"isn'?t\s+available|not\s+available|no\s+\w+(?:\s+\w+)?\s+tool|outside\s+what\s+i\s+can)\b", re.I)
 ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal"}
@@ -1246,7 +1262,16 @@ def _done_gate(task, name: str, args: dict) -> str:
     acted = any(r.get("tool") in ACTING_TOOLS for r in rows)
     why = ""
     open_steps = [x["step"] for x in (st.get("plan") or []) if x.get("status") in ("todo", "doing")]
-    if open_steps and n < 2:
+    goal = str(task.read("request.json").get("goal") or "")
+    read_pages = [r for r in rows if r.get("tool") == "fetch_url" or (r.get("tool") == "safari" and
+                  (r.get("args") or {}).get("action") in ("read", "snapshot", "navigate", "new_tab", "find"))]
+    wrote = " ".join(json.dumps(r.get("args")) for r in rows if r.get("tool") in ("write_file", "shell", "edit_file"))
+    if RESEARCH_RE.search(goal) and n < 2 and (not read_pages or not re.search(r"https?://", summary + " " + wrote)):
+        why = ("Before you finish: this is research, and you have " + ("not opened any source page" if not read_pages else
+               "not put source links in what you delivered") + ". Search results are leads: open the real pages "
+               "(fetch_url or safari read; for a GitHub project its repo page), take the numbers from them, cite the links, "
+               "and fix anything you wrote from memory.")
+    elif open_steps and n < 2:
         why = ("Before you finish: your plan still has open steps: " + "; ".join(open_steps[:6]) + ". Do them, or mark "
                "them dropped with the reason, then finish.")
     elif CANT_RE.search(summary):
@@ -1295,6 +1320,10 @@ def tell(hive: Path, line: str) -> dict:
         return {"ok": False}
     task = Task(Path(hive) / "operator-tasks" / tid)
     st = task.read("state.json")
+    if st.get("pending_cap") and (YES_RE.search(str(line)) or re.search(r"\b(go on|keep going|continue)\b", str(line), re.I)):
+        # his "go on" at the cost ceiling raises THIS job's ceiling by one more step (bench 10-16: it re-paused at once)
+        st = {**st, "cost_cap": round(float(st.get("cost_cap") or HX.JOB_COST_CAP) + HX.JOB_COST_CAP, 2), "pending_cap": False}
+        task.write("state.json", st)
     if st.get("pending_ok") and YES_RE.search(str(line)):
         task.write("state.json", {**st, "granted": st["pending_ok"]})  # his yes covers the one action he was asked about
     with FileLock(task.path / "messages.lock"):

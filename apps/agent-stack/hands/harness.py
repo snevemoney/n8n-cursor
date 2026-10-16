@@ -57,7 +57,37 @@ def add_usage(state: dict, usage: dict | None) -> dict:
             "tokens_out": int(state.get("tokens_out") or 0) + int(usage.get("completion_tokens") or 0)}
 
 
+COMPACT_AT = 160   # messages; long jobs (hours) fold older steps into a progress digest
+COMPACT_KEEP = 40
+
+
+def compact(messages: list, trace_rows: list) -> list:
+    """Keep the system prompt, his original request and the newest steps; replace the older middle with a digest of
+    what was actually done (from the trace, not a model's retelling). Cuts only at an assistant turn, so no tool result
+    is left without its call."""
+    if len(messages) <= COMPACT_AT:
+        return messages
+    head = messages[:2]
+    cut = len(messages) - COMPACT_KEEP
+    while cut < len(messages) and messages[cut].get("role") != "assistant":
+        cut += 1
+    if cut >= len(messages) - 2:
+        return messages
+    done = []
+    for r in trace_rows:
+        if r.get("event") != "tool" or r.get("tool") in ("say",):
+            continue
+        a = r.get("args") or {}
+        key = a.get("action") or a.get("command") or a.get("url") or a.get("path") or a.get("query") or a.get("target") or ""
+        res = str(r.get("result") or "").replace("\n", " ")[:120]
+        done.append(f"- {r.get('tool')} {str(key)[:80]} -> {res}")
+    digest = ("Progress so far (older steps folded to keep the job fast; this is from the real step log):\n"
+              + "\n".join(done[-120:]))
+    return head + [{"role": "user", "content": digest}] + messages[cut:]
+
+
 def over_cap(state: dict, cap: float = JOB_COST_CAP) -> bool:
+    cap = float(state.get("cost_cap") or cap)
     return float(state.get("cost_usd") or 0) >= cap
 
 

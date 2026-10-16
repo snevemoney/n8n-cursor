@@ -107,3 +107,50 @@ class BackgroundApps(unittest.TestCase):
 
     def test_private_apps_stay_fenced(self):
         self.assertEqual(O._private_app("app", {"app": "Messages"}), "Messages")
+
+
+class ResearchIsGrounded(unittest.TestCase):
+    """Bench 10-16 W01: four searches, no page opened, star counts from memory, 'as of late 2025'."""
+
+    def test_research_without_reading_sources_is_sent_back(self):
+        hive = Path(tempfile.mkdtemp())
+        t = O.Task.create(hive, "Research the three most popular open-source AI browser agents and compare their stars")
+        model = scripted([("web_search", {"query": "top browser agents"})],
+                         [("done", {"summary": "Saved the comparison.", "evidence": "file written"})],
+                         [("fetch_url", {"url": "https://github.com/browser-use/browser-use"})],
+                         [("done", {"summary": "Saved, sources: https://github.com/browser-use/browser-use", "evidence": "read the repo page"})])
+        with mock.patch.object(O.Tools, "web_search", return_value={"text": "results"}), \
+             mock.patch.object(O.Tools, "fetch_url", return_value={"text": "77k stars, MIT"}):
+            st = O.run(t.path, model_fn=model)
+        self.assertIn("browser-use", st["summary"])
+        self.assertTrue(any("this is research" in m["content"] for m in t.read("messages.json") if m.get("role") == "tool"))
+
+    def test_today_is_in_the_prompt(self):
+        self.assertIn("Today is", O.system_prompt())
+
+
+class LongJobs(unittest.TestCase):
+    """Evens 10-16: Jarvis runs for hours until the work is done (motion graphics, a whole Watch Later)."""
+
+    def test_limits_allow_hours(self):
+        self.assertGreaterEqual(O.MAX_STEPS, 400); self.assertGreaterEqual(O.TIME_BUDGET_S, 6 * 3600)
+
+    def test_compaction_keeps_pairs_and_the_real_log(self):
+        msgs = [{"role": "system", "content": "s"}, {"role": "user", "content": "goal"}]
+        for i in range(120):
+            msgs.append({"role": "assistant", "content": None, "tool_calls": [{"id": f"c{i}", "type": "function", "function": {"name": "shell", "arguments": "{}"}}]})
+            msgs.append({"role": "tool", "tool_call_id": f"c{i}", "content": "ok"})
+        trace = [{"event": "tool", "tool": "shell", "args": {"command": f"step {i}"}, "result": "ok"} for i in range(120)]
+        out = O.HX.compact(msgs, trace)
+        self.assertLess(len(out), len(msgs)); self.assertEqual(out[1]["content"], "goal")
+        self.assertIn("step 119", out[2]["content"]); self.assertEqual(out[3]["role"], "assistant")
+
+    def test_go_on_raises_the_cost_ceiling(self):
+        hive = Path(tempfile.mkdtemp())
+        t = O.Task.create(hive, "long job")
+        t.write("state.json", {**t.read("state.json"), "status": "WAITING_OWNER", "pending_cap": True, "cost_usd": 1.6,
+                               "pid": os.getpid()})
+        st = t.read("state.json"); st["status"] = "RUNNING"; t.write("state.json", st)
+        O.tell(hive, "go on")
+        st = t.read("state.json")
+        self.assertEqual(st["cost_cap"], 3.0); self.assertFalse(O.HX.over_cap(st))
