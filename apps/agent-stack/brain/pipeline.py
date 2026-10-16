@@ -1023,7 +1023,7 @@ ROUTE_SEARCH_LEAD_RE = re.compile(
 
 
 ACK_LINE = "On it."
-ACK_SKIP = frozenset({"say", "capability", "task_board"})
+ACK_SKIP = frozenset({"say", "capability", "task_board", "brain_model"})
 
 
 
@@ -1560,6 +1560,8 @@ def _model_free_route_once(spoken_in: str) -> dict | None:
         return {"tool": "task_board", "args": {"op": "modes"}, "speak": ""}
     if _task_board_hand().wants_drop(spoken_in) == "what":  # canvas: drop -> a real answer, not model recall
         return {"tool": "task_board", "args": {"op": "drop"}, "speak": ""}
+    if _brain_model_hand().wants(spoken_in):  # Evens 10-16: "switch to Sonnet" / "back to deepseek", by voice or text
+        return {"tool": "brain_model", "args": {}, "speak": ""}
     if _capability_hand().wants(spoken_in):  # "don't you have a red arrow?", "can you change your code?"
         return {"tool": "capability", "args": {}, "speak": ""}
     if (_pointer_request(spoken_in) or _pointer_hand().wants_pointer(spoken_in)) and not is_hard_step(spoken_in):
@@ -1891,6 +1893,10 @@ def _code_run_hand():
 
 def _apps_hand():
     return _load_ready_hand("agent_stack_apps", STACK / "hands" / "apps.py")  # locked (audit 2026-10-16)
+
+
+def _brain_model_hand():
+    return _load("agent_stack_brain_model", STACK / "hands" / "brain_model.py")
 
 
 def _capability_hand():
@@ -6868,6 +6874,11 @@ def _run_tool_inner(
         _today = re.search(r"\b(?:we|today|my\s+day|the\s+day)\b", utterance or "", re.I)
         return {"ok": True, "tool": tool, "spoken": _rm.spoken_today() if _today else _rm.spoken_recent(), "wires": ["results"], "cites": [],
                 "sent": False, "task_verified": True, "outcome": TOOL_LOOP}
+    if tool == "brain_model":
+        got = _brain_model_hand().run(utterance, args)
+        return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["brain_model"],
+                "cites": [], "sent": False, "task_verified": bool(got.get("task_verified")),
+                "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
     if tool == "capability":
         got = _capability_hand().run(utterance, prior=args.get("prior"))
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["capability"],
@@ -8099,7 +8110,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("capability", "task_board", "apps", "repo", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief")
+DETERMINISTIC_HANDS = ("capability", "task_board", "brain_model", "apps", "repo", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:

@@ -69,6 +69,7 @@ TALK_MISS = "UNKNOWN. The talk model returned no text in time this turn (primary
 OPENROUTER_WALL_SEC = _sec_env("JARVIS_TALK_WALL_SEC", 22.0)
 TALK_DARK = "The talk wire is dark this turn."
 OPENROUTER_MAX_TOKENS = 512
+THINK_TOKENS = 1024  # thinking budget for models that always reason (Claude Opus/Fable) when switched in by "use opus"
 OPENROUTER_RULE_TOKENS = int(os.environ.get("JARVIS_RULE_MAX_TOKENS") or 160)
 OPENROUTER_STATUS_ASK_TOKENS = int(os.environ.get("JARVIS_STATUS_ASK_MAX_TOKENS") or 120)
 # "Status check: are all your tools ready?" with no status hand: live non-stream 320-token
@@ -127,6 +128,13 @@ OPENROUTER_HANDS = (
         "parameters":{"type":"object","properties":{"action":{"type":"string","enum":["start","status","stop"]},
                                                      "goal":{"type":"string","description":"the full task in Evens's words plus needed context"}},
                       "additionalProperties":False}}},
+    {"type":"function","function":{"name":"brain_model",
+        "description":"Switch the model you think with when the current request needs better understanding than you have now: "
+                       "an ambiguous ask, a correction after a wrong answer, or careful multi-step work (sonnet; opus for the hardest). "
+                       "Your switch lasts 30 minutes, then you return to the default. Use model=deepseek to go back sooner. "
+                       "Say why in reason. Evens can also switch you himself by saying so.",
+        "parameters":{"type":"object","properties":{"model":{"type":"string","description":"haiku, sonnet, opus, fable, deepseek, or a full OpenRouter id"},
+                                                     "reason":{"type":"string"}},"required":["model"],"additionalProperties":False}}},
     {"type":"function","function":{"name":"pointer",
         "description":"Draw a red arrow at a visible target explicitly requested by the user. Host validates the current request or retained pointer follow-up. Never clicks; a capability question does not draw.",
         "parameters":{"type":"object","properties":{},"additionalProperties":False}}},
@@ -970,8 +978,18 @@ def has_openrouter_key() -> bool:
     return bool(openrouter_api_key())
 
 
+def _brain_override() -> str:
+    """Evens 10-16: "switch to Sonnet" by voice or text takes effect on the next call (hands/brain_model.py)."""
+    try:
+        spec = importlib.util.spec_from_file_location("agent_stack_brain_model", Path(__file__).resolve().parents[1] / "hands" / "brain_model.py")
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        return mod.current()
+    except Exception:  # noqa: BLE001 - a broken switch file must never darken talk
+        return ""
+
+
 def openrouter_model() -> str:
-    return (os.environ.get("OPENROUTER_MODEL") or DEFAULT_OPENROUTER_MODEL).strip() or DEFAULT_OPENROUTER_MODEL
+    return (_brain_override() or os.environ.get("OPENROUTER_MODEL") or DEFAULT_OPENROUTER_MODEL).strip() or DEFAULT_OPENROUTER_MODEL
 
 
 def openrouter_vision_model() -> str:
@@ -1655,6 +1673,10 @@ def _openrouter_payload(
     if model in OPENROUTER_PAID_FALLBACKS:
         # The conversational token ceiling needs answer tokens, not an unfinished thinking trace.
         body["reasoning"] = {"enabled": False}
+    elif re.match(r"anthropic/claude-(?:opus|fable)-", model or ""):
+        # Opus/Fable think by default (reasoning can't be turned off): cap the thinking and keep the answer budget whole.
+        body["reasoning"] = {"max_tokens": THINK_TOKENS}
+        body["max_tokens"] = int(body["max_tokens"]) + THINK_TOKENS
     if with_tools:
         tools = HAND_CATALOG.provider_tools(OPENROUTER_HANDS, Path(__file__).resolve().parent.parent) if hands else []
         if extra_tools:
