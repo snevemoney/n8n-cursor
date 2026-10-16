@@ -108,6 +108,45 @@ def profile_lines(limit: int = 2400) -> str:
     return "\n".join(keep)[:limit]
 
 
+OPERATOR_PROFILE = Path(os.environ.get("JARVIS_OPERATOR_PROFILE")
+                        or Path.home() / "ArtCraft Studio/00 Private/Context References/Operator Profile")
+PROFILE_CAP = {"EVENS-PROFILE.md": 9000, "COMMUNICATION-PROTOCOL.md": 3500, "GLOSSARY.md": 1800}
+
+
+def _section(text: str, keep: tuple) -> str:
+    """Only the '## ' sections whose heading starts with one of keep (whole text when keep is empty)."""
+    if not keep:
+        return text
+    out, on = [], False
+    for ln in text.splitlines():
+        if ln.startswith("## "):
+            on = ln[3:].strip().startswith(keep)
+        if on:
+            out.append(ln)
+    return "\n".join(out)
+
+
+def operator_profile() -> str:
+    """Evens 10-16: what he wants and cares about, how to read him and how to report to him, from the private Operator
+    Profile (ArtCraft Studio), read fresh every job so Jarvis never differs from it."""
+    picks = (("EVENS-PROFILE.md", ()), ("COMMUNICATION-PROTOCOL.md", ("A.", "B.")), ("GLOSSARY.md", ("Voice",)))
+    parts = []
+    for name, keep in picks:
+        try:
+            text = (OPERATOR_PROFILE / name).read_text(encoding="utf-8")
+        except OSError:
+            continue
+        text = re.sub(r"(?s)\A---.*?---\s*", "", text)
+        parts.append(_scrub(_section(text, keep).strip())[:PROFILE_CAP[name]])
+    if not parts:
+        return ""
+    return ("\n\nOperator Profile — what Evens wants and cares about and how to talk with him (his own words, kept current; "
+            "his latest word in chat wins):\n" + "\n\n".join(parts)
+            + f"\nWhen he states a new preference, correction or decision, append one line to {OPERATOR_PROFILE}/PROPOSALS-INBOX.md "
+            "the same turn (format: - YYYY-MM-DD · jarvis · \"his words\" → proposed change: ... [OPEN]). Never edit the "
+            "profile itself; never copy it anywhere public.")
+
+
 BRAIN_FILES = (("CURRENT_STATE.md", 1600), ("ACTIVE_TASKS.md", 1200), ("PLATFORM_DIGEST.md", 1600))
 CHAT_CORPUS = Path.home() / "jarvis-proof/intent/corpus-all.jsonl"
 
@@ -133,7 +172,7 @@ def system_prompt() -> str:
     prof = profile_lines()
     today = time.strftime("%A %Y-%m-%d, %H:%M") + " Eastern"
     base = (SYSTEM + f"\nToday is {today}. Anything you know from training may be out of date; for anything current, check it now.\n"
-            + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "") + brain_context())
+            + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "") + operator_profile() + brain_context())
     return base + ("\nHis coding agents are Claude Code, Codex and Cursor; 'Claude Code's changes' means their commits "
                    "and PRs on HIS repo snevemoney/n8n-cursor (Jarvis lives in apps/agent-stack), never Anthropic's repos.")
 

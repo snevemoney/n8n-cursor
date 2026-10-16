@@ -9,8 +9,16 @@ from unittest import mock
 
 H = Path(__file__).parent
 spec = importlib.util.spec_from_file_location("sig_test", H / "signals.py"); S = importlib.util.module_from_spec(spec); spec.loader.exec_module(S)
+# live 10-16: tests that fake model replies wrote them into the REAL ledger and were misread as live failures.
+# Every test in this file uses a throwaway cache/ledger.
+S.CACHE = Path(tempfile.mkdtemp()); S.LEDGER = S.CACHE / "ledger.jsonl"
 spec = importlib.util.spec_from_file_location("op_sig_test", H / "operator.py"); O = importlib.util.module_from_spec(spec); spec.loader.exec_module(O)
 spec = importlib.util.spec_from_file_location("auth_sig_test", H / "authority.py"); A = importlib.util.module_from_spec(spec); spec.loader.exec_module(A)
+
+
+class Isolation(unittest.TestCase):
+    def test_tests_never_write_the_real_ledger(self):
+        self.assertNotIn("Library/Caches", str(S.LEDGER))
 
 
 class Classify(unittest.TestCase):
@@ -386,7 +394,7 @@ class PlaybookUpdates(unittest.TestCase):  # Evens 10-16: each studio video upda
         self.assertIn("never", S.STUDIO_EXTRACT.split('"guideline"')[1][:400].lower())
 
 
-class LongWatchCompleteness(unittest.TestCase):  # live 10-16: 2h22m log stopped at 118:13; thinking ate the budget
+class LongWatchCompleteness(unittest.TestCase):  # live 10-16: 2h22m log stopped at 118:13 (gap filling); low thinking
     SIG = {"kind": "youtube", "id": "abcdefghijk", "url": "https://www.youtube.com/watch?v=abcdefghijk"}
 
     def test_watch_calls_keep_thinking_low_so_the_answer_gets_the_budget(self):
