@@ -53,6 +53,25 @@ SYSTEM = (
 )
 
 
+def profile_lines(limit: int = 2400) -> str:
+    """What Jarvis is (Evens's definition) and who Evens is, from the shared files. Facts, not instructions."""
+    keep = []
+    for name in ("JARVIS_DEFINITION.md", "OPERATOR_PROFILE.md"):
+        try:
+            text = (Path.home() / ".grok-shared" / name).read_text(encoding="utf-8")
+        except OSError:
+            continue
+        keep += [ln.strip() for ln in text.splitlines() if ln.strip().startswith("- ")]
+    return "\n".join(keep)[:limit]
+
+
+def system_prompt() -> str:
+    prof = profile_lines()
+    base = SYSTEM + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "")
+    return base + ("\nHis coding agents are Claude Code, Codex and Cursor; 'Claude Code's changes' means their commits "
+                   "and PRs on HIS repo snevemoney/n8n-cursor (Jarvis lives in apps/agent-stack), never Anthropic's repos.")
+
+
 def _fn(name, desc, props, required=()):
     return {"type": "function", "function": {"name": name, "description": desc,
             "parameters": {"type": "object", "properties": props, "required": list(required)}}}
