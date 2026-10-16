@@ -65,6 +65,8 @@ def _home_dot_path(p: Path) -> bool:
         rel = p.relative_to(Path.home().resolve())
     except ValueError:
         return False
+    if rel.parts[:2] in (("Library", "Mobile Documents"), ("Library", "CloudStorage")):
+        return False  # iCloud Drive / Google Drive / Dropbox: his own documents (live 10-16: iCloud read as "a secret")
     return bool(rel.parts) and (rel.parts[0].startswith(".") or rel.parts[0] == "Library")
 
 
