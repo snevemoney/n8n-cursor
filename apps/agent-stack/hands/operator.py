@@ -807,7 +807,7 @@ POOLS = {
     "mid": {"any": ["deepseek/deepseek-v4-pro", "x-ai/grok-4.3", "google/gemini-3.6-flash"],
             "screen": ["anthropic/claude-sonnet-5.5", "openai/gpt-6.1-sol", "google/gemini-3.6-flash"],
             "code": ["openai/gpt-5.1-codex", "deepseek/deepseek-v4-pro", "moonshotai/kimi-k2.7-code"],
-            "research": ["x-ai/grok-4.3", "google/gemini-3.6-flash", "deepseek/deepseek-v4-pro"],
+            "research": ["openai/gpt-6.1-sol", "google/gemini-3.6-flash", "x-ai/grok-4.3"],  # bench 10-16: grok cut corners on multi-source research
             "creative": ["google/gemini-3.6-flash", "x-ai/grok-4.3", "anthropic/claude-sonnet-5.5"]},
     "frontier": {"any": ["anthropic/claude-opus-5.5", "openai/gpt-6.1-sol", "google/gemini-4-argon"],
                  "screen": ["anthropic/claude-sonnet-5.5", "openai/gpt-6.1-sol", "anthropic/claude-opus-5.5"],
@@ -1262,6 +1262,14 @@ def _his_last_words(messages: list) -> str:
 
 HELPER_FENCED = {"computer", "safari", "open", "write_file", "edit_file", "mcp", "signal", "delegate", "say", "ask_owner"}
 
+def _unread_cited(text: str, rows: list) -> list:
+    """GitHub projects cited in what he gets but never opened in this job (bench 10-16: a license 'not listed in the
+    search snippet' because the repo page was never read)."""
+    opened = " ".join(json.dumps(r.get("args")).lower() for r in rows if r.get("tool") in ("fetch_url", "safari", "shell"))
+    cited = dict.fromkeys(m.lower().rstrip("/.") for m in re.findall(r"github\.com/[\w.-]+/[\w.-]+", text))
+    return [c for c in cited if c not in opened]
+
+
 RESEARCH_RE = re.compile(r"\b(research|look up|latest|current(?:ly)?|right now|this week|compare|comparison|"
                          r"most popular|top \d+|stars|price|prices|news|what'?s new|review of)\b", re.I)
 CANT_RE = re.compile(r"\b(i\s+can(?:'|no)?t|cannot|i\s+don'?t\s+have\s+(?:access|a\s+way|the\s+ability)|unable\s+to|"
@@ -1291,6 +1299,9 @@ def _done_gate(task, name: str, args: dict) -> str:
                "not put source links in what you delivered") + ". Search results are leads: open the real pages "
                "(fetch_url or safari read; for a GitHub project its repo page), take the numbers from them, cite the links, "
                "and fix anything you wrote from memory.")
+    elif RESEARCH_RE.search(goal) and n < 2 and _unread_cited(summary + " " + wrote, rows):
+        why = ("Before you finish: you cite pages you never opened in this job: " + ", ".join(_unread_cited(summary + " " + wrote, rows)[:5])
+               + ". Open each one and correct anything taken from search snippets.")
     elif open_steps and n < 2:
         why = ("Before you finish: your plan still has open steps: " + "; ".join(open_steps[:6]) + ". Do them, or mark "
                "them dropped with the reason, then finish.")

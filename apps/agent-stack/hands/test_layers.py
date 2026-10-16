@@ -154,3 +154,10 @@ class LongJobs(unittest.TestCase):
         O.tell(hive, "go on")
         st = t.read("state.json")
         self.assertEqual(st["cost_cap"], 3.0); self.assertFalse(O.HX.over_cap(st))
+
+
+class CitedMeansRead(unittest.TestCase):
+    def test_unread_citations_are_found(self):
+        rows = [{"tool": "fetch_url", "args": {"url": "https://github.com/Skyvern-AI/skyvern"}}]
+        self.assertEqual(O._unread_cited("see github.com/Skyvern-AI/skyvern and github.com/browser-use/browser-use", rows),
+                         ["github.com/browser-use/browser-use"])
