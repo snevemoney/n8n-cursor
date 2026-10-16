@@ -20,7 +20,9 @@ CLI_HARD = re.compile(r"\b(?:merge|push|delete|rm|release|deploy|publish|send|po
                       r"\s(?:-F|-d|-T|--data\S*|--upload-file|--form)\b", re.I)
 CLI_MORE = re.compile(
     r"^gh\s+(?:issue|pr|gist|repo|release)\b.*\b(?:create|comment|edit|close|delete|merge)\b|^gh\s+api\b.*(?:-X|--method)\s*(?:POST|PUT|PATCH|DELETE)|"
-    r"^(?:mail|mailx|sendmail|osascript)\b|(?:^|\s)-X\s*(?:POST|PUT|PATCH|DELETE)\b|"
+    r"^(?:mail|mailx|sendmail)\b|(?:^|\s)-X\s*(?:POST|PUT|PATCH|DELETE)\b|"
+    # AppleScript asks only when the script itself sends, posts, deletes or empties (live 21:16: "play document 1" was refused)
+    r"^osascript\b.*\b(?:send|reply|post|tweet|message|mail|delete|trash|empty|erase|purchase|buy|pay)\b|"
     r"^(?:rmdir|trash|unlink|shred|srm)\b|\s-delete\b", re.I)
 # Machine-destructive: never without Evens (moved from hands/agent_tools.py).
 CLI_MACHINE = re.compile(r"(?:^|\s)(?:sudo|mkfs|dd|shutdown|reboot|halt|diskutil\s+(?:erase|partition)|launchctl\s+(?:unload|remove|bootout))\b", re.I)

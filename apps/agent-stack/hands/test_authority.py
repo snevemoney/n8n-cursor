@@ -14,13 +14,15 @@ spec.loader.exec_module(A)
 class Shell(unittest.TestCase):
     def test_everyday_commands_run(self):
         for c in ["ls -la", "git status", "python3 --version", "npm test", "open -a Blender", "brew list",
-                  "grep -r 'token budget' notes", "curl -s https://example.com", "cat README.md | head -5"]:
+                  "grep -r 'token budget' notes", "curl -s https://example.com", "cat README.md | head -5",
+                  "osascript -e 'tell application \"QuickTime Player\" to play document 1'"]:
             self.assertEqual(A.authorize("shell", {"command": c})[0], A.ALLOW, c)
 
     def test_kept_stops_ask(self):
         for c in ["git push origin main", "rm -rf build", "ls && rm notes.txt", "gh pr create -t x", "mail bob < a.txt",
                   "curl -X POST https://api.x.com", "cat ~/.ssh/id_rsa", "sudo reboot", "find . -name '*.log' -delete",
-                  "echo hi | sendmail bob"]:
+                  "echo hi | sendmail bob", "osascript -e 'tell application \"Mail\" to send outgoing message 1'",
+                  "osascript -e 'tell application \"Finder\" to delete file \"a\"'"]:
             self.assertEqual(A.authorize("shell", {"command": c})[0], A.ASK, c)
 
 
