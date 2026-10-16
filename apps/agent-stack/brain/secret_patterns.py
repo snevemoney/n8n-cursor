@@ -22,11 +22,12 @@ TOKEN_RE = re.compile(
     r"|(?i:\bbearer)\s+[A-Za-z0-9._\-]{16,}"
 )
 # A password inside a URL: keep the scheme, user and host, drop the password.
-URL_CRED_RE = re.compile(r"(?P<pre>[a-z][a-z0-9+.\-]*://[^/\s:@]+:)(?P<pw>[^@\s/]+)(?P<at>@)", re.I)
+URL_CRED_RE = re.compile(r"(?P<pre>(?<![a-z0-9+.\-])[a-z][a-z0-9+.\-]{0,20}+://[^/\s:@]{1,128}+:)(?P<pw>[^@\s/]{1,256}+)(?P<at>@)", re.I)  # linear
 # NAME=value / name: value where the name says it is a secret.
-ASSIGN_RE = re.compile(
-    r"(?P<name>\b[A-Za-z0-9_.\-]*(?:api[_\-]?key|secret|token|passw(?:or)?d|passwd|private[_\-]?key|access[_\-]?key|"
-    r"client[_\-]?secret|auth)[A-Za-z0-9_.\-]*)(?P<sep>\s*[:=]\s*[\"']?)(?P<val>[^\s\"',;]{6,})", re.I)
+# Linear (routing audit 2026-10-16: the old name pattern was quadratic on "a.a.a..."): match any short name=value, then
+# keep only names that say they are secrets.
+ASSIGN_RE = re.compile(r"(?<![A-Za-z0-9_.\-])(?P<name>[A-Za-z0-9_.\-]{1,64}+)(?P<sep>\s*+[:=]\s*+[\"']?)(?P<val>[^\s\"',;]{6,})")
+_SECRET_NAME_RE = re.compile(r"api[_\-]?key|secret|token|passw(?:or)?d|passwd|private[_\-]?key|access[_\-]?key|client[_\-]?secret|auth", re.I)
 # "my password is Hunter2Pass!"
 SPOKEN_PW_RE = re.compile(r"(?P<lead>\b(?:password|passcode|pin)\s+(?:is|was)\s+)(?P<val>\S{4,})", re.I)
 
@@ -35,7 +36,11 @@ MASK = "[redacted]"
 
 def has_secret(text) -> bool:
     t = text if isinstance(text, str) else ""
-    return bool(TOKEN_RE.search(t) or URL_CRED_RE.search(t) or ASSIGN_RE.search(t) or SPOKEN_PW_RE.search(t))
+    return bool(TOKEN_RE.search(t) or URL_CRED_RE.search(t) or _secret_assign(t) or SPOKEN_PW_RE.search(t))
+
+
+def _secret_assign(t: str):
+    return next((m for m in ASSIGN_RE.finditer(t) if _SECRET_NAME_RE.search(m.group("name"))), None)
 
 
 def redact(text):
@@ -44,7 +49,8 @@ def redact(text):
         return text
     out = TOKEN_RE.sub(MASK, text)
     out = URL_CRED_RE.sub(lambda m: m.group("pre") + MASK + m.group("at"), out)
-    out = ASSIGN_RE.sub(lambda m: m.group("name") + m.group("sep") + (m.group("val") if m.group("val") == MASK else MASK), out)
+    out = ASSIGN_RE.sub(lambda m: m.group(0) if not _SECRET_NAME_RE.search(m.group("name")) else
+                        m.group("name") + m.group("sep") + (m.group("val") if m.group("val") == MASK else MASK), out)
     return SPOKEN_PW_RE.sub(lambda m: m.group("lead") + MASK, out)
 
 
@@ -54,7 +60,7 @@ def first_secret(text):
     m = TOKEN_RE.search(t)
     if m:
         return None, m.group(0)
-    m = ASSIGN_RE.search(t)
+    m = _secret_assign(t)
     if m:
         return m.group("name"), m.group("val")
     m = URL_CRED_RE.search(t)

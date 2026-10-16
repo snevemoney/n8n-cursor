@@ -73,7 +73,7 @@ GRANT_RE = re.compile(
     r"(?:full\s+)?(?:permission|permissions|access)\s+(?:is\s+)?granted|"
     r"i\s+(?:grant|give)\s+you\s+(?:full\s+)?(?:permission|access)|"
     r"(?:you\s+have|you've\s+got)\s+(?:my\s+)?(?:full\s+)?(?:permission|access)|"
-    r"i\s+(?:allow|authori[sz]e|permit)\s+(?:you|it|this|that)|"
+    r"i\s+(?:allow|authori[sz]e|permit)\s+you\b(?!\s+to\s+(?:rest|sleep|relax|take\s+a\s+break))|"
     r"you(?:\s+are|'re)\s+(?:allowed|authori[sz]ed|cleared|permitted)"
     r")(?:\s+to\s+(?:do\s+(?:it|this|that)|go\s+ahead|proceed|continue|look|read|open|search|browse))?"
     r"(?:[,.!]?\s*(?:sir|jarvis|go\s+ahead|do\s+it|proceed|continue|please))*\s*[.!]*\s*$", re.I)
@@ -83,7 +83,7 @@ REVOKE_RE = re.compile(
     r"(?:i\s+)?revoke\s+(?:your\s+|the\s+)?(?:permission|permissions|access)|"
     r"lock\s+(?:it\s+|yourself\s+)?(?:back\s+)?down|"
     r"(?:go\s+)?back\s+to\s+(?:safe|normal|restricted)\s+mode|"
-    r"close\s+(?:open\s+)?access"
+    r"close\s+(?:open\s+)?access|turn\s+(?:off\s+open\s+access|open\s+access\s+off)|disable\s+open\s+access"
     r")(?:\s*,?\s*(?:now|right\s+now|please))?[.!]*\s*$", re.I)
 
 
@@ -106,7 +106,7 @@ _GRANT_HEAD = re.compile(
     r"(?:full\s+)?(?:permission|permissions|access)\s+(?:is\s+)?granted|"
     r"i\s+(?:grant|give)\s+you\s+(?:full\s+)?(?:permission|access)|"
     r"(?:you\s+have|you've\s+got)\s+my\s+(?:full\s+)?(?:permission|access)|"
-    r"i\s+(?:allow|authori[sz]e|permit)\s+(?:you|it|this|that)|"
+    r"i\s+(?:allow|authori[sz]e|permit)\s+you\b(?!\s+to\s+(?:rest|sleep|relax|take\s+a\s+break))|"
     r"you(?:\s+are|'re)\s+now\s+(?:allowed|authori[sz]ed)"
     r")(?:\s+to\b)?[\s,.:;!-]*", re.I)
 # After a real grant, the owner often adds "you are allowed to ..." (Evens 2026-10-15); only then does it chain.
@@ -136,6 +136,11 @@ def grant_split(text: str) -> tuple[bool, str]:
     if not found:
         return False, ""
     rest = line.strip(" .!?,;:-")
+    # Routing audit 2026-10-16: "permission granted no wait / just kidding / lol / by the school / to the building" and
+    # "I said permission granted yesterday" are not a grant now.
+    if re.match(r"(?:no\b|nope\b|not\b|just\s+kidding|jk\b|lol\b|wait\b|by\s+the\b|by\s+my\b|to\s+the\b|for\s+(?:the|my)\b|"
+                r"yesterday\b|earlier\b|before\b|last\s+\w+|already\b)", rest, re.I) or re.search(r"\?\s*no\b|granted\s+to\s+(?:the|my|our|a)\b", raw, re.I):
+        return False, ""
     if re.fullmatch(r"(?:do\s+(?:it|this|that)|proceed|continue|go\s+ahead|now)?", rest, re.I):
         rest = ""
     return True, rest

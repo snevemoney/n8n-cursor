@@ -1,4 +1,4 @@
-route matrix: 74704/74704 pass · regressions=0 · improvements=0
+route matrix: 77360/77360 pass · regressions=0 · improvements=0
 system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tested · 198/629 links with both ends covered. Coverage, not the canvas's green.
 ## Inputs  (8/33 spoken route · 12/33 spoken or tested)
   ◦ Typed Orb text                     tests exist: face/test_serve.py

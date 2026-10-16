@@ -73,7 +73,7 @@ HARD_TEACH_RE = re.compile(
     re.I,
 )
 HARD_NEGATE_RE = re.compile(
-    r"\b(?:do not|don't|never|without|stop)\b.{0,48}\b(?:send|pay|deploy|book|publish|push|merge|delete|buy|purchase|order|transfer|wire)\b",
+    r"\b(?:do not|don't|didn't|won't|doesn't|can't|never|without|stop)\b.{0,48}\b(?:send|pay|deploy|book|publish|push|merge|delete|buy|purchase|order|transfer|wire)\b",
     re.I,
 )
 # An imperative send to the desks is a fan-out. An imperative Slack post is a post.
@@ -770,6 +770,8 @@ def _memory_hand():
 
 def wants_memory(utterance: str) -> bool:
     m = _memory_hand()
+    if hasattr(m, "wants"):
+        return bool(m.wants(utterance or ""))
     return bool(m.INTENT_RE.search(m._canon(utterance or "") if hasattr(m, "_canon") else (utterance or "")))
 
 
@@ -847,7 +849,8 @@ def wants_desk_dispatch(utterance: str) -> bool:
 
 
 LOOP_RE = re.compile(
-    r"\b(?:start|set\s+up|create|run)\s+(?:a\s+)?loop\b|\b(?:list|show)\s+(?:my\s+|the\s+)?loops\b|\b(?:cancel|stop|kill)\s+(?:the\s+)?[\w\s-]{0,30}\bloop\b",
+    r"\b(?:start|set\s+up|create|run)\s+(?:a\s+)?loop\b(?!\s+in\s+(?:python|js|javascript|code|bash))|\b(?:list|show)\s+(?:my\s+|the\s+)?loops\b|"
+    r"\b(?:cancel|stop|kill)\s+(?!(?:the\s+|an?\s+|my\s+)?(?:event|infinite|for|while|main|render|game)\b)(?:the\s+)?[\w\s-]{0,30}\bloop\b(?!\s+in\s+my\s+code)",
     re.I,
 )
 
@@ -951,9 +954,9 @@ def jarvis_rules() -> str:
 
 
 WEB_SEARCH_RE = re.compile(
-    r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b|\blook\s+(?:it\s+|this\s+|that\s+)?up\s+online\b|"
+    r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b(?!\s+(?:connection|speed|is\b|settings))|\blook\s+(?:it\s+|this\s+|that\s+)?up\s+online\b|"
     r"\bweb\s+search\b|\bgoogle\s+(?:the|for|it|what|who|how|when|where|a|an)\b|"
-    r"^\s*google\s+\w|\blook\s+up\s+.{1,80}?\s+(?:online|on\s+the\s+(?:web|internet))\b",
+    r"^\s*google\s+(?!is\b|docs?\b|sheets?\b|drive\b|maps?\b|chrome\b|was\b|has\b|says\b|a\s+good\b)\w|\blook\s+up\s+.{1,80}?\s+(?:online|on\s+the\s+(?:web|internet))\b",
     re.I,
 )
 
@@ -1153,7 +1156,8 @@ def split_steps(utterance: str) -> list[str]:
     return texts
 
 
-_THEN_SPLIT = re.compile(r"\s*(?:,|;)?\s+(?:and\s+)?then\s+|\s*,\s*then\s+", re.I)
+_THEN_SPLIT = re.compile(r"(?:\s*+[,;]\s*+|\s++)(?:and\s+)?then\s+|(?:\s*+,\s*+|\s++)and\s+(?=(?:open|close|quit|launch|start|find|search|read|"
+                         r"remember|show|list|check|take|look|play)\b)|(?:\s*+,\s*+|\s++)after\s+that(?:\s*+,\s*+|\s++)", re.I)  # linear (ReDoS audit)
 
 
 def _then_steps(utterance: str) -> list[str]:
@@ -1164,8 +1168,10 @@ def _then_steps(utterance: str) -> list[str]:
         parts = [p.strip(" ,;.?!") for p in _THEN_SPLIT.split(variant)]
         if not 2 <= len(parts) <= 4 or not all(parts):
             continue
-        if all(_simple_step(p) is not None or (model_free_route(p) or {}).get("tool") not in (None, "multistep")
-               for p in parts):
+        picks = [None if _simple_step(p) is not None else (model_free_route(p) or {}).get("tool") for p in parts]
+        if all(_simple_step(p) is not None or t not in (None, "multistep") for p, t in zip(parts, picks)):
+            if picks[0] == "memory" and any(t not in TALK_SAFE_TOOLS | {None, "say"} for t in picks[1:]):
+                return []  # "note that the recipe says open the oven then take a screenshot" is one note (audit A5)
             return parts
     return []
 
@@ -1196,8 +1202,10 @@ COST_FOLLOW_RE = re.compile(r"\bhow\s+much\s+(?:did|does|was)\s+(?:that|this|it)
 RESEARCH_RE = re.compile(r"\b(?:do|make|run)\s+(?:an?\s+)?online\s+research\s+(?:about|on|for)\s+\S|\bresearch\s+online\s+(?:about|on|for)\s+\S", re.I)
 RESEARCH_LEAD_RE = re.compile(r"^.*?\bonline\s+research\s+(?:about|on|for)\s+|^.*?\bresearch\s+online\s+(?:about|on|for)\s+", re.I)
 FILE_EXT_RE = re.compile(r"\.\w{2,4}\b")
-PULL_UP_MY_RE = re.compile(r"\b(?:pull|bring)\s+up\s+my\s+(?!screen\b|files?\b|downloads\b|desktop\b|documents\b|repos?\b)\w|"
-                           r"\b(?:find|show)\s+(?:me\s+)?my\s+(?!screen\b|files?\b|downloads\b|desktop\b|documents\b|repos?\b)\w", re.I)
+_NOT_NOTE = (r"(?!screen\b|files?\b|downloads\b|desktop\b|documents\b|repos?\b|keys?\b|way\b|phone\b|wallet\b|glasses\b|car\b|"
+             r"calendar\b|inbox\b|emails?\b|mail\b|agenda\b|schedule\b|location\b|airpods\b|mac\b|laptop\b|cursor\b|mouse\b)")
+PULL_UP_MY_RE = re.compile(r"^(?:(?:hey\s+)?jarvis\W+|(?:can|could|would)\s+you\s+|please\s+)*+(?:pull|bring)\s+up\s+my\s+" + _NOT_NOTE + r"\w|"
+                           r"^(?:(?:hey\s+)?jarvis\W+|(?:can|could|would)\s+you\s+|please\s+)*+(?:find|show)\s+(?:me\s+)?my\s+" + _NOT_NOTE + r"\w", re.I)
 # "I don't care about your <thing>" / "never mind that" / "forget it": a dismissal. The talk model echoed its last
 # reply (hand-back line) to it. Short dismissals get one fixed ack and no model; longer ones carrying a new ask fall through.
 DISMISS_RE = re.compile(r"^\s*(?:jarvis[\s,]*)?(?:(?:i|we)\s+(?:don['’]?t|do\s+not)\s+care\s+(?:about|for)\b(?:\s+\S+){0,4}"
@@ -1228,10 +1236,27 @@ def correction_text(spoken_in: str) -> str:
     return rest[:1].upper() + rest[1:]
 
 
+ROUTE_MAX_CHARS = 2000
+_WS_RUN = re.compile(r"[ \t\u00a0\u2000-\u200b\u3000]++")
+_QUOTES = str.maketrans({"\u2019": "'", "\u2018": "'", "\u02bc": "'", "\u201c": '"', "\u201d": '"'})
+
+
+def normalize_utterance(text, cap: int | None = None) -> str:
+    """One clean form of what was heard (routing audit 2026-10-16): lone surrogates no longer crash the turn,
+    curly apostrophes match "don't", runs of spaces collapse (several patterns were super-linear on them), and the
+    routing copy is capped. The model still gets the owner's words; only the routing reads this."""
+    t = str(text or "")
+    t = t.encode("utf-8", "replace").decode("utf-8", "replace").translate(_QUOTES)
+    t = _WS_RUN.sub(" ", t)
+    t = re.sub(r" ?\n[\s]*+", "\n", t).strip()
+    return t[:cap] if cap else t
+
+
 def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
     """Deterministic honest picks for the asks that went wrong in live chat. None = keep the normal route.
     Route matrix 2026-10-16: "hey jarvis, click the save button" / "so stop watching my screen" missed; the original
     phrasing is tried first, then the same lead-in fallbacks model_free_route uses."""
+    spoken_in = normalize_utterance(spoken_in, ROUTE_MAX_CHARS)
     pick = _live_chat_route_once(spoken_in, had_pending)
     if pick is not None or is_hard_step(spoken_in or ""):
         return pick
@@ -1244,6 +1269,8 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
 
 def _live_chat_route_once(spoken_in: str, had_pending: bool = False) -> dict | None:
     u = spoken_in or ""
+    if CANCEL_TAIL_RE.search(u) and len(u.split()) > 2:
+        return {"tool": "say", "args": {}, "speak": CANCEL_LINE}  # "click the save button no wait never mind": nothing acts
     if not had_pending and BARE_CONSENT_RE.match(u):
         return {"tool": "say", "args": {}, "speak": NO_PENDING_LINE}
     if DISMISS_RE.match(u):
@@ -1281,10 +1308,21 @@ def _live_chat_route_once(spoken_in: str, had_pending: bool = False) -> dict | N
     return None
 
 
-GREETING_LEAD_RE = re.compile(r"^\s*(?:(?:hey|hi|ok|okay|yo)\s+)?jarvis\s*[,:!.]?\s+|^\s*(?:so|and|now|ok|okay|alright)\s*,?\s+", re.I)
-REQUEST_LEAD_RE = re.compile(r"^\s*(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?|please\s+|(?:i\s+need|i\s+want|i'd\s+like)\s+you\s+to\s+"
-                             r"|go\s+ahead\s+and\s+)", re.I)
-POLITE_TAIL_RE = re.compile(r"(?:\s*,?\s*please|\s+for\s+me|\s+right\s+now|\s+now)?\s*[?.!]*\s*$", re.I)
+# Routing audit 2026-10-16 (B): speech-to-text hears "jervis", "travis", "jarvas"; owners say "um", "like", "okay so".
+_WAKE = r"(?:j[ae]rv[ia]s|jervis|jarvas|jarvi|travis|jarvus)"
+GREETING_LEAD_RE = re.compile(r"^\s*(?:(?:hey|hi|ok|okay|yo)\s+)?" + _WAKE + r"\s*[,:!.]?\s+|"
+                              r"^\s*(?:so|and|now|ok|okay|alright|um+|uh+|uhm|erm|like|yo|hey|well|right)\s*,?\s+", re.I)
+REQUEST_LEAD_RE = re.compile(r"^\s*(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?(?:like\s+|just\s+|go\s+ahead\s+and\s+)?|please\s+|"
+                             r"(?:i\s+need|i\s+want|i'd\s+like)\s+you\s+to\s+|go\s+ahead\s+and\s+)", re.I)
+POLITE_TAIL_RE = re.compile(r"(?:\s*+,?\s*+(?:please|thanks|thank\s+you|merci|s'il\s+te\s+pla[iî]t|" + _WAKE + r")|\s+for\s+me|\s+right\s+now|"
+                            r"\s+real\s+quick|\s+quickly|\s+now)*+[\s?.!]*+$", re.I)  # linear (ReDoS audit)
+# "open notes no wait safari" / "open notes i mean safari": keep the correction.
+CORRECTION_RE = re.compile(r"^(?P<verb>.*?\b(?:open|close|quit|launch|start|switch\s+to|go\s+to|play|search\s+for|look\s+up)\s+)"
+                           r"\S+(?:\s+\S+)?\s+(?:no\s+wait|i\s+mean|sorry|actually|no)\s*,?\s+(?P<fix>\S.*)$", re.I)
+_STT_FIXES = ((re.compile(r"\s+dot\s+(com|org|net|io|ai|ca|dev|md|txt|py|json|pdf)\b", re.I), r".\1"),
+              (re.compile(r"\b(cad|deck|design|effect|film|grid|light|pdf|photo|sound|vector|word)\s+craft\b", re.I),
+               lambda m: m.group(1).capitalize() + "Craft"),
+              (re.compile(r"^(?:first|start\s+by|to\s+start),?\s+", re.I), ""))
 
 
 def lead_variants(spoken_in: str) -> list[str]:
@@ -1304,6 +1342,15 @@ def lead_variants(spoken_in: str) -> list[str]:
     bare = POLITE_TAIL_RE.sub("", bare).strip()
     if bare and bare not in (raw, greet):
         out.append(bare[0].upper() + bare[1:])
+    base = bare or greet or raw
+    fixed = base
+    for rx, sub in _STT_FIXES:
+        fixed = rx.sub(sub, fixed)
+    m = CORRECTION_RE.match(fixed)
+    if m:
+        fixed = m.group("verb") + m.group("fix")
+    if fixed and fixed not in out and fixed != raw:
+        out.append(fixed)
     return out
 
 
@@ -1335,9 +1382,43 @@ def _mission_pick_once(text: str) -> tuple[dict, str] | None:
     return None
 
 
+# Routing audit 2026-10-16 (A1-A2): acting hands fired on "don't check my gmail", "did you ask codex", "how do i close
+# it", "my friend said install ...". A line that opens by negating, asking how, reporting the past or quoting someone
+# is talk, not an order: no acting hand is picked for it (the model answers).
+NOT_A_COMMAND_RE = re.compile(
+    r"^(?:(?:hey\s+)?jarvis\W+|so\s+|ok(?:ay)?\s+|please\s+|whatever\s+you\s+do,?\s+)*+(?:"
+    r"(?:please\s+)?(?:don'?t|do\s+not|never|no\s+need\s+to|stop\s+trying\s+to)\b|i\s+don'?t\s+want\s+you\s+to\b|"
+    r"you\s+(?:don'?t|do\s+not)\s+(?:need|have)\s+to\b|"
+    r"how\s+(?:do|would|can|should|could|did)\s+(?:i|you|we|people)\b|why\s+(?:did|do|would|are)\s+you\b|did\s+you\b|"
+    r"should\s+i\b|if\s+i\s+(?:say|said|ask|told)\b|i\s+already\b|i\s+(?:was\s+)?(?:gonna|going\s+to)\b|"
+    r"i\s+(?:plan|loop|read|clicked|opened|closed|installed|cloned|searched|asked|sent|wrote)\b|i\s+should\b|"
+    r"my\s+\w+\s+(?:said|says|told|wants|asked)\b|(?:he|she|they)\s+(?:said|told|asked)\b|can\s+i\s+ask\b|"
+    r"you\s+can\s+\w+\s+(?:it|this|that)\s+later\b|yesterday\s+i\b|the\s+video\s+says\b)", re.I)
+TALK_SAFE_TOOLS = frozenset({"say", "capability", "results_recall", "rules", "cost_card", "status", "mcp_inventory", "skills",
+                             "voice_engine", "prebrief", "pickup", "handback"})
+
+
 def turn_fixed_pick(spoken_in: str) -> dict | None:
     """The deterministic part of a turn, in the turn's order, with no hive, model or pending state:
     live-chat picks, then mission state, then the model-free route, then the Craft fast path."""
+    spoken_in = normalize_utterance(spoken_in, ROUTE_MAX_CHARS)
+    return talk_filter(_turn_fixed_pick(spoken_in), spoken_in)
+
+
+def talk_filter(pick: dict | None, spoken_in: str) -> dict | None:
+    """The router's pick, unless the line is talk (NOT_A_COMMAND_RE) or a hard step; then None (the model answers,
+    and the turn's hard-step gate refuses the step). Used by the turn and by turn_fixed_pick alike."""
+    tool = (pick or {}).get("tool")
+    if pick is None or tool in TALK_SAFE_TOOLS:
+        return pick
+    if tool != "memory" and NOT_A_COMMAND_RE.match(spoken_in):
+        return None
+    if is_hard_step(spoken_in) and tool not in ("refuse_hard_step", "say"):
+        return None  # a hard step never gets an acting pick (C8)
+    return pick
+
+
+def _turn_fixed_pick(spoken_in: str) -> dict | None:
     early = live_chat_route(spoken_in, False)
     if early is not None:
         return early
@@ -1356,6 +1437,7 @@ def turn_fixed_pick(spoken_in: str) -> dict | None:
 
 def model_free_route(spoken_in: str) -> dict | None:
     """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
+    spoken_in = normalize_utterance(spoken_in, ROUTE_MAX_CHARS)
     pick = _model_free_route_once(spoken_in)
     if pick is not None or is_hard_step(spoken_in):
         return pick
@@ -1366,8 +1448,9 @@ def model_free_route(spoken_in: str) -> dict | None:
     return None
 
 
-CLOCK_ASK_RE = re.compile(r"^(?:what(?:'s|\s+is)\s+(?:the\s+)?(?:time|date)(?:\s+(?:today|now|right\s+now))?|what\s+time\s+is\s+it(?:\s+(?:now|right\s+now))?"
-                          r"|what(?:'s|\s+is)\s+today'?s\s+date|what\s+day\s+is\s+(?:it|today)|what(?:'s|\s+is)\s+the\s+date\s+today"
+CLOCK_ASK_RE = re.compile(r"^(?:what(?:'?s|\s+is)\s+(?:the\s+)?(?:time|date)(?:\s+(?:today|now|right\s+now))?|what\s+time\s+is\s+it(?:\s+(?:now|right\s+now))?"
+                          r"|what(?:'?s|\s+is)\s+today'?s\s+date|what\s+day\s+is\s+(?:it|today)(?:\s+today)?|what(?:'?s|\s+is)\s+the\s+date\s+today"
+                          r"|tell\s+me\s+the\s+(?:time|date)|what\s+time\s+it\s+is|do\s+you\s+have\s+the\s+time"
                           r"|how\s+much\s+(?:free\s+)?disk\s+space\s+(?:do\s+i\s+have|is\s+(?:left|free))|how\s+much\s+free\s+space\s+do\s+i\s+have)"
                           r"[\s?.!]*$", re.I)
 
@@ -2234,27 +2317,107 @@ def _distinction_ask(text: str) -> bool:
     )
 
 
+# Routing audit 2026-10-16 (C1-C8, D): short spoken forms of consequential steps were missed ("send it", "pay normand",
+# "delete my notes", "push it", lowercase "call normand"), and the negate/teach rules swallowed real orders ("never mind,
+# send the email to sarah"). A clause is hard when it OPENS with the consequential verb after a lead-in: "remind me to
+# pay the rent", "i want to buy a laptop" and "the email says pay the invoice" do not open with it.
+_CLAUSE_LEAD = (r"^(?:(?:ok(?:ay)?|so|and|now|then|just|also|first|actually|please|jarvis|hey\s+jarvis|yes|yeah|alright|"
+                r"(?:can|could|would|will)\s+you(?:\s+please)?|i\s+need\s+you\s+to|go\s+ahead\s+and|"
+                r"when\s+(?:you'?re|you\s+are)\s+done|what\s+are\s+you\s+waiting\s+for|how\s+about\s+you|"
+                r"why\s+don'?t\s+you(?:\s+just)?|i\s+don'?t\s+care(?:\s+just)?|stop\s+stalling\s+and|don'?t\s+be\s+shy|"
+                r"don'?t\s+wait|do\s+not\s+hesitate\s+to|don'?t\s+forget\s+to|never\s*mind|stop\s+by\s+the\s+\w+\s+and|"
+                r"once\s+(?:the\s+)?\w+(?:\s+\w+)?\s+(?:passes|is\s+done|finishes)|when\s+the\s+\w+\s+(?:passes|is\s+done|finishes))\W*+)*+")
+_NOT_NAME = (r"(?!(?:me|it|back|the|a|an|this|that|these|those|function|api|method|hook|stack|center|centre|log|out|off|up|"
+             r"in|for|of|duty|doorbell|neck|maybe|you|him|her|them|us|here|there|again|anyone|someone|messages?|now|later|"
+             r"received|sent|delivered|failed|queued?|board|box|list|history|logs?|count|threads?|center|marketing|"
+             r"campaigns?|template|templates|tips|notifications?)\b)")
+_NAME_TAIL = (r"(?=\s*$|[\s,.!?]+(?:now|please|back|and|about|to|that|on|at|for|i'?m|saying|tell|tomorrow|today|tonight|"
+              r"later|the|a|an|my|asap|right)\b|\s*[,.!?]\s*$)")
+CLAUSE_HARD_RE = re.compile(_CLAUSE_LEAD + r"(?:"
+    r"send\s+(?!me\b|us\b)(?:it|this|that|them|these|those|the\s+\w+|my\s+\w+|over|\w+\s+(?:a|an|the|my|\$?\d+))\b|"
+    r"(?:call|phone|ring|text|sms|dm|facetime|whatsapp|email|e-mail|message|slack|forward|cc|bcc)\s+(?:my\s+\w+|" + _NOT_NAME + r"[a-z][a-z'-]{1,30}" + _NAME_TAIL + r")|"
+    r"forward\s+(?:it|this|that|them|the\s+\w+|my\s+\w+)\b|"
+    r"(?:reply|respond|write\s+back)\s+to\s+(?!the\s+(?:question|case|prompt|thread\s+in\s+my\s+head))\w+|"
+    r"give\s+\w+\s+a\s+(?:call|ring)\b|dial\s+\+?[\d\s().-]{7,}|(?:call|text)\s+\+?[\d\s().-]{7,}|"
+    r"(?:post|share)\s+(?:it|this|that|the\s+\w+|my\s+\w+)\s+(?:on|to)\b|tweet\b|publish\b|upload\s+(?:it|this|that|the\s+\w+|my\s+\w+)\s+to\b|"
+    r"pay\s+(?!attention\b|it\s+forward\b|the\s+price\b|respect\b|a\s+visit\b|me\s+a\s+compliment\b)\w+|"
+    r"(?:transfer|wire|e-?transfer|interac|venmo|zelle|paypal)\s+(?:\w+\s+)?\$?\d|"
+    r"(?:buy|purchase)\s+(?!(?:me\s+)?(?:some\s+)?time\b|the\s+(?:idea|argument)\b)\w+|"
+    r"order\s+(?:a|an|me|some|the|my|\d+)?\s*(?!(?:the|this|my|these|them)\s+\w+\s+by\b)(?:pizza|food|lunch|dinner|uber|taxi|groceries|\w+\s+online|it|one|two|three)\b|"
+    r"book\s+(?:a|an|my|it|the|me)\b|reserve\s+\w+|subscribe\s+to\b|sign\s+(?:me\s+)?up\s+for\b|"
+    r"(?:delete|erase|trash|shred)\s+(?:it|this|that|them|the\s+\w+|my\s+\w+|all\b|every\w*|\S+\.\w{1,5}\b)|"
+    r"remove\s+(?:my\s+\w+|all\b|\S+\.\w{1,5}\b|the\s+(?:file|folder|repo|branch|app|account))|rm\s+\S|"
+    r"empty\s+(?:the\s+)?trash\b|(?:wipe|format)\s+(?:my|the)\s+\w+|uninstall\s+\w+|drop\s+(?:the\s+)?(?:database|table|db)\b|"
+    r"(?:shut\s+down|shutdown|restart|reboot)\s+(?:my\s+|the\s+)?(?:mac|computer|laptop|server|vps)\b|kill\s+(?:all|every)\b|"
+    r"deploy\b|ship\s+(?:it|this)\b|push\s+(?:it|this|that|the\s+code|my\s+\w+|to\s+\w+)\b|merge\s+(?:it|this|that|pr\b|#?\d+|the\s+\w+)|"
+    r"git\s+(?:push|reset\s+--hard|clean\s+-\w*f)|gh\s+(?:pr\s+merge|repo\s+delete|release\s+create)|"
+    r"(?:log|sign)\s*(?:in|on)\s*(?:to\s+|into\s+)?(?!it\b)(?:my|the|\w+)\b|submit\s+(?:it|this|that|the|my)\b|"
+    r"approve\s+(?:the|this|that)\s+(?:payment|transfer|purchase|invoice|order|charge)|accept\s+the\s+(?:invite|invitation|offer|charge)\b"
+    r")", re.I)
+_CLAUSE_SPLIT = re.compile(r"[,;:!?]+\s*|\.\s+|\s+(?:and\s+then|then|and|but|after\s+that)\s+", re.I)
+_REPORTED_RE = re.compile(r"^(?:remind\s+me\s+to|add\b.{1,60}\bto\s+my\s+(?:todo|to-do|list|notes|calendar)|write\s+down|note\s+that|"
+                          r"(?:the|his|her|their|my)\s+(?:email|message|note|text|letter|teacher|boss|doctor|journal|article)\s+(?:says|said|wrote|asks)|"
+                          r"\w+\s+(?:wrote|said|says)\b|i\s+(?:want|wanna|plan|hope|would\s+like|'d\s+like|need|have|used)\s+to\b|"
+                          r"i\s+(?:might|may|could|would|will|should)\b|"
+                          r"(?:the|a|an|my|his|her|their|our)\s+\w+(?:\s+\w+)?\s+(?:will|would|might|may|can|could|refused|wants?|wanted|asked|tried|forgot|needs?|has|had)\b|"
+                          r"(?:can|should|could|shall)\s+we\b|we\s+(?:should|could|might|can|will)\b|i'?m\s+(?:going|gonna)\s+to\b)", re.I)
+_BENIGN_SUBS = ((re.compile(r"\b(the|a|this|that|my|your|his|her|reading|read)\s+book\b", re.I), r"\1 novel"),
+                (re.compile(r"\bin\s+order\b", re.I), "in-sequence"), (re.compile(r"\border\s+(?:the|this|my|these|them)\s+\w+\s+by\b", re.I), "sort by"),
+                (re.compile(r"\bpay\s+(?:it\s+forward|the\s+price|the\s+bills\b(?=.*\b(?:doesn'?t|won'?t|can'?t)\b)|attention)", re.I), "x"),
+                (re.compile(r"\bbuy\s+(?:me\s+)?(?:some\s+)?time\b|\bbuy\s+the\s+(?:idea|argument)\b", re.I), "x"),
+                (re.compile(r"\boutside\s+the\s+box\b", re.I), "x"), (re.compile(r"\bsend\s+(?:me|us)\b", re.I), "tell me"),
+                (re.compile(r"\bsend\s+it\s+in\s+plain\b", re.I), "write it in plain"))
+
+
+CANCEL_TAIL_RE = re.compile(r"(?:\bno\s+wait\b|\bnever\s*mind\b|\bjust\s+kidding\b|\bactually\s+(?:no|don'?t)\b|\bno\s+keep\s+it\b|"
+                            r"\bor\s+not\b|\blol\s+jk\b|\bjk\b|\bscratch\s+that\b|\bforget\s+(?:it|that)\b)[\s.!?]*+$", re.I)
+CANCEL_LINE = "Okay, I won't."
+
+
+def clause_hard(text: str) -> bool:
+    """True when any clause opens with a consequential verb (after lead-ins). Pure; used by is_hard_step."""
+    heard = normalize_utterance(text, ROUTE_MAX_CHARS)
+    if CANCEL_TAIL_RE.search(heard):
+        return False  # "delete the last paragraph? no keep it": the owner took it back
+    for rx, rep in _BENIGN_SUBS:
+        heard = rx.sub(rep, heard)
+    for clause in _CLAUSE_SPLIT.split(heard):
+        c = clause.strip()
+        if c and CLAUSE_HARD_RE.match(c):
+            return True
+    return False
+
+
 def is_hard_step(text: str) -> bool:
     """True only for an actual send/pay/deploy/book/publish. Not a how-to or a don't."""
-    heard = text or ""
+    heard = normalize_utterance(text, ROUTE_MAX_CHARS)
+    if is_class_of_payment_ask(heard) or _distinction_ask(heard):
+        return False  # a question ABOUT a quoted step ("what class is 'pay the invoice'?") is not the step
+    if clause_hard(heard):
+        return True  # a clause that opens with the step itself is an order, whatever a "don't"/"how" elsewhere says
+    if any(_REPORTED_RE.match(v) for v in [heard] + lead_variants(heard)):
+        return False  # reminders, notes, wishes, plans and reported speech are not the step
+    for rx, rep in _BENIGN_SUBS:
+        heard = rx.sub(rep, heard)
     if HARD_NEGATE_RE.search(heard) or HARD_TEACH_RE.search(heard):
         return False
     if is_class_of_payment_ask(heard) or _distinction_ask(heard):
         return False
     if FANOUT_SEND_RE.search(heard) or SLACK_POST_RE.search(heard):
         return True
-    return bool(HARD_STEP_RE.search(heard) or CONTACT_STEP_RE.search(heard) or CONTACT_NAME_RE.search(heard))
+    return bool(HARD_STEP_RE.search(heard) or CONTACT_STEP_RE.search(heard))  # names in any case: clause_hard
 
 
 # System matrix 2026-10-16 (owner canvas: Phone calls / Outbound calls / SMS, Push + PR, owner browser sessions):
 # reaching a person, publishing a branch, or logging in as him is a consequential step even with open access on.
 _WHO = r"(?:my\s+|the\s+)(?:accountant|client|mom|mother|dad|father|wife|husband|partner|boss|team|landlord|doctor|dentist|lawyer|bank)"
-CONTACT_STEP_RE = re.compile(r"^(?:\W*(?:(?:hey\s+)?jarvis\W+|(?:can|could|would|will)\s+you\s+(?:please\s+)?|please\s+|i\s+need\s+you\s+to\s+))*"
+_LEADS = r"^\W*+(?:(?:(?:hey\s+)?jarvis|(?:can|could|would|will)\s+you(?:\s+please)?|please|i\s+need\s+you\s+to)\b\W*+)*+"  # linear (ReDoS audit)
+CONTACT_STEP_RE = re.compile(_LEADS +
                              r"(?:(?:call|phone|ring|text|sms|dm|facetime)\s+" + _WHO + r"\b"
                              r"|push\s+(?:the|this|my|that)\s+(?:branch|commit|change|fix)s?\b"
                              r"|(?:open|create|file)\s+(?:a|the)\s+(?:pull\s+request|pr)\b"
                              r"|log\s*(?:in|on)\s*(?:to\s+|\s)(?:my|the)\s+\w+(?:\s+\w+)?\s+(?:account|site|bank|portal))", re.I)
-CONTACT_NAME_RE = re.compile(r"^(?:\W*(?:(?:[Hh]ey\s+)?[Jj]arvis\W+|(?:[Cc]an|[Cc]ould|[Ww]ould|[Ww]ill)\s+you\s+(?:please\s+)?|[Pp]lease\s+|I\s+need\s+you\s+to\s+))*"
+CONTACT_NAME_RE = re.compile(r"^\W*+(?:(?:(?:[Hh]ey\s+)?[Jj]arvis|(?:[Cc]an|[Cc]ould|[Ww]ould|[Ww]ill)\s+you(?:\s+please)?|[Pp]lease|I\s+need\s+you\s+to)\b\W*+)*+"
                              r"(?:[Cc]all|[Pp]hone|[Rr]ing|[Tt]ext|[Ff]ace[Tt]ime)\s+[A-Z][a-z]+\b(?!\s+(?:app|api|function|method|hook)\b)")
 
 
@@ -7835,7 +7998,7 @@ def apply_pipeline_iter(
     gen: int | None = None,
 ):
     """Yield first speakable sentence, then the finished turn. Do not wait for done to speak."""
-    spoken_in = (utterance or "").strip()
+    spoken_in = normalize_utterance(utterance)
     _turn_t0 = ONLINE.set_turn_start() if ONLINE is not None and hasattr(ONLINE, "set_turn_start") else None
     _jev_reset()
     begin_turn_evidence()
@@ -8001,9 +8164,10 @@ def apply_pipeline_iter(
     if document_followup and retained_context.get("status") == "MISSING":
         # Nothing was ever read: "compare pricing across these websites" is a new ask, not a follow-up on retained reads.
         document_followup, retained_context = False, {}
-    early = confirm_take(hive, spoken_in) or live_chat_route(spoken_in, had_pending) or _workflow_followup_route(spoken_in, hive)
+    early = (confirm_take(hive, spoken_in) or talk_filter(live_chat_route(spoken_in, had_pending), spoken_in)
+             or _workflow_followup_route(spoken_in, hive))
     if early is None and not document_followup:
-        early = model_free_route(spoken_in)
+        early = talk_filter(model_free_route(spoken_in), spoken_in)
     if early is not None and early.get("tool") == "capability" and prior_turns:
         early = {**early, "args": {**(early.get("args") or {}), "prior": dict(prior_turns[-1])}}  # "fix it" names what failed
     ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""

@@ -14,7 +14,9 @@ class Resolve(unittest.TestCase):
     def test_loose_names(self):
         self.assertEqual(A.resolve("spotify", APPS)[0], "Spotify")
         self.assertEqual(A.resolve("final cut", APPS)[0], "Final Cut Pro")
-        self.assertEqual(A.resolve("vs code", APPS), None)  # no silent wrong app
+        # 2026-10-16: spoken aliases name the right app; an alias for an app that isn't installed still finds nothing
+        self.assertEqual(A.resolve("vs code", APPS)[0], "Visual Studio Code")
+        self.assertEqual(A.resolve("code", {"Xcode": APPS.get("Xcode", Path("/Applications/Xcode.app"))}), None)  # never Xcode
         self.assertEqual(A.resolve("visual studio", APPS)[0], "Visual Studio Code")
         self.assertEqual(A.resolve("wordcraf", APPS)[0], "WordCraft")
 

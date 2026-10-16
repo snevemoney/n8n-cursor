@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 
 # "note that ..." / "don't forget that ..." / "keep in mind that ..." are remember, not a model chat (route matrix 2026-10-16).
-REMEMBER_SYN_RE = re.compile(r"^(\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?)(?:make\s+a\s+note\s+that|note\s+that|"
+REMEMBER_SYN_RE = re.compile(r"^(\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?)(?:(?:make|add|take)\s+a\s+note(?:\s+that)?|note\s+that|note(?=\s+(?:the|my|that)\s)|"
                              r"don'?t\s+forget(?:\s+that)?|do\s+not\s+forget(?:\s+that)?|keep\s+in\s+mind\s+that)\b", re.I)
 
 
@@ -28,6 +28,18 @@ INTENT_RE = re.compile(
     r"keep\s+in\s+mind\s+that)\b|"
     r"^\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?(?:remember|forget|recall)\b|"
     r"^\s*what\s+do\s+you\s+remember\b", re.I)
+
+
+# Routing audit 2026-10-16: reminiscing and dismissals are not memory commands ("remember that time we went to Quebec",
+# "remember when we fixed the vps", "note that down", "forget it, open spotify").
+NOT_MEMORY_RE = re.compile(r"^\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?(?:remember\s+(?:that\s+time|the\s+time|when|the\s+day)\b|"
+                           r"note\s+that\s+down\b|forget\s+(?:it|about\s+it|that)\b(?!\s+(?:my|the|i)\b)|forget\s+about\s+it\b|"
+                           r"recall\s+(?:that\s+time|when)\b)", re.I)
+
+
+def wants(utterance: str) -> bool:
+    u = utterance or ""
+    return bool(INTENT_RE.search(_canon(u))) and not NOT_MEMORY_RE.match(u)
 
 
 def default_path() -> Path:
@@ -72,7 +84,7 @@ def run(args: dict, *, utterance: str | None = None) -> dict:
     """
     args = args or {}
     if utterance is not None:
-        if not INTENT_RE.search(_canon(utterance)) or re.match(r"^\s*(?:please\s+)?forget\s+(?:it|that)\s*[,.!?]?(?:\s+(?:stop|cancel|never mind)\b.*)?$", utterance, re.I):
+        if not wants(utterance) or re.match(r"^\s*(?:please\s+)?forget\s+(?:it|that)\s*[,.!?]?(?:\s+(?:stop|cancel|never mind)\b.*)?$", utterance, re.I):
             result = {"op": str(args.get("op") or "recall"), "ok": False,
                       "count": 0, "spoken": "You didn't ask me to remember, recall, or forget anything."}
             result["log"] = {key: result[key] for key in ("op", "ok", "count")}

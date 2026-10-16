@@ -17,7 +17,8 @@ from pathlib import Path
 APP_DIRS = ("/Applications", "/Applications/Utilities", "/System/Applications", "/System/Applications/Utilities",
             "~/Applications", "/System/Library/CoreServices/Applications")
 OPEN_RE = re.compile(r"^(?:hey\s+)?(?:jarvis[, ]+)?(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?"
-                     r"(open|launch|start|run|bring\s+up|fire\s+up|switch\s+to|go\s+to|focus|quit|close)\s+(?:up\s+)?(?:the\s+|my\s+)?"
+                     r"(open|launch|start|run|bring\s+up|fire\s+up|pull\s+up|put\s+on|play|switch\s+to|go\s+to|focus|quit|close|"
+                     r"ouvre|ouvrir|lance|lancer|ferme|fermer|quitte|quitter)\s+(?:up\s+)?(?:the\s+|my\s+|l'|le\s+|la\s+)?"
                      r"(?:app\s+|application\s+)?(.{1,60}?)(?:\s+(?:app|application))?(?:\s+for\s+me|\s+please|\s+now)?[.!?]*$", re.I)
 NOT_APP_RE = re.compile(r"(?:^|\s)(?:/|~/)|\.(?:com|org|net|io|ai|ca|dev|app/|html?|pdf|md|txt|py|json|png|jpe?g|epub|docx?)\b|"
                         r"\b(?:folder|file|files|document|website|site|url|link|tab|page|repo|repository|downloads|desktop|"
@@ -50,11 +51,18 @@ def _norm(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", "", (s or "").lower())
 
 
+# Spoken names for apps whose bundle name differs (routing audit 2026-10-16: "open code" opened Xcode).
+APP_ALIASES = {"vscode": "visualstudiocode", "vs": "visualstudiocode", "code": "visualstudiocode", "chrome": "googlechrome",
+               "settings": "systemsettings", "quicktime": "quicktimeplayer", "activity": "activitymonitor", "finalcut": "finalcutpro",
+               "logic": "logicpro"}
+
+
 def resolve(name: str, bundles: dict[str, Path] | None = None) -> tuple[str, Path] | None:
     apps = _bundles() if bundles is None else bundles
     if not apps:
         return None
     want = _norm(name)
+    want = APP_ALIASES.get(want, want)
     if not want:
         return None
     by_norm = {_norm(k): k for k in apps}
@@ -181,7 +189,7 @@ def run(utterance: str, *, bundles: dict[str, Path] | None = None, runner=None, 
         return {"ok": False, "tool": "apps", "task_verified": False,
                 "spoken": f"I couldn't find an app called {raw} on your Mac." + (f" Closest: {', '.join(close)}." if close else "")}
     app, path = hit
-    quit_ = verb in ("quit", "close")
+    quit_ = verb in ("quit", "close", "ferme", "fermer", "quitte", "quitter")
     cmd = (["osascript", "-e", f'tell application "{app}" to quit'] if quit_ else ["open", "-a", str(path)])
     if runner is None and not _live():
         return {"ok": False, "tool": "apps", "app": app, "path": str(path), "outcome": "NOT_EXECUTED", "executed": False,

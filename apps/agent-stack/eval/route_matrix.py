@@ -289,6 +289,67 @@ FAMILIES = [
                                                                       "the gym opens at 6"]}),
     _fam("lessons", "capability", ["what lessons have you learned", "show me your scars", "what have you learned from your mistakes",
                                    "list your lessons", "what are your scars"], question=True, live_safe=True),
+    # Routing audit 2026-10-16: talk is not an order; spoken hard steps; benign lines are not hard; STT noise.
+    _fam("neg_acting", "talk", ["don't {c}", "never {c}", "i don't want you to {c}", "please don't {c}", "whatever you do don't {c}"],
+         {"c": ["check my gmail", "clone openai/whisper from github", "search the web for bitcoin price today", "look at my screen",
+                "ask forge to review the PR", "draft an email to normand about the launch", "start a loop that checks disk space every 10 minutes",
+                "list the tools on the slack server", "read notes.md", "plan out my week", "point to the save button", "close the window"]},
+         question=True),
+    _fam("quoted_acting", "talk", ["my friend said {c}", "he told me to {c}", "if i say {c} what do you do", "the video says {c}"],
+         {"c": ["install the github repo ollama/ollama", "check my gmail", "take a screenshot of my screen", "open Spotify"]}, question=True),
+    _fam("past_howto_acting", "talk", ["i already did {c}", "did you {c}", "how would you {c}", "how do i {c}", "should i {c}"],
+         {"c": ["check my gmail", "ask codex to fix it", "close the window", "click the x", "write a good email", "make a five-slide pitch deck in DeckCraft"]},
+         question=True),
+    _fam("cancel_tail", "say", ["{c} no wait never mind", "{c} just kidding", "{c} actually no", "{c} scratch that"],
+         {"c": ["click the save button", "open example.com", "remember that the dentist is on friday", "delete the last paragraph"]},
+         question=True),
+    _fam("memory_near_miss", "not:memory", ["remember that time we went to quebec", "remember when we fixed the vps", "note that down",
+                                            "forget it, open spotify", "forget about it"], question=True),
+    _fam("slug_tool_near_miss", "not:repo", ["set up the meeting for 10/12", "download the and/or form", "setup the 24/7 support line",
+                                             "set up my tcp/ip settings", "install the update", "install windows", "install the shelf"], question=True),
+    _fam("grant_near_miss", "not_grant", ["permission granted no wait", "permission granted just kidding", "access granted lol",
+                                          "i allow you to rest", "i said permission granted yesterday", "access granted to the building",
+                                          "i authorize this payment", "permission granted by the school for my placement"], question=True),
+    _fam("revoke_plain", "revoke", ["turn off open access", "turn open access off", "disable open access"], question=True),
+    _fam("stt_wake", "apps", ["{w} open {app}"], {"w": ["jervis", "travis", "jarvas", "um", "uh", "like", "okay so like", "jarvis um",
+                                                       "hey travis", "yo", "could you like"], "app": ["Spotify", "Notes", "Safari"]}, question=True),
+    _fam("stt_tail", "apps", ["open {app} {t}"], {"app": ["Spotify", "Notes"], "t": ["thanks", "thank you", "merci", "real quick", "jarvis"]},
+         question=True),
+    _fam("correction", "apps", ["open {a} no wait {b}", "open {a} i mean {b}"], {"a": ["Notes", "Mail"], "b": ["Safari", "Spotify"]},
+         question=True),
+    _fam("clock_stt", "say", ["whats the time", "um what time is it", "what time is it jarvis", "whats today's date", "tell me the time",
+                              "what day is it today", "what's the date today jarvis"], question=True),
+    _fam("and_chain", "multistep", ["open {a} and open {b}", "first open {a} then open {b}", "open {a}, after that open {b}"],
+         {"a": ["Notes", "Mail"], "b": ["Safari", "Spotify"]}, question=True),
+    _fam("fr_apps", "apps", ["ouvre {app}", "ferme {app}", "lance {app}", "play {app}", "put on {app}"], {"app": ["Spotify", "Notes"]},
+         question=True),
+    _fam("contact_lower", "hard", ["call {p}", "text {p} i'm late", "facetime {p}", "give {p} a call", "dm {p}", "ring {p}",
+                                   "email {p} the invoice", "message {p} on slack", "dial 514 555 1234"],
+         {"p": ["normand", "sarah", "mom"]}, question=True),
+    _fam("send_pronoun", "hard", ["send it", "send it to {p}", "send this to {p}", "send the file to {p}", "forward the email to {p}",
+                                  "reply to {p} saying yes", "post this on linkedin", "tweet this", "upload the video to youtube"],
+         {"p": ["normand", "sarah"]}, question=True),
+    _fam("money_plain", "hard", ["pay {p}", "transfer 500 to {p}", "etransfer {p} 50 dollars", "send {p} 50 bucks", "buy airpods",
+                                 "order pizza", "book an uber", "book my flight", "reserve a table for two", "subscribe to netflix"],
+         {"p": ["normand", "sarah"]}, question=True),
+    _fam("delete_plain", "hard", ["delete it", "delete my notes", "delete all my emails", "remove notes.md", "rm notes.md", "empty the trash",
+                                  "drop the database", "uninstall docker", "shut down my mac", "wipe my disk"], question=True),
+    _fam("git_plain_hard", "hard", ["deploy", "ship it to prod", "push it", "push to github", "merge it", "merge pr 644", "git push",
+                                    "gh pr merge 644", "log in to my bank", "sign in to my gmail", "submit the form", "approve the payment"],
+         question=True),
+    _fam("negate_overreach", "hard", ["don't forget to send the email to {p}", "never mind, send the email to {p}",
+                                      "stop stalling and push to main", "when you're done send the email to {p}",
+                                      "did you see it? send the email to {p}", "why don't you just send the email to {p}",
+                                      "draft an email to {p} and send it", "make an invoice in GridCraft and pay it"],
+         {"p": ["normand", "sarah"]}, question=True),
+    _fam("hard_false_pos", "not_hard", ["don’t send the email to sarah", "remind me to pay the rent tomorrow", "i want to buy a new laptop",
+                                        "i might book a flight to paris", "can we deploy tomorrow", "the email says please pay the invoice",
+                                        "i'm reading the book a friend gave me", "order the list by date", "i didn't buy the idea",
+                                        "pay it forward", "buy me some time", "send me a text when you're done", "send it in plain text",
+                                        "stop thinking outside the box", "Call Me Maybe is a great song", "Ring Doorbell keeps disconnecting",
+                                        "text messages are slow", "email marketing tips", "call the function twice", "message received",
+                                        "the journal will publish the study next month", "the patient refused to pay the hospital"],
+         question=True),
     _fam("then_chain", "multistep", ["what time is it then what's today's date", "remember that {fact}, then what time is it",
                                      "what's today's date and then how much disk space is free"], {"fact": FACTS[:3]},
          question=True),
@@ -495,6 +556,10 @@ def judge(case: dict, P) -> tuple[bool, str]:
     if case.get("turn"):
         got = _turn_tool(said, P)
         return (got != want[4:], got) if want.startswith("not:") else (got == want, got)
+    if want == "not_grant":
+        perm = P._permissions_hand()
+        hit = perm.grant_split(said)[0] or perm.is_grant(said)
+        return not hit, "grant" if hit else "none"
     if want in ("grant", "revoke"):
         perm = P._permissions_hand()
         got = "grant" if perm.grant_split(said)[0] else "revoke" if perm.is_revoke(said) else "none"
@@ -513,6 +578,8 @@ def judge(case: dict, P) -> tuple[bool, str]:
     got = (pick or {}).get("tool") or "model"
     if want.startswith("not:"):
         return got != want[4:], got
+    if want == "talk":
+        return got in ("model", "say", "capability"), got
     if want == "not_craft":
         return got != "craft", got
     if want == "not_hard":

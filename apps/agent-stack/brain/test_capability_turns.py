@@ -115,6 +115,38 @@ class CanvasRoutes(unittest.TestCase):
         self.assertTrue(got["ok"]); self.assertIn("never-again bank", got["spoken"])
 
 
+class RoutingAudit(unittest.TestCase):
+    """Routing audit 2026-10-16: no input hangs or crashes the router; talk never acts; spoken hard steps are hard."""
+    def setUp(self):
+        mode = mock.patch.dict(os.environ, {"JARVIS_MODE_FILE": str(Path(tempfile.mkdtemp()) / "mode.json")})
+        mode.start(); self.addCleanup(mode.stop)
+
+    def test_pathological_inputs_are_fast(self):
+        import time
+        for u in ("jarvis, " * 400 + "what is up", "Jarvis! " * 40 + "x", "open notes" + " " * 5000 + "please",
+                  "\n    " * 200 + "open notes", "a." * 2500, "https://" + "a." * 2000 + "com", " " * 5000, "token" * 3000):
+            t = time.monotonic(); P.turn_fixed_pick(u); P.is_hard_step(u)
+            self.assertLess(time.monotonic() - t, 1.0, u[:30])
+
+    def test_lone_surrogate_does_not_crash_the_turn(self):
+        hive = Path(tempfile.mkdtemp()); (hive / "bus").mkdir()
+        out = list(P.apply_pipeline_iter("\udcff open notes", hive=hive, talk_fn=lambda *a, **k: {"ok": True, "spoken": "ok"}))
+        self.assertTrue(out)
+
+    def test_talk_never_acts(self):
+        for u in ("don't check my gmail", "did you ask codex to fix it", "how do i close it", "my friend said install the github repo ollama/ollama",
+                  "never press the x", "click the save button no wait never mind", "remember that time we went to quebec", "install the update"):
+            self.assertNotIn((P.turn_fixed_pick(u) or {}).get("tool"), ("agent_tools", "desk_dispatch", "pointer_click", "repo", "memory", "pointer"), u)
+
+    def test_spoken_hard_steps_and_benign_lines(self):
+        for u in ("send it", "pay normand", "delete my notes", "push it", "call normand", "never mind, send the email to sarah",
+                  "draft an email to normand and send it", "log in to my bank"):
+            self.assertTrue(P.is_hard_step(u), u)
+        for u in ("remind me to pay the rent tomorrow", "Call Me Maybe is a great song", "don\u2019t send the email to sarah",
+                  "send me a text when you're done", "call the function twice", "i might book a flight to paris"):
+            self.assertFalse(P.is_hard_step(u), u)
+
+
 class RepoListing(unittest.TestCase):
     def setUp(self):
         self.home = Path(tempfile.mkdtemp())
