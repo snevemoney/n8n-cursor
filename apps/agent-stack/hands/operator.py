@@ -49,7 +49,8 @@ SYSTEM = (
     "in this conversation, never mean, and none when something failed that costs him (money, sends, deletes, lost work).\n"
     "Working: prefer shell and files when they do the job. His browser is Safari; never open Chrome or another browser unless he names it. Web work happens in his Safari "
     "in the BACKGROUND with the safari tool: open your own tab with new_tab (his current tab, his mouse and his front "
-    "app stay his), work it by element numbers, and check the page that comes back after each action. Use his current "
+    "app stay his), work it by element numbers, and check the page that comes back after each action. When he only asks to open, go to or show a site or page, it is for HIM to see: do it, then show it so it is "
+    "in front of him. Use his current "
     "tab (use_tab) only when he means the page he is looking at; when he asks to see it (let me see, show me, put it on my screen, anything like that) use show, which brings it in front of him; otherwise use show only when he wants to see the "
     "result. Do not route around the page with shell, gh or open when he asked for the browser. Stay on the app or site he named for the whole task: never switch to another app or channel (Messages, Mail, "
     "Contacts, phone, another site) to get it done another way; if you are stuck, say exactly what blocked you and ask. "
@@ -920,8 +921,11 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
         return "MODEL_UNAVAILABLE"
     calls = got.get("calls") or ([{"tool": got["tool"], "args": got.get("args") or {}, "call_id": got.get("call_id") or "call_0"}]
                                  if got.get("tool") else [])
-    if not calls:  # plain text with no tool call: treat as the final answer
-        task.write("state.json", {**task.read("state.json"), "status": "DONE", "summary": got.get("text", ""), "evidence": ""})
+    if not calls:  # plain text with no tool call: treat as the final answer, spoken like every other line
+        text = str(got.get("text") or "").strip()
+        if text:
+            task.speak(text)  # bench 10-16: "391." was the answer but never reached the speech log
+        task.write("state.json", {**task.read("state.json"), "status": "DONE", "summary": text, "evidence": ""})
         return "DONE"
     messages.append({"role": "assistant", "content": got.get("text") or None, "tool_calls": [
         {"id": c["call_id"], "type": "function", "function": {"name": c["tool"], "arguments": json.dumps(c["args"])}} for c in calls]})

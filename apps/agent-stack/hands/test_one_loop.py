@@ -50,6 +50,11 @@ class OneLoop(unittest.TestCase):
         O.run(t.path, model_fn=model)
         self.assertEqual([r["text"] for r in t.rows("speech.jsonl")], [line])
 
+    def test_a_plain_text_answer_is_spoken(self):  # bench 10-16 T01: "391." never reached the speech log
+        t = O.Task.create(self.hive, "what is 17 times 23")
+        O.run(t.path, model_fn=lambda m, tools: {"ok": True, "text": "391."})
+        self.assertEqual([r["text"] for r in t.rows("speech.jsonl")], ["391."])
+
     def test_a_new_line_reaches_the_running_loop(self):
         t = O.Task.create(self.hive, "render a video")
         O.tell(self.hive, "make it 10 seconds instead")
