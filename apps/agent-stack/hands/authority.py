@@ -16,7 +16,7 @@ ALLOW, ASK, DENY = "allow", "ask", "deny"
 # Kept stops in shell form (moved from brain/pipeline.py, 10-15).
 CLI_HARD = re.compile(r"\b(?:merge|push|delete|rm|release|deploy|publish|send|post|purchase|buy|--force)\b|"
                       # uploading data still asks; READING secrets is flagged, not stopped (Evens 10-16)
-                      r"\s(?:-F|-d|-T|--data\S*|--upload-file|--form)\b", re.I)
+                      r"^(?:curl|wget|http|https|xh)\b.*\s(?:-F|-d|-T|--data\S*|--upload-file|--form)\b", re.I)  # upload flags of upload tools only (live: ls -d asked)
 CLI_MORE = re.compile(
     r"^gh\s+(?:issue|pr|gist|repo|release)\b.*\b(?:create|comment|edit|close|delete|merge)\b|^gh\s+api\b.*(?:-X|--method)\s*(?:POST|PUT|PATCH|DELETE)|"
     r"^(?:mail|mailx|sendmail)\b|(?:^|\s)-X\s*(?:POST|PUT|PATCH|DELETE)\b|"

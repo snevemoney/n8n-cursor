@@ -484,7 +484,7 @@ class Tools:
 
     def open(self, a):
         t = str(a["target"])
-        looks_path = t.startswith(("/", "~", ".")) or "://" in t
+        looks_path = t.startswith(("/", "~", ".")) or bool(re.match(r"^[a-z][a-z0-9+.-]*:", t))  # paths, URLs, spotify: URIs
         argv = ["open", os.path.expanduser(t)] if looks_path else ["open", "-a", t]
         cp = subprocess.run(argv, capture_output=True, text=True, timeout=20)
         return {"text": f"exit {cp.returncode} {cp.stderr.strip()}".strip()}
