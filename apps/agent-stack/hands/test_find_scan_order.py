@@ -15,9 +15,9 @@ spec.loader.exec_module(W)
 class ScanOrder(unittest.TestCase):
     def test_home_before_volumes(self):
         home = Path("/Users/someone")
-        order = W._scan_order([Path("/Volumes"), home, Path("/Users/someone/jarvis-main"), Path("/Users/someone/Downloads")])
+        order = W._scan_order([Path("/Volumes"), home, Path("/Users/someone/jarvis-main"), Path("/Users/someone/Downloads")])  # public-guard: allow (made-up test path)
         self.assertEqual(order[-1], Path("/Volumes"))
-        self.assertEqual(order[0], Path("/Users/someone/Downloads"))
+        self.assertEqual(order[0], Path("/Users/someone/Downloads"))  # public-guard: allow (made-up test path)
 
     def test_system_volume_dirs_never_walked(self):
         for d in ("com.apple.TimeMachine.localsnapshots", "Recovery", "Backups.backupdb"):  # dot folders are skipped by the walk itself
