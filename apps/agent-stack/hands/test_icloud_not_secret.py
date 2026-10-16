@@ -47,3 +47,14 @@ class SlowFolder(unittest.TestCase):
         self.assertLess(took, 3.0)
         self.assertEqual(len(got["files"]), 1)
         self.assertFalse(got["complete"])
+
+
+class NamedICloud(unittest.TestCase):
+    """Live 2026-10-16 13:40: "list my books from icloud folder" searched every folder (After Effects manuals)."""
+
+    def test_icloud_is_a_named_folder(self):
+        cloud = str(Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs")
+        for u in ("list my books from icloud folder", "find the epub books in my iCloud Drive", "find pdfs in i cloud"):
+            self.assertEqual(W.args_from_utterance(u).get("path"), cloud, u)
+        self.assertEqual(W.args_from_utterance("list the files in my icloud folder"), {"op": "ls", "path": cloud})
+        self.assertEqual(W.args_from_utterance("find books in my downloads").get("path"), str(Path.home() / "Downloads"))

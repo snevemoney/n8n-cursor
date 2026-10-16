@@ -629,7 +629,14 @@ _FILE = re.compile(r"(?<![\w.\-/~])([\w.\-/~]+\.(?:md|txt|py|json|toml|ya?ml|sh|
 # Secret-looking file asks still go through _resolve, which refuses them (SECRET_NAME / SECRET_DIR).
 _SECRET_ASK = re.compile(r"(?<![\w/])(~?/?(?:[\w.\-]+/)*(?:\.env(?:\.[\w-]+)?|id_(?:rsa|dsa|ecdsa|ed25519)(?:\.pub)?|\.netrc|\.npmrc|\.pypirc)"
                          r"|~?/?(?:[\w.\-]+/)*\.(?:ssh|grok-private|gnupg|aws)(?:/[\w.\-]+)*)", re.I)
-_FOLDER = re.compile(r"\b(?:in|from|inside)\s+(?:my\s+|the\s+)?(downloads|desktop|documents)\b", re.I)
+_PLACES = r"downloads|desktop|documents|i\s*cloud(?:\s+drive)?"
+_FOLDER = re.compile(r"\b(?:in|from|inside)\s+(?:my\s+|the\s+)?(" + _PLACES + r")\b", re.I)
+ICLOUD = Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs"
+
+
+def _place(word: str) -> Path:
+    """'downloads' -> ~/Downloads; 'icloud' / 'iCloud Drive' -> iCloud Drive (live 10-16: "from icloud folder" was dropped)."""
+    return ICLOUD if re.match(r"i\s*cloud", word, re.I) else Path.home() / word.capitalize()
 
 
 def args_from_utterance(u: str) -> dict:
@@ -641,13 +648,13 @@ def args_from_utterance(u: str) -> dict:
     if named and open_access():
         folder = _FOLDER.search(s)
         return {"op": "find", "extensions": [], "name": named.group(1).strip(" .?!\"'"),
-                "path": str(Path.home() / folder.group(1).capitalize()) if folder else ""}
+                "path": str(_place(folder.group(1))) if folder else ""}
     if DOCUMENT_FIND_RE.search(s):
         suffixes = ([".epub"] if re.search(r"\bepubs?\b", s, re.I) else []) + ([".pdf"] if re.search(r"\bpdfs?\b", s, re.I) else [])
         folder = _FOLDER.search(s)
         topic = TOPIC_RE.search(s)
         return {"op": "find", "extensions": suffixes or [".epub", ".pdf"],
-                "path": str(Path.home() / folder.group(1).capitalize()) if folder else "",
+                "path": str(_place(folder.group(1))) if folder else "",
                 **({"topic": topic.group(1).strip(" .?!\"'")} if topic else {})}
     if _words().STATUS_ASK.search(s) and not _FILE.search(s):
         return {"op": "status", "path": ""}
@@ -658,14 +665,14 @@ def args_from_utterance(u: str) -> dict:
         return {"op": "git", "path": ""}
     if re.search(r"\brepos\b|\brepositories\b", s, re.I):
         return {"op": "repos"}
-    m = re.search(r"\b(downloads|desktop|documents)\b", s, re.I)
+    m = re.search(r"\b(" + _PLACES + r")\b", s, re.I)
     if re.search(r"\b(list|files|folder|ls)\b", s, re.I) and m:
-        return {"op": "ls", "path": str(Path.home() / m.group(1).capitalize())}
+        return {"op": "ls", "path": str(_place(m.group(1)))}
     f = _FILE.search(s)
     if f:
         fold = _FOLDER.search(s)
         if fold and "/" not in f.group(1):
-            return {"op": "read", "path": str(Path.home() / fold.group(1).capitalize() / f.group(1))}
+            return {"op": "read", "path": str(_place(fold.group(1)) / f.group(1))}
         return {"op": "read", "path": f.group(1)}
     return {"op": "ls", "path": ""}
 
