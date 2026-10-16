@@ -16,6 +16,7 @@ def _restore_environ():
     # Tests never read the live model switch (~/.grok-private/jarvis-brain.json): a live "switch to Sonnet" during a run
     # changed model-identity answers (2026-10-16).
     os.environ.setdefault("JARVIS_OPERATOR_FIRST", "0")  # routed-turn tests; brain/test_operator_first.py opts in
+    os.environ.setdefault("JARVIS_ONE_LOOP", "0")  # the front-door model tests; test_one_loop_turn.py opts in
     if "JARVIS_BRAIN_FILE" not in os.environ:
         import tempfile
         brain = Path(tempfile.gettempdir()) / f"jarvis-brain-test-{os.getpid()}.json"

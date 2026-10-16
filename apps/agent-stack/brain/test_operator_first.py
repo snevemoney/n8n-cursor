@@ -21,7 +21,7 @@ def run(utterance, model_reply):
         return model_reply
     tmp = Path(tempfile.mkdtemp()); (tmp / "bus").mkdir()
     with mock.patch.object(P.ONLINE, "call_openrouter", side_effect=fake), \
-            mock.patch.dict(os.environ, {"JARVIS_OPERATOR_FIRST": "1", "JARVIS_SIM": "1", "AGENT_STACK_DRY_TTS": "1",
+            mock.patch.dict(os.environ, {"JARVIS_OPERATOR_FIRST": "1", "JARVIS_ONE_LOOP": "0", "JARVIS_SIM": "1", "AGENT_STACK_DRY_TTS": "1",
                                            "AGENT_STACK_CURSOR_DRY": "0"}):
         assert P.operator_first(), "operator-first flag not seen by the pipeline"
         out = M.apply_turn(utterance, hive=tmp, retrieve_roots=None)
@@ -45,6 +45,22 @@ class OperatorFirst(unittest.TestCase):
         self.assertEqual(out.get("verb"), "refuse_hard_step"); self.assertEqual(seen, [])
         out, seen = run("switch to Sonnet", {"ok": True, "spoken": "x"})
         self.assertEqual(out.get("verb"), "brain_model"); self.assertEqual(seen, [])
+
+
+class OneLoop(unittest.TestCase):
+    def test_every_line_goes_to_the_one_loop_no_front_door_model(self):
+        # live 10-16: the front door answered "using my Safari ... how many stars" from a stale web search, twice
+        seen, started = [], []
+        tmp = Path(tempfile.mkdtemp()); (tmp / "bus").mkdir()
+        with mock.patch.object(P.ONLINE, "call_openrouter", side_effect=lambda *a, **k: seen.append(1) or {}), \
+                mock.patch.object(P, "_operator_turn", side_effect=lambda args, u, hive, turns=None: started.append(u) or
+                                  {"ok": True, "tool": "operator", "spoken": "Looking now.", "wires": ["operator"], "cites": []}), \
+                mock.patch.dict(os.environ, {"JARVIS_OPERATOR_FIRST": "1", "JARVIS_ONE_LOOP": "1", "JARVIS_SIM": "1",
+                                               "AGENT_STACK_DRY_TTS": "1", "AGENT_STACK_CURSOR_DRY": "0"}):
+            for u in ("hi", "using my Safari, how many stars does playwright-mcp have"):
+                out = M.apply_turn(u, hive=tmp, retrieve_roots=None)
+                self.assertEqual(out.get("verb"), "operator", u)  # sim mode records the operator start
+        self.assertEqual(seen, [])
 
 
 if __name__ == "__main__":

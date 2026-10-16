@@ -1025,7 +1025,7 @@ ROUTE_SEARCH_LEAD_RE = re.compile(
 
 
 ACK_LINE = "On it."
-ACK_SKIP = frozenset({"say", "capability", "task_board", "brain_model"})
+ACK_SKIP = frozenset({"say", "capability", "task_board", "brain_model", "operator"})  # the loop speaks for itself
 
 
 
@@ -1358,6 +1358,10 @@ OPERATOR_FIRST_RULE = (
     "You CAN open and operate Safari, apps and files through operator; earlier replies in the history that said otherwise "
     "were wrong and must not be repeated. Otherwise answer him directly in plain spoken English. Never claim something "
     "was done unless a tool did it.")
+
+
+def one_loop() -> bool:
+    return (os.environ.get("JARVIS_ONE_LOOP") or "1").strip() != "0"
 
 
 def operator_first() -> bool:
@@ -6770,22 +6774,27 @@ def _operator_turn(args: dict, utterance: str, hive, turns: list | None = None) 
         goal = str((args or {}).get("goal") or "").strip() or str(utterance or "")
         if utterance and goal != utterance:
             goal = f"{goal}\n\nEvens's exact words: {utterance}"
+        told_into = False
         if hasattr(op, "running") and op.running(Path(hive)):
             # Evens 10-16 ("not a complete harness"): talking to a working agent continues THAT work, like Claude Code.
             told = op.tell(Path(hive), str(utterance or goal))
             if told.get("ok"):
                 started = {"task_id": told["task_id"]}
+                told_into = True
             else:
                 started = op.start(Path(hive), goal, turns=turns)
         else:
             started = op.start(Path(hive), goal, turns=turns)
-        end = time.monotonic() + OPERATOR_WAIT_S
+        t0 = time.monotonic()
+        end = t0 + OPERATOR_WAIT_S
         state = op.status(Path(hive), started["task_id"])
         task = op.Task(Path(hive) / "operator-tasks" / started["task_id"])
-        while state.get("status") in ("QUEUED", "RUNNING") and time.monotonic() < end:
-            time.sleep(0.4)
+        heard = len(task.rows("speech.jsonl")) if told_into else 0  # only what it says from now on
+        while time.monotonic() < end and (state.get("status") in ("QUEUED", "RUNNING") or (
+                told_into and state.get("status") == "IDLE" and time.monotonic() - t0 < 4)):
+            time.sleep(0.4)  # an idle session wakes within a second of his line
             state = op.status(Path(hive), started["task_id"])
-        said = [str(r.get("text") or "").strip() for r in task.rows("speech.jsonl")]
+        said = [str(r.get("text") or "").strip() for r in task.rows("speech.jsonl")[heard:]]
         said = [line for line in said if line]
         if said:  # his own words from the loop: no wrapper line, no "I'm working on it (step 5)"
             spoken = " ".join(said[-4:])
@@ -8874,6 +8883,10 @@ def apply_pipeline_iter(
     if operator_first():
         early = confirm_take(hive, spoken_in) or (
             {"tool": "brain_model", "args": {}, "speak": ""} if _brain_model_hand().wants(spoken_in) else None)
+        if early is None and one_loop() and talk_fn is None:
+            # Evens 10-16: ONE agent, like Claude Code. Every line goes to the operator loop (it answers plain questions
+            # itself with say); a separate front-door model kept answering from stale history instead of acting.
+            early = {"tool": "operator", "args": {"action": "start"}, "speak": ""}
         if early is None:
             early = operator_first_pick(spoken_in, fit_budget(sitting_brief(prior_turns, bus_now, retrieve_roots, spoken_in)),
                                         talk_fn=talk_fn)
