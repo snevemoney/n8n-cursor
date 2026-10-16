@@ -1992,6 +1992,7 @@ def _call_openrouter_inner(
         return out
 
     free_quota_dead = False
+    http_codes: list[int] = []  # canvas Z35 / provider retry (audit 2026-10-16): say WHY no model answered
     if stills and not models:
         return {
             "ok": False,
@@ -2151,6 +2152,7 @@ def _call_openrouter_inner(
                         text, finish = _read_openrouter_stream(res, timeout=remaining)
         except urllib.error.HTTPError as exc:
             last_err = f"http {int(exc.code)}"
+            http_codes.append(int(exc.code))
             if int(exc.code) == 429 and str(mid).endswith(":free"):
                 free_quota_dead = True
             if int(exc.code) not in {400, 422}:
@@ -2249,8 +2251,11 @@ def _call_openrouter_inner(
             last_err = "scratchpad"
             continue
         last_err = "empty"
+    provider_state = provider_failure(http_codes)
     if last_err == "timeout":
         spoken = TALK_DARK
+    elif provider_state:
+        spoken = PROVIDER_LINES[provider_state]
     else:
         # Never speak a raw exception name ("TimeoutError") to Evens.
         why = f" ({last_err})" if str(last_err).startswith("http ") else ""
@@ -2261,8 +2266,31 @@ def _call_openrouter_inner(
         "wire": "openrouter",
         "engine": "openrouter",
         "error": last_err,
+        "provider_state": provider_state or None,
         "spoken": spoken,
     }
+
+
+PROVIDER_LINES = {
+    "credit_empty": "The paid model tank is empty: OpenRouter refused for credit (402). Top up the OpenRouter credits and "
+                    "ask again; nothing was answered this turn.",
+    "key_refused": "OpenRouter refused the key (401/403), so no model answered. The key needs checking; nothing ran.",
+    "rate_limited": "Every model was rate-limited (429) this turn. Give it a minute and ask again.",
+}
+
+
+def provider_failure(codes) -> str:
+    """Classify why the model wire failed: a 402 anywhere is an empty tank; all-401/403 is the key; all-429 is a limit."""
+    seen = [int(c) for c in (codes or [])]
+    if not seen:
+        return ""
+    if 402 in seen:
+        return "credit_empty"
+    if all(c in (401, 403) for c in seen):
+        return "key_refused"
+    if all(c == 429 for c in seen):
+        return "rate_limited"
+    return ""
 
 
 def call_xai(prompt: str, context: str = "") -> dict:

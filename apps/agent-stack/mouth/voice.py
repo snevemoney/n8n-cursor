@@ -13,6 +13,7 @@ from __future__ import annotations
 import base64
 import importlib.util
 import json
+import re
 import os
 import subprocess
 import sys
@@ -646,8 +647,30 @@ def _tts_stale(gen: int | None, hive: Path | None, token: int) -> bool:
     return False
 
 
+_MD_LINK = re.compile(r"\[([^\]]{1,200})\]\((?:https?://|/)[^)\s]{1,500}\)")
+_URL = re.compile(r"https?://[^\s)>\]]+")
+_SHOUT = re.compile(r"\b[A-Z][A-Z'-]{4,}\b")
+
+
+def speakable(text: str) -> str:
+    """Owner canvas Z61 (TTS cleanup): what the voice reads aloud, not what the card shows. Markdown marks, headings,
+    bullets and raw URLs are not spoken; shouted ALL-CAPS words (5+ letters) are read as words; short acronyms stay."""
+    t = str(text or "")
+    t = _MD_LINK.sub(r"\1", t)
+    t = _URL.sub("the link", t)
+    t = re.sub(r"`{1,3}([^`]*)`{1,3}", r"\1", t)
+    t = re.sub(r"(\*\*|__|~~)(.+?)\1", r"\2", t)
+    t = re.sub(r"(?<![\w*])\*(?!\s)([^*\n]+?)(?<!\s)\*(?![\w*])", r"\1", t)
+    t = re.sub(r"(?m)^\s{0,3}#{1,6}\s+", "", t)
+    t = re.sub(r"(?m)^\s*(?:[-*\u2022]|\d+[.)])\s+", "", t)
+    t = re.sub(r"(?m)^\s*\|.*\|\s*$", "", t)  # table rows are for the card
+    t = _SHOUT.sub(lambda m: m.group(0).lower(), t)
+    return re.sub(r"[ \t]+", " ", re.sub(r"\n{2,}", "\n", t)).strip()
+
+
 def tts_audio(text: str, *, gen: int | None = None, hive: Path | None = None) -> tuple[bytes, str]:
     start = _TTS_TOKEN
+    text = speakable(text)
     if dry() or not (text or "").strip():
         return b"", ""
     if _tts_stale(gen, hive, start):

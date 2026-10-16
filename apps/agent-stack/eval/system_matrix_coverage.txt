@@ -1,11 +1,11 @@
-route matrix: 77360/77360 pass · regressions=0 · improvements=0
-system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tested · 198/629 links with both ends covered. Coverage, not the canvas's green.
-## Inputs  (8/33 spoken route · 12/33 spoken or tested)
+route matrix: 77504/77504 pass · regressions=0 · improvements=0
+system matrix: 110/365 canvas nodes have a spoken route · 203/365 spoken or tested · 305/629 links with both ends covered. Coverage, not the canvas's green.
+## Inputs  (12/33 spoken route · 16/33 spoken or tested)
   ◦ Typed Orb text                     tests exist: face/test_serve.py
   ◦ Mic → speech-to-text               tests exist: mouth/test_voice.py
   ◦ Wake word “hey jarvis”             tests exist: brain/test_wake_word.py
   ✓ Watch screen frames                40/40  (watch_screen)  + tests: brain/test_watch_loop_result.py, brain/test_watch_stop.py, brain/test_watch_stroke.py
-  · File / image drop                  open: no spoken route, no test
+  ✓ File / image drop                  24/24  (drop_ask)  + tests: face/test_senses.py
   ✓ Scheduled loops                    512/512  (loop)
   ✓ Proactive briefings                24/24  (prebrief)
   ✓ Phone calls                        640/640  (outbound_contact)
@@ -22,19 +22,19 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   · Z31 · Hands-free ear               open: no spoken route, no test
   · Z40 · Two-phase call               open: no spoken route, no test
   · Z42 · Approval by call             open: no spoken route, no test
-  ◦ Z55 · Sense switches               tests exist: face/test_senses.py
+  ✓ Z55 · Sense switches               64/64  (mode_truth)  + tests: face/test_senses.py
   · Z62 · Briefing sanity              open: no spoken route, no test
-  · Z64 · Mode truth                   open: no spoken route, no test
+  ✓ Z64 · Mode truth                   64/64  (mode_truth)
   · Z86 · Automation spec              open: no spoken route, no test
   · Z108 · Wake/sleep state            open: no spoken route, no test
   · Z113 · Phone-stack claim           open: no spoken route, no test
   · X06 · Local wake                   open: no spoken route, no test
-  · X10 · Voice HUD states             open: no spoken route, no test
+  ✓ X10 · Voice HUD states             64/64  (mode_truth)  + tests: hands/test_methods_voice.py
   ✓ X26 · SMS + reports                640/640  (outbound_contact)
   · X35 · Ambient Omi                  open: no spoken route, no test
-  · X36 · Brief + automate             open: no spoken route, no test
+  ◦ X36 · Brief + automate             tests exist: mouth/test_methods_route.py
   · N02 · Wake + local LLM             open: no spoken route, no test
-## Face · Orb :4018  (4/24 spoken route · 11/24 spoken or tested)
+## Face · Orb :4018  (4/24 spoken route · 17/24 spoken or tested)
   ◦ Face server :4018                  tests exist: face/test_serve.py, face/test_serve_main_ports.py
   ◦ Reply stream (SSE)                 tests exist: face/test_sse_deadline.py, tests/test_stream_race.py
   ◦ Orb app (native)                   tests exist: face/test_orb.py, face/test_native_navigation.py
@@ -42,30 +42,30 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   ✓ Stop / barge-in                    56/56  (hush)  + tests: face/test_controls.py, memory/test_cancel_receipt.py
   ✓ Voice out                          16/16  (voice)  + tests: mouth/test_voice.py
   ◦ Eyes (camera)                      tests exist: face/test_senses.py
-  ✓ Truthful job status                48/48  (coding_status, browser_status)  + tests: brain/test_mission_controller.py
-  · History + scroll                   open: no spoken route, no test
+  ✓ Truthful job status                104/104  (coding_status, browser_status, task_board)  + tests: brain/test_mission_controller.py
+  ◦ History + scroll                   tests exist: face/test_response_viewport.cjs
   · Reconnect event replay             open: no spoken route, no test
-  · Z03 · Barge-in + sight             open: no spoken route, no test
+  ◦ Z03 · Barge-in + sight             tests exist: face/test_barge.cjs
   · Z13 · Voice + skin                 open: no spoken route, no test
   ◦ Z18 · Webcam eyes                  tests exist: face/test_senses.py
-  · Z53 · One filler                   open: no spoken route, no test
+  ◦ Z53 · One filler                   tests exist: tests/test_card_turn_and_z71_z81.py
   · Z61 · TTS cleanup                  open: no spoken route, no test
-  · Z69 · Drop stale speech            open: no spoken route, no test
+  ◦ Z69 · Drop stale speech            tests exist: face/test_stop_controls.cjs, mouth/test_voice.py
   · Z74 · Show-first card              open: no spoken route, no test
-  ✓ Z75 · Hush behavior                56/56  (hush)
+  ✓ Z75 · Hush behavior                56/56  (hush)  + tests: tests/test_card_turn_and_z71_z81.py
   ◦ Z81 · Slow-tool status             tests exist: tests/test_card_turn_and_z71_z81.py
   · Z97 · Score dashboard              open: no spoken route, no test
-  · Z102 · Stage board                 open: no spoken route, no test
-  · X07 · Voice parameters             open: no spoken route, no test
+  ◦ Z102 · Stage board                 tests exist: hands/test_project_methods.py, mouth/test_project_route.py
+  ◦ X07 · Voice parameters             tests exist: mouth/test_methods_route.py
   · X20 · Desk camera                  open: no spoken route, no test
   · N01 · Offline voice                open: no spoken route, no test
-## Orb HUD + senses  (7/21 spoken route · 8/21 spoken or tested)
+## Orb HUD + senses  (7/21 spoken route · 11/21 spoken or tested)
   ◦ 3D vault graph                     tests exist: face/test_graph.py
   · Particle orb motion                open: no spoken route, no test
   ✓ Red arrow · blue cursor            632/632  (cursor_demo, capability_arrow, pointer)  + tests: tests/test_pointer.py, tests/test_pointer_geom.py
   ✓ Takeover / handback                48/48  (stop_watch)  + tests: tests/test_takeover_handback.py
   · Suggestion chips                   open: no spoken route, no test
-  · Live routing bars                  open: no spoken route, no test
+  ◦ Live routing bars                  tests exist: tests/test_reflex5.py
   ✓ Tool receipt footer                32/32  (last_receipt)  + tests: hands/test_mcp_result_receipts.py
   · Driving badge + hands-off          open: no spoken route, no test
   ✓ Cursor ↔ action link               24/24  (cursor_demo)  + tests: hands/test_watch_cursor.py
@@ -78,10 +78,10 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   · Z43 · Graph controls               open: no spoken route, no test
   · Z44 · Provenance footer            open: no spoken route, no test
   · Z46 · Suggestion chips             open: no spoken route, no test
-  · Z49 · Live gate HUD                open: no spoken route, no test
+  ◦ Z49 · Live gate HUD                tests exist: tests/test_reflex5.py
   · Z70 · Voice graph focus            open: no spoken route, no test
-  · X40 · Graph reasoning              open: no spoken route, no test
-## Brain · turn  (12/47 spoken route · 19/47 spoken or tested)
+  ◦ X40 · Graph reasoning              tests exist: hands/test_project_methods.py, mouth/test_project_route.py
+## Brain · turn  (12/47 spoken route · 30/47 spoken or tested)
   ◦ Router (pipeline.py)               tests exist: brain/test_pipeline.py, tests/test_golden_pipeline.py
   ◦ Jev advisory router                tests exist: tests/test_jev_router.py, brain/test_jev_preflight.py
   · Decision Fabric (shadow)           open: no spoken route, no test
@@ -93,7 +93,7 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   ◦ 164 Saylor courses                 tests exist: hands/test_school_index.py
   ◦ Shared context read                tests exist: brain/test_shared_context.py, brain/test_shared_retrieval.py
   · Personality dials                  open: no spoken route, no test
-  · Lapsed-question follow-up          open: no spoken route, no test
+  ◦ Lapsed-question follow-up          tests exist: tests/test_fidelity_z51_z54_z60.py
   ✓ Duplicate-action guard             480/480  (drafts)  + tests: hands/test_drafts_dry_run.py
   ✓ Promise + cost guards              2112/2112  (cost, hard_steps, compound_hard)  + tests: tests/test_round3_honesty.py, tests/test_cost_card.py
   · Typed tool contracts               open: no spoken route, no test
@@ -102,7 +102,7 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   · Provider retry handling            open: no spoken route, no test
   ✓ Semantic repo map                  48/48  (git_context)
   · Action/plugin registry             open: no spoken route, no test
-  · Z12 · Five decisions               open: no spoken route, no test
+  ◦ Z12 · Five decisions               tests exist: tests/test_reflex5.py
   ✓ Z14 · Metered cost                 32/32  (cost)
   ✓ Z25 · Date + fetch cap             56/56  (clock)
   · Z26 · Persona dials                open: no spoken route, no test
@@ -113,29 +113,29 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   · Z45 · Same-language work           open: no spoken route, no test
   ✓ Z47 · Persona scope                24/24  (rules)
   ◦ Z51 · Duplicate check              tests exist: tests/test_fidelity_z51_z54_z60.py
-  · Z52 · One missing slot             open: no spoken route, no test
-  · Z56 · Lapsed question              open: no spoken route, no test
+  ◦ Z52 · One missing slot             tests exist: tests/test_fidelity_z51_z54_z60.py
+  ◦ Z56 · Lapsed question              tests exist: tests/test_fidelity_z51_z54_z60.py
   · Z59 · Ping etiquette               open: no spoken route, no test
   · Z66 · Review → do                  open: no spoken route, no test
   · Z67 · No invented stats            open: no spoken route, no test
   · Z72 · Facts + one quip             open: no spoken route, no test
   ✓ Z51/B6 · Gate-only act             1312/1312  (hard_steps)
-  · Z98 · Cost before click            open: no spoken route, no test
-  · Z107 · Optional modules            open: no spoken route, no test
-  · Z109 · Stage providers             open: no spoken route, no test
-  · Z110 · Plugin catalog              open: no spoken route, no test
-  · Z112 · Routine routing             open: no spoken route, no test
+  ◦ Z98 · Cost before click            tests exist: hands/test_project_methods.py, mouth/test_project_route.py
+  ◦ Z107 · Optional modules            tests exist: brain/test_lazy_hand_loading.py
+  ◦ Z109 · Stage providers             tests exist: mouth/test_methods_route.py
+  ◦ Z110 · Plugin catalog              tests exist: mouth/test_methods_route.py
+  ◦ Z112 · Routine routing             tests exist: mouth/test_methods_route.py
   · Z114 · Closed decisions            open: no spoken route, no test
   · Z115 · Local intent                open: no spoken route, no test
-  · X08 · Prepaid ceiling              open: no spoken route, no test
-  · X09 · Operator persona             open: no spoken route, no test
-## Brain · jobs  (10/24 spoken route · 12/24 spoken or tested)
+  ◦ X08 · Prepaid ceiling              tests exist: mouth/test_methods_route.py
+  ◦ X09 · Operator persona             tests exist: mouth/test_methods_route.py
+## Brain · jobs  (12/24 spoken route · 16/24 spoken or tested)
   ✓ Mission controller                 24/24  (coding_status)  + tests: brain/test_mission_controller.py, brain/test_mission_contract.py
   · Oct 12 controller (unused)         open: no spoken route, no test
   ✓ Checkpoint + resume                64/64  (coding_resume, pickup)  + tests: hands/test_coding_resume.py, tests/test_resume_and_backup_stream.py
   ✓ Owner approvals                    224/224  (capability_self_code, grant, revoke)  + tests: brain/test_open_access.py, brain/test_owner_approval.py
   ✓ Persistent task graph              736/736  (plan, plan_period)
-  ◦ Background concurrency             tests exist: brain/test_workflow_queue_lock.py
+  ✓ Background concurrency             56/56  (task_board)  + tests: brain/test_workflow_queue_lock.py
   ✓ Self-healing loop                  120/120  (capability_self_code, capability_fix_it)  + tests: hands/test_code_retry.py
   ✓ Long-running task owner            32/32  (coding_resume)  + tests: hands/test_agent_tools_lifecycle.py, hands/test_p0_lifecycle.py
   · Mid-task steering                  open: no spoken route, no test
@@ -143,17 +143,17 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   ✓ Task / standing grants             120/120  (grant)
   · Protected recovery host            open: no spoken route, no test
   · Z27 · Update cadence               open: no spoken route, no test
-  · Z57 · Slot readback                open: no spoken route, no test
-  ◦ Z60 · Approval record              tests exist: tests/test_fidelity_z51_z54_z60.py
+  ◦ Z57 · Slot readback                tests exist: tests/test_fidelity_z51_z54_z60.py
+  ◦ Z60 · Approval record              tests exist: tests/test_card_turn_and_z71_z81.py, tests/test_fidelity_z51_z54_z60.py
   · Z79 · MCP scopes                   open: no spoken route, no test
   ✓ Z88 · Off-Mac routine              512/512  (loop)
   ✓ Z96 · Scope upfront                640/640  (plan)
   · Z57b · Readback confidence         open: no spoken route, no test
-  · X03 · Interview → file             open: no spoken route, no test
+  ◦ X03 · Interview → file             tests exist: hands/test_project_methods.py, mouth/test_project_route.py
   · X24 · Own compute box              open: no spoken route, no test
-  · X28 · Per-task modes               open: no spoken route, no test
+  ◦ X28 · Per-task modes               tests exist: mouth/test_methods_route.py
   ✓ X39 · Project resume               32/32  (pickup)
-  · C01 · Voice task board             open: no spoken route, no test
+  ✓ C01 · Voice task board             56/56  (task_board)
 ## Hands · Mac + files  (9/26 spoken route · 11/26 spoken or tested)
   ✓ Read files + folders               35264/35264  (book_find, repos_list, git_context, file_read, folder_list)  + tests: hands/test_workflow_read_access.py, hands/test_document_find.py
   ✓ Finder / Preview                   1280/1280  (file_read)  + tests: hands/test_macos_read.py
@@ -181,7 +181,7 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   · X21 · See then compare             open: no spoken route, no test
   · X44 · Outside-vault drafts         open: no spoken route, no test
   · C03 · Live app edit                open: no spoken route, no test
-## Hands · Research  (6/24 spoken route · 7/24 spoken or tested)
+## Hands · Research  (6/24 spoken route · 8/24 spoken or tested)
   ✓ Web search                         1600/1600  (web_search)  + tests: hands/test_web_search_multi.py
   ✓ Saved-video research               8/8  (research_build)  + tests: hands/test_workflow_research.py
   ✓ 2,681-source corpus                8/8  (research_build)
@@ -198,7 +198,7 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   · Z63 · Premise check                open: no spoken route, no test
   · Z68 · Researched critique          open: no spoken route, no test
   ✓ X16 · Source quality               1600/1600  (repo_search)
-  · X22 · Intake + dedupe              open: no spoken route, no test
+  ◦ X22 · Intake + dedupe              tests exist: hands/test_project_methods.py, mouth/test_project_route.py
   · X37 · News → ideas                 open: no spoken route, no test
   · M-STT · Gap audit v1               open: no spoken route, no test
   · M-STT2 · Chunk + retry v2          open: no spoken route, no test
@@ -206,14 +206,14 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   · CORPUS · Coverage gap              open: no spoken route, no test
   · PENDING · Lost IDs                 open: no spoken route, no test
   · SOURCE · Transfer gap              open: no spoken route, no test
-## Hands · Browser  (2/6 spoken route · 2/6 spoken or tested)
+## Hands · Browser  (2/6 spoken route · 3/6 spoken or tested)
   ✓ Browser missions                   744/744  (browser_mission, browser_status, open_site)  + tests: hands/test_browser_runtime.py, brain/test_browser_mission.py
   · Full browser automation            open: no spoken route, no test
   ✓ Owner browser sessions             96/96  (owner_login)
   · DOM / CDP bridge                   open: no spoken route, no test
-  · Verified file download             open: no spoken route, no test
+  ◦ Verified file download             tests exist: hands/test_browser_runtime.py
   · Reusable web helpers               open: no spoken route, no test
-## Hands · Coding  (9/20 spoken route · 12/20 spoken or tested)
+## Hands · Coding  (9/20 spoken route · 17/20 spoken or tested)
   ✓ Frozen job workspace               664/664  (coding_mission, workbench)  + tests: hands/test_workflow_workspace.py, hands/test_immutable_workflow_source.py
   ✓ Coding worker                      640/640  (coding_mission)  + tests: hands/test_coding_mission.py
   ✓ Code writing                       640/640  (coding_mission)  + tests: hands/test_code_batches.py
@@ -229,12 +229,12 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   · Candidate rollback                 open: no spoken route, no test
   ◦ Model-config integrity             tests exist: hands/test_workflow_config_lock.py
   ◦ Startup diagnostics                tests exist: tests/test_launchd_start.py
-  · Z100 · Setup prompt                open: no spoken route, no test
-  · Z106 · Setup wizard                open: no spoken route, no test
-  · Z116 · Chores → PR                 open: no spoken route, no test
-  · X18 · Project folders              open: no spoken route, no test
-  · X25 · Personal-data apps           open: no spoken route, no test
-## Hands · Connectors  (7/24 spoken route · 9/24 spoken or tested)
+  ◦ Z100 · Setup prompt                tests exist: mouth/test_methods_route.py
+  ◦ Z106 · Setup wizard                tests exist: mouth/test_methods_route.py
+  ◦ Z116 · Chores → PR                 tests exist: mouth/test_methods_route.py
+  ◦ X18 · Project folders              tests exist: hands/test_project_methods.py, mouth/test_project_route.py
+  ◦ X25 · Personal-data apps           tests exist: mouth/test_methods_route.py
+## Hands · Connectors  (7/24 spoken route · 10/24 spoken or tested)
   ✓ MCP inventory                      24/24  (mcp_inventory)
   ✓ MCP tools + calls                  120/120  (mcp_call)  + tests: hands/test_owner_mcp_outcome.py
   ◦ Headless Obsidian note             tests exist: hands/test_headless_workflow_notes.py
@@ -255,11 +255,11 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   · Z91 · Column schema                open: no spoken route, no test
   · Z93 · Tool preflight               open: no spoken route, no test
   · Z52/B6 · Gate as MCP               open: no spoken route, no test
-  · Z99 · Private key setup            open: no spoken route, no test
+  ◦ Z99 · Private key setup            tests exist: mouth/test_methods_adversarial.py
   · Z103 · Comment → DM                open: no spoken route, no test
   · Z117 · Usage sign-in               open: no spoken route, no test
   · X43 · Schedule judgment            open: no spoken route, no test
-## Hands · Creative  (4/18 spoken route · 5/18 spoken or tested)
+## Hands · Creative  (4/18 spoken route · 8/18 spoken or tested)
   ✓ ArtCraft bridge                    2016/2016  (artcraft_open, artcraft_work, artcraft_question)  + tests: hands/test_craft.py, brain/test_craft_wire.py
   ✓ 12 ArtCraft workflows              1536/1536  (artcraft_work)  + tests: tests/test_artcraft_reply.py
   · Professional demo                  open: no spoken route, no test
@@ -273,23 +273,23 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   · Z65 · Critique rubric              open: no spoken route, no test
   · Z92 · Concrete critique            open: no spoken route, no test
   · Z94 · Scroll-video asset           open: no spoken route, no test
-  · Z101 · Approve/edit/redo           open: no spoken route, no test
-  · Z104 · Character form              open: no spoken route, no test
-  · Z105 · Minimal edit                open: no spoken route, no test
+  ◦ Z101 · Approve/edit/redo           tests exist: hands/test_project_methods.py, mouth/test_project_route.py
+  ◦ Z104 · Character form              tests exist: mouth/test_methods_route.py
+  ◦ Z105 · Minimal edit                tests exist: mouth/test_methods_route.py
   · C04 · Product-UI hero              open: no spoken route, no test
   · C05 · Chat video FX                open: no spoken route, no test
-## Multi-agent  (2/10 spoken route · 2/10 spoken or tested)
+## Multi-agent  (2/10 spoken route · 3/10 spoken or tested)
   ✓ Desk job cards                     960/960  (desk_dispatch)
   · 17-desk card coverage              open: no spoken route, no test
-  ✓ Real worker delegation             960/960  (desk_dispatch)  + tests: brain/test_workflow_consumer_dispatch.py
+  ✓ Real worker delegation             960/960  (desk_dispatch)  + tests: brain/test_workflow_consumer_dispatch.py, hands/test_fanout.py
   · Platform hand-off                  open: no spoken route, no test
   · 17 native specialisms              open: no spoken route, no test
   · Direct work by default             open: no spoken route, no test
   · Z24 · Optional specialists         open: no spoken route, no test
   · Z95 · Specialist synthesis         open: no spoken route, no test
   · X27 · Agent office UI              open: no spoken route, no test
-  · X30 · Parallel specialists         open: no spoken route, no test
-## Memory  (14/40 spoken route · 17/40 spoken or tested)
+  ◦ X30 · Parallel specialists         tests exist: hands/test_fanout.py
+## Memory  (14/40 spoken route · 32/40 spoken or tested)
   ✓ Remember / forget                  960/960  (remember, inbox_capture)  + tests: memory/test_store.py
   ✓ Retrieval + doc context            800/800  (vault_search)  + tests: memory/test_document_context.py, memory/test_retrieve_title_boost.py
   ✓ Obsidian second brain              800/800  (vault_search)
@@ -307,29 +307,29 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   · Z32 · Entity + format              open: no spoken route, no test
   ✓ Z38 · Inbox capture                384/384  (inbox_capture)
   · Z48 · Pattern recall               open: no spoken route, no test
-  ✓ Z58 · Work recap                   24/24  (results)
+  ✓ Z58 · Work recap                   24/24  (results)  + tests: tests/test_fidelity_z51_z54_z60.py
   ◦ Z71 · Value precedence             tests exist: tests/test_card_turn_and_z71_z81.py
   · Z76 · Entity ack                   open: no spoken route, no test
   · Z82 · Find-confirm-fetch           open: no spoken route, no test
   ✓ Z83 · State grounding              256/256  (desktop_state)
   · Z90 · Match then enrich            open: no spoken route, no test
-  · Z111 · Stable prefix               open: no spoken route, no test
-  · X04 · Routing readback             open: no spoken route, no test
-  · X11 · Compile at ingest            open: no spoken route, no test
-  · X12 · Weekly wiki lint             open: no spoken route, no test
-  · X13 · Daily compilation            open: no spoken route, no test
-  · X14 · Topic per file               open: no spoken route, no test
-  · X15 · Answer → wiki                open: no spoken route, no test
-  ✓ X17 · Vault CLI search             800/800  (vault_search)
-  · X29 · Project brain                open: no spoken route, no test
+  ◦ Z111 · Stable prefix               tests exist: hands/test_methods_config.py
+  ◦ X04 · Routing readback             tests exist: mouth/test_methods_route.py
+  ◦ X11 · Compile at ingest            tests exist: hands/test_project_methods.py, mouth/test_project_route.py
+  ◦ X12 · Weekly wiki lint             tests exist: hands/test_project_methods.py, mouth/test_project_route.py
+  ◦ X13 · Daily compilation            tests exist: mouth/test_methods_route.py
+  ◦ X14 · Topic per file               tests exist: hands/test_project_methods.py, mouth/test_project_route.py
+  ◦ X15 · Answer → wiki                tests exist: hands/test_project_methods.py, mouth/test_project_route.py
+  ✓ X17 · Vault CLI search             800/800  (vault_search)  + tests: mouth/test_methods_route.py
+  ◦ X29 · Project brain                tests exist: hands/test_project_methods.py, mouth/test_project_route.py
   · X32 · Memory bootstrap             open: no spoken route, no test
-  · X33 · Daily summary                open: no spoken route, no test
-  · X34 · PARA + metadata              open: no spoken route, no test
-  · X38 · Vault hygiene                open: no spoken route, no test
-  · X41 · Vault commands               open: no spoken route, no test
-  · X42 · Intent vs action             open: no spoken route, no test
-  · X45 · Self-extend tools            open: no spoken route, no test
-  · X46 · Graduate ideas               open: no spoken route, no test
+  ◦ X33 · Daily summary                tests exist: hands/test_project_methods.py, mouth/test_project_route.py
+  ◦ X34 · PARA + metadata              tests exist: hands/test_project_methods.py, mouth/test_project_route.py
+  ◦ X38 · Vault hygiene                tests exist: mouth/test_methods_route.py
+  ◦ X41 · Vault commands               tests exist: mouth/test_methods_route.py
+  ◦ X42 · Intent vs action             tests exist: hands/test_methods_reason.py
+  ◦ X45 · Self-extend tools            tests exist: mouth/test_methods_route.py
+  ◦ X46 · Graduate ideas               tests exist: mouth/test_methods_route.py
 ## Outputs  (3/9 spoken route · 5/9 spoken or tested)
   ◦ Spoken Orb reply                   tests exist: mouth/test_turn.py
   ✓ Verified result receipt            32/32  (last_receipt)  + tests: tests/test_ask_nothing_verified_flag.py
@@ -355,8 +355,8 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   ✓ ArtCraft Studio                    0/0  (artcraft_open)
   · Slack #hive                        open: no spoken route, no test
   ✓ VPS + n8n                          24/24  (vps_status)
-  ✓ X31 · Shared vault                 48/48  (session_recall)
-## Verification, acceptance + risks  (1/24 spoken route · 7/24 spoken or tested)
+  ✓ X31 · Shared vault                 48/48  (session_recall)  + tests: mouth/test_methods_route.py
+## Verification, acceptance + risks  (1/24 spoken route · 10/24 spoken or tested)
   · Watchdog desk                      open: no spoken route, no test
   · Stream C (stand-in)                open: no spoken route, no test
   · Face delivery gate                 open: no spoken route, no test
@@ -377,7 +377,7 @@ system matrix: 104/365 canvas nodes have a spoken route · 145/365 spoken or tes
   · Z50 · Router A/B trial             open: no spoken route, no test
   · Z85 · Model comparison             open: no spoken route, no test
   · Z87 · Event check                  open: no spoken route, no test
-  · X01 · Evidence audit               open: no spoken route, no test
-  ◦ X02 · Route probes                 tests exist: eval/route_matrix.py
-  · X05 · Usefulness tests             open: no spoken route, no test
-  · X23 · Score calibration            open: no spoken route, no test
+  ◦ X01 · Evidence audit               tests exist: hands/test_project_methods.py, mouth/test_project_route.py
+  ◦ X02 · Route probes                 tests exist: eval/route_matrix.py, mouth/test_methods_route.py
+  ◦ X05 · Usefulness tests             tests exist: hands/test_methods_vault.py
+  ◦ X23 · Score calibration            tests exist: mouth/test_methods_route.py

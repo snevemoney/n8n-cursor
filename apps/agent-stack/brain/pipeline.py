@@ -28,7 +28,7 @@ STACK = HERE.parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 PACK_NAME = "pipeline-pack.md"
-HANDS = ("capability", "apps", "repo", "vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
+HANDS = ("capability", "task_board", "apps", "repo", "vault_read", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "safari_see", "browser_mission", "cursor_ask", "craft", "status", "refuse_hard_step")
 WATCH_HANDS = ("mac_act",)
 TOOLS = HANDS
 WATCH_LOOP_CAP = 8
@@ -986,7 +986,7 @@ ROUTE_SEARCH_LEAD_RE = re.compile(
 
 
 ACK_LINE = "On it."
-ACK_SKIP = frozenset({"say", "capability"})
+ACK_SKIP = frozenset({"say", "capability", "task_board"})
 
 
 
@@ -1394,7 +1394,7 @@ NOT_A_COMMAND_RE = re.compile(
     r"i\s+(?:plan|loop|read|clicked|opened|closed|installed|cloned|searched|asked|sent|wrote)\b|i\s+should\b|"
     r"my\s+\w+\s+(?:said|says|told|wants|asked)\b|(?:he|she|they)\s+(?:said|told|asked)\b|can\s+i\s+ask\b|"
     r"you\s+can\s+\w+\s+(?:it|this|that)\s+later\b|yesterday\s+i\b|the\s+video\s+says\b)", re.I)
-TALK_SAFE_TOOLS = frozenset({"say", "capability", "results_recall", "rules", "cost_card", "status", "mcp_inventory", "skills",
+TALK_SAFE_TOOLS = frozenset({"say", "capability", "task_board", "results_recall", "rules", "cost_card", "status", "mcp_inventory", "skills",
                              "voice_engine", "prebrief", "pickup", "handback"})
 
 
@@ -1476,6 +1476,12 @@ def _model_free_route_once(spoken_in: str) -> dict | None:
         return {"tool": "results_recall", "args": {}, "speak": ""}
     if _cost_hand().wants_cost(spoken_in):
         return {"tool": "cost_card", "args": {}, "speak": ""}
+    if _task_board_hand().wants(spoken_in):  # canvas C01: "what are all my jobs" reads the real mission/loop state
+        return {"tool": "task_board", "args": {}, "speak": ""}
+    if _task_board_hand().wants_modes(spoken_in):  # canvas Z64: mode truth from the real switches
+        return {"tool": "task_board", "args": {"op": "modes"}, "speak": ""}
+    if _task_board_hand().wants_drop(spoken_in) == "what":  # canvas: drop -> a real answer, not model recall
+        return {"tool": "task_board", "args": {"op": "drop"}, "speak": ""}
     if _capability_hand().wants(spoken_in):  # "don't you have a red arrow?", "can you change your code?"
         return {"tool": "capability", "args": {}, "speak": ""}
     if _pointer_hand().wants_pointer(spoken_in) and not is_hard_step(spoken_in):
@@ -1886,6 +1892,10 @@ def _start_prebrief_pump() -> None:
 
 def _cost_hand():
     return _load_ready_hand("agent_stack_cost_card", STACK / "hands" / "cost_card.py")  # locked: no half-built module (audit 2026-10-16)
+
+
+def _task_board_hand():
+    return _load_ready_hand("agent_stack_task_board", STACK / "hands" / "task_board.py")
 
 
 def _pointer_hand():
@@ -6346,6 +6356,28 @@ def _run_tool_inner(
                 "outcome": TOOL_LOOP if got.get("found") else HONEST_UNKNOWN}
     if tool == "handback":
         return handback(hive, gen)
+    if tool == "task_board":
+        def _cs(mid):
+            return _coding_mission_hand().CodingMissionHandle(hive).status(mid)
+
+        def _bs(mid):
+            return browser_runtime().BrowserMissionHandle(hive).status(mid)
+        try:
+            loops = _loop_hand()._load()
+        except Exception:  # noqa: BLE001 — a missing loop file is no loops
+            loops = []
+        if args.get("op") == "drop":
+            got = _task_board_hand().drop_line(load_json(Path(hive) / "bus" / "state.json"))
+            return {"ok": got["ok"], "tool": tool, "spoken": got["spoken"], "wires": ["task_board", "drop"], "cites": [],
+                    "sent": False, "task_verified": got["task_verified"], "outcome": TOOL_LOOP if got["ok"] else HONEST_UNKNOWN}
+        if args.get("op") == "modes" or _task_board_hand().wants_modes(utterance):
+            got = _task_board_hand().modes(load_json(Path(hive) / "bus" / "state.json"), open_access=_open_access())
+            return {"ok": True, "tool": tool, "spoken": got["spoken"], "wires": ["task_board", "modes"], "cites": [], "sent": False,
+                    "task_verified": True, "outcome": TOOL_LOOP}
+        got = _task_board_hand().board(hive, coding_status=_cs, browser_status=_bs, loops=loops)
+        return {"ok": True, "tool": tool, "spoken": got["spoken"], "wires": ["task_board"], "cites": [], "sent": False,
+                "task_verified": True, "task_board_meta": {k: len(got[k]) for k in ("coding", "browser", "loops", "finished")},
+                "outcome": TOOL_LOOP}
     if tool == "multistep":
         lines, all_ok = [], True
         kw = dict(hive=hive, retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn,
@@ -7478,7 +7510,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("capability", "apps", "repo", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief")
+DETERMINISTIC_HANDS = ("capability", "task_board", "apps", "repo", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
