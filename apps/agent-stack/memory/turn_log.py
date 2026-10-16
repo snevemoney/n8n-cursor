@@ -14,7 +14,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_PATH = ROOT / "logs" / "jarvis-turns.jsonl"
 _LOCK = threading.Lock()
-_BOOT_ID = os.urandom(6).hex()  # one per Face process: gens restart at each boot, so (boot_id, gen) names a turn
+import sys as _sys
+_BOOT_ID = getattr(_sys, "_jarvis_boot_id", None) or os.urandom(6).hex()  # one per Face process (shared with pipeline)
+_sys._jarvis_boot_id = _BOOT_ID
 _REV: list = []
 
 

@@ -90,6 +90,39 @@ def vault_read_inflight(ev: dict) -> bool:
     return verb in ("vault_read", "craft")
 
 
+# Mac review 2026-10-16 (acceptance: "exceed four tool results, survive an Orb disconnect"): only vault_read/craft held
+# the 25 s + 10 s wall, so a general hand loop (45 s budget) was cut to the dark line, and a disconnect cancelled work in
+# flight. Any hand the pipeline has started now holds the wall up to HAND_HOLD_MAX_SEC, and a disconnect while a hand
+# runs detaches the turn instead of cancelling it: the pipeline still commits its own result to the bus.
+HAND_HOLD_MAX_SEC = float(os.environ.get("JARVIS_HAND_HOLD_MAX_SEC") or 240)
+_NOT_HANDS = frozenset({"", "converse", "think", "say", "stop", "vault_read", "craft"})
+
+
+def is_heartbeat(ev: dict) -> bool:
+    return isinstance(ev, dict) and "heartbeat" in (ev.get("wires") or [])
+
+
+def hand_inflight(ev: dict) -> bool:
+    """A hand (not talk) that the pipeline has started and not finished: its open marker or its one heartbeat."""
+    if not isinstance(ev, dict) or not ev.get("partial") or ev.get("done"):
+        return False
+    if str(ev.get("host") or "") != "pipeline":
+        return False
+    verb = str(ev.get("verb") or ev.get("tool") or "")
+    if verb in _NOT_HANDS:
+        return False
+    return not str(ev.get("spoken") or "").strip() or is_heartbeat(ev)
+
+
+def queued_hand(pending: queue.Queue) -> bool:
+    try:
+        with pending.mutex:
+            rows = list(pending.queue)
+    except (AttributeError, TypeError):
+        return False
+    return any(hand_inflight(ev) for ev in rows if isinstance(ev, dict))
+
+
 def queued_vault_read(pending: queue.Queue) -> bool:
     """True when the open signal is already queued and not yet read."""
     try:
@@ -930,6 +963,8 @@ class Handler(BaseHTTPRequestHandler):
         call_open = False
         heard_provider = False
         tool_open = False
+        hand_open = False
+        detached = False
         try:
             beat = think_heartbeat(utterance)
             self.wfile.write((f"data: {json.dumps(beat)}\n\n").encode("utf-8"))
@@ -1022,6 +1057,37 @@ class Handler(BaseHTTPRequestHandler):
                 return
             emit_dark()
 
+        def detach() -> bool:
+            """Client gone while a hand runs: let the producer finish on its own (its result lands on the bus) instead
+            of cancelling the work. Bounded by HAND_HOLD_MAX_SEC; a newer turn or Stop still ends it."""
+            nonlocal detached
+            if is_stop or not worker.is_alive() or not (hand_open or tool_open or queued_hand(pending) or queued_vault_read(pending)):
+                return False
+            if superseded() or self._turn_aborted(arrival):
+                return False
+            detached = True
+            limit = time.monotonic() + HAND_HOLD_MAX_SEC
+
+            def drain() -> None:
+                while True:
+                    try:
+                        ev = pending.get(timeout=0.5)
+                    except queue.Empty:
+                        ev = False
+                    if ev is None:
+                        return
+                    if time.monotonic() > limit or superseded():
+                        halt.set()
+                        return
+            threading.Thread(target=drain, daemon=True, name="turn-detached").start()
+            if pipe is not None and hasattr(pipe, "mutate_bus"):
+                gen_now = own_gen_now()
+                try:
+                    pipe.mutate_bus(HIVE, lambda bus: dict(bus, detached_gen=gen_now))
+                except Exception:  # noqa: BLE001 — the marker is a courtesy for the Orb
+                    pass
+            return True
+
         worker = threading.Thread(target=produce, daemon=True)
         worker_box["t"] = worker
         worker.start()
@@ -1041,6 +1107,7 @@ class Handler(BaseHTTPRequestHandler):
                     owns_turn = not superseded()
                     tool_holding = producer_alive and owns_turn and (
                         tool_open or queued_vault_read(pending)
+                        or ((hand_open or queued_hand(pending)) and now < deadline + HAND_HOLD_MAX_SEC)
                     )
                     in_grace = (
                         producer_alive
@@ -1052,6 +1119,8 @@ class Handler(BaseHTTPRequestHandler):
                         emit_wall()
                         return
                 client_gone = self._client_gone()
+                if client_gone and detach():
+                    return
                 if (not is_stop and self._turn_aborted(arrival)) or client_gone:
                     halt.set()
                     kill_own_turn(disconnected=client_gone)
@@ -1109,27 +1178,34 @@ class Handler(BaseHTTPRequestHandler):
                     halt.set()
                     return
                 clean = self._scrub_turn(live_mouth, ev if isinstance(ev, dict) else {})
-                if provider_sentence(clean):
+                if hand_inflight(clean):
+                    hand_open = True  # a heartbeat is the hand still working, not the provider's answer
+                elif provider_sentence(clean) and not is_heartbeat(clean):
                     heard_provider = True
                     call_open = False
                     tool_open = False
+                    hand_open = False
                 elif vault_read_inflight(clean):
                     tool_open = True
                 elif provider_call_open(clean):
                     call_open = True
                 if clean.get("done"):
                     tool_open = False
+                    hand_open = False
                 payload = (f"data: {json.dumps(clean)}\n\n").encode("utf-8")
                 self.wfile.write(payload)
                 self.wfile.flush()
                 if clean.get("done") or str(clean.get("verb") or "") == "stop":
                     return
         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+            if detach():
+                return
             halt.set()
             kill_own_turn(disconnected=True)
             return
         finally:
-            halt.set()
+            if not detached:
+                halt.set()
             self.close_connection = True
 
 
@@ -1149,6 +1225,12 @@ def serve(port: int = PORT) -> None:
         if bus.get("job_status") == "working" and bus.get("phase") == "think":
             bus["phase"] = "idle"
             bus["job_status"] = "done"
+            # Restart audit 2026-10-16: the interrupted turn vanished without a word, and its gen still read as live.
+            if bus.get("turn_gen"):
+                bus["cancel_gen"] = bus["turn_gen"]
+            bus.pop("agent_task_progress", None)
+            bus["spoken"] = "I restarted in the middle of your last request, so it did not finish. Say it again and I'll redo it."
+            bus["response_ok"] = False
         return bus
 
     if pipe is not None and hasattr(pipe, "mutate_bus"):

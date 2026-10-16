@@ -55,6 +55,18 @@ def _load() -> list[dict]:
         return []
 
 
+def load_checked() -> tuple[list[dict], bool]:
+    """(rows, readable). A missing file is no loops; an unreadable or corrupt one is NOT "no loops" (silent-failure audit)."""
+    p = _path()
+    if not p.exists():
+        return [], True
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return [], False
+    return (data, True) if isinstance(data, list) else ([], False)
+
+
 MAX_ROWS = 200
 
 

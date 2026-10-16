@@ -47,6 +47,13 @@ def load_json(path: Path) -> dict:
         return {}
 
 
+def _gen_floor(hive: Path) -> int:
+    try:
+        return int((Path(hive) / "bus" / "gen.floor").read_text(encoding="utf-8").strip() or 0)
+    except (OSError, ValueError):
+        return 0
+
+
 def _quarantine(path: Path) -> None:
     """Keep the unreadable file for diagnosis instead of overwriting it with {} (which wiped turns and cancel_gen)."""
     try:
@@ -113,7 +120,10 @@ def mutate_bus(hive: Path, apply: Callable[[dict], dict | None]) -> dict:
                     bus = _load_strict(path)
                 except CorruptBus:
                     _quarantine(path)
-                    bus = {}
+                    # Restart audit 2026-10-16: a fresh {} restarted gens at 1, so gens reused earlier numbers and
+                    # anything keyed on a gen (cancels, acks, logs) became ambiguous. Carry the last gen forward.
+                    floor = _gen_floor(dest)
+                    bus = {"turn_gen": floor} if floor else {}
                 before = json.dumps(bus, sort_keys=True, default=str)
                 out = apply(bus)
                 if out is None:
@@ -241,8 +251,12 @@ def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
     opener = threading.get_ident()
 
     def apply(bus: dict) -> dict:
-        gen = bus_gen(bus) + 1
+        gen = max(bus_gen(bus), _gen_floor(hive)) + 1
         bus["turn_gen"] = gen
+        try:  # the floor survives a corrupt state.json (see mutate_bus)
+            (Path(hive) / "bus" / "gen.floor").write_text(str(gen), encoding="utf-8")
+        except OSError:
+            pass
         # Concurrency audit 2026-10-16: the Face guessed its own gen as arrival+1, so with two requests in flight the
         # wall cancelled nothing and a timed-out worker ran on. Record which thread opened each gen (last 32).
         owners = bus.get("gen_threads") if isinstance(bus.get("gen_threads"), dict) else {}

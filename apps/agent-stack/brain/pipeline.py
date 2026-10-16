@@ -499,6 +499,25 @@ DISPATCH_DEST = ROOT / "docs/hive/outer-heaven/CONTENT/os/sessions/jarvis/dispat
 _LAST_GOOD: dict = {}
 
 
+def boot_id() -> str:
+    """One id per Face process, shared by every hot-reloaded copy of this module (stored on sys)."""
+    b = getattr(sys, "_jarvis_boot_id", None)
+    if not b:
+        b = os.urandom(6).hex()
+        sys._jarvis_boot_id = b
+    return b
+
+
+def _note_failure(where: str, exc: BaseException) -> None:
+    try:
+        log_dir().mkdir(parents=True, exist_ok=True)
+        with (log_dir() / "load-errors.jsonl").open("a", encoding="utf-8", errors="replace") as fh:
+            fh.write(json.dumps({"ts": time.time(), "module": f"pipeline:{where}", "error": hooks.redact(f"{type(exc).__name__}: {exc}")[:300],
+                                 "swallowed": True, "boot_id": boot_id()}) + "\n")
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def log_dir() -> Path:
     """Where diagnostic logs go. Mac review 2026-10-16: 174 of 187 turn-errors rows were test stubs written to the real
     log. Tests (pytest/unittest, same rule as memory/turn_log.py) get a per-process temp folder; JARVIS_LOG_DIR overrides."""
@@ -1045,7 +1064,7 @@ def confirm_arm(hive: Path, tool: str, args: dict, utterance: str) -> None:
     path = _confirm_path(hive)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + ".tmp")
-    tmp.write_text(json.dumps({"tool": tool, "args": args, "utterance": utterance, "at": time.time()}), encoding="utf-8")
+    tmp.write_text(json.dumps({"tool": tool, "args": args, "utterance": utterance, "at": time.time(), "boot": boot_id()}), encoding="utf-8")
     os.chmod(tmp, 0o600)
     os.replace(tmp, path)
 
@@ -1086,8 +1105,18 @@ def confirm_take(hive: Path | None, utterance: str) -> dict | None:
     ok_word = _pointer_hand().G.strict_confirm(utterance) if strict else bool(CONFIRM_YES_RE.fullmatch(utterance or ""))
     cancelled = bool(re.fullmatch(r"\s*(?:cancel|stop|deny|reject|no)(?:\s+(?:it|that|the action))?[.!]?\s*", utterance or "", re.I))
     try:
-        expired = time.time() - float(row.get("at") or 0) > CONFIRM_TTL_SEC
+        age = time.time() - float(row.get("at") or 0)
+        expired = age > CONFIRM_TTL_SEC
     except (ValueError, TypeError):
+        return None
+    # Restart audit 2026-10-16: a proposal armed before a restart survived it, and a bare "yes" meant for something
+    # else could fire it. A row from another Face process (or older than an hour) is dropped; nothing runs.
+    if row.get("boot") != boot_id() or age > 3600:
+        path.unlink(missing_ok=True)
+        if pointer:
+            _pointer_hand().dismiss()
+        if ok_word:
+            return {"tool": "say", "args": {}, "speak": "I restarted since that was proposed, so I dropped it. Ask again and I'll check it fresh."}
         return None
     if cancelled or (expired and pointer):
         path.unlink(missing_ok=True)
@@ -1858,11 +1887,36 @@ def _start_prebrief_pump() -> None:
     import sys as _sys
     if "_pytest" in _sys.modules or "unittest" in _sys.modules or not str(_sys.argv[0] if _sys.argv else "").endswith("serve.py"):
         return
-    if os.environ.get("JARVIS_PREBRIEF", "1") == "0":
-        return
     if getattr(_sys, "_jarvis_pumps_started", False):
         return  # concurrency audit 2026-10-16: each hot reload of this module started another set of pump threads
     _sys._jarvis_pumps_started = True
+
+    def boot_sweep():  # restart audit 2026-10-16: tell the owner which missions lost their worker
+        time.sleep(float(os.environ.get("JARVIS_BOOT_SWEEP_DELAY") or 45))
+        try:
+            cards = _task_board_hand().stranded(
+                HIVE, coding_status=lambda mid: _coding_mission_hand().CodingMissionHandle(HIVE).status(mid),
+                browser_status=lambda mid: browser_runtime().BrowserMissionHandle(HIVE).status(mid))
+        except Exception as exc:  # noqa: BLE001
+            _note_failure("boot_sweep", exc)
+            return
+        if not cards:
+            return
+
+        def apply(bus):
+            told = set(bus.get("stranded_told") or [])
+            ib = bus.get("inbox") if isinstance(bus.get("inbox"), dict) else {}
+            items = [c for c in (ib.get("items") or []) if isinstance(c, dict)]
+            for c in cards:
+                if c["id"] not in told:
+                    items.append({"title": c["title"], "body": c["body"], "ts": time.time()})
+                    told.add(c["id"])
+            bus["inbox"] = {"gen": int(ib.get("gen") or 0) + 1, "items": items[-5:]}
+            bus["stranded_told"] = sorted(told)[-64:]
+            return bus
+        mutate_bus(HIVE, apply)
+
+    threading.Thread(target=boot_sweep, daemon=True, name="boot-sweep").start()
 
     def pump():
         while True:
@@ -1872,7 +1926,8 @@ def _start_prebrief_pump() -> None:
             except Exception:  # noqa: BLE001 — the pump must survive a bad tick
                 continue
 
-    threading.Thread(target=pump, daemon=True, name="prebrief-pump").start()
+    if os.environ.get("JARVIS_PREBRIEF", "1") != "0":  # restart audit: this flag used to switch off loops and lapses too
+        threading.Thread(target=pump, daemon=True, name="prebrief-pump").start()
 
     def lapse_pump():  # Z56: unanswered questions time out into one status line
         while True:
@@ -5922,16 +5977,21 @@ def _hand_loop_handoff_path(hive) -> Path:
     return Path(hive) / "hand-loop" / "handoff.json"
 
 
-def _hand_loop_handoff_save(hive, token, utterance, receipts, reason):
-    """Keep a paused request (owner's words + bounded receipts) so "keep going" continues it through the same loop."""
+def _hand_loop_handoff_save(hive, token, utterance, receipts, reason, prev=None):
+    """Keep a paused request (owner's words + bounded receipts) so "keep going" continues it through the same loop.
+    prev: the handoff this run resumed (restart audit: re-reading the file after it was taken always saw nothing, so
+    the resume cap never applied)."""
     try:
-        prev = _hand_loop_handoff_load(hive) or {}
-        parts = int(prev.get("parts") or 0) + 1 if prev.get("utterance") == utterance else 1
-        if parts > HAND_LOOP_MAX_RESUMES:
+        prev = prev if isinstance(prev, dict) else {}
+        same = prev.get("utterance") == utterance
+        parts = int(prev.get("parts") or 1) + 1 if same else 1
+        if parts > HAND_LOOP_MAX_RESUMES + 1:
+            _hand_loop_handoff_path(hive).unlink(missing_ok=True)
             return None
+        new_hands = len(receipts) - (len(prev.get("receipts") or []) if same else 0)
         row = {"utterance": str(utterance or "")[:ROUTE_MAX_CHARS], "receipts": receipts[-8:], "reason": reason, "gen": token,
-               "parts": parts, "hands": int(prev.get("hands") or 0) + len(receipts) if parts > 1 else len(receipts),
-               "saved_at": time.time()}
+               "parts": parts, "hands": (int(prev.get("hands") or 0) if same else 0) + new_hands,
+               "saved_at": time.time(), "boot": boot_id()}
         if hooks.redact(row["utterance"]) != row["utterance"]:
             return None  # never keep a line that carries a secret
         path = _hand_loop_handoff_path(hive)
@@ -5963,6 +6023,16 @@ def _hand_loop_handoff_take(hive):
     except OSError:
         pass
     return row
+
+
+def _hand_loop_handoff_done(hive, entry):
+    """Remove the handoff only once its resume has finished (or saved a newer one): a crash mid-resume keeps it."""
+    row = _hand_loop_handoff_load(hive)
+    if row and entry and row.get("saved_at") == entry.get("saved_at"):
+        try:
+            _hand_loop_handoff_path(hive).unlink()
+        except OSError:
+            pass
 
 
 def _hand_loop_pick(pick):
@@ -6051,8 +6121,8 @@ def _hand_loop_receipt(pick,ran):
 def _receipt_redact(text):
     try:
         return hooks.redact(text)
-    except Exception:  # noqa: BLE001
-        return text
+    except Exception:  # noqa: BLE001 — receipts go to the provider: no detector, no text
+        return '[withheld]'
 
 
 # Read-only hands: re-reading after an edit, or once more after a transient failure, is not a repeated action.
@@ -6146,7 +6216,7 @@ def _provider_hand_exchange(selection, pick, result):
 
 def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None,
                         retrieve_roots=None,see_fn=None,status_fn=None,cursor_ask_fn=None,initial_selection=None,
-                        prior_receipts=None):
+                        prior_receipts=None,handoff_prev=None):
     """One bounded general tool loop; original owner utterance stays authoritative. prior_receipts: a paused run of
     the same request being resumed ("keep going"); its steps count for duplicates and failures but not the budget."""
     prior=list(prior_receipts or [])
@@ -6197,7 +6267,7 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
             if reason in {'hand_limit','time_limit'}:
                 # Mac review 2026-10-16: the loop ended work with no handoff. The receipts are kept with the turn's own
                 # gen; "keep going" resumes this request through the same loop (no second controller).
-                handed=_hand_loop_handoff_save(hive,token,utterance,receipts,reason)
+                handed=_hand_loop_handoff_save(hive,token,utterance,receipts,reason,prev=handoff_prev)
                 if handed:
                     row['hand_loop_handoff']=handed
                     tail='I paused after '+str(len(receipts))+' steps; say "keep going" and I will continue from here.'
@@ -6577,10 +6647,12 @@ def _run_tool_inner(
 
         def _bs(mid):
             return browser_runtime().BrowserMissionHandle(hive).status(mid)
+        loops_ok = True
         try:
-            loops = _loop_hand()._load()
-        except Exception:  # noqa: BLE001 — a missing loop file is no loops
-            loops = []
+            lh = _loop_hand()
+            loops, loops_ok = lh.load_checked() if hasattr(lh, "load_checked") else (lh._load(), True)
+        except Exception:  # noqa: BLE001 — an unloadable loop hand is not "no loops"
+            loops, loops_ok = [], False
         if args.get("op") == "drop":
             got = _task_board_hand().drop_line(load_json(Path(hive) / "bus" / "state.json"))
             return {"ok": got["ok"], "tool": tool, "spoken": got["spoken"], "wires": ["task_board", "drop"], "cites": [],
@@ -6590,8 +6662,10 @@ def _run_tool_inner(
             return {"ok": True, "tool": tool, "spoken": got["spoken"], "wires": ["task_board", "modes"], "cites": [], "sent": False,
                     "task_verified": True, "outcome": TOOL_LOOP}
         got = _task_board_hand().board(hive, coding_status=_cs, browser_status=_bs, loops=loops)
+        if not loops_ok:
+            got["spoken"] = got["spoken"].rstrip() + " I couldn't read the loop list, so loops may be missing from this."
         return {"ok": True, "tool": tool, "spoken": got["spoken"], "wires": ["task_board"], "cites": [], "sent": False,
-                "task_verified": True, "task_board_meta": {k: len(got[k]) for k in ("coding", "browser", "loops", "finished")},
+                "task_verified": bool(loops_ok), "task_board_meta": {k: len(got[k]) for k in ("coding", "browser", "loops", "finished")},
                 "outcome": TOOL_LOOP}
     if tool == "multistep":
         lines, all_ok = [], True
@@ -8131,9 +8205,11 @@ def _hand_loop_resume_iter(hive: Path, entry: dict, *, spoken_in: str, prior_tur
     ran = yield from _continue_hand_loop({"tool": last.get("hand"), "args": {}, "speak": ""}, None, utterance, hive=hive,
                                          token=token, brain="openrouter", brief=brief, talk_fn=talk_fn,
                                          retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn,
-                                         cursor_ask_fn=cursor_ask_fn, prior_receipts=receipts)
+                                         cursor_ask_fn=cursor_ask_fn, prior_receipts=receipts, handoff_prev=entry)
     if ran is None:
         return
+    if not ran.get("hand_loop_handoff"):
+        _hand_loop_handoff_done(hive, entry)
     brain = str(ran.pop("_hand_loop_brain", "") or "openrouter")
     ok = ran.get("ok") is not False
     if token and ran.get("hand_loop_meta"):
@@ -8196,7 +8272,7 @@ def apply_pipeline_iter(
                                   wires=["permissions"], cites=[], pack=None, gen=token)
             return
     if RESUME is not None and RESUME.is_continue(spoken_in):
-        _handoff = _hand_loop_handoff_take(hive)
+        _handoff = _hand_loop_handoff_load(hive)
         if _handoff:
             yield from _hand_loop_resume_iter(hive, _handoff, spoken_in=spoken_in, prior_turns=prior_turns, talk_fn=talk_fn,
                                               retrieve_roots=retrieve_roots, token=token, see_fn=see_fn, status_fn=status_fn,

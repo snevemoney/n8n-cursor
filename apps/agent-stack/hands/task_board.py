@@ -20,7 +20,7 @@ WANT_RE = re.compile(
     r"(?:list|show)\s+(?:me\s+)?(?:all\s+)?(?:my\s+|the\s+|your\s+)?(?:jobs|missions|running\s+tasks|background\s+(?:jobs|tasks))|"
     r"any\s+(?:jobs|tasks|missions)\s+(?:running|going)|status\s+of\s+(?:all\s+)?(?:my\s+)?(?:jobs|tasks|missions))"
     r"[\s?.!]*$", re.I)
-CODING_DONE = {"COMPLETED", "FAILED", "CANCELLED", "BLOCKED"}
+CODING_DONE = {"COMPLETED", "FAILED", "CANCELLED", "BLOCKED", "UNAVAILABLE", "DELIVERY_EVIDENCE_STALE"}
 BROWSER_DONE = {"VERIFIED", "PARTIAL", "FAILED", "CANCELLED"}
 RECENT_DONE = 3
 
@@ -118,6 +118,38 @@ def board(hive: Path, *, coding_status=None, browser_status=None, loops=None, no
             f" Recently finished: {'; '.join(done)}." if done else "")
     return {"ok": True, "spoken": spoken, "coding": coding, "browser": browser, "loops": active_loops, "paused": paused,
             "finished": coding_done + browser_done, "task_verified": True}
+
+
+def stranded(hive: Path, *, coding_status=None, browser_status=None) -> list[dict]:
+    """Restart audit 2026-10-16: a mission whose worker died (Face crash, reboot) stayed QUEUED/RUNNING on disk and the
+    owner was never told. Missions that are not finished and whose worker is not alive, as inbox cards. Nothing is
+    marked finished or failed here: the work and checkpoints stay resumable."""
+    out = []
+    for kind, folder, fn, done, verb in (("coding task", "coding-missions", coding_status, CODING_DONE, "resume the coding task"),
+                                         ("browser research", "browser-missions", browser_status, BROWSER_DONE, "")):
+        root = Path(hive) / folder
+        if not root.is_dir():
+            continue
+        for d in root.iterdir():
+            if not (d.is_dir() and re.fullmatch(r"[a-f0-9]{32}", d.name)) or (d / "result.json").exists():
+                continue
+            disk = _read(d / "state.json")
+            if str(disk.get("status") or "").upper() in done:
+                continue
+            try:
+                live = fn(d.name) if fn else disk
+            except (ValueError, OSError):
+                continue
+            gone = (str(live.get("status") or "").upper() == "UNAVAILABLE" and live.get("worker_liveness") != "starting") or (
+                str(live.get("terminal_reason") or "") == "worker_unavailable")
+            if not gone:
+                continue
+            req = _read(d / "request.json")
+            what = str(req.get("objective") or req.get("goal") or req.get("request") or "")[:90]
+            out.append({"id": d.name, "title": f"{kind.capitalize()} stopped", "body":
+                        f"The {kind}" + (f" ({what})" if what else "") + " stopped when its worker ended (restart or crash). "
+                        "Its saved work is kept and nothing is marked done." + (f" Say \"{verb}\" to continue it." if verb else "")})
+    return out
 
 
 # Owner canvas Z64 (mode truth, 2026-10-16): "are you listening", "can you see my screen", "is open access on" are answered
