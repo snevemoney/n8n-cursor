@@ -86,7 +86,9 @@ class DetachTest(unittest.TestCase):
         def producer():
             gen = self.pipe.begin_turn(self.face.HIVE)
             yield {"spoken": "", "done": False, "gen": gen, "partial": True, "host": "pipeline", "verb": "converse"}
-            time.sleep(0.2)
+            end = time.monotonic() + 5  # wait for the handler's cancel, not a fixed sleep (flaked under a loaded run)
+            while time.monotonic() < end and not self.pipe.turn_cancelled(self.face.HIVE, gen):
+                time.sleep(0.02)
             yield {"spoken": "late", "done": True, "gen": gen}
         self.stream(producer, client_gone=lambda: self.pipe.peek_gen(self.face.HIVE) > 0)
         self.assertEqual(self.bus()["spoken"], "Client disconnected. Turn cancelled.")
