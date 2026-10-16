@@ -37,6 +37,7 @@ WORKTREE = Path(os.environ.get("JARVIS_SIGNAL_WORKTREE") or Path.home() / "jarvi
 BRANCH = "jarvis/signals"
 PACKETS = "docs/hive/outer-heaven/CONTENT/watch-later/packets"
 LEDGER = CACHE / "ledger.jsonl"
+FRAMES = Path(os.environ.get("JARVIS_SIGNAL_FRAMES") or Path.home() / "jarvis-proof/signal-frames")
 FRAME_EVERY_S = 2          # one frame every 2 s ("frame by frame" without terabytes)
 SHEET_COLS, SHEET_ROWS = 6, 5  # 30 frames per sheet = 60 s of video per sheet
 MAX_HEIGHT = 720
@@ -121,17 +122,17 @@ def youtube(sig: dict, work: Path) -> dict:
     caps = sorted(work.glob("cap*.json3"), key=lambda p: ("orig" not in p.name, p.name))
     transcript = json3_to_text(json.loads(caps[0].read_text())) if caps else ""
     log(f"{vid}: transcript {len(transcript.split())} words from {caps[0].name if caps else 'no captions'}")
-    sheets = []
+    sheets, keyframes = [], []
     try:
         video = download(sig["url"], work)
-        sheets = contact_sheets(video, work / "sheets")
+        sheets, keyframes = contact_sheets(video, work / "sheets")
     finally:
         for v in work.glob("video.*"):
             v.unlink()  # Evens: downloads do not stay on the Mac
     log(f"{vid}: {len(sheets)} contact sheets, video deleted")
     return {"title": meta.get("title"), "channel": meta.get("channel") or meta.get("uploader"),
             "duration": meta.get("duration"), "upload_date": meta.get("upload_date"), "description": meta.get("description"),
-            "chapters": meta.get("chapters"), "transcript": transcript, "sheets": sheets, "links": _links(meta.get("description") or "")}
+            "chapters": meta.get("chapters"), "transcript": transcript, "sheets": sheets, "keyframes": keyframes, "links": _links(meta.get("description") or "")}
 
 
 CLIENTS = ("default", "mweb", "tv", "ios")  # live 10-16: the default client got HTTP 403, mweb worked
@@ -154,19 +155,38 @@ def download(url: str, work: Path) -> Path:
     raise RuntimeError("could not download the video (" + "; ".join(errors) + "); try his Safari route")
 
 
-def contact_sheets(video: Path, out: Path) -> list:
-    """One frame every FRAME_EVERY_S seconds, tiled 6x5 per sheet: sheet N covers minute N-1 (frames left to right,
-    top to bottom). This ffmpeg has no drawtext, so the time map is written to sheets/INDEX.md instead of on the frames."""
+KEEP_FILTER = "mpdecimate=hi=64*400:lo=64*160:frac=0.5"  # a frame counts only when the screen really changed
+KEYFRAME_W = 1280   # readable on-screen text (prompts, code, repo names) for the vision pass; not stored
+SHEET_W = 320       # stored contact-sheet tiles (the repo copy)
+KEYFRAMES_TO_MODEL = 60
+
+
+def contact_sheets(video: Path, out: Path) -> tuple:
+    """Look at one frame every FRAME_EVERY_S seconds and keep only frames where the screen changed (live 10-16: 27 of
+    192 frames, still every step of the tutorial). Returns (sheets, keyframes): small 6x5 contact sheets for the repo,
+    with sheets/INDEX.md giving every frame's time, and full-size keyframes for the model to read (deleted after)."""
     out.mkdir(parents=True, exist_ok=True)
-    vf = f"fps=1/{FRAME_EVERY_S},scale=384:-2,tile={SHEET_COLS}x{SHEET_ROWS}:padding=4:margin=4"
-    subprocess.run(["ffmpeg", "-v", "error", "-i", str(video), "-vf", vf, "-q:v", "5", str(out / "sheet_%03d.jpg")],
-                   check=True, timeout=3600)
+    keys = out.parent / "keyframes"
+    keys.mkdir(exist_ok=True)
+    cp = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(video), "-vf",
+                         f"fps=1/{FRAME_EVERY_S},{KEEP_FILTER},scale='min({KEYFRAME_W},iw)':-2,showinfo",
+                         "-fps_mode", "vfr", "-q:v", "4", str(keys / "k_%05d.jpg")],
+                        capture_output=True, text=True, timeout=3600)
+    if cp.returncode != 0:
+        raise RuntimeError("ffmpeg frame pass failed: " + cp.stderr[-300:])
+    times = [float(m) for m in re.findall(r"pts_time:([0-9.]+)", cp.stderr)]
+    keyframes = sorted(keys.glob("k_*.jpg"))
+    subprocess.run(["ffmpeg", "-hide_banner", "-v", "error", "-framerate", "1", "-i", str(keys / "k_%05d.jpg"), "-vf",
+                    f"scale={SHEET_W}:-2,tile={SHEET_COLS}x{SHEET_ROWS}:padding=4:margin=4", "-q:v", "6",
+                    str(out / "sheet_%03d.jpg")], check=True, timeout=3600)
     sheets = sorted(out.glob("sheet_*.jpg"))
-    per = FRAME_EVERY_S * SHEET_COLS * SHEET_ROWS
-    (out / "INDEX.md").write_text(f"One frame every {FRAME_EVERY_S} s, {SHEET_COLS} across x {SHEET_ROWS} down, read left to "
-                                  "right then top to bottom.\n" + "\n".join(
-                                      f"- {p.name}: {_mmss(i * per)} to {_mmss((i + 1) * per)}" for i, p in enumerate(sheets)))
-    return sheets
+    per = SHEET_COLS * SHEET_ROWS
+    lines = [f"Looked at one frame every {FRAME_EVERY_S} s; kept {len(keyframes)} frames where the screen changed. "
+             f"{SHEET_COLS} across x {SHEET_ROWS} down, left to right then top to bottom."]
+    for n, sh in enumerate(sheets):
+        lines.append(f"- {sh.name}: " + ", ".join(_mmss(int(t)) for t in times[n * per:(n + 1) * per]))
+    (out / "INDEX.md").write_text("\n".join(lines) + "\n")
+    return sheets, [(k, times[i] if i < len(times) else 0.0) for i, k in enumerate(keyframes)]
 
 
 def _mmss(t: int) -> str:
@@ -237,7 +257,7 @@ def web_page(sig: dict, work: Path, safari=None) -> dict:
 EXTRACT_PROMPT = """You are Jarvis's signal analyst, working the way Evens's Researcher desk works (deep-video-learning +
 multimodal-youtube-learning), in your own words. Read the WHOLE source below: the transcript (with [mm:ss] times) and,
 for videos, the contact sheets (one frame every {every} s; sheet N covers minute N-1, frames left to right then top to
-bottom; each image is labeled with its sheet name). Keep apart what was SAID and what was SHOWN on
+bottom; each image is labeled with its sheet name; sheets/INDEX.md, given below, lists every frame's time). Keep apart what was SAID and what was SHOWN on
 screen; never invent a click or a UI path you cannot see; tape numbers and prices are UNVERIFIED.
 
 Return JSON only: {{"learned_md": "...", "methods": [...]}}
@@ -290,10 +310,19 @@ def extract(sig: dict, got: dict) -> dict:
     content = [{"type": "text", "text": EXTRACT_PROMPT.format(every=FRAME_EVERY_S, title=got.get("title"), kind=sig["kind"],
                                                               meta=meta, body=body[:600000])}]
     sheets = got.get("sheets") or []
-    step = max(1, -(-len(sheets) // SHEETS_TO_MODEL))  # long videos: every Nth sheet, spread over the whole video
-    for s in sheets[::step]:
-        content.append({"type": "text", "text": f"{Path(s).name}:"})
-        content.append({"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + base64.b64encode(Path(s).read_bytes()).decode()}})
+    if sheets and (Path(sheets[0]).parent / "INDEX.md").exists():
+        content[0]["text"] += "\n\nFRAME TIMES (sheets/INDEX.md):\n" + (Path(sheets[0]).parent / "INDEX.md").read_text()[:20000]
+    keys = got.get("keyframes") or []
+    if keys:  # full-size changed frames: readable prompts, code, repo names, settings
+        step = max(1, -(-len(keys) // KEYFRAMES_TO_MODEL))
+        for k, t in keys[::step]:
+            content.append({"type": "text", "text": f"frame at {_mmss(int(t))}:"})
+            content.append({"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + base64.b64encode(Path(k).read_bytes()).decode()}})
+    else:
+        step = max(1, -(-len(sheets) // SHEETS_TO_MODEL))
+        for s in sheets[::step]:
+            content.append({"type": "text", "text": f"{Path(s).name}:"})
+            content.append({"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + base64.b64encode(Path(s).read_bytes()).decode()}})
     out = _json(_openrouter([{"role": "user", "content": content}]))
     if not isinstance(out.get("methods"), list):
         raise RuntimeError("the model returned no methods list")
@@ -346,12 +375,15 @@ def worktree() -> Path:
 def write_packet(sig: dict, got: dict, ext: dict, work: Path) -> Path:
     root = worktree()
     d = root / PACKETS / sig["id"]
+    if (d / "LEARNED.md").exists() and "jarvis-signal-engine" not in (d / "LEARNED.md").read_text(errors="ignore")[:300]:
+        d = d / "jarvis-pass"  # another desk's packet: never overwritten; Jarvis's frame-level pass sits beside it
     d.mkdir(parents=True, exist_ok=True)
     (d / "full.txt").write_text(got.get("transcript") or "")
     if got.get("pages"):
         (d / "linked-pages.md").write_text("\n\n".join(f"## {p.get('title')}\n{p.get('final') or p.get('url')}\n\n{p.get('text')}"
                                                      for p in got["pages"]))
     if got.get("sheets"):
+        # Evens 10-16: "keep everything stored in the repo" -> sheets live in the packet (sheets/ + INDEX.md)
         (d / "sheets").mkdir(exist_ok=True)
         for s in got["sheets"]:
             shutil.copy2(s, d / "sheets" / Path(s).name)
