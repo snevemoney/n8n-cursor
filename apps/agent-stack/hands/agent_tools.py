@@ -709,6 +709,13 @@ def _run(args: dict | None = None, approved: bool = False, *, cancel_check=None,
 # ---------------------------------------------------------------- routing
 _TASK = re.compile(r"^\s*(?:jarvis[,:]?\s*)?agent\s+task\s*:?\s*(\{.*\})\s*$", re.I | re.S)
 _CLI = re.compile(r"^\s*(?:jarvis[,:]?\s*)?(?:run\s+)?((?:gh|git|yt-dlp|ffprobe|ffmpeg|gws)\s+.+?)\s*$", re.I)
+# Owner canvas "Shell + terminal": a spoken command line. op_cli keeps its gates (read-only list when closed,
+# OPEN_CLI_HARD under open access), so speaking it never widens what runs.
+_SHELL = re.compile(r"^\s*(?:(?:hey\s+)?jarvis[,:]?\s*)?(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?|please\s+|i\s+need\s+you\s+to\s+)?"
+                    r"(?:run\s+(?:the\s+)?(?:command|shell\s+command)\s+[`'\"]?(?P<a>[^`'\"]+?)[`'\"]?"
+                    r"|run\s+[`'\"]?(?P<b>[^`'\"]+?)[`'\"]?\s+in\s+(?:the|my|a)\s+(?:terminal|shell)"
+                    r"|in\s+(?:the|my)\s+terminal,?\s+run\s+[`'\"]?(?P<c>[^`'\"]+?)[`'\"]?)"
+                    r"(?:\s+for\s+me|,?\s+please)?\s*[?.!]?\s*$", re.I)
 _MCPC = re.compile(r"\bcall\s+(?:the\s+)?([\w.\-]+)\s+mcp\s+tool\s+([\w.\-]+)(?:\s+with\s+(\{.*\}))?", re.I | re.S)
 
 
@@ -742,6 +749,7 @@ def _gws_reads_args(u: str) -> dict | None:
 
 def wants(u: str) -> bool:
     return bool(_LIST.search(u or "") or _CODE.match(u or "") or _TASK.search(u or "") or _CLI.match(u or "") or _MCPC.search(u or "")
+                or _SHELL.match(u or "")
                 or _gws_argv(u) or _gws_reads_args(u) or bool(_fanout_args(u)))
 
 
@@ -765,6 +773,13 @@ def args_from_utterance(u: str) -> dict:
         except ValueError:
             a = {}
         return {"op": "mcp", "server": m.group(1), "tool": m.group(2), "arguments": a}
+    m = _SHELL.match(u or "")
+    if m:
+        import shlex
+        try:
+            return {"op": "cli", "argv": shlex.split(m.group("a") or m.group("b") or m.group("c"))}
+        except ValueError:
+            return {}
     m = _CLI.match(u or "")
     if m:
         import shlex

@@ -1237,6 +1237,8 @@ def _live_chat_route_once(spoken_in: str, had_pending: bool = False) -> dict | N
         return {"tool": "cost_card", "args": {}, "speak": ""}
     if _pointer_hand().CURSOR_DEMO_RE.search(u):
         return {"tool": "pointer_demo", "args": {}, "speak": ""}  # Z02: harmless cursor demo, no click
+    if _apps_hand().list_kind(u):
+        return {"tool": "apps", "args": {}, "speak": ""}  # "show me my open windows" is desktop state, not a vault note
     if re.search(r"\b(?:close|quit)\b", u, re.I) and _apps_hand().wants(u):
         return {"tool": "apps", "args": {}, "speak": ""}  # "close Spotify" quits the app; it is not a click on an X
     if _pointer_hand().wants_click(u) and not is_hard_step(u):
@@ -1342,7 +1344,17 @@ def model_free_route(spoken_in: str) -> dict | None:
     return None
 
 
+CLOCK_ASK_RE = re.compile(r"^(?:what(?:'s|\s+is)\s+(?:the\s+)?(?:time|date)(?:\s+(?:today|now|right\s+now))?|what\s+time\s+is\s+it(?:\s+(?:now|right\s+now))?"
+                          r"|what(?:'s|\s+is)\s+today'?s\s+date|what\s+day\s+is\s+(?:it|today)|what(?:'s|\s+is)\s+the\s+date\s+today"
+                          r"|how\s+much\s+(?:free\s+)?disk\s+space\s+(?:do\s+i\s+have|is\s+(?:left|free))|how\s+much\s+free\s+space\s+do\s+i\s+have)"
+                          r"[\s?.!]*$", re.I)
+
+
 def _model_free_route_once(spoken_in: str) -> dict | None:
+    if CLOCK_ASK_RE.match((spoken_in or "").strip()):
+        said = _simple_step(spoken_in)
+        if said:
+            return {"tool": "say", "args": {}, "speak": said}  # canvas Z25: the real clock/disk, never a model guess
     if MACOS is not None and (MACOS.LATEST_SCREENSHOT_RE.fullmatch(spoken_in.strip()) or MACOS.FINDER_REFERENCE_RE.fullmatch(spoken_in.strip()) or MACOS.SAVED_IMAGE_RE.fullmatch(spoken_in.strip())):
         return {"tool": "workspace_read", "args": {"op": "screenshot_reference"}, "speak": ""}
     if _research_build_request(spoken_in):

@@ -59,6 +59,23 @@ class Resolve(unittest.TestCase):
             m = A.OPEN_RE.match(u)
             self.assertTrue(m is None or A.NOT_APP_RE.search(m.group(2)), u)
 
+    def test_desktop_state_reads(self):
+        self.assertEqual(A.list_kind("what apps are running?"), "apps")
+        self.assertEqual(A.list_kind("hey jarvis, which windows are open"), "windows")
+        self.assertEqual(A.list_kind("how many displays do I have"), "displays")
+        self.assertEqual(A.list_kind("what apps are good for budgeting"), "")
+        ran = A.run("what apps are running", runner=lambda c: SimpleNamespace(returncode=0, stdout="Finder, Safari, Notes", stderr=""))
+        self.assertTrue(ran["task_verified"]); self.assertEqual(ran["items"], ["Finder", "Safari", "Notes"])
+        disp = A.run("how many displays do I have", runner=lambda c: SimpleNamespace(
+            returncode=0, stderr="", stdout='{"SPDisplaysDataType":[{"spdisplays_ndrvs":[{"_name":"Built-in"},{"_name":"LG"}]}]}'))
+        self.assertIn("2 displays", disp["spoken"])
+        denied = A.run("which windows are open", runner=lambda c: SimpleNamespace(returncode=1, stdout="", stderr="not allowed"))
+        self.assertFalse(denied["ok"]); self.assertIn("not allowed", denied["spoken"])
+
+    def test_desktop_state_off_mac_is_not_executed(self):
+        got = A.run("what apps are running")
+        self.assertEqual(got["outcome"], "NOT_EXECUTED"); self.assertFalse(got["task_verified"])
+
 
 if __name__ == "__main__":
     unittest.main()

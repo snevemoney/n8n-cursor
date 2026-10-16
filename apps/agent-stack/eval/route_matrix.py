@@ -174,7 +174,7 @@ FAMILIES = [
          {"r": ["whisper", "crawl4ai", "markitdown"]}, question=True),
     _fam("near_miss_memory", "not:memory", ["do you remember the 90s", "I can't remember the name of that song",
                                             "remind me why we chose Supabase"], question=True),
-    _fam("everyday_model", "model", ["what time is it", "who are you", "what can you do", "how's the weather looking",
+    _fam("everyday_model", "model", ["who are you", "what can you do", "how's the weather looking",
                                      "help me think through the launch", "what should I prioritise this week",
                                      "write me a haiku about Montreal", "translate hello into French",
                                      "what's 17 times 23", "give me three name ideas for a bakery"], question=True),
@@ -264,6 +264,16 @@ FAMILIES = [
     _fam("push_pr", "hard", ["push the branch", "push this fix", "open a pull request", "create a PR",
                              "push my changes"]),
     _fam("owner_login", "hard", ["log in to my bank site", "log into the hostinger account", "log in to my email account"]),
+    _fam("clock", "say", ["what time is it", "what's the time", "what's today's date", "what day is it",
+                          "what is the date today", "how much disk space do I have", "how much free space do I have"], question=True),
+    _fam("desktop_state", "apps", ["what apps are running", "which apps are open", "list the running apps",
+                                   "which windows are open", "show me my open windows", "how many displays do I have",
+                                   "how many monitors are connected", "list my displays"], live_safe=True),
+    _fam("shell", "agent_tools", ["run the command {c}", "run {c} in the terminal", "in the terminal, run {c}"],
+         {"c": ["df -h", "uptime", "ls -la", "git status", "sw_vers", "brew list"]}),
+    _fam("session_recall", "chats", ["read my last sessions on all the platforms", "what did we decide in claude",
+                                     "show my last cursor chat", "what was my last grok session about",
+                                     "can you see my chats", "look at the last sessions on every platform"], question=True),
     _fam("then_chain", "multistep", ["what time is it then what's today's date", "remember that {fact}, then what time is it",
                                      "what's today's date and then how much disk space is free"], {"fact": FACTS[:3]},
          question=True),
@@ -292,11 +302,66 @@ NODE_OF = {
     "book_find": ["wsr"], "repos_list": ["wsr"], "git_context": ["wsr", "repomap"], "file_read": ["wsr", "macread"],
     "folder_list": ["wsr"], "pointer": ["pointer", "sig_z02"], "web_search": ["web"], "screen": ["see"],
     "screen_critique": ["see", "sig_z30"], "remember": ["rem"], "grant": ["perms", "scopedauthority"],
-    "revoke": ["perms"], "vault_search": ["vaultread", "ret", "sig_x17"], "cursor_handoff": ["clis", "cursor"],
+    "revoke": ["perms"], "clock": ["sig_z25"], "desktop_state": ["win", "sig_z83"], "shell": ["term"],
+    "session_recall": ["chats", "onebrain", "sig_x31"], "vault_search": ["vaultread", "ret", "sig_x17"], "cursor_handoff": ["clis", "cursor"],
     "gws_reads": ["gws"], "outbound_contact": ["phone", "sig_z07", "sig_x26"], "push_pr": ["push", "opr"],
     "owner_login": ["authbrowser"], "hard_steps": ["honesty", "sig_z51_batch6"], "compound_hard": ["honesty", "untrustedboundary"],
 }
 SYSTEM_MATRIX = HERE / "system_matrix.json"
+# Canvas nodes that are not a spoken command (servers, streams, guards, stores): the repo tests that exercise them.
+# --by-node lists these as "tests exist" (not run by the matrix); the canvas node is only green after those pass on
+# the Mac and live acceptance closes it.
+TESTED_BY = {
+    "typed": ["face/test_serve.py"], "mic": ["mouth/test_voice.py"], "wake": ["brain/test_wake_word.py"],
+    "watch": ["brain/test_watch_loop_result.py", "brain/test_watch_stop.py", "brain/test_watch_stroke.py"],
+    "sig_z55": ["face/test_senses.py"],
+    "serve": ["face/test_serve.py", "face/test_serve_main_ports.py"], "sse": ["face/test_sse_deadline.py", "tests/test_stream_race.py"],
+    "orb": ["face/test_orb.py", "face/test_native_navigation.py"], "pane": ["face/test_reply_panel.py"],
+    "stop": ["face/test_controls.py", "memory/test_cancel_receipt.py"], "tts": ["mouth/test_voice.py"],
+    "eyes": ["face/test_senses.py"], "sig_z18": ["face/test_senses.py"], "jobtruth": ["brain/test_mission_controller.py"],
+    "sig_z81": ["tests/test_card_turn_and_z71_z81.py"],
+    "graph3d": ["face/test_graph.py"], "pointer": ["tests/test_pointer.py", "tests/test_pointer_geom.py"],
+    "takeover": ["tests/test_takeover_handback.py"], "receiptcard": ["hands/test_mcp_result_receipts.py"],
+    "cursorbinding": ["hands/test_watch_cursor.py"],
+    "pipe": ["brain/test_pipeline.py", "tests/test_golden_pipeline.py"], "jev": ["tests/test_jev_router.py", "brain/test_jev_preflight.py"],
+    "reflex": ["tests/test_reflex5.py"], "loop": ["brain/test_general_hand_loop.py"], "persona": ["mouth/test_persona.py"],
+    "model": ["brain/test_online.py", "brain/test_model_router.py"], "saylor": ["hands/test_school_index.py"],
+    "shared": ["brain/test_shared_context.py", "brain/test_shared_retrieval.py"], "dupguard": ["hands/test_drafts_dry_run.py"],
+    "honesty": ["tests/test_round3_honesty.py", "tests/test_cost_card.py"], "sig_z51": ["tests/test_fidelity_z51_z54_z60.py"],
+    "mission": ["brain/test_mission_controller.py", "brain/test_mission_contract.py"],
+    "resume": ["hands/test_coding_resume.py", "tests/test_resume_and_backup_stream.py"],
+    "perms": ["brain/test_open_access.py", "brain/test_owner_approval.py"], "heal": ["hands/test_code_retry.py"],
+    "conc": ["brain/test_workflow_queue_lock.py"], "longowner": ["hands/test_agent_tools_lifecycle.py", "hands/test_p0_lifecycle.py"],
+    "sig_z60": ["tests/test_fidelity_z51_z54_z60.py"],
+    "wsr": ["hands/test_workflow_read_access.py", "hands/test_document_find.py"], "macread": ["hands/test_macos_read.py"],
+    "see": ["hands/test_screen_see.py", "hands/test_see.py"], "win": ["hands/test_apps.py"], "term": ["brain/test_terminal_hands.py"],
+    "sig_z17": ["brain/test_focus.py"], "sig_z54": ["tests/test_fidelity_z51_z54_z60.py"],
+    "web": ["hands/test_web_search_multi.py"], "saved": ["hands/test_workflow_research.py"], "origin": ["hands/test_workflow_origin.py"],
+    "methods": ["hands/test_methods_router.py", "hands/test_methods_vault.py"],
+    "safari": ["hands/test_browser_runtime.py", "brain/test_browser_mission.py"],
+    "ws": ["hands/test_workflow_workspace.py", "hands/test_immutable_workflow_source.py"], "worker": ["hands/test_coding_mission.py"],
+    "author": ["hands/test_code_batches.py"], "run": ["hands/test_code_retry.py"], "outputchannels": ["hands/test_open_tools.py"],
+    "install": ["hands/test_repo.py"], "modellockcheck": ["hands/test_workflow_config_lock.py"],
+    "startupcheck": ["tests/test_launchd_start.py"],
+    "call": ["hands/test_owner_mcp_outcome.py"], "mcpschemas": ["hands/test_mcp_delivery_schemas.py"],
+    "mcpreconnect": ["hands/test_mcp_oauth_plan.py"], "note": ["hands/test_headless_workflow_notes.py"],
+    "gws": ["hands/test_gws_reads.py", "hands/test_gws_gate.py"],
+    "craft": ["hands/test_craft.py", "brain/test_craft_wire.py"], "apps": ["tests/test_artcraft_reply.py"],
+    "multimodalreview": ["hands/test_craft_inspect.py"],
+    "rem": ["memory/test_store.py"], "ret": ["memory/test_document_context.py", "memory/test_retrieve_title_boost.py"],
+    "chats": ["memory/test_chats.py"], "scars": ["memory/test_scars.py"],
+    "toolhistory": ["brain/test_talk_tool_history.py", "memory/test_last_wire.py"],
+    "memoryauthority": ["hands/test_memory_authority.py", "tests/test_memory_dispatch_authority.py"],
+    "compact": ["tests/test_agent_task_context.py"], "sig_z11": ["tests/test_results_writeback.py"],
+    "sig_z71": ["tests/test_card_turn_and_z71_z81.py"],
+    "reply": ["mouth/test_turn.py"], "delbundle": ["hands/test_workflow_delivery.py", "brain/test_workflow_delivery_controller.py"],
+    "onote": ["hands/test_headless_workflow_notes.py"], "vrec": ["tests/test_ask_nothing_verified_flag.py"],
+    "deleg": ["brain/test_workflow_consumer_dispatch.py"],
+    "s30": ["eval/test_eval_contracts.py"], "phraseprobe": ["face/test_probe_felt.py"],
+    "noopsuccess": ["tests/test_ask_nothing_verified_flag.py", "hands/test_apps.py"], "risk": ["tests/test_public_guard.py"],
+    "untrustedboundary": ["tests/test_safety_gates.py"], "reusechecks": ["hands/test_repo.py"],
+    "sig_x02": ["eval/route_matrix.py"],
+}
 
 
 def by_node(d: dict) -> list[str]:
@@ -308,22 +373,27 @@ def by_node(d: dict) -> list[str]:
     for fam, nodes in NODE_OF.items():
         for n in nodes:
             hits.setdefault(n, []).append(fam)
-    lines, covered, total = [], set(), 0
+    tested = {n: [f for f in fs if (HERE.parent / f).exists()] for n, fs in TESTED_BY.items()}
+    lines, covered, any_cov, total = [], set(), set(), 0
     for lane in m["lanes"]:
         ids = [n["id"] for n in lane["nodes"]]
         have = [i for i in ids if i in hits]
-        total += len(ids); covered |= set(have)
-        lines.append(f"## {lane['title']}  ({len(have)}/{len(ids)} nodes with a spoken route)")
+        has_test = [i for i in ids if tested.get(i)]
+        total += len(ids); covered |= set(have); any_cov |= set(have) | set(has_test)
+        lines.append(f"## {lane['title']}  ({len(have)}/{len(ids)} spoken route · {len(set(have) | set(has_test))}/{len(ids)} "
+                     f"spoken or tested)")
         for n in lane["nodes"]:
-            fs = hits.get(n["id"]) or []
+            fs, ts = hits.get(n["id"]) or [], tested.get(n["id"]) or []
             if fs:
                 p = sum(fams[f]["passed"] for f in fs if f in fams); t = sum(fams[f]["total"] for f in fs if f in fams)
-                lines.append(f"  ✓ {n['label']:<34} {p}/{t}  ({', '.join(fs)})")
+                lines.append(f"  ✓ {n['label']:<34} {p}/{t}  ({', '.join(fs)})" + (f"  + tests: {', '.join(ts)}" if ts else ""))
+            elif ts:
+                lines.append(f"  ◦ {n['label']:<34} tests exist: {', '.join(ts)}")
             else:
-                lines.append(f"  · {n['label']:<34} no spoken route in the matrix")
-    linked = [l for l in m["links"] if l["from"] in covered and l["to"] in covered]
-    lines.insert(0, f"system matrix: {len(covered)}/{total} canvas nodes have a spoken route · "
-                    f"{len(linked)}/{len(m['links'])} links have both ends routed")
+                lines.append(f"  · {n['label']:<34} open: no spoken route, no test")
+    linked = [l for l in m["links"] if l["from"] in any_cov and l["to"] in any_cov]
+    lines.insert(0, f"system matrix: {len(covered)}/{total} canvas nodes have a spoken route · {len(any_cov)}/{total} spoken or "
+                    f"tested · {len(linked)}/{len(m['links'])} links with both ends covered. Coverage, not the canvas's green.")
     return lines
 
 
@@ -411,6 +481,14 @@ def judge(case: dict, P) -> tuple[bool, str]:
         perm = P._permissions_hand()
         got = "grant" if perm.grant_split(said)[0] else "revoke" if perm.is_revoke(said) else "none"
         return got == want, got
+    if want == "chats":
+        CH = P._chats() if hasattr(P, "_chats") else None
+        if CH is None:
+            import importlib.util as _u
+            spec = _u.spec_from_file_location("agent_stack_chats_matrix", HERE.parent / "memory" / "chats.py")
+            CH = _u.module_from_spec(spec); spec.loader.exec_module(CH)
+        hit = any(r.search(said) for r in (CH.ALL_SESSIONS_RE, CH.RECALL_RE, CH.LAST_SURFACE_RE))
+        return hit, "chats" if hit else "none"
     if want == "watch":
         return bool(P.wants_watch(said)), "watch" if P.wants_watch(said) else "not-watch"
     pick = P.turn_fixed_pick(said) if hasattr(P, "turn_fixed_pick") else P.model_free_route(said)

@@ -72,7 +72,64 @@ def resolve(name: str, bundles: dict[str, Path] | None = None) -> tuple[str, Pat
     return None
 
 
+# Read-only desktop state (owner canvas "Mac apps + displays"): which apps run, which windows are open, how many screens.
+LIST_RE = re.compile(r"^(?:(?:hey\s+)?jarvis\W+|so\s+)?(?:(?:can|could|would)\s+you\s+(?:please\s+)?|i\s+need\s+you\s+to\s+)?(?:please\s+)?(?:"
+                     r"(?P<apps>(?:what|which)\s+apps?\s+(?:are|is)\s+(?:running|open)|(?:list|show)\s+(?:me\s+)?(?:the\s+|my\s+)?(?:running|open)\s+apps)"
+                     r"|(?P<windows>(?:what|which)\s+windows\s+(?:are|do\s+i\s+have)\s+open|(?:list|show)\s+(?:me\s+)?(?:the\s+|my\s+)?open\s+windows)"
+                     r"|(?P<displays>how\s+many\s+(?:displays|monitors|screens)\s+(?:do\s+i\s+have|are\s+(?:connected|plugged\s+in))"
+                     r"|(?:list|show)\s+(?:me\s+)?(?:my\s+|the\s+)?(?:displays|monitors)))"
+                     r"(?:\s+(?:right\s+)?now|\s+on\s+my\s+mac|\s+for\s+me|,?\s+please)?[\s?.!]*$", re.I)
+_LIST_CMD = {
+    "apps": ["osascript", "-e", 'tell application "System Events" to get name of every application process whose background only is false'],
+    "windows": ["osascript", "-e", 'tell application "System Events" to get name of every window of (every application process '
+                                   'whose background only is false)'],
+    "displays": ["system_profiler", "SPDisplaysDataType", "-json"],
+}
+
+
+def list_kind(utterance: str) -> str:
+    m = LIST_RE.match((utterance or "").strip())
+    return next((k for k in ("apps", "windows", "displays") if m and m.group(k)), "")
+
+
+def _spoken_list(kind: str, out: str) -> tuple[str, list[str]]:
+    if kind == "displays":
+        import json as _json
+        try:
+            gpus = _json.loads(out or "{}").get("SPDisplaysDataType") or []
+        except ValueError:
+            return "I couldn't read the display list.", []
+        names = [d.get("_name") or "display" for g in gpus for d in (g.get("spdisplays_ndrvs") or [])]
+        return (f"{len(names)} display{'s' if len(names) != 1 else ''}: {', '.join(names)}." if names
+                else "macOS reported no displays."), names
+    names = [n.strip() for n in re.split(r",\s*", (out or "").replace("{", "").replace("}", "")) if n.strip() and n.strip() != "missing value"]
+    if kind == "apps":
+        return (f"{len(names)} apps running: {', '.join(names[:20])}." if names else "No foreground apps reported."), names
+    return (f"{len(names)} windows open: {', '.join(names[:15])}." if names else "No open windows reported."), names
+
+
+def run_list(kind: str, *, runner=None) -> dict:
+    """Read-only. Off the Mac nothing runs and the result says so; the listing is the observation itself."""
+    if runner is None and not _live():
+        return {"ok": False, "tool": "apps", "list": kind, "outcome": "NOT_EXECUTED", "executed": False, "task_verified": False,
+                "spoken": f"I can't list your {kind} from here: that read only runs on the Mac."}
+    run_fn = runner or (lambda c: subprocess.run(c, capture_output=True, text=True, timeout=15))
+    try:
+        cp = run_fn(_LIST_CMD[kind])
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {"ok": False, "tool": "apps", "list": kind, "executed": True, "task_verified": False,
+                "spoken": f"Listing {kind} failed: {type(exc).__name__}."}
+    if cp.returncode != 0:
+        err = (cp.stderr or cp.stdout or "").strip()[:160]
+        return {"ok": False, "tool": "apps", "list": kind, "executed": True, "task_verified": False,
+                "spoken": f"macOS refused the {kind} read: {err or 'no detail'}. Accessibility or Automation may need allowing."}
+    spoken, names = _spoken_list(kind, cp.stdout)
+    return {"ok": True, "tool": "apps", "list": kind, "items": names, "executed": True, "task_verified": True, "spoken": spoken}
+
+
 def wants(utterance: str) -> bool:
+    if list_kind(utterance):
+        return True
     m = OPEN_RE.match((utterance or "").strip())
     if not m or NOT_APP_RE.search(m.group(2)):
         return False
@@ -110,6 +167,9 @@ def run(utterance: str, *, bundles: dict[str, Path] | None = None, runner=None, 
 
     Off the Mac (or under tests without an injected runner) nothing runs, and the result says so. An injected
     runner without an injected observer never certifies completion: test doubles are not live Mac evidence."""
+    kind = list_kind(utterance)
+    if kind:
+        return run_list(kind, runner=runner)
     m = OPEN_RE.match((utterance or "").strip())
     if not m:
         return {"ok": False, "tool": "apps", "spoken": "Which app should I open?", "task_verified": False}
