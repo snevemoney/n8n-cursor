@@ -346,7 +346,10 @@ class Task:
                 history.append({"role": "assistant", "content": str(row["jarvis"])[:1500]})
         t.write("messages.json", [{"role": "system", "content": system_prompt()}, *history,
                                   {"role": "user", "content": goal}])
-        t.write("state.json", {"task_id": tid, "status": "QUEUED", "step": 0})
+        pick = choose_model(goal)
+        t.write("state.json", {"task_id": tid, "status": "QUEUED", "step": 0, "tier": pick["tier"], "model": pick["model"],
+                               "kind": pick.get("kind", "any"), "chain": pick.get("chain") or [pick["model"]],
+                               "model_why": pick["why"]})
         (Path(hive) / "operator-tasks" / "latest.json").write_text(json.dumps({"task_id": tid}))
         return t
 
@@ -397,7 +400,122 @@ def _authority():
     return _load("authority", "authority.py")
 
 
-def _model_fn():
+# Per-job model choice (Evens 10-16: "use claude models only when necessary. make jev classify which model to use,
+# like the methods in my signals": match-model-to-task, cheap-read-expensive-decide, per-prompt best-value router).
+TIERS = ("cheap", "mid", "frontier")
+KINDS = ("chat", "screen", "code", "research", "creative", "files")
+# Best value first within each pool; every model here takes tools; screen pools take images. OpenRouter ids, live 10-16.
+# Claude only where it is the strongest pick for the job (screen control, frontier code/design).
+POOLS = {
+    "cheap": {"any": ["deepseek/deepseek-v4-flash", "openai/gpt-6-luna", "google/gemini-2.5-flash-lite"],
+              "screen": ["openai/gpt-6-luna", "google/gemini-2.5-flash-lite", "anthropic/claude-haiku-5.5"],
+              "code": ["deepseek/deepseek-v4-flash", "openai/gpt-5.1-codex-mini", "openai/gpt-6-luna"]},
+    "mid": {"any": ["deepseek/deepseek-v4-pro", "x-ai/grok-4.3", "google/gemini-3.6-flash"],
+            "screen": ["google/gemini-3.6-flash", "x-ai/grok-4.3", "anthropic/claude-sonnet-5.5"],
+            "code": ["openai/gpt-5.1-codex", "deepseek/deepseek-v4-pro", "moonshotai/kimi-k2.7-code"],
+            "research": ["x-ai/grok-4.3", "google/gemini-3.6-flash", "deepseek/deepseek-v4-pro"],
+            "creative": ["google/gemini-3.6-flash", "x-ai/grok-4.3", "anthropic/claude-sonnet-5.5"]},
+    "frontier": {"any": ["anthropic/claude-opus-5.5", "openai/gpt-6.1-sol", "google/gemini-4-argon"],
+                 "screen": ["anthropic/claude-sonnet-5.5", "openai/gpt-6.1-sol", "anthropic/claude-opus-5.5"],
+                 "code": ["anthropic/claude-opus-5.5", "openai/gpt-5.3-codex", "openai/gpt-6.1-sol"],
+                 "research": ["google/gemini-4-argon", "x-ai/grok-4.7", "openai/gpt-6.1-sol"],
+                 "creative": ["anthropic/claude-opus-5.5", "google/gemini-4-argon", "openai/gpt-6.1-sol"]},
+}
+for _t, _env in (("cheap", "JARVIS_TIER_CHEAP"), ("mid", "JARVIS_TIER_MID"), ("frontier", "JARVIS_TIER_FRONTIER")):
+    if os.environ.get(_env):  # one-model override per tier
+        POOLS[_t] = {"any": [os.environ[_env].strip()]}
+TIER_MODELS = {t: POOLS[t]["any"][0] for t in TIERS}
+JEV_MIN_CONF = 0.6  # below it Jev has no opinion and the job goes UP a tier, never down (jev-preflight rule)
+SCORES = Path.home() / "Library" / "Caches" / "jarvis" / "model-scores.json"
+MIN_SAMPLES = 3
+
+
+def pool(tier: str, kind: str) -> list:
+    tiers = POOLS.get(tier) or POOLS["mid"]
+    return list(tiers.get(kind) or tiers["any"])
+
+
+def _scores() -> dict:
+    try:
+        return json.loads(SCORES.read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+def record_outcome(kind: str, model: str, ok: bool) -> None:
+    """Per (kind, model) finished/total: the best-value pick learns from real jobs, not from a price list."""
+    data = _scores()
+    row = data.setdefault(f"{kind}|{model}", {"ok": 0, "n": 0})
+    row["n"] += 1; row["ok"] += int(bool(ok))
+    try:
+        SCORES.parent.mkdir(parents=True, exist_ok=True)
+        tmp = SCORES.with_suffix(f".{os.getpid()}.tmp"); tmp.write_text(json.dumps(data, indent=1)); os.replace(tmp, SCORES)
+    except OSError:
+        pass
+
+
+def best_in_pool(tier: str, kind: str) -> list:
+    """Pool order (cheapest first), except a model that keeps failing this kind of job drops to the back."""
+    cands = pool(tier, kind)
+    data = _scores()
+    def rate(m):
+        r = data.get(f"{kind}|{m}") or {}
+        return (r.get("ok", 0) / r["n"]) if r.get("n", 0) >= MIN_SAMPLES else 1.0
+    return sorted(cands, key=lambda m: -rate(m))  # stable: ties keep best-value order
+VISION_FREE = {"deepseek/deepseek-v4-flash", "deepseek/deepseek-v4-pro", "deepseek/deepseek-chat-v3.1"}
+
+
+def next_tier(tier: str) -> str | None:
+    i = TIERS.index(tier) if tier in TIERS else 0
+    return TIERS[i + 1] if i + 1 < len(TIERS) else None
+
+
+def _jev_tier(goal: str) -> dict | None:
+    """Jev's live preflight: {"tier", "conf"} or None. Never raises; one call, bounded wait."""
+    try:
+        jev = _load_brain("jev_router")
+        pf = jev.start(goal, live=True)
+        live = pf.result(wait=True) if pf is not None else None
+        tier = (live or {}).get("model_tier")
+        if tier in TIERS:
+            kind = (live or {}).get("task_kind")
+            return {"tier": tier, "conf": float((live or {}).get("model_tier_conf") or 0), "kind": kind if kind in KINDS else "any"}
+    except Exception:  # noqa: BLE001
+        return None
+    return None
+
+
+def _owner_model() -> str:
+    try:
+        return _load("brain_model", "brain_model.py").current()
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+def choose_model(goal: str) -> dict:
+    """{"tier", "model", "why"}: his own switch wins; else Jev's tier; no opinion -> mid."""
+    owner = _owner_model()
+    if owner:
+        return {"tier": "owner", "model": owner, "why": "Evens switched the model"}
+    jev = _jev_tier(goal)
+    kind = (jev or {}).get("kind") or "any"
+    if jev and jev.get("conf", 0) >= JEV_MIN_CONF:
+        tier, why = jev["tier"], f"jev {jev['tier']}/{kind} {jev['conf']:.2f}"
+    else:
+        tier, why = "mid", ("jev no opinion" if not jev else f"jev low conf {jev['conf']:.2f}")
+    chain = best_in_pool(tier, kind)
+    return {"tier": tier, "kind": kind, "model": chain[0], "chain": chain, "why": why}
+
+
+def _load_brain(name: str):
+    mod = sys.modules.get(f"op_brain_{name}")
+    if mod is None:
+        spec = importlib.util.spec_from_file_location(f"op_brain_{name}", STACK / "brain" / f"{name}.py")
+        mod = importlib.util.module_from_spec(spec); sys.modules[f"op_brain_{name}"] = mod; spec.loader.exec_module(mod)
+    return mod
+
+
+def _model_fn(tier: str = "mid", chain: list | None = None):
     online_spec = importlib.util.spec_from_file_location("op_online", STACK / "brain" / "online.py")
     online = sys.modules.get("op_online")
     if online is None:
@@ -406,9 +524,11 @@ def _model_fn():
         online_spec.loader.exec_module(online)
     if hasattr(online, "load_existing_env"):
         online.load_existing_env()
-    agent = _load("agent_tools", "agent_tools.py")  # the coding chain Jarvis already uses (models unchanged)
-    # Cost (live 10-16: eight Opus jobs emptied the OpenRouter balance mid-run). Sonnet first; "use opus" switches.
-    chain = ((os.environ.get("JARVIS_OPERATOR_MODEL") or "anthropic/claude-sonnet-5.5").strip(), agent.CODE_MODEL)
+    owner = _owner_model()
+    if tier == "owner" and owner:
+        chain = (owner,)
+    else:
+        chain = tuple(chain or pool(tier, "any"))  # the job's pool; the next one only answers if the first errors
     return lambda messages, tools: online.call_openrouter_messages(messages, tools, model_chain=chain, max_tokens=12000,
                                                                    allow_reasoning=True, attempt_sec=120.0)
 
@@ -452,6 +572,12 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
         messages.append({"role": "tool", "tool_call_id": c["call_id"], "content": result.get("text", "")})
         if result.get("image"):
             images.append(result["image"])
+    if images:
+        st = task.read("state.json")
+        if st.get("model") in VISION_FREE:  # this model cannot see: same tier, a screen-capable pool
+            chain = best_in_pool(st.get("tier") or "mid", "screen")
+            st.update(kind="screen", model=chain[0], chain=chain, model_why="needs to see the screen")
+            task.write("state.json", st)
     for img in images[-1:]:  # only the newest screenshot rides along
         messages.append({"role": "user", "content": [{"type": "text", "text": "Screenshot from the screenshot tool:"},
                                                      {"type": "image_url", "image_url": {"url": img}}]})
@@ -471,7 +597,10 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
 def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: float = TIME_BUDGET_S) -> dict:
     task = Task(task_dir)
     tools = Tools(task.path)
-    model_fn = model_fn or _model_fn()
+    fixed_fn = model_fn
+    st0 = task.read("state.json")
+    tier, kind = st0.get("tier") or "mid", st0.get("kind") or "any"
+    model_fn = fixed_fn or _model_fn(tier, st0.get("chain"))
     state = task.read("state.json")
     state.update(status="RUNNING", pid=os.getpid(), started=state.get("started") or time.time())
     task.write("state.json", state)
@@ -488,11 +617,27 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
             state["step"] += 1
             task.write("state.json", state)
             status = step_once(task, tools, model_fn)
+            now = task.read("state.json")
+            if now.get("tier") != tier or now.get("kind") != kind:  # it moved for eyes
+                tier, kind = now.get("tier"), now.get("kind") or kind
+                model_fn = fixed_fn or _model_fn(tier, now.get("chain"))
+            if status == "MODEL_UNAVAILABLE" and tier in TIERS and next_tier(tier):
+                # the cheaper model failed: escalate ONE tier and keep the same job (match-model-to-task)
+                record_outcome(kind, str(now.get("model") or ""), False)
+                tier = next_tier(tier)
+                chain = best_in_pool(tier, kind)
+                now.update(tier=tier, model=chain[0], chain=chain, model_why=f"escalated after a failure on {now.get('model')}")
+                task.write("state.json", now)
+                task.trace({"event": "escalate", "to": tier, "model": chain[0]})
+                model_fn = fixed_fn if fixed_fn else _model_fn(tier, chain)
+                continue
             if status is None:
                 continue
         state = task.read("state.json")
         state.update(status=status, finished=time.time())
         task.write("state.json", state)
+        if state.get("tier") != "owner" and status in ("DONE", "MODEL_UNAVAILABLE", "STEP_LIMIT", "TIME_LIMIT"):
+            record_outcome(state.get("kind") or "any", str(state.get("model") or ""), status == "DONE")
         return state
 
 
