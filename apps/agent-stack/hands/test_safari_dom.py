@@ -62,6 +62,19 @@ class Background(unittest.TestCase):
         self.assertNotIn("set current tab", script); self.assertNotIn("activate", script)
         self.assertEqual(st["safari_tab"], [77, 15]); self.assertEqual(st["safari_own"], [[77, 15]])
 
+    def test_an_open_page_is_reused_not_duplicated(self):  # Evens 10-16: no duplicate tabs
+        f = FakeSafari()
+        orig = f.osa
+        def osa(lines, *args, **k):
+            if "repeat with t in tabs of w" in " ".join(lines) and "URL of t) & linefeed" in " ".join(lines) and "name of t" not in " ".join(lines):
+                return "77|4|https://www.linkedin.com/feed/?x=1\n"
+            return orig(lines, *args, **k)
+        st = {}
+        d = SD.SafariDOM(st, lambda r: {"text": "ok"}, lambda x, y: None, osa_fn=osa)
+        got = d.act({"action": "new_tab", "url": "linkedin.com/feed"})
+        self.assertEqual(st["safari_tab"], [77, 4]); self.assertIn("already open", got["text"])
+        self.assertFalse(any("make new tab" in " ".join(l) for l, _ in f.osa_calls))
+
     def test_click_happens_in_the_page_not_with_his_mouse(self):
         f = FakeSafari(); st = {"safari_tab": [77, 15]}
         got = f.driver(st).act({"action": "click", "ref": 1})

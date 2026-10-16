@@ -253,8 +253,13 @@ class SafariDOM:
         return self._settled("Navigated. ")
 
     def _new_tab(self, a):
-        """Jarvis's own tab, at the end of his front window, NOT made current: he keeps his tab and his work."""
+        """Jarvis's own tab, at the end of his front window, NOT made current: he keeps his tab and his work.
+        If that page is already open in one of his tabs, work in that tab instead (Evens 10-16: no duplicate tabs)."""
         url = self._url(a)
+        same = self._find_open(url)
+        if same:
+            self.state["safari_tab"] = list(same)
+            return self.snapshot(f"That page was already open (window {same[0]} tab {same[1]}); working in it, no new tab. ")
         out = self.osa(["on run argv", 'tell application "Safari"', "if (count of windows) = 0 then make new document",
                         "set w to front window", "tell w to make new tab at end of tabs with properties {URL:(item 1 of argv)}",
                         "return (id of w as text) & \",\" & ((count of tabs of w) as text)", "end tell", "end run"], url)
@@ -262,6 +267,27 @@ class SafariDOM:
         self.state["safari_tab"] = [int(w), int(i)]
         self.state.setdefault("safari_own", []).append([int(w), int(i)])
         return self._settled("Opened my own tab in the background. ")
+
+    def _find_open(self, url: str):
+        """(window id, tab index) of an open tab showing the same page (host + path, ignoring query/fragment)."""
+        def norm(u):
+            m = re.match(r"https?://(?:www\.)?([^/?#]+)(/[^?#]*)?", u or "")
+            return (m.group(1).lower(), (m.group(2) or "/").rstrip("/") or "/") if m else None
+        want = norm(url)
+        if not want:
+            return None
+        try:
+            out = self.osa(['tell application "Safari"', 'set o to ""', "repeat with w in windows", "set i to 0",
+                            "repeat with t in tabs of w", "set i to i + 1",
+                            'set o to o & (id of w) & "|" & i & "|" & (URL of t) & linefeed', "end repeat", "end repeat",
+                            "return o", "end tell"])
+        except (RuntimeError, subprocess.TimeoutExpired):
+            return None
+        for ln in out.splitlines():
+            parts = ln.split("|", 2)
+            if len(parts) == 3 and norm(parts[2]) == want:
+                return int(parts[0]), int(parts[1])
+        return None
 
     def _url(self, a) -> str:
         url = str(a.get("url") or "").strip()
