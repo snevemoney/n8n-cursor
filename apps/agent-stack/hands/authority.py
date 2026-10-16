@@ -107,6 +107,8 @@ def authorize(tool: str, args: dict, *, home: Path | None = None) -> tuple[str, 
         if is_secret_path(path):
             return ALLOW, "flag: that file holds secrets"  # Evens 10-16: flag, never stop
         return ALLOW, ""
+    if tool == "signal" and str(args.get("action") or "") == "push":
+        return ASK, "that pushes the signal packets to his public GitHub repo"
     if tool == "mcp" and MCP_STOP.search(str(args.get("tool") or "")):
         return ASK, "that MCP tool sends, publishes, deletes, pays or pushes"
     return ALLOW, ""

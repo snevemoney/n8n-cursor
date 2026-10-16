@@ -6208,7 +6208,68 @@ def gen_rules(u: str) -> str:
     return "\n".join(rules)
 
 
-TOOL_HEARTBEAT = "Still checking, sir; the wires are being fashionably slow."
+TOOL_HEARTBEAT = "Still checking, sir."
+TOOL_WAIT_WORDS = {"web_search": "Still searching", "fetch_url": "Still reading the page", "workspace_read": "Still going through your files",
+                   "vault_read": "Still going through your notes", "screen_see": "Still looking at your screen",
+                   "safari_see": "Still reading Safari", "apps": "Still checking your apps", "converse": "Still thinking"}
+
+
+def _host(url) -> str:
+    m = re.search(r"https?://(?:www\.)?([^/]+)", str(url or ""))
+    return m.group(1) if m else ""
+
+
+def operator_wait_line(hive) -> str:
+    """What the one loop is doing right now, in plain words (Evens 10-16: "checking, sir" / "waiting for X to Y",
+    not a joke line). Read from the newest step of the live job's trace."""
+    try:
+        op = _operator_hand()
+        st = op.status(Path(hive))
+        rows = op.Task(Path(hive) / "operator-tasks" / st["task_id"]).rows("trace.jsonl")
+    except Exception:  # noqa: BLE001 - no job: the plain line
+        return TOOL_HEARTBEAT
+    last = next((r for r in reversed(rows) if r.get("event") == "tool" and r.get("tool") not in ("say",)), None)
+    if not last:
+        return "Checking, sir."
+    t, a = last.get("tool"), last.get("args") or {}
+    act = str(a.get("action") or "")
+    if t == "safari":
+        h = _host(a.get("url")) or "the page"
+        if act in ("navigate", "new_tab", "reload", "back", "forward", "wait_for"):
+            return f"Waiting for {h} to load, sir."
+        if act in ("snapshot", "read", "find", "tabs"):
+            return "Still reading the page, sir."
+        return "Still working on the page, sir."
+    if t == "computer":
+        return "Looking at your screen, sir." if act in ("screenshot", "wait") else "Still clicking through it, sir."
+    if t == "shell":
+        cmd = str(a.get("command") or "")
+        if "yt-dlp" in cmd:
+            return "Waiting for the video to download, sir."
+        return "Waiting for a command to finish, sir."
+    if t == "signal":
+        return "Still processing the signal, sir."
+    if t in ("web_search",):
+        return f"Still searching for {str(a.get('query') or '')[:50]}, sir." if a.get("query") else "Still searching, sir."
+    if t == "fetch_url":
+        return f"Waiting for {_host(a.get('url')) or 'the page'} to answer, sir."
+    if t in ("read_file", "list_dir", "find_files", "grep", "write_file", "edit_file"):
+        return "Still going through your files, sir."
+    if t == "open":
+        return f"Waiting for {a.get('target')} to open, sir."
+    if t == "mcp":
+        return f"Waiting for {a.get('server') or 'the service'} to answer, sir."
+    return "Still checking, sir."
+
+
+def heartbeat_line(tool: str, hive=None, pick: dict | None = None) -> str:
+    if tool == "operator" and hive is not None:
+        return operator_wait_line(hive)
+    words = TOOL_WAIT_WORDS.get(tool)
+    q = str(((pick or {}).get("args") or {}).get("query") or "")[:50]
+    if words and q and tool == "web_search":
+        return f"Still searching for {q}, sir."
+    return f"{words}, sir." if words else TOOL_HEARTBEAT
 
 HAND_LOOP_MAX_HANDS = 4
 # Screen-overlay hands finish the turn themselves: a second model pass replaced "The red arrow is on it" with its own
@@ -6644,7 +6705,8 @@ def _run_tool_heartbeat(pick: dict, utterance: str, *, hive, token, brain, **kw)
     th.join(float(os.environ.get("JARVIS_TOOL_HEARTBEAT_SEC") or 6))
     if th.is_alive() and not (token and turn_cancelled(hive, token)):
         tool = str((pick or {}).get("tool") or "converse")
-        yield _pipeline_event(ok=True, tool=tool, spoken=TOOL_HEARTBEAT, spoken_delta=TOOL_HEARTBEAT, wires=[tool, "heartbeat"], cites=[],
+        line = heartbeat_line(tool, hive, pick)
+        yield _pipeline_event(ok=True, tool=tool, spoken=line, spoken_delta=line, wires=[tool, "heartbeat"], cites=[],
                               pack=None, done=False, partial=True, brain=brain, model_available=bool(brain), gen=token)
     # Concurrency audit 2026-10-16: an unbounded join kept a stopped turn waiting on a hanging hand. Wait in slices; a
     # cancelled turn returns at once (the hand's own deadline still bounds the thread it leaves behind).
@@ -9250,7 +9312,7 @@ def apply_pipeline_iter(
                     _hb_done = True
                     if not said and not (token and turn_cancelled(hive, token)):
                         # Z81 (dCK 4:34): ONE in-persona heartbeat when the model is slow; never a stream of fillers (Z53).
-                        _hb = "Still checking, sir; the wires are being fashionably slow."
+                        _hb = "Still thinking, sir."
                         yield _pipeline_event(ok=True, tool="converse", spoken=_hb, spoken_delta=_hb, wires=["converse", "heartbeat"],
                                               cites=[], pack=None, done=False, partial=True, brain="openrouter", model_available=True, gen=token)
                     continue

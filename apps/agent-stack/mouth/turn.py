@@ -1059,7 +1059,7 @@ def _reflex(utterance: str) -> dict | None:
 
 
 HEARTBEAT_SEC = float(os.environ.get("JARVIS_HEARTBEAT_SEC") or 8)
-HEARTBEAT = "Still checking, sir; the wires are being fashionably slow."
+HEARTBEAT = "Still checking, sir."
 
 
 def _placeholders(text: str, utterance: str) -> str:

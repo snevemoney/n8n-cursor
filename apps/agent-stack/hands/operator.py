@@ -16,6 +16,7 @@ import importlib.util
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -40,13 +41,18 @@ SYSTEM = (
     "not open tools for arithmetic or general knowledge), what you are about to do, what you just found, or a snag. "
     "Speak like a capable colleague: plain English, short, no markdown, no file slugs, no model names, no step numbers, "
     "no 'I have not run an executor'. One or two sentences at a time.\n"
+    "Wit (Evens 10-16): you know him from months of his chats; be the dry, quick-witted butler. When he slips (a "
+    "half-finished sentence, a contradiction, asking for something already done, forgetting a step, a login he skipped) "
+    "or he sounds stressed, add ONE short, creative, sarcastic line that is about this exact moment, then the facts. Never "
+    "a joke instead of the answer, never a speech or a setup-punchline routine, never a stock line or one you already used "
+    "in this conversation, never mean, and none when something failed that costs him (money, sends, deletes, lost work).\n"
     "Working: prefer shell and files when they do the job. His browser is Safari; never open Chrome or another browser unless he names it. Web work happens in his Safari "
     "in the BACKGROUND with the safari tool: open your own tab with new_tab (his current tab, his mouse and his front "
     "app stay his), work it by element numbers, and check the page that comes back after each action. Use his current "
     "tab (use_tab) only when he means the page he is looking at; use show at the end only when he wants to see the "
     "result. Do not route around the page with shell, gh or open when he asked for the browser. If a page says LOGIN "
     "NEEDED, tell him in one line to log in to that site in Safari and wait for him (ask_owner); never type his "
-    "passwords. (Background research without a browser: web_search and fetch_url.) If a site wants a login he has in "
+    "passwords. (Background research without a browser: web_search and fetch_url.) To learn from a video, an X post or a link he gives you, or when he says look for new signals (his Watch Later and X bookmarks), use the signal tool. If a site wants a login he has in "
     "an app instead (Spotify.app), use the app with computer. For desktop apps use "
     "computer: take a screenshot, click/type/scroll at pixels of that screenshot (your blue cursor shows him where), "
     "and look at the screenshot that comes back after every action. He has more than one screen: if you cannot see "
@@ -124,6 +130,13 @@ TOOLS = [
                                                "upload", "dialog"]},
          "ref": I, "text": S, "url": S, "keys": S, "direction": S, "amount": I, "window": I, "index": I, "submit": B,
          "replace": B, "checked": B, "code": S, "path": S, "timeout_s": I, "real": B}, ["action"]),
+    _fn("signal", "His signal engine (the Researcher desk's method, done by you): ingest url=... learns a YouTube video, "
+        "X post or page end to end (transcript, frame contact sheets, linked pages, every method) and writes a packet to "
+        "his repo; scan source=youtube|x|all [ingest=N] reads his Watch Later and X bookmarks in Safari and lists new "
+        "signals (and ingests the first N); status; push (sends the packets to GitHub, needs his OK). ingest and scan "
+        "run in the background: say you started, then check them with job.",
+        {"action": {"type": "string", "enum": ["ingest", "scan", "status", "push"]}, "url": S, "source": S, "ingest": I},
+        ["action"]),
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
     _fn("mcp", "Call a tool on a connected MCP server.", {"server": S, "tool": S, "arguments": {"type": "object"}},
         ["server", "tool"]),
@@ -429,6 +442,21 @@ class Tools:
             return got
         CU.settle(action)
         return self._shot(d, displays, windows, f"Did {action}. ")
+
+    def signal(self, a):
+        script = Path(__file__).with_name("signals.py")
+        act = str(a.get("action") or "status")
+        if act == "ingest":
+            if not str(a.get("url") or "").strip():
+                return {"text": "ingest needs url"}
+            cmd = f"{sys.executable} {shlex.quote(str(script))} ingest {shlex.quote(str(a['url']).strip())}"
+        elif act == "scan":
+            n = int(a.get("ingest") or 0)
+            cmd = f"{sys.executable} {shlex.quote(str(script))} scan {shlex.quote(str(a.get('source') or 'all'))}" + (f" --ingest {n}" if n else "")
+        else:
+            cp = subprocess.run([sys.executable, str(script), act], capture_output=True, text=True, timeout=900)
+            return {"text": _clip((cp.stdout or cp.stderr or "").strip())}
+        return self.shell({"command": cmd, "background": True})
 
     def safari(self, a):
         got = SD.SafariDOM(self.state, self._hands, self._show_cursor).act(a)
