@@ -45,13 +45,15 @@ SYSTEM = (
 )
 
 
-def profile_lines(limit: int = 1200) -> str:
+def profile_lines(limit: int = 2400) -> str:
     """Who Evens is, from the shared operator profile (his repos, agents, preferences). Empty when the file is missing."""
-    try:
-        text = (Path.home() / ".grok-shared" / "OPERATOR_PROFILE.md").read_text(encoding="utf-8")
-    except OSError:
-        return ""
-    keep = [ln.strip() for ln in text.splitlines() if ln.strip().startswith("- ")]
+    keep = []
+    for name in ("JARVIS_DEFINITION.md", "OPERATOR_PROFILE.md"):  # what Jarvis is (Evens 10-16), then who Evens is
+        try:
+            text = (Path.home() / ".grok-shared" / name).read_text(encoding="utf-8")
+        except OSError:
+            continue
+        keep += [ln.strip() for ln in text.splitlines() if ln.strip().startswith("- ")]
     return "\n".join(keep)[:limit]
 
 
