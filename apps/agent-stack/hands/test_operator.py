@@ -96,12 +96,13 @@ class OperatorLoop(unittest.TestCase):
         state = O.run(O.Task.create(self.hive, "loop").path, model_fn=model, max_steps=3)
         self.assertEqual(state["status"], "STEP_LIMIT")
 
-    def test_secret_read_refused(self):
-        (self.home / ".env").write_text("KEY=1\n")
-        model = scripted([("read_file", {"path": str(self.home / ".env")})], [("done", {"summary": "no"})])
+    def test_secret_read_is_flagged_and_masked(self):  # Evens 10-16: flag, never stop
+        fake = "sk-or-v1-" + "a" * 48  # synthetic, not a real key
+        (self.home / ".env").write_text(f"OPENROUTER_API_KEY={fake}\nMODE=test\n")
+        model = scripted([("read_file", {"path": str(self.home / ".env")})], [("done", {"summary": "ok"})])
         O.run(O.Task.create(self.hive, "read env").path, model_fn=model)
         content = [m for m in model.seen[1] if m["role"] == "tool"][0]["content"]
-        self.assertIn("refused", content); self.assertNotIn("KEY=1", content)
+        self.assertIn("Heads up", content); self.assertIn("OPENROUTER_API_KEY", content); self.assertNotIn(fake, content)
 
 
 if __name__ == "__main__":

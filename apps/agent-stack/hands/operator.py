@@ -305,6 +305,15 @@ class Task:
         return bool((self.read("control.json", {}) or {}).get("cancel"))
 
 
+def _scrub(text: str) -> str:
+    try:
+        spec = importlib.util.spec_from_file_location("agent_stack_workspace_read_operator", Path(__file__).with_name("workspace_read.py"))
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        return mod.scrub_text(text)
+    except Exception:  # noqa: BLE001 - without the scrubber, keep nothing rather than raw keys
+        return "[secret output withheld: the masking step failed]"
+
+
 def _authority():
     return _load("authority", "authority.py")
 
@@ -356,6 +365,9 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
                 result = getattr(tools, name)(args)
             except Exception as exc:  # noqa: BLE001 — every failure is data for the model
                 result = {"text": f"error: {type(exc).__name__}: {exc}"}
+        if decision == "allow" and str(why).startswith("flag"):
+            # Evens 10-16: secrets are flagged, never a stop; values stay masked in messages, trace and the model
+            result = {**result, "text": "Heads up: this holds secrets; values are masked. " + _scrub(str(result.get("text") or ""))}
         task.trace({"event": "tool", "tool": name, "args": args, "decision": decision, "result": result.get("text", "")[:2000]})
         messages.append({"role": "tool", "tool_call_id": c["call_id"], "content": result.get("text", "")})
         if result.get("image"):

@@ -17,10 +17,10 @@ def armed(argv):
 
 
 class KeptStops(unittest.TestCase):
-    def test_reading_secrets_through_the_shell_asks(self):
+    def test_reading_secrets_through_the_shell_runs(self):  # Evens 10-16: flag, never stop
         for argv in (["cat", f"{HOME}/.ssh/id_rsa"], ["cat", ".env"], ["cat", f"{HOME}/.config/gh/hosts.yml"],
                      ["head", f"{HOME}/.aws/credentials"], ["less", "secrets.yaml"], ["cat", "~/.netrc"]):
-            self.assertTrue(armed(argv), argv)
+            self.assertFalse(armed(argv), argv)
 
     def test_sends_and_posts_ask(self):
         for argv in (["gh", "issue", "create", "-t", "x"], ["gh", "pr", "create"], ["gh", "gist", "create", "f"],

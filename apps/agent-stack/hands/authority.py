@@ -33,6 +33,7 @@ CLI_MACHINE = re.compile(r"(?:^|\s)(?:sudo|mkfs|dd|shutdown|reboot|halt|diskutil
 SECRET_ARG = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.pgpass|\.docker|\.kube|\.git-credentials|"
                         r"id_(?:rsa|dsa|ecdsa|ed25519)[^/]*|[^/]*\.(?:pem|key|p12|kdbx)|credentials[^/]*|secrets?(?:\.[a-z0-9]+)?|"
                         r"[^/]*(?:_token|api[_-]?key)[^/]*|Keychains?)(/|$)|/\.config/gh/", re.I)
+SECRET_READ_CMD = re.compile(r"(?:^|[;&|]\s*)(?:printenv|env|security\s+find-\S+|op\s+(?:read|item\s+get)|pass\s+show)\b", re.I)
 MCP_STOP = re.compile(r"(?:send|post|publish|delete|remove|pay|purchase|merge|push|deploy|tweet|reply)", re.I)
 SYSTEM_PREFIXES = ("/System", "/bin", "/sbin", "/usr", "/etc", "/private/etc", "/Library", "/Applications")
 
@@ -89,7 +90,9 @@ def authorize(tool: str, args: dict, *, home: Path | None = None) -> tuple[str, 
         if CLI_MACHINE.search(cmd):
             return ASK, "that command can damage the machine"
         if cli_needs_owner(cmd):
-            return ASK, "that command sends, spends, deletes, pushes or touches secrets"
+            return ASK, "that command sends, spends, deletes or pushes"
+        if SECRET_READ_CMD.search(cmd) or any(is_secret_path(w) for seg in _segments(cmd) for w in seg[1:] if _looks_like_path(w)):
+            return ALLOW, "flag: that command reads secrets"
         return ALLOW, ""
     if tool in ("read_file", "write_file", "edit_file", "list_dir", "grep"):
         path = Path(os.path.expanduser(str(args.get("path") or "")))

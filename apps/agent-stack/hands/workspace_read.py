@@ -602,10 +602,15 @@ def _run(args: dict, roots=None) -> dict[str, Any]:
             return _deny("that folder can't be listed", op)
         names = allnames[:_max_names()]
         more = len(allnames) > _max_names()
+        # live 10-16: "read the .env in jarvis-main" -> "there is no .env": dot and secret files were invisible here
+        hidden = sorted(n.name for n in path.iterdir() if (n.name.startswith(".") or _secret_name(n.name))
+                        and n.name not in (".git", ".DS_Store", ".localized", "__pycache__", ".pytest_cache", ".venv"))[:30]
         sp = f"{path.name} has {len(allnames)} items" + (": " + ", ".join(names[:10]) if names else "") + ("…" if len(allnames) > 10 else ".")
+        if hidden:
+            sp += " Hidden files: " + ", ".join(hidden[:10]) + ("…" if len(hidden) > 10 else "") + "."
         if fingerprint(path) != before:
             return _deny('folder changed during listing', op)
-        return {"ok": True, "op": op, "path": str(path), "names": names, "more": more, "spoken": sp,
+        return {"ok": True, "op": op, "path": str(path), "names": names, "hidden": hidden, "more": more, "spoken": sp,
                 "fingerprint": before}
     if op == "git":
         d = path if path.is_dir() else path.parent

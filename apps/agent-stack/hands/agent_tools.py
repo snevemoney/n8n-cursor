@@ -815,10 +815,13 @@ def _run(args: dict | None = None, approved: bool = False, *, cancel_check=None,
             break
     done = sum(1 for t in todo if t["status"] == "verified")
     all_ok = done == len(todo) and len(steps) <= 12
-    lines = [f"{t['n']}. [{t['status']}] {t['op']} {t['what']}: {t.get('result', 'not run')}" for t in todo]
-    head = (f"Skill read first: {skill}. " if skill else "") + f"{done}/{len(steps)} steps verified."
-    if not all_ok:
-        head += " The complete requested outcome is not verified; completed step receipts are preserved."
+    # Plain English (Evens 10-16): say the result, not the receipt format; the receipts stay in "steps".
+    plain = lambda t: re.sub(r"^\S+ (?:ok|exited \S+): ", "", str(t.get("result") or "not run").strip())
+    if all_ok and len(todo) == 1:
+        head, lines = plain(todo[0]), []
+    else:
+        head = f"{done} of {len(todo)} steps done." + ("" if all_ok else " The rest is not finished; what ran is kept.")
+        lines = [f"Step {t['n']} ({t['status']}): {plain(t)}" for t in todo]
     gated = any(row.get('gated') for row in results)
     return {"ok": all_ok, "verified": all_ok, "steps": todo, "results": results, "skill": skill,
             "partial": bool(done) and not all_ok, "gated": gated,
