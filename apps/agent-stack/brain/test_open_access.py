@@ -102,13 +102,15 @@ class Files(OpenAccessBase):
 
     def test_closed_treats_token_names_as_secret(self):
         got = _wr().run({"op": "read", "path": str(self.other / "tokenomics.md")})
-        self.assertEqual(got["error"], "that looks like a secret")
+        self.assertTrue(got["ok"]); self.assertTrue(got.get("secret"))  # Evens 10-16: flag, never stop
 
     def test_open_reads_home_and_narrow_secrets(self):
         PERM.set_open_access(True)
         got = _wr().run({"op": "read", "path": str(self.other / "tokenomics.md")})
         self.assertTrue(got["ok"], got); self.assertIn("21M", got["text"])
-        self.assertFalse(_wr().run({"op": "read", "path": str(self.other / ".env")})["ok"])
+        self.assertFalse(got.get("secret"))
+        env = _wr().run({"op": "read", "path": str(self.other / ".env")})
+        self.assertTrue(env["ok"]); self.assertTrue(env["secret"]); self.assertIn("Heads up", env["spoken"])
         big = _wr().run({"op": "read", "path": str(self.other / "big.txt")})
         self.assertEqual(len(big["text"]), 50000); self.assertFalse(big["truncated"])
 

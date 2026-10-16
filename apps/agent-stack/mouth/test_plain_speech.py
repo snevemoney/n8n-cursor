@@ -39,5 +39,12 @@ class PlainSpeech(unittest.TestCase):
         self.assertIn("iCloud Drive", out); self.assertNotIn("**", out)
 
 
+class NoFakeDone(unittest.TestCase):
+    def test_open_claim_without_a_tool_is_dropped(self):
+        got = M.promise_guard("LinkedIn is open in Safari showing your feed.", ran_tool=False)
+        self.assertNotIn("is open", got)
+        self.assertEqual(M.promise_guard("LinkedIn is open in Safari.", ran_tool=True), "LinkedIn is open in Safari.")
+
+
 if __name__ == "__main__":
     unittest.main()

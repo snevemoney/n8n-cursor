@@ -119,7 +119,14 @@ def _deny(msg: str, op: str) -> dict[str, Any]:
     return {"ok": False, "op": op, "error": msg, "spoken": spoken}
 
 
-def _resolve(raw: str, roots: list[Path]) -> tuple[Path | None, str]:
+def _is_secret(real: Path) -> bool:
+    return any(str(x).lower() in SECRET_DIR for x in real.parts) or _secret_name(real.name) or _home_dot_path(real)
+
+
+SECRET_FLAG = "Heads up, this file holds secrets (keys or passwords); their values stay masked. "
+
+
+def _resolve(raw: str, roots: list[Path], allow_secret: bool = False) -> tuple[Path | None, str]:
     if not raw:
         return (roots[0] if roots else None), ""
     p = Path(str(raw)).expanduser()
@@ -128,14 +135,18 @@ def _resolve(raw: str, roots: list[Path]) -> tuple[Path | None, str]:
             return None, "no allowed folder"
         p = roots[0] / p
     parts = p.parts
-    if any(str(x).lower() in SECRET_DIR for x in parts) or _secret_name(p.name):
+    # Evens 10-16: "Do not stop when a secret is revealed. Just flag it." An explicit read is flagged, not refused;
+    # searches and listings still skip secret stores.
+    if not allow_secret and (any(str(x).lower() in SECRET_DIR for x in parts) or _secret_name(p.name)):
         return None, "that looks like a secret"
     try:
         real = p.resolve(strict=True)
     except (OSError, RuntimeError):
         return None, "not found"
-    if any(str(x).lower() in SECRET_DIR for x in real.parts) or _secret_name(real.name) or _home_dot_path(real):
+    if not allow_secret and _is_secret(real):
         return None, "that looks like a secret"
+    if allow_secret and _is_secret(real):
+        return real, ""
     if not any(real == r or r in real.parents for r in roots):
         return None, "outside the allowed folders"
     return real, ""
@@ -530,14 +541,14 @@ def open_document(args,utterance,roots=None):
             'spoken':('macOS accepted the document open request. I have not independently verified its visible window.' if ok else 'The document open request failed. No visible result is verified.')}
 
 
-def run(args: dict, roots=None) -> dict[str, Any]:
+def _run(args: dict, roots=None) -> dict[str, Any]:
     op = str((args or {}).get("op") or "read")
     rs = _roots(roots)
     if op == "find":
         return _find_documents(args or {}, rs)
     if op == "repos":
         return _list_repos(rs, roots is None)
-    path, err = _resolve(str((args or {}).get("path") or ""), rs)
+    path, err = _resolve(str((args or {}).get("path") or ""), rs, allow_secret=op in ("read", "auto", "ls", "list"))
     if path is None:
         return _deny(err or "not found", op)
     if op == "read":
@@ -701,3 +712,12 @@ def log_meta(result: dict) -> dict:
     return {"op": r.get("op"), "ok": bool(r.get("ok")), "suffix": Path(p).suffix if p else "",
             "chars": len(str(r.get("text") or "")), "names": len(r.get("names") or []),
             "truncated": bool(r.get("truncated"))}
+
+
+def run(args: dict, roots=None) -> dict[str, Any]:
+    """Every read goes through here; a result from a secret store carries the flag (Evens 10-16: flag, never stop)."""
+    got = _run(args, roots)
+    path = str((got or {}).get("path") or "")
+    if got.get("ok") and path and _is_secret(Path(path)):
+        got = {**got, "secret": True, "spoken": SECRET_FLAG + str(got.get("spoken") or "")}
+    return got

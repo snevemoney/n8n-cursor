@@ -286,6 +286,15 @@ def _pdf_first_page(path: Path) -> str:
     return (proc.stdout or "").strip()[:4000]
 
 
+def _scrub_secret_values(text: str) -> str:
+    try:
+        spec = importlib.util.spec_from_file_location("agent_stack_workspace_read_drop", Path(__file__).resolve().parents[1] / "hands" / "workspace_read.py")
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        return mod.scrub_text(text)
+    except Exception:  # noqa: BLE001 - if the scrubber can't load, keep nothing rather than raw keys
+        return ""
+
+
 def _secret_drop(src: Path) -> bool:
     """Secret stores never go on the bus: the shared permissions check, by the given and the resolved path."""
     try:
@@ -307,9 +316,7 @@ def save_drop(paths: list, *, hive: Path | None = None, gen: int | None = None) 
     src = Path(names[0]).expanduser()
     if not src.is_file():
         return {"ok": False, "wire": "drop", "spoken": "UNKNOWN. That drop is not a file on disk."}
-    if _secret_drop(src):
-        # Privacy audit 2026-10-16: a drop of ~/.grok-private/keys.json put the keys on the bus and in model context.
-        return {"ok": False, "wire": "drop", "spoken": "That file looks like a secret store, so I didn't read it."}
+    secret_drop = _secret_drop(src)  # Evens 10-16: flag, never stop (it was refused here)
     try:
         size = src.stat().st_size
     except OSError:
@@ -347,6 +354,8 @@ def save_drop(paths: list, *, hive: Path | None = None, gen: int | None = None) 
             ".csv": "text/csv",
         }[suffix]
         text = _plain_text(src)
+    if secret_drop and text:
+        text = _scrub_secret_values(text)  # the values stay masked on the bus and in model context
     payload = {
         "ok": True,
         "wire": "drop",
@@ -357,7 +366,8 @@ def save_drop(paths: list, *, hive: Path | None = None, gen: int | None = None) 
         "text": text,
         "still": still,
         "captured_at": now_iso(),
-        "spoken": f"I have {src.name} on the bus. Same conversation.",
+        "spoken": ("Heads up, this file holds secrets (keys or passwords); their values stay masked. " if secret_drop else "")
+                  + f"I have {src.name} on the bus. Same conversation.",
     }
     def apply(bus: dict) -> dict:
         turns = bus.get("turns") if isinstance(bus.get("turns"), list) else []

@@ -217,7 +217,7 @@ OPENROUTER_HANDS = (
         "type": "function",
         "function": {
             "name": "workspace_read",
-            "description": "Read-only: read a file's text (capped), list a folder's names, report git repo/branch/HEAD, or list local repos, inside allowed folders. Use it before claiming anything about files, repos or branches. Secrets are refused.",
+            "description": "One file read or one folder listing. Reading many documents, learning from them, or any job with several steps is operator work, not this. Read-only: read a file's text (capped), list a folder's names, report git repo/branch/HEAD, or list local repos, inside allowed folders. Use it before claiming anything about files, repos or branches. Secrets are refused.",
             "parameters": {
                 "type": "object",
                 "properties": {

@@ -43,7 +43,7 @@ class OpenCliPolicy(unittest.TestCase):
                        ["terraform", "apply", "-auto-approve"], ["stripe", "payment_intents", "create"],
                        ["crontab", "-r"], ["git", "branch", "-D", "main"], ["git", "checkout", "--", "."],
                        ["git", "clean", "-d", "-f"], ["find", ".", "-exec", "unlink", "{}", ";"], ["brew", "uninstall", "ffmpeg"],
-                       ["cat", ".env"], ["security", "find-generic-password", "-w"], ["aws", "s3", "cp", "a", "s3://b"],
+                       ["aws", "s3", "cp", "a", "s3://b"],
                        ["docker", "system", "prune", "-af"]]
         # ordinary work Evens asked for ("run code and shell commands; install repos and tools") runs without asking
         local += [["npx", "pkg"], ["mv", "a", "b"], ["python3", "-c", "print(1)"], ["sh", "-c", "ls"], ["osascript", "-e", "x"]]
@@ -52,6 +52,9 @@ class OpenCliPolicy(unittest.TestCase):
             self.assertEqual(self.A.cli_class(argv), "read", argv)
         for argv in local:
             self.assertEqual(self.A.cli_class(argv), "local", argv)
+        # Evens 10-16: reading a secret is flagged, never stopped
+        for argv in (["cat", ".env"], ["security", "find-generic-password", "-w"]):
+            self.assertNotEqual(self.A.cli_class(argv), "hard", argv)
         for argv in audit_holes:
             self.assertEqual(self.A.cli_class(argv), "hard", argv)
         for argv in hard:

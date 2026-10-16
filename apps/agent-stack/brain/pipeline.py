@@ -1580,6 +1580,8 @@ def _model_free_route_once(spoken_in: str) -> dict | None:
         return {"tool": "task_board", "args": {"op": "modes"}, "speak": ""}
     if _task_board_hand().wants_drop(spoken_in) == "what":  # canvas: drop -> a real answer, not model recall
         return {"tool": "task_board", "args": {"op": "drop"}, "speak": ""}
+    if GITHUB_SEE_RE.search(spoken_in):  # live 10-16: "can you see it on GitHub" answered with the local branch
+        return {"tool": "agent_tools", "args": {"op": "cli", "argv": list(GITHUB_PR_ARGV)}, "speak": ""}
     if _brain_model_hand().wants(spoken_in):  # Evens 10-16: "switch to Sonnet" / "back to deepseek", by voice or text
         return {"tool": "brain_model", "args": {}, "speak": ""}
     if _capability_hand().wants(spoken_in):  # "don't you have a red arrow?", "can you change your code?"
@@ -1913,6 +1915,12 @@ def _code_run_hand():
 
 def _apps_hand():
     return _load_ready_hand("agent_stack_apps", STACK / "hands" / "apps.py")  # locked (audit 2026-10-16)
+
+
+GITHUB_SEE_RE = re.compile(r"\b(?:see|show|check|look|what(?:'s|\s+is|\s+are)?|list|any)\b.{0,60}\b(?:on|in|at)\s+github\b|"
+                           r"\bgithub\b.{0,30}\b(?:changes|prs?|pull\s+requests?|updates)\b", re.I)
+GITHUB_PR_ARGV = ("gh", "pr", "list", "--repo", "snevemoney/n8n-cursor", "--state", "all", "--limit", "8", "--json",
+                  "number,title,state,updatedAt", "--jq", '.[] | "#\\(.number) \\(.title) (\\(.state | ascii_downcase))"')
 
 
 def _brain_model_hand():

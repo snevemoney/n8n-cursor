@@ -137,13 +137,27 @@ def run_list(kind: str, *, runner=None) -> dict:
     return {"ok": True, "tool": "apps", "list": kind, "items": names, "executed": True, "task_verified": True, "spoken": spoken}
 
 
+# Sites he names like apps (live 10-16: "open LinkedIn" got a made-up "LinkedIn is open" with nothing opened).
+SITES = {"linkedin": "https://www.linkedin.com", "youtube": "https://www.youtube.com", "twitter": "https://x.com",
+         "x": "https://x.com", "github": "https://github.com", "notion": "https://www.notion.so", "gmail": "https://mail.google.com",
+         "google": "https://www.google.com", "wikipedia": "https://www.wikipedia.org", "openrouter": "https://openrouter.ai",
+         "hostinger": "https://hpanel.hostinger.com", "instagram": "https://www.instagram.com", "tiktok": "https://www.tiktok.com",
+         "facebook": "https://www.facebook.com", "reddit": "https://www.reddit.com", "chatgpt": "https://chatgpt.com",
+         "claude": "https://claude.ai", "figma": "https://www.figma.com", "canva": "https://www.canva.com"}
+_SITE_TAIL = re.compile(r"\s+(?:in|on|with)\s+(?:safari|the\s+browser|my\s+browser|chrome)$|\s+(?:website|site|web\s*page)$", re.I)
+
+
+def site_url(raw: str) -> str:
+    return SITES.get(_norm(_SITE_TAIL.sub("", (raw or "").strip())), "")
+
+
 def wants(utterance: str) -> bool:
     if list_kind(utterance):
         return True
     m = OPEN_RE.match((utterance or "").strip())
     if not m or NOT_APP_RE.search(m.group(2)):
         return False
-    return resolve(m.group(2)) is not None
+    return resolve(m.group(2)) is not None or bool(site_url(m.group(2)))
 
 
 def _live() -> bool:
@@ -187,6 +201,21 @@ def run(utterance: str, *, bundles: dict[str, Path] | None = None, runner=None, 
         return {"ok": False, "tool": "apps", "spoken": "Which app should I open?", "task_verified": False}
     verb, raw = m.group(1).lower(), m.group(2).strip()
     hit = resolve(raw, bundles)
+    url = site_url(raw) if hit is None and verb not in ("quit", "close", "ferme", "fermer", "quitte", "quitter") else ""
+    if url:
+        if runner is None and not _live():
+            return {"ok": False, "tool": "apps", "app": "Safari", "url": url, "execution_status": "NOT_EXECUTED", "executed": False,
+                    "task_verified": False, "spoken": "Nothing was opened: app control only runs on the Mac."}
+        run_fn = runner or (lambda c: subprocess.run(c, capture_output=True, text=True, timeout=15))
+        try:
+            cp = run_fn(["open", "-a", "Safari", url])
+            ok = cp.returncode == 0
+        except (OSError, subprocess.TimeoutExpired):
+            ok = False
+        name = _SITE_TAIL.sub("", raw).strip()
+        return {"ok": ok, "tool": "apps", "app": "Safari", "url": url, "executed": True,
+                "execution_status": "EXECUTED" if ok else "FAILED", "task_verified": False,
+                "spoken": (f"I asked Safari to open {name}." if ok else f"Safari didn't open {name}.")}
     if hit is None:
         names = sorted((bundles if bundles is not None else _bundles()).keys())
         close = difflib.get_close_matches(raw, names, n=3, cutoff=0.5)

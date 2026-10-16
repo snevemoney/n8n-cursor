@@ -935,7 +935,9 @@ DONE_CLAIM_RE = re.compile(
     r"scheduled|booked|installed|uploaded|posted|set\s+up|added|updated|emailed|texted|called|paid|ordered|launched|closed|"
     r"downloaded|submitted|published|deployed|pushed|merged|recorded|exported|copied)\b"
     r"|\b(?:your|the)\s+[\w\s'-]{1,40}?\s+(?:is|are|has\s+been|have\s+been)\s+(?:now\s+)?(?:saved|sent|scheduled|created|renamed|"
-    r"booked|set|installed|uploaded|posted|deleted|moved|updated|exported|submitted)\b", re.I)
+    r"booked|set|installed|uploaded|posted|deleted|moved|updated|exported|submitted)\b"
+    # live 10-16: "LinkedIn is open in Safari showing your feed." with no tool run
+    r"|\b[A-Z][\w.]*(?:\s+[A-Z][\w.]*)?\s+(?:is|are)\s+(?:now\s+)?(?:open|opened|up|playing|running|launched|loaded|showing)\b", re.I)
 
 
 def promise_guard(text: str, *, ran_tool: bool) -> str:

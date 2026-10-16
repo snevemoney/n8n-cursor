@@ -15,8 +15,7 @@ ALLOW, ASK, DENY = "allow", "ask", "deny"
 
 # Kept stops in shell form (moved from brain/pipeline.py, 10-15).
 CLI_HARD = re.compile(r"\b(?:merge|push|delete|rm|release|deploy|publish|send|post|purchase|buy|--force)\b|"
-                      # revealing secrets / uploading data still asks
-                      r"^(?:security|printenv|env|op|pass|keychain)\b|\bauth\s+token\b|\bdump-keychain\b|"
+                      # uploading data still asks; READING secrets is flagged, not stopped (Evens 10-16)
                       r"\s(?:-F|-d|-T|--data\S*|--upload-file|--form)\b", re.I)
 CLI_MORE = re.compile(
     r"^gh\s+(?:issue|pr|gist|repo|release)\b.*\b(?:create|comment|edit|close|delete|merge)\b|^gh\s+api\b.*(?:-X|--method)\s*(?:POST|PUT|PATCH|DELETE)|"
@@ -62,8 +61,7 @@ def cli_needs_owner(argv) -> bool:
         return any(cli_needs_owner(seg) for seg in _segments(argv))
     args = [str(a) for a in (argv or [])]
     line = " ".join(args)
-    return bool(CLI_HARD.search(line) or CLI_MORE.search(line) or CLI_MACHINE.search(line)
-                or any(is_secret_path(a) for a in args[1:] if _looks_like_path(a)))
+    return bool(CLI_HARD.search(line) or CLI_MORE.search(line) or CLI_MACHINE.search(line))
 
 
 def _permissions():
@@ -95,14 +93,16 @@ def authorize(tool: str, args: dict, *, home: Path | None = None) -> tuple[str, 
         return ALLOW, ""
     if tool in ("read_file", "write_file", "edit_file", "list_dir", "grep"):
         path = Path(os.path.expanduser(str(args.get("path") or "")))
-        if is_secret_path(path):
-            return DENY, "that is a secret file"
         if tool in ("write_file", "edit_file"):
+            if is_secret_path(path):
+                return ASK, "that changes a secret file"
             resolved = str(path.resolve() if path.is_absolute() else (home / path).resolve())
             if resolved.startswith(SYSTEM_PREFIXES):
                 return DENY, "system files are off limits"
             if not resolved.startswith(str(home.resolve())):
                 return ASK, "that writes outside your home folder"
+        if is_secret_path(path):
+            return ALLOW, "flag: that file holds secrets"  # Evens 10-16: flag, never stop
         return ALLOW, ""
     if tool == "mcp" and MCP_STOP.search(str(args.get("tool") or "")):
         return ASK, "that MCP tool sends, publishes, deletes, pays or pushes"
