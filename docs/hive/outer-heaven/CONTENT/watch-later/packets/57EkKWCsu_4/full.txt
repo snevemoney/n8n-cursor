@@ -1,0 +1,355 @@
+[00:00] Now, MCPS have been a hot topic lately,
+[00:02] but most people don't realize how easy
+[00:04] it is to actually put them to work. So,
+[00:06] in this video, I'm going to show you how
+[00:07] you can use a powerful MCP with NADN to
+[00:10] automatically enrich company data right
+[00:13] inside your Google sheet. We'll pull in
+[00:15] details like the industry, company size,
+[00:17] revenue, and other information just by
+[00:20] adding a name and the website of the
+[00:21] company. So, whether you're in sales
+[00:24] research, or just love working smarter,
+[00:26] this is going to save you a ton of time.
+[00:28] I'm going to go ahead and start with a
+[00:29] quick demo so that way you can see what
+[00:30] this is capable and then afterwards I'm
+[00:32] going to show you step by step how this
+[00:34] is built. On top of that, you'll have
+[00:36] access to this free template. So all you
+[00:38] have to do is just follow me along. All
+[00:39] right, without wasting too much of your
+[00:40] time, let's jump right into the video.
+[00:41] All right, so let's go ahead and do a
+[00:43] quick demo. So just to quickly give you
+[00:45] uh what this setup looks like. We're
+[00:46] going to be using the explore your MCP,
+[00:48] which I'm going to talk about what this
+[00:50] is, but essentially we're grabbing uh
+[00:52] this Google Sheets trigger. We're adding
+[00:54] this Google Sheets trigger. And then in
+[00:56] our Google Sheets, all we have to do is
+[00:57] just add the name of the company and
+[00:59] then the website and then everything
+[01:01] else like the business ID and the NYAX,
+[01:03] the number of employee range, yearly re
+[01:06] uh uh revenue range and all of that will
+[01:07] automatically be pulled. I'm going to
+[01:09] again talk about all of these details in
+[01:11] a little bit. But let's go ahead and
+[01:12] take a look at an example. So for
+[01:13] instance, this already I already put
+[01:15] OpenAI there. So, let me go ahead and
+[01:17] put um something like uh google.com or
+[01:21] Google and then I'm going to put the
+[01:23] website google.com and then maybe
+[01:26] something like let's do like a smaller
+[01:29] company. Maybe we can do figure uh which
+[01:32] figure.ai which is a robotics company.
+[01:36] And then uh let's see what else. Uh
+[01:39] that's fine for now. So you'll see that
+[01:40] now this will let me get rid of this so
+[01:43] that way you can see that we'll start
+[01:45] fresh.
+[01:47] All right. So now we have these four uh
+[01:49] these three companies and this is our
+[01:52] agent NAN agent source Google sheet. All
+[01:54] right. So let's go back to our workflow
+[01:56] here. So now you will see that I'm going
+[01:58] to click on execute workflow and this
+[02:00] should go through and loop through each
+[02:01] item. There you go. So now it's going to
+[02:02] pull up one item from Google Sheep. The
+[02:05] AI agent is going to use entropic chat
+[02:07] model to uh also and of course it's
+[02:10] going to use the Explorium MCP to kind
+[02:12] of go back and forth and figure out all
+[02:13] the details and it's going to pull all
+[02:15] of the information for each individual
+[02:17] role based on uh the information that we
+[02:20] provided. Again, of course, this is
+[02:22] going to be uh done uh one at a time. So
+[02:25] as you can see now the first got
+[02:27] processed. The first one got processed
+[02:28] which was OpenAI in our case. And then I
+[02:30] was going to go ahead and do the same
+[02:32] thing for the second row, the third row.
+[02:34] And you can add as many rows as you
+[02:36] want. So if you're a team like a sales
+[02:39] team, uh, or if you're a team that's in
+[02:41] research, as you can imagine, this could
+[02:43] be very powerful because all you have to
+[02:44] do is just add the name of the company
+[02:46] and the website. And this is going to go
+[02:48] ahead and loop through each single item.
+[02:50] And then once it's done, it you will
+[02:52] have access to all of the company
+[02:54] information that we're going to go
+[02:55] through in a little bit. So let's go
+[02:56] ahead and let this thing finish. All
+[02:57] right, perfect. So the workflow is done
+[02:59] now. So let's go ahead and take a look
+[03:01] at our Google sheet now. There you go.
+[03:03] Great. So now you have the business ID
+[03:06] for each of these companies. You have
+[03:07] the NYAX, you have the number of
+[03:09] employee ranges, and then you also have
+[03:10] the uh yearly revenue range. So you can
+[03:13] see we can add other information or pull
+[03:15] other information as well. This is just
+[03:17] for example. So now let me go ahead and
+[03:19] explain what these things are. First of
+[03:20] all, if you're not familiar, so the
+[03:22] business ID, this is a unique identifier
+[03:25] for each company in a given database.
+[03:27] And this is very important to pull. The
+[03:29] second one, this is the NYAX
+[03:31] information. This is basically an
+[03:32] industry code. So for those of you who
+[03:34] not familiar, uh this is a standardized
+[03:37] classification of a company's primary
+[03:39] industry and each company has their own
+[03:41] unique code and then of course you have
+[03:43] the number of employees and then their
+[03:45] yearly revenue range there. All right.
+[03:47] So let me go ahead and now go inside the
+[03:49] uh end workflow and then I'm going to
+[03:51] talk about how you can set up the MCP as
+[03:54] well. First of all, as I mentioned, the
+[03:56] node, the Google sheet node, this is uh
+[03:58] just a trigger. What we're doing is just
+[04:01] grabbing this agent source um Google
+[04:04] sheet that you saw there. So, that way
+[04:05] we're iterating through each particular
+[04:08] row and then uh we're going to add a
+[04:10] loop later on to go through each item.
+[04:12] So, the trigger is going to be our
+[04:14] Google Sheets. This is going to listen
+[04:15] for a trigger or this is going to listen
+[04:17] for information that's being added to
+[04:18] the Google sheet. Afterwards, we're
+[04:20] going to filter the rows. So we want to
+[04:22] make sure that the rows are not empty.
+[04:25] And then once uh that's true, what we're
+[04:27] going to do is now we're going to add a
+[04:29] loop item. Now of course this is to make
+[04:31] sure that uh every row is processed and
+[04:35] that's where the loop node gets
+[04:36] introduced. This is a very simple node.
+[04:38] I mean we have done a bunch of tutorials
+[04:40] on this but essentially you add a uh
+[04:42] loop node here and uh until it's done uh
+[04:46] then it's going to go through the same
+[04:47] workflow over and over again to make
+[04:49] sure that it captures all of the rows in
+[04:52] that Google sheet there. Now our main um
+[04:55] you know AI agent is responsible to make
+[04:58] sure that so if I go inside my system
+[05:00] prompt here or the prompt here uh so it
+[05:03] says you'll provide uh you'll be
+[05:05] provided with company information
+[05:06] including the name and the domain your
+[05:08] task is to research and extract the
+[05:10] following key business metrics for
+[05:12] employees required data points right
+[05:14] we're grabbing the name website the
+[05:16] annual revenue as you can see number of
+[05:17] employees nax code and we're going to
+[05:20] use the explorium tools right so Again,
+[05:23] we're providing this prompt and then
+[05:25] afterwards we're uh giving this a MCP as
+[05:30] a tool including and then also obviously
+[05:33] it needs to have some uh a chat model.
+[05:35] I'm using entropic but you can feel free
+[05:37] to uh use um uh chat GPT or some or uh
+[05:41] GPT or some other chat model as well. So
+[05:44] the Explorium MCP. So this is what's
+[05:46] important right here. So if I go inside
+[05:49] this, this is very simple to add. The
+[05:52] only thing you need to do is once you
+[05:53] add your MCP client. So if I go and
+[05:57] click on tools here for those of you who
+[05:59] don't know how to add MCP. So if I
+[06:01] search for MCP, you can add MCP client
+[06:04] tool. Now this needs to reach to a
+[06:07] endpoint and we also need to have
+[06:09] authentication. So the way to do that,
+[06:11] so let me go back to this one. Let me
+[06:13] get rid of this.
+[06:15] So the Explorium MCP is very simple uh
+[06:18] to connect with. First of all, Explorium
+[06:20] is a great company. Feel free to check
+[06:22] that out. They have uh they're basically
+[06:24] a B2B data and infrastructure for
+[06:26] specifically built for AI agents and
+[06:29] they're, you know, very used throughout
+[06:31] the entire industry and they have API
+[06:34] keys and then also the MCP which again
+[06:37] is uh something that I'm using. So, if
+[06:39] you just go to the bottom here, you can
+[06:40] click on their MCP server and you can
+[06:42] take a look at their docs and
+[06:44] everything. But essentially, the easiest
+[06:45] thing to do is to head over uh to the
+[06:49] API documentation. So, if I go to that
+[06:52] um bring this down so you can see the
+[06:55] endpoint.
+[06:58] All right. So, if you go to
+[06:59] admin.explorium.ai/appi
+[07:02] key, you can set up create a API key. By
+[07:05] the way, this is free. you don't have to
+[07:07] uh put your credit card or anything like
+[07:08] that. They give you a free trial so that
+[07:10] way you can go ahead and uh utilize um
+[07:13] the MCP itself. So once you have your
+[07:16] API key, you're going to copy the key.
+[07:18] We're going to go back here. So this is
+[07:20] going to be the SSE endpoint and it's
+[07:22] just mcp.explorium.ai/sse.
+[07:26] Now the authentication is going to be a
+[07:28] heather a and then the credential for a
+[07:30] all you have to do is click on new
+[07:32] credential and the name is going to be
+[07:34] API key
+[07:37] and then you're going to paste that API
+[07:39] key right there. That's it. That's all
+[07:40] you need to do. Once you do that, you're
+[07:42] going to click on save and now you have
+[07:44] your MCP set up there. Now for tools you
+[07:47] can either select individual but I s uh
+[07:49] uh suggest just using all here so that
+[07:52] way you have access to all of the MCPS
+[07:55] all of the tools inside the MCP and as
+[07:57] you can see on the right hand side so
+[07:58] this is what the result looks like and
+[08:01] that's because we had the AI agent we
+[08:04] made the prompt to the AI agent to make
+[08:05] sure it pulls out all of this
+[08:07] information and we explicitly mentioned
+[08:09] to make sure it uses the Explorium tools
+[08:12] to first match the business name to find
+[08:14] the business ID then enrich the business
+[08:16] uh formographics to get the company
+[08:18] details and that's exactly what we did
+[08:19] here, right? Um so now the third one
+[08:23] right here, the tool is going to be our
+[08:25] output parser. Now this is important
+[08:27] because we want to make sure that we're
+[08:29] controlling the output on how uh what
+[08:32] kind of a data it outputs. So I'm just
+[08:33] giving it a name, website, the business
+[08:35] ID, the NYAX, the number of employees,
+[08:37] yearly uh u revenue range because this
+[08:41] is exactly what the columns of our
+[08:43] Google sheet look like, right? So that's
+[08:44] why we're doing this output parser. And
+[08:46] this is very simple to add. By the way,
+[08:48] you will have access to the this entire
+[08:50] workflow. I'm going to put the link in
+[08:51] the description. So all you have to do
+[08:53] is just click on that and it will take
+[08:54] you to the workflow. So you can download
+[08:56] this completely for free. But I'm just
+[08:57] trying to explain to make sure you
+[08:59] understand what's going on. So if you
+[09:00] wanted to change things, you can
+[09:01] certainly do that. All right. So that's
+[09:03] basically what the AI agent does. And as
+[09:05] you can see based on that output parser,
+[09:08] it gave us the exact information
+[09:10] according to that format. And that's the
+[09:12] great thing about output parser is that
+[09:14] you can actually have full control of
+[09:16] how um the output of the AI agent gets.
+[09:20] All right. So the next one is we're just
+[09:22] putting a code node and this is just to
+[09:24] make sure that we are returning the
+[09:27] proper uh um the proper information or
+[09:30] we're outputting right we're just
+[09:32] outputting exactly what we need. In this
+[09:35] case we're just having this simple code.
+[09:37] And again like I said all you have to do
+[09:38] is just copy and paste this. Don't worry
+[09:39] about uh if you're not familiar with
+[09:41] this. You can always utilize chat GPT or
+[09:44] clot if you want to make any kind of
+[09:46] changes to this if you want the output
+[09:48] to be different. Right? But essentially
+[09:50] we're just uh using a code note to
+[09:52] format the output. That's all we're
+[09:54] doing here. And then afterwards, same
+[09:56] thing. We need to update the company
+[09:58] rows, right? So now once this
+[09:59] information is coming out of from our AI
+[10:01] agent and it's formatted through our
+[10:03] code note what we're going to do is
+[10:05] we're going to update the rows inside
+[10:07] our uh Google sheet here because these
+[10:10] uh two columns the name and the website
+[10:12] that's what we're putting and then all
+[10:14] of these three four columns here are
+[10:16] being enriched by our naden workflow.
+[10:19] Therefore our Google sheet note needs to
+[10:21] be up needs to update each row uh with
+[10:24] the new information that's being
+[10:26] outputed. So that's all we're doing,
+[10:28] right? We're just literally uh uh drag
+[10:30] and dropping here. Uh so we have the
+[10:32] name, the website, the business ID, the
+[10:34] NYAX, and everything else that's coming
+[10:36] out of that code format. And that's
+[10:38] what's kind of the beauty of this code
+[10:40] note that it gives you this nice little
+[10:41] output. So then all you have to do is
+[10:43] just drag and drop. And as you can see,
+[10:45] the output is just each row gets updated
+[10:48] according to its proper information. And
+[10:50] then we're just going through this loop
+[10:52] again to make sure it goes through each
+[10:54] row one at a time and it enriches all of
+[10:57] that data. Super useful. And again, this
+[10:59] is a perfect example of how an MCP could
+[11:03] be used uh inside for a realworld
+[11:07] business for a real use case. And MCP is
+[11:10] very powerful tomb and it's going to be
+[11:12] even more powerful in the future because
+[11:13] we're just in the beginning stages. I'm
+[11:16] super excited actually about this uh
+[11:18] amazing,
+[11:19] you know, technology that we have
+[11:21] because this is going to make our AI
+[11:22] agents even more and more powerful. So,
+[11:24] feel free to check this out and there's
+[11:26] good information in the bottom here in
+[11:28] case uh you don't know what these each
+[11:30] notes are. There's like the how to loop
+[11:32] works and how the workflow structure
+[11:34] works and then also the MCP itself. So,
+[11:36] take a look at it again and if you're
+[11:38] interested in learning more about AI
+[11:40] agents, about MCPS, make sure you join
+[11:42] the community. We have courses that are
+[11:45] specifically like deep dive topics on
+[11:47] MCP and then also on uh vector databases
+[11:50] and then a bunch of other courses that
+[11:52] we have especially if you're new to NAD.
+[11:54] We have a beginner's course. We have an
+[11:56] entire earn with naden the AI agency
+[11:58] course where we have a fiveweek program
+[11:59] to get you started so that you can start
+[12:01] selling these for actual businesses
+[12:03] instead of just you know watching
+[12:05] tutorials and uh you know building cool
+[12:08] little AI agents. These are actually
+[12:10] these are the things that you can
+[12:11] actually build and sell to businesses
+[12:13] that they will use uh and they were
+[12:15] willing to pay for stuff like this. So,
+[12:17] make sure you check out the community
+[12:19] and then also like I said, let me know
+[12:20] if you have any questions about this.
+[12:21] Check out the link in the description
+[12:22] for this particular workflow so that way
+[12:24] you can have access to this. Thanks for
+[12:26] watching. Make sure you like and
+[12:27] subscribe and see you in our next one.
