@@ -14,8 +14,15 @@ from pathlib import Path
 
 try:
     from . import project_methods as pm
-except ImportError:  # loaded by path in tests
-    import project_methods as pm
+except ImportError:  # loaded by path (mouth/turn.py, tests): resolve the sibling by its own path, not by sys.path order
+    import sys as _sys
+    pm = _sys.modules.get("project_methods")
+    if pm is None:
+        import importlib.util as _u
+        _spec = _u.spec_from_file_location("project_methods", Path(__file__).resolve().with_name("project_methods.py"))
+        pm = _u.module_from_spec(_spec)
+        _spec.loader.exec_module(pm)
+        _sys.modules["project_methods"] = pm
 
 ENV_NAME = re.compile(r"[A-Z][A-Z0-9_]{1,63}\Z")
 ASSIGN = re.compile(r"(?<![A-Za-z0-9])([A-Za-z][A-Za-z0-9_-]*)\s*[:=]\s*[\"']?([A-Za-z0-9_./+-]{12,})")

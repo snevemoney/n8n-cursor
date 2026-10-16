@@ -499,6 +499,18 @@ DISPATCH_DEST = ROOT / "docs/hive/outer-heaven/CONTENT/os/sessions/jarvis/dispat
 _LAST_GOOD: dict = {}
 
 
+def log_dir() -> Path:
+    """Where diagnostic logs go. Mac review 2026-10-16: 174 of 187 turn-errors rows were test stubs written to the real
+    log. Tests (pytest/unittest, same rule as memory/turn_log.py) get a per-process temp folder; JARVIS_LOG_DIR overrides."""
+    raw = (os.environ.get("JARVIS_LOG_DIR") or "").strip()
+    if raw:
+        return Path(raw).expanduser()
+    if "_pytest" in sys.modules or "unittest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+        import tempfile
+        return Path(tempfile.gettempdir()) / f"jarvis-logs-test-{os.getpid()}"
+    return ROOT / "logs"
+
+
 def _load(name: str, path: Path):
     """Re-exec a hand from disk each call. The live Face shares its working tree with other workers, so a file
     caught mid-edit (syntax/import error) must not darken the turn: keep serving the last good copy and log it."""
@@ -512,8 +524,8 @@ def _load(name: str, path: Path):
     except Exception as exc:  # noqa: BLE001
         good = _LAST_GOOD.get(name) or prev
         try:
-            (ROOT / "logs").mkdir(exist_ok=True)
-            with (ROOT / "logs" / "load-errors.jsonl").open("a", encoding="utf-8") as fh:
+            log_dir().mkdir(parents=True, exist_ok=True)
+            with (log_dir() / "load-errors.jsonl").open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({"ts": time.time(), "module": name, "path": str(path), "error": f"{type(exc).__name__}: {exc}"[:300],
                                      "served_last_good": good is not None}) + "\n")
         except Exception:  # noqa: BLE001
@@ -1115,7 +1127,14 @@ def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
             cls = hd.cli_class(argv) if hasattr(hd, "cli_class") else "confirm"
             if cls == "confirm":
                 return True
-            return cls == "local" and list(argv) != list(typed_argv or [])
+            if cls != "local" or list(argv) == list(typed_argv or []):
+                return False
+            needs = getattr(hd, "cli_needs_owner_words", None)
+            if needs is None:
+                return True
+            # A model-picked local step runs when it neither installs nor fetches, or when the owner named that program.
+            exe = Path(str(argv[0])).name if argv else ""
+            return bool(needs(list(argv))) and not re.search(r"\b" + re.escape(exe) + r"\b", utterance or "", re.I)
 
         gated = any(step.get("op") == "fanout" or (step.get("op") == "mcp" and
                     (hd.WRITE_TOOL.search(str(step.get("tool") or "")) or
@@ -5777,8 +5796,10 @@ def _safari_see(args: dict, utterance: str, *, hive: Path, see_fn=None, gen=None
             return {"ok": False, "spoken": "The expected hash must come from your request."}
         click_guard = {"cancelled": lambda: turn_cancelled(hive, gen)} if gen else {}
         if act == "download":
-            if not url or url not in utterance or not expected or not digest:
-                return {"ok": False, "spoken": "The download mission requires your URL, filename and expected hash."}
+            # Mac review 2026-10-16: the hash was required, so an ordinary "download X from <url>" never ran. The hash is
+            # optional now: with it the content is proven; without it a NEW file of that name in Downloads is proven.
+            if not url or url not in utterance or not expected:
+                return {"ok": False, "spoken": "For a download I need the page URL and the file name you expect, in your words."}
             navigation = SEE.safari_open(url)
             if navigation.get("ok") is not True:
                 return {**navigation, "mission_stage": "navigation"}
@@ -5893,6 +5914,57 @@ COMPOUND_ASK_RE = re.compile(
 HAND_LOOP_SECONDS = 45
 
 
+HAND_LOOP_HANDOFF_TTL = 1800  # a paused request can be resumed for 30 minutes
+HAND_LOOP_MAX_RESUMES = 5     # at most 4 + 5*4 hands for one owner request
+
+
+def _hand_loop_handoff_path(hive) -> Path:
+    return Path(hive) / "hand-loop" / "handoff.json"
+
+
+def _hand_loop_handoff_save(hive, token, utterance, receipts, reason):
+    """Keep a paused request (owner's words + bounded receipts) so "keep going" continues it through the same loop."""
+    try:
+        prev = _hand_loop_handoff_load(hive) or {}
+        parts = int(prev.get("parts") or 0) + 1 if prev.get("utterance") == utterance else 1
+        if parts > HAND_LOOP_MAX_RESUMES:
+            return None
+        row = {"utterance": str(utterance or "")[:ROUTE_MAX_CHARS], "receipts": receipts[-8:], "reason": reason, "gen": token,
+               "parts": parts, "hands": int(prev.get("hands") or 0) + len(receipts) if parts > 1 else len(receipts),
+               "saved_at": time.time()}
+        if hooks.redact(row["utterance"]) != row["utterance"]:
+            return None  # never keep a line that carries a secret
+        path = _hand_loop_handoff_path(hive)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".tmp")
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(row, fh, ensure_ascii=False, default=lambda _: None)
+        os.replace(tmp, path)
+        return {"parts": parts, "hands": row["hands"], "reason": reason}
+    except Exception:  # noqa: BLE001 — a lost handoff only means "keep going" has nothing to resume
+        return None
+
+
+def _hand_loop_handoff_load(hive):
+    try:
+        row = json.loads(_hand_loop_handoff_path(hive).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(row, dict) or time.time() - float(row.get("saved_at") or 0) > HAND_LOOP_HANDOFF_TTL:
+        return None
+    return row
+
+
+def _hand_loop_handoff_take(hive):
+    row = _hand_loop_handoff_load(hive)
+    try:
+        _hand_loop_handoff_path(hive).unlink()
+    except OSError:
+        pass
+    return row
+
+
 def _hand_loop_pick(pick):
     """Provider selections are data; host approval objects never cross model rounds."""
     args=pick.get('args') if isinstance(pick.get('args'),dict) else {}
@@ -5906,29 +5978,121 @@ def _hand_loop_key(pick):
                           separators=(',',':'),default=lambda _:None).encode()).hexdigest()
 
 
+# Mac log review 2026-10-16: gens 2635-2637 logged workspace_read ACTION_FAILED with no reason, so the failure could
+# not be explained afterwards. A fixed code (never the message, path or text) is logged per failed hand.
+_ERROR_CLASSES = (
+    ("cancelled", r"^stopped\b|\bcancell?ed\b"),
+    ("outside_roots", r"outside the (?:allowed|selected) folder|no allowed folder"),
+    ("needs_open_access", r"needs open access|permission granted"),
+    ("secret", r"looks like a secret|\bsecret\b"),
+    ("os_permission", r"macos has not given me access|permission denied|operation not permitted"),
+    ("not_found", r"not found|no such file|does not exist|was not in the selected"),
+    ("not_a_file", r"not a (?:regular )?file|is not a regular file"),
+    ("not_a_folder", r"not a folder"),
+    ("binary", r"binary file"),
+    ("too_large", r"too (?:large|big)|truncated"),
+    ("changed", r"changed (?:while|during)|folder changed"),
+    ("stale_scope", r"different request|scope is stale"),
+    ("not_git", r"not a git repo|git status failed"),
+    ("unsupported", r"supports epub and pdf|unknown op|can't be (?:opened|listed)"),
+    ("timeout", r"timed? ?out|deadline"),
+    ("connector", r"could(?:\s+not|n't)\s+reach|connection refused|authentication required|not connected"),
+    ("gated", r"say \"?confirm|waiting for (?:your )?(?:ok|confirm)|needs your ok"),
+)
+
+
+def error_class(ran) -> str | None:
+    """A metadata-only failure code for logs and receipts: None when the hand did not fail."""
+    if not isinstance(ran, dict) or ran.get("ok") is not False and not ran.get("gated") and not ran.get("awaiting_confirm"):
+        return None
+    if ran.get("cancelled"):
+        return "cancelled"
+    if ran.get("gated") or ran.get("awaiting_confirm"):
+        return "gated"
+    if ran.get("timed_out"):
+        return "timeout"
+    text = " ".join(str(ran.get(k) or "") for k in ("workspace_error", "error", "spoken"))
+    for code, rx in _ERROR_CLASSES:
+        if re.search(rx, text, re.I):
+            return code
+    return "other"
+
+
 def _hand_loop_receipt(pick,ran):
     """Bounded real hand data, not an inferred completion or new owner instruction."""
     fields=('ok','verified','task_verified','unknown','gated','awaiting_confirm','cancelled','outcome','status',
             'spoken','brief','cites','sent','workspace_text','workspace_path','workspace_truncated',
             'workspace_fingerprint','workspace_error','workspace_files','workspace_complete','workspace_scope',
             'workspace_names','workspace_more',
+            # Mac review 2026-10-16: a failing command's output never reached the model, so it could not repair it.
+            'output','stdout','stderr','exit','exit_code','returncode','error','timed_out','passed','path',
             'steps','see','mission_id','document_context')
     def bounded(value,depth=0):
         if depth>4:return '[nested receipt omitted]'
-        if isinstance(value,str):return value[:6000]
+        if isinstance(value,str):return _receipt_redact(value[:6000])
         if value is None or isinstance(value,(bool,int,float)):return value
         if isinstance(value,list):return [bounded(v,depth+1) for v in value[:16]]
         if isinstance(value,dict):return {str(k):bounded(v,depth+1) for k,v in list(value.items())[:24]
             if not re.search(r'password|api.?key|authorization|cookie|secret|owner_approval',str(k),re.I)}
         return '[unsupported receipt value]'
     row={'hand':str(pick.get('tool') or ''),'result_tool':str(ran.get('tool') or ''),
+         'op_key':_hand_loop_key(pick),'op':str((pick.get('args') or {}).get('op') or '') if isinstance(pick.get('args'),dict) else '',
          'result':{key:bounded(ran[key]) for key in fields if key in ran}}
+    code=error_class(ran)
+    if code:row['result']['error_class']=code
     if isinstance(ran.get('workspace_text'),str):
         row['result']['workspace_text']=ran['workspace_text'][:12000]
     if isinstance(ran.get('workspace_names'),list):
         row['result']['workspace_names']=[str(n)[:255] for n in ran['workspace_names'][:50]]
     row['text_capped']=len(str(ran.get('workspace_text') or ''))>12000
     return row
+
+
+def _receipt_redact(text):
+    try:
+        return hooks.redact(text)
+    except Exception:  # noqa: BLE001
+        return text
+
+
+# Read-only hands: re-reading after an edit, or once more after a transient failure, is not a repeated action.
+HAND_LOOP_READ_HANDS = frozenset({"workspace_read", "vault_read", "web_search", "capability", "task_board", "status",
+                                  "results_recall", "mcp_inventory", "rules", "cost_card"})
+HAND_LOOP_TRANSIENT = frozenset({"timeout", "changed", "connector"})
+# Hands an owner's own words name without routing to them ("ask Cursor to fix the failing test", "draft the summary").
+HAND_LOOP_INTENT = {
+    "cursor_ask": r"\bcursor\b", "craft": r"\b(?:pages|keynote|numbers|word|excel|powerpoint|document|slide|spreadsheet)\b",
+    "drafts": r"\bdraft|\bemail\b|\breply\b", "memory": r"\bremember|\bnote\b", "workbench": r"\bworkbench|\bwrite (?:it|the|a) file|\bsave (?:it|the|that)\b",
+    "apps": r"\bopen\b|\blaunch\b|\bapp\b", "repo": r"\brepo(?:sitory)?\b|\bgithub\b|\bpull request\b|\bpr\b",
+    "screen_see": r"\bscreen\b|\blook at\b", "safari_see": r"\bsafari\b|\bbrowser\b|\bweb ?page\b|\bsite\b",
+    "browser_mission": r"\bresearch\b|\bbrowse\b", "loop": r"\bevery\b|\bkeep (?:checking|watching)\b|\bmonitor\b",
+    "multistep": r"\bthen\b|\bafter that\b|\band (?:then )?\w+", "desk_dispatch": r"\bdesk\b|\bdispatch\b",
+}
+
+
+def _hand_loop_in_scope(next_pick, utterance, receipts) -> str:
+    """'' when the owner's request covers this next hand; else why not. The original ask is authoritative: the hand is
+    named by one of its steps or by the ask's own words, and no target in the args came only from receipt text
+    (a web page or file cannot pick where an acting hand goes)."""
+    tool = str(next_pick.get('tool') or '')
+    steps = [utterance] + [s for s in (split_steps(utterance) if len(utterance or '') < 600 else []) if s != utterance]
+    named = any((turn_fixed_pick(s) or {}).get('tool') == tool for s in steps)
+    if not named and not (tool in HAND_LOOP_INTENT and re.search(HAND_LOOP_INTENT[tool], utterance or '', re.I)):
+        return 'needs_owner_ask'
+    said = (utterance or '').lower()
+    seen_text = json.dumps([r.get('result') for r in receipts], ensure_ascii=False, default=lambda _: None).lower()
+    def targets(value):
+        if isinstance(value, dict):
+            for v in value.values(): yield from targets(v)
+        elif isinstance(value, list):
+            for v in value: yield from targets(v)
+        elif isinstance(value, str):
+            for t in re.findall(r"https?://[^\s\"'<>]+|[\w.+-]+@[\w-]+\.[\w.]+|(?:~|/)[\w./ -]{3,}", value):
+                yield t.strip().lower()
+    for t in targets(next_pick.get('args') or {}):
+        if t not in said and t in seen_text:
+            return 'receipt_injected_target'
+    return ''
 
 
 HAND_LOOP_NEEDS_OWNER = frozenset({"craft", "cursor_ask", "safari_see", "screen_see", "loop", "apps", "pointer_click",
@@ -5940,9 +6104,17 @@ def _hand_loop_pause(ran):
         return 'authority_or_stop'
     if ran.get('tool') in {'refuse_hard_step','say'} or ran.get('outcome') in {'AWAITING_APPROVAL','NEEDS_ACTION_DETAILS'}:
         return 'owner_input_required'
-    if str(ran.get('workspace_error') or '').lower() in {
-            'outside the allowed folders','no allowed folder','that looks like a secret','permission denied'}:
+    werr=str(ran.get('workspace_error') or '').lower()
+    if werr in {'that looks like a secret','permission denied'}:
         return 'read_authority_required'
+    if werr in {'outside the allowed folders','no allowed folder'}:
+        # Mac gens 2635-2637: with open access on, the whole home folder is readable, so this refusal means the model
+        # invented a path outside it. Pausing "for permission" asked for a grant he had already given; the model may
+        # correct the path instead. Without open access it is a real authority stop.
+        try:
+            if not _open_access():return 'read_authority_required'
+        except Exception:  # noqa: BLE001
+            return 'read_authority_required'
     if ran.get('mission_id') and ran.get('task_verified') is not True:
         return 'durable_mission_pending'
     if ran.get('ok') is False and re.search(r"could(?:\s+not|n't)\s+reach|connection refused|authentication required",str(ran.get('spoken') or ''),re.I):
@@ -5973,9 +6145,16 @@ def _provider_hand_exchange(selection, pick, result):
 
 
 def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None,
-                        retrieve_roots=None,see_fn=None,status_fn=None,cursor_ask_fn=None,initial_selection=None):
-    """One bounded general tool loop; original owner utterance stays authoritative."""
-    receipts=[_hand_loop_receipt(pick,ran)];seen={_hand_loop_key(pick)}
+                        retrieve_roots=None,see_fn=None,status_fn=None,cursor_ask_fn=None,initial_selection=None,
+                        prior_receipts=None):
+    """One bounded general tool loop; original owner utterance stays authoritative. prior_receipts: a paused run of
+    the same request being resumed ("keep going"); its steps count for duplicates and failures but not the budget."""
+    prior=list(prior_receipts or [])
+    receipts=prior+([_hand_loop_receipt(pick,ran)] if ran is not None else [])
+    seen={r.get('op_key'):i for i,r in enumerate(receipts) if r.get('op_key')};retried=set()
+    budget=len(prior)+HAND_LOOP_MAX_HANDS
+    if ran is None:  # resuming: the last kept receipt is where the loop stands
+        ran={**receipts[-1]['result'],'tool':receipts[-1]['hand']}
     tool_history=_provider_hand_exchange(initial_selection,pick,ran)
     folder_scope=ran.get('_selected_folder_scope')
     history_rounds=[]
@@ -5987,24 +6166,44 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
         row['hand_loop']={'reason':reason,'hands':len(receipts),'receipts':receipts}
         row['hand_loop_meta']={'stop_reason':reason,'hands':len(receipts),'history_rounds':history_rounds,'steps':[
             {'n':n+1,'tool':receipt['hand'],'ok':receipt['result'].get('ok') is True,
+             'error_class':receipt['result'].get('error_class'),
              'receipt_sha256':hashlib.sha256(json.dumps(receipt,sort_keys=True,default=lambda _:None).encode()).hexdigest(),
              'workspace_path_sha256':hashlib.sha256(str(receipt['result'].get('workspace_path') or '').encode()).hexdigest()
                  if receipt['result'].get('workspace_path') else None}
             for n,receipt in enumerate(receipts)]}
         row['wires']=list(dict.fromkeys(wires));row['cites']=cites[:16]
         if len(receipts)>1:row['task_verified']=False
-        failed=[r['hand'] for i,r in enumerate(receipts[:-1]) if r['result'].get('ok') is not True
-                and not any(x['hand']==r['hand'] and x['result'].get('ok') is True for x in receipts[i+1:])]  # a corrected retry is fine
+        # Mac review 2026-10-16: a failure was forgiven when ANY later call of the same hand succeeded (reading file B
+        # hid that file A failed). Now only the same operation succeeding later, or a corrected lookup (same hand and op
+        # after a not-found), clears it.
+        def _cleared(i,r):
+            for x in receipts[i+1:]:
+                if x['result'].get('ok') is not True:continue
+                if x.get('op_key')==r.get('op_key'):return True
+                if (r['result'].get('error_class')=='not_found' and x['hand']==r['hand'] and x.get('op')==r.get('op')):return True
+            return False
+        failed=[r['hand'] for i,r in enumerate(receipts[:-1]) if r['result'].get('ok') is not True and not _cleared(i,r)]
         if failed and row.get('ok') is not False:
             # Honesty audit 2026-10-16: an earlier failed hand was dropped when a later one succeeded.
             row.update(ok=False,partial=True)
             row['spoken']=str(row.get('spoken') or '').rstrip()+' '+('Earlier step failed: '+', '.join(dict.fromkeys(failed))+'.')
         if reason=='provider_unavailable' and len(receipts)==1:
             return row  # the one hand ran; no follow-up from the model is not a failure of what already happened
-        if reason in {'duplicate_action','hand_limit','time_limit','invalid_next_pick','provider_unavailable','needs_owner_ask'}:
+        if reason in {'duplicate_action','hand_limit','time_limit','invalid_next_pick','provider_unavailable','needs_owner_ask',
+                      'receipt_injected_target'}:
             row.update(ok=False,task_verified=False,partial=True)
             evidence=str(last.get('spoken') or '').strip()
-            row['spoken']=(evidence+' ' if evidence else '')+'I stopped before another action; the remaining request is not verified.'
+            tail='I stopped before another action; the remaining request is not verified.'
+            if reason in {'hand_limit','time_limit'}:
+                # Mac review 2026-10-16: the loop ended work with no handoff. The receipts are kept with the turn's own
+                # gen; "keep going" resumes this request through the same loop (no second controller).
+                handed=_hand_loop_handoff_save(hive,token,utterance,receipts,reason)
+                if handed:
+                    row['hand_loop_handoff']=handed
+                    tail='I paused after '+str(len(receipts))+' steps; say "keep going" and I will continue from here.'
+            elif reason=='receipt_injected_target':
+                tail='The next step aimed at something only a page or file said, not you, so I stopped. Say it yourself and I will go on.'
+            row['spoken']=(evidence+' ' if evidence else '')+tail
         return row
     while True:
         if token and turn_cancelled(hive,token):return None
@@ -6037,13 +6236,23 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
         if next_tool not in HANDS:return finish('invalid_next_pick')
         next_pick=_hand_loop_pick(next_pick)
         key=_hand_loop_key(next_pick)
-        if key in seen:return finish('duplicate_action')
-        if next_tool in HAND_LOOP_NEEDS_OWNER and (turn_fixed_pick(utterance) or {}).get('tool')!=next_tool:
+        if key in seen:
+            # Mac review 2026-10-16: the guard keyed on tool+args blocked reread-after-edit and a retry after a transient
+            # failure. A read-only hand may repeat once state changed (an acting hand succeeded since) or once after a
+            # transient error; an acting hand never repeats.
+            at=seen[key];prior=receipts[at]['result']
+            changed=any(r['hand'] not in HAND_LOOP_READ_HANDS and r['result'].get('ok') is True for r in receipts[at+1:])
+            transient=prior.get('error_class') in HAND_LOOP_TRANSIENT and key not in retried
+            if next_tool not in HAND_LOOP_READ_HANDS or not (changed or transient):return finish('duplicate_action')
+            if transient:retried.add(key)
+        if next_tool in HAND_LOOP_NEEDS_OWNER:
             # Privacy audit 2026-10-16: the follow-up pick is model output after reading untrusted receipts (web pages,
-            # files, MCP results). Hands that act without their own confirm gate need the owner's own ask.
-            return finish('needs_owner_ask')
-        if len(receipts)>=HAND_LOOP_MAX_HANDS:return finish('hand_limit')
-        seen.add(key)
+            # files, MCP results). Acting hands need the owner's own request to cover them (Mac review: not only the
+            # first route of the whole utterance), and no target may come from receipt text alone.
+            why=_hand_loop_in_scope(next_pick,utterance,receipts)
+            if why:return finish(why)
+        if len(receipts)>=budget:return finish('hand_limit')
+        seen[key]=len(receipts)
         if token and turn_cancelled(hive,token):return None
         yield _pipeline_event(ok=True,tool=next_tool,spoken='',spoken_delta='',wires=[next_tool],cites=[],
                               pack=None,done=False,partial=True,brain=brain,model_available=bool(brain),gen=token)
@@ -6085,7 +6294,13 @@ def _run_tool_heartbeat(pick: dict, utterance: str, *, hive, token, brain, **kw)
     while th.is_alive():
         th.join(0.25)
         if th.is_alive() and token and turn_cancelled(hive, token):
-            return {"ok": False, "tool": str((pick or {}).get("tool") or ""), "spoken": "Stopped. Standing by.", "cancelled": True,
+            # Mac review 2026-10-16: "Stopped" was said while the hand's thread was still running. Say what is true:
+            # the turn stopped; the step in flight ends on its own deadline and its late result is discarded.
+            th.join(1.0)
+            alive = th.is_alive()
+            return {"ok": False, "tool": str((pick or {}).get("tool") or ""), "cancelled": True, "still_running": alive,
+                    "spoken": ("Stopped. The step that was running may still finish on its own; I won't use its result."
+                               if alive else "Stopped. Standing by."),
                     "task_verified": False, "wires": [], "cites": [], "sent": False}
     if "err" in box:
         raise box["err"]
@@ -6127,8 +6342,8 @@ def run_tool(pick: dict, utterance: str, **kw) -> dict:
                 mutate_bus(Path(kw["hive"]), _inbox)
     except Exception as exc:  # noqa: BLE001 — a ledger failure never takes the turn down, but it is not silent either
         try:
-            (ROOT / "logs").mkdir(exist_ok=True)
-            with (ROOT / "logs" / "load-errors.jsonl").open("a", encoding="utf-8") as fh:
+            log_dir().mkdir(parents=True, exist_ok=True)
+            with (log_dir() / "load-errors.jsonl").open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({"ts": time.time(), "module": "results_ledger", "error": type(exc).__name__}) + "\n")
         except OSError:
             pass
@@ -6677,6 +6892,7 @@ def _run_tool_inner(
             "sent": False,
             "task_verified": bool(got.get("verified")) if got.get("op") == "run" else bool(got.get("ok")),
             "skills_meta": sk.log_meta(got),
+            **{k: got[k] for k in ("output", "exit", "error", "gated") if k in got},
         }
     if tool == "memory":
         mem = _memory_hand()
@@ -7647,6 +7863,7 @@ def _pipeline_event(
     snapshot_response_meta: dict | None = None,
     source_nomination_error: str | None = None,
     task_verified: bool | None = None,
+    error_class: str | None = None,
 ) -> dict:
     available = bool(brain) if model_available is None else bool(model_available)
     ev = {
@@ -7680,6 +7897,8 @@ def _pipeline_event(
         ev['snapshot_response_meta']=snapshot_response_meta
     if source_nomination_error is not None:
         ev['source_nomination_error']=source_nomination_error
+    if error_class:
+        ev["error_class"] = str(error_class)
     if task_verified is not None:
         ev["task_verified"] = bool(task_verified)  # honesty audit 2026-10-16: the hand's own flag reaches every grader
     if mission is not None:
@@ -7900,6 +8119,40 @@ def _resume_turn_iter(hive: Path, entry: dict, *, spoken_in: str, prior_turns: l
     )
 
 
+def _hand_loop_resume_iter(hive: Path, entry: dict, *, spoken_in: str, prior_turns: list, talk_fn, retrieve_roots, token,
+                           see_fn=None, status_fn=None, cursor_ask_fn=None):
+    """"Keep going" after a paused hand loop: the SAME loop continues the owner's original request from its receipts."""
+    receipts = [r for r in entry.get("receipts") or [] if isinstance(r, dict) and isinstance(r.get("result"), dict)]
+    utterance = str(entry.get("utterance") or "")
+    if not receipts or not utterance:
+        return
+    last = receipts[-1]
+    brief = sitting_brief(prior_turns, load_json(Path(hive) / "bus" / "state.json"), retrieve_roots, utterance)
+    ran = yield from _continue_hand_loop({"tool": last.get("hand"), "args": {}, "speak": ""}, None, utterance, hive=hive,
+                                         token=token, brain="openrouter", brief=brief, talk_fn=talk_fn,
+                                         retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn,
+                                         cursor_ask_fn=cursor_ask_fn, prior_receipts=receipts)
+    if ran is None:
+        return
+    brain = str(ran.pop("_hand_loop_brain", "") or "openrouter")
+    ok = ran.get("ok") is not False
+    if token and ran.get("hand_loop_meta"):
+        metadata = {**ran["hand_loop_meta"], "gen": token, "resumed": True}
+        BUS_IO.commit_response(hive, token, lambda bus: dict(bus, hand_loop_meta=metadata), terminal=False)
+    tool = str(ran.get("tool") or last.get("hand") or "converse")
+    text, first, rest = _commit_spoken(
+        hive, spoken_in=spoken_in, prior_turns=prior_turns, tool=tool, raw=str(ran.get("spoken") or TALK_DARK),
+        wires=list(ran.get("wires") or []) + ["resume"], cites=list(ran.get("cites") or []), ok=ok, pack=None, brain=brain,
+        retrieve_roots=retrieve_roots, gen=token,
+        wire={"path": "hand_loop_resume", "tool": tool, "outcome": TOOL_LOOP if ok else WIRE_FAILURE, "provider": brain,
+              "hand_loop_meta": ran.get("hand_loop_meta")})
+    yield _pipeline_event(ok=ok, tool=tool, spoken=text, spoken_delta=text, wires=list(ran.get("wires") or []) + ["resume"],
+                          cites=list(ran.get("cites") or []), pack=None, brain=brain, model_available=True,
+                          outcome=TOOL_LOOP if ok else WIRE_FAILURE, gen=token, hand_loop_meta=ran.get("hand_loop_meta"),
+                          task_verified=ran.get("task_verified") if isinstance(ran.get("task_verified"), bool) else False,
+                          error_class=error_class(ran))
+
+
 def apply_pipeline_iter(
     utterance: str,
     *,
@@ -7941,6 +8194,13 @@ def apply_pipeline_iter(
                 pack=None, retrieve_roots=retrieve_roots, gen=token)
             yield _pipeline_event(ok=True, tool="converse", spoken=text, spoken_delta=rest if first and rest else text,
                                   wires=["permissions"], cites=[], pack=None, gen=token)
+            return
+    if RESUME is not None and RESUME.is_continue(spoken_in):
+        _handoff = _hand_loop_handoff_take(hive)
+        if _handoff:
+            yield from _hand_loop_resume_iter(hive, _handoff, spoken_in=spoken_in, prior_turns=prior_turns, talk_fn=talk_fn,
+                                              retrieve_roots=retrieve_roots, token=token, see_fn=see_fn, status_fn=status_fn,
+                                              cursor_ask_fn=cursor_ask_fn)
             return
     if RESUME is not None and RESUME.enabled():
         _rkey = _resume_key(hive)
@@ -8191,10 +8451,13 @@ def apply_pipeline_iter(
                 click_args["expected_sha256"] = digest.strip()
         pick = {"tool": "safari_see", "args": click_args, "speak": ""}
 
-    explicit_mission = re.fullmatch(r"\s*(?:please\s+)?open\s+(https?://\S+)\s+in\s+safari;\s*click\s+(?:the\s+)?(?:link|button)\s+(.+?);\s*verify download\s+(\S+)\s+sha256\s+([0-9a-f]{64})\s*", spoken_in, re.I)
+    explicit_mission = re.fullmatch(r"\s*(?:please\s+)?open\s+(https?://\S+)\s+in\s+safari;\s*click\s+(?:the\s+)?(?:link|button)\s+(.+?);\s*verify download\s+(\S+?)(?:\s+sha256\s+([0-9a-f]{64}))?\s*", spoken_in, re.I)
     if explicit_mission and wants_safari(spoken_in) and ran is None:
         url, label, filename, digest = explicit_mission.groups()
-        pick = {"tool": "safari_see", "args": {"act": "download", "url": url, "label": label, "expected_file": filename, "expected_sha256": digest}, "speak": ""}
+        dl_args = {"act": "download", "url": url, "label": label, "expected_file": filename}
+        if digest:
+            dl_args["expected_sha256"] = digest
+        pick = {"tool": "safari_see", "args": dl_args, "speak": ""}
     if pick is not None and ran is None and pick.get("tool") == "safari_see":
         brain = "safari"
 
@@ -8973,6 +9236,7 @@ def apply_pipeline_iter(
         source=source or None,
         gen=token,
         task_verified=(ran or {}).get("task_verified") if tool in HANDS and isinstance((ran or {}).get("task_verified"), bool) else None,
+        error_class=error_class(ran) if tool in HANDS else None,
     )
 
 

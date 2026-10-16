@@ -37,6 +37,36 @@ def _read(path: Path) -> dict:
         return {}
 
 
+def _deliverables(state: dict) -> list[str]:
+    out = []
+    arts = state.get("delivery_artifacts") if isinstance(state.get("delivery_artifacts"), dict) else {}
+    for phase in ("native", "export", "preview"):
+        f = (arts.get(phase) or {}).get("file") if isinstance(arts.get(phase), dict) else None
+        if isinstance(f, dict) and f.get("path"):
+            out.append(Path(str(f["path"])).name)
+    for key in ("artifacts", "changed_files", "files"):
+        for a in state.get(key) or []:
+            name = a.get("filename") or a.get("path") if isinstance(a, dict) else a
+            if isinstance(name, str) and name:
+                out.append(Path(name).name)
+    return list(dict.fromkeys(out))[:6]
+
+
+def paused_request(hive: Path, ttl: int = 1800) -> dict | None:
+    """A hand loop that hit its step or time limit keeps its receipts in hive/hand-loop/handoff.json (pipeline)."""
+    row = _read(Path(hive) / "hand-loop" / "handoff.json")
+    try:
+        import time
+        if not row or time.time() - float(row.get("saved_at") or 0) > ttl:
+            return None
+    except (TypeError, ValueError):
+        return None
+    steps = [r for r in row.get("receipts") or [] if isinstance(r, dict)]
+    return {"what": str(row.get("utterance") or "")[:90], "hands": int(row.get("hands") or len(steps)),
+            "failed": sum(1 for r in steps if (r.get("result") or {}).get("ok") is False),
+            "last": str((steps[-1] if steps else {}).get("hand") or ""), "reason": str(row.get("reason") or "")}
+
+
 def _missions(root: Path, status_fn, done: set) -> tuple[list[dict], list[dict]]:
     live, finished = [], []
     if not root.is_dir():
@@ -51,7 +81,10 @@ def _missions(root: Path, status_fn, done: set) -> tuple[list[dict], list[dict]]
         req = _read(d / "request.json")
         row = {"id": d.name[:8], "status": str(state.get("status") or "unknown").upper(),
                "what": str(req.get("objective") or req.get("goal") or req.get("request") or state.get("objective") or "")[:90],
-               "step": str((state.get("progress") or {}).get("what") or "")[:90]}
+               "step": str((state.get("progress") or {}).get("what") or "")[:90],
+               # Mac review 2026-10-16: say what a job actually produced, not only that it is "continuing".
+               "deliverables": _deliverables(state),
+               "verified": state.get("task_verified") is True}
         (finished if row["status"] in done else live).append(row)
     return live, finished[:RECENT_DONE]
 
@@ -63,21 +96,27 @@ def board(hive: Path, *, coding_status=None, browser_status=None, loops=None, no
     now_s = (now or datetime.now()).isoformat(timespec="seconds")
     active_loops = [r for r in (loops or []) if r.get("status") == "active" and str(r.get("expires") or "9999") > now_s]
     parts = []
+    paused = paused_request(hive)
+    if paused:
+        parts.append(f"a paused request" + (f" ({paused['what']})" if paused["what"] else "") + f", {paused['hands']} steps done"
+                     + (f", {paused['failed']} failed" if paused["failed"] else "") + "; say keep going to continue it")
     for r in coding:
         parts.append(f"coding task {r['id']}" + (f" ({r['what']})" if r["what"] else "") + f" is {r['status'].lower()}"
-                     + (f": {r['step']}" if r["step"] else ""))
+                     + (f": {r['step']}" if r["step"] else "")
+                     + (f"; so far: {', '.join(r['deliverables'])}" if r["deliverables"] else ""))
     for r in browser:
         parts.append(f"browser research {r['id']}" + (f" ({r['what']})" if r["what"] else "") + f" is {r['status'].lower()}")
     for r in active_loops:
         parts.append(f"loop: {r.get('what')} every {r.get('every_min')} min, run {r.get('runs', 0)} of {r.get('max_runs')}")
-    done = [f"{kind} {r['id']} {r['status'].lower()}" for kind, rows in (("coding task", coding_done), ("browser research", browser_done))
+    done = [f"{kind} {r['id']} {r['status'].lower()}" + (" (verified)" if r.get("verified") else "")
+            + (f", made {', '.join(r['deliverables'])}" if r.get("deliverables") else "") for kind, rows in (("coding task", coding_done), ("browser research", browser_done))
             for r in rows]
     if not parts:
         spoken = "Nothing is running right now." + (f" Recently finished: {'; '.join(done)}." if done else "")
     else:
         spoken = f"{len(parts)} job{'s' if len(parts) != 1 else ''} going: " + "; ".join(parts) + "." + (
             f" Recently finished: {'; '.join(done)}." if done else "")
-    return {"ok": True, "spoken": spoken, "coding": coding, "browser": browser, "loops": active_loops,
+    return {"ok": True, "spoken": spoken, "coding": coding, "browser": browser, "loops": active_loops, "paused": paused,
             "finished": coding_done + browser_done, "task_verified": True}
 
 

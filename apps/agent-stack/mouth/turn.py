@@ -1043,8 +1043,8 @@ def _turn_crash_log(utterance: str, exc: BaseException) -> None:
     import hashlib
     import traceback
     try:
-        p = Path(PIPELINE.ROOT) / "logs" / "turn-errors.jsonl"
-        p.parent.mkdir(exist_ok=True)
+        p = (PIPELINE.log_dir() if hasattr(PIPELINE, "log_dir") else Path(PIPELINE.ROOT) / "logs") / "turn-errors.jsonl"
+        p.parent.mkdir(parents=True, exist_ok=True)
         # Privacy audit 2026-10-16: the row kept the utterance and a traceback quoting document/JSON content; now a hash
         # of the utterance and a redacted error/trace.
         said = str(utterance or "")
@@ -1104,8 +1104,11 @@ def apply_turn_iter(utterance: str, **kw):
     try:
         _sc = PIPELINE._load("agent_stack_methods_config", PIPELINE.STACK / "hands" / "methods_config.py")
         _secret_input = _sc.find_secret(utterance or "") is not None
-    except Exception:
-        pass
+    except Exception:  # Mac load-errors 2026-10-16: this check failed open on every turn; fall back to the shared detector
+        try:
+            _secret_input = PIPELINE.hooks._secret_patterns().has_secret(utterance or "")
+        except Exception:  # noqa: BLE001
+            _secret_input = False
     if _secret_input:
         utterance = "[secret withheld]"
     started = _time.time()
@@ -1160,7 +1163,9 @@ def apply_turn_iter(utterance: str, **kw):
             if log.log_path() is not None:
                 talk, inject = _talk_records()
                 row = log.build_row(started=started, ended=_time.time(), events=events, talk=talk, inject=inject, first_ms=first_ms)
-                row["reflex"] = reflex if reflex is not None else _reflex(utterance)
+                rx = reflex if reflex is not None else _reflex(utterance)
+                # Privacy (Mac review 2026-10-16): the matched vault note's title is note content; keep the score only.
+                row["reflex"] = {k: v for k, v in rx.items() if k != "vault_note"} if isinstance(rx, dict) else rx
                 log.append(row)
         except Exception:  # noqa: BLE001
             pass

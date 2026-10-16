@@ -14,6 +14,32 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_PATH = ROOT / "logs" / "jarvis-turns.jsonl"
 _LOCK = threading.Lock()
+_BOOT_ID = os.urandom(6).hex()  # one per Face process: gens restart at each boot, so (boot_id, gen) names a turn
+_REV: list = []
+
+
+def release_rev() -> str | None:
+    """The git short rev the running code came from (read once, no subprocess): which build produced this row."""
+    if not _REV:
+        rev = None
+        try:
+            git = ROOT / ".git"
+            head = (git / "HEAD").read_text(encoding="utf-8").strip()
+            if head.startswith("ref: "):
+                ref = head[5:]
+                p = git / ref
+                if p.is_file():
+                    rev = p.read_text(encoding="utf-8").strip()
+                else:
+                    for line in (git / "packed-refs").read_text(encoding="utf-8").splitlines():
+                        if line.endswith(" " + ref):
+                            rev = line.split()[0]
+            else:
+                rev = head
+        except OSError:
+            rev = None
+        _REV.append(rev[:12] if rev else None)
+    return _REV[0]
 
 
 def log_path() -> Path | None:
@@ -51,6 +77,7 @@ def build_row(*, started: float, ended: float, events: list[dict], talk: dict | 
         if verb and verb not in tools and verb != "think":
             tools.append(verb)
     final = events[-1] if events else {}
+    meta = final.get("hand_loop_meta") if isinstance(final.get("hand_loop_meta"), dict) else {}
     talk = talk if isinstance(talk, dict) and float(talk.get("t") or 0) >= started else {}
     inject = inject if isinstance(inject, dict) and float(inject.get("t") or 0) >= started else {}
     return {
@@ -77,6 +104,14 @@ def build_row(*, started: float, ended: float, events: list[dict], talk: dict | 
             for r in (talk.get("retrieved") or []) if isinstance(r, dict)
         ],
         "tools": tools,
+        # Mac review 2026-10-16: one row per hand the turn ran (name, ok, fixed failure code), not only the last verb.
+        "hands": [{"tool": str(st.get("tool") or ""), "ok": bool(st.get("ok")), "error_class": st.get("error_class")}
+                  for st in (meta.get("steps") or []) if isinstance(st, dict)][:12] or None,
+        "stop_reason": meta.get("stop_reason"),
+        "error_class": final.get("error_class"),
+        "task_verified": final.get("task_verified") if isinstance(final.get("task_verified"), bool) else None,
+        "boot_id": _BOOT_ID,
+        "rev": release_rev(),
         "verb": final.get("verb"),
         "ok": bool(final.get("ok", True)),
         "outcome": final.get("outcome"),

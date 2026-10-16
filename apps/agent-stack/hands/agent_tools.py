@@ -291,6 +291,22 @@ OPEN_CLI_LOCAL = {
 }
 
 
+def cli_needs_owner_words(argv: list[str]) -> bool:
+    """A local command that installs software or pulls from the network: when the model (not the owner) picked it, it
+    waits for "confirm". Folder/file creation, git add/commit/init/stash/switch, tests and converters run at once
+    (Mac review 2026-10-16: every model-picked local step was gated, so multi-step work stalled)."""
+    if not argv:
+        return True
+    exe, rest = Path(argv[0]).name, list(argv[1:])
+    if exe in ("brew", "pip", "pip3", "pipx") or (exe == "npm" and rest[:1] and rest[0] in ("install", "i", "ci")):
+        return True
+    if exe == "yt-dlp" or (exe == "git" and rest[:1] and rest[0] in ("clone", "fetch")) or (exe == "gh" and rest[:2] == ["repo", "clone"]):
+        return True
+    if exe == "open" and any(re.match(r"[a-z][a-z0-9+.-]*://", t, re.I) for t in rest):
+        return True
+    return False
+
+
 def cli_class(argv: list[str]) -> str:
     """'read' | 'local' | 'confirm' | 'hard' for one argv under open access. Secrets on the line always confirm."""
     if not argv:
