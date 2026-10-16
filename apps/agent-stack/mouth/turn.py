@@ -456,19 +456,6 @@ def _door_speak(
     return event
 
 
-def _meant(spoken: str, tool: str, hive, speak: str = "") -> bool:
-    """Evens 10-16: a phrase pattern only proposes a hand; the intent gate (brain/intent_gate.py) decides whether he meant
-    it. True when no gate is loaded or the classifier is unreachable, so this never makes a turn worse than the pattern."""
-    gate = getattr(PIPELINE, "INTENT", None)
-    if gate is None:
-        return True
-    try:
-        prior = PIPELINE.load_turns(load_json(Path(hive) / "bus" / "state.json")) if hive is not None else []
-    except Exception:  # noqa: BLE001
-        prior = []
-    return gate.gate(spoken, {"tool": tool, "args": {}, "speak": speak}, prior) is not None
-
-
 def _apply_turn_iter_inner(
     utterance: str,
     *,
@@ -781,7 +768,7 @@ def _apply_turn_iter_inner(
     _spoke = False  # silent-failure audit 2026-10-16: once a reply is out, a later error must not fall through to a second one
     try:
         _ea = PIPELINE._load("agent_stack_entity_ack", PIPELINE.STACK / "hands" / "entity_ack.py")
-        if _ea.wants(spoken) and _meant(spoken, "entity_ack", hive):
+        if _ea.wants(spoken):
             _notes = _REFLEX._vault_index() if _REFLEX is not None else []
             got = _ea.run(spoken, notes=_notes, drafts=None if os.environ.get("PYTEST_CURRENT_TEST") else PIPELINE._drafts_hand().drafts_dir())
             yield _door_speak(hive, spoken, got["spoken"], "entity_ack", retrieve_roots, gen=token, execution=got)
@@ -801,7 +788,7 @@ def _apply_turn_iter_inner(
         _inv = PIPELINE._load("agent_stack_mcp_inventory", PIPELINE.STACK / "hands" / "mcp_inventory.py").inventory()[0]
         _pt = PIPELINE._pointer_hand()
         _gap = None if (_pt.wants_pointer(spoken) or _pt.wants_click(spoken) or _ea_want) else _tg.gap(spoken, [str(x.get("name") or "") for x in _inv])
-        if _gap and _meant(spoken, "toolgap", hive, _gap):
+        if _gap:
             yield _door_speak(hive, spoken, _gap, "toolgap", retrieve_roots, gen=token,
                               execution={"ok": True, "tool": "toolgap", "spoken": _gap, "wires": ["mcp_inventory"], "sent": False})
             return
@@ -812,7 +799,7 @@ def _apply_turn_iter_inner(
     try:
         _sl = PIPELINE._load("agent_stack_slots", PIPELINE.STACK / "hands" / "slots.py").ask_for(spoken)
         _rx2 = _reflex(spoken) or {}
-        if _sl and float(_rx2.get("stakes") or 0) >= 0.5 and float(_rx2.get("vault_hit") or 0) < 0.6 and _meant(spoken, "slots", hive, _sl["spoken"]):
+        if _sl and float(_rx2.get("stakes") or 0) >= 0.5 and float(_rx2.get("vault_hit") or 0) < 0.6:
             got = {"ok": True, "tool": "slots", "spoken": _sl["spoken"], "missing": _sl["missing"], "wires": ["reflex", "slots"],
                    "cites": [], "sent": False, "task_verified": False, "outcome": "ASK_NOTHING_IMPROVISED"}
             PIPELINE.mutate_bus(Path(hive), lambda bus: dict(bus, reflex=dict(bus.get("reflex") or {}, verdict="ASK \u00b7 NOTHING IMPROVISED")))
@@ -829,7 +816,7 @@ def _apply_turn_iter_inner(
     # Z06/Z07/Z40 simulated phone desk (telephony on HOLD): confirm card -> 'do it' -> ringing -> ended; nothing dials.
     try:
         _ph = PIPELINE._load("agent_stack_phone_sim", PIPELINE.STACK / "hands" / "phone_sim.py")
-        if _ph.wants(spoken) and _meant(spoken, "phone_sim", hive):
+        if _ph.wants(spoken):
             got = _ph.run(spoken)
 
             def _pcard(bus: dict, c=got["card"]) -> dict:
@@ -861,8 +848,7 @@ def _apply_turn_iter_inner(
     _spoke = False
     try:
         _ap = PIPELINE._load("agent_stack_approval", PIPELINE.STACK / "hands" / "approval.py")
-        if (_ap.wants(spoken) and not re.search(r"\b(?:send|wire|pay|transfer)\b(?!\s+me\s+a\s+confirmation)", spoken, re.I)
-                and _meant(spoken, "approval", hive)):
+        if _ap.wants(spoken) and not re.search(r"\b(?:send|wire|pay|transfer)\b(?!\s+me\s+a\s+confirmation)", spoken, re.I):
             _rm = PIPELINE._results_mem()
             got = _ap.run(spoken, inbox=Path(_rm.VAULT_INBOX) if not os.environ.get("PYTEST_CURRENT_TEST") else None)
             card = {"title": "📝 Approval granted (pending check)", "fields": got["fields"] + [f"File: {c}" for c in got["cites"]][:1],
@@ -886,8 +872,7 @@ def _apply_turn_iter_inner(
         if _spoke:
             return
     # Z02: "where do I click to X" is tutor mode: on-device locate + native arrow, never a Watch click, never a screenshot.
-    if hasattr(PIPELINE, "_pointer_hand") and (PIPELINE._pointer_request(spoken) or PIPELINE._pointer_hand().wants_pointer(spoken) or PIPELINE._pointer_followup(spoken,hive)) and not PIPELINE.is_hard_step(spoken) \
-            and _meant(spoken, "pointer", hive):
+    if hasattr(PIPELINE, "_pointer_hand") and (PIPELINE._pointer_request(spoken) or PIPELINE._pointer_hand().wants_pointer(spoken) or PIPELINE._pointer_followup(spoken,hive)) and not PIPELINE.is_hard_step(spoken):
         # demo 2:04.1: the ack is spoken at once, before the look (storyboards/Z02)
         yield _turn_event(spoken="Let me have a look, sir.", verb="pointer", host="local", wires=["pointer"],
                           spoken_delta="Let me have a look, sir.", done=False, partial=True, gen=token)

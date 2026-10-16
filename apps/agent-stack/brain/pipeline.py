@@ -641,7 +641,6 @@ def explicit_craft_pick(spoken: str) -> dict | None:
         return None
     return {"tool": "craft", "args": {"app": m.group(1).lower(), "task": text}, "speak": ""}
 ONLINE = _load("agent_stack_online", HERE / "online.py")
-INTENT = _load("agent_stack_intent_gate", HERE / "intent_gate.py")
 JEV = _load("agent_stack_jev_preflight", HERE / "jev_preflight.py")
 JEVR = _load("agent_stack_jev_router", HERE / "jev_router.py")
 RESUME = _load("agent_stack_resume", HERE / "resume.py")
@@ -8747,14 +8746,10 @@ def apply_pipeline_iter(
     if document_followup and retained_context.get("status") == "MISSING":
         # Nothing was ever read: "compare pricing across these websites" is a new ask, not a follow-up on retained reads.
         document_followup, retained_context = False, {}
-    confirmed = confirm_take(hive, spoken_in)
-    early = (confirmed or talk_filter(live_chat_route(spoken_in, had_pending), spoken_in)
+    early = (confirm_take(hive, spoken_in) or talk_filter(live_chat_route(spoken_in, had_pending), spoken_in)
              or _workflow_followup_route(spoken_in, hive))
     if early is None and not document_followup:
         early = _pointer_followup(spoken_in,hive) or talk_filter(model_free_route(spoken_in), spoken_in)
-    if early is not None and early is not confirmed and INTENT is not None:
-        # Evens 10-16: a phrase pattern only proposes; a model that read the line decides (brain/intent_gate.py).
-        early = INTENT.gate(spoken_in, early, prior_turns)
     if early is not None and early.get("tool") == "capability" and prior_turns:
         early = {**early, "args": {**(early.get("args") or {}), "prior": dict(prior_turns[-1])}}  # "fix it" names what failed
     ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""
