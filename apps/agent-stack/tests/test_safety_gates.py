@@ -126,7 +126,7 @@ class ConfirmGateTest(unittest.TestCase):
             ask = "Ask Jev whether the tunnel is healthy."
             first = P.run_tool({"tool": "desk_dispatch", "args": {}}, ask, hive=hive, retrieve_roots=None)
             self.assertTrue(first.get("awaiting_confirm"))
-            cards = hive / ".hive" / "bus" / "desk_cards"
+            cards = hive / "bus" / "desk_cards"  # 2026-10-16: cards live on the same hive bus the turn uses
             self.assertFalse(cards.exists() and any(cards.glob("*.json")))
             self.assertIsNone(P.confirm_take(hive, "what time is it"))  # any other turn drops it
             P.run_tool({"tool": "desk_dispatch", "args": {}}, ask, hive=hive, retrieve_roots=None)

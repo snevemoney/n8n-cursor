@@ -1830,6 +1830,9 @@ def _start_prebrief_pump() -> None:
         return
     if os.environ.get("JARVIS_PREBRIEF", "1") == "0":
         return
+    if getattr(_sys, "_jarvis_pumps_started", False):
+        return  # concurrency audit 2026-10-16: each hot reload of this module started another set of pump threads
+    _sys._jarvis_pumps_started = True
 
     def pump():
         while True:
@@ -1851,6 +1854,29 @@ def _start_prebrief_pump() -> None:
                 continue
 
     threading.Thread(target=lapse_pump, daemon=True, name="lapse-pump").start()
+
+    def loop_pump():  # owner canvas "Scheduled loops": registered read-only loops really run (audit 2026-10-16)
+        while True:
+            time.sleep(60)
+            try:
+                lm = _loop_hand()
+                lr = _load("agent_stack_loop_runner", STACK / "hands" / "loop_runner.py")
+
+                def card(row):
+                    def apply(bus):
+                        ib = bus.get("inbox") if isinstance(bus.get("inbox"), dict) else {}
+                        items = [c for c in (ib.get("items") or []) if isinstance(c, dict)][-4:]
+                        items.append({"title": f"Loop · {row.get('what')}", "body": str(row.get("last_result") or "")[:220],
+                                      "fields": [f"Run {row.get('runs')}/{row.get('max_runs')}"], "ts": row.get("last_run")})
+                        bus["inbox"] = {"gen": int(ib.get("gen") or 0) + 1, "items": items}
+                        return bus
+                    mutate_bus(HIVE, apply)
+                lr.tick(lm, notify=card)
+            except Exception:  # noqa: BLE001
+                continue
+
+    if os.environ.get("JARVIS_LOOP_RUNNER", "1") != "0":
+        threading.Thread(target=loop_pump, daemon=True, name="loop-pump").start()
 
 
 def _cost_hand():
@@ -5853,6 +5879,10 @@ def _hand_loop_receipt(pick,ran):
     return row
 
 
+HAND_LOOP_NEEDS_OWNER = frozenset({"craft", "cursor_ask", "safari_see", "screen_see", "loop", "apps", "pointer_click",
+                                   "repo", "desk_dispatch", "browser_mission", "drafts", "memory", "workbench", "multistep"})
+
+
 def _hand_loop_pause(ran):
     if ran.get('awaiting_confirm') or ran.get('gated') or ran.get('auth_missing') or ran.get('cancelled'):
         return 'authority_or_stop'
@@ -5911,9 +5941,15 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
             for n,receipt in enumerate(receipts)]}
         row['wires']=list(dict.fromkeys(wires));row['cites']=cites[:16]
         if len(receipts)>1:row['task_verified']=False
+        failed=[r['hand'] for i,r in enumerate(receipts[:-1]) if r['result'].get('ok') is not True
+                and not any(x['hand']==r['hand'] and x['result'].get('ok') is True for x in receipts[i+1:])]  # a corrected retry is fine
+        if failed and row.get('ok') is not False:
+            # Honesty audit 2026-10-16: an earlier failed hand was dropped when a later one succeeded.
+            row.update(ok=False,partial=True)
+            row['spoken']=str(row.get('spoken') or '').rstrip()+' '+('Earlier step failed: '+', '.join(dict.fromkeys(failed))+'.')
         if reason=='provider_unavailable' and len(receipts)==1:
             return row  # the one hand ran; no follow-up from the model is not a failure of what already happened
-        if reason in {'duplicate_action','hand_limit','time_limit','invalid_next_pick','provider_unavailable'}:
+        if reason in {'duplicate_action','hand_limit','time_limit','invalid_next_pick','provider_unavailable','needs_owner_ask'}:
             row.update(ok=False,task_verified=False,partial=True)
             evidence=str(last.get('spoken') or '').strip()
             row['spoken']=(evidence+' ' if evidence else '')+'I stopped before another action; the remaining request is not verified.'
@@ -5941,7 +5977,7 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
         next_tool=str(next_pick.get('tool') or '')
         if next_tool in {'converse','say'}:
             text=str(next_pick.get('speak') or '').strip();evidence=str(last.get('spoken') or last.get('brief') or '').strip()
-            protected=(last.get('ok') is False or last_pick.get('tool')=='craft' or
+            protected=(last.get('ok') is False or last.get('task_verified') is False or last_pick.get('tool')=='craft' or
                        isinstance(last.get('see'),dict) and isinstance(last['see'].get('verification'),dict))
             if last_pick.get('tool')=='vault_read' and evidence and not _hand_used_in_speak(text,evidence):protected=True
             if text and not talk_is_miss(text) and not protected:last={**last,'spoken':text}
@@ -5950,6 +5986,10 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
         next_pick=_hand_loop_pick(next_pick)
         key=_hand_loop_key(next_pick)
         if key in seen:return finish('duplicate_action')
+        if next_tool in HAND_LOOP_NEEDS_OWNER and (turn_fixed_pick(utterance) or {}).get('tool')!=next_tool:
+            # Privacy audit 2026-10-16: the follow-up pick is model output after reading untrusted receipts (web pages,
+            # files, MCP results). Hands that act without their own confirm gate need the owner's own ask.
+            return finish('needs_owner_ask')
         if len(receipts)>=HAND_LOOP_MAX_HANDS:return finish('hand_limit')
         seen.add(key)
         if token and turn_cancelled(hive,token):return None
@@ -6010,7 +6050,11 @@ def run_tool(pick: dict, utterance: str, **kw) -> dict:
         })
     got = hooked_result(_run_tool_inner(pick, utterance, **kw))
     try:  # Z11: every finished result is written back to the long-term results ledger
-        if got.get("ok"):
+        # Honesty audit 2026-10-16: only a verified result is "finished" (code_run failures, pointer misses, duplicate
+        # draft questions and registered-but-unrun loops were recapped as done), and a stopped turn records nothing.
+        _gen = kw.get("gen")
+        _stopped = bool(_gen and kw.get("hive") is not None and turn_cancelled(Path(kw["hive"]), int(_gen)))
+        if got.get("ok") and got.get("task_verified") is True and not _stopped:
             _rm = _results_mem()
             if _rm.write_back(str(got.get("tool") or tool), utterance, got) and kw.get("hive") is not None:
                 row = (_rm.recent(1, today_only=False) or [{}])[-1]
@@ -6023,8 +6067,13 @@ def run_tool(pick: dict, utterance: str, **kw) -> dict:
                     bus["inbox"] = {"gen": int(ib.get("gen") or 0) + 1, "items": items}
                     return bus
                 mutate_bus(Path(kw["hive"]), _inbox)
-    except Exception:  # noqa: BLE001
-        pass
+    except Exception as exc:  # noqa: BLE001 — a ledger failure never takes the turn down, but it is not silent either
+        try:
+            (ROOT / "logs").mkdir(exist_ok=True)
+            with (ROOT / "logs" / "load-errors.jsonl").open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps({"ts": time.time(), "module": "results_ledger", "error": type(exc).__name__}) + "\n")
+        except OSError:
+            pass
     return got
 
 
@@ -6125,8 +6174,9 @@ def _run_tool_inner(
         return browser_runtime().pipeline_tool(args, utterance, hive)
     if tool == "say":
         said = str(pick.get("speak") or "").strip()
+        # Honesty audit 2026-10-16: words are not a verified task ("Done, I opened Safari" from the model's say).
         return {"ok": bool(said), "tool": "say", "spoken": said, "wires": ["voice"], "cites": [],
-                "sent": False, "task_verified": bool(said), "outcome": TOOL_LOOP}
+                "sent": False, "task_verified": False, "outcome": TOOL_LOOP}
     if tool == "web_search":
         ws = _web_search_hand()
         q = str(args.get("query") or "") or ws.query_from_utterance(utterance)
@@ -6165,8 +6215,8 @@ def _run_tool_inner(
                                       "builder_model": au.get("builder_model"), "critic_model": au.get("critic_model")}}
         got = hd.run({k: v for k, v in eff.items() if k in ("code", "test")})
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
-                "wires": ["code_run"], "cites": [], "sent": False,
-                "task_verified": bool(got.get("ok")), "code_run_meta": hd.log_meta(got)}
+                "wires": ["code_run"], "cites": [], "sent": False, "stdout": got.get("stdout") or "", "stderr": got.get("stderr") or "",
+                "task_verified": bool(got.get("passed")), "code_run_meta": hd.log_meta(got)}
     if tool == "desk_dispatch":
         hd = _desk_dispatch_hand()
         got = _desk_dispatch_hand().run(dict(args) if args else hd.args_from_utterance(utterance), hive=hive)
@@ -6260,7 +6310,10 @@ def _run_tool_inner(
                     said, ok = "I need you to ask this one on its own.", False
                 else:
                     got = run_tool(pick2, step, **kw)
-                    said, ok = str(got.get("spoken") or "no answer"), bool(got.get("ok"))
+                    # Honesty audit 2026-10-16: a step still waiting for "confirm", or one its hand could not verify, is
+                    # not a finished step.
+                    said = str(got.get("spoken") or "no answer")
+                    ok = bool(got.get("ok")) and not got.get("awaiting_confirm") and got.get("task_verified") is not False
                 all_ok = all_ok and ok
             lines.append(f"Step {i} ({step}): {said}")
             try:
@@ -6654,7 +6707,10 @@ def _run_tool_inner(
             "wires": ["workspace_read"],
             "cites": [],
             "sent": False,
-            "task_verified": bool(got.get("ok")) and (got.get("complete") is True if got.get("op") == "find" else not got.get("truncated", False)),
+            # Honesty audit 2026-10-16: "open a book about AI" was verified by a search. A find answers a find; when the
+            # owner asked to open something, the search alone does not finish the task.
+            "task_verified": bool(got.get("ok")) and (got.get("complete") is True if got.get("op") == "find" else not got.get("truncated", False))
+                             and not (got.get("op") == "find" and re.search(r"\b(?:open|read|pull\s+up|bring\s+up)\b", utterance or "", re.I)),
             "workspace_meta": wr.log_meta(got),
             "workspace_error": str(got.get("error") or ""),
             "workspace_files": got.get("files", []),
@@ -7510,6 +7566,7 @@ def _pipeline_event(
     hand_loop_meta: dict | None = None,
     snapshot_response_meta: dict | None = None,
     source_nomination_error: str | None = None,
+    task_verified: bool | None = None,
 ) -> dict:
     available = bool(brain) if model_available is None else bool(model_available)
     ev = {
@@ -7543,6 +7600,8 @@ def _pipeline_event(
         ev['snapshot_response_meta']=snapshot_response_meta
     if source_nomination_error is not None:
         ev['source_nomination_error']=source_nomination_error
+    if task_verified is not None:
+        ev["task_verified"] = bool(task_verified)  # honesty audit 2026-10-16: the hand's own flag reaches every grader
     if mission is not None:
         ev["mission_id"] = mission.get("mission_id")
         ev["task_verified"] = bool(mission.get("task_verified"))
@@ -8713,7 +8772,9 @@ def apply_pipeline_iter(
     elif ran.get('awaiting_confirm'):
         outcome = 'AWAITING_APPROVAL'
     elif used_tool_loop:
-        outcome = TOOL_LOOP
+        # Honesty audit 2026-10-16: a hand that said it needs the owner (or could not verify) keeps that outcome.
+        own = str((ran or {}).get("outcome") or "")
+        outcome = own if own in {HONEST_UNKNOWN, WIRE_FAILURE, "AWAITING_APPROVAL", "NEEDS_ACTION_DETAILS"} else TOOL_LOOP
     elif str((ran or {}).get("outcome") or "") in {MODEL_TALK, TOOL_LOOP, STORE_DIRECT, HONEST_UNKNOWN, WIRE_FAILURE, "AWAITING_APPROVAL", "NEEDS_ACTION_DETAILS"}:
         outcome = str(ran.get("outcome"))
     elif str((got or {}).get("finish_reason") or "").lower() == "length" or str((got or {}).get("error") or "") == "length":
@@ -8830,6 +8891,7 @@ def apply_pipeline_iter(
         outcome=outcome,
         source=source or None,
         gen=token,
+        task_verified=(ran or {}).get("task_verified") if tool in HANDS and isinstance((ran or {}).get("task_verified"), bool) else None,
     )
 
 

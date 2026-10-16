@@ -314,7 +314,7 @@ def run(utterance: str, *, locate_fn=None, draw_fn=None, hover_fn=None, where_fn
         short = re.sub(r"^.*?\bbut\s+", "", short, flags=re.I)
         short = re.sub(r"\bthe (?:screenshot|image|screen)\b", "your screen", short, flags=re.I)
         short = short[:1].upper() + short[1:]
-        return {"ok": True, "found": False, "source": None, "keywords": kws, "drawn": False,
+        return {"ok": False, "found": False, "source": None, "keywords": kws, "drawn": False,
                 "spoken": "I looked at your screen and couldn't find that, so I'm not pointing anywhere. "
                           + (f"{short}." if short and "match" not in why else "Is it on the screen right now?")}
     x, y = float(got["x"]), float(got["y"])

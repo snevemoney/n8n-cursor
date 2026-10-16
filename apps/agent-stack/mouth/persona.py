@@ -906,9 +906,27 @@ PROMISE_RE = re.compile(
 CANT_YET_LINE = "I can't do that yet: no tool ran for it, so I won't pretend it's happening."
 
 
+# Honesty audit 2026-10-16: with no tool run, "Done. I've renamed report.txt" / "your reminder is saved" were spoken as
+# fact. A completed-action claim with no tool behind it is dropped exactly like an empty promise.
+DONE_CLAIM_RE = re.compile(
+    r"\bI(?:['\u2019]ve|\s+have|\s+just)\s+(?:now\s+|already\s+|successfully\s+)?(?:renamed|saved|sent|opened|created|deleted|moved|"
+    r"scheduled|booked|installed|uploaded|posted|set\s+up|added|updated|emailed|texted|called|paid|ordered|launched|closed|"
+    r"downloaded|submitted|published|deployed|pushed|merged|recorded|exported|copied)\b"
+    r"|\b(?:your|the)\s+[\w\s'-]{1,40}?\s+(?:is|are|has\s+been|have\s+been)\s+(?:now\s+)?(?:saved|sent|scheduled|created|renamed|"
+    r"booked|set|installed|uploaded|posted|deleted|moved|updated|exported|submitted)\b", re.I)
+
+
 def promise_guard(text: str, *, ran_tool: bool) -> str:
-    """Drop promise-only sentences. If nothing real is left, say so honestly."""
+    """Drop promise-only sentences (and, with no tool run, completed-action claims). If nothing real is left, say so."""
     body = (text or "").strip()
+    if body and not ran_tool and DONE_CLAIM_RE.search(body):
+        parts = re.split(r"(?<=[.!?])\s+", body)
+        claim = lambda s: DONE_CLAIM_RE.search(s) and not re.search(r"\bby\s+you\b|\byou\s+(?:said|told|asked)\b", s, re.I)
+        if any(claim(x) for x in parts):
+            rest = " ".join(x for x in parts if not claim(x) and not re.fullmatch(r"(?:done|all\s+set|finished)[.!,]?", x.strip(), re.I)).strip()
+            if len(rest) < 40:
+                return CANT_YET_LINE if not rest else f"{CANT_YET_LINE} {rest}"
+            body = text = rest
     if not body or not PROMISE_RE.search(body):
         return text
     parts = re.split(r"(?<=[.!?])\s+", body)

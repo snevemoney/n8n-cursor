@@ -18,7 +18,7 @@ CLAIM_RE = re.compile(
     r"\b(done|completed|finished|i(?:'ve| have)?\s+(?:checked|ran|run|sent|looked|verified|read|opened|searched))\b",
     re.I,
 )
-NO_EVIDENCE_TOOLS = frozenset({"", "converse"})
+NO_EVIDENCE_TOOLS = frozenset({"", "converse", "say"})  # a spoken line is not tool evidence (audit 2026-10-16)
 
 
 def pre_tool(tool: str, utterance: str = "") -> dict:

@@ -55,20 +55,58 @@ def _load() -> list[dict]:
         return []
 
 
+MAX_ROWS = 200
+
+
 def _save(rows: list[dict]) -> None:
+    """Atomic, unique temp name (concurrency audit 2026-10-16: a fixed .tmp lost 7 of 8 concurrent starts)."""
+    import tempfile
     p = _path(); p.parent.mkdir(parents=True, exist_ok=True)
-    tmp = p.with_name(p.name + ".tmp")
-    tmp.write_text(json.dumps(rows, indent=1) + "\n", encoding="utf-8")
+    keep = [r for r in rows if r.get("status") == "active"] + [r for r in rows if r.get("status") != "active"][-MAX_ROWS:]
+    fd, tmp = tempfile.mkstemp(prefix=p.name + ".", dir=str(p.parent))
+    with os.fdopen(fd, "w", encoding="utf-8") as fh:
+        fh.write(json.dumps(keep, indent=1) + "\n"); fh.flush(); os.fsync(fh.fileno())
     os.chmod(tmp, 0o600)
     os.replace(tmp, p)
 
 
+class _locked:
+    """Process-wide flock on the loop file: start/cancel and the runner never interleave a read-modify-write."""
+    def __enter__(self):
+        import fcntl
+        p = _path(); p.parent.mkdir(parents=True, exist_ok=True)
+        self.fh = open(p.with_name(p.name + ".lock"), "a+")
+        fcntl.flock(self.fh, fcntl.LOCK_EX)
+        return self
+
+    def __exit__(self, *exc):
+        import fcntl
+        fcntl.flock(self.fh, fcntl.LOCK_UN); self.fh.close()
+        return False
+
+
+def _runner_alive() -> bool:
+    """True only when a loop runner has written a heartbeat in the last 5 minutes (loop_runner.py)."""
+    beat = _path().with_name("jarvis-loops-runner.json")
+    try:
+        return time.time() - float(json.loads(beat.read_text(encoding="utf-8")).get("ts") or 0) < 300
+    except (OSError, ValueError, AttributeError):
+        return False
+
+
 def run(args: dict | None = None) -> dict:
+    with _locked():
+        return _run(args)
+
+
+def _run(args: dict | None = None) -> dict:
     args = args or {}
     op = str(args.get("op") or "list")
     rows = _load()
     if op == "list":
-        active = [r for r in rows if r.get("status") == "active"]
+        now_s = datetime.now().isoformat(timespec="seconds")
+        active = [r for r in rows if r.get("status") == "active" and str(r.get("expires") or "9999") > now_s
+                  and int(r.get("runs") or 0) < int(r.get("max_runs") or 1 << 30)]
         sp = (f"{len(active)} active loop{'s' if len(active) != 1 else ''}: " + "; ".join(f"{r['what']} every {r['every_min']} min" for r in active[:6])) if active else "No active loops."
         return {"ok": True, "op": op, "loops": active, "spoken": sp}
     if op == "cancel":
@@ -105,7 +143,9 @@ def run(args: dict | None = None) -> dict:
                 "created": now.isoformat(timespec="seconds"), "runs": 0, "status": "active"}
         rows.append(loop); _save(rows)
         return {"ok": True, "op": op, "loop": loop,
-                "spoken": f"Loop registered (read-only): {what}, every {every} minutes, up to {loop['max_runs']} runs, expires in 24 hours. Say cancel to stop it."}
+                "spoken": f"Loop registered (read-only): {what}, every {every} minutes, up to {loop['max_runs']} runs, expires in 24 hours. "
+                          + ("The loop runner checks it on schedule." if _runner_alive() else
+                             "No loop runner is active yet, so it is saved but not running.") + " Say cancel to stop it."}
     return {"ok": False, "op": op, "spoken": "Unknown loop op."}
 
 

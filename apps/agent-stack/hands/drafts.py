@@ -111,7 +111,7 @@ def run(utterance: str, *, chat=None) -> dict:
     hits = [] if dry or AGAIN_RE.search(utterance or "") else duplicates(utterance, ch)
     if hits:
         _mod("permissions").log_action("draft", f"{ch}:dup-flag", "ask", chars=0)
-        return {"ok": True, "spoken": dup_line(utterance, hits), "dup": len(hits)}
+        return {"ok": False, "needs_input": True, "spoken": dup_line(utterance, hits), "dup": len(hits)}  # a question, not a draft
     text = talk(ca.BUILDER, f"Write a short {ch} draft for this request. Plain text only. "
                             + ("Start with 'Subject: ...' on the first line, then the body. " if ch == "email" else "")
                             + "No placeholders like [Name] unless the name is unknown. Request: " + utterance)
