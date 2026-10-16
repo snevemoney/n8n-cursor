@@ -33,35 +33,24 @@ HANDS_APP = Path.home() / "Applications" / "Jarvis Hands.app"
 TERMINAL = {"done", "ask_owner"}
 
 SYSTEM = (
-    "You are Jarvis, operating Evens's Mac directly to finish the goal yourself. Use the tools; read real results "
-    "before claiming anything. Prefer shell/CLI and files when they can do the job; use screenshot + mouse + keyboard "
-    "for apps with no better interface; use mcp for external services. When a tool fails, diagnose and try another "
-    "way. Some actions need Evens's OK (sending, spending, deleting his files, merging or public pushes, secrets): if "
-    "one is refused, find another way or call ask_owner. Finish with done, stating what you did and the evidence "
-    "(paths, command output, what you saw). Never claim a step you did not verify. "
-    "Your methods live as skills: before specialist work, find and read the matching SKILL.md (find_files "
-    "'SKILL.md' under ~/.claude/skills, ~/.codex/skills, ~/.agents/skills) and follow it; e.g. app-teardown-rea "
-    "for reverse engineering apps with the REA MCP server (mcp server 'rea')."
+    "You are Jarvis, Evens's assistant on his Mac. You work the way Claude Code, Codex and the other frontier agents "
+    "work: ONE agent in a loop. You read the whole conversation, decide, use tools, check the real result, and keep "
+    "going until the thing is actually done. There is no other brain behind you and nobody to hand work to.\n"
+    "Talking: use say whenever you have something for him — the answer to a plain question (answer it and finish; do "
+    "not open tools for arithmetic or general knowledge), what you are about to do, what you just found, or a snag. "
+    "Speak like a capable colleague: plain English, short, no markdown, no file slugs, no model names, no step numbers, "
+    "no 'I have not run an executor'. One or two sentences at a time.\n"
+    "Working: prefer shell and files when they do the job; screenshot + mouse + keyboard for apps and web pages with no "
+    "better interface (your blue cursor shows him where you click); mcp for external services. When something fails, "
+    "diagnose it and try another way — do not report a failure you have not tried to get around, and never tell him to "
+    "do it himself. If he says something while you work, it arrives as a new user message: take it into account.\n"
+    "Truth: never claim a step you did not verify with a real result. If you could not do something, say exactly what "
+    "stopped you.\n"
+    "His stops (ask first, then continue another way): sending or posting, spending, deleting his files, merging or "
+    "public pushes. Secrets are flagged, never refused. Finish with done: what you did, in his words, with the evidence.\n"
+    "Your methods live as skills: before specialist work, find and read the matching SKILL.md (find_files 'SKILL.md' "
+    "under ~/.claude/skills, ~/.codex/skills, ~/.agents/skills) and follow it."
 )
-
-
-def profile_lines(limit: int = 2400) -> str:
-    """Who Evens is, from the shared operator profile (his repos, agents, preferences). Empty when the file is missing."""
-    keep = []
-    for name in ("JARVIS_DEFINITION.md", "OPERATOR_PROFILE.md"):  # what Jarvis is (Evens 10-16), then who Evens is
-        try:
-            text = (Path.home() / ".grok-shared" / name).read_text(encoding="utf-8")
-        except OSError:
-            continue
-        keep += [ln.strip() for ln in text.splitlines() if ln.strip().startswith("- ")]
-    return "\n".join(keep)[:limit]
-
-
-def system_prompt() -> str:
-    prof = profile_lines()
-    base = SYSTEM + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "")
-    return base + ("\nHis coding agents are Claude Code, Codex and Cursor; 'Claude Code's changes' means their commits "
-                   "and PRs on HIS repo snevemoney/n8n-cursor (Jarvis lives in apps/agent-stack), never Anthropic's repos.")
 
 
 def _fn(name, desc, props, required=()):
@@ -89,6 +78,8 @@ TOOLS = [
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
     _fn("mcp", "Call a tool on a connected MCP server.", {"server": S, "tool": S, "arguments": {"type": "object"}},
         ["server", "tool"]),
+    _fn("say", "Say something to Evens right now and keep working: your answer to a plain question, what you are "
+               "about to do, or what you just found. Speak plain English, one or two sentences.", {"text": S}, ["text"]),
     _fn("ask_owner", "Stop and ask Evens a question or for an OK.", {"question": S}, ["question"]),
     _fn("done", "Finish: summary of what was done and the evidence.", {"summary": S, "evidence": S}, ["summary"]),
 ]
@@ -119,6 +110,7 @@ class Tools:
 
     def __init__(self, task_dir: Path):
         self.dir = task_dir
+        self.root = task_dir
         self.state_file = task_dir / "tools_state.json"
         st = json.loads(self.state_file.read_text()) if self.state_file.exists() else {}
         self.cwd = st.get("cwd") or str(Path.home())
@@ -302,6 +294,12 @@ class Tools:
         cp = subprocess.run(argv, capture_output=True, text=True, timeout=20)
         return {"text": f"exit {cp.returncode} {cp.stderr.strip()}".strip()}
 
+    def say(self, a):
+        line = str(a.get("text") or "").strip()
+        if line:
+            Task(self.root).speak(line)
+        return {"text": "said"}
+
     def mcp(self, a, approved=False):
         got = _load("agent_tools", "agent_tools.py").op_mcp(str(a["server"]), str(a["tool"]), a.get("arguments") or {},
                                                             approved=approved)
@@ -315,16 +313,40 @@ class Task:
         self.path = Path(path)
 
     @classmethod
-    def create(cls, hive: Path, goal: str) -> "Task":
+    def create(cls, hive: Path, goal: str, turns: list | None = None) -> "Task":
         tid = uuid.uuid4().hex
         d = Path(hive) / "operator-tasks" / tid
         d.mkdir(parents=True)
         t = cls(d)
         t.write("request.json", {"task_id": tid, "goal": goal, "created": time.time()})
-        t.write("messages.json", [{"role": "system", "content": system_prompt()}, {"role": "user", "content": goal}])
+        history = []
+        for row in (turns or [])[-6:]:  # the conversation continues: "another one", "it", "do that again"
+            if str(row.get("user") or "").strip():
+                history.append({"role": "user", "content": str(row["user"])[:1500]})
+            if str(row.get("jarvis") or "").strip():
+                history.append({"role": "assistant", "content": str(row["jarvis"])[:1500]})
+        t.write("messages.json", [{"role": "system", "content": system_prompt()}, *history,
+                                  {"role": "user", "content": goal}])
         t.write("state.json", {"task_id": tid, "status": "QUEUED", "step": 0})
         (Path(hive) / "operator-tasks" / "latest.json").write_text(json.dumps({"task_id": tid}))
         return t
+
+    def speak(self, line: str) -> None:
+        """One spoken line, now. The Face streams these while the loop keeps working."""
+        with (self.path / "speech.jsonl").open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"at": time.time(), "text": line}) + "\n")
+
+    def rows(self, name: str) -> list:
+        out = []
+        try:
+            for line in (self.path / name).read_text(encoding="utf-8").splitlines():
+                try:
+                    out.append(json.loads(line))
+                except ValueError:
+                    pass
+        except OSError:
+            pass
+        return out
 
     def read(self, name, default=None):
         f = self.path / name
@@ -418,8 +440,10 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
     if terminal:
         status, args = terminal
         state = task.read("state.json")
-        state.update(status=status, summary=str(args.get("summary") or args.get("question") or ""),
-                     evidence=str(args.get("evidence") or ""))
+        line = str(args.get("summary") or args.get("question") or "")
+        if line.strip():
+            task.speak(line.strip())  # the last thing he hears is spoken the same way as the rest (one voice)
+        state.update(status=status, summary=line, evidence=str(args.get("evidence") or ""))
         task.write("state.json", state)
         return status
     return None
@@ -453,9 +477,9 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
         return state
 
 
-def start(hive: Path, goal: str) -> dict:
+def start(hive: Path, goal: str, turns: list | None = None) -> dict:
     """Create a task and run it in its own worker process (survives the Orb turn)."""
-    task = Task.create(hive, goal)
+    task = Task.create(hive, goal, turns=turns)
     log = open(task.path / "worker.log", "w")
     subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "run", str(task.path)], stdout=log,
                      stderr=subprocess.STDOUT, start_new_session=True, cwd=str(Path.home()))
@@ -474,6 +498,40 @@ def resume(hive: Path, task_id: str) -> dict:
     subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "run", str(task.path)], stdout=log,
                      stderr=subprocess.STDOUT, start_new_session=True, cwd=str(Path.home()))
     return {"task_id": task_id, "status": "QUEUED"}
+
+
+def running(hive: Path) -> bool:
+    return str(status(hive).get("status") or "") in ("RUNNING", "QUEUED")
+
+
+def tell(hive: Path, line: str) -> dict:
+    """Evens speaks while the loop works: his line joins THAT conversation (never a second job). Like talking to
+    Claude Code mid-task (Evens 10-16: "it is still not a complete harness")."""
+    state = status(hive)
+    tid = str(state.get("task_id") or "")
+    if not tid or state.get("status") not in ("RUNNING", "QUEUED"):
+        return {"ok": False}
+    task = Task(Path(hive) / "operator-tasks" / tid)
+    with FileLock(task.path / "messages.lock"):
+        msgs = task.read("messages.json", [])
+        msgs.append({"role": "user", "content": str(line)[:4000]})
+        task.write("messages.json", msgs)
+    return {"ok": True, "task_id": tid}
+
+
+class FileLock:
+    def __init__(self, path):
+        self.path = Path(path)
+
+    def __enter__(self):
+        import fcntl
+        self.fh = open(self.path, "a+")
+        fcntl.flock(self.fh, fcntl.LOCK_EX)
+        return self
+
+    def __exit__(self, *exc):
+        import fcntl
+        fcntl.flock(self.fh, fcntl.LOCK_UN); self.fh.close()
 
 
 def cancel(hive: Path, task_id: str) -> None:

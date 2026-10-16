@@ -6752,8 +6752,8 @@ def _operator_line(state: dict) -> str:
     return f"The task ended as {status.lower().replace('_', ' ')} after {state.get('step', 0)} steps. " + str(state.get("summary") or "")
 
 
-def _operator_turn(args: dict, utterance: str, hive) -> dict:
-    """One durable operator job per request; the Orb turn waits briefly, the job keeps running (blueprint B/C)."""
+def _operator_turn(args: dict, utterance: str, hive, turns: list | None = None) -> dict:
+    """The one agent loop. A new line while it works joins that conversation; its own speech is what Evens hears."""
     op = _operator_hand()
     action = str((args or {}).get("action") or "start")
     if action == "stop":
@@ -6768,12 +6768,30 @@ def _operator_turn(args: dict, utterance: str, hive) -> dict:
         goal = str((args or {}).get("goal") or "").strip() or str(utterance or "")
         if utterance and goal != utterance:
             goal = f"{goal}\n\nEvens's exact words: {utterance}"
-        started = op.start(Path(hive), goal)
+        if hasattr(op, "running") and op.running(Path(hive)):
+            # Evens 10-16 ("not a complete harness"): talking to a working agent continues THAT work, like Claude Code.
+            told = op.tell(Path(hive), str(utterance or goal))
+            if told.get("ok"):
+                started = {"task_id": told["task_id"]}
+            else:
+                started = op.start(Path(hive), goal, turns=turns)
+        else:
+            started = op.start(Path(hive), goal, turns=turns)
         end = time.monotonic() + OPERATOR_WAIT_S
         state = op.status(Path(hive), started["task_id"])
+        task = op.Task(Path(hive) / "operator-tasks" / started["task_id"])
         while state.get("status") in ("QUEUED", "RUNNING") and time.monotonic() < end:
-            time.sleep(1.0)
+            time.sleep(0.4)
             state = op.status(Path(hive), started["task_id"])
+        said = [str(r.get("text") or "").strip() for r in task.rows("speech.jsonl")]
+        said = [line for line in said if line]
+        if said:  # his own words from the loop: no wrapper line, no "I'm working on it (step 5)"
+            spoken = " ".join(said[-4:])
+            if state.get("status") in ("QUEUED", "RUNNING"):
+                spoken += " I'm still on it; say anything and I'll hear you."
+            return {"ok": True, "tool": "operator", "spoken": spoken[:1600], "wires": ["operator"], "cites": [],
+                    "sent": False, "task_verified": state.get("status") == "DONE",
+                    "operator_task": state.get("task_id"), "operator_status": state.get("status")}
     return {"ok": state.get("status") != "NONE", "tool": "operator", "spoken": _operator_line(state), "wires": ["operator"],
             "cites": [], "sent": False, "task_verified": state.get("status") == "DONE",
             "operator_task": state.get("task_id"), "operator_status": state.get("status")}
@@ -6905,7 +6923,7 @@ def _run_tool_inner(
             "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN,
         }
     if tool == "operator":
-        return _operator_turn(args, utterance, hive)
+        return _operator_turn(args, utterance, hive, turns=load_turns(load_json(Path(hive) / "bus" / "state.json")) if hive else None)
     if tool == "code_run":
         hd = _code_run_hand()
         eff = dict(args) if args else hd.args_from_utterance(utterance)

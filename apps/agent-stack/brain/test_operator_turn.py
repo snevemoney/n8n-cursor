@@ -26,8 +26,8 @@ class OperatorTurn(unittest.TestCase):
                  "calls": [{"tool": "write_file", "args": {"path": str(out), "content": "hi"}, "call_id": "a"}]},
                 {"ok": True, "tool": "done", "args": {"summary": "Wrote hello.txt", "evidence": str(out)}, "call_id": "b",
                  "calls": [{"tool": "done", "args": {"summary": "Wrote hello.txt", "evidence": str(out)}, "call_id": "b"}]}])
-            def start_inline(h, goal):
-                task = op.Task.create(h, goal)
+            def start_inline(h, goal, turns=None):
+                task = op.Task.create(h, goal, turns=turns)
                 op.run(task.path, model_fn=lambda m, tools: next(replies))
                 return {"task_id": task.path.name, "path": str(task.path)}
             with mock.patch.object(op, "start", side_effect=start_inline), mock.patch.object(Path, "home", return_value=Path(t)):
