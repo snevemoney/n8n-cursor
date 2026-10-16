@@ -68,6 +68,23 @@ class Routes(unittest.TestCase):
         self.assertEqual(args["op"], "find"); self.assertEqual(args["topic"], "AI")
 
 
+class ThenChains(unittest.TestCase):
+    def setUp(self):
+        mode = mock.patch.dict(os.environ, {"JARVIS_MODE_FILE": str(Path(tempfile.mkdtemp()) / "mode.json")})
+        mode.start(); self.addCleanup(mode.stop)
+
+    def test_spoken_chain_runs_each_step(self):
+        self.assertEqual(P.split_steps("what time is it then what's today's date"), ["what time is it", "what's today's date"])
+        hive = Path(tempfile.mkdtemp()); (hive / "bus").mkdir()
+        out = list(P.apply_pipeline_iter("what time is it then what's today's date", hive=hive))[-1]
+        self.assertEqual(out["tool"], "multistep"); self.assertIn("Step 2", out["spoken"])
+
+    def test_non_chains_and_hard_chains_are_not_split(self):
+        self.assertEqual(P.split_steps("I went home and then slept"), [])
+        self.assertNotEqual((P.model_free_route("fix the bug then push to main") or {}).get("tool"), "multistep")
+        self.assertTrue(P.is_hard_step("fix the bug then push to main"))
+
+
 class RepoListing(unittest.TestCase):
     def setUp(self):
         self.home = Path(tempfile.mkdtemp())

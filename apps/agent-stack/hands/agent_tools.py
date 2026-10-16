@@ -713,7 +713,8 @@ _MCPC = re.compile(r"\bcall\s+(?:the\s+)?([\w.\-]+)\s+mcp\s+tool\s+([\w.\-]+)(?:
 
 
 _LIST = re.compile(r"\blist\s+(?:the\s+)?([\w.\-]+)\s+mcp\s+tools\b", re.I)
-_CODE = re.compile(r"^\s*(?:jarvis[,:]?\s*)?in\s+(?:the\s+)?scratch\s+repo\s+([\w.\-]+)\s*[,:]\s*(.+?)\s*$", re.I | re.S)
+_CODE = re.compile(r"^\s*(?:(?:hey|ok|okay)\s+)?(?:jarvis[,:]?\s*)?(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?|please\s+|i\s+need\s+you\s+to\s+)?"
+                   r"in\s+(?:the\s+)?scratch\s+repo\s+([\w.\-]+)\s*[,:]\s*(.+?)\s*$", re.I | re.S)
 
 
 def _gws_argv(u: str) -> list[str] | None:

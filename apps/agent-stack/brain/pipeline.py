@@ -51,7 +51,8 @@ HARD_STEP_RE = re.compile(
     r"wire (?:the|this|that|a)\s+(?:payment|money|funds|transfer)\b|"
     r"book (a|the|this|me)\b|"
     r"publish (this|that|the|it|now)|"
-    r"(?:restart|reboot|shut\s*down|power\s+off|stop)\s+(?:\w+\s+){0,2}?(?:on\s+)?(?:the\s+|my\s+)?(?:vps|server|droplet|instance|box)\b|"
+    r"(?:restart|reboot|shut\s*down|power\s+off|stop)\s+(?:\w+\s+){0,2}?(?:on\s+)?(?:the\s+|my\s+)?(?:vps|server|droplet|instance|box)\b"
+    r"(?!\s+(?:loop|monitor|check|watch|alert|ping)s?\b)|"
     r"(?:restart|reboot)\s+(?:nginx|docker|n8n|postgres|redis|caddy|openclaw)\b"
     r")",
     re.I,
@@ -543,7 +544,8 @@ CRAFT = _load("agent_stack_craft", STACK / "hands" / "craft.py")
 _CRAFT_APPS = tuple(getattr(CRAFT, "APPS", ()) or ())
 _CRAFT_ASK_RE = re.compile(r"^(?:what|where|which|who|why|how|when|should|can|could|would|do|does|is|are)\b", re.I)
 _CRAFT_ACT_RE = re.compile(
-    r"\b(make|create|new|put|set|write|fill|add|insert|save|export|draw|edit|build|resize|crop|rename|type)\b", re.I
+    r"\b(make|create|new|put|set|write|fill|add|insert|save|export|draw|edit|build|resize|crop|rename|type|design|draft|compose|"
+    r"record|mix|master|grade|cut|trim|animate|render|sketch|plot|chart|format|layout|lay\s+out|retouch|color|colour)\b", re.I
 )
 
 
@@ -595,7 +597,10 @@ def shared_memory_answers(spoken: str) -> bool:
 def explicit_craft_pick(spoken: str) -> dict | None:
     """{tool: craft, args: {app, task}} for 'In GridCraft, make ... save ...'; None for questions/other asks."""
     text = (spoken or "").strip()
-    if not text or not _CRAFT_APPS or _CRAFT_ASK_RE.match(text) or text.endswith("?"):
+    bare = GREETING_LEAD_RE.sub("", text, count=1).strip()
+    imperative = bool(re.match(r"(?:please\s+)?(?:open|in|use|launch|go\s+to)\b", bare, re.I) or _CRAFT_ACT_RE.match(bare))
+    if (not text or not _CRAFT_APPS or _CRAFT_ASK_RE.match(text) or _CRAFT_ASK_RE.match(bare)
+            or (text.endswith("?") and not imperative)):
         return None
     m = re.search(r"\b(" + "|".join(_CRAFT_APPS) + r")\b", text, re.I)
     if not m or not _CRAFT_ACT_RE.search(text):
@@ -864,7 +869,8 @@ def wants_voice_engine(utterance: str) -> bool:
 
 SCREEN_SEE_RE = re.compile(
     r"\b(?:describe|grab|look\s+at)\s+my\s+screen\b|\bwhat(?:\x27s|s|\s+is)\s+on\s+my\s+screen\b|\bscreenshot\s+of\s+my\s+screen\b|"
-    r"\bwhat\s+am\s+i\s+looking\s+at\b",
+    r"\bwhat\s+am\s+i\s+looking\s+at\b|"
+    r"^(?:critique|review|rate|roast)\s+(?:my|the|this)\s+screen\b",  # canvas Z30 screen critique: look first, then judge
     re.I,
 )
 
@@ -875,7 +881,8 @@ def wants_screen_see(utterance: str) -> bool:
 
 
 PLAN_RE = re.compile(
-    r"\bplan\s+(?:how\s+to|out)\b|\b(?:make|draft|write)\s+(?:me\s+)?a\s+plan\s+(?:for|to)\b",
+    r"\bplan\s+(?:how\s+to|out)\b|\b(?:make|draft|write)\s+(?:me\s+)?a\s+plan\s+(?:for|to)\b|"
+    r"^plan\s+(?:my|the|this|next)\s+(?:day|week|weekend|month|sprint|launch|trip|move)\b",
     re.I,
 )
 
@@ -915,7 +922,8 @@ RULES_RE = re.compile(
     r"\b(?:what|which)\s+(?:are\s+)?(?:your\s+)?(?:operating\s+|house\s+|own\s+)?rules\s+(?:do\s+you\s+(?:follow|have|obey)|are\s+yours)\b|"
     r"\b(?:what|which)\s+are\s+your\s+(?:operating\s+|house\s+|own\s+)?rules\b|"
     r"\b(?:remind\s+me\s+of|list|tell\s+me)\s+your\s+(?:operating\s+|house\s+|own\s+)?rules\b|"
-    r"\bwhat\s+rules\s+do\s+you\s+(?:follow|have|obey)\b",
+    r"\bwhat\s+rules\s+do\s+you\s+(?:follow|have|obey)\b|"
+    r"^(?:read|show)\s+(?:me\s+)?(?:the|your)\s+(?:operating\s+|house\s+)?rules[\s?.!]*$",
     re.I,
 )
 
@@ -1125,8 +1133,25 @@ def split_steps(utterance: str) -> list[str]:
     parts = _STEP_SPLIT.split(utterance or "")
     nums, texts = parts[1::2], [t.strip(" ,;.") for t in parts[2::2]]
     if len(nums) < 2 or nums != [str(i) for i in range(1, len(nums) + 1)] or not all(texts):
-        return []
+        return _then_steps(utterance)
     return texts
+
+
+_THEN_SPLIT = re.compile(r"\s*(?:,|;)?\s+(?:and\s+)?then\s+|\s*,\s*then\s+", re.I)
+
+
+def _then_steps(utterance: str) -> list[str]:
+    """Route matrix 2026-10-16: "open Notes then find books about AI" was a file search for the whole line. Spoken
+    chains split on "then" (2-4 parts) only when every part routes to a model-free hand on its own; else []."""
+    text = (utterance or "").strip()
+    for variant in [text] + lead_variants(text):
+        parts = [p.strip(" ,;.?!") for p in _THEN_SPLIT.split(variant)]
+        if not 2 <= len(parts) <= 4 or not all(parts):
+            continue
+        if all(_simple_step(p) is not None or (model_free_route(p) or {}).get("tool") not in (None, "multistep")
+               for p in parts):
+            return parts
+    return []
 
 
 def _simple_step(step: str) -> str | None:
@@ -1166,6 +1191,11 @@ DISMISS_LINE = "Understood, I'll drop that. What do you want instead?"
 SCREEN_WORD_RE = re.compile(r"\b(?:screen|display|monitor|see|look|watch|showing|pop-?up|window)\b", re.I)
 
 
+VAULT_SEARCH_RE = re.compile(r"^(?:search|look\s+(?:in|through)|check|grep)\s+(?:my|the)\s+(?:obsidian\s+)?(?:vault|notes|second\s+brain)\s+(?:for|about)\s+\S"
+                             r"|^what\s+(?:do|does)\s+my\s+(?:obsidian\s+)?(?:notes|vault|second\s+brain)\s+say\s+about\s+\S"
+                             r"|^find\s+\S.*\s+in\s+my\s+(?:obsidian\s+)?(?:notes|vault|second\s+brain)[\s?.!]*$", re.I)
+
+
 CORRECTION_LEAD_RE = re.compile(r"^\s*no[,.!]?\s+(?=(?:use|do|open|try|run|go|make|put|pick|take)\b)", re.I)
 
 
@@ -1179,7 +1209,20 @@ def correction_text(spoken_in: str) -> str:
 
 
 def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
-    """Deterministic honest picks for the asks that went wrong in live chat. None = keep the normal route."""
+    """Deterministic honest picks for the asks that went wrong in live chat. None = keep the normal route.
+    Route matrix 2026-10-16: "hey jarvis, click the save button" / "so stop watching my screen" missed; the original
+    phrasing is tried first, then the same lead-in fallbacks model_free_route uses."""
+    pick = _live_chat_route_once(spoken_in, had_pending)
+    if pick is not None or is_hard_step(spoken_in or ""):
+        return pick
+    for variant in lead_variants(spoken_in):
+        pick = _live_chat_route_once(variant, had_pending)
+        if pick is not None and pick.get("speak") != NO_PENDING_LINE:
+            return pick  # "Do it now" must not shrink to bare consent: it is a follow-up to the last ask
+    return None
+
+
+def _live_chat_route_once(spoken_in: str, had_pending: bool = False) -> dict | None:
     u = spoken_in or ""
     if not had_pending and BARE_CONSENT_RE.match(u):
         return {"tool": "say", "args": {}, "speak": NO_PENDING_LINE}
@@ -1194,6 +1237,8 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
         return {"tool": "cost_card", "args": {}, "speak": ""}
     if _pointer_hand().CURSOR_DEMO_RE.search(u):
         return {"tool": "pointer_demo", "args": {}, "speak": ""}  # Z02: harmless cursor demo, no click
+    if re.search(r"\b(?:close|quit)\b", u, re.I) and _apps_hand().wants(u):
+        return {"tool": "apps", "args": {}, "speak": ""}  # "close Spotify" quits the app; it is not a click on an X
     if _pointer_hand().wants_click(u) and not is_hard_step(u):
         return {"tool": "pointer_click", "args": {}, "speak": ""}  # Z02: arrow + one-shot confirm, then one click
     if CLICK_ASK_RE.search(u) and not is_hard_step(u):
@@ -1201,6 +1246,8 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
         if named:
             return {"tool": "pointer", "args": {}, "speak": ""}
         return {"tool": "say", "args": {}, "speak": CLICK_UNNAMED_LINE}
+    if VAULT_SEARCH_RE.search(u) and not is_hard_step(u):
+        return {"tool": "vault_read", "args": {"query": u}, "speak": ""}  # canvas: Obsidian second brain
     if PULL_UP_MY_RE.search(u) and not FILE_EXT_RE.search(u) and not is_hard_step(u):
         # "pull up my social bios": a thing in his notes, not a folder path. Read the vault, never refuse on folders.
         return {"tool": "vault_read", "args": {"query": u}, "speak": ""}
@@ -1236,6 +1283,53 @@ def lead_variants(spoken_in: str) -> list[str]:
     return out
 
 
+CODING_STATUS_RE = re.compile(r"(?:please\s+)?(?:show|what is|give me)\s+(?:the\s+)?(?:coding|code)\s+(?:task|mission)\s+(?:status|progress)[.!?]?", re.I)
+
+
+def mission_pick(spoken_in: str) -> tuple[dict, str] | None:
+    """(pick, brain) for long-running mission state asks: coding status/resume, browser mission status/start. One place,
+    used by the turn and by eval/route_matrix.py, so the matrix tests the turn's real order."""
+    for text in [str(spoken_in or "").strip()] + lead_variants(spoken_in):
+        got = _mission_pick_once(text)
+        if got is not None:
+            return got
+    return None
+
+
+def _mission_pick_once(text: str) -> tuple[dict, str] | None:
+    if CODING_STATUS_RE.fullmatch(text):
+        return {"tool": "agent_tools", "args": {"action": "coding_status"}, "speak": ""}, "coding_mission"
+    if _coding_resume_match(text):
+        return {"tool": "agent_tools", "args": {"action": "coding_resume"}, "speak": ""}, "coding_mission"
+    # Browser progress is exact mission state, not a conversational model task.
+    if (re.search(r"\bbrowser (?:research )?(?:flows?|mission|work|research)\b", text, re.I)
+            and re.search(r"\b(how many|progress|status|finished|completed|done|so far)\b", text, re.I)
+            and re.match(r"^(?:please\s+)?(?:how|what|show|give|status|progress)\b", text, re.I)):
+        return {"tool": "browser_mission", "args": {"action": "status"}, "speak": ""}, "browser_runtime"
+    if re.search(r"\bbrowser mission\b", text, re.I) and re.match(r"^(?:please\s+)?(?:research|compare|find|collect|inspect|start|run)\b", text, re.I):
+        return {"tool": "browser_mission", "args": {"action": "start"}, "speak": ""}, "browser_runtime"
+    return None
+
+
+def turn_fixed_pick(spoken_in: str) -> dict | None:
+    """The deterministic part of a turn, in the turn's order, with no hive, model or pending state:
+    live-chat picks, then mission state, then the model-free route, then the Craft fast path."""
+    early = live_chat_route(spoken_in, False)
+    if early is not None:
+        return early
+    mission = mission_pick(spoken_in)
+    if mission is not None:
+        return mission[0]
+    early = model_free_route(spoken_in)
+    if early is not None:
+        return early
+    for text in [spoken_in] + lead_variants(spoken_in):
+        craft = explicit_craft_pick(text)
+        if craft is not None:
+            return craft
+    return None
+
+
 def model_free_route(spoken_in: str) -> dict | None:
     """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
     pick = _model_free_route_once(spoken_in)
@@ -1253,6 +1347,8 @@ def _model_free_route_once(spoken_in: str) -> dict | None:
         return {"tool": "workspace_read", "args": {"op": "screenshot_reference"}, "speak": ""}
     if _research_build_request(spoken_in):
         return {"tool":"agent_tools", "args":{"action":"research_build_start"}, "speak":""}
+    if _THEN_SPLIT.search(spoken_in or "") and not is_hard_step(spoken_in) and len(_then_steps(spoken_in)) >= 2:
+        return {"tool": "multistep", "args": {}, "speak": ""}  # "remember that X, then Y" is two steps, not one note
     if wants_memory(spoken_in):
         return {"tool": "memory", "args": _memory_hand().args_from_utterance(spoken_in), "speak": ""}
     if wants_continuity_status(spoken_in):
@@ -1271,6 +1367,9 @@ def _model_free_route_once(spoken_in: str) -> dict | None:
         return {"tool": "handback", "args": {}, "speak": ""}
     if len(split_steps(spoken_in)) >= 2 and not is_hard_step(spoken_in):
         return {"tool": "multistep", "args": {}, "speak": ""}
+    craft = None if is_hard_step(spoken_in) else explicit_craft_pick(spoken_in)
+    if craft is not None:
+        return craft  # "Open PdfCraft and create an invoice" is Craft work, not a file search for "pdf"
     if (not is_hard_step(spoken_in) and not re.match(r"\s*(?:gh|git)\s", spoken_in or "")
             and _repo_hand().wants(spoken_in)):
         return {"tool": "repo", "args": {}, "speak": ""}  # look at / search / install public GitHub repos
@@ -1490,7 +1589,7 @@ def _workflow_followup_route(utterance, hive):
 
 def _coding_resume_match(utterance):
     return re.fullmatch(
-        r"(?:please\s+)?(?:resume|continue)\s+(?:(?:that|the|my|last|latest)\s+)?"
+        r"(?:please\s+)?(?:resume|continue)\s+(?:(?:that|the|my|last|latest)\s+){0,2}"
         r"(?:coding|code)\s+(?:task|mission)(?:\s+([a-f0-9]{32}))?[.!?]?",
         str(utterance or "").strip(), re.I)
 
@@ -2084,7 +2183,19 @@ def is_hard_step(text: str) -> bool:
         return False
     if FANOUT_SEND_RE.search(heard) or SLACK_POST_RE.search(heard):
         return True
-    return bool(HARD_STEP_RE.search(heard))
+    return bool(HARD_STEP_RE.search(heard) or CONTACT_STEP_RE.search(heard) or CONTACT_NAME_RE.search(heard))
+
+
+# System matrix 2026-10-16 (owner canvas: Phone calls / Outbound calls / SMS, Push + PR, owner browser sessions):
+# reaching a person, publishing a branch, or logging in as him is a consequential step even with open access on.
+_WHO = r"(?:my\s+|the\s+)(?:accountant|client|mom|mother|dad|father|wife|husband|partner|boss|team|landlord|doctor|dentist|lawyer|bank)"
+CONTACT_STEP_RE = re.compile(r"^(?:\W*(?:(?:hey\s+)?jarvis\W+|(?:can|could|would|will)\s+you\s+(?:please\s+)?|please\s+|i\s+need\s+you\s+to\s+))*"
+                             r"(?:(?:call|phone|ring|text|sms|dm|facetime)\s+" + _WHO + r"\b"
+                             r"|push\s+(?:the|this|my|that)\s+(?:branch|commit|change|fix)s?\b"
+                             r"|(?:open|create|file)\s+(?:a|the)\s+(?:pull\s+request|pr)\b"
+                             r"|log\s*(?:in|on)\s*(?:to\s+|\s)(?:my|the)\s+\w+(?:\s+\w+)?\s+(?:account|site|bank|portal))", re.I)
+CONTACT_NAME_RE = re.compile(r"^(?:\W*(?:(?:[Hh]ey\s+)?[Jj]arvis\W+|(?:[Cc]an|[Cc]ould|[Ww]ould|[Ww]ill)\s+you\s+(?:please\s+)?|[Pp]lease\s+|I\s+need\s+you\s+to\s+))*"
+                             r"(?:[Cc]all|[Pp]hone|[Rr]ing|[Tt]ext|[Ff]ace[Tt]ime)\s+[A-Z][a-z]+\b(?!\s+(?:app|api|function|method|hook)\b)")
 
 
 def hard_step_line(text: str) -> str:
@@ -4021,7 +4132,8 @@ def wants_login_why(utterance: str) -> bool:
 
 def wants_watch(utterance: str) -> bool:
     """Face Watch only. Not 'watch later', not Watchdog, not a Safari trip."""
-    return bool(WATCH_CMD_RE.match((utterance or "").strip()))
+    text = (utterance or "").strip()
+    return any(WATCH_CMD_RE.match(re.sub(r"\?+$", "", t).strip()) for t in [text] + lead_variants(text))
 
 
 def watch_owns_turn(utterance: str, watch: dict | None = None) -> bool:
@@ -4318,6 +4430,7 @@ def wants_dropped_file_summary(utterance: str) -> bool:
 MACHINE_CURSOR_RE = re.compile(
     r"("
     r"\b(?:coding task|prompts? to cursor|give cursor|ask cursor|cursor ask)\b|"
+    r"\b(?:have|tell|get|let)\s+cursor\s+(?:to\s+)?(?:fix|write|add|build|refactor|update|review|make|create|implement)\b|"
     r"\bsend\s+a\s+prompt\b.{0,60}\bcursor\b|"
     r"\bprompt(?:ing)?\s+cursor\s+\S|"
     r"\bsay(?:ing)?\s+\S.{0,40}\bto\s+cursor\b"
@@ -7864,24 +7977,11 @@ def apply_pipeline_iter(
         except (OSError, TypeError, AttributeError):
             pass
 
-    if re.fullmatch(r"(?:please\s+)?(?:show|what is|give me)\s+(?:the\s+)?(?:coding|code)\s+(?:task|mission)\s+(?:status|progress)[.!?]?", spoken_in.strip(), re.I):
-        pick = {"tool": "agent_tools", "args": {"action": "coding_status"}, "speak": ""}
-        brain = "coding_mission"
-
-    if _coding_resume_match(spoken_in):
-        pick = {"tool": "agent_tools", "args": {"action": "coding_resume"}, "speak": ""}
-        ran = None  # only the real checkpoint receipt may acknowledge recovery
-        brain = "coding_mission"
-
-    # Browser progress is exact mission state, not a conversational model task.
-    if (re.search(r"\bbrowser (?:research )?(?:flows?|mission|work|research)\b", spoken_in, re.I)
-            and re.search(r"\b(how many|progress|status|finished|completed|done|so far)\b", spoken_in, re.I)
-            and re.match(r"^(?:please\s+)?(?:how|what|show|give|status|progress)\b", spoken_in, re.I)):
-        pick = {"tool":"browser_mission","args":{"action":"status"},"speak":""}
-        brain = "browser_runtime"
-    elif re.search(r"\bbrowser mission\b", spoken_in, re.I) and re.match(r"^(?:please\s+)?(?:research|compare|find|collect|inspect|start|run)\b", spoken_in, re.I):
-        pick = {"tool":"browser_mission","args":{"action":"start"},"speak":""}
-        brain = "browser_runtime"
+    _mission = mission_pick(spoken_in)
+    if _mission is not None:
+        pick, brain = _mission
+        if pick["args"].get("action") == "coding_resume":
+            ran = None  # only the real checkpoint receipt may acknowledge recovery
 
     dry = senses_dry_line(spoken_in, bus_now)
     if pick is None and dry:

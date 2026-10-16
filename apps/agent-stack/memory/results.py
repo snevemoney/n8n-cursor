@@ -23,7 +23,9 @@ SECRET_RE = re.compile(r"(?:api[_-]?key|bearer\s|sk-[A-Za-z0-9]{8,}|password|pas
 WANT_RE = re.compile(r"\bwhat\s+(?:did|have)\s+you\s+(?:do|done|finish(?:ed)?|get\s+done)\b(?:\s+(?:today|so\s+far|this\s+morning))?|"
                      r"\b(?:your|recent)\s+results\b|\bwhat\s+results\b|"
                      r"\bwhat\s+(?:did|have)\s+we\s+(?:work(?:ed)?\s+on|do|done|get\s+done|cover(?:ed)?)\b|"
-                     r"\b(?:recap|summary|summari[sz]e)\s+(?:of\s+)?(?:today|my\s+day|the\s+day)\b", re.I)
+                     r"\b(?:recap|summary|summari[sz]e)\s+(?:of\s+)?(?:today|my\s+day|the\s+day)\b|"
+                     r"\bwhat\s+did\s+(?:the|that|your)\s+last\s+(?:search|run|job|task|step)\s+(?:find|return|get|say)\b|"
+                     r"\bshow\s+(?:me\s+)?the\s+results\s+from\s+(?:earlier|before|today|this\s+morning)\b", re.I)
 DID = {"drafts": "draft", "web_search": "web search", "code_run": "code run", "loop": "loop job", "vault_read": "note pull-up",
        "cost_card": "meter check", "approval": "approval record", "pointer": "pointer", "workspace_read": "file read",
        "memory": "memory save or recall", "multistep": "multi-step job", "plan": "plan", "browser_mission": "browser mission",
