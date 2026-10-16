@@ -1,0 +1,218 @@
+[00:00] This is Jarvis, Tony Stark's personal
+[00:03] underpaid, overworked AI assistant. And
+[00:07] this isn't like any normal AI assistant
+[00:09] we have these days. It controls a
+[00:12] massive mansion in Malibu, runs combat
+[00:16] diagnosis in the Iron Man suit, manages
+[00:18] an entire Iron Legion, and also is
+[00:22] Tony's personal therapist and the
+[00:25] dearest, closest friend. So, that brings
+[00:29] us to the question. If Tony coded Jarvis
+[00:32] with his own hands, which he surely did,
+[00:35] what programming language did he
+[00:37] actually use? Because in which
+[00:39] programming language can you make
+[00:41] something like this? Did he use C++? C?
+[00:46] Or the language commonly associated with
+[00:49] AI, Python?
+[00:51] Well, the answer isn't that simple.
+[00:54] So, I went full Sherlock Holmes mode,
+[00:56] wear the goggles and the hat, rewatch
+[00:58] every Marvel movie featuring Tony Stark
+[01:01] and Jarvis,
+[01:03] and found the technical clue that
+[01:05] answers this once and for all. And I can
+[01:08] promise you what you're thinking is not
+[01:11] the answer. And you cannot guess the
+[01:13] language in a million years. That's a
+[01:16] fact. Starting with the biggest clue,
+[01:20] Jarvis wasn't an AI. I know, I know.
+[01:23] Deep. What the french fries are you
+[01:25] talking about? Have you lost your mind?
+[01:28] Well, listen. First, we need to
+[01:30] understand what Jarvis actually was at
+[01:33] the start. [music] In Age of Ultron,
+[01:34] Tony casually drops one of the biggest
+[01:37] clues in the entire Marvel Cinematic
+[01:39] Universe. He tells Bruce Banner when he
+[01:42] started making Jarvis, Jarvis was just a
+[01:45] natural language UI. And that, ladies
+[01:48] and gentlemen, changes everything.
+[01:51] Jarvis wasn't originally some magical,
+[01:53] super intelligence. It started as a
+[01:55] natural language [music] user interface.
+[01:58] Basically, an overcomplicated terminal
+[02:01] where instead of typing bash [music]
+[02:02] commands, Tony could just speak normal
+[02:05] English and his computer would execute
+[02:07] things, [music] like your modern Alexa
+[02:09] or Siri. Hey Alexa, turn off the light.
+[02:13] Oh, shoot. Over the year, Tony being
+[02:15] Tony kept upgrading Jarvis until Jarvis
+[02:18] became a fully autonomous entity.
+[02:20] >> [music]
+[02:21] >> So, the real question is back when Tony
+[02:23] started coding Jarvis, which for sure is
+[02:27] pre-2008
+[02:29] because the first movie we see Jarvis in
+[02:31] was in 2008.
+[02:34] So, what programming language would you
+[02:37] use to build an interface that
+[02:38] understands human logic? And here is a
+[02:41] controversial thing. The most popular
+[02:43] answer might not be the answer. By that,
+[02:47] I mean it's definitely not Python.
+[02:50] Now, I know what you're thinking. No
+[02:53] Python? Isn't Python the king of modern
+[02:56] AI, machine learning?
+[02:58] >> [music]
+[02:58] >> Python.
+[03:00] Neural network? Python.
+[03:03] And yeah, you're right.
+[03:05] >> [music]
+[03:05] >> But there is just one tiny little
+[03:07] problem. The first Iron Man movie came
+[03:10] in 2008,
+[03:12] which clearly means Jarvis already
+[03:14] existed long before that.
+[03:17] Back then, the modern AI ecosystem
+[03:19] didn't exist. There [music] was no
+[03:20] PyTorch, no TensorFlow, and no massive
+[03:24] large language models, and definitely no
+[03:26] downloading an open-source model from
+[03:28] Hugging Face and pretending you built it
+[03:30] yourself, you sneaky little boy. And
+[03:33] Tony was an egotistic playboy genius, so
+[03:36] his ego doesn't fit downloading stuff or
+[03:38] using pre-existing frameworks from uh
+[03:41] open-source.
+[03:43] Tony had to build that intelligence
+[03:45] logic from the ground up. So, if modern
+[03:48] Python isn't the answer, then for sure
+[03:51] he might used uh C or C++,
+[03:54] >> [music]
+[03:54] >> right?
+[03:55] C was built around system programming,
+[03:58] getting close to the hardware,
+[04:00] >> [music]
+[04:00] >> and making computers to do things
+[04:03] and making computers to do All right, I
+[04:05] fumbled. And making computers to do
+[04:08] things efficiently.
+[04:10] And that's great for controlling
+[04:11] machine. But Jarvis isn't just
+[04:13] controlling hardware. He's understanding
+[04:15] language, knowledge, and reasoning.
+[04:18] You can technically build an AI with
+[04:21] C++. Obviously, but historically it
+[04:24] wasn't the language most associated with
+[04:27] kind of AI Jarvis's intelligence
+[04:29] resembles. Okay, so not Python, not C,
+[04:33] not C++, so can it be Ada?
+[04:37] No, Ada might actually sound like a
+[04:39] pretty damn good answer. And if you have
+[04:41] watched my Terminator video, you already
+[04:44] know how important Ada was for AI stuff.
+[04:48] And the thing that backs Ada's claim, it
+[04:51] was developed for the US Department of
+[04:53] Defense. Oh, again, I'm sorry Uncle
+[04:56] Trump. US Department of War.
+[04:59] For large, reliable, real-time systems,
+[05:02] especially military and safety-critical
+[05:04] softwares.
+[05:06] And Tony Stark, he was the symbol of the
+[05:08] classic military-industrial complex.
+[05:11] [music]
+[05:11] Mhm, kind of makes sense, right?
+[05:14] But there is one problem again. Ada was
+[05:18] designed to make software reliable,
+[05:20] predictable, and safe. [music]
+[05:22] Jarvis isn't just controlling a machine.
+[05:24] He's understanding Tony, interpreting
+[05:27] natural language, reasoning about
+[05:29] situations, and having an actual
+[05:32] personality.
+[05:33] Ada could absolutely be used for
+[05:35] somewhere inside the Iron Man suit or
+[05:37] the Iron Man complex. I mean, the Malibu
+[05:40] complex, like somewhere it can be used
+[05:42] in anything. Like a lot of you guys
+[05:44] said.
+[05:46] But for the intelligence that makes
+[05:48] Jarvis Jarvis,
+[05:50] Ada probably isn't the best fit. So, if
+[05:54] not Ada, what was Tony actually using
+[05:57] for the brain of Jarvis?
+[06:00] Well, the programming language that Tony
+[06:02] might have used,
+[06:04] like I'm damn, damn sure you have never
+[06:07] heard of. Maybe.
+[06:09] It's Lisp. Not lips, my fellow single
+[06:12] subscribers.
+[06:14] Yes, the yin-yang of programming
+[06:16] languages. Hear me out. Before modern
+[06:19] data-driven machine learning took over,
+[06:22] artificial intelligence was built on
+[06:24] symbolic AI. It basically uses clear
+[06:27] rules and text-like code instead of data
+[06:30] to think like a human.
+[06:32] Instead of feeding a model billions of
+[06:34] web pages, photos, data, you program
+[06:37] explicit rules, knowledge trees, and
+[06:40] logical reasoning, so a computer could
+[06:42] understand relationship between
+[06:44] concepts.
+[06:46] And to do exactly that,
+[06:49] Lisp was created in 1958 by AI pioneer
+[06:53] John McCarthy. Lisp was literally
+[06:56] designed for parsing natural language,
+[06:58] processing, symbolic data, and recursive
+[07:02] decision-making.
+[07:03] And when Jarvis interprets a vague voice
+[07:05] command, organizes complex contextual
+[07:08] data,
+[07:10] and reasons to problems,
+[07:12] and that is classic symbolic AI logic.
+[07:16] Lisp makes a crazy amount of sense for
+[07:19] Jarvis's brain. But, there is a catch.
+[07:22] Here we go again.
+[07:24] Jarvis isn't an interface running on
+[07:27] Tony's computers.
+[07:28] When Tony yells, "Jarvis, put the pedal
+[07:31] to the metal." Jarvis can't sit there
+[07:34] garbage collecting memory. He's piloting
+[07:37] supersonic flight system, firing
+[07:39] weapons, reading sensor telemetry, and
+[07:41] balancing power grids in real time. For
+[07:44] microsecond hardware control, you need
+[07:47] raw performance.
+[07:48] That means low-level compiled system.
+[07:52] So, the architecture becomes clear. Lisp
+[07:55] for the brain and the symbolic logic and
+[07:58] C C++ for the real-time hardware
+[08:00] execution. And also in the future, maybe
+[08:03] as like Tony constantly upgrade stuff,
+[08:06] he might have used Python as well as
+[08:08] like other languages to make Jarvis a
+[08:10] fully conscious neural network-based
+[08:12] superintelligence.
+[08:14] Or instead of today's AI architecture,
+[08:16] he might have just used some of his own
+[08:19] language or own stack that he invented
+[08:21] himself when he was bored. I mean, could
+[08:24] be. He was a genius, after all.
+[08:27] I'm using jokes from previous video. Oh,
+[08:31] also, I actually found something really
+[08:33] fun. Mark Zuckerlizardberg
+[08:37] actually built a real-life home
+[08:38] assistant named Jarvis, which is
+[08:40] basically Alexa, but we we we going to
+[08:43] pretend that like he he got inspired,
+[08:44] okay? He got inspired. Like And for
+[08:47] making that, what he used, ladies and
+[08:48] gentlemen? He used Python, PHP, which is
+[08:52] his favorite language, by the way, and
+[08:54] Objective-C. I mean, not bad for 2016, I
+[08:58] guess. Anyways, what do you think? Do
+[09:01] you guys agree with me? I will see you
+[09:03] next time. Bye.
