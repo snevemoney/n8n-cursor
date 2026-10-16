@@ -344,6 +344,37 @@ NO_REPLY = "UNKNOWN. Cursor harness returned no reply."
 _CURSOR_LOCK = threading.Lock()
 _CURSOR_PROC: subprocess.Popen | None = None
 _CURSOR_CANCELLED = False
+# Concurrency audit 2026-10-16: the pipeline, the mouth and the Face each loaded their own copy of this module, so Stop
+# and the 25 s wall cancelled a copy whose _CURSOR_PROC was always None. Every live Cursor process is registered in one
+# process-wide registry (on sys, like the lazy-hand lock), each in its own process group so a kill reaches the children.
+import sys as _sys
+_REG = _sys.__dict__.setdefault("_jarvis_cursor_registry", {"lock": threading.Lock(), "procs": set(), "cancel_seq": 0})
+
+
+def _kill_group(proc) -> None:
+    import signal
+    try:
+        os.killpg(proc.pid, signal.SIGKILL)
+    except (ProcessLookupError, PermissionError, OSError, TypeError):
+        try:
+            proc.kill()
+        except OSError:
+            pass
+
+
+def _register(proc) -> int:
+    with _REG["lock"]:
+        _REG["procs"].add(proc)
+        return int(_REG["cancel_seq"])
+
+
+def _unregister(proc) -> None:
+    with _REG["lock"]:
+        _REG["procs"].discard(proc)
+
+
+def _cancelled_since(seq: int) -> bool:
+    return int(_REG["cancel_seq"]) != int(seq)
 _LOGIN_OK_UNTIL = 0.0
 LOGIN_CACHE_SEC = 60.0
 SYS = (
@@ -400,17 +431,19 @@ def clip_spoken(text: str, cap: int = SPEAK_CAP, *, finished: bool = False) -> s
 
 
 def cancel_cursor() -> bool:
+    """Stop every live Cursor process, whichever copy of this module started it."""
     global _CURSOR_PROC, _CURSOR_CANCELLED
     _CURSOR_CANCELLED = True
     with _CURSOR_LOCK:
-        proc = _CURSOR_PROC
-        _CURSOR_PROC = None
-    if proc is None:
-        return False
-    if proc.poll() is None:
-        proc.kill()
-        return True
-    return False
+        local, _CURSOR_PROC = _CURSOR_PROC, None
+    with _REG["lock"]:
+        _REG["cancel_seq"] = int(_REG["cancel_seq"]) + 1
+        live = [p for p in _REG["procs"] if p.poll() is None]
+    if local is not None and local not in live and local.poll() is None:
+        live.append(local)
+    for proc in live:
+        _kill_group(proc)
+    return bool(live)
 
 
 def was_cancelled() -> bool:
@@ -2788,10 +2821,12 @@ def call_cursor_turn_iter(prompt: str, *, mode: str = "ask", resume: str | None 
             text=True,
             cwd=str(ROOT),
             env=agent_env(),
+            start_new_session=True,
         )
     except OSError as exc:
         yield _cursor_fail(f"UNKNOWN. Cursor agent failed: {exc}.")
         return
+    seq = _register(proc)
     with _CURSOR_LOCK:
         _CURSOR_PROC = proc
     collected: list[str] = []
@@ -2799,19 +2834,19 @@ def call_cursor_turn_iter(prompt: str, *, mode: str = "ask", resume: str | None 
     err_text = ""
     timed_out = False
     used_stream = False
-    killer = threading.Timer(timeout, proc.kill)
+    killer = threading.Timer(timeout, lambda: _kill_group(proc))
     killer.daemon = True
     killer.start()
     try:
         while True:
-            if _CURSOR_CANCELLED:
+            if _CURSOR_CANCELLED or _cancelled_since(seq):
                 break
             line = _read_cursor_line(proc)
             if line is None:
                 try:
                     out, err = proc.communicate(timeout=max(1.0, timeout))
                 except subprocess.TimeoutExpired:
-                    proc.kill()
+                    _kill_group(proc)
                     timed_out = True
                     out, err = "", ""
                 err_text = (err or "").strip()
@@ -2857,7 +2892,7 @@ def call_cursor_turn_iter(prompt: str, *, mode: str = "ask", resume: str | None 
             if killer.is_alive() is False:
                 timed_out = True
     except subprocess.TimeoutExpired:
-        proc.kill()
+        _kill_group(proc)
         timed_out = True
     finally:
         killer.cancel()
@@ -2865,8 +2900,9 @@ def call_cursor_turn_iter(prompt: str, *, mode: str = "ask", resume: str | None 
             if _CURSOR_PROC is proc:
                 _CURSOR_PROC = None
         if proc.poll() is None:
-            proc.kill()
-    if _CURSOR_CANCELLED:
+            _kill_group(proc)
+        _unregister(proc)
+    if _CURSOR_CANCELLED or _cancelled_since(seq):
         yield _cursor_fail("", cancelled=True)
         return
     if timed_out and not "".join(collected).strip() and not result_text:
@@ -2948,22 +2984,25 @@ def call_cursor_converse(utterance: str) -> dict:
     ]
     global _CURSOR_PROC, _CURSOR_CANCELLED
     _CURSOR_CANCELLED = False
+    # Concurrency audit 2026-10-16: subprocess.run under _CURSOR_LOCK blocked cancel_cursor for the whole run and the
+    # process was never registered, so Stop could not reach it. Register it and wait without holding the lock.
     try:
-        with _CURSOR_LOCK:
-            proc = subprocess.run(
-                argv,
-                capture_output=True,
-                text=True,
-                timeout=CONVERSE_TIMEOUT,
-                cwd=str(ROOT),
-                env=agent_env(),
-            )
-    except subprocess.TimeoutExpired:
-        return _cursor_fail("UNKNOWN. Cursor timed out. Say stop, or ask again shorter.")
+        live = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                                cwd=str(ROOT), env=agent_env(), start_new_session=True)
     except OSError as exc:
         return _cursor_fail(f"UNKNOWN. Cursor agent failed: {exc}.")
-    if _CURSOR_CANCELLED:
+    seq = _register(live)
+    try:
+        out, err_raw = live.communicate(timeout=CONVERSE_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        _kill_group(live)
+        live.communicate()
+        return _cursor_fail("UNKNOWN. Cursor timed out. Say stop, or ask again shorter.")
+    finally:
+        _unregister(live)
+    if _CURSOR_CANCELLED or _cancelled_since(seq):
         return _cursor_fail("", cancelled=True)
+    proc = subprocess.CompletedProcess(argv, live.returncode, out, err_raw)
     text = (proc.stdout or "").strip()
     err = (proc.stderr or "").strip()
     if not text and cursor_login_error(err):
