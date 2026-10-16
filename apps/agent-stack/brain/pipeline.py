@@ -769,7 +769,8 @@ def _memory_hand():
 
 
 def wants_memory(utterance: str) -> bool:
-    return bool(_memory_hand().INTENT_RE.search(utterance or ""))
+    m = _memory_hand()
+    return bool(m.INTENT_RE.search(m._canon(utterance or "") if hasattr(m, "_canon") else (utterance or "")))
 
 
 def wants_workspace_read(utterance: str) -> bool:
@@ -870,7 +871,8 @@ def wants_voice_engine(utterance: str) -> bool:
 SCREEN_SEE_RE = re.compile(
     r"\b(?:describe|grab|look\s+at)\s+my\s+screen\b|\bwhat(?:\x27s|s|\s+is)\s+on\s+my\s+screen\b|\bscreenshot\s+of\s+my\s+screen\b|"
     r"\bwhat\s+am\s+i\s+looking\s+at\b|"
-    r"^(?:critique|review|rate|roast)\s+(?:my|the|this)\s+screen\b",  # canvas Z30 screen critique: look first, then judge
+    r"^(?:critique|review|rate|roast)\s+(?:my|the|this)\s+screen\b|"  # canvas Z30 screen critique: look first, then judge
+    r"^(?:read|translate)\s+(?:what(?:'s|\s+is)\s+on\s+)?(?:my|the|this)\s+screen\b|^translate\s+(?:this|the)\s+(?:page|window)\b",  # Z15
     re.I,
 )
 
@@ -1188,6 +1190,10 @@ DISMISS_RE = re.compile(r"^\s*(?:jarvis[\s,]*)?(?:(?:i|we)\s+(?:don['’]?t|do\s
                         r"|never\s*mind(?:\s+\S+){0,3}|forget\s+(?:about\s+)?(?:it|that|this|the\s+\S+|your\s+\S+)"
                         r"|drop\s+(?:it|that))[\s.!]*$", re.I)
 DISMISS_LINE = "Understood, I'll drop that. What do you want instead?"
+# Owner canvas Z75 hush: a hush gets a two-word ack, never a model monologue. A bare "stop" stays with the Face's Stop.
+HUSH_RE = re.compile(r"^\s*(?:(?:ok(?:ay)?|jarvis)[,\s]+)*(?:hush|shh+|be\s+quiet|quiet(?:\s+please)?|stop\s+talking|shut\s+up|"
+                     r"enough\s+talking|that'?s\s+enough)(?:\s+(?:now|please|jarvis))?[\s.!]*$", re.I)
+HUSH_LINE = "Quiet now."
 SCREEN_WORD_RE = re.compile(r"\b(?:screen|display|monitor|see|look|watch|showing|pop-?up|window)\b", re.I)
 
 
@@ -1228,6 +1234,8 @@ def _live_chat_route_once(spoken_in: str, had_pending: bool = False) -> dict | N
         return {"tool": "say", "args": {}, "speak": NO_PENDING_LINE}
     if DISMISS_RE.match(u):
         return {"tool": "say", "args": {}, "speak": DISMISS_LINE}
+    if HUSH_RE.match(u):
+        return {"tool": "say", "args": {}, "speak": HUSH_LINE}
     if BARE_DECIDE_RE.match(u):
         # Live: a bare "Decide" got the previous reply repeated. Nothing names the choice, so ask once.
         return {"tool": "say", "args": {}, "speak": "Decide what? Name the two options and I'll pick one and say why."}

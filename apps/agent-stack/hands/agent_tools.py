@@ -716,6 +716,26 @@ _SHELL = re.compile(r"^\s*(?:(?:hey\s+)?jarvis[,:]?\s*)?(?:(?:can|could|would|wi
                     r"|run\s+[`'\"]?(?P<b>[^`'\"]+?)[`'\"]?\s+in\s+(?:the|my|a)\s+(?:terminal|shell)"
                     r"|in\s+(?:the|my)\s+terminal,?\s+run\s+[`'\"]?(?P<c>[^`'\"]+?)[`'\"]?)"
                     r"(?:\s+for\s+me|,?\s+please)?\s*[?.!]?\s*$", re.I)
+# Owner canvas "CI checks" / "yt-dlp lookup": spoken asks that map to one read-only command on the allow list.
+_LEAD = r"^\s*(?:(?:hey\s+)?jarvis[,:]?\s*|so\s+)?(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?|please\s+)?"
+_NATURAL = (
+    (re.compile(_LEAD + r"(?:what(?:'s|\s+is)|show(?:\s+me)?|check)\s+(?:the\s+)?(?:ci|checks?|build|test)\s+(?:status\s+)?(?:on|for)\s+"
+                r"(?:pr|pull\s+request)\s*#?(\d+)[\s?.!]*$", re.I), lambda m: ["gh", "pr", "checks", m.group(1)]),
+    (re.compile(_LEAD + r"(?:what(?:'s|\s+is)\s+(?:the\s+)?ci\s+status|(?:check|show(?:\s+me)?)\s+(?:the\s+)?(?:github\s+actions|ci\s+runs?|latest\s+ci))"
+                r"[\s?.!]*$", re.I), lambda m: ["gh", "run", "list", "--limit", "5"]),
+    (re.compile(_LEAD + r"(?:look\s+up|check|what(?:'s|\s+is))\s+(?:this|that|the)\s+(?:youtube\s+)?video\s+(https?://(?:www\.)?(?:youtube\.com|youtu\.be)/\S+?)"
+                r"[\s?.!]*$", re.I), lambda m: ["yt-dlp", "--get-title", "--skip-download", m.group(1)]),
+)
+
+
+def _natural_argv(u: str) -> list[str] | None:
+    for rx, build in _NATURAL:
+        m = rx.match(u or "")
+        if m:
+            return build(m)
+    return None
+
+
 _MCPC = re.compile(r"\bcall\s+(?:the\s+)?([\w.\-]+)\s+mcp\s+tool\s+([\w.\-]+)(?:\s+with\s+(\{.*\}))?", re.I | re.S)
 
 
@@ -749,7 +769,7 @@ def _gws_reads_args(u: str) -> dict | None:
 
 def wants(u: str) -> bool:
     return bool(_LIST.search(u or "") or _CODE.match(u or "") or _TASK.search(u or "") or _CLI.match(u or "") or _MCPC.search(u or "")
-                or _SHELL.match(u or "")
+                or _SHELL.match(u or "") or _natural_argv(u)
                 or _gws_argv(u) or _gws_reads_args(u) or bool(_fanout_args(u)))
 
 
@@ -773,6 +793,9 @@ def args_from_utterance(u: str) -> dict:
         except ValueError:
             a = {}
         return {"op": "mcp", "server": m.group(1), "tool": m.group(2), "arguments": a}
+    nat = _natural_argv(u)
+    if nat:
+        return {"op": "cli", "argv": nat}
     m = _SHELL.match(u or "")
     if m:
         import shlex

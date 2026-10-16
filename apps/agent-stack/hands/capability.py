@@ -20,6 +20,10 @@ SELF_CODE_RE = re.compile(
     r"|\bgive\s+yourself\s+(?:more\s+)?(?:access|permissions?)\b", re.I)
 FIX_IT_RE = re.compile(r"^(?:jarvis[, ]+)?(?:can|could|will|would)\s+you\s+(?:please\s+)?(?:(?:fix|repair|sort\s+out)\s+(?:it|this|that)|sort\s+(?:it|this|that)\s+out)"
                        r"(?:\s+(?:now|yourself|for\s+me))*\s*[?.!]*$", re.I)
+LESSONS_RE = re.compile(r"^(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?(?:what\s+(?:lessons\s+)?have\s+you\s+learn(?:ed|t)(?:\s+from\s+(?:your\s+)?mistakes)?"
+                        r"|what\s+lessons\s+(?:have\s+you\s+learn(?:ed|t)|did\s+you\s+learn)|(?:show|list|read)\s+(?:me\s+)?your\s+(?:scars|lessons)"
+                        r"|what\s+are\s+your\s+(?:scars|lessons)|what\s+(?:mistakes|messes)\s+(?:do\s+you\s+)?(?:not|never)\s+repeat)"
+                        r"(?:\s+so\s+far)?[\s?.!]*$", re.I)
 QUESTION_RE = re.compile(r"\?\s*$|^(?:do|don't|dont|can|can't|could|are|aren't|is|have|will|would)\b", re.I)
 GREETING_RE = re.compile(r"^\s*(?:(?:hey|hi|ok|okay|yo)\s+)?jarvis\s*[,:!.]?\s+|^\s*(?:so|and|now|ok|okay|alright)\s*,?\s+", re.I)
 
@@ -59,13 +63,29 @@ CODE_LINE = ("Code: my coding worker builds in a scratch repo on its own branch;
              "after you approve it and restart me. I don't edit my live self.")
 
 
+def lessons_line() -> str:
+    """Owner canvas "Lessons (scars)": the never-again bank, read from memory/scars.json, not recalled by the model."""
+    try:
+        import json
+        rows = json.loads((Path(__file__).resolve().parents[1] / "memory" / "scars.json").read_text(encoding="utf-8")).get("scars") or []
+    except (OSError, ValueError, AttributeError):
+        rows = []
+    rows = [r for r in rows if isinstance(r, dict) and r.get("id")]
+    if not rows:
+        return "My lessons bank is empty right now."
+    parts = [f"{r['id'].replace('-', ' ')}: {str(r.get('never_again') or r.get('symptom') or '').strip().rstrip('.')}" for r in rows[:5]]
+    return f"{len(rows)} lesson{'s' if len(rows) != 1 else ''} in my never-again bank. " + ". ".join(parts) + "."
+
+
 def wants(utterance: str) -> str:
-    """'arrow' | 'self_code' | 'fix_it' | '' — only questions about Jarvis's own abilities."""
+    """'arrow' | 'self_code' | 'fix_it' | 'lessons' | '' — only questions about Jarvis's own abilities."""
     u = _strip_greeting((utterance or "").strip())
     if not u:
         return ""
     if FIX_IT_RE.match(u):
         return "fix_it"
+    if LESSONS_RE.match(u):
+        return "lessons"
     if SELF_CODE_RE.search(u) and QUESTION_RE.search(u):
         return "self_code"
     if ARROW_RE.search(u) and QUESTION_RE.search(u):
@@ -86,6 +106,8 @@ def run(utterance: str, prior: dict | None = None) -> dict:
                  if last else "I don't have the last turn to point at.")
         spoken = (about + " I can't patch my live self mid-conversation. " + CODE_LINE
                   + (" Say \"permission granted\" if it was blocked by access." if not _open_access() else ""))
+    elif kind == "lessons":
+        spoken = lessons_line()
     else:
         return {"ok": False, "tool": "capability", "spoken": "", "task_verified": False}
     return {"ok": True, "tool": "capability", "kind": kind, "spoken": spoken, "task_verified": True}

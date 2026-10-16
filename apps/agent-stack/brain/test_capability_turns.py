@@ -85,6 +85,36 @@ class ThenChains(unittest.TestCase):
         self.assertTrue(P.is_hard_step("fix the bug then push to main"))
 
 
+class CanvasRoutes(unittest.TestCase):
+    """Owner canvas nodes that got spoken routes 2026-10-16 (eval/system_matrix.json)."""
+    def setUp(self):
+        mode = mock.patch.dict(os.environ, {"JARVIS_MODE_FILE": str(Path(tempfile.mkdtemp()) / "mode.json")})
+        mode.start(); self.addCleanup(mode.stop)
+
+    def test_routes(self):
+        cases = {"what time is it": "say", "hush": "say", "what apps are running": "apps", "show me my open windows": "apps",
+                 "run the command df -h": "agent_tools", "what's the ci status on pr 645": "agent_tools",
+                 "search my vault for pricing": "vault_read", "translate my screen": "screen_see",
+                 "what did you just do": "results_recall", "capture this idea: a flashcard app": "memory",
+                 "what lessons have you learned": "capability", "remember that the gym opens at 6, then what time is it": "multistep"}
+        for said, tool in cases.items():
+            self.assertEqual((P.turn_fixed_pick(said) or {}).get("tool"), tool, said)
+
+    def test_reaching_people_publishing_and_logins_ask_first(self):
+        for said in ("call Normand", "text my accountant that I'm late", "push the branch", "open a pull request",
+                     "log into the hostinger account"):
+            self.assertTrue(P.is_hard_step(said), said)
+        for said in ("call the function twice", "how do I call a function in python", "did Normand call"):
+            self.assertFalse(P.is_hard_step(said), said)
+
+    def test_clock_is_the_machine_not_the_model(self):
+        self.assertTrue(P.turn_fixed_pick("what's today's date")["speak"].startswith("Today is"))
+
+    def test_lessons_come_from_the_bank(self):
+        got = P._capability_hand().run("show me your scars")
+        self.assertTrue(got["ok"]); self.assertIn("never-again bank", got["spoken"])
+
+
 class RepoListing(unittest.TestCase):
     def setUp(self):
         self.home = Path(tempfile.mkdtemp())

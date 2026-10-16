@@ -12,8 +12,15 @@ REMEMBER_SYN_RE = re.compile(r"^(\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s
                              r"don'?t\s+forget(?:\s+that)?|do\s+not\s+forget(?:\s+that)?|keep\s+in\s+mind\s+that)\b", re.I)
 
 
+# Owner canvas Z38 inbox capture: "capture this idea: X" / "add this to my inbox: X" / "jot down X" store X.
+CAPTURE_RE = re.compile(r"^(\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?)(?:capture|save)\s+(?:this|the|an|my)\s+(?:idea|thought|note)\s*:?\s+"
+                        r"|^(\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?)add\s+(?:this|that)\s+to\s+my\s+(?:jarvis\s+)?inbox\s*:?\s+"
+                        r"|^(\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?)jot\s+(?:this\s+)?down\s*:?\s+(?:that\s+)?", re.I)
+
+
 def _canon(utterance: str) -> str:
-    return REMEMBER_SYN_RE.sub(lambda m: m.group(1) + "remember that", utterance or "", count=1)
+    u = CAPTURE_RE.sub(lambda m: (m.group(1) or m.group(2) or m.group(3) or "") + "remember that ", utterance or "", count=1)
+    return REMEMBER_SYN_RE.sub(lambda m: m.group(1) + "remember that", u, count=1)
 
 
 INTENT_RE = re.compile(
@@ -65,7 +72,7 @@ def run(args: dict, *, utterance: str | None = None) -> dict:
     """
     args = args or {}
     if utterance is not None:
-        if not INTENT_RE.search(utterance) or re.match(r"^\s*(?:please\s+)?forget\s+(?:it|that)\s*[,.!?]?(?:\s+(?:stop|cancel|never mind)\b.*)?$", utterance, re.I):
+        if not INTENT_RE.search(_canon(utterance)) or re.match(r"^\s*(?:please\s+)?forget\s+(?:it|that)\s*[,.!?]?(?:\s+(?:stop|cancel|never mind)\b.*)?$", utterance, re.I):
             result = {"op": str(args.get("op") or "recall"), "ok": False,
                       "count": 0, "spoken": "You didn't ask me to remember, recall, or forget anything."}
             result["log"] = {key: result[key] for key in ("op", "ok", "count")}
