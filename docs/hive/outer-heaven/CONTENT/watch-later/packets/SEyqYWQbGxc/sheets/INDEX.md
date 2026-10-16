@@ -1,8 +1,2 @@
-One frame every 2 s, 6 across x 5 down, read left to right then top to bottom.
-- sheet_001.jpg: 00:00 to 01:00
-- sheet_002.jpg: 01:00 to 02:00
-- sheet_003.jpg: 02:00 to 03:00
-- sheet_004.jpg: 03:00 to 04:00
-- sheet_005.jpg: 04:00 to 05:00
-- sheet_006.jpg: 05:00 to 06:00
-- sheet_007.jpg: 06:00 to 07:00
+Looked at one frame every 2 s; kept 27 frames where the screen changed. 6 across x 5 down, left to right then top to bottom.
+- sheet_001.jpg: 00:00, 00:12, 00:22, 00:26, 01:04, 01:06, 01:34, 01:48, 01:50, 01:56, 02:00, 02:04, 02:40, 02:50, 02:54, 03:52, 03:54, 04:16, 04:30, 04:40, 04:46, 04:58, 05:06, 05:14, 05:20, 05:32, 05:42
