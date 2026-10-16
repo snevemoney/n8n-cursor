@@ -18,11 +18,11 @@ class Driver(unittest.TestCase):
         self.sent, self.cursor, self.osa_calls = [], [], []
 
         def run_js(code):
-            if "data-jref=\"1\"" in code and "screenX" in code:
-                return json.dumps({"x": 400.4, "y": 300.6, "tag": "a"})
+            if "data-jref=\"1\"" in code and "innerWidth" in code:
+                return json.dumps({"cx": 36.4, "cy": 29.6, "iw": 1070, "ih": 747, "tag": "a"})
             return PAGE
         d = SD.SafariDOM(lambda r: self.sent.append(r) or {"text": "ok"}, lambda x, y: self.cursor.append((x, y)),
-                         run_js=run_js, osa=lambda lines, *a, **k: self.osa_calls.append((lines, a)) or "")
+                         run_js=run_js, osa=lambda lines, *a, **k: self.osa_calls.append((lines, a)) or ("364, 1158, 1434, 2018" if "bounds" in lines[0] else ""))
         d._settle = lambda s: None
         return d
 
@@ -30,8 +30,9 @@ class Driver(unittest.TestCase):
         d = self.make()
         with mock.patch.object(SD.time, "sleep"):
             got = d.act({"action": "click", "ref": "1"})
-        self.assertEqual(self.cursor, [(400, 300)])
-        self.assertEqual(self.sent, [{"op": "click", "x": 400, "y": 300, "count": 1, "button": "left"}])
+        # live geometry 10-16: window {364,1158,1434,2018} on display 2, page 1070x747 -> toolbar 113
+        self.assertEqual(self.cursor, [(400, 1301)])
+        self.assertEqual(self.sent, [{"op": "click", "x": 400, "y": 1301, "count": 1, "button": "left"}])
         self.assertIn("Pull requests", got["text"])
 
     def test_navigate_changes_his_current_tab_not_a_new_one(self):

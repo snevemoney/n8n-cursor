@@ -28,7 +28,7 @@ return JSON.stringify({url:location.href,title:document.title,elements:out.join(
 
 WHERE_JS = r"""(()=>{const e=document.querySelector('[data-jref="%s"]');if(!e)return JSON.stringify({error:'no element %s on this page; take a new snapshot'});
 e.scrollIntoView({block:'center',inline:'center'});const r=e.getBoundingClientRect();
-return JSON.stringify({x:window.screenX+r.left+r.width/2,y:window.screenY+(window.outerHeight-window.innerHeight)+r.top+r.height/2,
+return JSON.stringify({cx:r.left+r.width/2,cy:r.top+r.height/2,iw:window.innerWidth,ih:window.innerHeight,
 tag:e.tagName.toLowerCase()});})()"""
 
 FOCUS_JS = r"""(()=>{const e=document.querySelector('[data-jref="%s"]');if(!e)return 'missing';e.scrollIntoView({block:'center'});e.focus();
@@ -112,13 +112,23 @@ class SafariDOM:
             return {"text": where["error"]}
         time.sleep(0.3)  # scrollIntoView settles before we read the spot again
         where = json.loads(self.js(WHERE_JS % (ref, ref)) or "{}")
-        x, y = int(where["x"]), int(where["y"])
+        x, y = self.to_screen(where)
         self.cursor(x, y)
         got = self.hands({"op": "click", "x": x, "y": y, "count": 1, "button": "left"})
         if "trusted\": false" in str(got.get("text", "")).replace(" ", "") or "not installed" in str(got.get("text", "")):
             return got
         self._settle(1.5)
         return self.snapshot(f"Clicked {ref}. ")
+
+    def to_screen(self, where: dict) -> tuple:
+        """Page point -> global mouse point. Safari hides screenX/screenY from pages (live 10-16: both 0, every click
+        landed in the corner of the main display), so the window frame comes from Safari's own AppleScript bounds:
+        {left, top, right, bottom} in global top-left points; the toolbar is the frame height minus innerHeight."""
+        b = [int(v) for v in self.osa(['tell application "Safari" to get bounds of front window']).replace(" ", "").split(",")]
+        left, top, right, bottom = b
+        x = left + (right - left - float(where["iw"])) / 2 + float(where["cx"])
+        y = top + (bottom - top - float(where["ih"])) + float(where["cy"])
+        return int(round(x)), int(round(y))
 
     def _type(self, a):
         ref, text = str(a.get("ref") or "").strip(), str(a.get("text") or "")
