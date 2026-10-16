@@ -1662,6 +1662,7 @@ def call_openrouter_messages(
     *,
     model_chain: tuple | list,
     attempt_sec: float = 25.0,
+    max_tokens: int | None = None,
 ) -> dict:
     """Worker tool loop turn: real chat messages, real tool roles. Not the talk mouth.
 
@@ -1680,7 +1681,7 @@ def call_openrouter_messages(
             "tools": tools,
             "tool_choice": "auto",
             "parallel_tool_calls": True,
-            "max_tokens": WORKER_MAX_TOKENS,
+            "max_tokens": max_tokens or WORKER_MAX_TOKENS,  # the operator writes whole files (10-15)
             "reasoning": {"enabled": False},
         }
         try:

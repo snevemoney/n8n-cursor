@@ -267,7 +267,7 @@ def op_cli(argv: list[str], cwd: str | None = None, *, max_output_chars: int = O
 def _op_cli_open(argv: list[str], cwd: str | None, *, max_output_chars: int = OUT_CAP) -> dict:
     """Open access: any installed CLI, run without a shell; consequential verbs still need Evens."""
     line = " ".join(argv)
-    if OPEN_CLI_HARD.search(line):
+    if OPEN_CLI_HARD.search(line) or _load("authority", "authority.py").cli_needs_owner(argv):  # one shared gate (10-15)
         PERM().log_action("cli", line[:80], "confirm", open_access=True)
         return {"ok": False, "verified": False, "gated": True,
                 "spoken": f"`{line[:120]}` deletes, pushes, deploys or sends. That still needs Evens."}
@@ -281,11 +281,15 @@ def _op_cli_open(argv: list[str], cwd: str | None, *, max_output_chars: int = OU
     except subprocess.TimeoutExpired:
         return {"ok": False, "verified": False, "spoken": f"{argv[0]} timed out."}
     limit = max(1, min(int(max_output_chars), 80000))
-    raw_text = _scrub(p.stdout or p.stderr).strip()
+    out_raw, err_raw = _scrub(p.stdout or "").strip(), _scrub(p.stderr or "").strip()
+    raw_text = out_raw or err_raw  # spoken/legacy field; stdout and stderr stay separate below (blueprint 2.3)
     text = raw_text[:limit] + ("…" if len(raw_text) > limit else "")
     ok = p.returncode == 0
+    spoken = (f"{argv[0]} ok: " if ok else f"{argv[0]} exited {p.returncode}: ") + text[:600]
+    if err_raw and out_raw and not ok:
+        spoken += " | stderr: " + err_raw[:300]
     return {"ok": ok, "verified": ok and bool(text), "output": text, "exit": p.returncode, "output_truncated": len(raw_text) > limit,
-            "spoken": (f"{argv[0]} ok: " if ok else f"{argv[0]} exited {p.returncode}: ") + text[:600]}
+            "execution_status": "EXECUTED", "stdout": out_raw[:limit], "stderr": err_raw[:limit], "spoken": spoken}
 
 
 # ---------------------------------------------------------------- ArtCraft: open a file and inspect it, read-only

@@ -19,9 +19,9 @@ class Resolve(unittest.TestCase):
 
     def test_open_and_quit_commands(self):
         ran = []
-        got = A.run("open the Notes app", bundles=APPS, runner=lambda c: ran.append(c) or SimpleNamespace(returncode=0, stdout="", stderr=""))
+        got = A.run("open the Notes app", bundles=APPS, check=lambda a: True, runner=lambda c: ran.append(c) or SimpleNamespace(returncode=0, stdout="", stderr=""))
         self.assertTrue(got["ok"]); self.assertEqual(ran[-1], ["open", "-a", "/Applications/Notes.app"])
-        A.run("quit Spotify", bundles=APPS, runner=lambda c: ran.append(c) or SimpleNamespace(returncode=0, stdout="", stderr=""))
+        A.run("quit Spotify", bundles=APPS, check=lambda a: False, runner=lambda c: ran.append(c) or SimpleNamespace(returncode=0, stdout="", stderr=""))
         self.assertEqual(ran[-1][:2], ["osascript", "-e"]); self.assertNotIn("force", ran[-1][-1])
 
     def test_unknown_app_is_honest(self):
@@ -32,6 +32,28 @@ class Resolve(unittest.TestCase):
         for u in ("open my Downloads folder", "open youtube.com", "open ~/notes.md", "close the window", "open it"):
             m = A.OPEN_RE.match(u)
             self.assertTrue(m is None or A.NOT_APP_RE.search(m.group(2)), u)
+
+
+class HonestEvidence(unittest.TestCase):
+    """Blueprint 2.1 (10-15): a skipped executor is NOT_EXECUTED; verified needs the app's real running state."""
+    OK = staticmethod(lambda c: SimpleNamespace(returncode=0, stdout="", stderr=""))
+
+    def test_disabled_execution_is_never_verified(self):
+        got = A.run("open Notes", bundles=APPS)  # under unittest: no runner, not live
+        self.assertEqual(got["execution_status"], "NOT_EXECUTED"); self.assertFalse(got["task_verified"])
+
+    def test_open_verified_only_when_running(self):
+        self.assertTrue(A.run("open Notes", bundles=APPS, runner=self.OK, check=lambda a: True)["task_verified"])
+        got = A.run("open Notes", bundles=APPS, runner=self.OK, check=lambda a: False)
+        self.assertFalse(got["task_verified"]); self.assertIn("couldn't confirm", got["spoken"])
+
+    def test_quit_with_save_dialog_waits_on_owner(self):
+        got = A.run("quit Notes", bundles=APPS, runner=self.OK, check=lambda a: True)
+        self.assertFalse(got["task_verified"]); self.assertTrue(got["waiting_owner"])
+
+    def test_stderr_kept_when_stdout_nonempty(self):
+        got = A.run("open Notes", bundles=APPS, runner=lambda c: SimpleNamespace(returncode=1, stdout="out", stderr="LSOpen failed"))
+        self.assertEqual(got["stderr"], "LSOpen failed"); self.assertEqual(got["stdout"], "out")
 
 
 if __name__ == "__main__":

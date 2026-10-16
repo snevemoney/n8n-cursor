@@ -83,7 +83,13 @@ def _live() -> bool:
         and not os.environ.get("PYTEST_CURRENT_TEST")
 
 
-def run(utterance: str, *, bundles: dict[str, Path] | None = None, runner=None) -> dict:
+def is_running(app: str) -> bool:
+    """Postcondition: macOS reports the app process is running (System Events, no UI scripting)."""
+    cp = subprocess.run(["osascript", "-e", f'application "{app}" is running'], capture_output=True, text=True, timeout=10)
+    return cp.stdout.strip() == "true"
+
+
+def run(utterance: str, *, bundles: dict[str, Path] | None = None, runner=None, check=None) -> dict:
     m = OPEN_RE.match((utterance or "").strip())
     if not m:
         return {"ok": False, "tool": "apps", "spoken": "Which app should I open?", "task_verified": False}
@@ -97,17 +103,31 @@ def run(utterance: str, *, bundles: dict[str, Path] | None = None, runner=None) 
     app, path = hit
     quit_ = verb in ("quit", "close")
     cmd = (["osascript", "-e", f'tell application "{app}" to quit'] if quit_ else ["open", "-a", str(path)])
-    run_fn = runner or (lambda c: subprocess.run(c, capture_output=True, text=True, timeout=15))
     if runner is None and not _live():
-        ok, err = True, ""
-    else:
-        try:
-            cp = run_fn(cmd)
-            ok, err = cp.returncode == 0, (cp.stderr or cp.stdout or "").strip()[:160]
-        except (OSError, subprocess.TimeoutExpired) as exc:
-            ok, err = False, type(exc).__name__
+        # Execution is disabled here (tests, non-Mac): that is NOT_EXECUTED, never a verified open (blueprint 2.1).
+        return {"ok": False, "tool": "apps", "app": app, "execution_status": "NOT_EXECUTED", "task_verified": False,
+                "spoken": f"I did not {'quit' if quit_ else 'open'} {app}: app control is off in this process."}
+    run_fn = runner or (lambda c: subprocess.run(c, capture_output=True, text=True, timeout=15))
+    try:
+        cp = run_fn(cmd)
+        ok, stdout, stderr = cp.returncode == 0, (cp.stdout or "").strip()[:300], (cp.stderr or "").strip()[:300]
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        ok, stdout, stderr = False, "", type(exc).__name__
+    base = {"tool": "apps", "app": app, "path": str(path), "execution_status": "EXECUTED" if ok else "FAILED",
+            "exit_ok": ok, "stdout": stdout, "stderr": stderr}
     if not ok:
-        return {"ok": False, "tool": "apps", "app": app, "task_verified": False,
-                "spoken": f"{app} didn't {'quit' if quit_ else 'open'}: {err or 'macOS refused'}."}
-    return {"ok": True, "tool": "apps", "app": app, "path": str(path), "task_verified": True,
-            "spoken": (f"Asked {app} to quit." if quit_ else f"{app} is open.")}
+        return {**base, "ok": False, "task_verified": False,
+                "spoken": f"{app} didn't {'quit' if quit_ else 'open'}: {stderr or stdout or 'macOS refused'}."}
+    probe = check or is_running
+    try:
+        running = probe(app)
+    except (OSError, subprocess.TimeoutExpired):
+        running = None
+    if quit_:
+        if running is False:
+            return {**base, "ok": True, "task_verified": True, "spoken": f"{app} has quit."}
+        return {**base, "ok": True, "task_verified": False, "waiting_owner": running is True,
+                "spoken": f"I asked {app} to quit; it is still open (it may be asking you to save)."}
+    if running:
+        return {**base, "ok": True, "task_verified": True, "spoken": f"{app} is open."}
+    return {**base, "ok": True, "task_verified": False, "spoken": f"I asked macOS to open {app}, but I couldn't confirm it is running."}

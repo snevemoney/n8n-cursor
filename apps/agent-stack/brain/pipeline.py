@@ -1533,29 +1533,19 @@ def _open_access() -> bool:
         return False
 
 
-# Open access still confirms code that deletes, sends, pushes or touches the network for writes.
-# With open access (default) shell runs without a confirm except: deletes, sends/posts, merges/pushes, releases, deploys, spend.
-OPEN_CLI_HARD = re.compile(r"\b(?:merge|push|delete|rm|release|deploy|publish|send|post|purchase|buy|--force)\b|"
-                           # revealing secrets / uploading data still asks
-                           r"^(?:security|printenv|env|op|pass|keychain)\b|\bauth\s+token\b|\bdump-keychain\b|"
-                           r"\s(?:-F|-d|-T|--data\S*|--upload-file|--form)\b", re.I)
-# The five stops Evens kept (sends/posts, spend, deletes, merges/pushes, revealing secrets) also apply to the shell,
-# which bypasses workspace_read's secret-file rules (independent check 2026-10-15).
-_OPEN_CLI_MORE = re.compile(
-    r"^gh\s+(?:issue|pr|gist|repo|release)\b.*\b(?:create|comment|edit|close|delete|merge)\b|^gh\s+api\b.*(?:-X|--method)\s*(?:POST|PUT|PATCH|DELETE)|"
-    r"^(?:mail|mailx|sendmail|osascript)\b|(?:^|\s)-X\s*(?:POST|PUT|PATCH|DELETE)\b|"
-    r"^(?:rmdir|trash|unlink|shred|srm)\b|\s-delete\b", re.I)
-_SECRET_ARG = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.pgpass|\.docker|\.kube|\.git-credentials|"
-                         r"id_(?:rsa|dsa|ecdsa|ed25519)[^/]*|[^/]*\.(?:pem|key|p12|kdbx)|credentials[^/]*|secrets?(?:\.[a-z0-9]+)?|"
-                         r"[^/]*(?:_token|api[_-]?key)[^/]*|Keychains?)(/|$)|/\.config/gh/", re.I)
+def _authority():
+    """hands/authority.py: the one gate for shell, files and the operator (moved here 10-15)."""
+    import importlib.util as _u
+    mod = sys.modules.get("agent_stack_authority")
+    if mod is None:
+        spec = _u.spec_from_file_location("agent_stack_authority", Path(__file__).resolve().parent.parent / "hands" / "authority.py")
+        mod = _u.module_from_spec(spec); sys.modules["agent_stack_authority"] = mod; spec.loader.exec_module(mod)
+    return mod
 
 
 def _open_cli_needs_owner(argv) -> bool:
     """True when a shell step touches one of Evens's kept stops; everything else runs without asking."""
-    args = [str(a) for a in (argv or [])]
-    line = " ".join(args)
-    return bool(OPEN_CLI_HARD.search(line) or _OPEN_CLI_MORE.search(line)
-                or any(_SECRET_ARG.search(os.path.expanduser(a)) for a in args[1:]))
+    return _authority().cli_needs_owner(argv)
 
 
 SELF_CHANGE_RE = re.compile(r"\b(?:change|fix|edit|improve|update|rewrite|modify|upgrade)\s+(?:your\s+(?:own\s+)?(?:code|self)|yourself)\b", re.I)

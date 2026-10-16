@@ -32,7 +32,7 @@ class CapabilityLine(unittest.TestCase):
             self.assertNotIn(bad,self.SRC)
     def test_confirms_kept_only_for_consequential(self):
         self.assertIn('if tool in {"screen_see", "repo"} and _open_access():',self.SRC)
-        for kept in ('merge','push','delete','send','post','purchase'):self.assertIn(kept,self.SRC[self.SRC.index('OPEN_CLI_HARD = re.compile('):][:300])
+        for kept in ('merge','push','delete','send','post','purchase'):self.assertIn(kept,(Path(__file__).resolve().parents[1]/'hands'/'authority.py').read_text()[:2000])
 if __name__=='__main__':unittest.main()
 
 
