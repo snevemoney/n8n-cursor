@@ -848,7 +848,9 @@ class Handler(BaseHTTPRequestHandler):
         worker.start()
         worker.join(TURN_WALL_SEC)
         if worker.is_alive():
-            own_gen = arrival_plain + 1
+            opened = (pipe_plain.BUS_IO.gen_for_thread(HIVE, worker.ident, arrival_plain)
+                      if pipe_plain is not None and hasattr(getattr(pipe_plain, "BUS_IO", None), "gen_for_thread") else None)
+            own_gen = opened or arrival_plain + 1  # the gen this request's own worker opened, not a guess
             current = (
                 int(pipe_plain.peek_gen(HIVE) or 0)
                 if pipe_plain is not None and hasattr(pipe_plain, "peek_gen")
@@ -924,6 +926,7 @@ class Handler(BaseHTTPRequestHandler):
         halt = threading.Event()
         deadline = time.monotonic() + TURN_WALL_SEC
         seen_gen = 0
+        worker_box: dict = {}
         call_open = False
         heard_provider = False
         tool_open = False
@@ -950,7 +953,12 @@ class Handler(BaseHTTPRequestHandler):
                 pending.put(None)
 
         def own_gen_now() -> int:
-            return seen_gen or (arrival + 1)
+            if seen_gen:
+                return seen_gen
+            w = worker_box.get("t")
+            opened = (pipe.BUS_IO.gen_for_thread(HIVE, w.ident, arrival)
+                      if w is not None and pipe is not None and hasattr(getattr(pipe, "BUS_IO", None), "gen_for_thread") else None)
+            return opened or (arrival + 1)
 
         def superseded() -> bool:
             """True when a newer generation owns the bus.
@@ -964,7 +972,7 @@ class Handler(BaseHTTPRequestHandler):
             current = int(pipe.peek_gen(HIVE) or 0)
             if seen_gen:
                 return current > seen_gen
-            return current > arrival + 1
+            return current > own_gen_now()
 
         def kill_own_turn(*, disconnected: bool = False) -> bool:
             """Close with the dark line only while this request still owns the bus.
@@ -1015,6 +1023,7 @@ class Handler(BaseHTTPRequestHandler):
             emit_dark()
 
         worker = threading.Thread(target=produce, daemon=True)
+        worker_box["t"] = worker
         worker.start()
         try:
             while True:

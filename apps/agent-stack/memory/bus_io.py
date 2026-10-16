@@ -238,9 +238,16 @@ def watch_stop_disarmed(bus: dict | None) -> bool:
 def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
     """Open a generation. Never first-arm. After Stop, arm_watch=True does not re-arm."""
 
+    opener = threading.get_ident()
+
     def apply(bus: dict) -> dict:
         gen = bus_gen(bus) + 1
         bus["turn_gen"] = gen
+        # Concurrency audit 2026-10-16: the Face guessed its own gen as arrival+1, so with two requests in flight the
+        # wall cancelled nothing and a timed-out worker ran on. Record which thread opened each gen (last 32).
+        owners = bus.get("gen_threads") if isinstance(bus.get("gen_threads"), dict) else {}
+        owners[str(gen)] = [os.getpid(), opener]
+        bus["gen_threads"] = dict(list(owners.items())[-32:])
         # An earlier tool's receipt is not evidence for the newly opened turn.
         bus.pop("execution", None)
         bus.pop("execution_gen", None)
@@ -257,6 +264,16 @@ def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
         return bus
 
     return bus_gen(mutate_bus(hive, apply))
+
+
+def gen_for_thread(hive: Path, ident: int | None, after: int = 0) -> int | None:
+    """The first generation this process's thread `ident` opened after gen `after` (the request's arrival), or None."""
+    if not ident:
+        return None
+    owners = load_json(Path(hive) / "bus" / "state.json").get("gen_threads") or {}
+    mine = [int(g) for g, who in owners.items()
+            if isinstance(who, list) and who == [os.getpid(), ident] and str(g).isdigit() and int(g) > int(after)]
+    return min(mine) if mine else None
 
 
 DARK_LINE = "The talk wire is dark this turn."

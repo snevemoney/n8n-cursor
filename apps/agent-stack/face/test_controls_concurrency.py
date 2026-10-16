@@ -54,6 +54,20 @@ class ControlsConcurrency(unittest.TestCase):
         [t.start() for t in ts]; [t.join() for t in ts]
         self.assertEqual(self.B.load_json(self.hive / "bus" / "state.json")["turn_gen"], 150)
 
+    def test_each_request_thread_finds_its_own_gen(self):
+        arrival = self.B.bus_gen(self.B.load_json(self.hive / "bus" / "state.json"))
+        got, ready = {}, threading.Barrier(2)
+
+        def request(name):
+            ready.wait()
+            gen = self.B.begin_turn(self.hive)
+            got[name] = (gen, self.B.gen_for_thread(self.hive, threading.get_ident(), arrival))
+        ts = [threading.Thread(target=request, args=(n,)) for n in ("a", "b")]
+        [t.start() for t in ts]; [t.join() for t in ts]
+        for name, (opened, found) in got.items():
+            self.assertEqual(opened, found, name)  # arrival+1 would be wrong for one of the two
+        self.assertEqual({g for g, _ in got.values()}, {arrival + 1, arrival + 2})
+
     def test_corrupt_bus_is_quarantined_not_wiped(self):
         path = self.hive / "bus" / "state.json"
         path.write_bytes(b"\xff\xfe not json")
