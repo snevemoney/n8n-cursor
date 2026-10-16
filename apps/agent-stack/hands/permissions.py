@@ -262,6 +262,18 @@ def _log_path() -> Path | None:
     return ROOT / "logs" / "jarvis-actions.jsonl"
 
 
+LOG_MAX_BYTES = 20 * 1024 * 1024
+
+
+def _rotate(dest: Path) -> None:
+    """Keep one previous file; the log never grows without bound (concurrency audit 2026-10-16)."""
+    try:
+        if dest.stat().st_size > LOG_MAX_BYTES:
+            os.replace(dest, dest.with_name(dest.name + ".1"))
+    except OSError:
+        pass
+
+
 def log_action(kind: str, target: str, decision: str, **meta) -> None:
     dest = _log_path()
     if dest is None:
@@ -271,7 +283,9 @@ def log_action(kind: str, target: str, decision: str, **meta) -> None:
     row.update({k: v for k, v in meta.items() if isinstance(v, (int, float, bool)) or (isinstance(v, str) and len(v) <= 120)})
     try:
         dest.parent.mkdir(parents=True, exist_ok=True)
-        with _LOCK, dest.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(row, sort_keys=True) + "\n")
+        with _LOCK:
+            _rotate(dest)
+            with dest.open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(row, sort_keys=True) + "\n")
     except OSError:
         pass

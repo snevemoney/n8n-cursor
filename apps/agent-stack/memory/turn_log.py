@@ -97,6 +97,11 @@ def append(row: dict, path: Path | None = None) -> Path | None:
         return None
     try:
         dest.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            if dest.stat().st_size > 20 * 1024 * 1024:  # one previous file kept; no unbounded growth (audit 2026-10-16)
+                os.replace(dest, dest.with_name(dest.name + ".1"))
+        except OSError:
+            pass
         with _LOCK, dest.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
     except OSError:

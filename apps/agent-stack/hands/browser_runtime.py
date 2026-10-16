@@ -24,6 +24,19 @@ from urllib.parse import urlsplit, urljoin, parse_qsl
 import urllib.request
 
 
+
+_WORKERS: dict = {}
+
+
+def _proc_identity(pid):
+    """Start time + command of a PID (ps), or None when it cannot be read; never treated as a mismatch on None."""
+    try:
+        r = subprocess.run(['/bin/ps', '-ww', '-p', str(int(pid)), '-o', 'lstart=', '-o', 'command='],
+                           capture_output=True, text=True, timeout=2)
+        return r.stdout.strip() or None if not r.returncode else None
+    except (OSError, ValueError, subprocess.TimeoutExpired):
+        return None
+
 def profiles():
     name = 'agent_stack_profiles'
     if name not in sys.modules:
@@ -1269,13 +1282,14 @@ class BrowserMissionHandle:
             process = subprocess.Popen([python, str(Path(__file__).resolve()), 'mission', str(root)],
                 stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True,
                 env={**os.environ, 'JARVIS_OPEN_ACCESS': '1' if opened else '0'})
-        write_json(root / 'owner.json', {'pid': process.pid, 'created': time.time()})
+        _WORKERS[mission_id] = process  # kept so status() can poll() (reaps the zombie a crashed worker leaves)
+        write_json(root / 'owner.json', {'pid': process.pid, 'created': time.time(), 'identity': _proc_identity(process.pid)})
         write_json(self.hive / 'browser-missions' / 'latest.json', {'mission_id': mission_id})
         return {'ok': True, 'tool': 'browser_mission', 'mission_id': mission_id, 'task_verified': False,
                 'spoken': 'I’ve started the browser research. I’ll verify each result as the sites finish.',
                 'wires': ['browser_mission'], 'sent': False, 'cites': []}
 
-    def cancel_active(self):
+    def cancel_active(self):  # noqa: D401
         cancelled = []
         for root in (self.hive / 'browser-missions').glob('*'):
             if not root.is_dir() or not (root / 'request.json').exists() or (root / 'result.json').exists():
@@ -1293,10 +1307,17 @@ class BrowserMissionHandle:
         if not state: raise ValueError('unknown mission')
         owner = read_json(root / 'owner.json')
         if state.get('status') not in ('VERIFIED', 'PARTIAL', 'FAILED', 'CANCELLED'):
+            # Concurrency audit 2026-10-16: kill(pid, 0) succeeds on a zombie and on a reused PID, so a crashed worker
+            # read as QUEUED. Poll our own child, and compare the recorded process identity.
+            proc = _WORKERS.get(mission_id)
             try:
                 pid = owner.get('pid')
                 if not isinstance(pid, int) or pid <= 0: raise ProcessLookupError()
+                if proc is not None and proc.pid == pid and proc.poll() is not None: raise ProcessLookupError()
                 os.kill(pid, 0)
+                was = owner.get('identity')
+                now = _proc_identity(pid) if was else None
+                if was and now and now != was: raise ProcessLookupError()
             except (ProcessLookupError, PermissionError, TypeError):
                 state.update(status='FAILED', verified=False, terminal_reason='worker_unavailable')
         return state

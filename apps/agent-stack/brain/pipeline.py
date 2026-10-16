@@ -6070,7 +6070,13 @@ def _run_tool_heartbeat(pick: dict, utterance: str, *, hive, token, brain, **kw)
         tool = str((pick or {}).get("tool") or "converse")
         yield _pipeline_event(ok=True, tool=tool, spoken=TOOL_HEARTBEAT, spoken_delta=TOOL_HEARTBEAT, wires=[tool, "heartbeat"], cites=[],
                               pack=None, done=False, partial=True, brain=brain, model_available=bool(brain), gen=token)
-    th.join()
+    # Concurrency audit 2026-10-16: an unbounded join kept a stopped turn waiting on a hanging hand. Wait in slices; a
+    # cancelled turn returns at once (the hand's own deadline still bounds the thread it leaves behind).
+    while th.is_alive():
+        th.join(0.25)
+        if th.is_alive() and token and turn_cancelled(hive, token):
+            return {"ok": False, "tool": str((pick or {}).get("tool") or ""), "spoken": "Stopped. Standing by.", "cancelled": True,
+                    "task_verified": False, "wires": [], "cites": [], "sent": False}
     if "err" in box:
         raise box["err"]
     return box["ran"]
