@@ -168,6 +168,8 @@ class SafariDOM:
         return self._el(a, J.HOVER, f"Hovering {a.get('ref')}.", 0.8)
 
     def _type(self, a):
+        if a.get("real"):
+            return self._real_type(a)
         return self._el(a, J.type_script(str(a.get("text") or ""), a.get("replace", True) is not False,
                                          bool(a.get("submit"))), "Typed.", 2.0 if a.get("submit") else 0.5)
 
@@ -318,6 +320,20 @@ class SafariDOM:
         """The next confirm() on the page answers OK (only after his OK for anything that sends/pays/deletes)."""
         self.js(J.wrap(J.LIB + "guard();W.__jconfirm=true;return JSON.stringify({ok:1})"))
         return {"text": "the next confirmation on this page will answer OK"}
+
+    def _real_type(self, a):
+        """Foreground fallback for pages that ignore typed-in values (live 10-16: Facebook's friends search): the tab
+        comes in front, a real click focuses the field, real keystrokes type."""
+        got = self._real_click({"ref": a.get("ref")})
+        if "Real click" not in got.get("text", ""):
+            return got
+        if a.get("replace", True) is not False:
+            self.hands({"op": "key", "keys": "cmd+a"})
+        self.hands({"op": "type", "text": str(a.get("text") or "")})
+        if a.get("submit"):
+            self.hands({"op": "key", "keys": "return"})
+        time.sleep(1.5)
+        return self.snapshot("Typed for real. ")
 
     def _real_click(self, a):
         """Foreground fallback: real mouse at the element (brings the tab forward; he sees it happen)."""

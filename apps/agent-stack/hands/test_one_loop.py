@@ -7,6 +7,7 @@ others ... it is still not a complete harness." One agent loop for every turn, l
 import importlib.util
 import json
 import tempfile
+from unittest import mock
 import unittest
 from pathlib import Path
 
@@ -77,3 +78,31 @@ class OneLoop(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PrivateApps(unittest.TestCase):
+    """Live 10-16: asked to message Juliana on Facebook, Jarvis opened his Contacts and Messages on its own."""
+
+    def test_the_calls_from_that_job_are_held(self):
+        for name, args in [("shell", {"command": "osascript -e 'tell application \"Contacts\" to get {name} of people'"}),
+                           ("open", {"target": "Messages"}),
+                           ("computer", {"action": "screenshot", "app": "Messages"}),
+                           ("shell", {"command": "osascript -e 'tell application \"System Events\" to tell process \"Messages\" to click menu item 1'"})]:
+            self.assertTrue(O._private_app(name, args), args)
+        self.assertEqual(O._private_app("open", {"target": "Safari"}), "")
+        self.assertEqual(O._private_app("shell", {"command": "ls ~/Documents"}), "")
+
+    def test_held_unless_he_named_it(self):
+        hive = Path(tempfile.mkdtemp())
+        t = O.Task.create(hive, "Open Facebook, find Juliana in my friends list and send her hi")
+        ran = []
+        with mock.patch.object(O.Tools, "open", side_effect=lambda a: ran.append(a) or {"text": "exit 0"}):
+            O.step_once(t, O.Tools(t.path), lambda m, tools: {"ok": True, "calls": [{"tool": "open", "args": {"target": "Messages"}, "call_id": "a"}]})
+        self.assertEqual(ran, []); self.assertIn("did not ask for", t.read("messages.json")[-1]["content"])
+        t2 = O.Task.create(hive, "open my Messages app")
+        with mock.patch.object(O.Tools, "open", side_effect=lambda a: ran.append(a) or {"text": "exit 0"}):
+            O.step_once(t2, O.Tools(t2.path), lambda m, tools: {"ok": True, "calls": [{"tool": "open", "args": {"target": "Messages"}, "call_id": "b"}]})
+        self.assertEqual(len(ran), 1)
+
+    def test_it_is_told_to_stay_on_the_named_channel(self):
+        self.assertIn("Stay on the app or site he named", O.SYSTEM)

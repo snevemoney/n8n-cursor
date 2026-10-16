@@ -50,7 +50,10 @@ SYSTEM = (
     "in the BACKGROUND with the safari tool: open your own tab with new_tab (his current tab, his mouse and his front "
     "app stay his), work it by element numbers, and check the page that comes back after each action. Use his current "
     "tab (use_tab) only when he means the page he is looking at; when he asks to see it (let me see, show me, put it on my screen, anything like that) use show, which brings it in front of him; otherwise use show only when he wants to see the "
-    "result. Do not route around the page with shell, gh or open when he asked for the browser. If a page says LOGIN "
+    "result. Do not route around the page with shell, gh or open when he asked for the browser. Stay on the app or site he named for the whole task: never switch to another app or channel (Messages, Mail, "
+    "Contacts, phone, another site) to get it done another way; if you are stuck, say exactly what blocked you and ask. "
+    "Speech-to-text mishears him: read his words in the context of the place he named (after 'open Facebook', 'send a "
+    "iMessage' means a Facebook message); when unsure what he meant, ask in one line. If a page says LOGIN "
     "NEEDED, tell him in one line to log in to that site in Safari and wait for him (ask_owner); never type his "
     "passwords. (Background research without a browser: web_search and fetch_url.) For a desktop app he wants to see, open or activate it so it comes to the front. To learn from a video, an X post or a link he gives you, or when he says look for new signals (his Watch Later and X bookmarks), use the signal tool. If a site wants a login he has in "
     "an app instead (Spotify.app), use the app with computer. For desktop apps use "
@@ -122,7 +125,7 @@ TOOLS = [
         "scroll direction=down [ref=N], find text=..., wait_for text=..., read, back/forward/reload, navigate url=..., "
         "tabs, use_tab window=W index=N (his current tab when he means the page he is on), show (bring your tab into "
         "view when he wants to see it), close_tab (only yours), eval code='return ...', upload ref=N path=..., dialog. "
-        "real=true on click = a real mouse click in the foreground, only if a page ignores the normal click. Every action "
+        "real=true on click or type = real mouse and keys in the foreground, only if the page ignored the normal way. Every action "
         "returns the page after it.",
         {"action": {"type": "string", "enum": ["snapshot", "navigate", "new_tab", "click", "double_click", "hover", "type",
                                                "select", "check", "key", "scroll", "find", "wait_for", "read", "back",
@@ -801,6 +804,11 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
             continue
         decision, why = _authority().authorize(name, args)
         if decision == "allow" and name not in TERMINAL:
+            private = _private_app(name, args)
+            if private and not re.search(PRIVATE_APPS[private], _his_last_words(messages), re.I):
+                # live 10-16: asked to message someone on Facebook, it opened his Contacts and Messages on its own
+                decision, why = "ask", f"that opens his {private}, which he did not ask for"
+        if decision == "allow" and name not in TERMINAL:
             held = tools.preflight(name, args) if hasattr(tools, "preflight") else ""
             if held:
                 decision, why = "ask", f"that {held}"
@@ -1007,6 +1015,27 @@ def running(hive: Path) -> bool:
 
 YES_RE = re.compile(r"^\W*(yes|yeah|yep|ok|okay|sure|go ahead|go for it|do it|send it|post it|confirm|confirmed|approved?|"
                     r"oui|vas-y|d'accord)\b", re.I)
+
+
+PRIVATE_APPS = {"Messages": r"\b(i?messages?|imessage|text)\b", "Contacts": r"\bcontacts?\b", "Mail": r"\b(e-?mail|mail|inbox)\b",
+                "Photos": r"\bphotos?\b", "Notes": r"\bnotes?\b", "Calendar": r"\b(calendar|agenda|schedule)\b",
+                "FaceTime": r"\bface ?time\b", "Reminders": r"\breminders?\b", "WhatsApp": r"\bwhats ?app\b",
+                "Signal": r"\bsignal app\b", "Telegram": r"\btelegram\b"}
+
+
+def _private_app(name: str, args: dict) -> str:
+    """The private app a tool call would open, read or drive, if any."""
+    text = "\n".join(str(args.get(k)).strip() for k in ("target", "command", "app") if args.get(k))
+    if name not in ("open", "shell", "computer") or not text:
+        return ""
+    for app in PRIVATE_APPS:
+        if re.search(rf"(application \\?\"{app}\\?\"|-a {app}\b|^{app}$|process \\?\"{app}\\?\"|\b{app}\.app\b)", text, re.I | re.M):
+            return app
+    return ""
+
+
+def _his_last_words(messages: list) -> str:
+    return next((str(m.get("content")) for m in reversed(messages) if m.get("role") == "user" and isinstance(m.get("content"), str)), "")
 
 
 def _fingerprint(name: str, args: dict) -> str:
