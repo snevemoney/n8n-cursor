@@ -5562,6 +5562,17 @@ class ActiveExchangeContextTest(unittest.TestCase):
         self.assertIn("carry relevant user constraints",brief)
         self.assertLessEqual(brief.count("Evens:"),12)
 
+    def test_long_latest_answer_stays_with_its_question(self):
+        # Live 2026-10-16: "list my books from icloud folder" -> a 272-file list; the list was rendered ABOVE the
+        # "Immediately prior turn" header and the question below it alone, so "read all of them" had no referent.
+        turns=[{"user":"Earlier unrelated ask.","jarvis":"Earlier answer."},
+               {"user":"list my books from icloud folder","jarvis":"Sir. Found 272 EPUB/PDF documents. "+"Book title.pdf; "*80}]
+        brief=PIPE.sitting_brief(turns,{},retrieve_roots=[],utterance="can you read all of them related to ai?")
+        head=brief.index("Immediately prior turn")
+        self.assertGreater(brief.index("Found 272 EPUB/PDF documents"),head)
+        self.assertGreater(brief.index("list my books from icloud folder"),head)
+        self.assertLess(brief.index("Earlier answer."),head)
+
     def test_focus_and_background_share_one_bounded_history_budget(self):
         turns=[{"user":f"Old topic {i}.","jarvis":"Background detail. "*30} for i in range(20)]
         turns.append({"user":"Keep the UI unchanged.","jarvis":"I will trace authentication."})

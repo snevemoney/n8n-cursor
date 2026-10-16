@@ -4233,12 +4233,12 @@ def sitting_brief(
         # assistant answer was long, while unrelated earlier turns competed
         # equally with the current topic.
         latest = recent[-1] if recent else {}
-        active = []
-        for key, label in (("user", "Evens"), ("jarvis", "Jarvis")):
-            value = str(latest.get(key) or "").strip()
-            line = f"{label}: {value}"
-            if value and line in recent_lines:
-                active.append(line)
+        # The latest exchange is the tail of recent_lines, taken by position: those lines are clipped, so matching the
+        # unclipped reply missed every long answer and left the question alone under the header (live 10-16: a
+        # 272-book list sat above it and "read all of them" had no referent).
+        n_latest = sum(1 for key in ("user", "jarvis") if str(latest.get(key) or "").strip())
+        convo = [line for line in recent_lines if line.startswith(("Evens: ", "Jarvis: "))]
+        active = convo[-n_latest:] if n_latest else []
         head = (
             "Immediately prior turn (active discussion, not a new request):\n"
             "Resolve follow-ups against this exchange and carry relevant user constraints "
