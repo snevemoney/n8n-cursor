@@ -124,7 +124,7 @@ def youtube(sig: dict, work: Path) -> dict:
     log(f"{vid}: transcript {len(transcript.split())} words from {caps[0].name if caps else 'no captions'}")
     sheets, keyframes = [], []
     try:
-        video = download(sig["url"], work)
+        video = download(sig["url"], work, meta.get("duration") or 0)
         sheets, keyframes = contact_sheets(video, work / "sheets")
     finally:
         for v in work.glob("video.*"):
@@ -138,14 +138,19 @@ def youtube(sig: dict, work: Path) -> dict:
 CLIENTS = ("default", "mweb", "tv", "ios")  # live 10-16: the default client got HTTP 403, mweb worked
 
 
-def download(url: str, work: Path) -> Path:
+def download_timeout(duration: float) -> int:
+    """Live limit was a flat 30 min; a 2 h video at a slow link needs longer."""
+    return max(1800, int(float(duration or 0) * 1.5))
+
+
+def download(url: str, work: Path, duration: float = 0) -> Path:
     """<=720p copy into the temp cache, trying YouTube player clients in turn."""
     errors = []
     for client in CLIENTS:
         extra = [] if client == "default" else ["--extractor-args", f"youtube:player_client={client}"]
         cp = subprocess.run(["yt-dlp", "--no-update", "--no-warnings", *extra, "-f", f"b[height<={MAX_HEIGHT}]/bv*[height<={MAX_HEIGHT}]+ba/b",
                              "--merge-output-format", "mp4", "-o", str(work / "video.%(ext)s"), url],
-                            capture_output=True, text=True, timeout=1800)
+                            capture_output=True, text=True, timeout=download_timeout(duration))
         got = [p for p in work.glob("video.*") if p.suffix in (".mp4", ".webm", ".mkv")]
         if cp.returncode == 0 and got:
             return got[0]
@@ -155,10 +160,32 @@ def download(url: str, work: Path) -> Path:
     raise RuntimeError("could not download the video (" + "; ".join(errors) + "); try his Safari route")
 
 
-KEEP_FILTER = "mpdecimate=hi=64*400:lo=64*160:frac=0.5"  # a frame counts only when the screen really changed
+# ffmpeg's default duplicate test: only frames identical to the last kept one are dropped. Live 10-16 the old setting
+# (hi=64*400:lo=64*160:frac=0.5) kept 3 of 274 frames of a HUD demo and lost every on-screen change but scene cuts.
+KEEP_FILTER = "mpdecimate"
 KEYFRAME_W = 1280   # readable on-screen text (prompts, code, repo names) for the vision pass; not stored
 SHEET_W = 320       # stored contact-sheet tiles (the repo copy)
-KEYFRAMES_TO_MODEL = 60
+KEYFRAMES_TO_MODEL = 60    # images attached to the final extraction call (all frames are read via frame_notes)
+FRAMES_PER_NOTE_CALL = 40  # images per frame-notes call; every kept frame is read, in order, no sampling
+FRAME_NOTES_PROMPT = """These are consecutive frames from a video (time shown before each). For EVERY frame write one line:
+"MM:SS — what is on screen": exact visible text (titles, prompts, code, commands, file and repo names, URLs, settings,
+numbers), the app or UI shown, and what changed since the previous frame. Do not skip frames, do not summarise across
+frames, do not guess what is not visible. Plain lines only."""
+
+
+def frame_notes(keys: list) -> tuple:
+    """Read every kept frame in batches (Evens 10-16: "so jarvis skimmed nothing?"; 7 of 26 videos had half their
+    frames dropped by a 60-image cap). Returns (notes text, frames read)."""
+    notes, read = [], 0
+    for at in range(0, len(keys), FRAMES_PER_NOTE_CALL):
+        batch = keys[at:at + FRAMES_PER_NOTE_CALL]
+        content = [{"type": "text", "text": FRAME_NOTES_PROMPT}]
+        for k, t in batch:
+            content.append({"type": "text", "text": f"frame at {_mmss(int(t))}:"})
+            content.append({"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + base64.b64encode(Path(k).read_bytes()).decode()}})
+        notes.append(_openrouter([{"role": "user", "content": content}], max_tokens=8000).strip())
+        read += len(batch)
+    return "\n".join(notes), read
 
 
 def contact_sheets(video: Path, out: Path) -> tuple:
@@ -260,7 +287,7 @@ for videos, the contact sheets (one frame every {every} s; sheet N covers minute
 bottom; each image is labeled with its sheet name; sheets/INDEX.md, given below, lists every frame's time). Keep apart what was SAID and what was SHOWN on
 screen; never invent a click or a UI path you cannot see; tape numbers and prices are UNVERIFIED.
 
-Return JSON only: {{"learned_md": "...", "methods": [...]}}
+Return JSON only: {{"learned_md": "...", "methods": [...], "capabilities": [...]}}
 learned_md: markdown with these sections: A. Source map (beats in order, with times) · B. Atomic knowledge (claim,
 why, conditions, evidence, SOURCE/INFERENCE label) · C. Procedures as ordered steps · D. Shown on screen (what the
 sheets show: tools, screens, prompts, code, settings, at which times; say UNKNOWN when not visible) · E. Said vs shown
@@ -268,9 +295,15 @@ mismatches · F. Failures and recoveries · G. Decision points (IF -> THEN) · H
 were used for · I. Challenges (what may be wrong, outdated or hype) · J. Use for Jarvis (how Evens's Mac operator could
 apply it) · K. Open questions.
 methods: EVERY concrete reusable method in the source (one signal can hold 60; never cap, never merge different ones):
-{{"name","family" (computer-use|browser-use|jev-routing|models-ai|jarvis-assistant|workflows|skills|repos-tools|mcp|
-wiring-engineering|coding-agents|memory|voice-ui|signal-ingestion|evals|cost-ops|content-creative|business),
+{{"name","family" (computer-use|browser-use|jev-routing-decisions|models-ai|jarvis-assistant|workflows-automation|skills|
+repos-tools-install|mcp-connectors|wiring-engineering-architecture|coding-agents|memory-knowledge|voice-ui|
+signal-ingestion-research|evals-verification|cost-ops|content-creative|business-other),
 "summary","steps":[...],"at":"mm:ss or section","evidence":"shown|said|claimed","tools":[...],"jarvis_use":"one line"}}
+capabilities: EVERY ability the thing in the source has (what it can DO for its user, e.g. "opens apps by voice",
+"remembers past chats", "controls the browser in the background"), one entry each:
+{{"name","what_it_does","evidence":"shown working|said|claimed","at":"mm:ss","built_with":[tools/repos/models],
+"jarvis_has":"yes|partly|no|unknown" (Jarvis = Evens's Mac operator: voice Face, own-cursor computer use, background
+Safari DOM control, native-app Accessibility, shell/files, research, signal learning, kept stops for send/pay/delete)}}
 
 SOURCE: {title} ({kind}, {meta})
 {body}"""
@@ -300,20 +333,77 @@ def _openrouter(messages: list, max_tokens: int = 32000) -> str:
     raise RuntimeError(f"no model answered ({last})")
 
 
+SEGMENT_S = 1200  # long videos (1-2 h) are read in 20-minute parts so no frame, line or method is cut off
+LINE_T = re.compile(r"^\[(\d+):(\d\d)\]")
+
+
+def _segments(got: dict) -> list:
+    """Split a long video by time: each part gets its own transcript lines and frames, each exactly once."""
+    dur = int(got.get("duration") or 0)
+    keys = got.get("keyframes") or []
+    if keys:
+        dur = max(dur, int(keys[-1][1]) + 1)
+    if dur <= SEGMENT_S * 1.25:
+        return [(got, "")]
+    lines = (got.get("transcript") or "").splitlines()
+
+    def when(line: str) -> int:
+        m = LINE_T.match(line)
+        return int(m.group(1)) * 60 + int(m.group(2)) if m else -1
+
+    parts, last = [], -1
+    for a in range(0, dur, SEGMENT_S):
+        b = a + SEGMENT_S
+        mine = []
+        for ln in lines:
+            t = when(ln)
+            t = last if t < 0 else t  # an untimed line stays with the line before it
+            last = t
+            if a <= max(t, 0) < b:
+                mine.append(ln)
+        seg = {**got, "transcript": "\n".join(mine), "keyframes": [(k, t) for k, t in keys if a <= t < b],
+               "sheets": [] if keys else got.get("sheets")}
+        parts.append((seg, f"part {_mmss(a)}-{_mmss(min(b, dur))}"))
+    return parts
+
+
 def extract(sig: dict, got: dict) -> dict:
+    """Whole source, every frame. Long videos go part by part and the parts are joined."""
+    parts = _segments(got)
+    if len(parts) == 1:
+        return _extract_one(sig, got, "")
+    learned, methods, caps, kept, read = [], [], [], 0, 0
+    for seg, label in parts:
+        r = _extract_one(sig, seg, label)
+        learned.append(f"## {label}\n\n{r.get('learned_md') or ''}")
+        methods += r.get("methods") or []
+        caps += r.get("capabilities") or []
+        kept += (r.get("coverage") or {}).get("frames_kept", 0)
+        read += (r.get("coverage") or {}).get("frames_read", 0)
+    return {"learned_md": "\n\n".join(learned), "methods": methods, "capabilities": caps,
+            "coverage": {"frames_kept": kept, "frames_read": read}}
+
+
+def _extract_one(sig: dict, got: dict, label: str) -> dict:
     body = got.get("transcript") or "(no transcript)"
     for p in got.get("pages") or []:
         body += f"\n\n=== LINKED PAGE {p.get('final') or p.get('url')} — {p.get('title')} ===\n{p.get('text')}"
     if got.get("description"):
         body = f"DESCRIPTION:\n{got['description'][:4000]}\n\nTRANSCRIPT:\n{body}"
     meta = f"channel {got.get('channel')}, {got.get('duration')} s" if sig["kind"] == "youtube" else sig["url"]
+    if label:
+        meta += f"; THIS CALL COVERS ONLY {label} of the video (other parts are read separately)"
     content = [{"type": "text", "text": EXTRACT_PROMPT.format(every=FRAME_EVERY_S, title=got.get("title"), kind=sig["kind"],
                                                               meta=meta, body=body[:600000])}]
     sheets = got.get("sheets") or []
     if sheets and (Path(sheets[0]).parent / "INDEX.md").exists():
         content[0]["text"] += "\n\nFRAME TIMES (sheets/INDEX.md):\n" + (Path(sheets[0]).parent / "INDEX.md").read_text()[:20000]
     keys = got.get("keyframes") or []
-    if keys:  # full-size changed frames: readable prompts, code, repo names, settings
+    read = 0
+    if keys:  # every kept frame is read first; the notes go into the extraction with an even spread of the images
+        notes, read = frame_notes(keys)
+        content[0]["text"] += "\n\nFRAME NOTES (every kept frame, in order):\n" + notes[:200000]
+    if keys:
         step = max(1, -(-len(keys) // KEYFRAMES_TO_MODEL))
         for k, t in keys[::step]:
             content.append({"type": "text", "text": f"frame at {_mmss(int(t))}:"})
@@ -324,6 +414,7 @@ def extract(sig: dict, got: dict) -> dict:
             content.append({"type": "text", "text": f"{Path(s).name}:"})
             content.append({"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + base64.b64encode(Path(s).read_bytes()).decode()}})
     out = _json(_openrouter([{"role": "user", "content": content}]))
+    out["coverage"] = {"frames_kept": len(keys), "frames_read": read}
     if not isinstance(out.get("methods"), list):
         raise RuntimeError("the model returned no methods list")
     # live 10-16: one pass folded a whole tutorial into 2 methods. A second, method-only pass splits every distinct
@@ -335,8 +426,37 @@ def extract(sig: dict, got: dict) -> dict:
     return out
 
 
+def _coverage_line(ext: dict) -> str:
+    c = ext.get("coverage") or {}
+    if not c.get("frames_kept"):
+        return "Frames: none (text only)\n"
+    return f"Frames: read {c.get('frames_read')} of {c.get('frames_kept')} kept (one frame every {FRAME_EVERY_S} s, identical frames dropped)\n"
+
+
 def _json(raw: str) -> dict:
-    return json.loads(re.sub(r"^```(?:json)?|```$", "", raw.strip()).strip())
+    """The model's JSON. Live 10-16: long videos sometimes came back as two objects back to back ("Extra data"),
+    the second holding the rest of the methods; all objects are read and their methods lists joined."""
+    text = re.sub(r"^```(?:json)?|```$", "", raw.strip()).strip()
+    dec, at, parts = json.JSONDecoder(), 0, []
+    while at < len(text):
+        while at < len(text) and text[at] in " \t\r\n,`":
+            at += 1
+        if at >= len(text):
+            break
+        obj, at = dec.raw_decode(text, at)
+        parts.append(obj)
+    if not parts or not isinstance(parts[0], dict):
+        raise ValueError("the model returned no JSON object")
+    out = dict(parts[0])
+    for extra in parts[1:]:
+        if not isinstance(extra, dict):
+            continue
+        for k, v in extra.items():
+            if k == "methods" and isinstance(v, list):
+                out["methods"] = list(out.get("methods") or []) + v
+            else:
+                out.setdefault(k, v)
+    return out
 
 
 SWEEP_PROMPT = """Split this signal into ATOMIC methods. A method is one distinct, reusable thing someone could copy:
@@ -398,7 +518,8 @@ def write_packet(sig: dict, got: dict, ext: dict, work: Path) -> Path:
         + f"\n**Ingested:** {time.strftime('%Y-%m-%d %H:%M')} by Jarvis\n**Contact sheets:** {len(got.get('sheets') or [])} "
           f"(one frame every {FRAME_EVERY_S} s, {SHEET_COLS}x{SHEET_ROWS} per sheet)\n**Methods:** {n} (methods.jsonl)\n"
           f"**Links:** {', '.join(got.get('links') or []) or 'none'}\n")
-    (d / "LEARNED.md").write_text(f"# LEARNED — {sig['id']}\nProtocol: jarvis-signal-engine\n\n" + str(ext.get("learned_md") or ""))
+    (d / "LEARNED.md").write_text(f"# LEARNED — {sig['id']}\nProtocol: jarvis-signal-engine\n" + _coverage_line(ext) + "\n" + str(ext.get("learned_md") or ""))
+    (d / "capabilities.jsonl").write_text("".join(json.dumps({**c, "source_id": sig["id"]}) + "\n" for c in ext.get("capabilities") or []))
     (d / "methods.jsonl").write_text("\n".join(json.dumps({**m, "source_id": sig["id"]}) for m in ext["methods"]) + "\n")
     subprocess.run(["git", "-C", str(root), "add", str(d.relative_to(root))], check=True)
     subprocess.run(["git", "-C", str(root), "commit", "-q", "-m", f"signals: {sig['id']} — {n} methods ({sig['kind']})\n\n"
@@ -437,7 +558,7 @@ def _ingest(url: str, force: bool = False) -> dict:
         log(f"{sig['id']}: extracting methods")
         ext = extract(sig, got)
         d = write_packet(sig, got, ext, work)
-        ledger({"event": "packet", "id": sig["id"], "methods": len(ext["methods"]), "path": str(d)})
+        ledger({"event": "packet", "id": sig["id"], "methods": len(ext["methods"]), "path": str(d), "coverage": ext.get("coverage")})
         extra = [classify(u)["url"] for u in got.get("links") or [] if classify(u)["kind"] == "youtube"]
         return {"id": sig["id"], "status": "DONE", "methods": len(ext["methods"]), "packet": str(d), "also_signals": extra,
                 "text": f"{got.get('title')}: {len(ext['methods'])} methods, packet {d}"}
@@ -532,6 +653,127 @@ def push() -> dict:
     return {"ok": cp.returncode == 0, "text": (cp.stdout + cp.stderr)[-1500:]}
 
 
+INDEX = "docs/hive/outer-heaven/CONTENT/watch-later/index"
+FAMILY = {"jev-routing": "jev-routing-decisions", "workflows": "workflows-automation", "repos-tools": "repos-tools-install",
+          "mcp": "mcp-connectors", "wiring-engineering": "wiring-engineering-architecture", "memory": "memory-knowledge",
+          "signal-ingestion": "signal-ingestion-research", "evals": "evals-verification", "business": "business-other",
+          "app-reverse-engineering": "coding-agents", "debugging": "coding-agents", "knowledge-management": "memory-knowledge",
+          "system-architecture": "wiring-engineering-architecture", "testing-verification": "evals-verification",
+          "prompt-engineering": "models-ai"}
+CATALOG = Path.home() / "jarvis-proof/signals-corpus-20261016/methods-catalog.jsonl"
+
+
+STANDARD = ("computer-use", "browser-use", "jev-routing-decisions", "models-ai", "jarvis-assistant", "workflows-automation",
+            "skills", "repos-tools-install", "mcp-connectors", "wiring-engineering-architecture", "coding-agents",
+            "memory-knowledge", "voice-ui", "signal-ingestion-research", "evals-verification", "cost-ops",
+            "content-creative", "business-other")
+FAMILY_WORDS = (("browser", "browser-use"), ("computer", "computer-use"), ("screen", "computer-use"), ("mcp", "mcp-connectors"),
+                ("route", "jev-routing-decisions"), ("decision", "jev-routing-decisions"), ("voice", "voice-ui"), ("ui", "voice-ui"),
+                ("memory", "memory-knowledge"), ("knowledge", "memory-knowledge"), ("eval", "evals-verification"),
+                ("test", "evals-verification"), ("verif", "evals-verification"), ("cost", "cost-ops"), ("ops", "cost-ops"),
+                ("code", "coding-agents"), ("debug", "coding-agents"), ("engineer", "wiring-engineering-architecture"),
+                ("architect", "wiring-engineering-architecture"), ("security", "wiring-engineering-architecture"),
+                ("repo", "repos-tools-install"), ("tool", "repos-tools-install"), ("install", "repos-tools-install"),
+                ("skill", "skills"), ("workflow", "workflows-automation"), ("automat", "workflows-automation"),
+                ("signal", "signal-ingestion-research"), ("research", "signal-ingestion-research"), ("model", "models-ai"),
+                ("prompt", "models-ai"), ("ai", "models-ai"), ("jarvis", "jarvis-assistant"), ("assistant", "jarvis-assistant"),
+                ("content", "content-creative"), ("creative", "content-creative"), ("video", "content-creative"),
+                ("design", "content-creative"))
+
+
+def family_of(name) -> str:
+    f = FAMILY.get(name or "", name or "")
+    if f in STANDARD:
+        return f
+    low = str(f).lower()
+    return next((std for word, std in FAMILY_WORDS if word in low), "business-other")
+
+
+def build_index() -> dict:
+    """Machine-readable index of every signal, next to the packets (Evens 10-16: store signals properly, CSV and more):
+    videos.csv (every Watch Later video + whether and how it was learned), methods.csv (every method: the recovered
+    catalog plus every Jarvis packet), families.csv (methods per family and Jarvis status). GridCraft/WordCraft render
+    the readable versions from these."""
+    import csv
+    root = worktree()
+    out = root / INDEX
+    out.mkdir(parents=True, exist_ok=True)
+    packets = root / PACKETS
+    vids = json.loads((CACHE / "watch-later.json").read_text()) if (CACHE / "watch-later.json").exists() else []
+    seen = {v["id"] for v in vids}
+    for d in sorted(p for p in packets.iterdir() if p.is_dir()):
+        if d.name not in seen:
+            vids.append({"id": d.name, "link": "", "title": "", "channel": "", "length": ""})
+    methods, per_packet, caps = [], {}, []
+    for d in sorted(p for p in packets.iterdir() if p.is_dir()):
+        for f in (d / "methods.jsonl", d / "jarvis-pass" / "methods.jsonl"):
+            if f.exists():
+                rows = [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
+                per_packet[d.name] = per_packet.get(d.name, 0) + len(rows)
+                for m in rows:
+                    methods.append({"source": "jarvis-signal-engine", "signal_id": d.name, "name": m.get("name"),
+                                    "family": family_of(m.get("family")), "evidence": m.get("evidence"), "at": m.get("at"),
+                                    "summary": m.get("summary"), "steps": " | ".join(m.get("steps") or []),
+                                    "tools": ", ".join(m.get("tools") or []), "jarvis_use": m.get("jarvis_use"),
+                                    "jarvis_status": "", "priority": ""})
+        for f in (d / "capabilities.jsonl", d / "jarvis-pass" / "capabilities.jsonl"):
+            if f.exists():
+                for c in (json.loads(l) for l in f.read_text().splitlines() if l.strip()):
+                    caps.append({"signal_id": d.name, "name": c.get("name"), "what_it_does": c.get("what_it_does"),
+                                 "evidence": c.get("evidence"), "at": c.get("at"),
+                                 "built_with": ", ".join(c.get("built_with") or []), "jarvis_has": c.get("jarvis_has")})
+    if CATALOG.exists():
+        for line in CATALOG.read_text().splitlines():
+            m = json.loads(line)
+            methods.append({"source": "recovery-2026-10-16", "signal_id": "; ".join((m.get("sources") or [])[:6]),
+                            "name": m.get("name"), "family": m.get("family"), "evidence": m.get("evidence"), "at": "",
+                            "summary": m.get("summary"), "steps": " | ".join(m.get("steps") or []),
+                            "tools": ", ".join(m.get("tools_repos") or []), "jarvis_use": m.get("jarvis_use"),
+                            "jarvis_status": m.get("jarvis_status"), "priority": m.get("priority")})
+    with (out / "videos.csv").open("w", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(["video_id", "title", "channel", "duration", "duration_seconds", "link", "packet", "researcher_notes",
+                    "jarvis_frames", "frames_read", "methods"])
+        for v in vids:
+            d = packets / v["id"]
+            lrn = (d / "LEARNED.md").read_text(errors="ignore")[:300] if (d / "LEARNED.md").exists() else ""
+            jarvis = (d / "sheets").exists() or (d / "jarvis-pass").exists()
+            mine = d / "jarvis-pass" / "LEARNED.md" if (d / "jarvis-pass" / "LEARNED.md").exists() else d / "LEARNED.md"
+            cov = re.search(r"Frames: read (\d+) of (\d+)", mine.read_text(errors="ignore")[:600]) if mine.exists() else None
+            secs = 0
+            for part in str(v.get("length") or "").split(":"):
+                secs = secs * 60 + int(part) if part.isdigit() else secs
+            dur = (f"{secs // 3600}h {secs % 3600 // 60}m {secs % 60}s" if secs >= 3600 else f"{secs // 60}m {secs % 60}s") if secs else ""
+            w.writerow([v["id"], v.get("title"), v.get("channel"), dur, secs or "", v.get("link"),
+                        "yes" if d.exists() else "no", "yes" if lrn and "jarvis-signal-engine" not in lrn else "no",
+                        "yes" if jarvis else "no", f"{cov.group(1)}/{cov.group(2)}" if cov else "", per_packet.get(v["id"], 0)])
+    with (out / "capabilities.csv").open("w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=["signal_id", "name", "what_it_does", "evidence", "at", "built_with", "jarvis_has"])
+        w.writeheader(); w.writerows(caps)
+    with (out / "methods.csv").open("w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(methods[0].keys()) if methods else ["name"])
+        w.writeheader(); w.writerows(methods)
+    fam = {}
+    for m in methods:
+        f = fam.setdefault(m.get("family") or "other", {"HAVE": 0, "PARTIAL": 0, "MISSING": 0, "NOT_FOR_JARVIS": 0, "UNGRADED": 0})
+        f[m.get("jarvis_status") or "UNGRADED"] = f.get(m.get("jarvis_status") or "UNGRADED", 0) + 1
+    with (out / "families.csv").open("w", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(["family", "methods", "have", "partial", "missing", "not_for_jarvis", "ungraded"])
+        for k, f in sorted(fam.items(), key=lambda kv: -sum(kv[1].values())):
+            w.writerow([k, sum(f.values()), f["HAVE"], f["PARTIAL"], f["MISSING"], f["NOT_FOR_JARVIS"], f["UNGRADED"]])
+    done = sum(1 for v in vids if (packets / v["id"]).exists())
+    (out / "README.md").write_text(
+        "# Signals index\n\nGenerated by Jarvis's signal engine (`signals.py index`); regenerate after every run.\n\n"
+        f"- `videos.csv`: {len(vids)} videos (his Watch Later + packets), {done} learned.\n"
+        f"- `methods.csv`: {len(methods)} methods (recovered catalog + Jarvis packets), with family, evidence, steps, tools, "
+        "Jarvis status.\n- `families.csv`: methods per family and Jarvis status.\n"
+        f"- `capabilities.csv`: {len(caps)} capabilities seen in the sources (what each thing can do, and whether Jarvis has it).\n"
+        "- `*.xlsx`: the same data as formatted GridCraft workbooks; `METHODS-REPORT.docx`: readable report (WordCraft).\n")
+    return {"videos": len(vids), "learned": done, "methods": len(methods), "capabilities": len(caps), "families": len(fam), "path": str(out),
+            "text": f"index: {len(vids)} videos ({done} learned), {len(methods)} methods, {len(fam)} families in {out}"}
+
+
 def status() -> dict:
     rows = [json.loads(l) for l in LEDGER.read_text().splitlines()] if LEDGER.exists() else []
     done = [r for r in rows if r.get("event") == "packet"]
@@ -560,6 +802,8 @@ def main(argv: list) -> int:
         out = {"count": len(vids), "path": str(CACHE / "watch-later.json"), "notes": sc.get("notes"),
                "sample": vids[:3], "text": f"{len(vids)} Watch Later videos with title, channel, length and link in "
                                           f"{CACHE / 'watch-later.json'} (JSON list)"}
+    elif cmd == "index":
+        out = build_index()
     elif cmd == "push":
         out = push()
     else:

@@ -34,7 +34,7 @@ class Safety(unittest.TestCase):
         work = Path(tempfile.mkdtemp())
         (work / "cap.en.json3").write_text('{"events": []}')
 
-        def dl(url, w):
+        def dl(url, w, duration=0):
             p = w / "video.mp4"; p.write_bytes(b"x"); return p
         with mock.patch.object(S.subprocess, "run", return_value=mock.Mock(stdout='{"title": "t"}', returncode=0)), \
              mock.patch.object(S, "download", side_effect=dl), \
@@ -56,6 +56,80 @@ class Tool(unittest.TestCase):
         self.assertTrue(sh.call_args[0][0]["background"]); self.assertIn("signals.py", sh.call_args[0][0]["command"])
         self.assertIn("background job", got["text"])
         self.assertIn("signal", {x["function"]["name"] for x in O.TOOLS})
+
+
+class ModelJson(unittest.TestCase):  # live 10-16: 3 of 26 videos failed with "Extra data" (two objects back to back)
+    def test_fenced_single_object(self):
+        self.assertEqual(S._json('```json\n{"methods": [1]}\n```'), {"methods": [1]})
+
+    def test_two_objects_back_to_back_are_merged(self):
+        got = S._json('{"learned_md": "x", "methods": [{"name": "a"}]}\n{"methods": [{"name": "b"}]}')
+        self.assertEqual(got["learned_md"], "x")
+        self.assertEqual([m["name"] for m in got["methods"]], ["a", "b"])
+
+    def test_garbage_still_raises(self):
+        with self.assertRaises(ValueError):
+            S._json("no json here")
+
+
+class EveryFrame(unittest.TestCase):  # Evens 10-16 "so jarvis skimmed nothing?": 7 of 26 videos lost half their frames
+    def _keys(self, n):
+        d = Path(tempfile.mkdtemp())
+        out = []
+        for i in range(n):
+            f = d / f"k_{i:05d}.jpg"; f.write_bytes(b"jpg"); out.append((f, i * 2.0))
+        return out
+
+    def test_every_kept_frame_is_read_in_batches(self):
+        seen = []
+        def fake(messages, **k):
+            imgs = [p for p in messages[0]["content"] if p.get("type") == "image_url"]
+            seen.append(len(imgs))
+            return "notes"
+        with mock.patch.object(S, "_openrouter", side_effect=fake):
+            notes, read = S.frame_notes(self._keys(95))
+        self.assertEqual(sum(seen), 95)
+        self.assertTrue(all(n <= S.FRAMES_PER_NOTE_CALL for n in seen))
+        self.assertEqual(read, 95)
+
+    def test_filter_only_drops_identical_frames(self):
+        self.assertNotIn("400", S.KEEP_FILTER)
+
+
+class LongVideos(unittest.TestCase):  # Evens 10-16: "what if jarvis encounters videos over 1h-2h?"
+    def _got(self, seconds):
+        d = Path(tempfile.mkdtemp()); keys = []
+        for i in range(0, seconds, 2):
+            f = d / f"k_{i:06d}.jpg"; f.write_bytes(b"j"); keys.append((f, float(i)))
+        lines = "\n".join(f"[{t // 60:02d}:{t % 60:02d}] line {t}" for t in range(0, seconds, 30))
+        return {"title": "t", "duration": seconds, "transcript": lines, "keyframes": keys, "sheets": []}
+
+    def test_two_hour_video_is_read_in_segments_with_nothing_dropped(self):
+        got = self._got(7200)
+        calls = []
+        def fake_one(sig, seg, label):
+            calls.append(seg)
+            return {"learned_md": label, "methods": [{"name": label}], "capabilities": [{"name": label}],
+                    "coverage": {"frames_kept": len(seg["keyframes"]), "frames_read": len(seg["keyframes"])}}
+        with mock.patch.object(S, "_extract_one", side_effect=fake_one):
+            out = S.extract({"kind": "youtube", "id": "x", "url": "u"}, got)
+        self.assertEqual(len(calls), 7200 // S.SEGMENT_S)
+        self.assertEqual(sum(len(c["keyframes"]) for c in calls), 3600)            # every frame, once
+        self.assertEqual(sum(c["transcript"].count("\n") + 1 for c in calls), 240)  # every transcript line, once
+        self.assertEqual(out["coverage"], {"frames_kept": 3600, "frames_read": 3600})
+        self.assertEqual(len(out["methods"]), len(calls)); self.assertEqual(len(out["capabilities"]), len(calls))
+
+    def test_short_video_is_one_segment(self):
+        with mock.patch.object(S, "_extract_one", return_value={"methods": [], "coverage": {}}) as one:
+            S.extract({"kind": "youtube", "id": "x", "url": "u"}, self._got(600))
+        self.assertEqual(one.call_count, 1)
+
+    def test_download_timeout_grows_with_length(self):
+        self.assertGreaterEqual(S.download_timeout(7200), 7200)
+        self.assertEqual(S.download_timeout(300), 1800)
+
+    def test_capabilities_are_asked_for(self):
+        self.assertIn("capabilities", S.EXTRACT_PROMPT)
 
 
 if __name__ == "__main__":
