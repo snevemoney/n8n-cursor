@@ -1,5 +1,6 @@
 """Evens 2026-10-16: everything he wants and cares about reaches Jarvis every job (Operator Profile)."""
 import importlib.util
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -33,6 +34,27 @@ class OperatorProfile(unittest.TestCase):
         (self.d / "EVENS-PROFILE.md").write_text("key sk-or-v1-" + "a" * 40)
         with mock.patch.object(O, "OPERATOR_PROFILE", self.d):
             self.assertNotIn("sk-or-v1-aaaa", O.operator_profile())
+
+
+class OpsAlerts(unittest.TestCase):  # Evens 10-16: bring things to light, no pop-ups, once
+    def setUp(self):
+        self.d = Path(tempfile.mkdtemp())
+        (self.d / "alerts.json").write_text(json.dumps([
+            {"id": "credits", "level": "RED", "title": "OpenRouter is out of credits", "fix": "Top up", "owner": "Evens", "fresh": True},
+            {"id": "prs", "level": "AMBER", "title": "PR backlog", "fix": "triage", "owner": "Forge", "fresh": True}]))
+        self.seen = self.d / "mentioned.json"
+
+    def test_new_alerts_reach_jarvis_once(self):
+        with mock.patch.object(O, "OPS_WATCH", self.d), mock.patch.object(O, "OPS_MENTIONED", self.seen):
+            first = O.ops_alerts()
+            again = O.ops_alerts()
+        self.assertIn("OpenRouter is out of credits", first)
+        self.assertNotIn("PR backlog", first)          # agents' own items are not raised to him
+        self.assertEqual(again, "")
+
+    def test_no_alert_file_is_quiet(self):
+        with mock.patch.object(O, "OPS_WATCH", self.d / "nope"), mock.patch.object(O, "OPS_MENTIONED", self.seen):
+            self.assertEqual(O.ops_alerts(), "")
 
 
 if __name__ == "__main__":

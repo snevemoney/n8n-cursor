@@ -147,6 +147,33 @@ def operator_profile() -> str:
             "profile itself; never copy it anywhere public.")
 
 
+OPS_WATCH = Path.home() / "ArtCraft Studio/00 Private/Studio Operations/Ops Watch"
+OPS_MENTIONED = Path.home() / "Library/Caches/jarvis/ops-mentioned.json"
+
+
+def ops_alerts() -> str:
+    """Evens 10-16: bring things to light without pop-ups. Ops Watch's red items and anything that needs Evens, each told
+    to him once (remembered per alert and level); the agents' own amber items stay on the status page."""
+    try:
+        alerts = json.loads((OPS_WATCH / "alerts.json").read_text())
+    except (OSError, ValueError):
+        return ""
+    try:
+        told = json.loads(OPS_MENTIONED.read_text())
+    except (OSError, ValueError):
+        told = {}
+    new = [a for a in alerts if (a.get("level") == "RED" or "Evens" in str(a.get("owner")))
+           and told.get(a.get("id")) != a.get("level")]
+    if not new:
+        return ""
+    OPS_MENTIONED.parent.mkdir(parents=True, exist_ok=True)
+    OPS_MENTIONED.write_text(json.dumps({**told, **{a["id"]: a["level"] for a in new}}))
+    lines = "\n".join(f"- {a['level']}: {a['title']} — fix: {a.get('fix') or 'see status page'}" for a in new)
+    return ("\n\nNew items from Ops Watch that he has not heard yet (mention them ONCE, in one or two short lines, at the "
+            "start of your next reply, then carry on with what he asked; full page: "
+            f"{OPS_WATCH}/STATUS.md):\n" + lines)
+
+
 BRAIN_FILES = (("CURRENT_STATE.md", 1600), ("ACTIVE_TASKS.md", 1200), ("PLATFORM_DIGEST.md", 1600))
 CHAT_CORPUS = Path.home() / "jarvis-proof/intent/corpus-all.jsonl"
 
@@ -172,7 +199,7 @@ def system_prompt() -> str:
     prof = profile_lines()
     today = time.strftime("%A %Y-%m-%d, %H:%M") + " Eastern"
     base = (SYSTEM + f"\nToday is {today}. Anything you know from training may be out of date; for anything current, check it now.\n"
-            + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "") + operator_profile() + brain_context())
+            + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "") + operator_profile() + brain_context() + ops_alerts())
     return base + ("\nHis coding agents are Claude Code, Codex and Cursor; 'Claude Code's changes' means their commits "
                    "and PRs on HIS repo snevemoney/n8n-cursor (Jarvis lives in apps/agent-stack), never Anthropic's repos.")
 
