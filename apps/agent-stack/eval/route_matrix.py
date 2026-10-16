@@ -38,8 +38,34 @@ TAILS = ["", " please", " for me", "?"]
 QUESTION_LEADS = ["", "jarvis, ", "hey jarvis, ", "so "]
 QUESTION_TAILS = ["", "?"]
 
+ARTCRAFT = ["CadCraft", "DeckCraft", "DesignCraft", "EffectCraft", "FilmCraft", "GridCraft", "LightCraft", "PdfCraft",
+            "PhotoCraft", "SoundCraft", "VectorCraft", "WordCraft"]
 APPS = ["Notes", "Safari", "Spotify", "Final Cut Pro", "Visual Studio Code", "Calendar", "Mail", "Messages",
-        "Preview", "Terminal", "Finder", "Slack", "Cursor", "Obsidian", "Photos", "Music"]
+        "Preview", "Terminal", "Finder", "Slack", "Cursor", "Obsidian", "Photos", "Music", "Google Chrome", "Arc",
+        "Logic Pro", "Pages", "Numbers", "Keynote", "Xcode", "Figma", "Notion", "Discord", "Zoom", "System Settings",
+        "Activity Monitor", "QuickTime Player", "Reminders", "Maps", "Grok", "Claude", "ChatGPT", "Docker"] + ARTCRAFT
+# ArtCraft professional work: each app with tasks it can really do
+CRAFT_TASKS = {
+    "GridCraft": ["make a budget sheet for October and save it", "create a sales table with totals", "add a column for tax and save",
+                  "build a monthly cash flow sheet"],
+    "WordCraft": ["write a one-page proposal for Normand and save it", "create a cover letter", "draft a meeting agenda and save it",
+                  "edit the heading to say Q4 Plan"],
+    "DeckCraft": ["make a five-slide pitch deck", "create a title slide that says Jarvis", "add a slide with three bullet points",
+                  "build a deck for the Monday sync"],
+    "PdfCraft": ["create a pdf invoice draft", "add a page with the signature block", "export the report as a pdf",
+                 "make a one-page pdf summary"],
+    "PhotoCraft": ["crop the hero image to square", "resize the logo to 512 pixels", "make a banner 1200 by 630",
+                   "edit the photo brightness and save"],
+    "VectorCraft": ["draw a simple logo with a circle", "create an icon set for the app", "make a vector badge",
+                    "export the logo as svg"],
+    "DesignCraft": ["make a flyer for the launch", "create a poster layout", "build a one-page brochure", "design a business card"],
+    "EffectCraft": ["make a title animation", "create a lower third", "add a glow effect and save", "build an intro sequence"],
+    "FilmCraft": ["make a 30 second edit from the clips", "create a trailer cut", "add captions to the video",
+                  "export the edit as mp4"],
+    "SoundCraft": ["make a 10 second intro sting", "create a podcast session", "add a fade out and save", "export the mix as wav"],
+    "LightCraft": ["create a warm grade preset", "make the photo moodier", "edit the exposure and save", "build a film look preset"],
+    "CadCraft": ["draw a 2 by 4 meter room plan", "create a floor plan", "make a bracket drawing", "add dimensions and save"],
+}
 REPOS = ["browser-use/browser-use", "microsoft/markitdown", "openai/whisper", "unclecode/crawl4ai", "coderamp-labs/gitingest",
          "anthropics/claude-code", "langchain-ai/langgraph", "ollama/ollama", "remotion-dev/remotion", "n8n-io/n8n"]
 TOPICS = ["AI", "machine learning", "marketing", "python", "finance", "design", "history", "psychology", "startups", "nursing"]
@@ -57,6 +83,14 @@ FACTS = ["my favourite colour is teal", "the dentist is on Friday", "my car is a
 PEOPLE = ["Normand", "my accountant", "the client", "Sarah", "the team"]
 
 
+def _craft_cases():
+    out = []
+    for app, tasks in CRAFT_TASKS.items():
+        for t in tasks:
+            out += [f"In {app}, {t}", f"{t} in {app}", f"Use {app} to {t}", f"Open {app} and {t}"]
+    return out
+
+
 def _fam(name, expect, templates, slots=None, *, question=False, live_safe=False):
     return {"family": name, "expect": expect, "templates": templates, "slots": slots or {},
             "question": question, "live_safe": live_safe}
@@ -66,6 +100,54 @@ FAMILIES = [
     _fam("apps_open", "apps", ["open {app}", "launch {app}", "start {app}", "fire up {app}", "bring up {app}",
                                 "switch to {app}", "open the {app} app"], {"app": APPS}),
     _fam("apps_quit", "apps", ["quit {app}", "close {app}", "quit the {app} app"], {"app": APPS}),
+    _fam("artcraft_open", "apps", ["open {app}", "launch {app}", "switch to {app}", "quit {app}"], {"app": ARTCRAFT}),
+    _fam("artcraft_work", "craft", _craft_cases(), question=True),
+    _fam("artcraft_question", "not_craft", ["can {app} export a pdf", "what file types does {app} open", "is {app} installed",
+                                            "how do I save in {app}", "does {app} support layers"], {"app": ARTCRAFT}, question=True),
+    _fam("screen_click", "pointer_click", ["click the {c}", "tap the {c}", "press the {c}", "click on the {c}",
+                                           "click it", "click that", "close the window", "click the x"], {"c": CONTROLS}),
+    _fam("cursor_demo", "pointer_demo", ["show me your cursor", "show me the jarvis cursor", "show your cursor"], question=True),
+    _fam("watch_screen", "watch", ["watch my screen", "watch the screen", "watch", "I'm sharing my screen",
+                                   "share my screen with you"], question=True),
+    _fam("stop_watch", "handback", ["stop watching my screen", "stop looking at my screen", "I'll take over",
+                                    "hands off", "let me drive", "give me back the wheel"], question=True),
+    _fam("coding_mission", "agent_tools", ["in scratch repo {r}: {g}"],
+         {"r": ["demo", "jarvis-sandbox", "proofcheck", "quickmarket"],
+          "g": ["add a test for the date parser", "fix the failing lint step", "write a README section on setup",
+                "refactor the config loader", "add a health endpoint"]}),
+    _fam("coding_status", "agent_tools", ["show the coding task status", "what is the coding mission progress",
+                                          "give me the code task status"], question=True),
+    _fam("coding_resume", "agent_tools", ["resume the coding task", "continue my coding mission", "continue the last code task",
+                                          "resume that coding mission"], question=True),
+    _fam("browser_mission", "browser_mission", ["research {t} with a browser mission", "start a browser mission on {t}",
+                                                "compare prices for {t} in a browser mission"], {"t": SEARCH_TOPICS}, question=True),
+    _fam("browser_status", "browser_mission", ["how many browser flows are done", "what is the browser mission progress",
+                                               "show the browser research status"], question=True),
+    _fam("plan", "plan", ["plan out {g}", "make a plan for {g}", "draft a plan to {g}", "plan how to {g}"],
+         {"g": ["the ProofCheck launch", "my week", "migrating the vps", "the client onboarding", "the saved-video build"]}),
+    _fam("loop", "loop", ["start a loop that checks {x} every 10 minutes", "set up a loop to watch {x}", "list my loops",
+                          "stop the {x} loop"], {"x": ["disk space", "the vps", "my inbox", "the build", "CI"]}),
+    _fam("desk_dispatch", "desk_dispatch", ["ask {d} to {g}", "dispatch this to {d}", "hand this to {d}"],
+         {"d": ["forge", "watchdog", "librarian", "consultant", "jev", "codex"],
+          "g": ["review the PR", "check the vps", "find the repo plan"]}),
+    _fam("skills", "skills", ["which skills do you have", "list your skills", "show me the deep-research skill",
+                              "run the feature-loop workflow"], question=True),
+    _fam("mcp_inventory", "mcp_inventory", ["what mcp servers do you have", "list the mcp servers", "which mcp tools are connected"],
+         question=True),
+    _fam("mcp_call", "mcp_call", ["list the tools on the {m} server", "what tools are on the {m} mcp server",
+                                  "show tools from the {m} server"], {"m": ["slack", "github", "figma", "artcraft", "n8n"]}, question=True),
+    _fam("code_run", "code_run", ["write python that sums a list and run the tests", "run this python and test it"], question=True),
+    _fam("drafts", "drafts", ["draft an email to {p} about the launch", "write up a short slack message for {p}",
+                              "compose a reply to {p}"], {"p": PEOPLE}),
+    _fam("rules", "rules", ["what are your rules", "which rules do you follow", "remind me of your rules"], question=True),
+    _fam("voice", "voice_engine", ["what voice engine are you using", "which tts engine is speaking"], question=True),
+    _fam("cost", "cost_card", ["how much did that cost", "what did that reply cost", "today's spend", "show the cost card"],
+         question=True),
+    _fam("results", "results_recall", ["what did you get done today", "what have we worked on", "recap of today"], question=True),
+    _fam("prebrief", "prebrief", ["prep me for my next meeting", "brief me", "prebrief my next call"], question=True),
+    _fam("vps_status", "status", ["is the vps up", "how is my server doing", "vps health check"], question=True),
+    _fam("open_site", "safari_see", ["open {u}", "go to {u}", "visit {u}"],
+         {"u": ["example.com", "github.com", "evenslouis.ca", "news.ycombinator.com", "https://claude.ai"]}),
     _fam("repo_look", "repo", ["look at the repo {r}", "check out github.com/{r}", "tell me about the github repo {r}",
                                "show me the repo {r}", "review the repo {r}", "look into https://github.com/{r}"],
          {"r": REPOS}, live_safe=True),
@@ -182,8 +264,12 @@ def judge(case: dict, P) -> tuple[bool, str]:
         perm = P._permissions_hand()
         got = "grant" if perm.grant_split(said)[0] else "revoke" if perm.is_revoke(said) else "none"
         return got == want, got
-    pick = P.model_free_route(said)
+    if want == "watch":
+        return bool(P.wants_watch(said)), "watch" if P.wants_watch(said) else "not-watch"
+    pick = P.turn_fixed_pick(said) if hasattr(P, "turn_fixed_pick") else P.model_free_route(said)
     got = (pick or {}).get("tool") or "model"
+    if want == "not_craft":
+        return got != "craft", got
     if want == "not_hard":
         hard = bool(P.is_hard_step(said))
         return not hard, "hard" if hard else "not-hard"
