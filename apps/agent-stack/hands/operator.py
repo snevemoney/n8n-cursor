@@ -1088,6 +1088,7 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
             if _idle_until_spoken_to(task):
                 start = time.monotonic()
                 continue
+            state = task.read("state.json")
         tools.close()
         return state
 
@@ -1108,6 +1109,8 @@ def _idle_until_spoken_to(task) -> bool:
     code = _code_stamp()
     while time.monotonic() < end:
         if task.cancelled() or _code_stamp() != code:
+            st = task.read("state.json")
+            task.write("state.json", {**st, "status": "CANCELLED" if task.cancelled() else "DONE", "ended": "session closed"})
             # live 10-16: an idle session kept the pre-deploy tool list ("no signal engine tool"); a new deploy ends it,
             # and his next line starts a fresh job that carries the conversation.
             return False
@@ -1116,6 +1119,8 @@ def _idle_until_spoken_to(task) -> bool:
             st = task.read("state.json"); st.update(status="RUNNING", step=0, turn_at=time.time()); task.write("state.json", st)
             return True
         time.sleep(1.0)
+    st = task.read("state.json")
+    task.write("state.json", {**st, "status": "DONE", "ended": "idle timeout"})
     return False
 
 
@@ -1176,6 +1181,9 @@ def _alive(pid) -> bool:
 def running(hive: Path) -> bool:
     """A job is running only if its worker is alive (live 10-16: a killed job stayed RUNNING and swallowed the next ask)."""
     st = status(hive)
+    tid = str(st.get("task_id") or "")
+    if tid and Task(Path(hive) / "operator-tasks" / tid).cancelled():
+        return False  # live 10-16: a cancelled session still shutting down swallowed the next request
     if st.get("status") in ("RUNNING", "IDLE"):
         return _alive(st.get("pid"))
     if st.get("status") == "QUEUED":

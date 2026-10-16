@@ -6810,7 +6810,7 @@ def _operator_hand():
 
 def _operator_line(state: dict) -> str:
     status = str(state.get("status") or "")
-    if status == "DONE":
+    if status in ("DONE", "IDLE"):  # IDLE = done and still listening (live 10-16: "the task ended as idle after 1 steps")
         evidence = str(state.get("evidence") or "").strip()
         return (str(state.get("summary") or "Done.").strip() + (f" Evidence: {evidence}" if evidence else ""))[:1200]
     if status == "WAITING_OWNER":
@@ -6822,7 +6822,12 @@ def _operator_line(state: dict) -> str:
                 "ask me again and I'll start it over.")
     if status == "NONE":
         return "There's no operator task yet."
-    return f"The task ended as {status.lower().replace('_', ' ')} after {state.get('step', 0)} steps. " + str(state.get("summary") or "")
+    if status == "CANCELLED":
+        return "Stopped."
+    if status in ("STEP_LIMIT", "TIME_LIMIT"):
+        return ("I ran out of " + ("steps" if status == "STEP_LIMIT" else "time") + " before finishing. " +
+                str(state.get("summary") or "Ask me to keep going and I'll pick it up.")).strip()
+    return str(state.get("summary") or "Done.")
 
 
 def _operator_turn(args: dict, utterance: str, hive, turns: list | None = None) -> dict:
