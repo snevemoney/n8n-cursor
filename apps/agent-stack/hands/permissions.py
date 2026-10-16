@@ -137,7 +137,45 @@ def open_access() -> bool:
     import sys
     if not (os.environ.get("JARVIS_MODE_FILE") or "").strip() and ("_pytest" in sys.modules or "unittest" in sys.modules):
         return False
-    return not mode().get("revoked_by_owner")
+    return not mode().get("revoked_by_owner") or task_grant_active()
+
+
+TASK_GRANT_SECONDS = 1800  # a spoken "permission granted" covers that request for 30 minutes, never standing access
+STANDING_ON_RE = re.compile(r"^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:please\s+)?(?:turn|switch|put)\s+(?:open\s+access|standing\s+access|full\s+access)"
+                            r"\s+(?:back\s+)?on\b|^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:restore|re-?enable)\s+(?:open|standing|full)\s+access\b", re.I)
+
+
+def is_standing_on(text: str) -> bool:
+    """Only this explicit owner choice restores standing access after a revoke (blueprint 2.4 / directive 4)."""
+    return bool(STANDING_ON_RE.search(text or ""))
+
+
+def task_grant_active() -> bool:
+    g = mode().get("task_grant") or {}
+    try:
+        return bool(g) and datetime.fromisoformat(str(g.get("expires"))) > datetime.now()
+    except ValueError:
+        return False
+
+
+def grant_task(request: str) -> dict:
+    """Owner's one-task approval: recorded with its request and expiry; standing access is untouched."""
+    now = datetime.now()
+    grant = {"kind": "task", "request": str(request or "")[:300], "origin": "owner_turn",
+             "granted": now.isoformat(timespec="seconds"),
+             "expires": datetime.fromtimestamp(now.timestamp() + TASK_GRANT_SECONDS).isoformat(timespec="seconds")}
+    _write_mode({**mode(), "task_grant": grant})
+    log_action("grant", "task", "on", request=grant["request"][:80])
+    return grant
+
+
+def _write_mode(data: dict) -> None:
+    f = _mode_file()
+    f.parent.mkdir(parents=True, exist_ok=True)
+    tmp = f.with_name(f.name + ".tmp")
+    tmp.write_text(json.dumps(data, indent=1), encoding="utf-8")
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, f)
 
 
 def set_open_access(on: bool) -> dict:
@@ -146,6 +184,8 @@ def set_open_access(on: bool) -> dict:
     now = datetime.now()
     data = {**mode(), "open_access": bool(on), "revoked_by_owner": not on, "updated": now.isoformat(timespec="seconds")}
     data.pop("expires", None)
+    if not on:
+        data.pop("task_grant", None)  # a revoke also ends any task grant
     tmp = f.with_name(f.name + ".tmp")
     tmp.write_text(json.dumps(data, indent=1), encoding="utf-8")
     os.chmod(tmp, 0o600)

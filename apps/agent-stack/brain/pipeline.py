@@ -1558,6 +1558,8 @@ CODE_DANGER_RE = re.compile(
     r"\b(?:npm|pnpm|yarn|twine|cargo)(?:\s+|['\"]\s*,\s*['\"])publish\b|"
     r"\bgh(?:\s+|['\"]\s*,\s*['\"])(?:pr(?:\s+|['\"]\s*,\s*['\"])merge|release(?:\s+|['\"]\s*,\s*['\"])create|repo(?:\s+|['\"]\s*,\s*['\"])delete)\b|\bcurl\b[^\n]*\s-X\s*(?:POST|PUT|DELETE|PATCH)|\bgit\s+push\b|"
     r"\bdrop\s+(?:table|database)\b|\btruncate\s+table\b|\bsudo\b|\bmkfs\b|\bdd\s+if=", re.I)
+TASK_GRANT_LINE = ("Okay, that's allowed for this request for the next 30 minutes. Your standing access setting is unchanged; "
+                   "say \"turn open access back on\" to change that.")
 OPEN_ON_LINE = ("Open access is on until you say \"lock it down\": any folder on your Mac, any public website, "
                 "your screen and Safari, edits in your home folder, read-only code runs and site logins with details you give me. "
                 "Sends, payments, bookings, publishing, deletes, pushes, deploys and real secrets still need you.")
@@ -7888,12 +7890,16 @@ def apply_pipeline_iter(
     # Owner grant (Evens 2026-10-15): only his own line flips open access; a grant redoes the request just blocked.
     _perm = _permissions_hand()
     _granted, _rest = _perm.grant_split(spoken_in)
-    if _granted or _perm.is_revoke(spoken_in):
-        granted = bool(_granted)
+    _standing_on = _perm.is_standing_on(spoken_in)
+    if _granted or _standing_on or _perm.is_revoke(spoken_in):
+        granted = bool(_granted or _standing_on)
         # "permission granted, find books about AI" runs the rest now; a bare grant redoes the request just refused.
-        redo = (_rest or _blocked_request(prior_turns)) if granted else ""
+        redo = (_rest or _blocked_request(prior_turns)) if _granted else ""
         try:
-            _perm.set_open_access(granted)
+            if _standing_on or not granted:
+                _perm.set_open_access(granted)  # standing choice: explicit on, or revoke
+            else:
+                _perm.grant_task(redo or spoken_in)  # "allow this" covers this request only (blueprint 2.4)
         except OSError:
             granted, redo = None, ""  # the switch did not move; say so, never pretend
         if redo:
@@ -7901,7 +7907,7 @@ def apply_pipeline_iter(
         else:
             text, first, rest = _commit_spoken(
                 hive, spoken_in=spoken_in, prior_turns=prior_turns, tool="converse",
-                raw=(OPEN_ON_LINE if granted else OPEN_OFF_LINE) if granted is not None
+                raw=((OPEN_ON_LINE if _standing_on else TASK_GRANT_LINE) if granted else OPEN_OFF_LINE) if granted is not None
                     else "I couldn't change the access setting, so it stays as it was.", wires=["permissions"], cites=[], ok=granted is not None,
                 pack=None, retrieve_roots=retrieve_roots, gen=token)
             yield _pipeline_event(ok=True, tool="converse", spoken=text, spoken_delta=rest if first and rest else text,

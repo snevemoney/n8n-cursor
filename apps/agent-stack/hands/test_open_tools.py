@@ -26,6 +26,7 @@ class OpenTools(unittest.TestCase):
         self.perm = AT.PERM()
 
     def test_closed_cli_stays_read_only(self):
+        self.perm.set_open_access(False)  # open by default since 10-15; closed only after Evens revokes
         self.assertIn("read-only CLI list", AT.op_cli(["echo", "hi"])["spoken"])
 
     def test_open_cli_runs_any_tool_but_not_hard_verbs(self):
@@ -45,6 +46,7 @@ class OpenTools(unittest.TestCase):
             self.assertEqual(call.call_count, 1)
 
     def test_open_mcp_allowlist_is_every_configured_server(self):
+        self.perm.set_open_access(False)
         self.assertEqual(MC.allowlist(), {"codebase-memory-mcp"})
         self.perm.set_open_access(True)
         with mock.patch.object(MC._inventory(), "inventory", return_value=([{"name": "artcraft"}, {"name": "n8n"}], 0)):

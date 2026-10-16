@@ -171,12 +171,17 @@ class Pipeline(OpenAccessBase):
 
     def test_grant_turn_switches_on_and_revoke_off(self):
         hive = self.root / "hive"; (hive / "bus").mkdir(parents=True)
+        # Blueprint 2.4 (10-15): a spoken grant covers this request only; standing access needs its own explicit words.
         out = list(P.apply_pipeline_iter("permission granted", hive=hive))
-        self.assertTrue(PERM.open_access())
-        self.assertIn("Open access is on", out[-1]["spoken"])
+        self.assertTrue(PERM.open_access()); self.assertTrue(PERM.task_grant_active())
+        self.assertTrue(PERM.mode().get("revoked_by_owner"))  # standing choice untouched
+        self.assertIn("this request", out[-1]["spoken"])
         out = list(P.apply_pipeline_iter("lock it down", hive=hive))
-        self.assertFalse(PERM.open_access())
+        self.assertFalse(PERM.open_access()); self.assertFalse(PERM.task_grant_active())
         self.assertIn("Open access is off", out[-1]["spoken"])
+        out = list(P.apply_pipeline_iter("turn open access back on", hive=hive))
+        self.assertTrue(PERM.open_access()); self.assertFalse(PERM.mode().get("revoked_by_owner"))
+        self.assertIn("Open access is on", out[-1]["spoken"])
 
 
 if __name__ == "__main__":
