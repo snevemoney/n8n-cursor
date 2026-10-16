@@ -85,6 +85,14 @@ class LiveSession(unittest.TestCase):
         self.assertEqual(task.read("state.json")["status"], "RUNNING")
         self.assertGreater(len(task.read("messages.json")), len(msgs))
 
+    def test_a_deploy_ends_an_idle_session(self):
+        hive = Path(tempfile.mkdtemp())
+        with mock.patch.object(O, "_jev_tier", return_value={"tier": "mid", "conf": 0.9}):
+            task = O.Task.create(hive, "x")
+        stamps = iter([(1,), (2,)])
+        with mock.patch.object(O, "IDLE_S", 5), mock.patch.object(O, "_code_stamp", side_effect=lambda: next(stamps, (2,))):
+            self.assertFalse(O._idle_until_spoken_to(task))
+
     def test_idle_session_ends_after_the_idle_time(self):
         hive = Path(tempfile.mkdtemp())
         with mock.patch.object(O, "_jev_tier", return_value={"tier": "mid", "conf": 0.9}):

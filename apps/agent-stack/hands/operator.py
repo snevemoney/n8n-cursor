@@ -935,13 +935,21 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
 IDLE_S = float(os.environ.get("JARVIS_SESSION_IDLE_S") or 7200)
 
 
+def _code_stamp() -> tuple:
+    here = Path(__file__).resolve().parent
+    return tuple(int(p.stat().st_mtime) for p in sorted(here.glob("*.py")) if not p.name.startswith("test_"))
+
+
 def _idle_until_spoken_to(task) -> bool:
     """IDLE until a new user message arrives (True: carry on) or the idle time runs out / he cancels (False)."""
     seen = len(task.read("messages.json", []))
     st = task.read("state.json"); st.update(status="IDLE", idle_since=time.time()); task.write("state.json", st)
     end = time.monotonic() + IDLE_S
+    code = _code_stamp()
     while time.monotonic() < end:
-        if task.cancelled():
+        if task.cancelled() or _code_stamp() != code:
+            # live 10-16: an idle session kept the pre-deploy tool list ("no signal engine tool"); a new deploy ends it,
+            # and his next line starts a fresh job that carries the conversation.
             return False
         msgs = task.read("messages.json", [])
         if len(msgs) > seen and msgs[-1].get("role") == "user":
