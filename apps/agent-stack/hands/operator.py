@@ -239,8 +239,27 @@ class Tools:
             time.sleep(0.05)
         return {"text": "mouse/keyboard helper gave no answer"}
 
+    def _show_cursor(self, x, y) -> None:
+        """Evens 10-16: "still no floating cursor". Jarvis's blue cursor glides to the target before the action lands
+        (the same overlay the Watch clicks use). Best effort: a missing overlay never blocks the action."""
+        try:
+            spec = importlib.util.spec_from_file_location("agent_stack_pointer_operator", Path(__file__).with_name("pointer.py"))
+            ph = importlib.util.module_from_spec(spec); spec.loader.exec_module(ph)
+            if not ph.live():
+                return
+            try:
+                frm = tuple(ph.cursor_display()["cursor"])
+            except Exception:  # noqa: BLE001
+                frm = (x, y)
+            if ph.cursor_start(frm, (float(x), float(y)), 3):
+                time.sleep(ph.GLIDE_SEC)
+        except Exception:  # noqa: BLE001
+            return
+
     def mouse(self, a):
         act = str(a.get("action") or "click")
+        if act in ("move", "click", "double_click", "right_click", "drag") and "x" in a and "y" in a:
+            self._show_cursor(a["x"], a["y"])
         if act == "move":
             return self._hands({"op": "move", "x": a["x"], "y": a["y"]})
         if act in ("click", "double_click", "right_click"):

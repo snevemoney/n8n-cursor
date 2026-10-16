@@ -113,6 +113,12 @@ class Sites(unittest.TestCase):
         A.run("open Notion in Safari", bundles=APPS, runner=ok)
         self.assertEqual(ran[-1][-1], "https://www.notion.so")
 
+    def test_naming_the_browser_opens_the_site_not_the_app(self):
+        ran = []
+        A.run("open Spotify on my browser", bundles={**APPS, "Spotify": Path("/Applications/Spotify.app")},
+              runner=lambda c: ran.append(c) or SimpleNamespace(returncode=0, stdout="", stderr=""))
+        self.assertEqual(ran, [["open", "-a", "Safari", "https://open.spotify.com"]])
+
     def test_unknown_name_still_says_not_found(self):
         got = A.run("open Zzqx", bundles=APPS, runner=lambda c: self.fail("must not run"))
         self.assertIn("couldn't find", got["spoken"])

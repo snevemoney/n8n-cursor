@@ -27,12 +27,12 @@ def test_model_argument_alone_cannot_authorize_new_root(tmp_path):
     assert wr.requested_path(f'do not read {path}') is None
     assert wr.requested_path(f'he said "read {path}"') is None
 
-def test_secret_and_symlink_secret_still_denied(tmp_path):
+def test_secret_and_symlink_secret_are_flagged_not_refused(tmp_path):  # Evens 10-16: flag, never stop
     secret = tmp_path / '.env'; secret.write_text('synthetic fixture')
     link = tmp_path / 'ordinary.md'; link.symlink_to(secret)
     for path in (secret,link):
         got = wr.run_requested({}, f'read {path}', roots=[])
-        assert not got['ok'] and 'secret' in got['spoken']
+        assert got['ok'] and got.get('secret') and 'Heads up' in got['spoken']
 
 def test_missing_is_exact_not_an_unrelated_listing(tmp_path):
     got = wr.run_requested({}, f'read "{tmp_path}/missing file.md"', roots=[tmp_path])

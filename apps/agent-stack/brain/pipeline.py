@@ -1344,6 +1344,38 @@ def normalize_utterance(text, cap: int | None = None) -> str:
     return t[:cap] if cap else t
 
 
+# Operator-first (Evens 10-16: "you have been making too specific workflows and that's why i have to test jarvis myself").
+# One model decision per turn: answer, or hand the whole request to the operator (files, shell, apps, browser, screen,
+# mouse/keyboard with the blue cursor, MCP). No phrase routes. JARVIS_OPERATOR_FIRST=0 restores the routed turn.
+OPERATOR_FIRST_TOOLS = ("operator", "web_search", "memory", "brain_model")
+OPERATOR_FIRST_RULE = (
+    "Decide in one step. If Evens wants something DONE on his Mac or the web (open, find, read files, click, type, play, "
+    "install, build, fix, check GitHub, anything with steps), call operator with action=start and a goal that holds his "
+    "full request plus what earlier turns make it refer to (resolve 'it', 'them', 'another one'). For a quick current fact "
+    "use web_search. To remember or recall something he told you, use memory. To change your model, brain_model. "
+    "Otherwise answer him directly in plain spoken English. Never claim something was done unless a tool did it.")
+
+
+def operator_first() -> bool:
+    return (os.environ.get("JARVIS_OPERATOR_FIRST") or "1").strip() != "0"
+
+
+def _operator_first_tools() -> list:
+    rows = getattr(ONLINE, "OPENROUTER_HANDS", ()) or ()
+    return [r for r in rows if (r.get("function") or {}).get("name") in OPERATOR_FIRST_TOOLS]
+
+
+def operator_first_pick(spoken_in: str, brief: str, talk_fn=None) -> dict:
+    """{tool, args, speak}: a tool call from the four, or {"tool": "say", "speak": answer}."""
+    talked = online_talk(spoken_in, f"{brief}\n\n{OPERATOR_FIRST_RULE}" if brief else OPERATOR_FIRST_RULE,
+                         talk_fn=talk_fn, hands=False, extra_tools=_operator_first_tools())
+    pick = extract_pick(talked) if talked else None
+    if pick and str(pick.get("tool") or "") in OPERATOR_FIRST_TOOLS:
+        return pick
+    said = _talk_speak(talked) if talked else ""
+    return {"tool": "say", "args": {}, "speak": said or TALK_DARK}
+
+
 def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
     """Deterministic honest picks for the asks that went wrong in live chat. None = keep the normal route.
     Route matrix 2026-10-16: "hey jarvis, click the save button" / "so stop watching my screen" missed; the original
@@ -1916,6 +1948,8 @@ def _code_run_hand():
 def _apps_hand():
     return _load_ready_hand("agent_stack_apps", STACK / "hands" / "apps.py")  # locked (audit 2026-10-16)
 
+
+# Evens 10-16: "can open the browser and the link page, but still cant see and take actions in the browser".
 
 GITHUB_SEE_RE = re.compile(r"\b(?:see|show|check|look|what(?:'s|\s+is|\s+are)?|list|any)\b.{0,60}\b(?:on|in|at)\s+github\b|"
                            r"\bgithub\b.{0,30}\b(?:changes|prs?|pull\s+requests?|updates)\b", re.I)
@@ -8807,10 +8841,17 @@ def apply_pipeline_iter(
     if document_followup and retained_context.get("status") == "MISSING":
         # Nothing was ever read: "compare pricing across these websites" is a new ask, not a follow-up on retained reads.
         document_followup, retained_context = False, {}
-    early = (confirm_take(hive, spoken_in) or talk_filter(live_chat_route(spoken_in, had_pending), spoken_in)
-             or _workflow_followup_route(spoken_in, hive))
-    if early is None and not document_followup:
-        early = _pointer_followup(spoken_in,hive) or talk_filter(model_free_route(spoken_in), spoken_in)
+    if operator_first():
+        early = confirm_take(hive, spoken_in) or (
+            {"tool": "brain_model", "args": {}, "speak": ""} if _brain_model_hand().wants(spoken_in) else None)
+        if early is None:
+            early = operator_first_pick(spoken_in, fit_budget(sitting_brief(prior_turns, bus_now, retrieve_roots, spoken_in)),
+                                        talk_fn=talk_fn)
+    else:
+        early = (confirm_take(hive, spoken_in) or talk_filter(live_chat_route(spoken_in, had_pending), spoken_in)
+                 or _workflow_followup_route(spoken_in, hive))
+        if early is None and not document_followup:
+            early = _pointer_followup(spoken_in,hive) or talk_filter(model_free_route(spoken_in), spoken_in)
     if early is not None and early.get("tool") == "capability" and prior_turns:
         early = {**early, "args": {**(early.get("args") or {}), "prior": dict(prior_turns[-1])}}  # "fix it" names what failed
     ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""
@@ -9303,10 +9344,12 @@ def apply_pipeline_iter(
     if pick and pick.get('tool') in {'converse','say'} and ran is None and re.match(
         r"^(?:(?:can|could|would|will) you\s+)?(?:please\s+)?(?:open|read|find|list|point|run|execute|install|edit|write|create)\b",spoken_in,re.I
     ) and re.search(r"\b(?:my|mac|screen|file|folder|repo|project|shell|command|book|app)\b",spoken_in,re.I):
-        line="I have not run an executor for this request. No local observation or completed action is verified. Please name the exact target and action."
-        pick={'tool':'converse','args':{},'speak':line}
-        ran={'ok':False,'tool':'converse','spoken':line,'task_verified':False,'wires':[],
-             'cites':[],'sent':False,'outcome':'EXECUTOR_REQUIRED'}
+        # Evens 10-16: the canned "I have not run an executor" dead end is gone; the operator does the work, with the
+        # previous turn as context ("open another project instead" only makes sense after "open FilmCraft").
+        last = prior_turns[-1] if prior_turns else {}
+        goal = spoken_in + (f"\n\nContext, the turn before: Evens said \"{str(last.get('user') or '')[:200]}\"; "
+                            f"Jarvis answered \"{str(last.get('jarvis') or '')[:300]}\"" if last else "")
+        pick = {'tool': 'operator', 'args': {'action': 'start', 'goal': goal}, 'speak': ''}
 
     if pick is None and wants_safari(spoken_in):
         ran = no_model_reply(spoken_in, hive=hive, see_fn=see_fn, retrieve_roots=retrieve_roots, turns=prior_turns)

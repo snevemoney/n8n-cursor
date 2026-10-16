@@ -143,7 +143,8 @@ SITES = {"linkedin": "https://www.linkedin.com", "youtube": "https://www.youtube
          "google": "https://www.google.com", "wikipedia": "https://www.wikipedia.org", "openrouter": "https://openrouter.ai",
          "hostinger": "https://hpanel.hostinger.com", "instagram": "https://www.instagram.com", "tiktok": "https://www.tiktok.com",
          "facebook": "https://www.facebook.com", "reddit": "https://www.reddit.com", "chatgpt": "https://chatgpt.com",
-         "claude": "https://claude.ai", "figma": "https://www.figma.com", "canva": "https://www.canva.com"}
+         "claude": "https://claude.ai", "figma": "https://www.figma.com", "canva": "https://www.canva.com",
+         "spotify": "https://open.spotify.com"}
 _SITE_TAIL = re.compile(r"\s+(?:in|on|with)\s+(?:safari|the\s+browser|my\s+browser|chrome)$|\s+(?:website|site|web\s*page)$", re.I)
 
 
@@ -200,7 +201,8 @@ def run(utterance: str, *, bundles: dict[str, Path] | None = None, runner=None, 
     if not m:
         return {"ok": False, "tool": "apps", "spoken": "Which app should I open?", "task_verified": False}
     verb, raw = m.group(1).lower(), m.group(2).strip()
-    hit = resolve(raw, bundles)
+    in_browser = bool(_SITE_TAIL.search(raw))  # "open Spotify on my browser": the site, not the installed app
+    hit = None if in_browser and site_url(raw) else resolve(raw, bundles)
     url = site_url(raw) if hit is None and verb not in ("quit", "close", "ferme", "fermer", "quitte", "quitter") else ""
     if url:
         if runner is None and not _live():

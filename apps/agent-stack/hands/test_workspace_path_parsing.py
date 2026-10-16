@@ -54,5 +54,5 @@ class EmbeddedPaths(unittest.TestCase):
             root=Path(d).resolve(); file=root/'credentials.json';file.write_text('{}')
             utterance=f'Compare {file} with other.py'
             result=W.run_requested(W.args_from_utterance(utterance),utterance,roots=[root])
-            self.assertFalse(result['ok']);self.assertIn('secret',result['error'])
+            self.assertTrue(result['ok']);self.assertTrue(result.get('secret'))  # Evens 10-16: flag, never stop
 if __name__=='__main__':unittest.main()

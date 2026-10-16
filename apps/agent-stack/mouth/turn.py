@@ -466,6 +466,52 @@ def _note_route_ok(spoken: str) -> bool:
     return not pick or pick.get("tool") in ("vault_read", "say")
 
 
+def _pipeline_tail(spoken, *, hive, retrieve_roots, cursor_fn, see_fn, status_fn, cursor_ask_fn, talk_fn, login_fn, token):
+    """The pipeline turn and its events (shared by the normal path and operator-first mode)."""
+    for out in PIPELINE.apply_pipeline_iter(
+        spoken,
+        hive=hive,
+        retrieve_roots=retrieve_roots,
+        cursor_fn=cursor_fn,
+        see_fn=see_fn,
+        status_fn=status_fn,
+        cursor_ask_fn=cursor_ask_fn,
+        talk_fn=talk_fn,
+        login_fn=login_fn,
+        gen=token,
+    ):
+        text = str(out.get("spoken") or "")
+        if not text and not bool(out.get("partial")):
+            text = DARK_BRAIN
+        if is_ask_leak(text):
+            text = DARK_BRAIN
+        delta = str(out.get("spoken_delta") or "")
+        if is_ask_leak(delta):
+            delta = ""
+        yield _turn_event(
+            ok=bool(out.get("ok")),
+            spoken=text,
+            see=out.get("see"),
+            mission=out if out.get("mission_id") else None,
+            verb=str(out.get("verb") or out.get("tool") or "pipeline"),
+            host="pipeline",
+            cites=out.get("cites") or [],
+            wires=out.get("wires") or ["pipeline"],
+            args=out.get("args"),
+            done=bool(out.get("done", True)),
+            spoken_delta=delta,
+            partial=bool(out.get("partial")),
+            brain=out.get("brain"),
+            login_tried=bool(out.get("login_tried")),
+            model_available=out.get("model_available"),
+            unknown=bool(out.get("unknown")),
+            outcome=out.get("outcome") or out.get("status"),
+            source=out.get("source"),
+            gen=out.get("gen") or out.get("turn_gen") or token,
+        )
+
+
+
 def _apply_turn_iter_inner(
     utterance: str,
     *,
@@ -626,6 +672,12 @@ def _apply_turn_iter_inner(
         if hasattr(PIPELINE, "begin_turn")
         else None
     )
+    if hasattr(PIPELINE, "operator_first") and PIPELINE.operator_first():
+        # Evens 10-16: "you have been making too specific workflows". No phrase pre-routes: one model decision in
+        # the pipeline (answer, or hand the whole request to the operator). Stop, Watch and kept stops ran above.
+        yield from _pipeline_tail(spoken, hive=hive, retrieve_roots=retrieve_roots, cursor_fn=cursor_fn, see_fn=see_fn,
+                                  status_fn=status_fn, cursor_ask_fn=cursor_ask_fn, talk_fn=talk_fn, login_fn=login_fn, token=token)
+        return
     fresh = load_json(hive / "bus" / "state.json")
     watch_row = fresh.get("watch") if isinstance(fresh.get("watch"), dict) else {}
     watch_on = bool(watch_row.get("armed"))
@@ -969,47 +1021,8 @@ def _apply_turn_iter_inner(
         yield _door_speak(hive, spoken, str(got.get("spoken") or ""), "focus", retrieve_roots, gen=token)
         return
 
-    for out in PIPELINE.apply_pipeline_iter(
-        spoken,
-        hive=hive,
-        retrieve_roots=retrieve_roots,
-        cursor_fn=cursor_fn,
-        see_fn=see_fn,
-        status_fn=status_fn,
-        cursor_ask_fn=cursor_ask_fn,
-        talk_fn=talk_fn,
-        login_fn=login_fn,
-        gen=token,
-    ):
-        text = str(out.get("spoken") or "")
-        if not text and not bool(out.get("partial")):
-            text = DARK_BRAIN
-        if is_ask_leak(text):
-            text = DARK_BRAIN
-        delta = str(out.get("spoken_delta") or "")
-        if is_ask_leak(delta):
-            delta = ""
-        yield _turn_event(
-            ok=bool(out.get("ok")),
-            spoken=text,
-            see=out.get("see"),
-            mission=out if out.get("mission_id") else None,
-            verb=str(out.get("verb") or out.get("tool") or "pipeline"),
-            host="pipeline",
-            cites=out.get("cites") or [],
-            wires=out.get("wires") or ["pipeline"],
-            args=out.get("args"),
-            done=bool(out.get("done", True)),
-            spoken_delta=delta,
-            partial=bool(out.get("partial")),
-            brain=out.get("brain"),
-            login_tried=bool(out.get("login_tried")),
-            model_available=out.get("model_available"),
-            unknown=bool(out.get("unknown")),
-            outcome=out.get("outcome") or out.get("status"),
-            source=out.get("source"),
-            gen=out.get("gen") or out.get("turn_gen") or token,
-        )
+    yield from _pipeline_tail(spoken, hive=hive, retrieve_roots=retrieve_roots, cursor_fn=cursor_fn, see_fn=see_fn,
+                              status_fn=status_fn, cursor_ask_fn=cursor_ask_fn, talk_fn=talk_fn, login_fn=login_fn, token=token)
 
 
 _TURN_LOG = None
