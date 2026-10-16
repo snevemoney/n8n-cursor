@@ -7,7 +7,18 @@ import re
 import tempfile
 from pathlib import Path
 
+# "note that ..." / "don't forget that ..." / "keep in mind that ..." are remember, not a model chat (route matrix 2026-10-16).
+REMEMBER_SYN_RE = re.compile(r"^(\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?)(?:make\s+a\s+note\s+that|note\s+that|"
+                             r"don'?t\s+forget(?:\s+that)?|do\s+not\s+forget(?:\s+that)?|keep\s+in\s+mind\s+that)\b", re.I)
+
+
+def _canon(utterance: str) -> str:
+    return REMEMBER_SYN_RE.sub(lambda m: m.group(1) + "remember that", utterance or "", count=1)
+
+
 INTENT_RE = re.compile(
+    r"^\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?(?:make\s+a\s+note\s+that|note\s+that|don'?t\s+forget|do\s+not\s+forget|"
+    r"keep\s+in\s+mind\s+that)\b|"
     r"^\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?(?:remember|forget|recall)\b|"
     r"^\s*what\s+do\s+you\s+remember\b", re.I)
 
@@ -17,7 +28,7 @@ def default_path() -> Path:
 
 
 def args_from_utterance(utterance: str) -> dict:
-    s = (utterance or "").strip()
+    s = _canon((utterance or "").strip())
     m = re.match(r"^\s*(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?(remember|forget|recall)\b\s*(.*)", s, re.I)
     if not m:
         return {"op": "recall"}

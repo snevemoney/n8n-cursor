@@ -37,7 +37,7 @@ REPO_WORD_RE = re.compile(r"\b(?:github|repo|repos|repository|repositories)\b", 
 TOOL_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?install\s+(?:the\s+)?(?:tool\s+|package\s+|cli\s+)?"
                      r"([A-Za-z0-9][A-Za-z0-9@._/+-]{0,80})(?:\s+(?:with|using|via|from)\s+(brew|homebrew|pip|pipx|npm|cargo))?\s*(?:for\s+me|please|now)?[.!?]*$", re.I)
 TOOL_MANAGERS = {"brew": "brew", "homebrew": "brew", "pip": "pip", "pipx": "pipx", "npm": "npm", "cargo": "cargo"}
-SEARCH_RE = re.compile(r"\b(?:find|search(?:\s+for)?|look\s+for|any)\s+(?:me\s+)?(?:a\s+|some\s+|the\s+best\s+|good\s+)?(?:public\s+)?(?:github\s+)?(?:repos?|repositories|projects?\s+on\s+github)\s+(?:for|about|that|on|to|with)\s+(.{2,120}?)[.?!]*$", re.I)
+SEARCH_RE = re.compile(r"\b(?:find|search(?:\s+for)?|look\s+for|any)\s+(?:me\s+)?(?:a\s+|some\s+|the\s+best\s+|good\s+)?(?:public\s+)?(?:github\s+)?(?:repos?|repository|repositories|projects?\s+on\s+github)\s+(?:for|about|that|on|to|with)\s+(.{2,120}?)[.?!]*$", re.I)
 
 
 def _permissions():

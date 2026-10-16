@@ -12,15 +12,24 @@ import re
 import sys
 from pathlib import Path
 
-_ASK = r"(?:do|don't|dont|do\s+not|can|can't|cant|cannot|could|couldn't|are|aren't|is\s+there|have)\s+(?:you|jarvis)\b"
+_ASK = r"(?:(?:do|don't|dont|do\s+not|can|can't|cant|cannot|could|couldn't|are|aren't|have)\s+(?:you|jarvis)|is\s+there)\b"
 ARROW_RE = re.compile(_ASK + r".{0,50}\b(?:red\s+arrow|arrow|pointer|point(?:\s+at|\s+to)?\s+(?:things|stuff|controls?))\b", re.I)
 SELF_CODE_RE = re.compile(
     r"\b(?:change|edit|modify|update|rewrite|fix|improve|upgrade|patch|reprogram)\b.{0,30}"
     r"\b(?:your(?:\s+own)?\s+(?:code|program|software|source|brain|rules)|yourself)\b"
     r"|\bgive\s+yourself\s+(?:more\s+)?(?:access|permissions?)\b", re.I)
-FIX_IT_RE = re.compile(r"^(?:jarvis[, ]+)?(?:can|could|will|would)\s+you\s+(?:please\s+)?(?:fix|repair|sort\s+out)\s+(?:it|this|that)"
+FIX_IT_RE = re.compile(r"^(?:jarvis[, ]+)?(?:can|could|will|would)\s+you\s+(?:please\s+)?(?:(?:fix|repair|sort\s+out)\s+(?:it|this|that)|sort\s+(?:it|this|that)\s+out)"
                        r"(?:\s+(?:now|yourself|for\s+me))*\s*[?.!]*$", re.I)
-QUESTION_RE = re.compile(r"\?\s*$|^(?:jarvis[, ]+)?(?:do|don't|dont|can|can't|could|are|aren't|is|have|will|would)\b", re.I)
+QUESTION_RE = re.compile(r"\?\s*$|^(?:do|don't|dont|can|can't|could|are|aren't|is|have|will|would)\b", re.I)
+GREETING_RE = re.compile(r"^\s*(?:(?:hey|hi|ok|okay|yo)\s+)?jarvis\s*[,:!.]?\s+|^\s*(?:so|and|now|ok|okay|alright)\s*,?\s+", re.I)
+
+
+def _strip_greeting(u: str) -> str:
+    while True:
+        nxt = GREETING_RE.sub("", u, count=1).strip()
+        if nxt == u:
+            return u
+        u = nxt
 
 ARROW_LINE = ("Yes. I can put a red arrow on a control: say \"point to\" and the thing, or \"where do I click to\" "
               "and what you want to do. I'm not drawing one now.")
@@ -52,7 +61,7 @@ CODE_LINE = ("Code: my coding worker builds in a scratch repo on its own branch;
 
 def wants(utterance: str) -> str:
     """'arrow' | 'self_code' | 'fix_it' | '' — only questions about Jarvis's own abilities."""
-    u = (utterance or "").strip()
+    u = _strip_greeting((utterance or "").strip())
     if not u:
         return ""
     if FIX_IT_RE.match(u):

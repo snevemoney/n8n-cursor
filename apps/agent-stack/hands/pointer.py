@@ -36,7 +36,7 @@ VISION_BUDGET_SEC = 12.0  # all vision models + refine share this; 15:47 took 46
 OVERLAY_PATTERNS = ("Caches/jarvis/pointer_arrow", "Caches/jarvis/pointer_cursor")
 LOOK_LINE = "Let me have a look, sir."
 WANT_RE = re.compile(r"\b(?:where\s+(?:do|should|can)\s+i\s+(?:click|tap|press|go)|where(?:'s|\s+is)\s+(?:the\s+)?(?:button|[\w\s'-]{1,40}?"
-                     r"\s+(?:button|menu|link|icon|tab|setting|toggle|field))|point\s+(?:to|at|me\s+to)|show\s+me\s+where)\b", re.I)
+                     r"\s+(?:button|menu|link|icon|tab|setting|toggle|field|option|bar|switch|box|panel))|point\s+(?:to|at|me\s+to)|show\s+me\s+where)\b", re.I)
 STOP = set("a an the to on in of for my me i do can you could would should show where is are click tap press button "
            "find point at this that it please hey jarvis new go how which there here sir open turn get make use and or on with button icon".split())
 SYN = {"create": ["create", "new", "plus", "+"], "reel": ["reel", "reels"], "settings": ["settings", "preferences"],

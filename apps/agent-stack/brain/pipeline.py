@@ -40,6 +40,15 @@ HARD_STEP_RE = re.compile(
     r"send (?:[\w']+\s+){1,6}(?:an?\s+)?(email|message|invoice|payment|sms|text)|"
     r"pay (this|that|the|an?|him|her|them|it)\b|"
     r"deploy (this|that|it|to|now|prod)|"
+    # Route matrix 2026-10-16: these reached the model unclassified. Each needs a concrete target.
+    r"deploy (?:the|my|our)\s+(?:\w+\s+){0,2}?(?:site|app|server|build|website|release|changes?)\b|"
+    r"(?:force[- ]?)?push (?:it\s+|this\s+|the\s+branch\s+)?to (?:main|master|origin|prod(?:uction)?|remote)\b|"
+    r"merge (?:the|this|that|my|your)\s+(?:pull request|pr|branch)\b|"
+    r"\brm\s+-[a-z]*r[a-z]*f?\b|"
+    r"delete (?:the\s+|my\s+|this\s+|that\s+)?[\w.-]+\.(?:md|txt|json|ya?ml|py|js|ts|pdf|docx?|csv|sh)\b|"
+    r"(?:buy|purchase|order) (?:a|an|the|me|some|this|that)\b|"
+    r"(?:transfer|wire|send) \$\s?\d|"
+    r"wire (?:the|this|that|a)\s+(?:payment|money|funds|transfer)\b|"
     r"book (a|the|this|me)\b|"
     r"publish (this|that|the|it|now)|"
     r"(?:restart|reboot|shut\s*down|power\s+off|stop)\s+(?:\w+\s+){0,2}?(?:on\s+)?(?:the\s+|my\s+)?(?:vps|server|droplet|instance|box)\b|"
@@ -50,6 +59,7 @@ HARD_STEP_RE = re.compile(
 HARD_TEACH_RE = re.compile(
     r"("
     r"\bhow (?:do i|can i|to|would i|should i)\b|"
+    r"\bshould (?:i|we)\b|\bdid you\b|\bwhat (?:would|will|does) it cost\b|\bwhat does\b.{0,40}\bdo\b|"
     r"\bexplain (?:how|how to)\b|"
     r"\bwalk me through\b|"
     r"\bwhat does it mean to\b|"
@@ -62,7 +72,7 @@ HARD_TEACH_RE = re.compile(
     re.I,
 )
 HARD_NEGATE_RE = re.compile(
-    r"\b(?:do not|don't|never|without|stop)\b.{0,48}\b(?:send|pay|deploy|book|publish)\b",
+    r"\b(?:do not|don't|never|without|stop)\b.{0,48}\b(?:send|pay|deploy|book|publish|push|merge|delete|buy|purchase|order|transfer|wire)\b",
     re.I,
 )
 # An imperative send to the desks is a fan-out. An imperative Slack post is a post.
@@ -729,7 +739,9 @@ def local_greeting_reply() -> dict:
 WORKSPACE_READ_RE = re.compile(
     r"\b(read|open|show|cat)\b.{0,40}\b[\w.\-/]+\.(?:md|txt|py|json|toml|ya?ml|sh|js|ts|cfg|ini)\b|"
     r"\b(?:what|which)\s+(?:repo|branch|git\s+branch|commit\s+head)\b|"
-    r"\b(?:what|which)\s+repos\b|\brepos?\b.{0,30}\b(?:installed|locally|on\s+(?:this|my)\s+(?:mac|machine))\b|"
+    r"\b(?:what|which)\s+repos\b|\b(?:repos?|repositor(?:y|ies))\b.{0,30}\b(?:installed|locally|on\s+(?:this|my)\s+(?:mac|machine))\b|"
+    r"\b(?:what|which)(?:'s|\s+is)?\s+(?:the\s+)?(?:current\s+)?(?:commit\s+head|head\s+commit)\b|"
+    r"\b(?:list|show)\s+(?:me\s+)?(?:my\s+|the\s+)?(?:downloads|desktop|documents)\b.{0,20}\b(?:folder|files|contents)\b|"
     r"\b(?:list|show)\b.{0,30}\b(?:files|folder|contents)\b.{0,30}\b(?:downloads|desktop|documents)\b|"
     r"\bgit\s+status\b|\buncommitted\s+changes\b|\b(?:working\s+)?tree\s+(?:is\s+)?clean\b|"
     r"\b(?:read|open|show|cat)\b.{0,30}(?:\.env\b|\bid_(?:rsa|dsa|ecdsa|ed25519)\b|\.ssh/|\.grok-private/)",
@@ -851,7 +863,8 @@ def wants_voice_engine(utterance: str) -> bool:
 
 
 SCREEN_SEE_RE = re.compile(
-    r"\b(?:describe|grab|look\s+at)\s+my\s+screen\b|\bwhat(?:\x27s|s|\s+is)\s+on\s+my\s+screen\b|\bscreenshot\s+of\s+my\s+screen\b",
+    r"\b(?:describe|grab|look\s+at)\s+my\s+screen\b|\bwhat(?:\x27s|s|\s+is)\s+on\s+my\s+screen\b|\bscreenshot\s+of\s+my\s+screen\b|"
+    r"\bwhat\s+am\s+i\s+looking\s+at\b",
     re.I,
 )
 
@@ -929,7 +942,8 @@ def jarvis_rules() -> str:
 
 WEB_SEARCH_RE = re.compile(
     r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b|\blook\s+(?:it\s+|this\s+|that\s+)?up\s+online\b|"
-    r"\bweb\s+search\b|\bgoogle\s+(?:the|for|it|what|who|how|when|where|a|an)\b",
+    r"\bweb\s+search\b|\bgoogle\s+(?:the|for|it|what|who|how|when|where|a|an)\b|"
+    r"^\s*google\s+\w|\blook\s+up\s+.{1,80}?\s+(?:online|on\s+the\s+(?:web|internet))\b",
     re.I,
 )
 
@@ -1196,8 +1210,45 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
     return None
 
 
+GREETING_LEAD_RE = re.compile(r"^\s*(?:(?:hey|hi|ok|okay|yo)\s+)?jarvis\s*[,:!.]?\s+|^\s*(?:so|and|now|ok|okay|alright)\s*,?\s+", re.I)
+REQUEST_LEAD_RE = re.compile(r"^\s*(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?|please\s+|(?:i\s+need|i\s+want|i'd\s+like)\s+you\s+to\s+"
+                             r"|go\s+ahead\s+and\s+)", re.I)
+POLITE_TAIL_RE = re.compile(r"(?:\s*,?\s*please|\s+for\s+me|\s+right\s+now|\s+now)?\s*[?.!]*\s*$", re.I)
+
+
+def lead_variants(spoken_in: str) -> list[str]:
+    """Route-matrix 2026-10-16: "hey jarvis, open Notes" / "I need you to open Notes" / "so what's on my screen" missed
+    anchored hands. Fallbacks only: the original phrasing is always tried first, so nothing that routes today changes."""
+    raw = (spoken_in or "").strip()
+    out: list[str] = []
+    greet = raw
+    while True:
+        nxt = GREETING_LEAD_RE.sub("", greet, count=1).strip()
+        if nxt == greet:
+            break
+        greet = nxt
+    if greet and greet != raw:
+        out.append(greet)
+    bare = REQUEST_LEAD_RE.sub("", greet, count=1).strip()
+    bare = POLITE_TAIL_RE.sub("", bare).strip()
+    if bare and bare not in (raw, greet):
+        out.append(bare[0].upper() + bare[1:])
+    return out
+
+
 def model_free_route(spoken_in: str) -> dict | None:
     """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
+    pick = _model_free_route_once(spoken_in)
+    if pick is not None or is_hard_step(spoken_in):
+        return pick
+    for variant in lead_variants(spoken_in):
+        pick = _model_free_route_once(variant)
+        if pick is not None:
+            return pick
+    return None
+
+
+def _model_free_route_once(spoken_in: str) -> dict | None:
     if MACOS is not None and (MACOS.LATEST_SCREENSHOT_RE.fullmatch(spoken_in.strip()) or MACOS.FINDER_REFERENCE_RE.fullmatch(spoken_in.strip()) or MACOS.SAVED_IMAGE_RE.fullmatch(spoken_in.strip())):
         return {"tool": "workspace_read", "args": {"op": "screenshot_reference"}, "speak": ""}
     if _research_build_request(spoken_in):
@@ -1274,6 +1325,9 @@ def fixed_route(utterance: str) -> dict | None:
     if not u or is_hard_step(u) or ROUTE_HARD_RE.search(u):
         return None
     m = ROUTE_OPEN_RE.match(u)
+    if m and not re.match(r"(?:https?://|www\.)|.*/", m.group(1), re.I) and re.search(
+            r"\.(?:md|txt|py|json|ya?ml|sh|js|ts|cfg|ini|csv|pdf|docx?|epub|log|toml)$", m.group(1), re.I):
+        m = None  # "open README.md" is a file (".md" is also Moldova's TLD); workspace_read takes it
     if m and not re.search(r";|\bclick\b|\bthen\b|\bdownload\b", u, re.I):
         url = m.group(1).rstrip(".,!?")
         url = url if url.lower().startswith(("http://", "https://")) else "https://" + url

@@ -83,11 +83,19 @@ REVOKE_RE = re.compile(
     r"lock\s+(?:it\s+|yourself\s+)?(?:back\s+)?down|"
     r"(?:go\s+)?back\s+to\s+(?:safe|normal|restricted)\s+mode|"
     r"close\s+(?:open\s+)?access"
-    r")[.!]*\s*$", re.I)
+    r")(?:\s*,?\s*(?:now|right\s+now|please))?[.!]*\s*$", re.I)
+
+
+_SOFT_LEAD = re.compile(r"^\s*(?:so|and|now|ok(?:ay)?|alright)\s*,?\s+(?=\S)", re.I)
+
+
+def _soft(text: str) -> str:
+    """"so lock it down?" / "ok, permission granted." -> the bare phrase (route matrix 2026-10-16)."""
+    return re.sub(r"[\s?.!]+$", "", _SOFT_LEAD.sub("", str(text or ""), count=1))
 
 
 def is_grant(text: str) -> bool:
-    return bool(GRANT_RE.fullmatch(text or "") or grant_split(text)[0])
+    return bool(GRANT_RE.fullmatch(_soft(text)) or grant_split(text)[0])
 
 
 # A grant that leads the line, then whatever he wants done: "permission granted, you are allowed to find books"
@@ -105,7 +113,7 @@ _FILLER = re.compile(r"^(?:(?:so|now|please|sir|jarvis|go\s+ahead|and|then)[\s,.
 
 def grant_split(text: str) -> tuple[bool, str]:
     """(True, remaining command) when the line opens with a grant; (False, "") otherwise."""
-    line = str(text or "")
+    line = _SOFT_LEAD.sub("", str(text or ""), count=1)
     found = False
     while True:
         m = _GRANT_HEAD.match(line)
@@ -122,7 +130,7 @@ def grant_split(text: str) -> tuple[bool, str]:
 
 
 def is_revoke(text: str) -> bool:
-    return bool(REVOKE_RE.fullmatch(text or ""))
+    return bool(REVOKE_RE.fullmatch(_soft(text)))
 
 
 def open_access() -> bool:
