@@ -286,6 +286,16 @@ def _pdf_first_page(path: Path) -> str:
     return (proc.stdout or "").strip()[:4000]
 
 
+def _secret_drop(src: Path) -> bool:
+    """Secret stores never go on the bus: the shared permissions check, by the given and the resolved path."""
+    try:
+        spec = importlib.util.spec_from_file_location("agent_stack_permissions_drop", Path(__file__).resolve().parents[1] / "hands" / "permissions.py")
+        perm = importlib.util.module_from_spec(spec); spec.loader.exec_module(perm)
+        return bool(perm.is_secret_path(str(src)) or perm.is_secret_path(str(src.resolve())))
+    except Exception:  # noqa: BLE001 — if the check cannot run, refuse rather than read blind
+        return True
+
+
 def save_drop(paths: list, *, hive: Path | None = None, gen: int | None = None) -> dict:
     """Store a dropped file on the bus. Never execute. Never open."""
     dest_hive = hive if hive is not None else HIVE
@@ -297,6 +307,9 @@ def save_drop(paths: list, *, hive: Path | None = None, gen: int | None = None) 
     src = Path(names[0]).expanduser()
     if not src.is_file():
         return {"ok": False, "wire": "drop", "spoken": "UNKNOWN. That drop is not a file on disk."}
+    if _secret_drop(src):
+        # Privacy audit 2026-10-16: a drop of ~/.grok-private/keys.json put the keys on the bus and in model context.
+        return {"ok": False, "wire": "drop", "spoken": "That file looks like a secret store, so I didn't read it."}
     try:
         size = src.stat().st_size
     except OSError:

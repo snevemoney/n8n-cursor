@@ -26,9 +26,12 @@ SECRET_RE = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.grok-pri
                        r"credentials[^/]*|secrets?[^/]*|[^/]*token[^/]*|Keychains?)(/|$)", re.I)
 # Always secret wherever they sit: key material, dot-config stores, and folders named for secrets.
 STRONG_SECRET_RE = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.grok-private|id_[a-z0-9]+|[^/]*\.pem|[^/]*\.key|"
-                              r"[^/]*\.p12|[^/]*\.pfx|[^/]*\.kdbx|\.git-credentials|Keychains?|"
+                              r"[^/]*\.p12|[^/]*\.pfx|[^/]*\.kdbx|\.git-credentials|Keychains?|\.docker|\.kube|\.npmrc|\.pypirc|\.gh|"
+                              r"\.config/gh|\.config/gcloud|\.azure|\.terraform\.d|\.vercel|\.stripe|\.password-store|1Password[^/]*|"
                               r"\.?secrets?|credentials|\.?tokens?)(/|$)", re.I)
 WEAK_SECRET_WORD = re.compile(r"credential|secret|token", re.I)
+# Source code is never a secret store by its name alone: test_tokens.py, tokenizer.py, secret_scanner.ts.
+# (2026-10-15: the saved-video build stopped at preparation because a test file had "tokens" in its name.)
 CODE_SUFFIXES = frozenset({".py", ".pyi", ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".swift", ".rs", ".go", ".java",
                            ".kt", ".rb", ".c", ".h", ".cc", ".cpp", ".hpp", ".m", ".mm", ".cs", ".php", ".lua", ".scala"})
 
@@ -50,11 +53,31 @@ def auto_accept_edits() -> bool:
     return bool(mode().get("auto_accept_edits"))
 
 
-def set_auto_accept(on: bool) -> dict:
+def _update_mode(key: str, on: bool, *, extra: dict | None = None, drop: tuple = ()) -> dict:
+    """Locked read-modify-write with a unique temp file (concurrency audit 2026-10-16: the fixed mode.json.tmp raised
+    FileNotFoundError on concurrent grants, and set_auto_accept lost the other flag 199/200 times)."""
+    import fcntl
+    import tempfile
     f = _mode_file()
     f.parent.mkdir(parents=True, exist_ok=True)
-    data = {**mode(), "auto_accept_edits": bool(on), "updated": datetime.now().isoformat(timespec="seconds")}
-    f.write_text(json.dumps(data, indent=1), encoding="utf-8")
+    with open(f.with_name(f.name + ".lock"), "a+") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            data = {**mode(), key: bool(on), **(extra or {}), "updated": datetime.now().isoformat(timespec="seconds")}
+            for k in drop:
+                data.pop(k, None)
+            fd, tmp = tempfile.mkstemp(prefix=f.name + ".", dir=str(f.parent))
+            with os.fdopen(fd, "w", encoding="utf-8") as out:
+                out.write(json.dumps(data, indent=1)); out.flush(); os.fsync(out.fileno())
+            os.chmod(tmp, 0o600)
+            os.replace(tmp, f)
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+    return data
+
+
+def set_auto_accept(on: bool) -> dict:
+    data = _update_mode("auto_accept_edits", on)
     log_action("mode", "auto_accept_edits", "on" if on else "off")
     return data
 
@@ -71,7 +94,8 @@ _GRANT_CORE = (
     r"(?:full\s+)?(?:permission|permissions)\s+(?:is\s+)?granted|"
     r"full\s+access\s+(?:is\s+)?granted|"
     r"i\s+(?:grant|give)\s+you\s+(?:full\s+)?(?:permission|permissions|access)|"
-    r"i\s+(?:allow|authori[sz]e|permit)\s+you")
+    r"i\s+(?:allow|authori[sz]e|permit)\s+you|"
+    r"(?:you\s+have|you've\s+got)\s+my\s+(?:full\s+)?(?:permission|permissions|access)")
 GRANT_RE = re.compile(
     r"^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:(?:ok(?:ay)?|yes|yeah)[,.!]?\s*)?(?:" + _GRANT_CORE +
     r")(?:\s+to\s+(?:do\s+(?:it|this|that)|go\s+ahead|proceed|continue|look|read|open|search|browse))?"
@@ -82,13 +106,21 @@ REVOKE_RE = re.compile(
     r"(?:i\s+)?revoke\s+(?:your\s+|the\s+)?(?:permission|permissions|access)|"
     r"lock\s+(?:it\s+|yourself\s+)?(?:back\s+)?down|"
     r"(?:go\s+)?back\s+to\s+(?:safe|normal|restricted)\s+mode|"
-    r"close\s+(?:open\s+)?access"
-    r")(?:[,.!]?\s*(?:please|sir|now|thanks|thank\s+you|jarvis))*[.!]*\s*$", re.I)
+    r"close\s+(?:open\s+)?access|turn\s+(?:off\s+open\s+access|open\s+access\s+off)|disable\s+open\s+access"
+    r")(?:[,.!]?\s*(?:please|sir|now|right\s+now|thanks|thank\s+you|jarvis))*[.!]*\s*$", re.I)
 OPEN_ACCESS_TTL_SECONDS = None  # Evens 2026-10-15 10:25: no expiry; open by default until he revokes
 
 
+_SOFT_LEAD = re.compile(r"^\s*(?:so|and|now|ok(?:ay)?|alright)\s*,?\s+(?=\S)", re.I)
+
+
+def _soft(text: str) -> str:
+    """"so lock it down?" / "ok, permission granted." -> the bare phrase (route matrix 2026-10-16)."""
+    return re.sub(r"[\s?.!]+$", "", _SOFT_LEAD.sub("", str(text or ""), count=1))
+
+
 def is_grant(text: str) -> bool:
-    return bool(GRANT_RE.fullmatch(text or "") or grant_split(text)[0])
+    return bool(GRANT_RE.fullmatch(_soft(text)) or grant_split(text)[0])
 
 
 # A grant that leads the line, then whatever he wants done: "permission granted, you are allowed to find books"
@@ -96,8 +128,9 @@ def is_grant(text: str) -> bool:
 _GRANT_HEAD = re.compile(
     r"^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:(?:ok(?:ay)?|yes|yeah|i\s+said)[,.!]?\s*)?(?:" + _GRANT_CORE +
     r")(?:\s+to\b)?[\s,.:;!-]*", re.I)
-_FILLER = re.compile(r"^(?:(?:so|now|please|sir|jarvis|go\s+ahead|and|then|"
-                     r"you(?:'re|\s+are)\s+(?:now\s+)?(?:allowed|authori[sz]ed|permitted)\s+to)[\s,.:;!-]*)+", re.I)
+# After a real grant, the owner often adds "you are allowed to ..." (Evens 2026-10-15); only then does it chain.
+_GRANT_CHAIN = re.compile(r"^\s*you(?:\s+are|'re)\s+(?:now\s+)?(?:allowed|authori[sz]ed|cleared|permitted)(?:\s+to\b)?[\s,.:;!-]*", re.I)
+_FILLER = re.compile(r"^(?:(?:so|now|please|sir|jarvis|go\s+ahead|and|then)[\s,.:;!-]*)+", re.I)
 
 
 _COMMAND_START = re.compile(
@@ -107,12 +140,21 @@ _COMMAND_START = re.compile(
     r"send|email|message|reply|schedule|book|post|delete|move|copy|save|upload|share|print|organi[sz]e|clean)\b", re.I)
 
 
+GRANT_MAX_CHARS = 200
+
+
 def grant_split(text: str) -> tuple[bool, str]:
-    """(True, remaining command) when the line opens with a grant; (False, "") otherwise."""
-    line = str(text or "")
+    """(True, remaining command) when the line opens with a grant; (False, "") otherwise.
+    Safety audit 2026-10-16: pasted documents often open "You have access to the following tools: ...". Only the owner's
+    own short one-line ask can grant: multi-line or long text never does, and "you have access"/"you're permitted"
+    without "my"/"now" are document phrasing, not a grant."""
+    raw = str(text or "")
+    if "\n" in raw.strip() or len(raw) > GRANT_MAX_CHARS:
+        return False, ""
+    line = _SOFT_LEAD.sub("", raw, count=1)
     found = False
     while True:
-        m = _GRANT_HEAD.match(line)
+        m = _GRANT_HEAD.match(line) or (_GRANT_CHAIN.match(line) if found else None)
         if not m or not m.group(0).strip():
             break
         found, line = True, line[m.end():]
@@ -120,6 +162,11 @@ def grant_split(text: str) -> tuple[bool, str]:
     if not found:
         return False, ""
     rest = line.strip(" .!?,;:-")
+    # Routing audit 2026-10-16: "permission granted no wait / just kidding / lol / by the school / to the building" and
+    # "I said permission granted yesterday" are not a grant now.
+    if re.match(r"(?:no\b|nope\b|not\b|just\s+kidding|jk\b|lol\b|wait\b|by\s+the\b|by\s+my\b|to\s+the\b|for\s+(?:the|my)\b|"
+                r"yesterday\b|earlier\b|before\b|last\s+\w+|already\b)", rest, re.I) or re.search(r"\?\s*no\b|granted\s+to\s+(?:the|my|our|a)\b", raw, re.I):
+        return False, ""
     if re.fullmatch(r"(?:do\s+(?:it|this|that)|proceed|continue|go\s+ahead|now)?", rest, re.I):
         rest = ""
     if rest and not _COMMAND_START.match(rest):
@@ -128,7 +175,7 @@ def grant_split(text: str) -> tuple[bool, str]:
 
 
 def is_revoke(text: str) -> bool:
-    return bool(REVOKE_RE.fullmatch(text or ""))
+    return bool(REVOKE_RE.fullmatch(_soft(text)))
 
 
 def open_access() -> bool:
@@ -179,17 +226,8 @@ def _write_mode(data: dict) -> None:
 
 
 def set_open_access(on: bool) -> dict:
-    f = _mode_file()
-    f.parent.mkdir(parents=True, exist_ok=True)
-    now = datetime.now()
-    data = {**mode(), "open_access": bool(on), "revoked_by_owner": not on, "updated": now.isoformat(timespec="seconds")}
-    data.pop("expires", None)
-    if not on:
-        data.pop("task_grant", None)  # a revoke also ends any task grant
-    tmp = f.with_name(f.name + ".tmp")
-    tmp.write_text(json.dumps(data, indent=1), encoding="utf-8")
-    os.chmod(tmp, 0o600)
-    os.replace(tmp, f)
+    drop = ("expires",) if on else ("expires", "task_grant")  # a revoke also ends any task grant
+    data = _update_mode("open_access", on, extra={"revoked_by_owner": not on}, drop=drop)
     if bool(mode().get("revoked_by_owner")) == bool(on):  # a revoke that did not land must not pass silently
         raise OSError("open access mode file did not take the change")
     log_action("mode", "open_access", "on" if on else "off")
@@ -286,6 +324,18 @@ def _log_path() -> Path | None:
     return ROOT / "logs" / "jarvis-actions.jsonl"
 
 
+LOG_MAX_BYTES = 20 * 1024 * 1024
+
+
+def _rotate(dest: Path) -> None:
+    """Keep one previous file; the log never grows without bound (concurrency audit 2026-10-16)."""
+    try:
+        if dest.stat().st_size > LOG_MAX_BYTES:
+            os.replace(dest, dest.with_name(dest.name + ".1"))
+    except OSError:
+        pass
+
+
 def log_action(kind: str, target: str, decision: str, **meta) -> None:
     dest = _log_path()
     if dest is None:
@@ -295,7 +345,9 @@ def log_action(kind: str, target: str, decision: str, **meta) -> None:
     row.update({k: v for k, v in meta.items() if isinstance(v, (int, float, bool)) or (isinstance(v, str) and len(v) <= 120)})
     try:
         dest.parent.mkdir(parents=True, exist_ok=True)
-        with _LOCK, dest.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(row, sort_keys=True) + "\n")
+        with _LOCK:
+            _rotate(dest)
+            with dest.open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(row, sort_keys=True) + "\n")
     except OSError:
         pass

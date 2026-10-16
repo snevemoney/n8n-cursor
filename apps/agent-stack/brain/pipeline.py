@@ -43,9 +43,19 @@ HARD_STEP_RE = re.compile(
     r"send (?:[\w']+\s+){1,6}(?:an?\s+)?(email|message|invoice|payment|sms|text)|"
     r"pay (this|that|the|an?|him|her|them|it)\b|"
     r"deploy (this|that|it|to|now|prod)|"
+    # Route matrix 2026-10-16: these reached the model unclassified. Each needs a concrete target.
+    r"deploy (?:the|my|our)\s+(?:\w+\s+){0,2}?(?:site|app|server|build|website|release|changes?)\b|"
+    r"(?:force[- ]?)?push (?:it\s+|this\s+|the\s+branch\s+)?to (?:main|master|origin|prod(?:uction)?|remote)\b|"
+    r"merge (?:the|this|that|my|your)\s+(?:pull request|pr|branch)\b|"
+    r"\brm\s+-[a-z]*r[a-z]*f?\b|"
+    r"delete (?:the\s+|my\s+|this\s+|that\s+)?[\w.-]+\.(?:md|txt|json|ya?ml|py|js|ts|pdf|docx?|csv|sh)\b|"
+    r"(?:buy|purchase|order) (?:a|an|the|me|some|this|that)\b|"
+    r"(?:transfer|wire|send) \$\s?\d|"
+    r"wire (?:the|this|that|a)\s+(?:payment|money|funds|transfer)\b|"
     r"book (a|the|this|me)\b|"
     r"publish (this|that|the|it|now)|"
-    r"(?:restart|reboot|shut\s*down|power\s+off|stop)\s+(?:\w+\s+){0,2}?(?:on\s+)?(?:the\s+|my\s+)?(?:vps|server|droplet|instance|box)\b|"
+    r"(?:restart|reboot|shut\s*down|power\s+off|stop)\s+(?:\w+\s+){0,2}?(?:on\s+)?(?:the\s+|my\s+)?(?:vps|server|droplet|instance|box)\b"
+    r"(?!\s+(?:loop|monitor|check|watch|alert|ping)s?\b)|"
     r"(?:restart|reboot)\s+(?:nginx|docker|n8n|postgres|redis|caddy|openclaw)\b"
     r")",
     re.I,
@@ -53,6 +63,7 @@ HARD_STEP_RE = re.compile(
 HARD_TEACH_RE = re.compile(
     r"("
     r"\bhow (?:do i|can i|to|would i|should i)\b|"
+    r"\bshould (?:i|we)\b|\bdid you\b|\bwhat (?:would|will|does) it cost\b|\bwhat does\b.{0,40}\bdo\b|"
     r"\bexplain (?:how|how to)\b|"
     r"\bwalk me through\b|"
     r"\bwhat does it mean to\b|"
@@ -65,7 +76,7 @@ HARD_TEACH_RE = re.compile(
     re.I,
 )
 HARD_NEGATE_RE = re.compile(
-    r"\b(?:do not|don't|never|without|stop)\b.{0,48}\b(?:send|pay|deploy|book|publish)\b",
+    r"\b(?:do not|don't|didn't|won't|doesn't|can't|never|without|stop)\b.{0,48}\b(?:send|pay|deploy|book|publish|push|merge|delete|buy|purchase|order|transfer|wire)\b",
     re.I,
 )
 # An imperative send to the desks is a fan-out. An imperative Slack post is a post.
@@ -490,6 +501,37 @@ DISPATCH_DEST = ROOT / "docs/hive/outer-heaven/CONTENT/os/sessions/jarvis/dispat
 _LAST_GOOD: dict = {}
 
 
+def boot_id() -> str:
+    """One id per Face process, shared by every hot-reloaded copy of this module (stored on sys)."""
+    b = getattr(sys, "_jarvis_boot_id", None)
+    if not b:
+        b = os.urandom(6).hex()
+        sys._jarvis_boot_id = b
+    return b
+
+
+def _note_failure(where: str, exc: BaseException) -> None:
+    try:
+        log_dir().mkdir(parents=True, exist_ok=True)
+        with (log_dir() / "load-errors.jsonl").open("a", encoding="utf-8", errors="replace") as fh:
+            fh.write(json.dumps({"ts": time.time(), "module": f"pipeline:{where}", "error": hooks.redact(f"{type(exc).__name__}: {exc}")[:300],
+                                 "swallowed": True, "boot_id": boot_id()}) + "\n")
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def log_dir() -> Path:
+    """Where diagnostic logs go. Mac review 2026-10-16: 174 of 187 turn-errors rows were test stubs written to the real
+    log. Tests (pytest/unittest, same rule as memory/turn_log.py) get a per-process temp folder; JARVIS_LOG_DIR overrides."""
+    raw = (os.environ.get("JARVIS_LOG_DIR") or "").strip()
+    if raw:
+        return Path(raw).expanduser()
+    if "_pytest" in sys.modules or "unittest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+        import tempfile
+        return Path(tempfile.gettempdir()) / f"jarvis-logs-test-{os.getpid()}"
+    return ROOT / "logs"
+
+
 def _load(name: str, path: Path):
     """Re-exec a hand from disk each call. The live Face shares its working tree with other workers, so a file
     caught mid-edit (syntax/import error) must not darken the turn: keep serving the last good copy and log it."""
@@ -503,8 +545,8 @@ def _load(name: str, path: Path):
     except Exception as exc:  # noqa: BLE001
         good = _LAST_GOOD.get(name) or prev
         try:
-            (ROOT / "logs").mkdir(exist_ok=True)
-            with (ROOT / "logs" / "load-errors.jsonl").open("a", encoding="utf-8") as fh:
+            log_dir().mkdir(parents=True, exist_ok=True)
+            with (log_dir() / "load-errors.jsonl").open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({"ts": time.time(), "module": name, "path": str(path), "error": f"{type(exc).__name__}: {exc}"[:300],
                                      "served_last_good": good is not None}) + "\n")
         except Exception:  # noqa: BLE001
@@ -536,7 +578,8 @@ CRAFT = _load("agent_stack_craft", STACK / "hands" / "craft.py")
 _CRAFT_APPS = tuple(getattr(CRAFT, "APPS", ()) or ())
 _CRAFT_ASK_RE = re.compile(r"^(?:what|where|which|who|why|how|when|should|can|could|would|do|does|is|are)\b", re.I)
 _CRAFT_ACT_RE = re.compile(
-    r"\b(make|create|new|put|set|write|fill|add|insert|save|export|draw|edit|build|resize|crop|rename|type)\b", re.I
+    r"\b(make|create|new|put|set|write|fill|add|insert|save|export|draw|edit|build|resize|crop|rename|type|design|draft|compose|"
+    r"record|mix|master|grade|cut|trim|animate|render|sketch|plot|chart|format|layout|lay\s+out|retouch|color|colour)\b", re.I
 )
 
 
@@ -588,7 +631,10 @@ def shared_memory_answers(spoken: str) -> bool:
 def explicit_craft_pick(spoken: str) -> dict | None:
     """{tool: craft, args: {app, task}} for 'In GridCraft, make ... save ...'; None for questions/other asks."""
     text = (spoken or "").strip()
-    if not text or not _CRAFT_APPS or _CRAFT_ASK_RE.match(text) or text.endswith("?"):
+    bare = GREETING_LEAD_RE.sub("", text, count=1).strip()
+    imperative = bool(re.match(r"(?:please\s+)?(?:open|in|use|launch|go\s+to)\b", bare, re.I) or _CRAFT_ACT_RE.match(bare))
+    if (not text or not _CRAFT_APPS or _CRAFT_ASK_RE.match(text) or _CRAFT_ASK_RE.match(bare)
+            or (text.endswith("?") and not imperative)):
         return None
     m = re.search(r"\b(" + "|".join(_CRAFT_APPS) + r")\b", text, re.I)
     if not m or not _CRAFT_ACT_RE.search(text):
@@ -732,7 +778,9 @@ def local_greeting_reply() -> dict:
 WORKSPACE_READ_RE = re.compile(
     r"\b(read|open|show|cat)\b.{0,40}\b[\w.\-/]+\.(?:md|txt|py|json|toml|ya?ml|sh|js|ts|cfg|ini)\b|"
     r"\b(?:what|which)\s+(?:repo|branch|git\s+branch|commit\s+head)\b|"
-    r"\b(?:what|which)\s+repos\b|\brepos?\b.{0,30}\b(?:installed|locally|on\s+(?:this|my)\s+(?:mac|machine))\b|"
+    r"\b(?:what|which)\s+repos\b|\b(?:repos?|repositor(?:y|ies))\b.{0,30}\b(?:installed|locally|on\s+(?:this|my)\s+(?:mac|machine))\b|"
+    r"\b(?:what|which)(?:'s|\s+is)?\s+(?:the\s+)?(?:current\s+)?(?:commit\s+head|head\s+commit)\b|"
+    r"\b(?:list|show)\s+(?:me\s+)?(?:my\s+|the\s+)?(?:downloads|desktop|documents)\b.{0,20}\b(?:folder|files|contents)\b|"
     r"\b(?:list|show)\b.{0,30}\b(?:files|folder|contents)\b.{0,30}\b(?:downloads|desktop|documents)\b|"
     r"\bgit\s+status\b|\buncommitted\s+changes\b|\b(?:working\s+)?tree\s+(?:is\s+)?clean\b|"
     r"\b(?:read|open|show|cat)\b.{0,30}(?:\.env\b|\bid_(?:rsa|dsa|ecdsa|ed25519)\b|\.ssh/|\.grok-private/)",
@@ -755,7 +803,10 @@ def _memory_hand():
 
 
 def wants_memory(utterance: str) -> bool:
-    return bool(_memory_hand().INTENT_RE.search(utterance or ""))
+    m = _memory_hand()
+    if hasattr(m, "wants"):
+        return bool(m.wants(utterance or ""))
+    return bool(m.INTENT_RE.search(m._canon(utterance or "") if hasattr(m, "_canon") else (utterance or "")))
 
 
 def wants_workspace_read(utterance: str) -> bool:
@@ -834,7 +885,8 @@ def wants_desk_dispatch(utterance: str) -> bool:
 
 
 LOOP_RE = re.compile(
-    r"\b(?:start|set\s+up|create|run)\s+(?:a\s+)?loop\b|\b(?:list|show)\s+(?:my\s+|the\s+)?loops\b|\b(?:cancel|stop|kill)\s+(?:the\s+)?[\w\s-]{0,30}\bloop\b",
+    r"\b(?:start|set\s+up|create|run)\s+(?:a\s+)?loop\b(?!\s+in\s+(?:python|js|javascript|code|bash))|\b(?:list|show)\s+(?:my\s+|the\s+)?loops\b|"
+    r"\b(?:cancel|stop|kill)\s+(?!(?:the\s+|an?\s+|my\s+)?(?:event|infinite|for|while|main|render|game)\b)(?:the\s+)?[\w\s-]{0,30}\bloop\b(?!\s+in\s+my\s+code)",
     re.I,
 )
 
@@ -857,7 +909,10 @@ def wants_voice_engine(utterance: str) -> bool:
 
 SCREEN_SEE_RE = re.compile(
     r"\b(?:describe|grab|look\s+at)\s+my\s+screen\b|\bwhat(?:\x27s|s|\s+is)\s+on\s+my\s+screen\b|\bscreenshot\s+of\s+my\s+screen\b|"
-    r"\bwhere\b.{0,80}\bon\s+my\s+(?:\w+\s+)?screen\b",
+    r"\bwhere\b.{0,80}\bon\s+my\s+(?:\w+\s+)?screen\b|"
+    r"\bwhat\s+am\s+i\s+looking\s+at\b|"
+    r"^(?:critique|review|rate|roast)\s+(?:my|the|this)\s+screen\b|"  # canvas Z30 screen critique: look first, then judge
+    r"^(?:read|translate)\s+(?:what(?:'s|\s+is)\s+on\s+)?(?:my|the|this)\s+screen\b|^translate\s+(?:this|the)\s+(?:page|window)\b",  # Z15
     re.I,
 )
 
@@ -868,7 +923,8 @@ def wants_screen_see(utterance: str) -> bool:
 
 
 PLAN_RE = re.compile(
-    r"\bplan\s+(?:how\s+to|out)\b|\b(?:make|draft|write)\s+(?:me\s+)?a\s+plan\s+(?:for|to)\b",
+    r"\bplan\s+(?:how\s+to|out)\b|\b(?:make|draft|write)\s+(?:me\s+)?a\s+plan\s+(?:for|to)\b|"
+    r"^plan\s+(?:my|the|this|next)\s+(?:day|week|weekend|month|sprint|launch|trip|move)\b",
     re.I,
 )
 
@@ -908,7 +964,8 @@ RULES_RE = re.compile(
     r"\b(?:what|which)\s+(?:are\s+)?(?:your\s+)?(?:operating\s+|house\s+|own\s+)?rules\s+(?:do\s+you\s+(?:follow|have|obey)|are\s+yours)\b|"
     r"\b(?:what|which)\s+are\s+your\s+(?:operating\s+|house\s+|own\s+)?rules\b|"
     r"\b(?:remind\s+me\s+of|list|tell\s+me)\s+your\s+(?:operating\s+|house\s+|own\s+)?rules\b|"
-    r"\bwhat\s+rules\s+do\s+you\s+(?:follow|have|obey)\b",
+    r"\bwhat\s+rules\s+do\s+you\s+(?:follow|have|obey)\b|"
+    r"^(?:read|show)\s+(?:me\s+)?(?:the|your)\s+(?:operating\s+|house\s+)?rules[\s?.!]*$",
     re.I,
 )
 
@@ -934,8 +991,9 @@ def jarvis_rules() -> str:
 
 
 WEB_SEARCH_RE = re.compile(
-    r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b|\blook\s+(?:it\s+|this\s+|that\s+)?up\s+online\b|"
-    r"\bweb\s+search\b|\bgoogle\s+(?:the|for|it|what|who|how|when|where|a|an)\b",
+    r"\b(?:search|check)\s+(?:the\s+)?(?:web|internet|online)\b(?!\s+(?:connection|speed|is\b|settings))|\blook\s+(?:it\s+|this\s+|that\s+)?up\s+online\b|"
+    r"\bweb\s+search\b|\bgoogle\s+(?:the|for|it|what|who|how|when|where|a|an)\b|"
+    r"^\s*google\s+(?!is\b|docs?\b|sheets?\b|drive\b|maps?\b|chrome\b|was\b|has\b|says\b|a\s+good\b)\w|\blook\s+up\s+.{1,80}?\s+(?:online|on\s+the\s+(?:web|internet))\b",
     re.I,
 )
 
@@ -965,7 +1023,7 @@ ROUTE_SEARCH_LEAD_RE = re.compile(
 
 
 ACK_LINE = "On it."
-ACK_SKIP = frozenset({"say", "capability"})
+ACK_SKIP = frozenset({"say", "capability", "task_board"})
 
 
 
@@ -1013,7 +1071,7 @@ def confirm_arm(hive: Path, tool: str, args: dict, utterance: str) -> None:
     path = _confirm_path(hive)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + ".tmp")
-    tmp.write_text(json.dumps({"tool": tool, "args": args, "utterance": utterance, "at": time.time()}), encoding="utf-8")
+    tmp.write_text(json.dumps({"tool": tool, "args": args, "utterance": utterance, "at": time.time(), "boot": boot_id()}), encoding="utf-8")
     os.chmod(tmp, 0o600)
     os.replace(tmp, path)
 
@@ -1056,8 +1114,18 @@ def confirm_take(hive: Path | None, utterance: str) -> dict | None:
     ok_word = _pointer_hand().G.strict_confirm(utterance) if strict else bool(CONFIRM_YES_RE.fullmatch(utterance or ""))
     cancelled = bool(re.fullmatch(r"\s*(?:cancel|stop|deny|reject|no)(?:\s+(?:it|that|the action))?[.!]?\s*", utterance or "", re.I))
     try:
-        expired = time.time() - float(row.get("at") or 0) > CONFIRM_TTL_SEC
+        age = time.time() - float(row.get("at") or 0)
+        expired = age > CONFIRM_TTL_SEC
     except (ValueError, TypeError):
+        return None
+    # Restart audit 2026-10-16: a proposal armed before a restart survived it, and a bare "yes" meant for something
+    # else could fire it. A row from another Face process (or older than an hour) is dropped; nothing runs.
+    if row.get("boot") != boot_id() or age > 3600:
+        path.unlink(missing_ok=True)
+        if pointer:
+            _pointer_hand().dismiss()
+        if ok_word:
+            return {"tool": "say", "args": {}, "speak": "I restarted since that was proposed, so I dropped it. Ask again and I'll check it fresh."}
         return None
     if cancelled or (expired and pointer):
         path.unlink(missing_ok=True)
@@ -1111,11 +1179,18 @@ def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
         hd = _agent_tools_hand()
         eff = dict(args) if args.get("op") or args.get("steps") else hd.args_from_utterance(utterance)
         steps = eff.get("steps") or ([eff] if eff.get("op") else [])
+        typed = hd.args_from_utterance(utterance)
+        typed_argv = typed.get("argv") if typed.get("op") == "cli" else None
+
+        def _cli_gated(step: dict) -> bool:
+            argv = step.get("argv") or str(step.get("cmd") or "").split()
+            # Evens 10-15: open by default; only a kept stop (send, spend, delete, push, secret) or machine damage asks.
+            return hd.cli_class(argv) == "hard" if hasattr(hd, "cli_class") else True
+
         gated = any(step.get("op") == "fanout" or (step.get("op") == "mcp" and
                     (hd.WRITE_TOOL.search(str(step.get("tool") or "")) or
                      not hd.READ_TOOL.match(str(step.get("tool") or "")))) or
-                    (step.get("op") == "cli" and not _cli_read_only(hd, step.get("argv"))
-                     and not (_open_access() and not _open_cli_needs_owner(step.get("argv"))))
+                    (step.get("op") == "cli" and (_cli_gated(step) if _open_access() else not _cli_read_only(hd, step.get("argv"))))
                     for step in steps if isinstance(step, dict))
         return eff if gated else None
     if tool == "code_run":
@@ -1149,8 +1224,28 @@ def split_steps(utterance: str) -> list[str]:
     parts = _STEP_SPLIT.split(utterance or "")
     nums, texts = parts[1::2], [t.strip(" ,;.") for t in parts[2::2]]
     if len(nums) < 2 or nums != [str(i) for i in range(1, len(nums) + 1)] or not all(texts):
-        return []
+        return _then_steps(utterance)
     return texts
+
+
+_THEN_SPLIT = re.compile(r"(?:\s*+[,;]\s*+|\s++)(?:and\s+)?then\s+|(?:\s*+,\s*+|\s++)and\s+(?=(?:open|close|quit|launch|start|find|search|read|"
+                         r"remember|show|list|check|take|look|play)\b)|(?:\s*+,\s*+|\s++)after\s+that(?:\s*+,\s*+|\s++)", re.I)  # linear (ReDoS audit)
+
+
+def _then_steps(utterance: str) -> list[str]:
+    """Route matrix 2026-10-16: "open Notes then find books about AI" was a file search for the whole line. Spoken
+    chains split on "then" (2-4 parts) only when every part routes to a model-free hand on its own; else []."""
+    text = (utterance or "").strip()
+    for variant in [text] + lead_variants(text):
+        parts = [p.strip(" ,;.?!") for p in _THEN_SPLIT.split(variant)]
+        if not 2 <= len(parts) <= 4 or not all(parts):
+            continue
+        picks = [None if _simple_step(p) is not None else (model_free_route(p) or {}).get("tool") for p in parts]
+        if all(_simple_step(p) is not None or t not in (None, "multistep") for p, t in zip(parts, picks)):
+            if picks[0] == "memory" and any(t not in TALK_SAFE_TOOLS | {None, "say"} for t in picks[1:]):
+                return []  # "note that the recipe says open the oven then take a screenshot" is one note (audit A5)
+            return parts
+    return []
 
 
 def _simple_step(step: str) -> str | None:
@@ -1179,15 +1274,26 @@ COST_FOLLOW_RE = re.compile(r"\bhow\s+much\s+(?:did|does|was)\s+(?:that|this|it)
 RESEARCH_RE = re.compile(r"\b(?:do|make|run)\s+(?:an?\s+)?online\s+research\s+(?:about|on|for)\s+\S|\bresearch\s+online\s+(?:about|on|for)\s+\S", re.I)
 RESEARCH_LEAD_RE = re.compile(r"^.*?\bonline\s+research\s+(?:about|on|for)\s+|^.*?\bresearch\s+online\s+(?:about|on|for)\s+", re.I)
 FILE_EXT_RE = re.compile(r"\.\w{2,4}\b")
-PULL_UP_MY_RE = re.compile(r"\b(?:pull|bring)\s+up\s+my\s+(?!screen\b|files?\b|downloads\b|desktop\b|documents\b|repos?\b)\w|"
-                           r"\b(?:find|show)\s+(?:me\s+)?my\s+(?!screen\b|files?\b|downloads\b|desktop\b|documents\b|repos?\b)\w", re.I)
+_NOT_NOTE = (r"(?!screen\b|files?\b|downloads\b|desktop\b|documents\b|repos?\b|keys?\b|way\b|phone\b|wallet\b|glasses\b|car\b|"
+             r"calendar\b|inbox\b|emails?\b|mail\b|agenda\b|schedule\b|location\b|airpods\b|mac\b|laptop\b|cursor\b|mouse\b)")
+PULL_UP_MY_RE = re.compile(r"^(?:(?:hey\s+)?jarvis\W+|(?:can|could|would)\s+you\s+|please\s+)*+(?:pull|bring)\s+up\s+my\s+" + _NOT_NOTE + r"\w|"
+                           r"^(?:(?:hey\s+)?jarvis\W+|(?:can|could|would)\s+you\s+|please\s+)*+(?:find|show)\s+(?:me\s+)?my\s+" + _NOT_NOTE + r"\w", re.I)
 # "I don't care about your <thing>" / "never mind that" / "forget it": a dismissal. The talk model echoed its last
 # reply (hand-back line) to it. Short dismissals get one fixed ack and no model; longer ones carrying a new ask fall through.
 DISMISS_RE = re.compile(r"^\s*(?:jarvis[\s,]*)?(?:(?:i|we)\s+(?:don['’]?t|do\s+not)\s+care\s+(?:about|for)\b(?:\s+\S+){0,4}"
                         r"|never\s*mind(?:\s+\S+){0,3}|forget\s+(?:about\s+)?(?:it|that|this|the\s+\S+|your\s+\S+)"
                         r"|drop\s+(?:it|that))[\s.!]*$", re.I)
 DISMISS_LINE = "Understood, I'll drop that. What do you want instead?"
+# Owner canvas Z75 hush: a hush gets a two-word ack, never a model monologue. A bare "stop" stays with the Face's Stop.
+HUSH_RE = re.compile(r"^\s*(?:(?:ok(?:ay)?|jarvis)[,\s]+)*(?:hush|shh+|be\s+quiet|quiet(?:\s+please)?|stop\s+talking|shut\s+up|"
+                     r"enough\s+talking|that'?s\s+enough)(?:\s+(?:now|please|jarvis))?[\s.!]*$", re.I)
+HUSH_LINE = "Quiet now."
 SCREEN_WORD_RE = re.compile(r"\b(?:screen|display|monitor|see|look|watch|showing|pop-?up|window)\b", re.I)
+
+
+VAULT_SEARCH_RE = re.compile(r"^(?:search|look\s+(?:in|through)|check|grep)\s+(?:my|the)\s+(?:obsidian\s+)?(?:vault|notes|second\s+brain)\s+(?:for|about)\s+\S"
+                             r"|^what\s+(?:do|does)\s+my\s+(?:obsidian\s+)?(?:notes|vault|second\s+brain)\s+say\s+about\s+\S"
+                             r"|^find\s+\S.*\s+in\s+my\s+(?:obsidian\s+)?(?:notes|vault|second\s+brain)[\s?.!]*$", re.I)
 
 
 CORRECTION_LEAD_RE = re.compile(r"^\s*no[,.!]?\s+(?=(?:use|do|open|try|run|go|make|put|pick|take)\b)", re.I)
@@ -1202,13 +1308,47 @@ def correction_text(spoken_in: str) -> str:
     return rest[:1].upper() + rest[1:]
 
 
+ROUTE_MAX_CHARS = 2000
+_WS_RUN = re.compile(r"[ \t\u00a0\u2000-\u200b\u3000]++")
+_QUOTES = str.maketrans({"\u2019": "'", "\u2018": "'", "\u02bc": "'", "\u201c": '"', "\u201d": '"'})
+
+
+def normalize_utterance(text, cap: int | None = None) -> str:
+    """One clean form of what was heard (routing audit 2026-10-16): lone surrogates no longer crash the turn,
+    curly apostrophes match "don't", runs of spaces collapse (several patterns were super-linear on them), and the
+    routing copy is capped. The model still gets the owner's words; only the routing reads this."""
+    t = str(text or "")
+    t = t.encode("utf-8", "replace").decode("utf-8", "replace").translate(_QUOTES)
+    t = _WS_RUN.sub(" ", t)
+    t = re.sub(r" ?\n[\s]*+", "\n", t).strip()
+    return t[:cap] if cap else t
+
+
 def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
-    """Deterministic honest picks for the asks that went wrong in live chat. None = keep the normal route."""
+    """Deterministic honest picks for the asks that went wrong in live chat. None = keep the normal route.
+    Route matrix 2026-10-16: "hey jarvis, click the save button" / "so stop watching my screen" missed; the original
+    phrasing is tried first, then the same lead-in fallbacks model_free_route uses."""
+    spoken_in = normalize_utterance(spoken_in, ROUTE_MAX_CHARS)
+    pick = _live_chat_route_once(spoken_in, had_pending)
+    if pick is not None or is_hard_step(spoken_in or ""):
+        return pick
+    for variant in lead_variants(spoken_in):
+        pick = _live_chat_route_once(variant, had_pending)
+        if pick is not None and pick.get("speak") != NO_PENDING_LINE:
+            return pick  # "Do it now" must not shrink to bare consent: it is a follow-up to the last ask
+    return None
+
+
+def _live_chat_route_once(spoken_in: str, had_pending: bool = False) -> dict | None:
     u = spoken_in or ""
+    if CANCEL_TAIL_RE.search(u) and len(u.split()) > 2:
+        return {"tool": "say", "args": {}, "speak": CANCEL_LINE}  # "click the save button no wait never mind": nothing acts
     if not had_pending and BARE_CONSENT_RE.match(u):
         return {"tool": "say", "args": {}, "speak": NO_PENDING_LINE}
     if DISMISS_RE.match(u):
         return {"tool": "say", "args": {}, "speak": DISMISS_LINE}
+    if HUSH_RE.match(u):
+        return {"tool": "say", "args": {}, "speak": HUSH_LINE}
     if BARE_DECIDE_RE.match(u):
         # Live: a bare "Decide" got the previous reply repeated. Nothing names the choice, so ask once.
         return {"tool": "say", "args": {}, "speak": "Decide what? Name the two options and I'll pick one and say why."}
@@ -1218,6 +1358,10 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
         return {"tool": "cost_card", "args": {}, "speak": ""}
     if _pointer_hand().CURSOR_DEMO_RE.search(u):
         return {"tool": "pointer_demo", "args": {}, "speak": ""}  # Z02: harmless cursor demo, no click
+    if _apps_hand().list_kind(u):
+        return {"tool": "apps", "args": {}, "speak": ""}  # "show me my open windows" is desktop state, not a vault note
+    if re.search(r"\b(?:close|quit)\b", u, re.I) and _apps_hand().wants(u):
+        return {"tool": "apps", "args": {}, "speak": ""}  # "close Spotify" quits the app; it is not a click on an X
     if _pointer_hand().wants_click(u) and not is_hard_step(u):
         return {"tool": "pointer_click", "args": {}, "speak": ""}  # Z02: arrow + one-shot confirm, then one click
     if CLICK_ASK_RE.search(u) and not is_hard_step(u):
@@ -1225,6 +1369,8 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
         if named:
             return {"tool": "pointer", "args": {}, "speak": ""}
         return {"tool": "say", "args": {}, "speak": CLICK_UNNAMED_LINE}
+    if VAULT_SEARCH_RE.search(u) and not is_hard_step(u):
+        return {"tool": "vault_read", "args": {"query": u}, "speak": ""}  # canvas: Obsidian second brain
     if PULL_UP_MY_RE.search(u) and not FILE_EXT_RE.search(u) and not is_hard_step(u):
         # "pull up my social bios": a thing in his notes, not a folder path. Read the vault, never refuse on folders.
         return {"tool": "vault_read", "args": {"query": u}, "speak": ""}
@@ -1235,15 +1381,169 @@ def live_chat_route(spoken_in: str, had_pending: bool = False) -> dict | None:
 
 
 ARROW_MISHEARD_RE = re.compile(r"(?<=\bshow me )a\s+narrow(?=\s+(?:on|at|over)\s+(?:the|my|this)\b)", re.I)
+# Routing audit 2026-10-16 (B): speech-to-text hears "jervis", "travis", "jarvas"; owners say "um", "like", "okay so".
+_WAKE = r"(?:j[ae]rv[ia]s|jervis|jarvas|jarvi|travis|jarvus)"
+GREETING_LEAD_RE = re.compile(r"^\s*(?:(?:hey|hi|ok|okay|yo)\s+)?" + _WAKE + r"\s*[,:!.]?\s+|"
+                              r"^\s*(?:so|and|now|ok|okay|alright|um+|uh+|uhm|erm|like|yo|hey|well|right)\s*,?\s+", re.I)
+REQUEST_LEAD_RE = re.compile(r"^\s*(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?(?:like\s+|just\s+|go\s+ahead\s+and\s+)?|please\s+|"
+                             r"(?:i\s+need|i\s+want|i'd\s+like)\s+you\s+to\s+|go\s+ahead\s+and\s+)", re.I)
+POLITE_TAIL_RE = re.compile(r"(?:\s*+,?\s*+(?:please|thanks|thank\s+you|merci|s'il\s+te\s+pla[iî]t|" + _WAKE + r")|\s+for\s+me|\s+right\s+now|"
+                            r"\s+real\s+quick|\s+quickly|\s+now)*+[\s?.!]*+$", re.I)  # linear (ReDoS audit)
+# "open notes no wait safari" / "open notes i mean safari": keep the correction.
+CORRECTION_RE = re.compile(r"^(?P<verb>.*?\b(?:open|close|quit|launch|start|switch\s+to|go\s+to|play|search\s+for|look\s+up)\s+)"
+                           r"\S+(?:\s+\S+)?\s+(?:no\s+wait|i\s+mean|sorry|actually|no)\s*,?\s+(?P<fix>\S.*)$", re.I)
+_STT_FIXES = ((re.compile(r"\s+dot\s+(com|org|net|io|ai|ca|dev|md|txt|py|json|pdf)\b", re.I), r".\1"),
+              (re.compile(r"\b(cad|deck|design|effect|film|grid|light|pdf|photo|sound|vector|word)\s+craft\b", re.I),
+               lambda m: m.group(1).capitalize() + "Craft"),
+              (re.compile(r"^(?:first|start\s+by|to\s+start),?\s+", re.I), ""))
+
+
+def lead_variants(spoken_in: str) -> list[str]:
+    """Route-matrix 2026-10-16: "hey jarvis, open Notes" / "I need you to open Notes" / "so what's on my screen" missed
+    anchored hands. Fallbacks only: the original phrasing is always tried first, so nothing that routes today changes."""
+    raw = (spoken_in or "").strip()
+    out: list[str] = []
+    greet = raw
+    while True:
+        nxt = GREETING_LEAD_RE.sub("", greet, count=1).strip()
+        if nxt == greet:
+            break
+        greet = nxt
+    if greet and greet != raw:
+        out.append(greet)
+    bare = REQUEST_LEAD_RE.sub("", greet, count=1).strip()
+    bare = POLITE_TAIL_RE.sub("", bare).strip()
+    if bare and bare not in (raw, greet):
+        out.append(bare[0].upper() + bare[1:])
+    base = bare or greet or raw
+    fixed = base
+    for rx, sub in _STT_FIXES:
+        fixed = rx.sub(sub, fixed)
+    m = CORRECTION_RE.match(fixed)
+    if m:
+        fixed = m.group("verb") + m.group("fix")
+    if fixed and fixed not in out and fixed != raw:
+        out.append(fixed)
+    return out
+
+
+CODING_STATUS_RE = re.compile(r"(?:please\s+)?(?:show|what is|give me)\s+(?:the\s+)?(?:coding|code)\s+(?:task|mission)\s+(?:status|progress)[.!?]?", re.I)
+
+
+def mission_pick(spoken_in: str) -> tuple[dict, str] | None:
+    """(pick, brain) for long-running mission state asks: coding status/resume, browser mission status/start. One place,
+    used by the turn and by eval/route_matrix.py, so the matrix tests the turn's real order."""
+    for text in [str(spoken_in or "").strip()] + lead_variants(spoken_in):
+        got = _mission_pick_once(text)
+        if got is not None:
+            return got
+    return None
+
+
+def _mission_pick_once(text: str) -> tuple[dict, str] | None:
+    if CODING_STATUS_RE.fullmatch(text) or _coding_status_match(text):
+        return {"tool": "agent_tools", "args": {"action": "coding_status"}, "speak": ""}, "coding_mission"
+    if _coding_resume_match(text):
+        return {"tool": "agent_tools", "args": {"action": "coding_resume"}, "speak": ""}, "coding_mission"
+    # Browser progress is exact mission state, not a conversational model task.
+    if (re.search(r"\bbrowser (?:research )?(?:flows?|mission|work|research)\b", text, re.I)
+            and re.search(r"\b(how many|progress|status|finished|completed|done|so far)\b", text, re.I)
+            and re.match(r"^(?:please\s+)?(?:how|what|show|give|status|progress)\b", text, re.I)):
+        return {"tool": "browser_mission", "args": {"action": "status"}, "speak": ""}, "browser_runtime"
+    if re.search(r"\bbrowser mission\b", text, re.I) and re.match(r"^(?:please\s+)?(?:research|compare|find|collect|inspect|start|run)\b", text, re.I):
+        return {"tool": "browser_mission", "args": {"action": "start"}, "speak": ""}, "browser_runtime"
+    return None
+
+
+# Routing audit 2026-10-16 (A1-A2): acting hands fired on "don't check my gmail", "did you ask codex", "how do i close
+# it", "my friend said install ...". A line that opens by negating, asking how, reporting the past or quoting someone
+# is talk, not an order: no acting hand is picked for it (the model answers).
+NOT_A_COMMAND_RE = re.compile(
+    r"^(?:(?:hey\s+)?jarvis\W+|so\s+|ok(?:ay)?\s+|please\s+|whatever\s+you\s+do,?\s+)*+(?:"
+    r"(?:please\s+)?(?:don'?t|do\s+not|never|no\s+need\s+to|stop\s+trying\s+to)\b|i\s+don'?t\s+want\s+you\s+to\b|"
+    r"you\s+(?:don'?t|do\s+not)\s+(?:need|have)\s+to\b|"
+    r"how\s+(?:do|would|can|should|could|did)\s+(?:i|you|we|people)\b|why\s+(?:did|do|would|are)\s+you\b|did\s+you\b|"
+    r"should\s+i\b|if\s+i\s+(?:say|said|ask|told)\b|i\s+already\b|i\s+(?:was\s+)?(?:gonna|going\s+to)\b|"
+    r"i\s+(?:plan|loop|read|clicked|opened|closed|installed|cloned|searched|asked|sent|wrote)\b|i\s+should\b|"
+    r"my\s+\w+\s+(?:said|says|told|wants|asked)\b|(?:he|she|they)\s+(?:said|told|asked)\b|can\s+i\s+ask\b|"
+    r"you\s+can\s+\w+\s+(?:it|this|that)\s+later\b|yesterday\s+i\b|the\s+video\s+says\b)", re.I)
+TALK_SAFE_TOOLS = frozenset({"say", "capability", "task_board", "results_recall", "rules", "cost_card", "status", "mcp_inventory", "skills",
+                             "voice_engine", "prebrief", "pickup", "handback"})
+
+
+def turn_fixed_pick(spoken_in: str) -> dict | None:
+    """The deterministic part of a turn, in the turn's order, with no hive, model or pending state:
+    live-chat picks, then mission state, then the model-free route, then the Craft fast path."""
+    spoken_in = normalize_utterance(spoken_in, ROUTE_MAX_CHARS)
+    return talk_filter(_turn_fixed_pick(spoken_in), spoken_in)
+
+
+# Hands that never send or act on a hard step: they refuse it, or write a proposal/card the owner sends himself.
+PROPOSAL_ONLY_TOOLS = frozenset({"refuse_hard_step", "say", "desk_dispatch", "drafts"})
+
+
+def talk_filter(pick: dict | None, spoken_in: str) -> dict | None:
+    """The router's pick, unless the line is talk (NOT_A_COMMAND_RE) or a hard step; then None (the model answers,
+    and the turn's hard-step gate refuses the step). Used by the turn and by turn_fixed_pick alike."""
+    tool = (pick or {}).get("tool")
+    if pick is None or tool in TALK_SAFE_TOOLS:
+        return pick
+    if tool != "memory" and NOT_A_COMMAND_RE.match(spoken_in):
+        return None
+    if is_hard_step(spoken_in) and tool not in PROPOSAL_ONLY_TOOLS:
+        return None  # a hard step never gets an acting pick (C8)
+    return pick
+
+
+def _turn_fixed_pick(spoken_in: str) -> dict | None:
+    early = live_chat_route(spoken_in, False)
+    if early is not None:
+        return early
+    mission = mission_pick(spoken_in)
+    if mission is not None:
+        return mission[0]
+    early = model_free_route(spoken_in)
+    if early is not None:
+        return early
+    for text in [spoken_in] + lead_variants(spoken_in):
+        craft = explicit_craft_pick(text)
+        if craft is not None:
+            return craft
+    return None
 
 
 def model_free_route(spoken_in: str) -> dict | None:
     """The one model-free pick (fixed phrases, file read, web search). None = model path. Used by the turn and the probe eval."""
+    spoken_in = normalize_utterance(spoken_in, ROUTE_MAX_CHARS)
+    pick = _model_free_route_once(spoken_in)
+    if pick is not None or is_hard_step(spoken_in):
+        return pick
+    for variant in lead_variants(spoken_in):
+        pick = _model_free_route_once(variant)
+        if pick is not None:
+            return pick
+    return None
+
+
+CLOCK_ASK_RE = re.compile(r"^(?:what(?:'?s|\s+is)\s+(?:the\s+)?(?:time|date)(?:\s+(?:today|now|right\s+now))?|what\s+time\s+is\s+it(?:\s+(?:now|right\s+now))?"
+                          r"|what(?:'?s|\s+is)\s+today'?s\s+date|what\s+day\s+is\s+(?:it|today)(?:\s+today)?|what(?:'?s|\s+is)\s+the\s+date\s+today"
+                          r"|tell\s+me\s+the\s+(?:time|date)|what\s+time\s+it\s+is|do\s+you\s+have\s+the\s+time"
+                          r"|how\s+much\s+(?:free\s+)?disk\s+space\s+(?:do\s+i\s+have|is\s+(?:left|free))|how\s+much\s+free\s+space\s+do\s+i\s+have)"
+                          r"[\s?.!]*$", re.I)
+
+
+def _model_free_route_once(spoken_in: str) -> dict | None:
     spoken_in = ARROW_MISHEARD_RE.sub("your red arrow", spoken_in)  # speech-to-text hears "an arrow on" as "a narrow on"
+    if CLOCK_ASK_RE.match((spoken_in or "").strip()):
+        said = _simple_step(spoken_in)
+        if said:
+            return {"tool": "say", "args": {}, "speak": said}  # canvas Z25: the real clock/disk, never a model guess
     if MACOS is not None and (MACOS.LATEST_SCREENSHOT_RE.fullmatch(spoken_in.strip()) or MACOS.FINDER_REFERENCE_RE.fullmatch(spoken_in.strip()) or MACOS.SAVED_IMAGE_RE.fullmatch(spoken_in.strip())):
         return {"tool": "workspace_read", "args": {"op": "screenshot_reference"}, "speak": ""}
     if _research_build_request(spoken_in):
         return {"tool":"agent_tools", "args":{"action":"research_build_start"}, "speak":""}
+    if _THEN_SPLIT.search(spoken_in or "") and not is_hard_step(spoken_in) and len(_then_steps(spoken_in)) >= 2:
+        return {"tool": "multistep", "args": {}, "speak": ""}  # "remember that X, then Y" is two steps, not one note
     if wants_memory(spoken_in):
         return {"tool": "memory", "args": _memory_hand().args_from_utterance(spoken_in), "speak": ""}
     if wants_continuity_status(spoken_in):
@@ -1254,6 +1554,12 @@ def model_free_route(spoken_in: str) -> dict | None:
         return {"tool": "results_recall", "args": {}, "speak": ""}
     if _cost_hand().wants_cost(spoken_in):
         return {"tool": "cost_card", "args": {}, "speak": ""}
+    if _task_board_hand().wants(spoken_in):  # canvas C01: "what are all my jobs" reads the real mission/loop state
+        return {"tool": "task_board", "args": {}, "speak": ""}
+    if _task_board_hand().wants_modes(spoken_in):  # canvas Z64: mode truth from the real switches
+        return {"tool": "task_board", "args": {"op": "modes"}, "speak": ""}
+    if _task_board_hand().wants_drop(spoken_in) == "what":  # canvas: drop -> a real answer, not model recall
+        return {"tool": "task_board", "args": {"op": "drop"}, "speak": ""}
     if _capability_hand().wants(spoken_in):  # "don't you have a red arrow?", "can you change your code?"
         return {"tool": "capability", "args": {}, "speak": ""}
     if (_pointer_request(spoken_in) or _pointer_hand().wants_pointer(spoken_in)) and not is_hard_step(spoken_in):
@@ -1262,6 +1568,9 @@ def model_free_route(spoken_in: str) -> dict | None:
         return {"tool": "handback", "args": {}, "speak": ""}
     if len(split_steps(spoken_in)) >= 2 and not is_hard_step(spoken_in):
         return {"tool": "multistep", "args": {}, "speak": ""}
+    craft = None if is_hard_step(spoken_in) else explicit_craft_pick(spoken_in)
+    if craft is not None:
+        return craft  # "Open PdfCraft and create an invoice" is Craft work, not a file search for "pdf"
     if (not is_hard_step(spoken_in) and not re.match(r"\s*(?:gh|git)\s", spoken_in or "")
             and _repo_hand().wants(spoken_in)):
         return {"tool": "repo", "args": {}, "speak": ""}  # look at / search / install public GitHub repos
@@ -1321,6 +1630,9 @@ def fixed_route(utterance: str) -> dict | None:
     if not u or is_hard_step(u) or ROUTE_HARD_RE.search(u):
         return None
     m = ROUTE_OPEN_RE.match(u)
+    if m and not re.match(r"(?:https?://|www\.)|.*/", m.group(1), re.I) and re.search(
+            r"\.(?:md|txt|py|json|ya?ml|sh|js|ts|cfg|ini|csv|pdf|docx?|epub|log|toml)$", m.group(1), re.I):
+        m = None  # "open README.md" is a file (".md" is also Moldova's TLD); workspace_read takes it
     if m and not re.search(r";|\bclick\b|\bthen\b|\bdownload\b", u, re.I):
         url = m.group(1).rstrip(".,!?")
         url = url if url.lower().startswith(("http://", "https://")) else "https://" + url
@@ -1370,23 +1682,11 @@ def _code_author_hand():
 
 
 def _web_search_hand():
-    name = "agent_stack_web_search"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "web_search.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_web_search", STACK / "hands" / "web_search.py")  # locked (audit 2026-10-16)
 
 
 def _mcp_inventory_hand():
-    name = "agent_stack_mcp_inventory"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "mcp_inventory.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_mcp_inventory", STACK / "hands" / "mcp_inventory.py")  # locked (audit 2026-10-16)
 
 
 def _agent_tools_hand():
@@ -1506,7 +1806,7 @@ def _workflow_followup_route(utterance, hive):
 
 def _coding_resume_match(utterance):
     return re.fullmatch(
-        r"(?:please\s+)?(?:resume|continue)\s+(?:(?:that|the|my|last|latest)\s+)?"
+        r"(?:please\s+)?(?:resume|continue)\s+(?:(?:that|the|my|last|latest)\s+){0,2}"
         r"(?:coding|code)\s+(?:task|mission)(?:\s+([a-f0-9]{32}))?[.!?]?",
         str(utterance or "").strip(), re.I)
 
@@ -1526,13 +1826,7 @@ def _coding_mission_hand():
 
 
 def _permissions_hand():
-    name = "agent_stack_permissions"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "permissions.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_permissions", STACK / "hands" / "permissions.py")  # locked (audit 2026-10-16)
 
 
 def _open_access() -> bool:
@@ -1592,23 +1886,15 @@ def _blocked_request(prior_turns: list) -> str:
 
 
 def _code_run_hand():
-    name = "agent_stack_code_run"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "code_run.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_code_run", STACK / "hands" / "code_run.py")  # locked (audit 2026-10-16)
 
 
 def _apps_hand():
-    name = "agent_stack_apps"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "apps.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_apps", STACK / "hands" / "apps.py")  # locked (audit 2026-10-16)
+
+
+def _capability_hand():
+    return _load_ready_hand("agent_stack_capability", STACK / "hands" / "capability.py")  # locked (audit 2026-10-16)
 
 
 def available_executors():
@@ -1654,43 +1940,19 @@ def _capability_hand():
 
 
 def _repo_hand():
-    name = "agent_stack_repo"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "repo.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_repo", STACK / "hands" / "repo.py")  # locked (audit 2026-10-16)
 
 
 def _desk_dispatch_hand():
-    name = "agent_stack_desk_dispatch"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "desk_dispatch.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_desk_dispatch", STACK / "hands" / "desk_dispatch.py")  # locked (audit 2026-10-16)
 
 
 def _loop_hand():
-    name = "agent_stack_loop"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "loop.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_loop", STACK / "hands" / "loop.py")  # locked (audit 2026-10-16)
 
 
 def _voice_engine_hand():
-    name = "agent_stack_voice_engine"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "voice_engine.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_voice_engine", STACK / "hands" / "voice_engine.py")  # locked (audit 2026-10-16)
 
 
 def _screen_see_hand():
@@ -1708,33 +1970,15 @@ def _screen_see_hand():
 
 
 def _plan_hand():
-    name = "agent_stack_plan"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "plan.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_plan", STACK / "hands" / "plan.py")  # locked (audit 2026-10-16)
 
 
 def _results_mem():
-    key = "agent_stack_results_mem"
-    if key not in sys.modules:
-        spec = importlib.util.spec_from_file_location(key, STACK / "memory" / "results.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[key] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[key]
+    return _load_ready_hand("agent_stack_results_mem", STACK / "memory" / "results.py")  # locked: no half-built module (audit 2026-10-16)
 
 
 def _prebrief_hand():
-    key = "agent_stack_prebrief"
-    if key not in sys.modules:
-        spec = importlib.util.spec_from_file_location(key, STACK / "hands" / "prebrief.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[key] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[key]
+    return _load_ready_hand("agent_stack_prebrief", STACK / "hands" / "prebrief.py")  # locked: no half-built module (audit 2026-10-16)
 
 
 PREBRIEF_PUMP_SEC = 120
@@ -1763,8 +2007,36 @@ def _start_prebrief_pump() -> None:
     import sys as _sys
     if "_pytest" in _sys.modules or "unittest" in _sys.modules or not str(_sys.argv[0] if _sys.argv else "").endswith("serve.py"):
         return
-    if os.environ.get("JARVIS_PREBRIEF", "1") == "0":
-        return
+    if getattr(_sys, "_jarvis_pumps_started", False):
+        return  # concurrency audit 2026-10-16: each hot reload of this module started another set of pump threads
+    _sys._jarvis_pumps_started = True
+
+    def boot_sweep():  # restart audit 2026-10-16: tell the owner which missions lost their worker
+        time.sleep(float(os.environ.get("JARVIS_BOOT_SWEEP_DELAY") or 45))
+        try:
+            cards = _task_board_hand().stranded(
+                HIVE, coding_status=lambda mid: _coding_mission_hand().CodingMissionHandle(HIVE).status(mid),
+                browser_status=lambda mid: browser_runtime().BrowserMissionHandle(HIVE).status(mid))
+        except Exception as exc:  # noqa: BLE001
+            _note_failure("boot_sweep", exc)
+            return
+        if not cards:
+            return
+
+        def apply(bus):
+            told = set(bus.get("stranded_told") or [])
+            ib = bus.get("inbox") if isinstance(bus.get("inbox"), dict) else {}
+            items = [c for c in (ib.get("items") or []) if isinstance(c, dict)]
+            for c in cards:
+                if c["id"] not in told:
+                    items.append({"title": c["title"], "body": c["body"], "ts": time.time()})
+                    told.add(c["id"])
+            bus["inbox"] = {"gen": int(ib.get("gen") or 0) + 1, "items": items[-5:]}
+            bus["stranded_told"] = sorted(told)[-64:]
+            return bus
+        mutate_bus(HIVE, apply)
+
+    threading.Thread(target=boot_sweep, daemon=True, name="boot-sweep").start()
 
     def pump():
         while True:
@@ -1774,7 +2046,8 @@ def _start_prebrief_pump() -> None:
             except Exception:  # noqa: BLE001 — the pump must survive a bad tick
                 continue
 
-    threading.Thread(target=pump, daemon=True, name="prebrief-pump").start()
+    if os.environ.get("JARVIS_PREBRIEF", "1") != "0":  # restart audit: this flag used to switch off loops and lapses too
+        threading.Thread(target=pump, daemon=True, name="prebrief-pump").start()
 
     def lapse_pump():  # Z56: unanswered questions time out into one status line
         while True:
@@ -1787,15 +2060,36 @@ def _start_prebrief_pump() -> None:
 
     threading.Thread(target=lapse_pump, daemon=True, name="lapse-pump").start()
 
+    def loop_pump():  # owner canvas "Scheduled loops": registered read-only loops really run (audit 2026-10-16)
+        while True:
+            time.sleep(60)
+            try:
+                lm = _loop_hand()
+                lr = _load("agent_stack_loop_runner", STACK / "hands" / "loop_runner.py")
+
+                def card(row):
+                    def apply(bus):
+                        ib = bus.get("inbox") if isinstance(bus.get("inbox"), dict) else {}
+                        items = [c for c in (ib.get("items") or []) if isinstance(c, dict)][-4:]
+                        items.append({"title": f"Loop · {row.get('what')}", "body": str(row.get("last_result") or "")[:220],
+                                      "fields": [f"Run {row.get('runs')}/{row.get('max_runs')}"], "ts": row.get("last_run")})
+                        bus["inbox"] = {"gen": int(ib.get("gen") or 0) + 1, "items": items}
+                        return bus
+                    mutate_bus(HIVE, apply)
+                lr.tick(lm, notify=card)
+            except Exception:  # noqa: BLE001
+                continue
+
+    if os.environ.get("JARVIS_LOOP_RUNNER", "1") != "0":
+        threading.Thread(target=loop_pump, daemon=True, name="loop-pump").start()
+
 
 def _cost_hand():
-    key = "agent_stack_cost_card"
-    if key not in sys.modules:
-        spec = importlib.util.spec_from_file_location(key, STACK / "hands" / "cost_card.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[key] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[key]
+    return _load_ready_hand("agent_stack_cost_card", STACK / "hands" / "cost_card.py")  # locked: no half-built module (audit 2026-10-16)
+
+
+def _task_board_hand():
+    return _load_ready_hand("agent_stack_task_board", STACK / "hands" / "task_board.py")
 
 
 def _pointer_hand():
@@ -1803,53 +2097,23 @@ def _pointer_hand():
 
 
 def _pickup_hand():
-    key = "agent_stack_pickup"
-    if key not in sys.modules:
-        spec = importlib.util.spec_from_file_location(key, STACK / "hands" / "pickup.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[key] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[key]
+    return _load_ready_hand("agent_stack_pickup", STACK / "hands" / "pickup.py")  # locked: no half-built module (audit 2026-10-16)
 
 
 def _drafts_hand():
-    name = "agent_stack_drafts"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "drafts.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_drafts", STACK / "hands" / "drafts.py")  # locked (audit 2026-10-16)
 
 
 def _workbench_hand():
-    name = "agent_stack_workbench"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "workbench.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_workbench", STACK / "hands" / "workbench.py")  # locked (audit 2026-10-16)
 
 
 def _mcp_call_hand():
-    name = "agent_stack_mcp_call"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "mcp_call.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_mcp_call", STACK / "hands" / "mcp_call.py")  # locked (audit 2026-10-16)
 
 
 def _skills_hand():
-    name = "agent_stack_skills"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "skills.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_skills", STACK / "hands" / "skills.py")  # locked (audit 2026-10-16)
 
 
 def _workspace_read_hand():
@@ -2143,16 +2407,110 @@ def _distinction_ask(text: str) -> bool:
     )
 
 
+# Routing audit 2026-10-16 (C1-C8, D): short spoken forms of consequential steps were missed ("send it", "pay normand",
+# "delete my notes", "push it", lowercase "call normand"), and the negate/teach rules swallowed real orders ("never mind,
+# send the email to sarah"). A clause is hard when it OPENS with the consequential verb after a lead-in: "remind me to
+# pay the rent", "i want to buy a laptop" and "the email says pay the invoice" do not open with it.
+_CLAUSE_LEAD = (r"^(?:(?:ok(?:ay)?|so|and|now|then|just|also|first|actually|please|jarvis|hey\s+jarvis|yes|yeah|alright|"
+                r"(?:can|could|would|will)\s+you(?:\s+please)?|i\s+need\s+you\s+to|go\s+ahead\s+and|"
+                r"when\s+(?:you'?re|you\s+are)\s+done|what\s+are\s+you\s+waiting\s+for|how\s+about\s+you|"
+                r"why\s+don'?t\s+you(?:\s+just)?|i\s+don'?t\s+care(?:\s+just)?|stop\s+stalling\s+and|don'?t\s+be\s+shy|"
+                r"don'?t\s+wait|do\s+not\s+hesitate\s+to|don'?t\s+forget\s+to|never\s*mind|stop\s+by\s+the\s+\w+\s+and|"
+                r"once\s+(?:the\s+)?\w+(?:\s+\w+)?\s+(?:passes|is\s+done|finishes)|when\s+the\s+\w+\s+(?:passes|is\s+done|finishes))\W*+)*+")
+_NOT_NAME = (r"(?!(?:me|it|back|the|a|an|this|that|these|those|function|api|method|hook|stack|center|centre|log|out|off|up|"
+             r"in|for|of|duty|doorbell|neck|maybe|you|him|her|them|us|here|there|again|anyone|someone|messages?|now|later|"
+             r"received|sent|delivered|failed|queued?|board|box|list|history|logs?|count|threads?|center|marketing|"
+             r"campaigns?|template|templates|tips|notifications?)\b)")
+_NAME_TAIL = (r"(?=\s*$|[\s,.!?]+(?:now|please|back|and|about|to|that|on|at|for|i'?m|saying|tell|tomorrow|today|tonight|"
+              r"later|the|a|an|my|asap|right)\b|\s*[,.!?]\s*$)")
+CLAUSE_HARD_RE = re.compile(_CLAUSE_LEAD + r"(?:"
+    r"send\s+(?!me\b|us\b)(?:it|this|that|them|these|those|the\s+\w+|my\s+\w+|over|\w+\s+(?:a|an|the|my|\$?\d+))\b|"
+    r"(?:call|phone|ring|text|sms|dm|facetime|whatsapp|email|e-mail|message|slack|forward|cc|bcc)\s+(?:my\s+\w+|" + _NOT_NAME + r"[a-z][a-z'-]{1,30}" + _NAME_TAIL + r")|"
+    r"forward\s+(?:it|this|that|them|the\s+\w+|my\s+\w+)\b|"
+    r"(?:reply|respond|write\s+back)\s+to\s+(?!the\s+(?:question|case|prompt|thread\s+in\s+my\s+head))\w+|"
+    r"give\s+\w+\s+a\s+(?:call|ring)\b|dial\s+\+?[\d\s().-]{7,}|(?:call|text)\s+\+?[\d\s().-]{7,}|"
+    r"(?:post|share)\s+(?:it|this|that|the\s+\w+|my\s+\w+)\s+(?:on|to)\b|tweet\b|publish\b|upload\s+(?:it|this|that|the\s+\w+|my\s+\w+)\s+to\b|"
+    r"pay\s+(?!attention\b|it\s+forward\b|the\s+price\b|respect\b|a\s+visit\b|me\s+a\s+compliment\b)\w+|"
+    r"(?:transfer|wire|e-?transfer|interac|venmo|zelle|paypal)\s+(?:\w+\s+)?\$?\d|"
+    r"(?:buy|purchase)\s+(?!(?:me\s+)?(?:some\s+)?time\b|the\s+(?:idea|argument)\b)\w+|"
+    r"order\s+(?:a|an|me|some|the|my|\d+)?\s*(?!(?:the|this|my|these|them)\s+\w+\s+by\b)(?:pizza|food|lunch|dinner|uber|taxi|groceries|\w+\s+online|it|one|two|three)\b|"
+    r"book\s+(?:a|an|my|it|the|me)\b|reserve\s+\w+|subscribe\s+to\b|sign\s+(?:me\s+)?up\s+for\b|"
+    r"(?:delete|erase|trash|shred)\s+(?:it|this|that|them|the\s+\w+|my\s+\w+|all\b|every\w*|\S+\.\w{1,5}\b)|"
+    r"remove\s+(?:my\s+\w+|all\b|\S+\.\w{1,5}\b|the\s+(?:file|folder|repo|branch|app|account))|rm\s+\S|"
+    r"empty\s+(?:the\s+)?trash\b|(?:wipe|format)\s+(?:my|the)\s+\w+|uninstall\s+\w+|drop\s+(?:the\s+)?(?:database|table|db)\b|"
+    r"(?:shut\s+down|shutdown|restart|reboot)\s+(?:my\s+|the\s+)?(?:mac|computer|laptop|server|vps)\b|kill\s+(?:all|every)\b|"
+    r"deploy\b|ship\s+(?:it|this)\b|push\s+(?:it|this|that|the\s+code|my\s+\w+|to\s+\w+)\b|merge\s+(?:it|this|that|pr\b|#?\d+|the\s+\w+)|"
+    r"git\s+(?:push|reset\s+--hard|clean\s+-\w*f)|gh\s+(?:pr\s+merge|repo\s+delete|release\s+create)|"
+    r"(?:log|sign)\s*(?:in|on)\s*(?:to\s+|into\s+)?(?!it\b)(?:my|the|\w+)\b|submit\s+(?:it|this|that|the|my)\b|"
+    r"approve\s+(?:the|this|that)\s+(?:payment|transfer|purchase|invoice|order|charge)|accept\s+the\s+(?:invite|invitation|offer|charge)\b"
+    r")", re.I)
+_CLAUSE_SPLIT = re.compile(r"[,;:!?]+\s*|\.\s+|\s+(?:and\s+then|then|and|but|after\s+that)\s+", re.I)
+_REPORTED_RE = re.compile(r"^(?:remind\s+me\s+to|add\b.{1,60}\bto\s+my\s+(?:todo|to-do|list|notes|calendar)|write\s+down|note\s+that|"
+                          r"(?:the|his|her|their|my)\s+(?:email|message|note|text|letter|teacher|boss|doctor|journal|article)\s+(?:says|said|wrote|asks)|"
+                          r"\w+\s+(?:wrote|said|says)\b|i\s+(?:want|wanna|plan|hope|would\s+like|'d\s+like|need|have|used)\s+to\b|"
+                          r"i\s+(?:might|may|could|would|will|should)\b|"
+                          r"(?:the|a|an|my|his|her|their|our)\s+\w+(?:\s+\w+)?\s+(?:will|would|might|may|can|could|refused|wants?|wanted|asked|tried|forgot|needs?|has|had)\b|"
+                          r"(?:can|should|could|shall)\s+we\b|we\s+(?:should|could|might|can|will)\b|i'?m\s+(?:going|gonna)\s+to\b)", re.I)
+_BENIGN_SUBS = ((re.compile(r"\b(the|a|this|that|my|your|his|her|reading|read)\s+book\b", re.I), r"\1 novel"),
+                (re.compile(r"\bin\s+order\b", re.I), "in-sequence"), (re.compile(r"\border\s+(?:the|this|my|these|them)\s+\w+\s+by\b", re.I), "sort by"),
+                (re.compile(r"\bpay\s+(?:it\s+forward|the\s+price|the\s+bills\b(?=.*\b(?:doesn'?t|won'?t|can'?t)\b)|attention)", re.I), "x"),
+                (re.compile(r"\bbuy\s+(?:me\s+)?(?:some\s+)?time\b|\bbuy\s+the\s+(?:idea|argument)\b", re.I), "x"),
+                (re.compile(r"\boutside\s+the\s+box\b", re.I), "x"), (re.compile(r"\bsend\s+(?:me|us)\b", re.I), "tell me"),
+                (re.compile(r"\bsend\s+it\s+in\s+plain\b", re.I), "write it in plain"),
+                # handing a job to his own agent desk writes a card; desk_dispatch never sends it
+                (re.compile(r"\bsend\s+(?:this|the|that|my|a)?\s*(?:task|job|prompt|card|work)\s+to\s+(?:grok|cursor|codex|claude|jarvis|the\s+\w+\s+desk)\b", re.I), "hand the card to"))
+
+
+CANCEL_TAIL_RE = re.compile(r"(?:\bno\s+wait\b|\bnever\s*mind\b|\bjust\s+kidding\b|\bactually\s+(?:no|don'?t)\b|\bno\s+keep\s+it\b|"
+                            r"\bor\s+not\b|\blol\s+jk\b|\bjk\b|\bscratch\s+that\b|\bforget\s+(?:it|that)\b)[\s.!?]*+$", re.I)
+CANCEL_LINE = "Okay, I won't."
+
+
+def clause_hard(text: str) -> bool:
+    """True when any clause opens with a consequential verb (after lead-ins). Pure; used by is_hard_step."""
+    heard = normalize_utterance(text, ROUTE_MAX_CHARS)
+    if CANCEL_TAIL_RE.search(heard):
+        return False  # "delete the last paragraph? no keep it": the owner took it back
+    for rx, rep in _BENIGN_SUBS:
+        heard = rx.sub(rep, heard)
+    for clause in _CLAUSE_SPLIT.split(heard):
+        c = clause.strip()
+        if c and CLAUSE_HARD_RE.match(c):
+            return True
+    return False
+
+
 def is_hard_step(text: str) -> bool:
     """True only for an actual send/pay/deploy/book/publish. Not a how-to or a don't."""
-    heard = text or ""
+    heard = normalize_utterance(text, ROUTE_MAX_CHARS)
+    if is_class_of_payment_ask(heard) or _distinction_ask(heard):
+        return False  # a question ABOUT a quoted step ("what class is 'pay the invoice'?") is not the step
+    if clause_hard(heard):
+        return True  # a clause that opens with the step itself is an order, whatever a "don't"/"how" elsewhere says
+    if any(_REPORTED_RE.match(v) for v in [heard] + lead_variants(heard)):
+        return False  # reminders, notes, wishes, plans and reported speech are not the step
+    for rx, rep in _BENIGN_SUBS:
+        heard = rx.sub(rep, heard)
     if HARD_NEGATE_RE.search(heard) or HARD_TEACH_RE.search(heard):
         return False
     if is_class_of_payment_ask(heard) or _distinction_ask(heard):
         return False
     if FANOUT_SEND_RE.search(heard) or SLACK_POST_RE.search(heard):
         return True
-    return bool(HARD_STEP_RE.search(heard))
+    return bool(HARD_STEP_RE.search(heard) or CONTACT_STEP_RE.search(heard))  # names in any case: clause_hard
+
+
+# System matrix 2026-10-16 (owner canvas: Phone calls / Outbound calls / SMS, Push + PR, owner browser sessions):
+# reaching a person, publishing a branch, or logging in as him is a consequential step even with open access on.
+_WHO = r"(?:my\s+|the\s+)(?:accountant|client|mom|mother|dad|father|wife|husband|partner|boss|team|landlord|doctor|dentist|lawyer|bank)"
+_LEADS = r"^\W*+(?:(?:(?:hey\s+)?jarvis|(?:can|could|would|will)\s+you(?:\s+please)?|please|i\s+need\s+you\s+to)\b\W*+)*+"  # linear (ReDoS audit)
+CONTACT_STEP_RE = re.compile(_LEADS +
+                             r"(?:(?:call|phone|ring|text|sms|dm|facetime)\s+" + _WHO + r"\b"
+                             r"|push\s+(?:the|this|my|that)\s+(?:branch|commit|change|fix)s?\b"
+                             r"|(?:open|create|file)\s+(?:a|the)\s+(?:pull\s+request|pr)\b"
+                             r"|log\s*(?:in|on)\s*(?:to\s+|\s)(?:my|the)\s+\w+(?:\s+\w+)?\s+(?:account|site|bank|portal))", re.I)
+CONTACT_NAME_RE = re.compile(r"^\W*+(?:(?:(?:[Hh]ey\s+)?[Jj]arvis|(?:[Cc]an|[Cc]ould|[Ww]ould|[Ww]ill)\s+you(?:\s+please)?|[Pp]lease|I\s+need\s+you\s+to)\b\W*+)*+"
+                             r"(?:[Cc]all|[Pp]hone|[Rr]ing|[Tt]ext|[Ff]ace[Tt]ime)\s+[A-Z][a-z]+\b(?!\s+(?:app|api|function|method|hook)\b)")
 
 
 # Evens 2026-10-15: Jarvis asks first ONLY before these. The words are fixed here so model wording cannot drift
@@ -4120,7 +4478,8 @@ def wants_login_why(utterance: str) -> bool:
 
 def wants_watch(utterance: str) -> bool:
     """Face Watch only. Not 'watch later', not Watchdog, not a Safari trip."""
-    return bool(WATCH_CMD_RE.match((utterance or "").strip()))
+    text = (utterance or "").strip()
+    return any(WATCH_CMD_RE.match(re.sub(r"\?+$", "", t).strip()) for t in [text] + lead_variants(text))
 
 
 def watch_owns_turn(utterance: str, watch: dict | None = None) -> bool:
@@ -4416,7 +4775,8 @@ def wants_dropped_file_summary(utterance: str) -> bool:
 
 MACHINE_CURSOR_RE = re.compile(
     r"("
-    r"\b(?:prompts? to cursor|give cursor|ask cursor|cursor ask)\b|"
+    r"\b(?:coding task|prompts? to cursor|give cursor|ask cursor|cursor ask)\b|"
+    r"\b(?:have|tell|get|let)\s+cursor\s+(?:to\s+)?(?:fix|write|add|build|refactor|update|review|make|create|implement)\b|"
     r"\bsend\s+a\s+prompt\b.{0,60}\bcursor\b|"
     r"\bprompt(?:ing)?\s+cursor\s+\S|"
     r"\bsay(?:ing)?\s+\S.{0,40}\bto\s+cursor\b"
@@ -5662,8 +6022,10 @@ def _safari_see(args: dict, utterance: str, *, hive: Path, see_fn=None, gen=None
             return {"ok": False, "spoken": "The expected hash must come from your request."}
         click_guard = {"cancelled": lambda: turn_cancelled(hive, gen)} if gen else {}
         if act == "download":
-            if not url or url not in utterance or not expected or not digest:
-                return {"ok": False, "spoken": "The download mission requires your URL, filename and expected hash."}
+            # Mac review 2026-10-16: the hash was required, so an ordinary "download X from <url>" never ran. The hash is
+            # optional now: with it the content is proven; without it a NEW file of that name in Downloads is proven.
+            if not url or url not in utterance or not expected:
+                return {"ok": False, "spoken": "For a download I need the page URL and the file name you expect, in your words."}
             navigation = SEE.safari_open(url)
             if navigation.get("ok") is not True:
                 return {**navigation, "mission_stage": "navigation"}
@@ -5724,14 +6086,7 @@ def _evidence_line(speak: str, evidence: str) -> str:
 
 def browser_runtime():
     """Lazy dependency-free bridge; Browser Use imports only in its worker."""
-    name = "agent_stack_browser_runtime"
-    if name not in sys.modules:
-        path = STACK / "hands" / "browser_runtime.py"
-        spec = importlib.util.spec_from_file_location(name, path)
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_browser_runtime", STACK / "hands" / "browser_runtime.py")  # locked (audit 2026-10-16)
 
 
 def hooked_result(result):
@@ -5787,6 +6142,72 @@ COMPOUND_ASK_RE = re.compile(
 HAND_LOOP_SECONDS = 45
 
 
+HAND_LOOP_HANDOFF_TTL = 1800  # a paused request can be resumed for 30 minutes
+HAND_LOOP_MAX_RESUMES = 5     # at most 4 + 5*4 hands for one owner request
+
+
+def _hand_loop_handoff_path(hive) -> Path:
+    return Path(hive) / "hand-loop" / "handoff.json"
+
+
+def _hand_loop_handoff_save(hive, token, utterance, receipts, reason, prev=None):
+    """Keep a paused request (owner's words + bounded receipts) so "keep going" continues it through the same loop.
+    prev: the handoff this run resumed (restart audit: re-reading the file after it was taken always saw nothing, so
+    the resume cap never applied)."""
+    try:
+        prev = prev if isinstance(prev, dict) else {}
+        same = prev.get("utterance") == utterance
+        parts = int(prev.get("parts") or 1) + 1 if same else 1
+        if parts > HAND_LOOP_MAX_RESUMES + 1:
+            _hand_loop_handoff_path(hive).unlink(missing_ok=True)
+            return None
+        new_hands = len(receipts) - (len(prev.get("receipts") or []) if same else 0)
+        row = {"utterance": str(utterance or "")[:ROUTE_MAX_CHARS], "receipts": receipts[-8:], "reason": reason, "gen": token,
+               "parts": parts, "hands": (int(prev.get("hands") or 0) if same else 0) + new_hands,
+               "saved_at": time.time(), "boot": boot_id()}
+        if hooks.redact(row["utterance"]) != row["utterance"]:
+            return None  # never keep a line that carries a secret
+        path = _hand_loop_handoff_path(hive)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".tmp")
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(row, fh, ensure_ascii=False, default=lambda _: None)
+        os.replace(tmp, path)
+        return {"parts": parts, "hands": row["hands"], "reason": reason}
+    except Exception:  # noqa: BLE001 — a lost handoff only means "keep going" has nothing to resume
+        return None
+
+
+def _hand_loop_handoff_load(hive):
+    try:
+        row = json.loads(_hand_loop_handoff_path(hive).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(row, dict) or time.time() - float(row.get("saved_at") or 0) > HAND_LOOP_HANDOFF_TTL:
+        return None
+    return row
+
+
+def _hand_loop_handoff_take(hive):
+    row = _hand_loop_handoff_load(hive)
+    try:
+        _hand_loop_handoff_path(hive).unlink()
+    except OSError:
+        pass
+    return row
+
+
+def _hand_loop_handoff_done(hive, entry):
+    """Remove the handoff only once its resume has finished (or saved a newer one): a crash mid-resume keeps it."""
+    row = _hand_loop_handoff_load(hive)
+    if row and entry and row.get("saved_at") == entry.get("saved_at"):
+        try:
+            _hand_loop_handoff_path(hive).unlink()
+        except OSError:
+            pass
+
+
 def _hand_loop_pick(pick):
     """Provider selections are data; host approval objects never cross model rounds."""
     args=pick.get('args') if isinstance(pick.get('args'),dict) else {}
@@ -5800,24 +6221,69 @@ def _hand_loop_key(pick):
                           separators=(',',':'),default=lambda _:None).encode()).hexdigest()
 
 
+# Mac log review 2026-10-16: gens 2635-2637 logged workspace_read ACTION_FAILED with no reason, so the failure could
+# not be explained afterwards. A fixed code (never the message, path or text) is logged per failed hand.
+_ERROR_CLASSES = (
+    ("cancelled", r"^stopped\b|\bcancell?ed\b"),
+    ("outside_roots", r"outside the (?:allowed|selected) folder|no allowed folder"),
+    ("needs_open_access", r"needs open access|permission granted"),
+    ("secret", r"looks like a secret|\bsecret\b"),
+    ("os_permission", r"macos has not given me access|permission denied|operation not permitted"),
+    ("not_found", r"not found|no such file|does not exist|was not in the selected"),
+    ("not_a_file", r"not a (?:regular )?file|is not a regular file"),
+    ("not_a_folder", r"not a folder"),
+    ("binary", r"binary file"),
+    ("too_large", r"too (?:large|big)|truncated"),
+    ("changed", r"changed (?:while|during)|folder changed"),
+    ("stale_scope", r"different request|scope is stale"),
+    ("not_git", r"not a git repo|git status failed"),
+    ("unsupported", r"supports epub and pdf|unknown op|can't be (?:opened|listed)"),
+    ("timeout", r"timed? ?out|deadline"),
+    ("connector", r"could(?:\s+not|n't)\s+reach|connection refused|authentication required|not connected"),
+    ("gated", r"say \"?confirm|waiting for (?:your )?(?:ok|confirm)|needs your ok"),
+)
+
+
+def error_class(ran) -> str | None:
+    """A metadata-only failure code for logs and receipts: None when the hand did not fail."""
+    if not isinstance(ran, dict) or ran.get("ok") is not False and not ran.get("gated") and not ran.get("awaiting_confirm"):
+        return None
+    if ran.get("cancelled"):
+        return "cancelled"
+    if ran.get("gated") or ran.get("awaiting_confirm"):
+        return "gated"
+    if ran.get("timed_out"):
+        return "timeout"
+    text = " ".join(str(ran.get(k) or "") for k in ("workspace_error", "error", "spoken"))
+    for code, rx in _ERROR_CLASSES:
+        if re.search(rx, text, re.I):
+            return code
+    return "other"
+
+
 def _hand_loop_receipt(pick,ran):
     """Bounded real hand data, not an inferred completion or new owner instruction."""
     fields=('ok','verified','task_verified','unknown','gated','awaiting_confirm','cancelled','outcome','status',
             'spoken','brief','cites','sent','workspace_text','workspace_path','workspace_truncated',
             'workspace_fingerprint','workspace_error','workspace_files','workspace_complete','workspace_scope',
             'workspace_names','workspace_more',
+            # Mac review 2026-10-16: a failing command's output never reached the model, so it could not repair it.
+            'output','stdout','stderr','exit','exit_code','returncode','error','timed_out','passed','path',
             'steps','see','mission_id','document_context','skill_name','skill_text',
             'skill_inventory','skill_inventory_complete','skill_inventory_total','skill_text_truncated')
     def bounded(value,depth=0):
         if depth>4:return '[nested receipt omitted]'
-        if isinstance(value,str):return value[:6000]
+        if isinstance(value,str):return _receipt_redact(value[:6000])
         if value is None or isinstance(value,(bool,int,float)):return value
         if isinstance(value,list):return [bounded(v,depth+1) for v in value[:16]]
         if isinstance(value,dict):return {str(k):bounded(v,depth+1) for k,v in list(value.items())[:24]
             if not re.search(r'password|api.?key|authorization|cookie|secret|owner_approval',str(k),re.I)}
         return '[unsupported receipt value]'
     row={'hand':str(pick.get('tool') or ''),'result_tool':str(ran.get('tool') or ''),
+         'op_key':_hand_loop_key(pick),'op':str((pick.get('args') or {}).get('op') or '') if isinstance(pick.get('args'),dict) else '',
          'result':{key:bounded(ran[key]) for key in fields if key in ran}}
+    code=error_class(ran)
+    if code:row['result']['error_class']=code
     if isinstance(ran.get('workspace_text'),str):
         row['result']['workspace_text']=ran['workspace_text'][:12000]
     if isinstance(ran.get('workspace_names'),list):
@@ -5829,15 +6295,74 @@ def _hand_loop_receipt(pick,ran):
     return row
 
 
+def _receipt_redact(text):
+    try:
+        return hooks.redact(text)
+    except Exception:  # noqa: BLE001 — receipts go to the provider: no detector, no text
+        return '[withheld]'
+
+
+# Read-only hands: re-reading after an edit, or once more after a transient failure, is not a repeated action.
+HAND_LOOP_READ_HANDS = frozenset({"workspace_read", "vault_read", "web_search", "capability", "task_board", "status",
+                                  "results_recall", "mcp_inventory", "rules", "cost_card"})
+HAND_LOOP_TRANSIENT = frozenset({"timeout", "changed", "connector"})
+# Hands an owner's own words name without routing to them ("ask Cursor to fix the failing test", "draft the summary").
+HAND_LOOP_INTENT = {
+    "cursor_ask": r"\bcursor\b", "craft": r"\b(?:pages|keynote|numbers|word|excel|powerpoint|document|slide|spreadsheet)\b",
+    "drafts": r"\bdraft|\bemail\b|\breply\b", "memory": r"\bremember|\bnote\b", "workbench": r"\bworkbench|\bwrite (?:it|the|a) file|\bsave (?:it|the|that)\b",
+    "apps": r"\bopen\b|\blaunch\b|\bapp\b", "repo": r"\brepo(?:sitory)?\b|\bgithub\b|\bpull request\b|\bpr\b",
+    "screen_see": r"\bscreen\b|\blook at\b", "safari_see": r"\bsafari\b|\bbrowser\b|\bweb ?page\b|\bsite\b",
+    "browser_mission": r"\bresearch\b|\bbrowse\b", "loop": r"\bevery\b|\bkeep (?:checking|watching)\b|\bmonitor\b",
+    "multistep": r"\bthen\b|\bafter that\b|\band (?:then )?\w+", "desk_dispatch": r"\bdesk\b|\bdispatch\b",
+}
+
+
+def _hand_loop_in_scope(next_pick, utterance, receipts) -> str:
+    """'' when the owner's request covers this next hand; else why not. The original ask is authoritative: the hand is
+    named by one of its steps or by the ask's own words, and no target in the args came only from receipt text
+    (a web page or file cannot pick where an acting hand goes)."""
+    tool = str(next_pick.get('tool') or '')
+    steps = [utterance] + [s for s in (split_steps(utterance) if len(utterance or '') < 600 else []) if s != utterance]
+    named = any((turn_fixed_pick(s) or {}).get('tool') == tool for s in steps)
+    if not named and not (tool in HAND_LOOP_INTENT and re.search(HAND_LOOP_INTENT[tool], utterance or '', re.I)):
+        return 'needs_owner_ask'
+    said = (utterance or '').lower()
+    seen_text = json.dumps([r.get('result') for r in receipts], ensure_ascii=False, default=lambda _: None).lower()
+    def targets(value):
+        if isinstance(value, dict):
+            for v in value.values(): yield from targets(v)
+        elif isinstance(value, list):
+            for v in value: yield from targets(v)
+        elif isinstance(value, str):
+            for t in re.findall(r"https?://[^\s\"'<>]+|[\w.+-]+@[\w-]+\.[\w.]+|(?:~|/)[\w./ -]{3,}", value):
+                yield t.strip().lower()
+    for t in targets(next_pick.get('args') or {}):
+        if t not in said and t in seen_text:
+            return 'receipt_injected_target'
+    return ''
+
+
+HAND_LOOP_NEEDS_OWNER = frozenset({"craft", "cursor_ask", "safari_see", "screen_see", "loop", "apps", "pointer_click",
+                                   "repo", "desk_dispatch", "browser_mission", "drafts", "memory", "workbench", "multistep"})
+
+
 def _hand_loop_pause(ran):
     if ran.get('awaiting_confirm') or ran.get('gated') or ran.get('auth_missing') or ran.get('cancelled'):
         return 'authority_or_stop'
     if (ran.get('tool') in {'refuse_hard_step','say'} or ran.get('unnamed_path')
             or ran.get('outcome') in {'AWAITING_APPROVAL','NEEDS_ACTION_DETAILS'}):
         return 'owner_input_required'
-    if str(ran.get('workspace_error') or '').lower() in {
-            'outside the allowed folders','no allowed folder','that looks like a secret','permission denied'}:
+    werr=str(ran.get('workspace_error') or '').lower()
+    if werr in {'that looks like a secret','permission denied'}:
         return 'read_authority_required'
+    if werr in {'outside the allowed folders','no allowed folder'}:
+        # Mac gens 2635-2637: with open access on, the whole home folder is readable, so this refusal means the model
+        # invented a path outside it. Pausing "for permission" asked for a grant he had already given; the model may
+        # correct the path instead. Without open access it is a real authority stop.
+        try:
+            if not _open_access():return 'read_authority_required'
+        except Exception:  # noqa: BLE001
+            return 'read_authority_required'
     if ran.get('mission_id') and ran.get('task_verified') is not True:
         return 'durable_mission_pending'
     if ran.get('ok') is False and re.search(r"could(?:\s+not|n't)\s+reach|connection refused|authentication required",str(ran.get('spoken') or ''),re.I):
@@ -5868,9 +6393,16 @@ def _provider_hand_exchange(selection, pick, result):
 
 
 def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None,
-                        retrieve_roots=None,see_fn=None,status_fn=None,cursor_ask_fn=None,initial_selection=None):
-    """One bounded general tool loop; original owner utterance stays authoritative."""
-    receipts=[_hand_loop_receipt(pick,ran)];seen={_hand_loop_key(pick)}
+                        retrieve_roots=None,see_fn=None,status_fn=None,cursor_ask_fn=None,initial_selection=None,
+                        prior_receipts=None,handoff_prev=None):
+    """One bounded general tool loop; original owner utterance stays authoritative. prior_receipts: a paused run of
+    the same request being resumed ("keep going"); its steps count for duplicates and failures but not the budget."""
+    prior=list(prior_receipts or [])
+    receipts=prior+([_hand_loop_receipt(pick,ran)] if ran is not None else [])
+    seen={r.get('op_key'):i for i,r in enumerate(receipts) if r.get('op_key')};retried=set()
+    budget=len(prior)+HAND_LOOP_MAX_HANDS
+    if ran is None:  # resuming: the last kept receipt is where the loop stands
+        ran={**receipts[-1]['result'],'tool':receipts[-1]['hand']}
     tool_history=_provider_hand_exchange(initial_selection,pick,ran)
     folder_scope=ran.get('_selected_folder_scope')
     history_rounds=[]
@@ -5883,6 +6415,7 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
         row['hand_loop']={'reason':reason,'hands':len(receipts),'receipts':receipts}
         row['hand_loop_meta']={'stop_reason':reason,'hands':len(receipts),'history_rounds':history_rounds,'steps':[
             {'n':n+1,'tool':receipt['hand'],'ok':receipt['result'].get('ok') is True,
+             'error_class':receipt['result'].get('error_class'),
              'receipt_sha256':hashlib.sha256(json.dumps(receipt,sort_keys=True,default=lambda _:None).encode()).hexdigest(),
              'workspace_path_sha256':hashlib.sha256(str(receipt['result'].get('workspace_path') or '').encode()).hexdigest()
                  if receipt['result'].get('workspace_path') else None}
@@ -5890,12 +6423,38 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
         if provider_failure:row['hand_loop_meta']['provider_failure']=provider_failure
         row['wires']=list(dict.fromkeys(wires));row['cites']=cites[:16]
         if len(receipts)>1:row['task_verified']=False
+        # Mac review 2026-10-16: a failure was forgiven when ANY later call of the same hand succeeded (reading file B
+        # hid that file A failed). Now only the same operation succeeding later, or a corrected lookup (same hand and op
+        # after a not-found), clears it.
+        def _cleared(i,r):
+            for x in receipts[i+1:]:
+                if x['result'].get('ok') is not True:continue
+                if x.get('op_key')==r.get('op_key'):return True
+                if (r['result'].get('error_class')=='not_found' and x['hand']==r['hand'] and x.get('op')==r.get('op')):return True
+            return False
+        failed=[r['hand'] for i,r in enumerate(receipts[:-1]) if r['result'].get('ok') is not True and not _cleared(i,r)]
+        if failed and row.get('ok') is not False:
+            # Honesty audit 2026-10-16: an earlier failed hand was dropped when a later one succeeded.
+            row.update(ok=False,partial=True)
+            row['spoken']=str(row.get('spoken') or '').rstrip()+' '+('Earlier step failed: '+', '.join(dict.fromkeys(failed))+'.')
         # One hand already answered and only the "what next?" pick failed: the answer stands (live 02:50 repos reply).
-        answered=len(receipts)==1 and last.get('ok') is True and reason in {'invalid_next_pick','provider_unavailable'}
-        if not answered and reason in {'duplicate_action','hand_limit','time_limit','invalid_next_pick','provider_unavailable'}:
+        if len(receipts)==1 and last.get('ok') is True and reason in {'invalid_next_pick','provider_unavailable'}:
+            return row
+        if reason in {'duplicate_action','hand_limit','time_limit','invalid_next_pick','provider_unavailable','needs_owner_ask',
+                      'receipt_injected_target'}:
             row.update(ok=False,task_verified=False,partial=True)
             evidence=str(last.get('spoken') or '').strip()
-            row['spoken']=(evidence+' ' if evidence else '')+'I stopped before another action; the remaining request is not verified.'
+            tail='I stopped before another action; the remaining request is not verified.'
+            if reason in {'hand_limit','time_limit'}:
+                # Mac review 2026-10-16: the loop ended work with no handoff. The receipts are kept with the turn's own
+                # gen; "keep going" resumes this request through the same loop (no second controller).
+                handed=_hand_loop_handoff_save(hive,token,utterance,receipts,reason,prev=handoff_prev)
+                if handed:
+                    row['hand_loop_handoff']=handed
+                    tail='I paused after '+str(len(receipts))+' steps; say "keep going" and I will continue from here.'
+            elif reason=='receipt_injected_target':
+                tail='The next step aimed at something only a page or file said, not you, so I stopped. Say it yourself and I will go on.'
+            row['spoken']=(evidence+' ' if evidence else '')+tail
         return row
     while True:
         if token and turn_cancelled(hive,token):return None
@@ -5934,7 +6493,7 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
         next_tool=str(next_pick.get('tool') or '')
         if next_tool in {'converse','say'}:
             text=str(next_pick.get('speak') or '').strip();evidence=str(last.get('spoken') or last.get('brief') or '').strip()
-            protected=(last.get('ok') is False or last_pick.get('tool')=='craft' or
+            protected=(last.get('ok') is False or last.get('task_verified') is False or last_pick.get('tool')=='craft' or
                        isinstance(last.get('see'),dict) and isinstance(last['see'].get('verification'),dict))
             if last_pick.get('tool')=='vault_read' and evidence and not _hand_used_in_speak(text,evidence):protected=True
             if text and not talk_is_miss(text) and not protected:last={**last,'spoken':text}
@@ -5942,9 +6501,23 @@ def _continue_hand_loop(pick,ran,utterance,*,hive,token,brain,brief,talk_fn=None
         if next_tool not in HANDS:return finish('invalid_next_pick')
         next_pick=_hand_loop_pick(next_pick)
         key=_hand_loop_key(next_pick)
-        if key in seen:return finish('duplicate_action')
-        if len(receipts)>=HAND_LOOP_MAX_HANDS:return finish('hand_limit')
-        seen.add(key)
+        if key in seen:
+            # Mac review 2026-10-16: the guard keyed on tool+args blocked reread-after-edit and a retry after a transient
+            # failure. A read-only hand may repeat once state changed (an acting hand succeeded since) or once after a
+            # transient error; an acting hand never repeats.
+            at=seen[key];prior=receipts[at]['result']
+            changed=any(r['hand'] not in HAND_LOOP_READ_HANDS and r['result'].get('ok') is True for r in receipts[at+1:])
+            transient=prior.get('error_class') in HAND_LOOP_TRANSIENT and key not in retried
+            if next_tool not in HAND_LOOP_READ_HANDS or not (changed or transient):return finish('duplicate_action')
+            if transient:retried.add(key)
+        if next_tool in HAND_LOOP_NEEDS_OWNER:
+            # Privacy audit 2026-10-16: the follow-up pick is model output after reading untrusted receipts (web pages,
+            # files, MCP results). Acting hands need the owner's own request to cover them (Mac review: not only the
+            # first route of the whole utterance), and no target may come from receipt text alone.
+            why=_hand_loop_in_scope(next_pick,utterance,receipts)
+            if why:return finish(why)
+        if len(receipts)>=budget:return finish('hand_limit')
+        seen[key]=len(receipts)
         if token and turn_cancelled(hive,token):return None
         yield _pipeline_event(ok=True,tool=next_tool,spoken='',spoken_delta='',wires=[next_tool],cites=[],
                               pack=None,done=False,partial=True,brain=brain,model_available=bool(brain),gen=token)
@@ -5989,7 +6562,19 @@ def _run_tool_heartbeat(pick: dict, utterance: str, *, hive, token, brain, **kw)
         tool = str((pick or {}).get("tool") or "converse")
         yield _pipeline_event(ok=True, tool=tool, spoken=TOOL_HEARTBEAT, spoken_delta=TOOL_HEARTBEAT, wires=[tool, "heartbeat"], cites=[],
                               pack=None, done=False, partial=True, brain=brain, model_available=bool(brain), gen=token)
-    th.join()
+    # Concurrency audit 2026-10-16: an unbounded join kept a stopped turn waiting on a hanging hand. Wait in slices; a
+    # cancelled turn returns at once (the hand's own deadline still bounds the thread it leaves behind).
+    while th.is_alive():
+        th.join(0.25)
+        if th.is_alive() and token and turn_cancelled(hive, token):
+            # Mac review 2026-10-16: "Stopped" was said while the hand's thread was still running. Say what is true:
+            # the turn stopped; the step in flight ends on its own deadline and its late result is discarded.
+            th.join(1.0)
+            alive = th.is_alive()
+            return {"ok": False, "tool": str((pick or {}).get("tool") or ""), "cancelled": True, "still_running": alive,
+                    "spoken": ("Stopped. The step that was running may still finish on its own; I won't use its result."
+                               if alive else "Stopped. Standing by."),
+                    "task_verified": False, "wires": [], "cites": [], "sent": False}
     if "err" in box:
         raise box["err"]
     return box["ran"]
@@ -6011,7 +6596,11 @@ def run_tool(pick: dict, utterance: str, **kw) -> dict:
         })
     got = hooked_result(_run_tool_inner(pick, utterance, **kw))
     try:  # Z11: every finished result is written back to the long-term results ledger
-        if got.get("ok"):
+        # Honesty audit 2026-10-16: only a verified result is "finished" (code_run failures, pointer misses, duplicate
+        # draft questions and registered-but-unrun loops were recapped as done), and a stopped turn records nothing.
+        _gen = kw.get("gen")
+        _stopped = bool(_gen and kw.get("hive") is not None and turn_cancelled(Path(kw["hive"]), int(_gen)))
+        if got.get("ok") and got.get("task_verified") is True and not _stopped:
             _rm = _results_mem()
             if _rm.write_back(str(got.get("tool") or tool), utterance, got) and kw.get("hive") is not None:
                 row = (_rm.recent(1, today_only=False) or [{}])[-1]
@@ -6024,8 +6613,13 @@ def run_tool(pick: dict, utterance: str, **kw) -> dict:
                     bus["inbox"] = {"gen": int(ib.get("gen") or 0) + 1, "items": items}
                     return bus
                 mutate_bus(Path(kw["hive"]), _inbox)
-    except Exception:  # noqa: BLE001
-        pass
+    except Exception as exc:  # noqa: BLE001 — a ledger failure never takes the turn down, but it is not silent either
+        try:
+            log_dir().mkdir(parents=True, exist_ok=True)
+            with (log_dir() / "load-errors.jsonl").open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps({"ts": time.time(), "module": "results_ledger", "error": type(exc).__name__}) + "\n")
+        except OSError:
+            pass
     return got
 
 
@@ -6191,8 +6785,9 @@ def _run_tool_inner(
         return browser_runtime().pipeline_tool(args, utterance, hive)
     if tool == "say":
         said = str(pick.get("speak") or "").strip()
+        # Honesty audit 2026-10-16: words are not a verified task ("Done, I opened Safari" from the model's say).
         return {"ok": bool(said), "tool": "say", "spoken": said, "wires": ["voice"], "cites": [],
-                "sent": False, "task_verified": bool(said), "outcome": TOOL_LOOP}
+                "sent": False, "task_verified": False, "outcome": TOOL_LOOP}
     if tool == "web_search":
         ws = _web_search_hand()
         q = str(args.get("query") or "") or ws.query_from_utterance(utterance)
@@ -6233,8 +6828,8 @@ def _run_tool_inner(
                                       "builder_model": au.get("builder_model"), "critic_model": au.get("critic_model")}}
         got = hd.run({k: v for k, v in eff.items() if k in ("code", "test")})
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""),
-                "wires": ["code_run"], "cites": [], "sent": False,
-                "task_verified": bool(got.get("ok")), "code_run_meta": hd.log_meta(got)}
+                "wires": ["code_run"], "cites": [], "sent": False, "stdout": got.get("stdout") or "", "stderr": got.get("stderr") or "",
+                "task_verified": bool(got.get("passed")), "code_run_meta": hd.log_meta(got)}
     if tool == "desk_dispatch":
         hd = _desk_dispatch_hand()
         got = _desk_dispatch_hand().run(dict(args) if args else hd.args_from_utterance(utterance), hive=hive)
@@ -6274,7 +6869,7 @@ def _run_tool_inner(
         return {"ok": True, "tool": tool, "spoken": _rm.spoken_today() if _today else _rm.spoken_recent(), "wires": ["results"], "cites": [],
                 "sent": False, "task_verified": True, "outcome": TOOL_LOOP}
     if tool == "capability":
-        got = _capability_hand().run(utterance, prior=args.get("prior"), executors=available_executors())
+        got = _capability_hand().run(utterance, prior=args.get("prior"))
         return {"ok": bool(got.get("ok")), "tool": tool, "spoken": str(got.get("spoken") or ""), "wires": ["capability"],
                 "cites": [], "sent": False, "task_verified": bool(got.get("task_verified")),
                 "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN}
@@ -6325,6 +6920,32 @@ def _run_tool_inner(
                 "outcome": TOOL_LOOP if got.get("found") else HONEST_UNKNOWN}
     if tool == "handback":
         return handback(hive, gen)
+    if tool == "task_board":
+        def _cs(mid):
+            return _coding_mission_hand().CodingMissionHandle(hive).status(mid)
+
+        def _bs(mid):
+            return browser_runtime().BrowserMissionHandle(hive).status(mid)
+        loops_ok = True
+        try:
+            lh = _loop_hand()
+            loops, loops_ok = lh.load_checked() if hasattr(lh, "load_checked") else (lh._load(), True)
+        except Exception:  # noqa: BLE001 — an unloadable loop hand is not "no loops"
+            loops, loops_ok = [], False
+        if args.get("op") == "drop":
+            got = _task_board_hand().drop_line(load_json(Path(hive) / "bus" / "state.json"))
+            return {"ok": got["ok"], "tool": tool, "spoken": got["spoken"], "wires": ["task_board", "drop"], "cites": [],
+                    "sent": False, "task_verified": got["task_verified"], "outcome": TOOL_LOOP if got["ok"] else HONEST_UNKNOWN}
+        if args.get("op") == "modes" or _task_board_hand().wants_modes(utterance):
+            got = _task_board_hand().modes(load_json(Path(hive) / "bus" / "state.json"), open_access=_open_access())
+            return {"ok": True, "tool": tool, "spoken": got["spoken"], "wires": ["task_board", "modes"], "cites": [], "sent": False,
+                    "task_verified": True, "outcome": TOOL_LOOP}
+        got = _task_board_hand().board(hive, coding_status=_cs, browser_status=_bs, loops=loops)
+        if not loops_ok:
+            got["spoken"] = got["spoken"].rstrip() + " I couldn't read the loop list, so loops may be missing from this."
+        return {"ok": True, "tool": tool, "spoken": got["spoken"], "wires": ["task_board"], "cites": [], "sent": False,
+                "task_verified": bool(loops_ok), "task_board_meta": {k: len(got[k]) for k in ("coding", "browser", "loops", "finished")},
+                "outcome": TOOL_LOOP}
     if tool == "multistep":
         lines, all_ok = [], True
         kw = dict(hive=hive, retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn,
@@ -6337,7 +6958,10 @@ def _run_tool_inner(
                     said, ok = "I need you to ask this one on its own.", False
                 else:
                     got = run_tool(pick2, step, **kw)
-                    said, ok = str(got.get("spoken") or "no answer"), bool(got.get("ok"))
+                    # Honesty audit 2026-10-16: a step still waiting for "confirm", or one its hand could not verify, is
+                    # not a finished step.
+                    said = str(got.get("spoken") or "no answer")
+                    ok = bool(got.get("ok")) and not got.get("awaiting_confirm") and got.get("task_verified") is not False
                 all_ok = all_ok and ok
             lines.append(f"Step {i} ({step}): {said}")
             try:
@@ -6638,6 +7262,7 @@ def _run_tool_inner(
             "skill_text_truncated": bool(got.get('truncated')) or len(str(got.get('text') or ''))>6000,
             "skill_inventory": got.get('skills') or [],
             "skill_inventory_total": got.get('inventory_total'),
+            **{k: got[k] for k in ("output", "exit", "error", "gated") if k in got},
         }
     if tool == "memory":
         mem = _memory_hand()
@@ -6751,7 +7376,10 @@ def _run_tool_inner(
             "wires": ["workspace_read"],
             "cites": [],
             "sent": False,
-            "task_verified": bool(got.get("ok")) and (got.get("complete") is True if got.get("op") == "find" else got.get('task_verified') is True if opening else not got.get("truncated", False)),
+            # Honesty audit 2026-10-16: a find answers a find; when the owner asked to open something, the search alone
+            # does not finish the task.
+            "task_verified": bool(got.get("ok")) and (got.get("complete") is True if got.get("op") == "find" else got.get('task_verified') is True if opening else not got.get("truncated", False))
+                             and not (got.get("op") == "find" and re.search(r"\b(?:open|read|pull\s+up|bring\s+up)\b", utterance or "", re.I)),
             "workspace_meta": wr.log_meta(got),
             "workspace_error": str(got.get("error") or ""),
             "workspace_files": got.get("files", []),
@@ -7471,7 +8099,7 @@ def _salvage_general_line(text: str) -> str:
     return ""
 
 
-DETERMINISTIC_HANDS = ("capability", "apps", "repo", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief")
+DETERMINISTIC_HANDS = ("capability", "task_board", "apps", "repo", "workspace_read", "memory", "skills", "mcp_inventory", "mcp_call", "agent_tools", "plan", "screen_see", "voice_engine", "loop", "desk_dispatch", "code_run", "web_search", "say", "status", "safari_see", "rules", "workbench", "drafts", "pickup", "multistep", "handback", "pointer", "pointer_click", "pointer_demo", "cost_card", "results_recall", "prebrief")
 
 
 def _turn_ok(ran: dict | None, brain, tool) -> bool:
@@ -7623,6 +8251,8 @@ def _pipeline_event(
     snapshot_response_meta: dict | None = None,
     source_nomination_error: str | None = None,
     execution_result: dict | None = None,
+    task_verified: bool | None = None,
+    error_class: str | None = None,
 ) -> dict:
     available = bool(brain) if model_available is None else bool(model_available)
     ev = {
@@ -7660,6 +8290,10 @@ def _pipeline_event(
         ev['snapshot_response_meta']=snapshot_response_meta
     if source_nomination_error is not None:
         ev['source_nomination_error']=source_nomination_error
+    if error_class:
+        ev["error_class"] = str(error_class)
+    if task_verified is not None:
+        ev["task_verified"] = bool(task_verified)  # honesty audit 2026-10-16: the hand's own flag reaches every grader
     if mission is not None:
         ev["mission_id"] = mission.get("mission_id")
         ev["task_verified"] = bool(mission.get("task_verified"))
@@ -7878,6 +8512,42 @@ def _resume_turn_iter(hive: Path, entry: dict, *, spoken_in: str, prior_turns: l
     )
 
 
+def _hand_loop_resume_iter(hive: Path, entry: dict, *, spoken_in: str, prior_turns: list, talk_fn, retrieve_roots, token,
+                           see_fn=None, status_fn=None, cursor_ask_fn=None):
+    """"Keep going" after a paused hand loop: the SAME loop continues the owner's original request from its receipts."""
+    receipts = [r for r in entry.get("receipts") or [] if isinstance(r, dict) and isinstance(r.get("result"), dict)]
+    utterance = str(entry.get("utterance") or "")
+    if not receipts or not utterance:
+        return
+    last = receipts[-1]
+    brief = sitting_brief(prior_turns, load_json(Path(hive) / "bus" / "state.json"), retrieve_roots, utterance)
+    ran = yield from _continue_hand_loop({"tool": last.get("hand"), "args": {}, "speak": ""}, None, utterance, hive=hive,
+                                         token=token, brain="openrouter", brief=brief, talk_fn=talk_fn,
+                                         retrieve_roots=retrieve_roots, see_fn=see_fn, status_fn=status_fn,
+                                         cursor_ask_fn=cursor_ask_fn, prior_receipts=receipts, handoff_prev=entry)
+    if ran is None:
+        return
+    if not ran.get("hand_loop_handoff"):
+        _hand_loop_handoff_done(hive, entry)
+    brain = str(ran.pop("_hand_loop_brain", "") or "openrouter")
+    ok = ran.get("ok") is not False
+    if token and ran.get("hand_loop_meta"):
+        metadata = {**ran["hand_loop_meta"], "gen": token, "resumed": True}
+        BUS_IO.commit_response(hive, token, lambda bus: dict(bus, hand_loop_meta=metadata), terminal=False)
+    tool = str(ran.get("tool") or last.get("hand") or "converse")
+    text, first, rest = _commit_spoken(
+        hive, spoken_in=spoken_in, prior_turns=prior_turns, tool=tool, raw=str(ran.get("spoken") or TALK_DARK),
+        wires=list(ran.get("wires") or []) + ["resume"], cites=list(ran.get("cites") or []), ok=ok, pack=None, brain=brain,
+        retrieve_roots=retrieve_roots, gen=token,
+        wire={"path": "hand_loop_resume", "tool": tool, "outcome": TOOL_LOOP if ok else WIRE_FAILURE, "provider": brain,
+              "hand_loop_meta": ran.get("hand_loop_meta")})
+    yield _pipeline_event(ok=ok, tool=tool, spoken=text, spoken_delta=text, wires=list(ran.get("wires") or []) + ["resume"],
+                          cites=list(ran.get("cites") or []), pack=None, brain=brain, model_available=True,
+                          outcome=TOOL_LOOP if ok else WIRE_FAILURE, gen=token, hand_loop_meta=ran.get("hand_loop_meta"),
+                          task_verified=ran.get("task_verified") if isinstance(ran.get("task_verified"), bool) else False,
+                          error_class=error_class(ran))
+
+
 def apply_pipeline_iter(
     utterance: str,
     *,
@@ -7893,7 +8563,7 @@ def apply_pipeline_iter(
     gen: int | None = None,
 ):
     """Yield first speakable sentence, then the finished turn. Do not wait for done to speak."""
-    spoken_in = (utterance or "").strip()
+    spoken_in = normalize_utterance(utterance)
     _turn_t0 = ONLINE.set_turn_start() if ONLINE is not None and hasattr(ONLINE, "set_turn_start") else None
     _jev_reset()
     begin_turn_evidence()
@@ -7927,6 +8597,13 @@ def apply_pipeline_iter(
                 pack=None, retrieve_roots=retrieve_roots, gen=token)
             yield _pipeline_event(ok=True, tool="converse", spoken=text, spoken_delta=rest if first and rest else text,
                                   wires=["permissions"], cites=[], pack=None, gen=token)
+            return
+    if RESUME is not None and RESUME.is_continue(spoken_in):
+        _handoff = _hand_loop_handoff_load(hive)
+        if _handoff:
+            yield from _hand_loop_resume_iter(hive, _handoff, spoken_in=spoken_in, prior_turns=prior_turns, talk_fn=talk_fn,
+                                              retrieve_roots=retrieve_roots, token=token, see_fn=see_fn, status_fn=status_fn,
+                                              cursor_ask_fn=cursor_ask_fn)
             return
     if RESUME is not None and RESUME.enabled():
         _rkey = _resume_key(hive)
@@ -8069,9 +8746,10 @@ def apply_pipeline_iter(
     if document_followup and retained_context.get("status") == "MISSING":
         # Nothing was ever read: "compare pricing across these websites" is a new ask, not a follow-up on retained reads.
         document_followup, retained_context = False, {}
-    early = confirm_take(hive, spoken_in) or live_chat_route(spoken_in, had_pending) or _workflow_followup_route(spoken_in, hive)
+    early = (confirm_take(hive, spoken_in) or talk_filter(live_chat_route(spoken_in, had_pending), spoken_in)
+             or _workflow_followup_route(spoken_in, hive))
     if early is None and not document_followup:
-        early = _pointer_followup(spoken_in,hive) or model_free_route(spoken_in)
+        early = _pointer_followup(spoken_in,hive) or talk_filter(model_free_route(spoken_in), spoken_in)
     if early is not None and early.get("tool") == "capability" and prior_turns:
         early = {**early, "args": {**(early.get("args") or {}), "prior": dict(prior_turns[-1])}}  # "fix it" names what failed
     ack = ACK_LINE if early is not None and early["tool"] not in ACK_SKIP else ""
@@ -8138,25 +8816,11 @@ def apply_pipeline_iter(
         except (OSError, TypeError, AttributeError):
             pass
 
-    if _coding_status_match(spoken_in):
-        pick = {"tool": "agent_tools", "args": {"action": "coding_status"}, "speak": ""}
-        ran = None  # stale recall cannot satisfy a live status question
-        brain = "coding_mission"
-
-    if _coding_resume_match(spoken_in):
-        pick = {"tool": "agent_tools", "args": {"action": "coding_resume"}, "speak": ""}
-        ran = None  # only the real checkpoint receipt may acknowledge recovery
-        brain = "coding_mission"
-
-    # Browser progress is exact mission state, not a conversational model task.
-    if (re.search(r"\bbrowser (?:research )?(?:flows?|mission|work|research)\b", spoken_in, re.I)
-            and re.search(r"\b(how many|progress|status|finished|completed|done|so far)\b", spoken_in, re.I)
-            and re.match(r"^(?:please\s+)?(?:how|what|show|give|status|progress)\b", spoken_in, re.I)):
-        pick = {"tool":"browser_mission","args":{"action":"status"},"speak":""}
-        brain = "browser_runtime"
-    elif re.search(r"\bbrowser mission\b", spoken_in, re.I) and re.match(r"^(?:please\s+)?(?:research|compare|find|collect|inspect|start|run)\b", spoken_in, re.I):
-        pick = {"tool":"browser_mission","args":{"action":"start"},"speak":""}
-        brain = "browser_runtime"
+    _mission = mission_pick(spoken_in)
+    if _mission is not None:
+        pick, brain = _mission
+        if pick["args"].get("action") in ("coding_status", "coding_resume"):
+            ran = None  # stale recall cannot answer a live status; only the real checkpoint may acknowledge recovery
 
     dry = senses_dry_line(spoken_in, bus_now)
     if pick is None and dry:
@@ -8192,10 +8856,13 @@ def apply_pipeline_iter(
                 click_args["expected_sha256"] = digest.strip()
         pick = {"tool": "safari_see", "args": click_args, "speak": ""}
 
-    explicit_mission = re.fullmatch(r"\s*(?:please\s+)?open\s+(https?://\S+)\s+in\s+safari;\s*click\s+(?:the\s+)?(?:link|button)\s+(.+?);\s*verify download\s+(\S+)\s+sha256\s+([0-9a-f]{64})\s*", spoken_in, re.I)
+    explicit_mission = re.fullmatch(r"\s*(?:please\s+)?open\s+(https?://\S+)\s+in\s+safari;\s*click\s+(?:the\s+)?(?:link|button)\s+(.+?);\s*verify download\s+(\S+?)(?:\s+sha256\s+([0-9a-f]{64}))?\s*", spoken_in, re.I)
     if explicit_mission and wants_safari(spoken_in) and ran is None:
         url, label, filename, digest = explicit_mission.groups()
-        pick = {"tool": "safari_see", "args": {"act": "download", "url": url, "label": label, "expected_file": filename, "expected_sha256": digest}, "speak": ""}
+        dl_args = {"act": "download", "url": url, "label": label, "expected_file": filename}
+        if digest:
+            dl_args["expected_sha256"] = digest
+        pick = {"tool": "safari_see", "args": dl_args, "speak": ""}
     if pick is not None and ran is None and pick.get("tool") == "safari_see":
         brain = "safari"
 
@@ -8867,7 +9534,9 @@ def apply_pipeline_iter(
     elif ran.get('awaiting_confirm'):
         outcome = 'AWAITING_APPROVAL'
     elif used_tool_loop:
-        outcome = TOOL_LOOP
+        # Honesty audit 2026-10-16: a hand that said it needs the owner (or could not verify) keeps that outcome.
+        own = str((ran or {}).get("outcome") or "")
+        outcome = own if own in {HONEST_UNKNOWN, WIRE_FAILURE, "AWAITING_APPROVAL", "NEEDS_ACTION_DETAILS"} else TOOL_LOOP
     elif str((ran or {}).get("outcome") or "") in {MODEL_TALK, TOOL_LOOP, STORE_DIRECT, HONEST_UNKNOWN, WIRE_FAILURE, "AWAITING_APPROVAL", "NEEDS_ACTION_DETAILS"}:
         outcome = str(ran.get("outcome"))
     elif str((got or {}).get("finish_reason") or "").lower() == "length" or str((got or {}).get("error") or "") == "length":
@@ -8985,6 +9654,8 @@ def apply_pipeline_iter(
         outcome=outcome,
         source=source or None,
         gen=token,
+        task_verified=(ran or {}).get("task_verified") if tool in HANDS and isinstance((ran or {}).get("task_verified"), bool) else None,
+        error_class=error_class(ran) if tool in HANDS else None,
     )
 
 

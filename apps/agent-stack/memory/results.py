@@ -23,7 +23,10 @@ SECRET_RE = re.compile(r"(?:api[_-]?key|bearer\s|sk-[A-Za-z0-9]{8,}|password|pas
 WANT_RE = re.compile(r"\bwhat\s+(?:did|have)\s+you\s+(?:do|done|finish(?:ed)?|get\s+done)\b(?:\s+(?:today|so\s+far|this\s+morning))?|"
                      r"\b(?:your|recent)\s+results\b|\bwhat\s+results\b|"
                      r"\bwhat\s+(?:did|have)\s+we\s+(?:work(?:ed)?\s+on|do|done|get\s+done|cover(?:ed)?)\b|"
-                     r"\b(?:recap|summary|summari[sz]e)\s+(?:of\s+)?(?:today|my\s+day|the\s+day)\b", re.I)
+                     r"\b(?:recap|summary|summari[sz]e)\s+(?:of\s+)?(?:today|my\s+day|the\s+day)\b|"
+                     r"\bwhat\s+did\s+(?:the|that|your)\s+last\s+(?:search|run|job|task|step)\s+(?:find|return|get|say)\b|"
+                     r"\bshow\s+(?:me\s+)?the\s+results\s+from\s+(?:earlier|before|today|this\s+morning)\b|"
+                     r"\bwhat\s+did\s+you\s+just\s+(?:do|run|finish)\b|\bshow\s+(?:me\s+)?(?:the\s+)?last\s+(?:tool\s+)?(?:receipt|result)s?\b", re.I)
 DID = {"drafts": "draft", "web_search": "web search", "code_run": "code run", "loop": "loop job", "vault_read": "note pull-up",
        "cost_card": "meter check", "approval": "approval record", "pointer": "pointer", "workspace_read": "file read",
        "memory": "memory save or recall", "multistep": "multi-step job", "plan": "plan", "browser_mission": "browser mission",
@@ -45,11 +48,24 @@ def wants_results(u: str) -> bool:
     return bool(WANT_RE.search(u or ""))
 
 
+def _secret_patterns():
+    """The shared detector (brain/secret_patterns.py), loaded by path like every other module here."""
+    import importlib.util as _u
+    import sys as _sys
+    from pathlib import Path as _P
+    name = "agent_stack_secret_patterns"
+    if name not in _sys.modules:
+        spec = _u.spec_from_file_location(name, _P(__file__).resolve().parents[1] / "brain" / "secret_patterns.py")
+        mod = _u.module_from_spec(spec); spec.loader.exec_module(mod); _sys.modules[name] = mod  # publish only when built
+    return _sys.modules[name]
+
+
 def write_back(hand: str, ask: str, got: dict) -> bool:
     if hand not in PRODUCERS or not isinstance(got, dict) or got.get("read_only_summary"):
         return False
     spoken = " ".join(str(got.get("spoken") or "").split())
-    if not spoken or SECRET_RE.search(spoken) or SECRET_RE.search(ask or ""):
+    sp = _secret_patterns()
+    if not spoken or SECRET_RE.search(spoken) or SECRET_RE.search(ask or "") or sp.has_secret(spoken) or sp.has_secret(ask or ""):
         return False
     if re.search(r'say "confirm"', spoken, re.I):
         return False  # only an offer, not a result

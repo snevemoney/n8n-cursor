@@ -14,8 +14,15 @@ from pathlib import Path
 
 try:
     from . import project_methods as pm
-except ImportError:  # loaded by path in tests
-    import project_methods as pm
+except ImportError:  # loaded by path (mouth/turn.py, tests): resolve the sibling by its own path, not by sys.path order
+    import sys as _sys
+    pm = _sys.modules.get("project_methods")
+    if pm is None:
+        import importlib.util as _u
+        _spec = _u.spec_from_file_location("project_methods", Path(__file__).resolve().with_name("project_methods.py"))
+        pm = _u.module_from_spec(_spec)
+        _spec.loader.exec_module(pm)
+        _sys.modules["project_methods"] = pm
 
 ENV_NAME = re.compile(r"[A-Z][A-Z0-9_]{1,63}\Z")
 ASSIGN = re.compile(r"(?<![A-Za-z0-9])([A-Za-z][A-Za-z0-9_-]*)\s*[:=]\s*[\"']?([A-Za-z0-9_./+-]{12,})")
@@ -23,11 +30,26 @@ TOKEN = re.compile(r"\b(?:sk-|xai-|ghp_|gho_|github_pat_|xox[abp]-)[A-Za-z0-9_-]
 
 
 # ---- Z99: secrets go to .env.local, never into chat -------------------------------
+def _secret_patterns():
+    """The shared detector (brain/secret_patterns.py), loaded by path like every other module here."""
+    import importlib.util as _u
+    import sys as _sys
+    from pathlib import Path as _P
+    name = "agent_stack_secret_patterns"
+    if name not in _sys.modules:
+        spec = _u.spec_from_file_location(name, _P(__file__).resolve().parents[1] / "brain" / "secret_patterns.py")
+        mod = _u.module_from_spec(spec); spec.loader.exec_module(mod); _sys.modules[name] = mod  # publish only when built
+    return _sys.modules[name]
+
+
 def find_secret(text):
     """Return (name_hint, value) for the first secret-looking value, or None."""
     t = TOKEN.search(text)
     if t:
         return None, t.group(0)
+    shared = _secret_patterns().first_secret(text)  # PEM keys, JWTs, URL passwords, sk_live_, hf_ ... (audit 2026-10-16)
+    if shared:
+        return shared
     if pm.SECRET.search(text):
         for m in ASSIGN.finditer(text):
             if re.search(r"key|token|secret|password", m.group(1), re.I):

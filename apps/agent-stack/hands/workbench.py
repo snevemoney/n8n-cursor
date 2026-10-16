@@ -115,8 +115,9 @@ def run(utterance: str, *, chat=None) -> dict:
     got = _mod("code_run").run({"code": code, "test": test})
     P.log_action("run_sandbox", f"{repo.name}/test_{name}.py", "allow", passed=bool(got.get("passed")))
     if not got.get("passed"):
-        steps.append("tests failed in the sandbox")
-        return {"ok": True, "branch": branch, "committed": False, "passed": False,
+        # Honesty audit 2026-10-16: "tests failed" was said when nothing ran (no sandbox), and the turn verified.
+        steps.append("tests failed in the sandbox" if got.get("ran") else "the tests did not run")
+        return {"ok": False, "branch": branch, "committed": False, "passed": False, "ran": bool(got.get("ran")),
                 "spoken": f"In {repo.name}: " + "; ".join(steps) + f". {got.get('spoken')} I did not commit."}
     steps.append("tests passed in the sandbox")
     _git(repo, "add", *files)

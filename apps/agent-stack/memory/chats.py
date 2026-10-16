@@ -224,9 +224,21 @@ def _unescape(text: str) -> str:
     return UNICODE_ESC_RE.sub(repl, text or "")
 
 
+def _secret_patterns():
+    """The shared detector (brain/secret_patterns.py), loaded by path like every other module here."""
+    import importlib.util as _u
+    import sys as _sys
+    from pathlib import Path as _P
+    name = "agent_stack_secret_patterns"
+    if name not in _sys.modules:
+        spec = _u.spec_from_file_location(name, _P(__file__).resolve().parents[1] / "brain" / "secret_patterns.py")
+        mod = _u.module_from_spec(spec); spec.loader.exec_module(mod); _sys.modules[name] = mod  # publish only when built
+    return _sys.modules[name]
+
+
 def _clean(text: str) -> str:
     body = PATH_RE.sub("", _unescape(text or ""))
-    body = SECRET_RE.sub("", body)
+    body = SECRET_RE.sub("", _secret_patterns().redact(body))
     body = body.replace("`", "")
     body = re.sub(r"\*+", "", body)
     return re.sub(r"\s+", " ", body).strip()
@@ -235,7 +247,7 @@ def _clean(text: str) -> str:
 def _bus_line(text: str) -> str:
     """The bus payload. Markdown stays. Secrets and filesystem paths do not."""
     body = PATH_RE.sub("", _unescape(text or ""))
-    body = SECRET_RE.sub("", body)
+    body = SECRET_RE.sub("", _secret_patterns().redact(body))
     return re.sub(r"[ \t]+", " ", body).strip()
 
 
@@ -496,13 +508,15 @@ def append_jarvis_turn(
         dest = root / SESSIONS_REL / "jarvis" / f"{day}.md"
         dest.parent.mkdir(parents=True, exist_ok=True)
         # Latency loop: append, never re-read + rewrite the whole day's log (cost grew with the file).
-        if dest.is_file():
-            with dest.open("a", encoding="utf-8") as fh:
+        # Concurrency audit 2026-10-16: two first-of-the-day writers shared one fixed .tmp and lost a turn. Create the
+        # day file exclusively (the winner writes the header), everyone else appends; never crash on odd characters.
+        try:
+            fd = os.open(dest, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8", errors="replace") as fh:
+                fh.write(header + block)
+        except FileExistsError:
+            with dest.open("a", encoding="utf-8", errors="replace") as fh:
                 fh.write(block)
-        else:
-            tmp = dest.with_name(dest.name + ".tmp")
-            tmp.write_text(header + block, encoding="utf-8")
-            os.replace(tmp, dest)
         written.append(dest)
     return written
 

@@ -117,6 +117,8 @@ def run(args: dict, roots=None) -> dict[str, Any]:
                 "spoken": f"The {name} skill: {hit[1] or 'no description'}."
                           + (f" Its first step: {step}" if step else " It lists no numbered steps.")}
     if op == "run":
+        if (args or {}).get("all"):
+            return run_all(found, str((args or {}).get("name") or ""))
         return run_step(found, str((args or {}).get("name") or ""), int((args or {}).get("step") or 1))
     return {"ok": False, "op": op, "error": "unknown op", "spoken": "I can't read that: unknown skills op."}
 
@@ -163,23 +165,58 @@ def run_step(found: dict, name: str, step: int = 1) -> dict[str, Any]:
     if not cmds:
         return {"ok": False, "op": "run", "name": name, "step": step, "step_text": text, "verified": False,
                 "spoken": f"Step {step} of {name} is \"{text[:160]}\". It has no command I can run, so nothing was run."}
-    cmd = cmds[0].strip()
-    if re.search(r"[<>|;&$]", cmd):
-        return {"ok": False, "op": "run", "name": name, "step": step, "command": cmd, "verified": False,
-                "spoken": f"Step {step} of {name} is `{cmd}`; it has a placeholder or shell syntax, so I didn't run it."}
+    # Mac review 2026-10-16: only the first command of a step ran. Every command runs in order; the first that cannot
+    # run (shell syntax, not on the read-only list) or exits non-zero stops the step, and the receipt says which.
     import shlex
-    try:
-        argv = shlex.split(cmd)
-    except ValueError:
-        argv = []
-    got = _agent_tools().op_cli(argv)
-    if got.get("gated") or not got.get("ok"):
-        return {"ok": False, "op": "run", "name": name, "step": step, "command": cmd, "verified": False, "gated": bool(got.get("gated")),
-                "spoken": f"Step {step} of {name} is `{cmd}`. Not run: {got.get('spoken')}"}
-    out = str(got.get("output") or "").strip()
-    return {"ok": True, "op": "run", "name": name, "step": step, "command": cmd, "verified": got.get("exit") == 0,
-            "exit": got.get("exit"), "output": out,
-            "spoken": f"Ran step {step} of the {name} skill: `{cmd}` (exit {got.get('exit')}). Output: " + (out[:700] or "(empty)")}
+    ran, outs = [], []
+    for cmd in (c.strip() for c in cmds[:6]):
+        if re.search(r"[<>|;&$]", cmd):
+            return {"ok": False, "op": "run", "name": name, "step": step, "command": cmd, "ran": ran, "verified": False,
+                    "output": "\n".join(outs),
+                    "spoken": f"Step {step} of {name} is `{cmd}`; it has a placeholder or shell syntax, so I didn't run it."
+                              + (f" Already ran: {', '.join(ran)}." if ran else "")}
+        try:
+            argv = shlex.split(cmd)
+        except ValueError:
+            argv = []
+        got = _agent_tools().op_cli(argv, closed=True)  # skill files are third-party text: the read-only list only
+        if got.get("gated") or not got.get("ok"):
+            return {"ok": False, "op": "run", "name": name, "step": step, "command": cmd, "ran": ran, "verified": False,
+                    "gated": bool(got.get("gated")), "output": "\n".join(outs), "exit": got.get("exit"),
+                    "spoken": f"Step {step} of {name} is `{cmd}`. Not run: {got.get('spoken')}"}
+        ran.append(cmd)
+        outs.append(str(got.get("output") or "").strip())
+        if got.get("exit") not in (0, None):
+            break
+    out = "\n".join(o for o in outs if o)
+    exit_code = got.get("exit")
+    cmd_line = "`, `".join(ran)
+    return {"ok": True, "op": "run", "name": name, "step": step, "command": ran[-1], "commands": ran, "verified": exit_code == 0,
+            "exit": exit_code, "output": out,
+            "spoken": f"Ran step {step} of the {name} skill: `{cmd_line}` (exit {exit_code}). Output: " + (out[:700] or "(empty)")}
+
+
+def run_all(found: dict, name: str, max_steps: int = 12) -> dict[str, Any]:
+    """Run a skill's numbered steps in order. Stops at the first step that has no runnable command, is held or fails;
+    the receipt lists the steps done and the one it stopped on, so nothing is reported as finished that was not."""
+    hit = found.get(name) if name and "/" not in name and "\\" not in name and name not in (".", "..") else None
+    if hit is None:
+        return {"ok": False, "op": "run", "verified": False, "spoken": "I can't run that: I have no skill by that name."}
+    body = re.sub(r"\A---.*?\n---\s*\n", "", hit[0].read_text(errors="ignore")[:MAX_BYTES], flags=re.S)
+    numbers = sorted({int(n) for n, _ in _NUMBERED.findall(body)})[:max_steps]
+    if not numbers:
+        return {"ok": False, "op": "run", "name": name, "verified": False, "spoken": f"The {name} skill lists no numbered steps."}
+    done, last = [], {}
+    for n in numbers:
+        last = run_step(found, name, n)
+        if not last.get("ok") or not last.get("verified"):
+            return {**last, "steps_done": done, "stopped_at": n, "steps_total": len(numbers), "verified": False,
+                    "ok": False,
+                    "spoken": (f"Ran {len(done)} of {len(numbers)} steps of {name}; stopped at step {n}. " if done else "")
+                              + str(last.get("spoken") or "")}
+        done.append(n)
+    return {**last, "steps_done": done, "steps_total": len(numbers), "verified": True, "ok": True,
+            "spoken": f"Ran all {len(numbers)} steps of the {name} skill. Last: " + str(last.get("spoken") or "")}
 
 
 _READ = re.compile(r"\b(?:read|open|show)\s+(?:me\s+)?(?:the\s+)?([\w][\w .\-]{0,100}?)\s+skill\b"
@@ -196,7 +233,9 @@ def first_step(text: str) -> str:
     return m.group(1).strip().rstrip(".") + "." if m else ""
 
 
-_RUN = re.compile(r"\brun\b(?:\s+(?:the\s+)?(?:(first|1st|second|2nd|third|3rd)|step\s+(\d+))\s*(?:step)?\s+of)?\s+(?:the\s+|my\s+)?([\w.\-]+)\s+skill\b", re.I)
+_RUN = re.compile(r"\brun\b(?:\s+(?:the\s+)?(?:(first|1st|second|2nd|third|3rd)|step\s+(\d+))\s*(?:step)?\s+of)?"
+                  r"(?:\s+(?:all(?:\s+the)?\s+steps|every\s+step)\s+of)?\s+(?:the\s+|my\s+)?(?:whole\s+|entire\s+)?([\w.\-]+)\s+skill\b", re.I)
+_ALL = re.compile(r"\b(?:all(?:\s+the)?\s+steps|every\s+step|whole|entire|end\s+to\s+end|all\s+of\s+it)\b", re.I)
 _ORD = {"first": 1, "1st": 1, "second": 2, "2nd": 2, "third": 3, "3rd": 3}
 
 
@@ -207,6 +246,8 @@ def args_from_utterance(u: str) -> dict:
         return {'op':'list'}
     r = _RUN.search(u or "")
     if r:
+        if not (r.group(1) or r.group(2)) and _ALL.search(u or ""):
+            return {"op": "run", "name": r.group(3), "all": True}
         return {"op": "run", "name": r.group(3), "step": int(r.group(2) or _ORD.get((r.group(1) or "first").lower(), 1))}
     if _FIRST.search(u or ""):
         return {"op": "read", "name": "#first"}

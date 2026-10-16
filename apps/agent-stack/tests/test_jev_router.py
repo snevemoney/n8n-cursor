@@ -204,8 +204,8 @@ class M6ShadowLog(unittest.TestCase):
             out = pipe.apply_pipeline("send the invoice to Bob now", hive=hive, retrieve_roots=[], talk_fn=lambda *a, **k: {})
             row = json.loads((hive / "bus" / JR.LOG_NAME).read_text().splitlines()[-1])
         self.assertEqual(out.get("verb") or out.get("tool"), "refuse_hard_step")
-        self.assertEqual(row["path"], "refuse_hard_step")
-        self.assertNotIn("source", row)  # the preflight never ran: the regex gate answered first
+        self.assertEqual(row["tool"], "refuse_hard_step"); self.assertTrue(row["hard_step"])
+        self.assertIn(row.get("source"), (None, "picker")); self.assertIsNone(row.get("live_ms"))  # local picker only, no model call
         self.assertNotIn("invoice", json.dumps(row))
 
 

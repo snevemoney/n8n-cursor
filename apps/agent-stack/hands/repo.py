@@ -30,14 +30,22 @@ STEP_TIMEOUT = 600
 _NAME = r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})"
 _REPO = r"[A-Za-z0-9._-]{1,100}"
 URL_RE = re.compile(rf"(?:https?://)?(?:www\.)?github\.com/({_NAME})/({_REPO}?)(?:\.git)?(?=[/#?\s]|$)", re.I)
-SLUG_RE = re.compile(rf"(?<![\w./~-])({_NAME})/({_REPO})(?![\w/])")
+# Routing audit 2026-10-16: "10/12", "and/or", "24/7", "tcp/ip", "him/her" are not owner/repo. Both halves need a letter,
+# the repo half 3+ chars, and common word pairs are refused.
+_NOT_SLUG = {"and/or", "him/her", "his/her", "he/she", "tcp/ip", "read/write", "on/off", "yes/no", "ac/dc", "input/output",
+             "client/server", "true/false", "w/o", "n/a", "either/or", "pros/cons", "before/after", "24/7"}
+SLUG_RE = re.compile(rf"(?<![\w./~-])(?=[^/\s]*[A-Za-z])({_NAME})/(?=[^\s]*[A-Za-z])({_REPO})(?![\w/])")
 INSTALL_RE = re.compile(r"\b(?:install|clone|set\s*up|setup|download)\b", re.I)
 LOOK_RE = re.compile(r"\b(?:look\s+(?:at|into|up)|check\s+out|read|open|show\s+me|inspect|explore|review|what(?:'s|\s+is)\s+(?:in\s+)?|tell\s+me\s+about|summari[sz]e)\b", re.I)
 REPO_WORD_RE = re.compile(r"\b(?:github|repo|repos|repository|repositories)\b", re.I)
 TOOL_RE = re.compile(r"^(?:jarvis[, ]+)?(?:(?:can|could|would)\s+you\s+)?(?:please\s+)?install\s+(?:the\s+)?(?:tool\s+|package\s+|cli\s+)?"
                      r"([A-Za-z0-9][A-Za-z0-9@._/+-]{0,80})(?:\s+(?:with|using|via|from)\s+(brew|homebrew|pip|pipx|npm|cargo))?\s*(?:for\s+me|please|now)?[.!?]*$", re.I)
+# Routing audit 2026-10-16: "install the update", "install windows", "install the shelf" are not packages.
+TOOL_NOT_NAMES = {"it", "this", "that", "them", "these", "those", "everything", "something", "update", "updates", "upgrade",
+                  "upgrades", "windows", "shelf", "shelves", "app", "apps", "the", "patch", "fix", "printer", "tv", "ac",
+                  "carpet", "floor", "tiles", "door", "lights", "camera", "battery", "game", "games", "spotify", "macos", "ios"}
 TOOL_MANAGERS = {"brew": "brew", "homebrew": "brew", "pip": "pip", "pipx": "pipx", "npm": "npm", "cargo": "cargo"}
-SEARCH_RE = re.compile(r"\b(?:find|search(?:\s+for)?|look\s+for|any)\s+(?:me\s+)?(?:a\s+|some\s+|the\s+best\s+|good\s+)?(?:public\s+)?(?:github\s+)?(?:repos?|repositories|projects?\s+on\s+github)\s+(?:for|about|that|on|to|with)\s+(.{2,120}?)[.?!]*$", re.I)
+SEARCH_RE = re.compile(r"\b(?:find|search(?:\s+for)?|look\s+for|any)\s+(?:me\s+)?(?:a\s+|some\s+|the\s+best\s+|good\s+)?(?:public\s+)?(?:github\s+)?(?:repos?|repository|repositories|projects?\s+on\s+github)\s+(?:for|about|that|on|to|with)\s+(.{2,120}?)[.?!]*$", re.I)
 
 
 def _permissions():
@@ -60,6 +68,8 @@ def parse_spec(text: str) -> tuple[str, str] | None:
     if not REPO_WORD_RE.search(text or "") and not INSTALL_RE.search(text or ""):
         return None  # a bare "a/b" in prose is a path, not a repo
     m = SLUG_RE.search(text or "")
+    if m and (f"{m.group(1)}/{m.group(2)}".lower() in _NOT_SLUG or len(m.group(2)) < 3):
+        m = None
     if m and not m.group(1).lower() in {"apps", "src", "docs", "users", "home", "hands", "brain", "face"}:
         return m.group(1), m.group(2).removesuffix(".git")
     return None
@@ -74,7 +84,7 @@ def wants(utterance: str) -> str:
     if not spec:
         t = TOOL_RE.match(u.strip())
         return "tool" if (t and "/" not in t.group(1) and not REPO_WORD_RE.search(t.group(1))
-                          and t.group(1).lower() not in {"it", "this", "that", "them", "these", "those", "everything", "something"}) else ""
+                          and t.group(1).lower() not in TOOL_NOT_NAMES) else ""
     if INSTALL_RE.search(u):
         return "install"
     if LOOK_RE.search(u) or REPO_WORD_RE.search(u) or URL_RE.search(u):

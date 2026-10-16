@@ -23,7 +23,12 @@ CLI_MORE = re.compile(
     r"^(?:mail|mailx|sendmail)\b|(?:^|\s)-X\s*(?:POST|PUT|PATCH|DELETE)\b|"
     # AppleScript asks only when the script itself sends, posts, deletes or empties (live 21:16: "play document 1" was refused)
     r"^osascript\b.*\b(?:send|reply|post|tweet|message|mail|delete|trash|empty|erase|purchase|buy|pay)\b|"
-    r"^(?:rmdir|trash|unlink|shred|srm)\b|\s-delete\b", re.I)
+    r"^(?:rmdir|trash|unlink|shred|srm)\b|\s-delete\b|-exec(?:dir)?\s+(?:rm|unlink|shred|srm)\b|"
+    # safety audit 2026-10-16 holes, each a kept stop: uploads, GraphQL writes, deploys, spend, deletes of his work
+    r"^(?:scp|sftp)\b|^rsync\b.*\s\S+:\S*|^aws\s+s3\s+(?:cp|mv|sync|rm)\b|^gh\s+api\s+graphql\b.*\bmutation\b|"
+    r"\s--prod\b|^(?:terraform|tofu)\s+(?:apply|destroy)\b|^pulumi\s+(?:up|destroy)\b|^kubectl\s+(?:apply|delete)\b|"
+    r"^stripe\b|^crontab\s+-r\b|^git\s+(?:branch\s+.*-[dD]\b|clean\s+.*-\w*f|checkout\s+--\s|restore\b|reset\s+--hard)|"
+    r"\b(?:uninstall|prune)\b", re.I)
 # Machine-destructive: never without Evens (moved from hands/agent_tools.py).
 CLI_MACHINE = re.compile(r"(?:^|\s)(?:sudo|mkfs|dd|shutdown|reboot|halt|diskutil\s+(?:erase|partition)|launchctl\s+(?:unload|remove|bootout))\b", re.I)
 SECRET_ARG = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.pgpass|\.docker|\.kube|\.git-credentials|"

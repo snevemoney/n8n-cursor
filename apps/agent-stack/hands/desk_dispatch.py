@@ -90,7 +90,7 @@ def run(args: dict | None = None, hive: Path | None = None) -> dict:
             "at": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "advisory": True, "sent": False,
             "desk_state": state, "lock": lock_row(_spoken_name(desk))}
     base = Path(hive) if hive is not None else Path.home() / ".grok-private"
-    d = base / ".hive" / "bus" / "desk_cards"
+    d = (base / "bus" / "desk_cards") if hive is not None else (base / ".hive" / "bus" / "desk_cards")
     d.mkdir(parents=True, exist_ok=True)
     tmp = d / f".{card['id']}.tmp"
     tmp.write_text(json.dumps(card, indent=1) + "\n", encoding="utf-8")
@@ -102,8 +102,9 @@ def run(args: dict | None = None, hive: Path | None = None) -> dict:
     elif state == "UNKNOWN":
         waiting = f" I couldn't confirm whether the {name} desk is running."
     return {"ok": True, "sent": False, "card": card,
-            "spoken": f"I wrote an advisory job card for the {name} desk. Nothing was sent; "
-                      f"the desk picks it up from the hive bus.{waiting} Lock: {card['lock'][:160]}"}
+            # Honesty audit 2026-10-16: nothing in this repo reads desk cards, so never claim a desk will pick it up.
+            "spoken": f"I wrote an advisory job card for the {name} desk. Nothing was sent, and no desk "
+                      f"reads these cards automatically yet; it waits on the hive bus until one does.{waiting} Lock: {card['lock'][:160]}"}
 
 
 # Longest names first so "money desk" wins over "money", "claude code" over "claude".

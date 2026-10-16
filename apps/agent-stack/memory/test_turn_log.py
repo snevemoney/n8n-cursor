@@ -43,7 +43,9 @@ class TurnLogTest(unittest.TestCase):
                    "finish_reason", "resume",  # both metadata only: a finish code and resume counts
                    "tool_ms", "first_chunk_ms", "roadblock", "cost_bucket",  # timings and codes, never text
                    "usage_tokens_in", "usage_tokens_out", "usage_cost_usd", "usage_gen_id",  # metered numbers + provider id
-                   "task_verified", "awaiting_approval", "execution_summary"}  # booleans + executor/outcome codes
+                   "task_verified", "awaiting_approval", "execution_summary",  # booleans + executor/outcome codes
+                   # Mac review 2026-10-16: fixed codes, booleans and build identity only
+                   "hands", "stop_reason", "error_class", "boot_id", "rev"}
         self.assertEqual(set(json.loads(line)), allowed)
 
     def test_stale_talk_record_is_not_this_turn(self):

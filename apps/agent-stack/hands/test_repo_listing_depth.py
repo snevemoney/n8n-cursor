@@ -23,7 +23,7 @@ class RepoDepth(unittest.TestCase):
             (home / "jarvis-cowork/claude-a/.git").write_text("gitdir: elsewhere")
             with mock.patch.object(W, "open_access", return_value=True):
                 out = W.run({"op": "repos"}, roots=[home])
-        self.assertEqual(sorted(out["names"]), ["ECC", "clipengine", "context7", "jarvis-main"])
+        self.assertEqual(sorted(Path(n).name for n in out["names"]), ["ECC", "clipengine", "context7", "jarvis-main"])
         self.assertIn("4", out["spoken"])
 
     def test_slow_walk_answers_partial(self):
@@ -34,7 +34,7 @@ class RepoDepth(unittest.TestCase):
         self.assertIn("partial", out["spoken"])
 
     def test_root_slash_is_not_walked(self):
-        with mock.patch.object(W, "_repos_under", side_effect=lambda r, d, dl=None: [r.name or "ROOT"]) as walk, \
+        with mock.patch.object(W, "_repos_under", side_effect=lambda r, d, dl=None: []) as walk, \
                 mock.patch.object(W, "open_access", return_value=True):
             W.run({"op": "repos"}, roots=[Path("/"), Path.home()])
         self.assertNotIn(Path("/"), [c.args[0] for c in walk.call_args_list])
@@ -52,7 +52,7 @@ class RepoDepth(unittest.TestCase):
             with mock.patch.object(W, "_repos_under", side_effect=slow), mock.patch.object(W, "REPO_BUDGET_S", 1.0), \
                     mock.patch.object(W, "open_access", return_value=True):
                 t0 = _t.monotonic(); out = W.run({"op": "repos"}, roots=[home / "a", home / "hang"]); took = _t.monotonic() - t0
-        self.assertLess(took, 2.5); self.assertIn("a", out["names"]); self.assertIn("partial", out["spoken"])
+        self.assertLess(took, 2.5); self.assertIn("a", [Path(n).name for n in out["names"]]); self.assertIn("partial", out["spoken"])
 
 
 if __name__ == "__main__":

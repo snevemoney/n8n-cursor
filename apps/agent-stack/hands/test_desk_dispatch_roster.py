@@ -68,7 +68,7 @@ class RosterTest(unittest.TestCase):
             self.assertIn("stopped", got["spoken"].lower())
             self.assertEqual(run2["card"]["desk"], "creative-studio")
             self.assertTrue(run2["card"]["desk_state"].startswith("RUNNING"))
-            cards = list((Path(tmp) / ".hive" / "bus" / "desk_cards").glob("*.json"))
+            cards = list((Path(tmp) / "bus" / "desk_cards").glob("*.json"))
             self.assertEqual(len(cards), 2)
             self.assertFalse(json.loads(cards[0].read_text())["sent"])
 

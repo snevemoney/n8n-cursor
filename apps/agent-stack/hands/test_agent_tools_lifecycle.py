@@ -87,7 +87,7 @@ def test_task_loop_stops_before_next_operation(hand, monkeypatch):
     mod, calls, root = hand
     stopped = [False]
     fired = []
-    def cli(argv, cwd=None):
+    def cli(argv, cwd=None, **kw):  # op_cli takes approved= since the open-access CLI policy
         fired.append(argv)
         stopped[0] = True
         return {"ok": True, "verified": True, "spoken": "observed"}

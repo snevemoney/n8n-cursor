@@ -20,20 +20,46 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def load_json(path: Path) -> dict:
-    """Read JSON. Retry a torn write. Never treat a mid-write as an empty bus."""
+class CorruptBus(ValueError):
+    """The bus file exists but is not readable JSON (concurrency audit 2026-10-16)."""
+
+
+def _load_strict(path: Path) -> dict:
     if not path.is_file():
         return {}
     for attempt in range(3):
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
+        except (OSError, ValueError):  # ValueError covers JSONDecodeError and UnicodeDecodeError
             if attempt == 2:
-                return {}
+                raise CorruptBus(str(path))
             time.sleep(0.01)
             continue
         return data if isinstance(data, dict) else {}
-    return {}
+    raise CorruptBus(str(path))
+
+
+def load_json(path: Path) -> dict:
+    """Read JSON. Retry a torn write. Never treat a mid-write as an empty bus; unreadable reads as {} for readers."""
+    try:
+        return _load_strict(path)
+    except CorruptBus:
+        return {}
+
+
+def _gen_floor(hive: Path) -> int:
+    try:
+        return int((Path(hive) / "bus" / "gen.floor").read_text(encoding="utf-8").strip() or 0)
+    except (OSError, ValueError):
+        return 0
+
+
+def _quarantine(path: Path) -> None:
+    """Keep the unreadable file for diagnosis instead of overwriting it with {} (which wiped turns and cancel_gen)."""
+    try:
+        os.replace(path, path.with_name(f"{path.name}.corrupt-{int(time.time())}"))
+    except OSError:
+        pass
 
 
 def write_json(path: Path, data: dict) -> None:
@@ -44,6 +70,8 @@ def write_json(path: Path, data: dict) -> None:
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())  # a crash between write and replace must not leave an empty bus
         os.replace(tmp_name, path)
     except Exception:
         try:
@@ -88,13 +116,22 @@ def mutate_bus(hive: Path, apply: Callable[[dict], dict | None]) -> dict:
         with open(lock_path, "a+", encoding="utf-8") as handle:
             fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
             try:
-                bus = load_json(path)
+                try:
+                    bus = _load_strict(path)
+                except CorruptBus:
+                    _quarantine(path)
+                    # Restart audit 2026-10-16: a fresh {} restarted gens at 1, so gens reused earlier numbers and
+                    # anything keyed on a gen (cancels, acks, logs) became ambiguous. Carry the last gen forward.
+                    floor = _gen_floor(dest)
+                    bus = {"turn_gen": floor} if floor else {}
+                before = json.dumps(bus, sort_keys=True, default=str)
                 out = apply(bus)
                 if out is None:
                     out = bus
                 if not isinstance(out, dict):
                     out = bus
-                write_json(path, out)
+                if not path.is_file() or json.dumps(out, sort_keys=True, default=str) != before:
+                    write_json(path, out)  # an unchanged bus is not rewritten (peeks rewrote it every 0.2s)
                 return out
             finally:
                 fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
@@ -211,9 +248,20 @@ def watch_stop_disarmed(bus: dict | None) -> bool:
 def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
     """Open a generation. Never first-arm. After Stop, arm_watch=True does not re-arm."""
 
+    opener = threading.get_ident()
+
     def apply(bus: dict) -> dict:
-        gen = bus_gen(bus) + 1
+        gen = max(bus_gen(bus), _gen_floor(hive)) + 1
         bus["turn_gen"] = gen
+        try:  # the floor survives a corrupt state.json (see mutate_bus)
+            (Path(hive) / "bus" / "gen.floor").write_text(str(gen), encoding="utf-8")
+        except OSError:
+            pass
+        # Concurrency audit 2026-10-16: the Face guessed its own gen as arrival+1, so with two requests in flight the
+        # wall cancelled nothing and a timed-out worker ran on. Record which thread opened each gen (last 32).
+        owners = bus.get("gen_threads") if isinstance(bus.get("gen_threads"), dict) else {}
+        owners[str(gen)] = [os.getpid(), opener]
+        bus["gen_threads"] = dict(list(owners.items())[-32:])
         # An earlier tool's receipt is not evidence for the newly opened turn.
         bus.pop("execution", None)
         bus.pop("execution_gen", None)
@@ -230,6 +278,16 @@ def begin_turn(hive: Path, *, arm_watch: bool = False) -> int:
         return bus
 
     return bus_gen(mutate_bus(hive, apply))
+
+
+def gen_for_thread(hive: Path, ident: int | None, after: int = 0) -> int | None:
+    """The first generation this process's thread `ident` opened after gen `after` (the request's arrival), or None."""
+    if not ident:
+        return None
+    owners = load_json(Path(hive) / "bus" / "state.json").get("gen_threads") or {}
+    mine = [int(g) for g, who in owners.items()
+            if isinstance(who, list) and who == [os.getpid(), ident] and str(g).isdigit() and int(g) > int(after)]
+    return min(mine) if mine else None
 
 
 DARK_LINE = "The talk wire is dark this turn."

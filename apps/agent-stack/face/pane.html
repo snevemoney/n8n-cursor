@@ -478,6 +478,8 @@
     let ttsGen = 0;
     let speakHeld = false;
     let watchNoticeId = "";
+    // A turn that kept working after this pane lost its stream (reload, sleep, network): show its result once.
+    let detachedShown = 0;
     const ttsAborts = new Set();
     const TTS_FETCH_MS = 15000;
     let lastSpoken = "";
@@ -2084,6 +2086,15 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ event_id: notice.event_id }),
             }).catch(() => {});
+          }
+        }
+        const dGen = Number((bus && bus.detached_gen) || 0);
+        if (dGen && dGen !== detachedShown && Number(bus.turn_gen || 0) === dGen && bus.job_status === "done" && !state.turning) {
+          detachedShown = dGen;
+          const line = String(bus.spoken || "");
+          if (line) {
+            $("spoken").textContent = line;
+            if (state.armed) enqueueSpeak(line);
           }
         }
         reconcilePhase(bus);

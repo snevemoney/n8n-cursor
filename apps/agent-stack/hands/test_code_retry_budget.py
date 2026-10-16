@@ -2,7 +2,12 @@
 working rounds. Rejected replies get up to REPLY_RETRIES free rounds; the total stays bounded."""
 import json
 import pytest
-from hands.test_coding_resume import coding
+import importlib.util
+from pathlib import Path
+
+_spec = importlib.util.spec_from_file_location("agent_stack_test_coding_resume", Path(__file__).with_name("test_coding_resume.py"))
+_resume = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(_resume)
+coding = _resume.coding
 
 GOOD = json.dumps({'files': {'a.py': 'def answer(): return 43\n',
                              'test_check.py': 'import unittest\nfrom a import answer\nclass Check(unittest.TestCase):\n'

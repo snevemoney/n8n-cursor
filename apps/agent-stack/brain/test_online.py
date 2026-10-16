@@ -380,13 +380,14 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertIn("dry", out["spoken"])
 
     def test_call_cursor_converse_uses_text_not_stream(self) -> None:
+        # 2026-10-16: converse uses a registered Popen (so Stop can kill it), no longer subprocess.run under the lock.
         proc = mock.Mock()
-        proc.stdout = "I am Jarvis on this Mac.\n"
-        proc.stderr = ""
+        proc.communicate.return_value = ("I am Jarvis on this Mac.\n", "")
         proc.returncode = 0
+        proc.poll.return_value = 0
         with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):
             with mock.patch.object(MOD, "cursor_logged_in", return_value=True):
-                with mock.patch.object(MOD.subprocess, "run", return_value=proc) as run:
+                with mock.patch.object(MOD.subprocess, "Popen", return_value=proc) as run:
                     out = MOD.call_cursor_converse("Identify yourself in one short sentence.")
         self.assertTrue(out["ok"])
         self.assertEqual(out["engine"], "cursor-cli")
@@ -400,9 +401,9 @@ class OnlineBrainTest(unittest.TestCase):
         self.assertNotIn("--force", argv)
         self.assertNotIn("--yolo", argv)
         self.assertNotIn("login", argv)
-        kwargs = run.call_args.kwargs
-        self.assertEqual(kwargs.get("timeout"), MOD.CONVERSE_TIMEOUT)
-        self.assertEqual(kwargs.get("cwd"), str(MOD.ROOT))
+        self.assertTrue(run.call_args.kwargs.get("start_new_session"))
+        self.assertEqual(proc.communicate.call_args.kwargs.get("timeout"), MOD.CONVERSE_TIMEOUT)
+        self.assertEqual(run.call_args.kwargs.get("cwd"), str(MOD.ROOT))
 
     def test_call_cursor_converse_skips_p_when_dark(self) -> None:
         with mock.patch.object(MOD, "agent_cmd", return_value=["/usr/local/bin/agent"]):

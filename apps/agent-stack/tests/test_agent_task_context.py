@@ -7,7 +7,7 @@ from brain import pipeline as P
 
 def test_stop_reaches_task_and_rejects_stale_progress(tmp_path, monkeypatch):
     gen = P.begin_turn(tmp_path)
-    def run(args, *, cancel_check, progress):
+    def run(args, *, cancel_check, progress, approved=False):
         assert not cancel_check()
         progress({"n":1,"what":"model","status":"running"})
         assert P.load_json(tmp_path / "bus/state.json")["agent_task_progress"]["gen"] == gen
@@ -26,7 +26,7 @@ def test_stop_reaches_task_and_rejects_stale_progress(tmp_path, monkeypatch):
 def test_newer_turn_supersedes_old_task(tmp_path, monkeypatch):
     old = P.begin_turn(tmp_path)
     P.begin_turn(tmp_path)
-    def run(args, *, cancel_check, progress):
+    def run(args, *, cancel_check, progress, approved=False):
         assert cancel_check()
         progress({"n":1,"what":"old task","status":"running"})
         return {"ok":False,"verified":False,"cancelled":True,"spoken":"Task cancelled."}

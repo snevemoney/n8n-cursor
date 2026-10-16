@@ -417,7 +417,9 @@ def _find_documents(args, rs):
         kind += f" about {args.get('topic')} (matched by title)"
     spoken = f"Found {len(found)} {kind} in {scope}. "
     if found:
-        spoken += "Candidates: " + "; ".join(found[:12]) + ". "
+        # Names, not paths: the mouth strips ~/ and /Users paths, which cut the candidate list to "; ; ."
+        # Full paths stay in "files" for the next step (open / read).
+        spoken += "Candidates: " + "; ".join(f"{Path(f).name} (in {Path(f).parent.name})" for f in found[:12]) + ". "
         if len(found) > 12:
             spoken += f"The inventory contains all {len(found)} paths; only the first 12 are spoken. "
     if not anytype:
@@ -429,21 +431,21 @@ def _find_documents(args, rs):
             "scope": [str(r) for r in scan_roots], "errors": errors, "spoken": spoken}
 
 
-REPO_DEPTH = 3  # ~/tools/<repo> and ~/projects/<repo> sit two levels down (live 2026-10-15)
-NO_REPO_DIRS = {"Library", "Pictures", "Music", "Movies", "Applications"}  # Photos library blocked the walk (live 18:2x)
+REPO_DEPTH = 3  # ~/tools/<repo>, ~/tools/<group>/<repo> and ~/projects/<repo> (live 2026-10-15; Grok bad-turn 14:16Z)
+NO_REPO_DIRS = {"Library", "Pictures", "Music", "Movies", "Applications", "Public", "node_modules"}  # Photos library blocked the walk (live 18:2x)
 BUNDLE_SUFFIXES = (".app", ".photoslibrary", ".musiclibrary", ".fcpbundle", ".imovielibrary", ".lrdata", ".bundle", ".tvlibrary")
 AGENT_WORKTREES = {"jarvis-cowork", "jarvis-scratch", "worktrees"}
 REPO_BUDGET_S = 8.0  # a cold first walk on a loaded Mac took 94 s; answer with what was found by then
 
 
-def _repos_under(root: Path, depth: int, deadline: float = float("inf")) -> list[str]:
-    """Real checkouts (a .git folder); worktrees (.git file), hidden folders and Library are skipped."""
+def _repos_under(root: Path, depth: int, deadline: float = float("inf")) -> list[Path]:
+    """Real checkouts (a .git folder); agent worktrees (.git file), hidden folders and Library are skipped."""
     if time.monotonic() > deadline:
         return []
     git = root / ".git"
     # a .git file is a worktree: ~/jarvis-main counts; agent scratch worktrees do not
     if git.is_dir() or (git.is_file() and not AGENT_WORKTREES.intersection(root.parts) and not root.name.startswith("workflow-")):
-        return [root.name]
+        return [root]
     if depth <= 0:
         return []
     try:
@@ -452,7 +454,52 @@ def _repos_under(root: Path, depth: int, deadline: float = float("inf")) -> list
                       key=lambda c: (c.name == "Documents", c.name))  # iCloud Documents last: it can block (live 18:2x)
     except OSError:
         return []
-    return [n for c in kids for n in _repos_under(c, depth - 1, deadline)]
+    return [p for c in kids for p in _repos_under(c, depth - 1, deadline)]
+
+
+def _short(p: Path) -> str:
+    try:
+        return "~/" + str(p.relative_to(Path.home()))
+    except ValueError:
+        return str(p)
+
+
+def _spoken_place(p: Path, home: Path, folder: bool = False) -> str:
+    """'whisper in tools' / 'your home folder': speakable, no path syntax (the mouth strips ~/ paths as crumbs)."""
+    if p == home:
+        return "your home folder"
+    if folder:
+        return f"your {p.name} folder" if p.parent == home else f"{p.name} (in {p.parent.name})"
+    return p.name if p.parent == home else f"{p.name} in {p.parent.name}"
+
+
+def _list_repos(rs: list[Path], default: bool) -> dict[str, Any]:
+    """Git clones by folder name only (no contents), within a time budget. Jarvis's own installs (~/jarvis-repos)
+    always count; open access also walks home. Closed access says where it looked and how to widen."""
+    home, opened = Path.home(), open_access()
+    roots = list(rs) + (([home / "jarvis-repos"] + ([home] if opened else [])) if default else [])
+    # never walk / or external drives for repos (live 18:09: READ_ROOTS=/ made this 66 s and timed out the turn)
+    scan = [r for r in dict.fromkeys(_scan_order(roots)) if r not in (VOLUMES, Path("/")) and VOLUMES not in r.parents and r.is_dir()]
+    deadline = time.monotonic() + REPO_BUDGET_S
+    got: list[Path] = []
+
+    def walk():
+        for r in scan:
+            got.extend(_repos_under(r, REPO_DEPTH, deadline))
+    # one folder can block inside a single listing (iCloud, privacy prompts): answer at the deadline anyway
+    worker = threading.Thread(target=walk, daemon=True); worker.start(); worker.join(REPO_BUDGET_S)
+    found = list(dict.fromkeys(list(got)))[:_max_names()]
+    names, spoken_names = [_short(p) for p in found], [_spoken_place(p, home) for p in found]
+    if names:
+        sp = f"I found {len(names)} git repos: " + ", ".join(spoken_names[:25]) + ("" if len(names) <= 25 else f", and {len(names) - 25} more") + "."
+    else:
+        sp = "I found no git repos."
+    sp += " I looked in " + (", ".join(_spoken_place(r, home, folder=True) for r in scan) or "no folders") + "."
+    if time.monotonic() > deadline:
+        sp += " The Mac was slow, so that list may be partial; ask again for the rest."
+    if not opened:
+        sp += ' Say "permission granted" and I will look across your Mac, including your tools folder.'
+    return {"ok": True, "op": "repos", "names": names, "looked": [_short(r) for r in scan], "spoken": sp}
 
 
 def open_document(args,utterance,roots=None):
@@ -479,25 +526,7 @@ def run(args: dict, roots=None) -> dict[str, Any]:
     if op == "find":
         return _find_documents(args or {}, rs)
     if op == "repos":
-        deadline = time.monotonic() + REPO_BUDGET_S
-        # never walk / or external drives for repos (live 18:09: READ_ROOTS=/ made this 66 s and timed out the turn)
-        scan = [r for r in _scan_order(rs) if r not in (VOLUMES, Path("/")) and VOLUMES not in r.parents]
-        got: list[str] = []
-        def walk():
-            for r in scan:
-                got.extend(_repos_under(r, REPO_DEPTH, deadline))
-        # one folder can block inside a single listing (iCloud, privacy prompts): answer at the deadline anyway
-        worker = threading.Thread(target=walk, daemon=True); worker.start(); worker.join(REPO_BUDGET_S)
-        found = list(dict.fromkeys(list(got)))
-        names = found[:_max_names()]
-        more = f" and {len(found) - len(names)} more" if len(found) > len(names) else ""
-        sp = (f"{len(found)} local repos: " + ", ".join(names) + more + ".") if found else "I found no git repos in my allowed folders."
-        if time.monotonic() > deadline:
-            sp += " The Mac was slow, so that list may be partial; ask again for the rest."
-        if not open_access():  # a closed look is not the whole Mac; say so (live 2026-10-15)
-            sp += ' I only looked in my own folders; say "permission granted" and I\'ll look across your Mac.'
-
-        return {"ok": True, "op": op, "names": names, "spoken": sp}
+        return _list_repos(rs, roots is None)
     path, err = _resolve(str((args or {}).get("path") or ""), rs)
     if path is None:
         return _deny(err or "not found", op)

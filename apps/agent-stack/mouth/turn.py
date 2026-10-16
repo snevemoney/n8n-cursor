@@ -487,7 +487,8 @@ def _apply_turn_iter_inner(
             _tok_m = PIPELINE.begin_turn(hive) if hasattr(PIPELINE, "begin_turn") else None
             yield _door_speak(hive, "[secret withheld]" if _got.get("secret") else spoken, _got["spoken"], "methods_router", retrieve_roots, gen=_tok_m, execution=_got)
             return
-    except Exception:  # Once intercepted, fail closed even if storage/receipt construction fails.
+    except Exception as _exc:  # Once intercepted, fail closed even if storage/receipt construction fails.
+        _note_failure("methods_router", _exc)
         if _methods_claimed:
             yield _door_speak(hive, "[input withheld]", "I withheld that input because its handler failed. Nothing was sent to a model.", "methods_router", retrieve_roots,
                               execution={"ok": False, "tool": "methods_router", "sent": False, "task_verified": False, "secret": True, "wires": ["methods_handler_failed"]})
@@ -764,19 +765,23 @@ def _apply_turn_iter_inner(
                           execution={"ok": True, "tool": "hush", "spoken": "Off you go, sir.", "wires": ["hush"], "sent": False})
         return
     # Z76/Z71: create an invoice for a named lead -> name the matched record, request values win, local draft only.
+    _spoke = False  # silent-failure audit 2026-10-16: once a reply is out, a later error must not fall through to a second one
     try:
         _ea = PIPELINE._load("agent_stack_entity_ack", PIPELINE.STACK / "hands" / "entity_ack.py")
         if _ea.wants(spoken):
             _notes = _REFLEX._vault_index() if _REFLEX is not None else []
             got = _ea.run(spoken, notes=_notes, drafts=None if os.environ.get("PYTEST_CURRENT_TEST") else PIPELINE._drafts_hand().drafts_dir())
             yield _door_speak(hive, spoken, got["spoken"], "entity_ack", retrieve_roots, gen=token, execution=got)
+            _spoke = True
             if got["parsed"]["kind"] == "invoice":  # Z34 offer can lapse (Z56)
                 _lp = PIPELINE._load("agent_stack_lapse", PIPELINE.STACK / "hands" / "lapse.py")
                 PIPELINE.mutate_bus(Path(hive), lambda b: _lp.open_q(b, topic="payment reminder", ask="Shall I pop a reminder on your calendar?",
                                     pending=f"No payment reminder for {got['parsed']['who']} is on your calendar."))
             return
-    except Exception:  # noqa: BLE001
-        pass
+    except Exception as _exc:  # noqa: BLE001
+        _note_failure("entity_ack", _exc)
+        if _spoke:
+            return
     # Z84 (dCK 10:49): an app with no tool -> "<App> isn't in your arsenal yet", nothing improvised.
     try:
         _tg = PIPELINE._load("agent_stack_toolgap", PIPELINE.STACK / "hands" / "toolgap.py")
@@ -790,6 +795,7 @@ def _apply_turn_iter_inner(
     except Exception:  # noqa: BLE001
         pass
     # Z52 (D5v4UuvtUXc 9:20): high stakes + vault miss + missing slots -> one compact question, nothing improvised.
+    _spoke = False
     try:
         _sl = PIPELINE._load("agent_stack_slots", PIPELINE.STACK / "hands" / "slots.py").ask_for(spoken)
         _rx2 = _reflex(spoken) or {}
@@ -798,12 +804,15 @@ def _apply_turn_iter_inner(
                    "cites": [], "sent": False, "task_verified": False, "outcome": "ASK_NOTHING_IMPROVISED"}
             PIPELINE.mutate_bus(Path(hive), lambda bus: dict(bus, reflex=dict(bus.get("reflex") or {}, verdict="ASK \u00b7 NOTHING IMPROVISED")))
             yield _door_speak(hive, spoken, got["spoken"], "slots", retrieve_roots, gen=token, execution=got)
+            _spoke = True
             _lp = PIPELINE._load("agent_stack_lapse", PIPELINE.STACK / "hands" / "lapse.py")
             PIPELINE.mutate_bus(Path(hive), lambda b: _lp.open_q(b, topic=_sl["noun"], ask=_sl["spoken"],
                                 pending=f"The {_sl['noun']} is not started yet; I still need " + " and ".join("whom" if m == "who" else "what it covers" for m in _sl["missing"]) + "."))
             return
-    except Exception:  # noqa: BLE001
-        pass
+    except Exception as _exc:  # noqa: BLE001
+        _note_failure("slots", _exc)
+        if _spoke:
+            return
     # Z06/Z07/Z40 simulated phone desk (telephony on HOLD): confirm card -> 'do it' -> ringing -> ended; nothing dials.
     try:
         _ph = PIPELINE._load("agent_stack_phone_sim", PIPELINE.STACK / "hands" / "phone_sim.py")
@@ -836,6 +845,7 @@ def _apply_turn_iter_inner(
                           execution={"ok": True, "tool": "custom_tool", "spoken": _line, "wires": ["custom_tools.json"], "sent": False})
         return
     # Z60 (zdnijkAbknA 3:31-3:42, 4:26): a spoken conditional approval -> read-back + written approval record + inbox card.
+    _spoke = False
     try:
         _ap = PIPELINE._load("agent_stack_approval", PIPELINE.STACK / "hands" / "approval.py")
         if _ap.wants(spoken) and not re.search(r"\b(?:send|wire|pay|transfer)\b(?!\s+me\s+a\s+confirmation)", spoken, re.I):
@@ -851,13 +861,16 @@ def _apply_turn_iter_inner(
                 return bus
             PIPELINE.mutate_bus(Path(hive), _inbox)
             yield _door_speak(hive, spoken, got["spoken"], "approval", retrieve_roots, gen=token, execution=got)
+            _spoke = True
             _lp = PIPELINE._load("agent_stack_lapse", PIPELINE.STACK / "hands" / "lapse.py")
             _r = got["record"]
             PIPELINE.mutate_bus(Path(hive), lambda b: _lp.open_q(b, topic="calendar", ask="Did I get that right?",
                                 pending=f"The {_r['what']} booking{(', ' + _r['when']) if _r['when'] else ''}, is not on your calendar yet."))
             return
-    except Exception:  # noqa: BLE001
-        pass
+    except Exception as _exc:  # noqa: BLE001
+        _note_failure("approval", _exc)
+        if _spoke:
+            return
     # Z02: "where do I click to X" is tutor mode: on-device locate + native arrow, never a Watch click, never a screenshot.
     if hasattr(PIPELINE, "_pointer_hand") and (PIPELINE._pointer_request(spoken) or PIPELINE._pointer_hand().wants_pointer(spoken) or PIPELINE._pointer_followup(spoken,hive)) and not PIPELINE.is_hard_step(spoken):
         # demo 2:04.1: the ack is spoken at once, before the look (storyboards/Z02)
@@ -1045,14 +1058,39 @@ def _placeholders(text: str, utterance: str) -> str:
     return re.sub(r"\$?\d[\d,.]*%?", sub, text)
 
 
+def _redact(text: str) -> str:
+    """The shared secret detector (brain/secret_patterns.py) for anything this module writes to disk or the bus."""
+    try:
+        return PIPELINE.hooks.redact(text) if hasattr(PIPELINE, "hooks") else text
+    except Exception:  # noqa: BLE001
+        return "[withheld]"
+
+
+def _note_failure(where: str, exc: BaseException) -> None:
+    """One metadata row for a swallowed error (where + type + redacted message), so a silent fallback is diagnosable."""
+    try:
+        d = PIPELINE.log_dir() if hasattr(PIPELINE, "log_dir") else Path(PIPELINE.ROOT) / "logs"
+        d.mkdir(parents=True, exist_ok=True)
+        with (d / "load-errors.jsonl").open("a", encoding="utf-8", errors="replace") as fh:
+            fh.write(json.dumps({"ts": time.time(), "module": f"turn:{where}", "error": _redact(f"{type(exc).__name__}: {exc}")[:300],
+                                 "swallowed": True}) + "\n")
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def _turn_crash_log(utterance: str, exc: BaseException) -> None:
+    import hashlib
     import traceback
     try:
-        p = Path(PIPELINE.ROOT) / "logs" / "turn-errors.jsonl"
-        p.parent.mkdir(exist_ok=True)
-        with p.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"ts": time.time(), "utterance": str(utterance or "")[:120], "error": f"{type(exc).__name__}: {exc}"[:300],
-                                 "trace": "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))[-2500:]}) + "\n")
+        p = (PIPELINE.log_dir() if hasattr(PIPELINE, "log_dir") else Path(PIPELINE.ROOT) / "logs") / "turn-errors.jsonl"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        # Privacy audit 2026-10-16: the row kept the utterance and a traceback quoting document/JSON content; now a hash
+        # of the utterance and a redacted error/trace.
+        said = str(utterance or "")
+        with p.open("a", encoding="utf-8", errors="replace") as fh:
+            fh.write(json.dumps({"ts": time.time(), "utterance_sha256": hashlib.sha256(said.encode("utf-8", "replace")).hexdigest()[:16],
+                                 "utterance_chars": len(said), "error": _redact(f"{type(exc).__name__}: {exc}")[:300],
+                                 "trace": _redact("".join(traceback.format_exception(type(exc), exc, exc.__traceback__))[-2500:])}) + "\n")
     except Exception:  # noqa: BLE001
         pass
 
@@ -1105,8 +1143,15 @@ def apply_turn_iter(utterance: str, **kw):
     try:
         _sc = PIPELINE._load("agent_stack_methods_config", PIPELINE.STACK / "hands" / "methods_config.py")
         _secret_input = _sc.find_secret(utterance or "") is not None
-    except Exception:
-        pass
+    except Exception as _exc:  # Mac load-errors 2026-10-16: this check failed open on every turn; fall back to the shared detector
+        _note_failure("secret_precheck", _exc)
+        try:
+            _secret_input = PIPELINE.hooks._secret_patterns().has_secret(utterance or "")
+        except Exception:  # noqa: BLE001 — both detectors load brain/secret_patterns.py; the hooks regex has no dependency
+            try:
+                _secret_input = bool(PIPELINE.hooks.SECRET_RE.search(utterance or ""))
+            except Exception:  # noqa: BLE001
+                _secret_input = True  # no detector at all: withhold rather than send
     if _secret_input:
         utterance = "[secret withheld]"
     started = _time.time()
@@ -1118,7 +1163,7 @@ def apply_turn_iter(utterance: str, **kw):
         reflex = _reflex(utterance)
         if isinstance(reflex, dict):
             reflex = dict(reflex, ms=round((_time.perf_counter() - t0) * 1000, 1))
-            card = dict(reflex, ts=_time.time(), ask=str(utterance or "")[:80])
+            card = dict(reflex, ts=_time.time(), ask=_redact(str(utterance or ""))[:80])
             PIPELINE.mutate_bus(kw.get("hive") or HIVE, lambda bus: dict(bus, reflex=card))
         _lp = PIPELINE._load("agent_stack_lapse", PIPELINE.STACK / "hands" / "lapse.py")  # Z56: a new turn answers an open question
         PIPELINE.mutate_bus(kw.get("hive") or HIVE, _lp.answered)
@@ -1161,7 +1206,9 @@ def apply_turn_iter(utterance: str, **kw):
             if log.log_path() is not None:
                 talk, inject = _talk_records()
                 row = log.build_row(started=started, ended=_time.time(), events=events, talk=talk, inject=inject, first_ms=first_ms)
-                row["reflex"] = reflex if reflex is not None else _reflex(utterance)
+                rx = reflex if reflex is not None else _reflex(utterance)
+                # Privacy (Mac review 2026-10-16): the matched vault note's title is note content; keep the score only.
+                row["reflex"] = {k: v for k, v in rx.items() if k != "vault_note"} if isinstance(rx, dict) else rx
                 log.append(row)
         except Exception:  # noqa: BLE001
             pass

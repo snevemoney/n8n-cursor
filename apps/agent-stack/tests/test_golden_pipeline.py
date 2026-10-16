@@ -176,7 +176,7 @@ class GoldenPipelineTest(unittest.TestCase):
             _ = fake_send
         self.assertEqual(sent, [])
         self.assertEqual(out.get("verb"), "refuse_hard_step")
-        self.assertIn("Proposal only", out.get("spoken") or "")
+        self.assertIn("your OK first", out.get("spoken") or "")  # Evens 10-15: ask first, nothing ran
         self.assertNotIn("I will send it now", out.get("spoken") or "")
         self.assertFalse(out.get("ask"))
 
@@ -509,7 +509,7 @@ class GoldenPipelineTest(unittest.TestCase):
                 },
             )
         self.assertEqual(out.get("verb"), "refuse_hard_step")
-        self.assertIn("Proposal only", out.get("spoken") or "")
+        self.assertIn("your OK first", out.get("spoken") or "")  # Evens 10-15: ask first, nothing ran
         self.assertNotIn("I will publish it", out.get("spoken") or "")
 
     def test_14_xai_mouth_when_cursor_dark(self) -> None:
