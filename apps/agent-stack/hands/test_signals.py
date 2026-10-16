@@ -106,7 +106,7 @@ class WatchTheVideo(unittest.TestCase):  # Evens 10-16: no download, watch the a
         def fake(messages, **k):
             sent.append(messages)
             if len(sent) == 1:
-                return '{"start": "00:00", "end": "00:09", "action": "opens the app"}\n'
+                return '{"start": "00:00", "end": "2:00:00", "action": "opens the app"}\n'
             return '{"kind": "learned_md", "text": "x"}\n{"kind": "method", "name": "m"}\n{"kind": "capability", "name": "c"}\n'
         with mock.patch.object(S, "_watch", side_effect=fake), mock.patch.object(S, "download") as dl:
             out = S.extract(self.SIG, {"title": "t", "duration": 7200, "transcript": "[00:01] hi", "watch": True})
@@ -188,7 +188,7 @@ class VisualLog(unittest.TestCase):  # Evens 10-16: any agent can read what happ
                 return self.ROWS
             return '{"kind": "learned_md", "text": "x"}\n{"kind": "method", "name": "m"}\n'
         with mock.patch.object(S, "_watch", side_effect=fake):
-            out = S.extract(self.SIG, {"title": "t", "duration": 600, "transcript": "", "watch": True})
+            out = S.extract(self.SIG, {"title": "t", "duration": 10, "transcript": "", "watch": True})
         self.assertEqual(sent[0][0]["content"][0]["type"], "video_url")          # 1: watch -> visual log
         self.assertIn("clicks Run", sent[1][0]["content"][1]["text"])            # 2: methods see the log
         self.assertIn("CHECKING", json.dumps(sent[2]))                           # 3: independent spot-check watch
@@ -335,6 +335,83 @@ class StudioFiling(unittest.TestCase):  # Evens 10-16: studio notes stored in Ar
         out = S.parse_extract_rows('{"kind": "studio_type", "value": "Brand & Identity"}\n{"kind": "method", "name": "m"}\n')
         self.assertEqual(out["studio_type"], "Brand & Identity")
         self.assertIn("studio_type", S.STUDIO_EXTRACT)
+
+
+class PlaybookUpdates(unittest.TestCase):  # Evens 10-16: each studio video updates the playbook .md files
+    GUIDE = ("# 06 Video Editing — Guidelines\n\n## Method rules — [S] sourced, [C] our convention\n"
+             "- [S] Storyboard first. — *source:* x\n\n## Folder specifics\n- [C] Only footage Evens owns.\n")
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp())
+        self.book = self.root / "01 Internal/Playbooks/Video Editing"
+        (self.book / "refs").mkdir(parents=True)
+        (self.book / "GUIDELINES.md").write_text(self.GUIDE)
+        (self.book / "CHECKLIST.md").write_text("# Done check\n\n## VID\n- [ ] verify_video PASS\n")
+        (self.book / "SKILL.md").write_text("# Skill\n\n## Recipe\n1. Brief\n")
+        self.sig = {"id": "abcdefghijk", "url": "https://www.youtube.com/watch?v=abcdefghijk", "kind": "youtube"}
+        self.ext = {"studio_type": "Video Editing",
+                    "guidelines": [{"rule": "Overshoot logo hits by 8-12% and settle within 6 frames", "at": "00:04"}],
+                    "checks": [{"text": "Every logo hit settles within 6 frames of the beat", "at": "00:04"}],
+                    "methods": [{"name": "Overshoot logo hit", "summary": "scale pop", "steps": ["EffectCraft: scale keys"], "at": "00:04"}]}
+
+    def _run(self):
+        with mock.patch.object(S, "STUDIO_ROOT", self.root):
+            ref = self.book / "refs" / "abcdefghijk - Logo"
+            ref.mkdir(exist_ok=True)
+            S.update_playbook(self.sig, {"title": "Logo"}, self.ext, ref)
+
+    def test_rules_go_inside_the_method_rules_section_in_its_format(self):
+        self._run()
+        g = (self.book / "GUIDELINES.md").read_text()
+        rule_at, folder_at = g.index("Overshoot logo hits"), g.index("## Folder specifics")
+        self.assertLess(rule_at, folder_at)
+        self.assertIn("- [S] Overshoot logo hits by 8-12% and settle within 6 frames — *source:* "
+                      "https://www.youtube.com/watch?v=abcdefghijk&t=4s", g)
+        self.assertIn("- [S] Storyboard first.", g)  # existing lines untouched
+
+    def test_checklist_skill_and_techniques_are_updated(self):
+        self._run()
+        self.assertIn("- [ ] Every logo hit settles within 6 frames of the beat", (self.book / "CHECKLIST.md").read_text())
+        self.assertIn("TECHNIQUES.md", (self.book / "SKILL.md").read_text())
+        self.assertIn("### Overshoot logo hit", (self.book / "TECHNIQUES.md").read_text())
+
+    def test_ingesting_again_adds_nothing_twice(self):
+        self._run(); first = {f: (self.book / f).read_text() for f in ("GUIDELINES.md", "CHECKLIST.md", "SKILL.md", "TECHNIQUES.md")}
+        self._run()
+        for f, text in first.items():
+            self.assertEqual((self.book / f).read_text(), text, f)
+
+    def test_the_model_is_asked_for_rules_and_checks_without_copying_the_look(self):
+        out = S.parse_extract_rows('{"kind": "guideline", "rule": "r", "at": "00:01"}\n{"kind": "check", "text": "c"}\n')
+        self.assertEqual(out["guidelines"][0]["rule"], "r"); self.assertEqual(out["checks"][0]["text"], "c")
+        self.assertIn("never", S.STUDIO_EXTRACT.split('"guideline"')[1][:400].lower())
+
+
+class LongWatchCompleteness(unittest.TestCase):  # live 10-16: 2h22m log stopped at 118:13; thinking ate the budget
+    SIG = {"kind": "youtube", "id": "abcdefghijk", "url": "https://www.youtube.com/watch?v=abcdefghijk"}
+
+    def test_watch_calls_keep_thinking_low_so_the_answer_gets_the_budget(self):
+        bodies = []
+        with mock.patch.object(S, "_post", side_effect=lambda b: bodies.append(b) or {"choices": [{"message": {"content": "x"}, "finish_reason": "stop"}]}), \
+             mock.patch.object(S, "ledger"):
+            S._watch([{"role": "user", "content": "go"}])
+        self.assertEqual(bodies[0]["reasoning"], {"effort": "low"})
+
+    def test_missing_minutes_are_filled_by_another_watch_until_no_gap(self):
+        first = "\n".join('{"start": "%d:00", "end": "%d:59", "action": "a%d"}' % (m, m, m) for m in range(0, 118))
+        fill = "\n".join('{"start": "%d:00", "end": "%d:59", "action": "b%d"}' % (m, m, m) for m in range(118, 143))
+        calls = []
+        def fake(messages, **k):
+            calls.append(json.dumps(messages))
+            return first if len(calls) == 1 else fill
+        with mock.patch.object(S, "_watch", side_effect=fake):
+            rows = S.watch_visual_log(self.SIG["url"], 8572, "learn", "")
+        self.assertEqual(len(calls), 2)
+        self.assertIn("1:57:59", calls[1])                    # the follow-up names the missing stretch
+        self.assertEqual(S.coverage_gaps(rows, 8572), [])
+        self.assertEqual([r["start"] for r in rows], sorted([r["start"] for r in rows], key=S._secs))
+
+    def test_density_is_asked_for(self):
+        self.assertIn("5-15 s", S.VISUAL_PROMPT)
 
 
 if __name__ == "__main__":

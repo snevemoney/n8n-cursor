@@ -401,8 +401,10 @@ def _watch(messages: list, max_tokens: int = 65000) -> str:
         convo, text = list(messages), ""
         try:
             for _ in range(MAX_CONTINUE):
+                # live 10-16: on a 2 h video Gemini's thinking used the whole output budget (27 chars came back);
+                # low thinking leaves the budget for the answer (236 rows, 0 reasoning tokens).
                 data = _post({"model": model, "provider": WATCH_PROVIDER, "messages": convo, "max_tokens": max_tokens,
-                              "usage": {"include": True}})
+                              "reasoning": {"effort": "low"}, "usage": {"include": True}})
                 if data.get("error"):
                     raise RuntimeError(str(data["error"])[:300])
                 choice = (data.get("choices") or [{}])[0]
@@ -433,7 +435,8 @@ VISUAL_FIELDS = ("start", "end", "scene", "app_or_ui", "on_screen_text", "action
 VISUAL_PROMPT = """Write the VISUAL LOG of this video: a shot-by-shot record of everything that happens on screen, so
 someone who never sees the video knows exactly what was shown, in order. One row every time anything visible changes
 (new screen, scene, window, tab, slide, panel, typed text, click, menu, terminal output, generated result, overlay),
-and at least one row every 30 s even when nothing changes. Never merge two changes into one row, never skip a part.
+and at least one row every 30 s even when nothing changes. In tutorials and screen recordings expect a new row
+every 5-15 s; write the whole video to its last second, however long the log gets (it can continue in more messages). Never merge two changes into one row, never skip a part.
 Copy on-screen text, code, commands, prompts, file names, URLs, settings and numbers VERBATIM. Say UNCLEAR rather
 than guess.
 Output ONLY JSON Lines: one JSON object per line, no array, no prose, fields:
@@ -466,11 +469,42 @@ methods: one per reusable technique ({"name","family":"content-creative","summar
 capabilities: one per technique the piece demonstrates ({"name","what_it_does","evidence":"shown working","at",
 "built_with":[...],"jarvis_has":"yes|partly|no|unknown" — can Jarvis already produce it with ArtCraft?}).
 
+Then up to 5 lines {"kind":"guideline","rule":"one reusable rule","at":"mm:ss"}: rules about timing, rhythm,
+structure, easing, composition, hierarchy, pacing or sound sync that any studio piece could follow (measurable where
+possible, e.g. "entrances ease out in 10-14 frames"). They are methods to reverse-engineer, then change: never adopt the
+source's palette, artwork, characters, melody or copy as a rule.
+Then up to 3 lines {"kind":"check","text":"a general, measurable done-check","at":"mm:ss"} for the CHECKLIST.
 Also write ONE line {"kind":"studio_type","value":"..."} naming the studio content type this inspires, exactly one of:
 Video Editing · Explainer Videos · Brand & Identity · Marketing & Social · Product Launch · Slides & Decks ·
 Photo & Retouching · Print & 3D (CAD) · Audio & Podcast · Info Products & Templates · Client Deliverables.
 
 SOURCE: {title} ({meta})"""
+
+
+GAP_ROUNDS = 3
+
+
+def watch_visual_log(url: str, duration: float, lens: str, body: str) -> list:
+    """The log of everything shown. Live 10-16: on a 2h22m course the log stopped at 118:13, so every stretch with no
+    row is sent back for another watch (the whole video again, rows only for the missing stretch) until none is left."""
+    fields = STUDIO_FIELDS if lens == "studio" else VISUAL_FIELDS
+    head = STUDIO_PROMPT if lens == "studio" else VISUAL_PROMPT
+    video = video_part(url, duration, lens)
+    rows = parse_visual_rows(_watch([{"role": "user", "content": [video, {"type": "text", "text": head
+                                      + "\n\nTRANSCRIPT (aid only):\n" + body[:300000]}]}]), fields)
+    for _ in range(GAP_ROUNDS):
+        gaps = coverage_gaps(rows, duration) if rows else []
+        if not gaps:
+            break
+        more = parse_visual_rows(_watch([{"role": "user", "content": [video, {"type": "text", "text": head
+                                          + "\n\nYour log so far is MISSING these stretches of the video: " + ", ".join(gaps)
+                                          + ". Watch them and write rows ONLY for those stretches, same format, to their last second."}]}]),
+                                 fields)
+        if not more:
+            break
+        seen = {(r["start"], r.get("action") or r.get("shot")) for r in rows}
+        rows = rows + [r for r in more if (r["start"], r.get("action") or r.get("shot")) not in seen]
+    return sorted(rows, key=lambda r: _secs(r["start"]))
 
 
 def parse_visual_rows(text: str, fields: tuple = None) -> list:
@@ -599,7 +633,7 @@ A long answer may be continued in another message: just keep writing lines."""
 
 def parse_extract_rows(text: str) -> dict:
     """learned_md / methods / capabilities from JSON Lines; a row cut by the output limit loses only that row."""
-    dec, at, learned, methods, caps, stype = json.JSONDecoder(), 0, [], [], [], ""
+    dec, at, learned, methods, caps, stype, guides, checks = json.JSONDecoder(), 0, [], [], [], "", [], []
     while True:
         at = text.find("{", at)
         if at < 0:
@@ -621,9 +655,17 @@ def parse_extract_rows(text: str) -> dict:
             caps.append(obj)
         elif kind == "studio_type" and obj.get("value"):
             stype = str(obj["value"])
+        elif kind == "guideline" and obj.get("rule"):
+            guides.append(obj)
+        elif kind == "check" and obj.get("text"):
+            checks.append(obj)
     out = {"learned_md": "\n\n".join(learned), "methods": methods, "capabilities": caps}
     if stype:
         out["studio_type"] = stype
+    if guides:
+        out["guidelines"] = guides
+    if checks:
+        out["checks"] = checks
     return out
 
 
@@ -685,7 +727,83 @@ def file_in_studio(sig: dict, got: dict, ext: dict, packet: Path) -> Path:
     old = refs.read_text() if refs.exists() else f"# {stype} — references\n\n"
     if f"- {sig['id']} -" not in old:
         refs.write_text(old.rstrip("\n") + "\n" + line)
+    update_playbook(sig, got, {**ext, "studio_type": stype}, d)
     return d
+
+
+def _at_link(url: str, at: str) -> str:
+    return f"{url}{'&' if '?' in url else '?'}t={max(0, _secs(at))}s"
+
+
+def _norm(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", str(text).lower()).strip()
+
+
+def _insert_before(text: str, heading_re: str, block: str) -> str:
+    """Put block at the end of the section whose heading matches heading_re (before the next ## heading)."""
+    m = re.search(heading_re, text, re.M)
+    if not m:
+        return text.rstrip("\n") + "\n\n" + block
+    nxt = re.search(r"^## ", text[m.end():], re.M)
+    cut = m.end() + nxt.start() if nxt else len(text)
+    head = text[:cut].rstrip("\n") + "\n"
+    return head + block + ("\n" + text[cut:] if nxt else "")
+
+
+def update_playbook(sig: dict, got: dict, ext: dict, ref: Path) -> dict:
+    """Evens 10-16: each studio video updates its playbook in the playbook's own format; nothing existing is
+    rewritten and nothing is added twice. GUIDELINES.md: [S] method rules with the source link to the second.
+    CHECKLIST.md: general done-checks. TECHNIQUES.md: the technique catalog. SKILL.md: a pointer section."""
+    book = ref.parent.parent
+    rel = f"refs/{ref.name}/"
+    done = {}
+    g = book / "GUIDELINES.md"
+    if g.exists() and ext.get("guidelines"):
+        text = g.read_text(); have = _norm(text); add = []
+        for r in [r for r in ext["guidelines"] if isinstance(r, dict) and r.get("rule")][:5]:
+            if _norm(r["rule"]) and _norm(r["rule"]) not in have:
+                add.append(f"- [S] {r['rule'].strip().rstrip('.')} — *source:* {_at_link(sig['url'], r.get('at'))} "
+                           f"(Jarvis studio watch, {rel}SCRIPT.md)")
+        if add:
+            g.write_text(_insert_before(text, r"^## Method rules.*$", "\n".join(add) + "\n"))
+        done["guidelines"] = len(add)
+    c = book / "CHECKLIST.md"
+    if c.exists() and ext.get("checks"):
+        text = c.read_text(); have = _norm(text); add = []
+        for k in [k for k in ext["checks"] if isinstance(k, dict) and k.get("text")][:3]:
+            if _norm(k["text"]) and _norm(k["text"]) not in have:
+                add.append(f"- [ ] {k['text'].strip()} — *from:* {_at_link(sig['url'], k.get('at'))}")
+        if add:
+            if not re.search(r"^## Reference techniques", text, re.M):
+                text = text.rstrip("\n") + "\n\n## Reference techniques (from watched references)\n"
+            c.write_text(_insert_before(text, r"^## Reference techniques.*$", "\n".join(add) + "\n"))
+        done["checks"] = len(add)
+    t = book / "TECHNIQUES.md"
+    text = t.read_text() if t.exists() else (
+        f"# {book.name} — Techniques from watched references\n\nEvery technique Jarvis recovered from a studio watch, with "
+        "the moment it appears and how to rebuild it in ArtCraft. Study, then change: never copy the source's assets.\n")
+    add = []
+    for m in ext.get("methods") or []:
+        if not isinstance(m, dict) or not m.get("name") or f"### {m.get('name')}" in text:
+            continue
+        steps = "".join(f"\n  {i}. {st}" for i, st in enumerate(m.get("steps") or [], 1))
+        add.append(f"\n### {m.get('name')}\n- From: [{got.get('title')}]({_at_link(sig['url'], m.get('at'))}) · `{rel}`\n"
+                   f"- What: {m.get('summary') or ''}\n- Rebuild:{steps or ' see ' + rel + 'SCRIPT.md'}\n")
+    if add:
+        t.write_text(text.rstrip("\n") + "\n" + "".join(add))
+        os.chmod(t, 0o644)
+    done["techniques"] = len(add)
+    k = book / "SKILL.md"
+    if k.exists():
+        text = k.read_text()
+        if f"`{rel}`" not in text:
+            if not re.search(r"^## Techniques from watched references", text, re.M):
+                text = (text.rstrip("\n") + "\n\n## Techniques from watched references\n"
+                        "Read `TECHNIQUES.md` (full catalog with rebuild steps) before starting; each reference below has a "
+                        "shot list with EffectCraft/FilmCraft recipes.\n")
+            line = f"- {got.get('title')} — {len(ext.get('methods') or [])} techniques · `{rel}`\n"
+            k.write_text(_insert_before(text, r"^## Techniques from watched references.*$", line))
+    return done
 
 
 def extract(sig: dict, got: dict) -> dict:
@@ -710,10 +828,7 @@ def _extract_watch(sig: dict, got: dict) -> dict:
         body = f"DESCRIPTION:\n{got['description'][:4000]}\n\nTRANSCRIPT (aid only):\n{body}"
     meta = f"channel {got.get('channel')}, {got.get('duration')} s"
     # 1. the log of everything shown, timestamped (Evens 10-16: any agent reads what happened on screen)
-    head = STUDIO_PROMPT if lens == "studio" else VISUAL_PROMPT
-    rows = parse_visual_rows(_watch([{"role": "user", "content": [video, {"type": "text", "text": head
-                                      + "\n\nTRANSCRIPT (aid only):\n" + body[:300000]}]}]),
-                             STUDIO_FIELDS if lens == "studio" else VISUAL_FIELDS)
+    rows = watch_visual_log(sig["url"], got.get("duration") or 0, lens, body)
     if not rows:
         raise RuntimeError("the watch returned no visual log")  # never a packet that is blind to the screen
     rows = add_links(rows, sig["url"])
