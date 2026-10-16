@@ -1,43 +1,40 @@
-"""Browser use in Evens's OWN Safari (his tabs, his logins), the way browser-use / Codex drive a page
-(Evens 2026-10-16: "Jarvis still can't navigate on my browser"; live: it ran gh + `open URL` instead of using the page).
+"""Browser use in Evens's OWN Safari (his tabs, his logins), in the background, the way browser-use / Codex drive a
+page (Evens 2026-10-16: "prepare Jarvis for any type of workflow possibility on a browser ... work in the background
+without interrupting me ... its own floating cursor, it does not use my cursor").
 
-The page is read through Safari's "do JavaScript" (his Safari allows JavaScript from Apple Events): every visible
-link, button and field gets a number. Clicks are REAL mouse clicks at the element's screen position (the blue cursor
-glides there, and sites that ignore scripted clicks still react); typing is real keystrokes into the focused field.
-Every action returns the fresh page, so the model sees what its action did and can correct it.
+- Jarvis works in its OWN tab (opened in the background; his current tab and his mouse are never touched). Actions
+  go through Safari's `do JavaScript` into that tab: no focus, no real mouse, Safari need not be in front.
+- Jarvis's blue overlay cursor glides to the element when that tab is visible (it is an overlay, not his pointer).
+- Every action returns the page after it (numbered links/buttons/fields, text, login wall, page dialogs).
+- Login walls are reported, never filled: Evens logs in himself.
+- Buttons that send, post, pay, buy or delete are his kept stops: the click is held for his OK (`stop_reason`).
+- `real=true` falls back to a real mouse click in the foreground (only for sites that ignore page events).
 """
 from __future__ import annotations
 
+import base64
 import json
+import mimetypes
+import re
 import subprocess
 import time
+from pathlib import Path
 
-ACTIONS = ("snapshot", "navigate", "click", "type", "key", "scroll", "back", "tabs", "switch_tab", "read")
-OSA_TIMEOUT = 15
-MAX_ELEMENTS = 250
+import importlib.util as _u
 
-SNAPSHOT_JS = r"""(()=>{let n=0,out=[];
-const sel='a[href],button,input:not([type=hidden]),select,textarea,summary,[role=button],[role=link],[role=tab],[role=menuitem],[role=option],[role=checkbox],[role=switch],[role=combobox],[role=searchbox],[contenteditable=true],[onclick]';
-document.querySelectorAll('[data-jref]').forEach(e=>e.removeAttribute('data-jref'));
-for(const e of document.querySelectorAll(sel)){const r=e.getBoundingClientRect();if(r.width<2||r.height<2)continue;
-const st=getComputedStyle(e);if(st.visibility==='hidden'||st.display==='none'||st.opacity==='0')continue;
-const lab=(e.getAttribute('aria-label')||e.innerText||e.value||e.placeholder||e.title||e.getAttribute('alt')||(e.querySelector('img')||{}).alt||e.getAttribute('href')||'').trim().replace(/\s+/g,' ').slice(0,90);
-n++;e.setAttribute('data-jref',n);const off=(r.bottom<0||r.top>innerHeight)?' (scroll to see)':'';
-out.push(n+' '+(e.getAttribute('role')||e.tagName.toLowerCase())+(e.type&&e.tagName!=='BUTTON'?'['+e.type+']':'')+' "'+lab+'"'+off);if(n>=%d)break;}
-return JSON.stringify({url:location.href,title:document.title,elements:out.join('\n'),text:(document.body?document.body.innerText:'').replace(/\n{3,}/g,'\n\n').slice(0,2500)});})()""" % MAX_ELEMENTS
+_spec = _u.spec_from_file_location("agent_stack_safari_js", Path(__file__).with_name("safari_js.py"))
+J = _u.module_from_spec(_spec); _spec.loader.exec_module(J)
 
-WHERE_JS = r"""(()=>{const e=document.querySelector('[data-jref="%s"]');if(!e)return JSON.stringify({error:'no element %s on this page; take a new snapshot'});
-e.scrollIntoView({block:'center',inline:'center'});const r=e.getBoundingClientRect();
-return JSON.stringify({cx:r.left+r.width/2,cy:r.top+r.height/2,iw:window.innerWidth,ih:window.innerHeight,
-tag:e.tagName.toLowerCase()});})()"""
-
-FOCUS_JS = r"""(()=>{const e=document.querySelector('[data-jref="%s"]');if(!e)return 'missing';e.scrollIntoView({block:'center'});e.focus();
-if(e.select&&%s)e.select();return 'ok';})()"""
-
-READ_JS = r"""(()=>JSON.stringify({url:location.href,title:document.title,text:(document.body?document.body.innerText:'').slice(0,12000)}))()"""
+ACTIONS = ("snapshot", "navigate", "new_tab", "click", "double_click", "hover", "type", "select", "check", "key",
+           "scroll", "find", "wait_for", "read", "back", "forward", "reload", "tabs", "use_tab", "show", "close_tab",
+           "eval", "upload", "dialog")
+OSA_TIMEOUT = 20
+UPLOAD_MAX = 600_000  # bytes: the file rides in the osascript argument list
+STOP_RE = re.compile(r"\b(send|post|publish|tweet|reply all|share now|buy|purchase|pay|place order|checkout|check out|"
+                     r"subscribe|donate|transfer|delete|remove|merge|confirm (?:payment|order|purchase)|submit order)\b", re.I)
 
 
-def _osa(lines: list, *args: str, timeout: int = OSA_TIMEOUT) -> str:
+def osa(lines: list, *args: str, timeout: int = OSA_TIMEOUT) -> str:
     argv = ["osascript"]
     for ln in lines:
         argv += ["-e", ln]
@@ -47,28 +44,91 @@ def _osa(lines: list, *args: str, timeout: int = OSA_TIMEOUT) -> str:
     return cp.stdout.strip()
 
 
-def js(code: str) -> str:
-    return _osa(["on run argv", 'tell application "Safari" to do JavaScript (item 1 of argv) in current tab of front window',
-                 "end run"], code)
-
-
 class SafariDOM:
-    """`hands(req)` sends one Jarvis Hands event; `cursor(x, y)` glides the blue cursor. Both come from the operator."""
+    """`state` is the job's dict (persisted by the operator): the working tab and the tabs Jarvis opened.
+    `hands(req)` sends a real input event (only for real=true); `cursor(x, y)` glides the blue overlay cursor."""
 
-    def __init__(self, hands, cursor, run_js=js, osa=_osa):
-        self.hands, self.cursor, self.js, self.osa = hands, cursor, run_js, osa
+    def __init__(self, state: dict, hands, cursor, osa_fn=osa):
+        self.state, self.hands, self.cursor, self.osa = state, hands, cursor, osa_fn
 
-    def _front(self) -> None:
-        self.osa(['tell application "Safari"', "activate",
-                  "if (count of windows) = 0 then make new document", "end tell"])
+    # ---- tabs ---------------------------------------------------------------------------------------------
+    def _tab(self) -> tuple:
+        """(window id, tab index) of the working tab; his current tab if none chosen yet."""
+        t = self.state.get("safari_tab")
+        if t:
+            return int(t[0]), int(t[1])
+        out = self.osa(['tell application "Safari"', "if (count of windows) = 0 then make new document",
+                        "return (id of front window as text) & \",\" & (index of current tab of front window as text)",
+                        "end tell"])
+        w, i = out.split(",")
+        self.state["safari_tab"] = [int(w), int(i)]
+        return int(w), int(i)
 
-    def snapshot(self, lead: str = "") -> dict:
+    def js(self, code: str) -> dict:
+        w, i = self._tab()
+        raw = self.osa(["on run argv", f'tell application "Safari" to do JavaScript (item 1 of argv) in tab {i} of window id {w}',
+                        "end run"], code)
         try:
-            d = json.loads(self.js(SNAPSHOT_JS) or "{}")
-        except (ValueError, RuntimeError) as exc:
-            return {"text": f"{lead}could not read the page: {exc}"}
-        return {"text": (f"{lead}Safari page: {d.get('title')} — {d.get('url')}\nElements (use the number to click/type):\n"
-                         f"{d.get('elements') or '(none)'}\n\nPage text:\n{d.get('text') or ''}")}
+            return json.loads(raw or "{}")
+        except ValueError:
+            return {"result": raw}
+
+    def _visible(self) -> bool:
+        w, i = self._tab()
+        try:
+            return self.osa([f'tell application "Safari" to return ((index of current tab of window id {w}) = {i}) '
+                             f'and (visible of window id {w})']) == "true"
+        except RuntimeError:
+            return False
+
+    def _glide(self, where: dict) -> None:
+        """Jarvis's own cursor, only when he can see the tab (it never moves his pointer)."""
+        if "cx" in where and self._visible():
+            x, y = self.to_screen(where)
+            self.cursor(x, y)
+
+    def to_screen(self, where: dict) -> tuple:
+        """Page point -> global point. Safari hides screenX/screenY from pages (live 10-16: both 0), so the frame
+        comes from Safari's AppleScript bounds {left, top, right, bottom}; toolbar = frame height - innerHeight."""
+        w, _ = self._tab()
+        left, top, right, bottom = [int(v) for v in self.osa(
+            [f'tell application "Safari" to get bounds of window id {w}']).replace(" ", "").split(",")]
+        return (int(round(left + (right - left - float(where["iw"])) / 2 + float(where["cx"]))),
+                int(round(top + (bottom - top - float(where["ih"])) + float(where["cy"]))))
+
+    # ---- the page ------------------------------------------------------------------------------------------
+    def snapshot(self, lead: str = "") -> dict:
+        d = self.js(J.wrap(J.SNAPSHOT))
+        if d.get("error"):
+            return {"text": f"{lead}could not read the page: {d['error']}"}
+        w, i = self._tab()
+        login = ("\nLOGIN NEEDED: this page wants him signed in. Tell Evens in one line to log in to this site in Safari "
+                 "(never type his password), wait for his reply, then snapshot again.") if d.get("login") else ""
+        dlg = ("\nThe page showed: " + "; ".join(d["dialogs"])) if d.get("dialogs") else ""
+        return {"text": (f"{lead}Safari tab {i} of window {w}: {d.get('title')} — {d.get('url')} (loading: {d.get('ready')}, "
+                         f"scroll {d.get('scroll')}){login}{dlg}\nElements (use the number):\n{d.get('elements') or '(none)'}"
+                         f"\n\nPage text:\n{d.get('text') or ''}")}
+
+    def stop_reason(self, a: dict) -> str:
+        """Non-empty when this action would send, post, pay, buy or delete (his kept stops)."""
+        action = str(a.get("action") or "")
+        if action not in ("click", "double_click", "type", "key", "eval"):
+            return ""
+        if action == "eval":
+            return "runs a page script" if STOP_RE.search(str(a.get("code") or "")) else ""
+        if action in ("type", "key") and not (a.get("submit") or "enter" in str(a.get("keys") or "").lower()
+                                              or "return" in str(a.get("keys") or "").lower()):
+            return ""
+        if not a.get("ref"):
+            return ""
+        try:
+            info = self.js(J.element_script(int(a["ref"]), J.INFO))
+        except (RuntimeError, ValueError, subprocess.TimeoutExpired):
+            return ""
+        label = str(info.get("label") or "")
+        if action in ("type", "key"):
+            return f"submits the form around '{label}'" if info.get("form") and STOP_RE.search(label) else ""
+        return f"clicks '{label}'" if STOP_RE.search(label) else ""
 
     def act(self, a: dict) -> dict:
         action = str(a.get("action") or "snapshot")
@@ -77,99 +137,197 @@ class SafariDOM:
         try:
             return getattr(self, "_" + action)(a)
         except subprocess.TimeoutExpired:
-            return {"text": "Safari did not answer in time (it may be showing a dialog); take a computer screenshot to see"}
-        except RuntimeError as exc:
+            return {"text": "Safari did not answer in time (a dialog may be open); take a computer screenshot to look"}
+        except (RuntimeError, ValueError, KeyError) as exc:
             return {"text": f"Safari error: {exc}"}
+
+    def _el(self, a: dict, body: str, lead: str, settle: float = 1.2) -> dict:
+        ref = int(a.get("ref") or 0)
+        if not ref:
+            return {"text": f"{a.get('action')} needs ref=N from a snapshot"}
+        got = self.js(J.element_script(ref, body))
+        if got.get("error"):
+            return {"text": got["error"]}
+        self._glide(got)
+        time.sleep(settle)
+        extra = (" The page showed: " + "; ".join(got["dialogs"]) + ".") if got.get("dialogs") else ""
+        return self.snapshot(f"{lead}{extra} ")
 
     def _snapshot(self, a):
         return self.snapshot()
 
-    def _read(self, a):
-        d = json.loads(self.js(READ_JS) or "{}")
-        return {"text": f"{d.get('title')} — {d.get('url')}\n{d.get('text') or ''}"}
-
-    def _navigate(self, a):
-        url = str(a.get("url") or "").strip()
-        if not url:
-            return {"text": "navigate needs url"}
-        if "://" not in url:
-            url = "https://" + url
-        self._front()
-        # the tab he is on changes address: no new tab per request (live 10-16: 18 Spotify tabs)
-        self.osa(["on run argv", 'tell application "Safari" to set URL of current tab of front window to (item 1 of argv)',
-                  "end run"], url)
-        self._settle(2.5)
-        return self.snapshot("Navigated. ")
-
-    def _settle(self, s: float) -> None:
-        time.sleep(s)
-
     def _click(self, a):
-        ref = str(a.get("ref") or "").strip()
-        self._front()
-        where = json.loads(self.js(WHERE_JS % (ref, ref)) or "{}")
-        if where.get("error"):
-            return {"text": where["error"]}
-        time.sleep(0.3)  # scrollIntoView settles before we read the spot again
-        where = json.loads(self.js(WHERE_JS % (ref, ref)) or "{}")
-        x, y = self.to_screen(where)
-        self.cursor(x, y)
-        got = self.hands({"op": "click", "x": x, "y": y, "count": 1, "button": "left"})
-        if "trusted\": false" in str(got.get("text", "")).replace(" ", "") or "not installed" in str(got.get("text", "")):
-            return got
-        self._settle(1.5)
-        return self.snapshot(f"Clicked {ref}. ")
+        if a.get("real"):
+            return self._real_click(a)
+        return self._el(a, J.CLICK, f"Clicked {a.get('ref')}.", 1.5)
 
-    def to_screen(self, where: dict) -> tuple:
-        """Page point -> global mouse point. Safari hides screenX/screenY from pages (live 10-16: both 0, every click
-        landed in the corner of the main display), so the window frame comes from Safari's own AppleScript bounds:
-        {left, top, right, bottom} in global top-left points; the toolbar is the frame height minus innerHeight."""
-        b = [int(v) for v in self.osa(['tell application "Safari" to get bounds of front window']).replace(" ", "").split(",")]
-        left, top, right, bottom = b
-        x = left + (right - left - float(where["iw"])) / 2 + float(where["cx"])
-        y = top + (bottom - top - float(where["ih"])) + float(where["cy"])
-        return int(round(x)), int(round(y))
+    def _double_click(self, a):
+        return self._el(a, J.DBLCLICK, f"Double-clicked {a.get('ref')}.", 1.2)
+
+    def _hover(self, a):
+        return self._el(a, J.HOVER, f"Hovering {a.get('ref')}.", 0.8)
 
     def _type(self, a):
-        ref, text = str(a.get("ref") or "").strip(), str(a.get("text") or "")
-        self._front()
-        if ref and self.js(FOCUS_JS % (ref, "true" if a.get("replace", True) else "false")) == "missing":
-            return {"text": f"no element {ref}; take a new snapshot"}
-        self.hands({"op": "type", "text": text})
-        if a.get("submit"):
-            self.hands({"op": "key", "keys": "return"})
-            self._settle(2.0)
-        else:
-            self._settle(0.6)
-        return self.snapshot("Typed. ")
+        return self._el(a, J.type_script(str(a.get("text") or ""), a.get("replace", True) is not False,
+                                         bool(a.get("submit"))), "Typed.", 2.0 if a.get("submit") else 0.5)
+
+    def _select(self, a):
+        return self._el(a, J.select_script(str(a.get("text") or a.get("option") or "")), "Selected.", 0.8)
+
+    def _check(self, a):
+        want = a.get("checked", True) is not False
+        body = ("const on=('checked' in e)?e.checked:(e.getAttribute('aria-checked')==='true');"
+                f"if(on!=={'true' if want else 'false'}){{" + J.CLICK.split("return JSON.stringify")[0] + "}" +
+                "return JSON.stringify(Object.assign(pt(e),{ok:1}))")
+        return self._el(a, body, "Set the checkbox.", 0.8)
 
     def _key(self, a):
-        self._front()
-        self.hands({"op": "key", "keys": str(a.get("keys") or a.get("text") or "")})
-        self._settle(1.0)
+        got = self.js(J.key_script(str(a.get("keys") or a.get("text") or ""), int(a["ref"]) if a.get("ref") else None))
+        if got.get("error"):
+            return {"text": got["error"]}
+        time.sleep(1.0)
         return self.snapshot("Pressed. ")
 
     def _scroll(self, a):
-        amount = int(a.get("amount") or 600) * (-1 if str(a.get("direction") or "down") == "up" else 1)
-        self.js(f"window.scrollBy(0,{amount});'ok'")
-        self._settle(0.5)
+        got = self.js(J.scroll_script(str(a.get("direction") or "down"), int(a.get("amount") or 700),
+                                      int(a["ref"]) if a.get("ref") else None))
+        if got.get("error"):
+            return {"text": got["error"]}
+        time.sleep(0.5)
         return self.snapshot("Scrolled. ")
 
+    def _find(self, a):
+        got = self.js(J.find_script(str(a.get("text") or "")))
+        return {"text": got.get("error") or json.dumps({"lines": got.get("lines"), "elements": got.get("elements")})[:6000]}
+
+    def _wait_for(self, a):
+        """Until the text shows up (or the page finishes loading), up to timeout_s."""
+        want = str(a.get("text") or "").lower()
+        end = time.monotonic() + min(60, int(a.get("timeout_s") or 15))
+        while time.monotonic() < end:
+            d = self.js(J.STATE)
+            if (want and want in str(d.get("text") or "").lower()) or (not want and d.get("ready") == "complete"):
+                return self.snapshot("Ready. ")
+            time.sleep(1.0)
+        return self.snapshot(f"Waited, and {'did not see ' + repr(want) if want else 'the page is still loading'}. ")
+
+    def _read(self, a):
+        d = self.js(J.READ)
+        return {"text": d.get("error") or f"{d.get('title')} — {d.get('url')}\n{d.get('text') or ''}"}
+
+    def _history(self, how: str, lead: str):
+        self.js(J.wrap(f"{how};return JSON.stringify({{ok:1}})"))
+        time.sleep(2.0)
+        return self.snapshot(lead)
+
     def _back(self, a):
-        self.js("history.back();'ok'")
-        self._settle(2.0)
-        return self.snapshot("Went back. ")
+        return self._history("history.back()", "Went back. ")
+
+    def _forward(self, a):
+        return self._history("history.forward()", "Went forward. ")
+
+    def _reload(self, a):
+        return self._history("location.reload()", "Reloaded. ")
+
+    def _navigate(self, a):
+        url = self._url(a)
+        w, i = self._tab()
+        self.osa(["on run argv", f'tell application "Safari" to set URL of tab {i} of window id {w} to (item 1 of argv)',
+                  "end run"], url)
+        return self._settled("Navigated. ")
+
+    def _new_tab(self, a):
+        """Jarvis's own tab, at the end of his front window, NOT made current: he keeps his tab and his work."""
+        url = self._url(a)
+        out = self.osa(["on run argv", 'tell application "Safari"', "if (count of windows) = 0 then make new document",
+                        "set w to front window", "tell w to make new tab at end of tabs with properties {URL:(item 1 of argv)}",
+                        "return (id of w as text) & \",\" & ((count of tabs of w) as text)", "end tell", "end run"], url)
+        w, i = out.split(",")
+        self.state["safari_tab"] = [int(w), int(i)]
+        self.state.setdefault("safari_own", []).append([int(w), int(i)])
+        return self._settled("Opened my own tab in the background. ")
+
+    def _url(self, a) -> str:
+        url = str(a.get("url") or "").strip()
+        if not url:
+            raise ValueError("needs url")
+        return url if "://" in url else "https://" + url
+
+    def _settled(self, lead: str) -> dict:
+        end = time.monotonic() + 12
+        time.sleep(1.0)
+        while time.monotonic() < end:
+            try:
+                if self.js(J.STATE).get("ready") == "complete":
+                    break
+            except RuntimeError:
+                pass
+            time.sleep(0.7)
+        return self.snapshot(lead)
 
     def _tabs(self, a):
-        out = self.osa(['tell application "Safari"', "set o to \"\"", "set w to front window", "set i to 0",
-                        "repeat with t in tabs of w", "set i to i + 1",
-                        "set o to o & i & \" | \" & (name of t) & \" | \" & (URL of t) & linefeed", "end repeat",
-                        "return o", "end tell"])
-        return {"text": "Tabs in his front Safari window (switch_tab with index):\n" + out}
+        out = self.osa(['tell application "Safari"', 'set o to ""', "repeat with w in windows",
+                        "set i to 0", "repeat with t in tabs of w", "set i to i + 1",
+                        'set o to o & (id of w) & "|" & i & "|" & (name of t) & "|" & (URL of t) & linefeed',
+                        "end repeat", "end repeat", "return o", "end tell"])
+        cur = self.state.get("safari_tab")
+        rows = []
+        for ln in out.splitlines():
+            parts = ln.split("|", 3)
+            if len(parts) == 4:
+                mark = " (my working tab)" if cur and [int(parts[0]), int(parts[1])] == cur else ""
+                rows.append(f"window {parts[0]} tab {parts[1]}: {parts[2]} — {parts[3]}{mark}")
+        return {"text": "Safari tabs (use_tab window=W index=N works there without switching his view):\n" + "\n".join(rows)}
 
-    def _switch_tab(self, a):
-        i = int(a.get("index") or 1)
-        self._front()
-        self.osa([f'tell application "Safari" to set current tab of front window to tab {i} of front window'])
-        self._settle(0.8)
-        return self.snapshot(f"Switched to tab {i}. ")
+    def _use_tab(self, a):
+        w = int(a.get("window") or self._tab()[0])
+        self.state["safari_tab"] = [w, int(a.get("index") or 1)]
+        return self.snapshot("Working in that tab now. ")
+
+    def _show(self, a):
+        """Bring the working tab into view (only when he asked to see it)."""
+        w, i = self._tab()
+        self.osa([f'tell application "Safari" to set current tab of window id {w} to tab {i} of window id {w}'])
+        return self.snapshot("It's the tab he sees now. ")
+
+    def _close_tab(self, a):
+        w, i = self._tab()
+        if [w, i] not in self.state.get("safari_own", []):
+            return {"text": "that is his tab, not one I opened; leave it open"}
+        self.osa([f'tell application "Safari" to close tab {i} of window id {w}'])
+        self.state["safari_own"] = [t for t in self.state.get("safari_own", []) if t != [w, i]]
+        self.state.pop("safari_tab", None)
+        return {"text": "closed my tab"}
+
+    def _eval(self, a):
+        got = self.js(J.eval_script(str(a.get("code") or "return document.title")))
+        return {"text": json.dumps(got)[:8000]}
+
+    def _upload(self, a):
+        p = Path(str(a.get("path") or "")).expanduser()
+        if not p.is_file():
+            return {"text": f"no file at {p}"}
+        if p.stat().st_size > UPLOAD_MAX:
+            return {"text": f"{p.name} is over {UPLOAD_MAX // 1000} KB; click the field with real=true and use the file picker with computer"}
+        mime = mimetypes.guess_type(p.name)[0] or "application/octet-stream"
+        return self._el(a, J.upload_script(p.name, mime, base64.b64encode(p.read_bytes()).decode()), f"Attached {p.name}.", 0.8)
+
+    def _dialog(self, a):
+        """The next confirm() on the page answers OK (only after his OK for anything that sends/pays/deletes)."""
+        self.js(J.wrap(J.LIB + "guard();W.__jconfirm=true;return JSON.stringify({ok:1})"))
+        return {"text": "the next confirmation on this page will answer OK"}
+
+    def _real_click(self, a):
+        """Foreground fallback: real mouse at the element (brings the tab forward; he sees it happen)."""
+        got = self.js(J.element_script(int(a.get("ref") or 0), J.HOVER))
+        if got.get("error"):
+            return {"text": got["error"]}
+        self._show(a)
+        self.osa(['tell application "Safari" to activate'])
+        time.sleep(0.4)
+        got = self.js(J.element_script(int(a["ref"]), J.HOVER))
+        x, y = self.to_screen(got)
+        self.cursor(x, y)
+        self.hands({"op": "click", "x": x, "y": y, "count": 1, "button": "left"})
+        time.sleep(1.5)
+        return self.snapshot(f"Real click on {a['ref']}. ")

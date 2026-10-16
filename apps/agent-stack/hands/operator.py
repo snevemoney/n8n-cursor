@@ -40,7 +40,13 @@ SYSTEM = (
     "not open tools for arithmetic or general knowledge), what you are about to do, what you just found, or a snag. "
     "Speak like a capable colleague: plain English, short, no markdown, no file slugs, no model names, no step numbers, "
     "no 'I have not run an executor'. One or two sentences at a time.\n"
-    "Working: prefer shell and files when they do the job. His browser is Safari; never open Chrome or another browser unless he names it. For anything on the web he wants in his browser, use safari (his Safari, signed in): navigate, snapshot, click and type by element number, and check the page that comes back; do not route around the page with shell, gh or open when he asked for the browser, and leave the result in his front tab. (Background research without a browser: web_search and fetch_url.) If a site wants a login he has in "
+    "Working: prefer shell and files when they do the job. His browser is Safari; never open Chrome or another browser unless he names it. Web work happens in his Safari "
+    "in the BACKGROUND with the safari tool: open your own tab with new_tab (his current tab, his mouse and his front "
+    "app stay his), work it by element numbers, and check the page that comes back after each action. Use his current "
+    "tab (use_tab) only when he means the page he is looking at; use show at the end only when he wants to see the "
+    "result. Do not route around the page with shell, gh or open when he asked for the browser. If a page says LOGIN "
+    "NEEDED, tell him in one line to log in to that site in Safari and wait for him (ask_owner); never type his "
+    "passwords. (Background research without a browser: web_search and fetch_url.) If a site wants a login he has in "
     "an app instead (Spotify.app), use the app with computer. For desktop apps use "
     "computer: take a screenshot, click/type/scroll at pixels of that screenshot (your blue cursor shows him where), "
     "and look at the screenshot that comes back after every action. He has more than one screen: if you cannot see "
@@ -104,13 +110,20 @@ TOOLS = [
          "coordinate": {"type": "array", "items": I}, "start_coordinate": {"type": "array", "items": I},
          "text": S, "scroll_direction": {"type": "string", "enum": ["up", "down", "left", "right"]},
          "scroll_amount": I, "duration": I, "display": I, "app": S}, ["action"]),
-    _fn("safari", "Evens's OWN Safari: his tabs and logins, on his screen. Use it whenever he wants something on the web "
-        "done in his browser. snapshot lists the page's links/buttons/fields with numbers; click ref=N (real mouse, he "
-        "sees the cursor), type ref=N text=... (submit=true presses Return), navigate url=... (changes his current tab, "
-        "no new tabs), key keys=cmd+f, scroll direction=down, back, read (full page text), tabs, switch_tab index=N. "
-        "Every action returns the page after it.",
-        {"action": {"type": "string", "enum": ["snapshot", "navigate", "click", "type", "key", "scroll", "back", "tabs", "switch_tab", "read"]}, "ref": S, "text": S, "url": S, "keys": S,
-         "direction": S, "amount": I, "index": I, "submit": B}, ["action"]),
+    _fn("safari", "Evens's OWN Safari (his logins), worked in the BACKGROUND: new_tab url=... opens your own tab without "
+        "changing his; then snapshot (numbered links/buttons/fields), click/double_click/hover ref=N, type ref=N text=... "
+        "(submit=true sends Enter), select ref=N text=option, check ref=N checked=true, key keys=enter|escape|tab|cmd+a, "
+        "scroll direction=down [ref=N], find text=..., wait_for text=..., read, back/forward/reload, navigate url=..., "
+        "tabs, use_tab window=W index=N (his current tab when he means the page he is on), show (bring your tab into "
+        "view when he wants to see it), close_tab (only yours), eval code='return ...', upload ref=N path=..., dialog. "
+        "real=true on click = a real mouse click in the foreground, only if a page ignores the normal click. Every action "
+        "returns the page after it.",
+        {"action": {"type": "string", "enum": ["snapshot", "navigate", "new_tab", "click", "double_click", "hover", "type",
+                                               "select", "check", "key", "scroll", "find", "wait_for", "read", "back",
+                                               "forward", "reload", "tabs", "use_tab", "show", "close_tab", "eval",
+                                               "upload", "dialog"]},
+         "ref": I, "text": S, "url": S, "keys": S, "direction": S, "amount": I, "window": I, "index": I, "submit": B,
+         "replace": B, "checked": B, "code": S, "path": S, "timeout_s": I, "real": B}, ["action"]),
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
     _fn("mcp", "Call a tool on a connected MCP server.", {"server": S, "tool": S, "arguments": {"type": "object"}},
         ["server", "tool"]),
@@ -226,10 +239,10 @@ class Tools:
         st = json.loads(self.state_file.read_text()) if self.state_file.exists() else {}
         self.cwd = st.get("cwd") or str(Path.home())
         self.jobs = st.get("jobs") or {}
-        self.state = {"display_n": st.get("display_n")}
+        self.state = {k: st.get(k) for k in ("display_n", "safari_tab", "safari_own") if st.get(k) is not None}
 
     def _save(self):
-        self.state_file.write_text(json.dumps({"cwd": self.cwd, "jobs": self.jobs, "display_n": self.state.get("display_n")}))
+        self.state_file.write_text(json.dumps({"cwd": self.cwd, "jobs": self.jobs, **self.state}))
 
     def read_file(self, a):
         p = _path(a["path"], self.cwd)
@@ -418,7 +431,15 @@ class Tools:
         return self._shot(d, displays, windows, f"Did {action}. ")
 
     def safari(self, a):
-        return SD.SafariDOM(self._hands, self._show_cursor).act(a)
+        got = SD.SafariDOM(self.state, self._hands, self._show_cursor).act(a)
+        self._save()  # the working tab and the tabs Jarvis opened survive between steps
+        return got
+
+    def preflight(self, name: str, args: dict) -> str:
+        """A kept stop the generic authority cannot see from the arguments alone (the label of a page button)."""
+        if name == "safari":
+            return SD.SafariDOM(self.state, self._hands, self._show_cursor).stop_reason(args)
+        return ""
 
     def browser(self, a):
         if self.web is None:
@@ -750,13 +771,29 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
             messages.append({"role": "tool", "tool_call_id": c["call_id"], "content": "stopped: repeated without progress"})
             continue
         decision, why = _authority().authorize(name, args)
+        if decision == "allow" and name not in TERMINAL:
+            held = tools.preflight(name, args) if hasattr(tools, "preflight") else ""
+            if held:
+                decision, why = "ask", f"that {held}"
+        if decision == "ask":
+            # OpenClaude/Claude Code: needs permission -> ask -> resume if approved. His yes lets THIS exact call run once.
+            fp = _fingerprint(name, args)
+            st = task.read("state.json")
+            if st.get("granted") == fp:
+                st.pop("granted", None); st.pop("pending_ok", None)
+                task.write("state.json", st)
+                task.trace({"event": "approved", "tool": name, "why": why})
+                decision = "allow"
+            else:
+                task.write("state.json", {**st, "pending_ok": fp, "pending_what": why})
         if name in TERMINAL:
             result = {"text": "ok"}
             terminal = ("DONE" if name == "done" else "WAITING_OWNER", args)
         elif decision == "deny":
             result = {"text": f"refused: {why}. Choose another way."}
         elif decision == "ask":
-            result = {"text": f"needs Evens's OK first: {why}. Not run. Find another way or call ask_owner."}
+            result = {"text": f"needs Evens's OK first: {why}. Not run. Ask him in one plain line with ask_owner; if he says "
+                              "yes, make exactly the same call again and it will go through."}
         elif not hasattr(Tools, name) or name.startswith("_"):
             result = {"text": f"unknown tool {name}"}
         else:
@@ -796,7 +833,8 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
     return None
 
 
-def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: float = TIME_BUDGET_S) -> dict:
+def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: float = TIME_BUDGET_S,
+        session: bool = False) -> dict:
     task = Task(task_dir)
     tools = Tools(task.path)
     fixed_fn = model_fn
@@ -847,7 +885,7 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
                 pass  # a missing note never fails the job
         if state.get("tier") != "owner" and status in ("DONE", "MODEL_UNAVAILABLE", "STEP_LIMIT", "TIME_LIMIT"):
             record_outcome(state.get("kind") or "any", str(state.get("model") or ""), status == "DONE")
-        if status in ("DONE", "WAITING_OWNER") and tools.browser_open() and not fixed_fn:
+        if status in ("DONE", "WAITING_OWNER") and session:
             # A live session like Codex/Claude Code: the page stays open and his next line continues THIS agent.
             if _idle_until_spoken_to(task):
                 start = time.monotonic()
@@ -920,6 +958,14 @@ def running(hive: Path) -> bool:
     return False
 
 
+YES_RE = re.compile(r"^\W*(yes|yeah|yep|ok|okay|sure|go ahead|go for it|do it|send it|post it|confirm|confirmed|approved?|"
+                    r"oui|vas-y|d'accord)\b", re.I)
+
+
+def _fingerprint(name: str, args: dict) -> str:
+    return name + ":" + json.dumps(args or {}, sort_keys=True, default=str)
+
+
 def tell(hive: Path, line: str) -> dict:
     """Evens speaks while the loop works: his line joins THAT conversation (never a second job). Like talking to
     Claude Code mid-task (Evens 10-16: "it is still not a complete harness")."""
@@ -928,6 +974,9 @@ def tell(hive: Path, line: str) -> dict:
     if not tid or not running(hive):
         return {"ok": False}
     task = Task(Path(hive) / "operator-tasks" / tid)
+    st = task.read("state.json")
+    if st.get("pending_ok") and YES_RE.search(str(line)):
+        task.write("state.json", {**st, "granted": st["pending_ok"]})  # his yes covers the one action he was asked about
     with FileLock(task.path / "messages.lock"):
         msgs = task.read("messages.json", [])
         msgs.append({"role": "user", "content": str(line)[:4000]})
@@ -967,4 +1016,4 @@ def status(hive: Path, task_id: str | None = None) -> dict:
 
 if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "run":
-        print(json.dumps(run(Path(sys.argv[2])), default=str))
+        print(json.dumps(run(Path(sys.argv[2]), session=True), default=str))  # the worker stays for his next line
