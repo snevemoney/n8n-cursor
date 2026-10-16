@@ -41,6 +41,8 @@ class FakeSafari:
             return "true" if self.visible else "false"
         if "bounds of window" in text:
             return "364, 1158, 1434, 2018"
+        if "frontmost is true" in text:
+            return "Safari"
         return ""
 
     def driver(self, state=None):
@@ -80,6 +82,7 @@ class Background(unittest.TestCase):
         script = " ".join(" ".join(l) for l, _ in f.osa_calls)
         self.assertIn("set current tab of window id 77 to tab 15", script)
         self.assertIn("set index of window id 77 to 1", script); self.assertIn("activate", script)
+        self.assertIn("frontmost", script)
 
     def test_typing_that_did_not_take_is_reported(self):  # live 10-16: Facebook's friends search ignored the text
         got = FakeSafari().driver({"safari_tab": [77, 15]}).act({"action": "type", "ref": 1, "text": "Juliana"})

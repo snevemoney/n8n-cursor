@@ -302,11 +302,19 @@ class SafariDOM:
 
     def _show(self, a):
         """Put the working tab on his screen (Evens 10-16: "let me see / put it on my screen"): that tab current,
-        its window in front, Safari active."""
+        its window in front, Safari active, then CHECK that Safari is really the front app (retry once)."""
         w, i = self._tab()
-        self.osa(['tell application "Safari"', f"set current tab of window id {w} to tab {i} of window id {w}",
-                  f"set index of window id {w} to 1", "activate", "end tell"])
-        return self.snapshot("It's on his screen now. ")
+        front = ""
+        for _ in range(2):
+            self.osa(['tell application "Safari"', f"set current tab of window id {w} to tab {i} of window id {w}",
+                      f"set index of window id {w} to 1", "activate", "end tell"])
+            time.sleep(0.6)
+            front = self.osa(['tell application "System Events" to name of first process whose frontmost is true'])
+            if front == "Safari":
+                break
+        seen = ("Verified: Safari is the front app with this tab showing. " if front == "Safari" else
+                f"Could not bring Safari to the front ({front or 'another app'} stayed in front); say so honestly. ")
+        return self.snapshot(seen)
 
     def _close_tab(self, a):
         w, i = self._tab()
