@@ -214,7 +214,9 @@ OPEN_CLI_HARD = re.compile(r"(?:^|\s)(?:sudo|rm|rmdir|mkfs|dd|shutdown|reboot|ha
                            r"delete|destroy|drop\s+(?:table|database))\b|(?:^|\s)(?:-X|--request)\s*=?\s*(?:POST|PUT|PATCH|DELETE)\b|"
                            r"(?:^|\s)--force\b", re.I)
 OPEN_MCP_HARD = re.compile(r"(send|delete|remove|trash|publish|deploy|merge|push|pay|purchase|charge|transfer|share|invite|tiktok|"
-                           r"drop|destroy|post_message|reply|forward)", re.I)
+                           r"drop|destroy|post_?message|reply|forward|schedule_?message|comment|pull_?request|create_?issue|"
+                           r"buy|order|promot|rollback|execute_?sql|sql|migrat|visibility|submit|upload|grant|permission|role|"
+                           r"member|domain|dns|billing|refund|invoice|payout|subscri|email|sms|tweet|dm)", re.I)
 
 
 def _open_access() -> bool:
@@ -227,9 +229,67 @@ def _open_access() -> bool:
 CLI_GATED = re.compile(r"\b(merge|push|close|delete|create|edit|comment|review|release|deploy|reset|rebase|--force|-X\s*(POST|PUT|PATCH|DELETE))\b", re.I)
 
 
-def op_cli(argv: list[str], cwd: str | None = None, *, max_output_chars: int = OUT_CAP) -> dict:
-    if argv and argv[0] != "gws" and _open_access():
-        return _op_cli_open(argv, cwd, max_output_chars=max_output_chars)
+# Open-access CLI policy (safety audit 2026-10-16). A verb blocklist cannot cover every CLI (curl -d uploads, sendmail,
+# gh pr create, vercel --prod, terraform apply, stripe, npx ...), so under open access only known read-only commands and
+# everyday local writes run at once; anything unknown is held for the owner's "confirm"; OPEN_CLI_HARD stays refused.
+_FIND_ACT = re.compile(r"^-(?:delete|exec|execdir|ok|okdir|fprint\w*|fls)$")
+OPEN_CLI_READ = {
+    **{c: None for c in ("ls", "cat", "head", "tail", "wc", "df", "du", "uptime", "sw_vers", "uname", "whoami", "date", "pwd",
+                         "which", "file", "stat", "tree", "echo", "ps", "lsof", "mdfind", "mdls", "system_profiler", "jq",
+                         "grep", "rg", "ffprobe", "cal", "hostname", "id", "env", "sort", "uniq", "cut", "diff", "md5", "shasum")},
+    "find": lambda rest: not any(_FIND_ACT.match(t) for t in rest),
+    "defaults": lambda rest: bool(rest) and rest[0] in ("read", "domains"),
+    "diskutil": lambda rest: bool(rest) and rest[0] in ("list", "info"),
+    "brew": lambda rest: bool(rest) and rest[0] in ("list", "info", "search", "outdated", "deps", "--version", "config", "leaves"),
+    "pip": lambda rest: bool(rest) and rest[0] in ("list", "show", "--version", "freeze"),
+    "pip3": lambda rest: bool(rest) and rest[0] in ("list", "show", "--version", "freeze"),
+    "npm": lambda rest: bool(rest) and rest[0] in ("ls", "list", "view", "--version", "-v", "outdated"),
+    "docker": lambda rest: bool(rest) and rest[0] in ("ps", "images", "version", "info"),
+    "git": lambda rest: bool(rest) and (rest[0] in ("log", "status", "diff", "show", "rev-parse", "ls-files", "blame", "describe", "shortlog")
+                                         or (rest[0] in ("branch", "tag", "remote") and not any(t.startswith("-") and t not in ("-a", "-v", "-vv", "-l", "--list", "-r") for t in rest[1:])
+                                             and (rest[0] != "remote" or len(rest) == 1 or rest[1] == "-v")
+                                             and (rest[0] == "remote" or all(t.startswith("-") for t in rest[1:])))),
+    **{c: (lambda rest, c=c: bool(CLI_ALLOW[c].search(" ".join(rest)))) for c in ("gh", "yt-dlp", "ffmpeg", "node", "python3")},
+}
+OPEN_CLI_LOCAL = {
+    **{c: None for c in ("mkdir", "touch", "open", "say", "pandoc", "magick", "convert", "tesseract")},
+    "cp": lambda rest: "-f" not in rest,
+    "brew": lambda rest: bool(rest) and rest[0] in ("install", "upgrade", "update", "tap"),
+    "pip": lambda rest: bool(rest) and rest[0] == "install", "pip3": lambda rest: bool(rest) and rest[0] == "install",
+    "pipx": lambda rest: bool(rest) and rest[0] == "install",
+    "npm": lambda rest: bool(rest) and rest[0] in ("install", "i", "ci", "test", "run"),
+    "git": lambda rest: bool(rest) and rest[0] in ("add", "commit", "init", "clone", "fetch", "stash", "switch")
+                        or rest[:1] == ["checkout"] and len(rest) >= 2 and rest[1] == "-b",
+    "gh": lambda rest: rest[:2] == ["repo", "clone"],
+    "ffmpeg": lambda rest: "-y" not in rest,
+    "yt-dlp": None,
+}
+
+
+def cli_class(argv: list[str]) -> str:
+    """'read' | 'local' | 'confirm' | 'hard' for one argv under open access. Secrets on the line always confirm."""
+    if not argv:
+        return "confirm"
+    line = " ".join(argv)
+    if OPEN_CLI_HARD.search(line):
+        return "hard"
+    try:
+        if any(PERM().is_secret_path(t) for t in argv[1:]):
+            return "confirm"
+    except Exception:  # noqa: BLE001 — an unknown secret check is the cautious answer
+        return "confirm"
+    exe, rest = Path(argv[0]).name, list(argv[1:])
+    for table, cls in ((OPEN_CLI_READ, "read"), (OPEN_CLI_LOCAL, "local")):
+        if exe in table and (table[exe] is None or table[exe](rest)):
+            return cls
+    return "confirm"
+
+
+def op_cli(argv: list[str], cwd: str | None = None, *, max_output_chars: int = OUT_CAP, approved: bool = False,
+           closed: bool = False) -> dict:
+    """closed=True: the read-only list only, whatever the access state (skill files, other third-party text)."""
+    if argv and argv[0] != "gws" and _open_access() and not closed:
+        return _op_cli_open(argv, cwd, max_output_chars=max_output_chars, approved=approved)
     if not argv or argv[0] not in CLI_ALLOW:
         return {"ok": False, "verified": False, "spoken": f"{(argv or ['?'])[0]} isn't on the read-only CLI list."}
     rest = " ".join(argv[1:])
@@ -282,13 +342,20 @@ def _spoken_cli(name: str, ok: bool, code, ch: dict) -> str:
     return head + body
 
 
-def _op_cli_open(argv: list[str], cwd: str | None, *, max_output_chars: int = OUT_CAP) -> dict:
-    """Open access: any installed CLI, run without a shell; consequential verbs still need Evens."""
+def _op_cli_open(argv: list[str], cwd: str | None, *, max_output_chars: int = OUT_CAP, approved: bool = False) -> dict:
+    """Open access: read-only and everyday local commands run, without a shell; unknown ones wait for "confirm";
+    deletes, pushes, deploys and sends still need Evens."""
     line = " ".join(argv)
-    if OPEN_CLI_HARD.search(line):
+    cls = cli_class(argv)
+    if cls == "hard":
         PERM().log_action("cli", line[:80], "confirm", open_access=True)
         return {"ok": False, "verified": False, "gated": True,
                 "spoken": f"`{line[:120]}` deletes, pushes, deploys or sends. That still needs Evens."}
+    if cls == "confirm" and approved is not True:
+        PERM().log_action("cli", line[:80], "confirm", open_access=True)
+        return {"ok": False, "verified": False, "gated": True, "needs_confirm": True,
+                "spoken": f"`{line[:120]}` isn't on my read-only or local list, so it could upload, publish or change "
+                          "something. Say \"confirm\" and I'll run it once."}
     exe = shutil.which(argv[0], path=os.environ.get("PATH", "") + ":/opt/homebrew/bin:/usr/local/bin")
     if not exe:
         return {"ok": False, "verified": False, "spoken": f"{argv[0]} is not installed. Ask me to install it."}
@@ -586,7 +653,7 @@ def _step(s: dict, approved: bool, *, cancel_check=None, progress=None) -> dict:
         return op_mcp(s.get("server", ""), s.get("tool", ""), s.get("arguments") or {}, approved)
     if op == "cli":
         argv = s.get("argv") or str(s.get("cmd") or "").split()
-        return op_cli(argv, s.get("cwd"))
+        return op_cli(argv, s.get("cwd"), approved=approved)
     if op == "repo":
         return op_repo(s.get("repo", ""), s.get("action", ""), **{k: v for k, v in s.items() if k not in {"op", "repo", "action"}})
     if op == "mcp_list":

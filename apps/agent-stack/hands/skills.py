@@ -148,7 +148,7 @@ def run_step(found: dict, name: str, step: int = 1) -> dict[str, Any]:
         argv = shlex.split(cmd)
     except ValueError:
         argv = []
-    got = _agent_tools().op_cli(argv)
+    got = _agent_tools().op_cli(argv, closed=True)  # skill files are third-party text: the read-only list only
     if got.get("gated") or not got.get("ok"):
         return {"ok": False, "op": "run", "name": name, "step": step, "command": cmd, "verified": False, "gated": bool(got.get("gated")),
                 "spoken": f"Step {step} of {name} is `{cmd}`. Not run: {got.get('spoken')}"}

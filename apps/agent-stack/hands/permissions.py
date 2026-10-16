@@ -104,19 +104,30 @@ _GRANT_HEAD = re.compile(
     r"^\s*(?:(?:hey\s+)?jarvis[,.]?\s*)?(?:(?:ok(?:ay)?|yes|yeah|i\s+said)[,.!]?\s*)?(?:"
     r"(?:full\s+)?(?:permission|permissions|access)\s+(?:is\s+)?granted|"
     r"i\s+(?:grant|give)\s+you\s+(?:full\s+)?(?:permission|access)|"
-    r"(?:you\s+have|you've\s+got)\s+(?:my\s+)?(?:full\s+)?(?:permission|access)|"
+    r"(?:you\s+have|you've\s+got)\s+my\s+(?:full\s+)?(?:permission|access)|"
     r"i\s+(?:allow|authori[sz]e|permit)\s+(?:you|it|this|that)|"
-    r"you(?:\s+are|'re)\s+(?:now\s+)?(?:allowed|authori[sz]ed|cleared|permitted)"
+    r"you(?:\s+are|'re)\s+now\s+(?:allowed|authori[sz]ed)"
     r")(?:\s+to\b)?[\s,.:;!-]*", re.I)
+# After a real grant, the owner often adds "you are allowed to ..." (Evens 2026-10-15); only then does it chain.
+_GRANT_CHAIN = re.compile(r"^\s*you(?:\s+are|'re)\s+(?:now\s+)?(?:allowed|authori[sz]ed|cleared|permitted)(?:\s+to\b)?[\s,.:;!-]*", re.I)
 _FILLER = re.compile(r"^(?:(?:so|now|please|sir|jarvis|go\s+ahead|and|then)[\s,.:;!-]*)+", re.I)
 
 
+GRANT_MAX_CHARS = 200
+
+
 def grant_split(text: str) -> tuple[bool, str]:
-    """(True, remaining command) when the line opens with a grant; (False, "") otherwise."""
-    line = _SOFT_LEAD.sub("", str(text or ""), count=1)
+    """(True, remaining command) when the line opens with a grant; (False, "") otherwise.
+    Safety audit 2026-10-16: pasted documents often open "You have access to the following tools: ...". Only the owner's
+    own short one-line ask can grant: multi-line or long text never does, and "you have access"/"you're permitted"
+    without "my"/"now" are document phrasing, not a grant."""
+    raw = str(text or "")
+    if "\n" in raw.strip() or len(raw) > GRANT_MAX_CHARS:
+        return False, ""
+    line = _SOFT_LEAD.sub("", raw, count=1)
     found = False
     while True:
-        m = _GRANT_HEAD.match(line)
+        m = _GRANT_HEAD.match(line) or (_GRANT_CHAIN.match(line) if found else None)
         if not m or not m.group(0).strip():
             break
         found, line = True, line[m.end():]

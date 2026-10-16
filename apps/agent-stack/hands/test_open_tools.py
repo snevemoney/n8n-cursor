@@ -37,7 +37,9 @@ class OpenTools(unittest.TestCase):
 
     def test_open_cli_keeps_stdout_and_stderr(self):
         self.perm.set_open_access(True)
-        got = AT.op_cli(["python3", "-c", "import sys; print('made it'); print('warning: disk low', file=sys.stderr); sys.exit(3)"])
+        # approved=True: `python3 -c` is an unknown command under the 2026-10-16 policy; this test is about output channels.
+        got = AT.op_cli(["python3", "-c", "import sys; print('made it'); print('warning: disk low', file=sys.stderr); sys.exit(3)"],
+                        approved=True)
         self.assertFalse(got["ok"]); self.assertEqual(got["exit"], 3)
         self.assertIn("made it", got["stdout"]); self.assertIn("disk low", got["stderr"])
         self.assertIn("disk low", got["spoken"])
@@ -46,7 +48,7 @@ class OpenTools(unittest.TestCase):
         self.perm.set_open_access(True)
         exc = AT.subprocess.TimeoutExpired(["make"], 120, output=b"step 1 of 9", stderr=b"")
         with mock.patch.object(AT.subprocess, "run", side_effect=exc):
-            got = AT.op_cli(["python3", "-c", "pass"])
+            got = AT.op_cli(["python3", "-c", "pass"], approved=True)  # output/timeout behaviour, not policy
         self.assertTrue(got["timed_out"]); self.assertFalse(got["verified"])
         self.assertIn("step 1 of 9", got["stdout"]); self.assertIn("scratch repo", got["spoken"])
 

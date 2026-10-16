@@ -1102,9 +1102,23 @@ def _needs_confirm(tool: str, args: dict, utterance: str) -> dict | None:
         hd = _agent_tools_hand()
         eff = dict(args) if args.get("op") or args.get("steps") else hd.args_from_utterance(utterance)
         steps = eff.get("steps") or ([eff] if eff.get("op") else [])
+        typed = hd.args_from_utterance(utterance)
+        typed_argv = typed.get("argv") if typed.get("op") == "cli" else None
+
+        def _cli_gated(step: dict) -> bool:
+            # Safety audit 2026-10-16: unknown commands wait for "confirm" (hard ones stay refused in the hand), and a
+            # command the model picked runs at once only when it is read-only.
+            argv = step.get("argv") or str(step.get("cmd") or "").split()
+            cls = hd.cli_class(argv) if hasattr(hd, "cli_class") else "confirm"
+            if cls == "confirm":
+                return True
+            return cls == "local" and list(argv) != list(typed_argv or [])
+
         gated = any(step.get("op") == "fanout" or (step.get("op") == "mcp" and
                     (hd.WRITE_TOOL.search(str(step.get("tool") or "")) or
-                     not hd.READ_TOOL.match(str(step.get("tool") or "")))) for step in steps if isinstance(step, dict))
+                     not hd.READ_TOOL.match(str(step.get("tool") or "")))) or
+                    (step.get("op") == "cli" and hd._open_access() and _cli_gated(step))
+                    for step in steps if isinstance(step, dict))
         return eff if gated else None
     if tool == "code_run":
         hd = _code_run_hand()
