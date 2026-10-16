@@ -1746,6 +1746,7 @@ def call_openrouter_messages(
             "tool_choice": "auto",
             "parallel_tool_calls": True,
             "max_tokens": max_tokens or WORKER_MAX_TOKENS,  # the operator writes whole files (10-15)
+            "usage": {"include": True},  # billed cost per call: the operator meters each job
         }
         if not allow_reasoning:
             body["reasoning"] = {"enabled": False}  # Opus 5.5 refuses this ("reasoning is mandatory"): operator opts out
@@ -1775,10 +1776,11 @@ def call_openrouter_messages(
                 "call_id": str(first.get("id") or "call_0"),
                 "text": "",
                 "model": mid,
+                "usage": data.get("usage"),
             }
         text = str(msg.get("content") or "").strip()
         if text and str(choice.get("finish_reason") or "").lower() != "length":
-            return {"ok": True, "tool": "", "args": {}, "call_id": "", "text": text, "model": mid}
+            return {"ok": True, "tool": "", "args": {}, "call_id": "", "text": text, "model": mid, "usage": data.get("usage")}
         last_err = f"{mid}: {'length' if text else 'empty'}"
     return {"ok": False, "unknown": True, "error": f"UNKNOWN. {last_err}."}
 

@@ -136,6 +136,7 @@ def _load(name, file):
 
 CU = _load("computer_use", "computer_use.py")
 BS = _load("browser_session", "browser_session.py")
+HX = _load("harness", "harness.py")
 
 
 def _clip(text, n=OUT_CHARS):
@@ -520,7 +521,7 @@ class Task:
                 history.append({"role": "user", "content": str(row["user"])[:1500]})
             if str(row.get("jarvis") or "").strip():
                 history.append({"role": "assistant", "content": str(row["jarvis"])[:1500]})
-        t.write("messages.json", [{"role": "system", "content": system_prompt()}, *history,
+        t.write("messages.json", [{"role": "system", "content": system_prompt() + HX.recall_text(hive, goal)}, *history,
                                   {"role": "user", "content": goal}])
         pick = choose_model(goal)
         t.write("state.json", {"task_id": tid, "status": "QUEUED", "step": 0, "tier": pick["tier"], "model": pick["model"],
@@ -712,7 +713,13 @@ def _model_fn(tier: str = "mid", chain: list | None = None):
 def step_once(task: Task, tools: Tools, model_fn) -> str | None:
     """One model turn plus its tool calls. Returns a terminal status or None to continue."""
     messages = task.read("messages.json")
-    got = model_fn(messages, TOOLS)
+    got = model_fn(HX.context_view(messages), TOOLS)
+    metered = HX.add_usage(task.read("state.json"), got.get("usage"))
+    task.write("state.json", metered)
+    if HX.over_cap(metered):
+        task.speak(f"This job has cost {metered['cost_usd']:.2f} dollars so far, so I paused it. Say go on and I'll continue.")
+        task.write("state.json", {**metered, "status": "WAITING_OWNER", "question": "cost ceiling reached"})
+        return "WAITING_OWNER"
     if not got.get("ok"):
         task.trace({"event": "model_error", "error": got.get("error")})
         return "MODEL_UNAVAILABLE"
@@ -823,6 +830,13 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
         state = task.read("state.json")
         state.update(status=status, finished=time.time())
         task.write("state.json", state)
+        if status == "DONE" and not fixed_fn:
+            try:
+                rows = [json.loads(l) for l in (task.path / "trace.jsonl").read_text().splitlines() if l.strip()]
+                HX.remember(task.path.parent.parent, task.read("request.json").get("goal", ""), state.get("summary") or "",
+                            rows, str(state.get("model") or ""))
+            except (OSError, ValueError):
+                pass  # a missing note never fails the job
         if state.get("tier") != "owner" and status in ("DONE", "MODEL_UNAVAILABLE", "STEP_LIMIT", "TIME_LIMIT"):
             record_outcome(state.get("kind") or "any", str(state.get("model") or ""), status == "DONE")
         if status in ("DONE", "WAITING_OWNER") and tools.browser_open() and not fixed_fn:
