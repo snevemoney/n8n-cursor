@@ -6,6 +6,7 @@ others ... it is still not a complete harness." One agent loop for every turn, l
 """
 import importlib.util
 import json
+import os
 import tempfile
 from unittest import mock
 import unittest
@@ -58,9 +59,24 @@ class OneLoop(unittest.TestCase):
     def test_a_new_line_reaches_the_running_loop(self):
         t = O.Task.create(self.hive, "render a video")
         O.tell(self.hive, "make it 10 seconds instead")
-        msgs = t.read("messages.json")
-        self.assertEqual(msgs[-1], {"role": "user", "content": "make it 10 seconds instead"})
         self.assertTrue(O.running(self.hive))
+        seen = []
+        O.step_once(t, O.Tools(t.path), lambda m, tools: seen.append(m) or {"ok": True, "text": "ok"})
+        self.assertIn("make it 10 seconds instead", json.dumps(seen[0]))
+
+    def test_lines_said_during_a_step_are_never_lost(self):  # Evens 10-16: he keeps talking while Jarvis works
+        t = O.Task.create(self.hive, "list Claude Code's changes in my repo")
+        st = t.read("state.json"); st.update(status="RUNNING", pid=os.getpid()); t.write("state.json", st)
+        def model(m, tools):  # he talks while this step runs
+            O.tell(self.hive, "also open YouTube")
+            O.tell(self.hive, "and use the GitHub MCP for it")
+            return {"ok": True, "calls": [{"tool": "say", "args": {"text": "Looking."}, "call_id": "a"}]}
+        O.step_once(t, O.Tools(t.path), model)
+        seen = []
+        O.step_once(t, O.Tools(t.path), lambda m, tools: seen.append(m) or {"ok": True, "text": "ok"})
+        text = json.dumps(seen[0])
+        self.assertIn("also open YouTube", text); self.assertIn("use the GitHub MCP", text)
+        self.assertIn("Acknowledge it", text)
 
     def test_a_dead_worker_is_not_running(self):
         t = O.Task.create(self.hive, "old job")

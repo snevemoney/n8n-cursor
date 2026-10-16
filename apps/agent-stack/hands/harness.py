@@ -110,8 +110,14 @@ def _path(trace_rows: list) -> list:
     return steps[-14:]
 
 
+RESEARCHY = re.compile(r"\b(research|latest|current|right now|compare|most popular|top \d+|stars|price|news)\b", re.I)
+
+
 def remember(hive: Path, goal: str, summary: str, trace_rows: list, model: str = "") -> None:
-    """Append one procedure note for a finished job (bounded file)."""
+    """Append one procedure note for a finished job (bounded file). Research answers are facts that go stale, so they
+    are not kept (bench 10-16: a wrong first answer was replayed by the next run)."""
+    if RESEARCHY.search(goal):
+        return
     f = Path(hive) / PROC_FILE
     row = {"at": time.time(), "goal": goal[:300], "summary": summary[:600], "path": _path(trace_rows), "model": model}
     rows = [l for l in (f.read_text().splitlines() if f.exists() else []) if l.strip()][-(PROC_KEEP - 1):]
@@ -119,9 +125,9 @@ def remember(hive: Path, goal: str, summary: str, trace_rows: list, model: str =
 
 
 def recall(hive: Path, goal: str, k: int = 2, min_overlap: int = 2) -> list:
-    """The k most similar past procedures (shared words in the goal), newest wins ties."""
+    """The k most similar past procedures (shared words in the goal), newest wins ties. Never for research asks."""
     f = Path(hive) / PROC_FILE
-    if not f.exists():
+    if not f.exists() or RESEARCHY.search(goal):
         return []
     want = _words(goal)
     scored = []
@@ -142,7 +148,8 @@ def recall_text(hive: Path, goal: str) -> str:
         return ""
     parts = [f"- Asked: {r['goal']}\n  Outcome: {r['summary']}\n  What worked: {'; '.join(r.get('path') or []) or 'n/a'}"
              for r in rows]
-    return ("\n\nYou did similar jobs before (use what worked, skip what failed; still check the screen):\n"
+    return ("\n\nYou did similar jobs before (reuse the METHOD that worked, skip what failed; their facts may be stale "
+            "or wrong, so verify everything again):\n"
             + "\n".join(parts))
 
 
