@@ -119,6 +119,14 @@ OPENROUTER_PLAIN_TOKENS = int(os.environ.get("JARVIS_PLAIN_MAX_TOKENS") or 256)
 LENGTH_RETRY_TOKENS = 640
 LENGTH_MISS = "UNKNOWN. That answer ran out of room."
 OPENROUTER_HANDS = (
+    {"type":"function","function":{"name":"operator",
+        "description":"Do real work on Evens's Mac yourself until it is finished and verified: any task that needs several steps "
+                       "across files, shell commands, installed apps (operate them, not just launch), the screen, mouse and keyboard, "
+                       "web research, or MCP services. Also action=status for how a running task is going, action=stop to stop it. "
+                       "Use it whenever the request is work to do rather than a quick question.",
+        "parameters":{"type":"object","properties":{"action":{"type":"string","enum":["start","status","stop"]},
+                                                     "goal":{"type":"string","description":"the full task in Evens's words plus needed context"}},
+                      "additionalProperties":False}}},
     {"type":"function","function":{"name":"pointer",
         "description":"Draw a red arrow at a visible target explicitly requested by the user. Host validates the current request or retained pointer follow-up. Never clicks; a capability question does not draw.",
         "parameters":{"type":"object","properties":{},"additionalProperties":False}}},

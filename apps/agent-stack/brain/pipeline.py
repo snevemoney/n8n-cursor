@@ -5761,7 +5761,7 @@ HAND_LOOP_MAX_HANDS = 4
 # Screen-overlay hands finish the turn themselves: a second model pass replaced "The red arrow is on it" with its own
 # line, and a repeat pointer pick re-captured the screen (hide_overlays) or ended the turn as a failed duplicate.
 COMPLETE_READ_OPS = {'open_document', 'screenshot_reference', 'repos', 'list', 'git', 'status'}  # the hand's own reply is the whole answer; no model pass
-TERMINAL_HANDS = frozenset({"pointer", "pointer_click", "pointer_demo", "apps", "capability", "code_run"})  # code_run: live 18:08 the model narrated a fake syntax error over real output 45
+TERMINAL_HANDS = frozenset({"pointer", "pointer_click", "pointer_demo", "apps", "capability", "code_run", "operator"})  # code_run: live 18:08 the model narrated a fake syntax error over real output 45
 # A model-free (fixed) route already answered a single ask; only a compound ask ("read A and B and compare")
 # earns the follow-up model pass. Without this the loop re-talked over Obsidian reads, stack as-of, calendar,
 # Safari navigation, harness cards and store recalls (7bffe3301 regressions).
@@ -6014,6 +6014,62 @@ def run_tool(pick: dict, utterance: str, **kw) -> dict:
     return got
 
 
+OPERATOR_WAIT_S = float(os.environ.get("JARVIS_OPERATOR_WAIT") or 40)
+
+
+def _operator_hand():
+    import importlib.util as _u
+    mod = sys.modules.get("agent_stack_operator")
+    if mod is None:
+        spec = _u.spec_from_file_location("agent_stack_operator", Path(__file__).resolve().parent.parent / "hands" / "operator.py")
+        mod = _u.module_from_spec(spec); sys.modules["agent_stack_operator"] = mod; spec.loader.exec_module(mod)
+    return mod
+
+
+def _operator_line(state: dict) -> str:
+    status = str(state.get("status") or "")
+    if status == "DONE":
+        evidence = str(state.get("evidence") or "").strip()
+        return (str(state.get("summary") or "Done.").strip() + (f" Evidence: {evidence}" if evidence else ""))[:1200]
+    if status == "WAITING_OWNER":
+        return "I need you before I continue: " + str(state.get("summary") or "")
+    if status in ("RUNNING", "QUEUED"):
+        return f"I'm working on it (step {state.get('step', 0)}). It keeps going in the background; ask me how it's going anytime."
+    if status == "MODEL_UNAVAILABLE":
+        return ("I stopped because my model is unavailable right now (the model account may be out of credit). "
+                "Nothing is lost; say continue when it's back.")
+    if status == "NONE":
+        return "There's no operator task yet."
+    return f"The task ended as {status.lower().replace('_', ' ')} after {state.get('step', 0)} steps. " + str(state.get("summary") or "")
+
+
+def _operator_turn(args: dict, utterance: str, hive) -> dict:
+    """One durable operator job per request; the Orb turn waits briefly, the job keeps running (blueprint B/C)."""
+    op = _operator_hand()
+    action = str((args or {}).get("action") or "start")
+    if action == "stop":
+        state = op.status(Path(hive))
+        if state.get("task_id"):
+            op.cancel(Path(hive), state["task_id"])
+        return {"ok": True, "tool": "operator", "spoken": "Stopped the operator task.", "wires": ["operator"], "cites": [],
+                "sent": False, "task_verified": False}
+    if action == "status":
+        state = op.status(Path(hive))
+    else:
+        goal = str((args or {}).get("goal") or "").strip() or str(utterance or "")
+        if utterance and goal != utterance:
+            goal = f"{goal}\n\nEvens's exact words: {utterance}"
+        started = op.start(Path(hive), goal)
+        end = time.monotonic() + OPERATOR_WAIT_S
+        state = op.status(Path(hive), started["task_id"])
+        while state.get("status") in ("QUEUED", "RUNNING") and time.monotonic() < end:
+            time.sleep(1.0)
+            state = op.status(Path(hive), started["task_id"])
+    return {"ok": state.get("status") != "NONE", "tool": "operator", "spoken": _operator_line(state), "wires": ["operator"],
+            "cites": [], "sent": False, "task_verified": state.get("status") == "DONE",
+            "operator_task": state.get("task_id"), "operator_status": state.get("status")}
+
+
 def _run_tool_inner(
     pick: dict,
     utterance: str,
@@ -6138,6 +6194,8 @@ def _run_tool_inner(
             "web_search_meta": ws.log_meta(got),
             "outcome": TOOL_LOOP if got.get("ok") else HONEST_UNKNOWN,
         }
+    if tool == "operator":
+        return _operator_turn(args, utterance, hive)
     if tool == "code_run":
         hd = _code_run_hand()
         eff = dict(args) if args else hd.args_from_utterance(utterance)
