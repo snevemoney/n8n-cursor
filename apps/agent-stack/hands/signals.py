@@ -294,12 +294,38 @@ def extract(sig: dict, got: dict) -> dict:
     for s in sheets[::step]:
         content.append({"type": "text", "text": f"{Path(s).name}:"})
         content.append({"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + base64.b64encode(Path(s).read_bytes()).decode()}})
-    raw = _openrouter([{"role": "user", "content": content}])
-    raw = re.sub(r"^```(?:json)?|```$", "", raw.strip()).strip()
-    out = json.loads(raw)
+    out = _json(_openrouter([{"role": "user", "content": content}]))
     if not isinstance(out.get("methods"), list):
         raise RuntimeError("the model returned no methods list")
+    # live 10-16: one pass folded a whole tutorial into 2 methods. A second, method-only pass splits every distinct
+    # technique, command, setting and shown feature into its own method (the Researcher's granularity).
+    sweep = _json(_openrouter([{"role": "user", "content": SWEEP_PROMPT.format(
+        learned=str(out.get("learned_md") or "")[:60000], first=json.dumps(out["methods"])[:20000], body=body[:300000])}]))
+    if isinstance(sweep.get("methods"), list) and len(sweep["methods"]) >= len(out["methods"]):
+        out["methods"] = sweep["methods"]
     return out
+
+
+def _json(raw: str) -> dict:
+    return json.loads(re.sub(r"^```(?:json)?|```$", "", raw.strip()).strip())
+
+
+SWEEP_PROMPT = """Split this signal into ATOMIC methods. A method is one distinct, reusable thing someone could copy:
+a technique, a command or setup step that does its own job, a configuration choice, a prompt pattern, an architecture
+choice, a tool or repo used for a specific purpose, a product feature shown working (e.g. "recallable memory",
+"hardware monitor panel", "auto-start at login"), a verification or debugging trick, a failure-and-fix. Never merge two
+of these into one. Never invent: only what the analysis or source shows or says. Return JSON {{"methods": [...]}} with
+the same fields as the first pass (name, family, summary, steps, at, evidence, tools, jarvis_use). Expect many more
+than the first pass when the source shows several features or steps.
+
+ANALYSIS:
+{learned}
+
+FIRST PASS (too coarse):
+{first}
+
+SOURCE:
+{body}"""
 
 
 # ---- packet in the repo ----------------------------------------------------------------------------------------
