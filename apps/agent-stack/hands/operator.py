@@ -40,12 +40,17 @@ SYSTEM = (
     "not open tools for arithmetic or general knowledge), what you are about to do, what you just found, or a snag. "
     "Speak like a capable colleague: plain English, short, no markdown, no file slugs, no model names, no step numbers, "
     "no 'I have not run an executor'. One or two sentences at a time.\n"
-    "Working: prefer shell and files when they do the job; screenshot + mouse + keyboard for apps and web pages with no "
-    "better interface (your blue cursor shows him where you click); mcp for external services. He has more than one "
-    "screen: if you cannot see the app, take screenshot with app=Name. In the browser, reuse the tab that is already "
-    "open (switch to it or change its address); never open the same page again and again. When something fails, "
-    "diagnose it and try another way — do not report a failure you have not tried to get around, and never tell him to "
-    "do it himself. If he says something while you work, it arrives as a new user message: take it into account.\n"
+    "Working: prefer shell and files when they do the job. For anything on the web use browser: navigate, then "
+    "browser_snapshot to read the page and act on element refs (click, type, press keys); it is one window that stays "
+    "open between your steps and between his requests, so never open the same page twice. It is its own window, not his "
+    "Safari: if a site needs his account (Spotify, Gmail, LinkedIn) and the browser shows a login wall, use his Safari "
+    "or the site's Mac app (Spotify.app) with computer instead of asking him to log in. For desktop apps use "
+    "computer: take a screenshot, click/type/scroll at pixels of that screenshot (your blue cursor shows him where), "
+    "and look at the screenshot that comes back after every action. He has more than one screen: if you cannot see "
+    "the app, screenshot with app=Name. If an action did the wrong thing, fix it on the screen (go back, close, undo, "
+    "click the right spot) and continue. mcp for external services. When something fails, diagnose it and try "
+    "another way; never tell him to do it himself. If he says something while you work, it arrives as a new user "
+    "message: take it into account.\n"
     "Truth: never claim a step you did not verify with a real result. If you could not do something, say exactly what "
     "stopped you.\n"
     "His stops (ask first, then continue another way): sending or posting, spending, deleting his files, merging or "
@@ -92,10 +97,23 @@ TOOLS = [
     _fn("job", "Output and status of a background shell job.", {"job_id": S}, ["job_id"]),
     _fn("web_search", "Search the internet.", {"query": S}, ["query"]),
     _fn("fetch_url", "Download a public web page as text.", {"url": S}, ["url"]),
-    _fn("screenshot", "Look at a screen. Defaults to the display his front window is on; display=N or app=Name to look elsewhere.", {"display": I, "app": S}),
-    _fn("mouse", "Mouse at screen points: move, click, double_click, right_click, drag (to x2,y2), scroll (dy).",
-        {"action": S, "x": I, "y": I, "x2": I, "y2": I, "dy": I}, ["action"]),
-    _fn("keyboard", "Type text, or press keys like 'cmd+s', 'return', 'cmd+shift+4'.", {"text": S, "keys": S}),
+    _fn("computer", "Use the Mac like a person: the screen, the mouse and the keyboard. Actions: screenshot, left_click, "
+        "right_click, double_click, mouse_move, left_click_drag, scroll, type, key, wait, cursor_position. coordinate is "
+        "[x, y] in pixels of the LAST screenshot you got; every action that changes the screen returns a new screenshot "
+        "of the same display, so check it and fix mistakes on screen (undo with key cmd+z, go back, close what you "
+        "opened). key takes combos like cmd+l, cmd+t, return, escape. display=N or app=Name picks the screen to look at.",
+        {"action": {"type": "string", "enum": ["screenshot", "left_click", "right_click", "double_click", "mouse_move",
+                                               "left_click_drag", "scroll", "type", "key", "wait", "cursor_position"]},
+         "coordinate": {"type": "array", "items": I}, "start_coordinate": {"type": "array", "items": I},
+         "text": S, "scroll_direction": {"type": "string", "enum": ["up", "down", "left", "right"]},
+         "scroll_amount": I, "duration": I, "display": I, "app": S}, ["action"]),
+    _fn("browser", "A real web browser you drive by page structure (Playwright), visible to Evens; tabs, logins and "
+        "history last for the whole conversation. Call with tool + args, e.g. {tool: browser_navigate, args: {url}}, "
+        "{tool: browser_snapshot} (the page as an accessibility tree with element refs), {tool: browser_click, args: "
+        "{element, ref}}, {tool: browser_type, args: {element, ref, text, submit}}, browser_press_key {key}, "
+        "browser_navigate_back, browser_tabs {action: list|select|close}, browser_wait_for {text|time}, "
+        "browser_take_screenshot. Prefer this over computer for anything on the web.",
+        {"tool": S, "args": {"type": "object"}}, ["tool"]),
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
     _fn("mcp", "Call a tool on a connected MCP server.", {"server": S, "tool": S, "arguments": {"type": "object"}},
         ["server", "tool"]),
@@ -114,6 +132,10 @@ def _load(name, file):
         sys.modules["op_" + name] = mod
         spec.loader.exec_module(mod)
     return mod
+
+
+CU = _load("computer_use", "computer_use.py")
+BS = _load("browser_session", "browser_session.py")
 
 
 def _clip(text, n=OUT_CHARS):
@@ -200,13 +222,15 @@ class Tools:
     def __init__(self, task_dir: Path):
         self.dir = task_dir
         self.root = task_dir
+        self.web = None  # the live browser for this conversation (browser_session.py)
         self.state_file = task_dir / "tools_state.json"
         st = json.loads(self.state_file.read_text()) if self.state_file.exists() else {}
         self.cwd = st.get("cwd") or str(Path.home())
         self.jobs = st.get("jobs") or {}
+        self.state = {"display_n": st.get("display_n")}
 
     def _save(self):
-        self.state_file.write_text(json.dumps({"cwd": self.cwd, "jobs": self.jobs}))
+        self.state_file.write_text(json.dumps({"cwd": self.cwd, "jobs": self.jobs, "display_n": self.state.get("display_n")}))
 
     def read_file(self, a):
         p = _path(a["path"], self.cwd)
@@ -323,6 +347,85 @@ class Tools:
                     f.unlink()
                 except OSError:
                     pass
+
+    def _display(self, a) -> dict:
+        displays, windows = live_screens()
+        if a.get("display") or a.get("app"):
+            d = pick_display(displays, windows, app=a.get("app"), index=a.get("display"))
+        else:
+            last = self.state.get("display_n")
+            d = next((x for x in displays if x["n"] == last), None) or pick_display(displays, windows)
+        self.state["display_n"] = d["n"]
+        self._save()
+        return d, displays, windows
+
+    def _shot(self, d: dict, displays: list, windows: list, lead: str = "") -> dict:
+        shot = Path(tempfile.mkstemp(suffix=".png")[1])
+        try:
+            subprocess.run(["screencapture", "-x", "-D", str(d["n"]), str(shot)], check=True, timeout=10)
+            w = int(d["w"] * CU.image_scale(d))
+            subprocess.run(["sips", "-Z", str(w), "-s", "format", "jpeg", str(shot), "--out", str(shot) + ".jpg"],
+                           capture_output=True, timeout=20)
+            data = base64.b64encode(Path(str(shot) + ".jpg").read_bytes()).decode()
+        except (subprocess.SubprocessError, OSError) as exc:
+            return {"text": f"{lead}screenshot failed: {exc}. Screen Recording permission may be missing for Jarvis."}
+        finally:
+            for f in (shot, Path(str(shot) + ".jpg")):
+                try:
+                    f.unlink()
+                except OSError:
+                    pass
+        others = "; ".join(f"display {o['n']}" for o in displays if o["n"] != d["n"])
+        front = next((o for o, _ in windows if o not in IGNORE_WINDOWS), "")
+        return {"text": (f"{lead}Screenshot of display {d['n']} of {len(displays)}, front app {front}. Coordinates are "
+                         f"pixels of this image." + (f" Also: {others} (pass display=N or app=Name)." if others else "")),
+                "image": "data:image/jpeg;base64," + data}
+
+    def computer(self, a):
+        action = str(a.get("action") or "screenshot")
+        if action not in CU.ACTIONS:
+            return {"text": f"unknown action {action}; use one of {', '.join(CU.ACTIONS)}"}
+        d, displays, windows = self._display(a)
+        if action == "wait":
+            time.sleep(min(10, max(1, int(a.get("duration") or 2))))
+            return self._shot(d, displays, windows, "Waited. ")
+        if action == "cursor_position":
+            g = _jxa('ObjC.import("AppKit");var p=$.NSEvent.mouseLocation;p.x+","+p.y').split(",")
+            try:
+                gx, gy = float(g[0]), displays[0]["h"] - float(g[1])
+                return {"text": "cursor at pixel " + str(list(CU.to_image(d, gx, gy))) + f" of display {d['n']}"}
+            except (ValueError, IndexError):
+                return {"text": "cursor position unknown"}
+        if action == "screenshot":
+            return self._shot(d, displays, windows)
+        try:
+            req = CU.hands_request(action, a, d)
+        except (KeyError, TypeError, IndexError):
+            return {"text": f"{action} needs coordinate [x, y] (and start_coordinate for a drag)"}
+        if req and "x" in req:
+            self._show_cursor(req["x"], req["y"])  # the blue Jarvis cursor glides to the spot first
+        if req and req.get("op") == "scroll" and "x" in req:
+            self._hands({"op": "move", "x": req.pop("x"), "y": req.pop("y")})
+        got = self._hands(req) if req else {"text": "ok"}
+        if "not installed" in got.get("text", "") or '"trusted": false' in got.get("text", "").replace(" ", " "):
+            return got
+        CU.settle(action)
+        return self._shot(d, displays, windows, f"Did {action}. ")
+
+    def browser(self, a):
+        if self.web is None:
+            self.web = BS.BrowserSession()
+        try:
+            return self.web.call(str(a.get("tool") or "browser_snapshot"), a.get("args") or {})
+        except Exception as exc:  # noqa: BLE001 - every failure is data for the model
+            return {"text": f"browser error: {type(exc).__name__}: {exc}"}
+
+    def browser_open(self) -> bool:
+        return self.web is not None and self.web.proc is not None and self.web.proc.poll() is None
+
+    def close(self) -> None:
+        if self.web is not None:
+            self.web.close()
 
     def _hands(self, req):
         if not (HANDS_APP / "Contents" / "MacOS" / "jarvis_hands").exists():
@@ -481,10 +584,10 @@ KINDS = ("chat", "screen", "code", "research", "creative", "files")
 # Claude only where it is the strongest pick for the job (screen control, frontier code/design).
 POOLS = {
     "cheap": {"any": ["deepseek/deepseek-v4-flash", "openai/gpt-6-luna", "google/gemini-2.5-flash-lite"],
-              "screen": ["openai/gpt-6-luna", "google/gemini-2.5-flash-lite", "anthropic/claude-haiku-5.5"],
+              "screen": ["anthropic/claude-haiku-5.5", "openai/gpt-6-luna", "google/gemini-2.5-flash-lite"],
               "code": ["deepseek/deepseek-v4-flash", "openai/gpt-5.1-codex-mini", "openai/gpt-6-luna"]},
     "mid": {"any": ["deepseek/deepseek-v4-pro", "x-ai/grok-4.3", "google/gemini-3.6-flash"],
-            "screen": ["google/gemini-3.6-flash", "x-ai/grok-4.3", "anthropic/claude-sonnet-5.5"],
+            "screen": ["anthropic/claude-sonnet-5.5", "openai/gpt-6.1-sol", "google/gemini-3.6-flash"],
             "code": ["openai/gpt-5.1-codex", "deepseek/deepseek-v4-pro", "moonshotai/kimi-k2.7-code"],
             "research": ["x-ai/grok-4.3", "google/gemini-3.6-flash", "deepseek/deepseek-v4-pro"],
             "creative": ["google/gemini-3.6-flash", "x-ai/grok-4.3", "anthropic/claude-sonnet-5.5"]},
@@ -623,7 +726,9 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
     images, terminal = [], None
     for c in calls:
         name, args = c["tool"], c["args"] or {}
-        rep = repetition(task, name, args) if name not in TERMINAL and name not in ("screenshot", "say") else None
+        looking = name == "say" or (name == "computer" and args.get("action") in ("screenshot", "wait", "cursor_position")) \
+            or (name == "browser" and str(args.get("tool") or "").endswith(("snapshot", "take_screenshot", "wait_for")))
+        rep = repetition(task, name, args) if name not in TERMINAL and not looking else None
         if rep == "stop":
             task.speak("I kept trying the same thing without getting anywhere, so I stopped. Tell me how you want it done.")
             terminal = ("WAITING_OWNER", {"question": f"I repeated {name} five times without progress."})
@@ -661,7 +766,7 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
             st.update(kind="screen", model=chain[0], chain=chain, model_why="needs to see the screen")
             task.write("state.json", st)
     for img in images[-1:]:  # only the newest screenshot rides along
-        messages.append({"role": "user", "content": [{"type": "text", "text": "Screenshot from the screenshot tool:"},
+        messages.append({"role": "user", "content": [{"type": "text", "text": "The screen now:"},
                                                      {"type": "image_url", "image_url": {"url": img}}]})
     task.write("messages.json", messages)
     if terminal:
@@ -720,7 +825,32 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
         task.write("state.json", state)
         if state.get("tier") != "owner" and status in ("DONE", "MODEL_UNAVAILABLE", "STEP_LIMIT", "TIME_LIMIT"):
             record_outcome(state.get("kind") or "any", str(state.get("model") or ""), status == "DONE")
+        if status in ("DONE", "WAITING_OWNER") and tools.browser_open() and not fixed_fn:
+            # A live session like Codex/Claude Code: the page stays open and his next line continues THIS agent.
+            if _idle_until_spoken_to(task):
+                start = time.monotonic()
+                continue
+        tools.close()
         return state
+
+
+IDLE_S = float(os.environ.get("JARVIS_SESSION_IDLE_S") or 7200)
+
+
+def _idle_until_spoken_to(task) -> bool:
+    """IDLE until a new user message arrives (True: carry on) or the idle time runs out / he cancels (False)."""
+    seen = len(task.read("messages.json", []))
+    st = task.read("state.json"); st.update(status="IDLE", idle_since=time.time()); task.write("state.json", st)
+    end = time.monotonic() + IDLE_S
+    while time.monotonic() < end:
+        if task.cancelled():
+            return False
+        msgs = task.read("messages.json", [])
+        if len(msgs) > seen and msgs[-1].get("role") == "user":
+            st = task.read("state.json"); st.update(status="RUNNING", step=0); task.write("state.json", st)
+            return True
+        time.sleep(1.0)
+    return False
 
 
 def start(hive: Path, goal: str, turns: list | None = None) -> dict:
@@ -746,8 +876,26 @@ def resume(hive: Path, task_id: str) -> dict:
     return {"task_id": task_id, "status": "QUEUED"}
 
 
+def _alive(pid) -> bool:
+    try:
+        os.kill(int(pid), 0)
+        return True
+    except (OSError, ValueError, TypeError):
+        return False
+
+
 def running(hive: Path) -> bool:
-    return str(status(hive).get("status") or "") in ("RUNNING", "QUEUED")
+    """A job is running only if its worker is alive (live 10-16: a killed job stayed RUNNING and swallowed the next ask)."""
+    st = status(hive)
+    if st.get("status") in ("RUNNING", "IDLE"):
+        return _alive(st.get("pid"))
+    if st.get("status") == "QUEUED":
+        try:
+            created = float(json.loads((Path(hive) / "operator-tasks" / st["task_id"] / "request.json").read_text())["created"])
+        except (OSError, ValueError, KeyError):
+            return False
+        return time.time() - created < 30
+    return False
 
 
 def tell(hive: Path, line: str) -> dict:
@@ -755,7 +903,7 @@ def tell(hive: Path, line: str) -> dict:
     Claude Code mid-task (Evens 10-16: "it is still not a complete harness")."""
     state = status(hive)
     tid = str(state.get("task_id") or "")
-    if not tid or state.get("status") not in ("RUNNING", "QUEUED"):
+    if not tid or not running(hive):
         return {"ok": False}
     task = Task(Path(hive) / "operator-tasks" / tid)
     with FileLock(task.path / "messages.lock"):
