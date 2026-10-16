@@ -429,14 +429,27 @@ def _list_repos(rs: list[Path], default: bool) -> dict[str, Any]:
         looked.append(_short(r))
         visit(r, 3 if (opened and r == home) else 1)  # ~/tools/<group>/<clone>
     names = [_short(p) for p in found]
+    # Spoken: plain folder words. The mouth strips ~/ and /Users paths as debugger crumbs, which left
+    # "I found 2 git repos: , ." on the Orb; full paths stay in names/looked for the record.
+    spoken_names = [_spoken_place(p, home) for p in found]
     if names:
-        sp = f"I found {len(names)} git repos: " + ", ".join(names[:25]) + ("" if len(names) <= 25 else f", and {len(names) - 25} more") + "."
+        sp = f"I found {len(names)} git repos: " + ", ".join(spoken_names[:25]) + ("" if len(names) <= 25 else f", and {len(names) - 25} more") + "."
     else:
         sp = "I found no git repos."
-    sp += " I looked in " + (", ".join(looked) if looked else "no folders") + "."
+    places = [_spoken_place(Path(l).expanduser(), home, folder=True) for l in looked]
+    sp += " I looked in " + (", ".join(places) if places else "no folders") + "."
     if not opened:
-        sp += ' Say "permission granted" and I will look across your Mac, including ~/tools.'
+        sp += ' Say "permission granted" and I will look across your Mac, including your tools folder.'
     return {"ok": True, "op": "repos", "names": names, "looked": looked, "spoken": sp}
+
+
+def _spoken_place(p: Path, home: Path, folder: bool = False) -> str:
+    """'whisper in tools' / 'your home folder': speakable, no path syntax."""
+    if p == home:
+        return "your home folder"
+    if folder:
+        return f"your {p.name} folder" if p.parent == home else f"{p.name} (in {p.parent.name})"
+    return p.name if p.parent == home else f"{p.name} in {p.parent.name}"
 
 
 def run(args: dict, roots=None) -> dict[str, Any]:

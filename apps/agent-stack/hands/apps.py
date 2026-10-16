@@ -11,6 +11,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 APP_DIRS = ("/Applications", "/Applications/Utilities", "/System/Applications", "/System/Applications/Utilities",
@@ -83,7 +84,32 @@ def _live() -> bool:
         and not os.environ.get("PYTEST_CURRENT_TEST")
 
 
-def run(utterance: str, *, bundles: dict[str, Path] | None = None, runner=None) -> dict:
+def _observe_running(app: str) -> bool | None:
+    """What macOS reports, not what the launch command returned. None = could not observe."""
+    try:
+        cp = subprocess.run(["osascript", "-e", f'application "{app}" is running'], capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    out = (cp.stdout or "").strip().lower()
+    return True if out == "true" else False if out == "false" else None
+
+
+def _settle(observe, app: str, want: bool, tries: int = 6, pause: float = 0.5) -> bool | None:
+    seen = None
+    for i in range(tries):
+        seen = observe(app)
+        if seen is want:
+            return seen
+        if i + 1 < tries:
+            time.sleep(pause)
+    return seen
+
+
+def run(utterance: str, *, bundles: dict[str, Path] | None = None, runner=None, observe=None) -> dict:
+    """Launch exit and observed app state are separate facts; only the observed state verifies the task.
+
+    Off the Mac (or under tests without an injected runner) nothing runs, and the result says so. An injected
+    runner without an injected observer never certifies completion: test doubles are not live Mac evidence."""
     m = OPEN_RE.match((utterance or "").strip())
     if not m:
         return {"ok": False, "tool": "apps", "spoken": "Which app should I open?", "task_verified": False}
@@ -97,17 +123,28 @@ def run(utterance: str, *, bundles: dict[str, Path] | None = None, runner=None) 
     app, path = hit
     quit_ = verb in ("quit", "close")
     cmd = (["osascript", "-e", f'tell application "{app}" to quit'] if quit_ else ["open", "-a", str(path)])
-    run_fn = runner or (lambda c: subprocess.run(c, capture_output=True, text=True, timeout=15))
     if runner is None and not _live():
-        ok, err = True, ""
-    else:
-        try:
-            cp = run_fn(cmd)
-            ok, err = cp.returncode == 0, (cp.stderr or cp.stdout or "").strip()[:160]
-        except (OSError, subprocess.TimeoutExpired) as exc:
-            ok, err = False, type(exc).__name__
-    if not ok:
-        return {"ok": False, "tool": "apps", "app": app, "task_verified": False,
+        return {"ok": False, "tool": "apps", "app": app, "path": str(path), "outcome": "NOT_EXECUTED", "executed": False,
+                "task_verified": False, "spoken": f"Nothing was {'quit' if quit_ else 'opened'}: app control only runs on the Mac."}
+    run_fn = runner or (lambda c: subprocess.run(c, capture_output=True, text=True, timeout=15))
+    try:
+        cp = run_fn(cmd)
+        launched, err = cp.returncode == 0, (cp.stderr or cp.stdout or "").strip()[:160]
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        launched, err = False, type(exc).__name__
+    if not launched:
+        return {"ok": False, "tool": "apps", "app": app, "executed": True, "command_ok": False, "task_verified": False,
                 "spoken": f"{app} didn't {'quit' if quit_ else 'open'}: {err or 'macOS refused'}."}
-    return {"ok": True, "tool": "apps", "app": app, "path": str(path), "task_verified": True,
-            "spoken": (f"Asked {app} to quit." if quit_ else f"{app} is open.")}
+    if observe is None and runner is None:
+        observe = _observe_running
+    state = _settle(observe, app, not quit_) if observe is not None else None
+    verified = state is (not quit_)
+    if verified:
+        spoken = f"{app} has quit." if quit_ else f"{app} is open."
+    elif state is None:
+        spoken = f"macOS accepted the {'quit' if quit_ else 'open'} command for {app}, but I couldn't confirm it."
+    else:
+        spoken = (f"I asked {app} to quit, but it's still running (it may be asking to save)." if quit_
+                  else f"macOS accepted the open command, but {app} isn't running yet.")
+    return {"ok": True, "tool": "apps", "app": app, "path": str(path), "executed": True, "command_ok": True,
+            "observed_running": state, "task_verified": verified, "spoken": spoken}

@@ -259,9 +259,27 @@ def op_cli(argv: list[str], cwd: str | None = None, *, max_output_chars: int = O
     truncated = len(raw_text) > limit
     text = raw_text[:limit] + ("…" if truncated else "")
     ok = p.returncode == 0
+    ch = _channels(p.stdout, p.stderr, limit)
     return {"ok": ok, "verified": ok and bool(text), "output": text, "exit": p.returncode,
-            "output_truncated": truncated,
-            "spoken": (f"{argv[0]} ok: " if ok else f"{argv[0]} exited {p.returncode}: ") + text[:600]}
+            "output_truncated": truncated, **ch, "spoken": _spoken_cli(argv[0], ok, p.returncode, ch)}
+
+
+def _channels(stdout, stderr, limit: int) -> dict:
+    """Both streams, scrubbed and bounded; neither hides the other (stdout-or-stderr dropped real errors)."""
+    out = _scrub(stdout or "").strip()
+    err = _scrub(stderr or "").strip()
+    return {"stdout": out[:limit] + ("…" if len(out) > limit else ""), "stderr": err[:limit] + ("…" if len(err) > limit else ""),
+            "stdout_truncated": len(out) > limit, "stderr_truncated": len(err) > limit}
+
+
+def _spoken_cli(name: str, ok: bool, code, ch: dict) -> str:
+    head = f"{name} ok: " if ok else f"{name} exited {code}: "
+    body = ch["stdout"][:600]
+    if ch["stderr"] and (not ok or not body):
+        body = (body + " | stderr: " if body else "stderr: ") + ch["stderr"][-400:]
+    elif ch["stderr"]:
+        body += " | stderr: " + ch["stderr"][-200:]
+    return head + body
 
 
 def _op_cli_open(argv: list[str], cwd: str | None, *, max_output_chars: int = OUT_CAP) -> dict:
@@ -275,17 +293,26 @@ def _op_cli_open(argv: list[str], cwd: str | None, *, max_output_chars: int = OU
     if not exe:
         return {"ok": False, "verified": False, "spoken": f"{argv[0]} is not installed. Ask me to install it."}
     PERM().log_action("cli", line[:80], "allow", open_access=True)
-    try:
-        p = subprocess.run([exe, *argv[1:]], capture_output=True, text=True, timeout=max(CLI_DEADLINE_S, 120),
-                           cwd=cwd or str(Path.home()), stdin=subprocess.DEVNULL)
-    except subprocess.TimeoutExpired:
-        return {"ok": False, "verified": False, "spoken": f"{argv[0]} timed out."}
     limit = max(1, min(int(max_output_chars), 80000))
-    raw_text = _scrub(p.stdout or p.stderr).strip()
-    text = raw_text[:limit] + ("…" if len(raw_text) > limit else "")
+    deadline = max(CLI_DEADLINE_S, 120)
+    try:
+        p = subprocess.run([exe, *argv[1:]], capture_output=True, text=True, timeout=deadline,
+                           cwd=cwd or str(Path.home()), stdin=subprocess.DEVNULL)
+    except subprocess.TimeoutExpired as exc:
+        # One-shot commands only. A build or render that outlives a turn belongs to the existing managed coding
+        # worker ("in scratch repo <name>: <goal>"), not a second task owner here.
+        dec = lambda b: b.decode("utf-8", "replace") if isinstance(b, bytes) else (b or "")
+        ch = _channels(dec(exc.stdout), dec(exc.stderr), limit)
+        return {"ok": False, "verified": False, "timed_out": True, "deadline_s": deadline, "exit": None, **ch,
+                "spoken": f"{argv[0]} was stopped after {deadline}s, so it didn't finish. Long builds and renders go through "
+                          "my coding worker: say \"in scratch repo\", the name, and the goal."
+                          + (f" Last output: {(ch['stderr'] or ch['stdout'])[-300:]}" if (ch['stderr'] or ch['stdout']) else "")}
+    ch = _channels(p.stdout, p.stderr, limit)
+    text = ch["stdout"] or ch["stderr"]
     ok = p.returncode == 0
-    return {"ok": ok, "verified": ok and bool(text), "output": text, "exit": p.returncode, "output_truncated": len(raw_text) > limit,
-            "spoken": (f"{argv[0]} ok: " if ok else f"{argv[0]} exited {p.returncode}: ") + text[:600]}
+    return {"ok": ok, "verified": ok and bool(text), "output": text, "exit": p.returncode,
+            "output_truncated": ch["stdout_truncated"] or ch["stderr_truncated"], **ch,
+            "spoken": _spoken_cli(argv[0], ok, p.returncode, ch)}
 
 
 # ---------------------------------------------------------------- ArtCraft: open a file and inspect it, read-only

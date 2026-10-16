@@ -82,12 +82,20 @@ class RepoListing(unittest.TestCase):
         self.assertIn("~/jarvis-main", got["names"]); self.assertIn("~/jarvis-repos/acme__tool", got["names"])
         self.assertNotIn("~/tools/whisper", got["names"])
         self.assertIn("I looked in", got["spoken"]); self.assertIn("permission granted", got["spoken"])
+        self.assertIn("acme__tool in jarvis-repos", got["spoken"]); self.assertNotIn("~/", got["spoken"])
 
     def test_open_finds_tools_clones(self):
         with mock.patch.object(self.W, "open_access", return_value=True):
             got = self.W._list_repos([self.home / "jarvis-main"], True)
         self.assertIn("~/tools/whisper", got["names"]); self.assertIn("~/tools/markitdown", got["names"])
-        self.assertNotIn("permission granted", got["spoken"])
+        self.assertNotIn("permission granted", got["spoken"]); self.assertIn("whisper in tools", got["spoken"])
+
+    def test_spoken_survives_the_mouth_filter(self):
+        spec = importlib.util.spec_from_file_location("agent_stack_persona_repo_test", STACK / "mouth" / "persona.py")
+        M = importlib.util.module_from_spec(spec); spec.loader.exec_module(M)
+        with mock.patch.object(self.W, "open_access", return_value=True):
+            sp = self.W._list_repos([self.home / "jarvis-main"], True)["spoken"]
+        self.assertEqual(M.strip_factory(sp, utterance="What repos do you have installed"), sp)
 
 
 class PidReuse(unittest.TestCase):
