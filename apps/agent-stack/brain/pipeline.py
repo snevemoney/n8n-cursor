@@ -3685,6 +3685,9 @@ def assemble_pack(
         f"Registered hand choices: {routing_catalogue()}. Names describe dispatch, not permission or readiness. mac_act only while Watch is armed. "
         "craft drives a Craft app: args {app, task}. "
         # live 2026-10-15: the model denied hands it has ("I do not have a red arrow", "I cannot open files")
+        "When Evens asks you to DO something on his Mac (make, build, open and use an app, install, fix, render, save, "
+        "research and write up), call the operator tool with the full goal: it does the work itself until it is done. "
+        "Answer each new request fresh; never repeat an earlier reply as the answer. "
         "Your real abilities (never deny them): a red arrow and a blue cursor on screen (say 'point to <thing>' or 'where do I click'; "
         "you click after his confirm); open, quit or switch any Mac app and open any file or book with it; read and write anywhere in "
         "his home folder except secret files and keychains; run shell commands and code; install repos, tools and skills; capture the "
@@ -6038,8 +6041,8 @@ def _operator_line(state: dict) -> str:
     if status in ("RUNNING", "QUEUED"):
         return f"I'm working on it (step {state.get('step', 0)}). It keeps going in the background; ask me how it's going anytime."
     if status == "MODEL_UNAVAILABLE":
-        return ("I stopped because my model is unavailable right now (the model account may be out of credit). "
-                "Nothing is lost; say continue when it's back.")
+        return ("That task stopped at its first step because my model call failed. The task is saved; "
+                "ask me again and I'll start it over.")
     if status == "NONE":
         return "There's no operator task yet."
     return f"The task ended as {status.lower().replace('_', ' ')} after {state.get('step', 0)} steps. " + str(state.get("summary") or "")

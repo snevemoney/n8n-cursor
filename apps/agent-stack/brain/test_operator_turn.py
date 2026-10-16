@@ -36,8 +36,16 @@ class OperatorTurn(unittest.TestCase):
             self.assertTrue(got["task_verified"], got)
             self.assertIn("Wrote hello.txt", got["spoken"]); self.assertEqual(out.read_text(), "hi")
 
-    def test_out_of_credit_is_said_plainly(self):
-        self.assertIn("out of credit", P._operator_line({"status": "MODEL_UNAVAILABLE"}))
+    def test_model_failure_line_does_not_invite_a_parrot(self):
+        line = P._operator_line({"status": "MODEL_UNAVAILABLE"})
+        self.assertIn("model call failed", line); self.assertNotIn("say continue", line)
+
+    def test_pack_sends_work_requests_to_operator(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as t:
+            hive = Path(t); (hive / "bus").mkdir()
+            pack = P.assemble_pack("make a 3D animation", hive=hive, retrieve_roots=[], turns=[])
+        self.assertIn("call the operator tool", pack); self.assertIn("never repeat an earlier reply", pack)
 
 
 if __name__ == "__main__":
