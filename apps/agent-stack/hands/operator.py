@@ -41,7 +41,9 @@ SYSTEM = (
     "Speak like a capable colleague: plain English, short, no markdown, no file slugs, no model names, no step numbers, "
     "no 'I have not run an executor'. One or two sentences at a time.\n"
     "Working: prefer shell and files when they do the job; screenshot + mouse + keyboard for apps and web pages with no "
-    "better interface (your blue cursor shows him where you click); mcp for external services. When something fails, "
+    "better interface (your blue cursor shows him where you click); mcp for external services. He has more than one "
+    "screen: if you cannot see the app, take screenshot with app=Name. In the browser, reuse the tab that is already "
+    "open (switch to it or change its address); never open the same page again and again. When something fails, "
     "diagnose it and try another way — do not report a failure you have not tried to get around, and never tell him to "
     "do it himself. If he says something while you work, it arrives as a new user message: take it into account.\n"
     "Truth: never claim a step you did not verify with a real result. If you could not do something, say exactly what "
@@ -90,7 +92,7 @@ TOOLS = [
     _fn("job", "Output and status of a background shell job.", {"job_id": S}, ["job_id"]),
     _fn("web_search", "Search the internet.", {"query": S}, ["query"]),
     _fn("fetch_url", "Download a public web page as text.", {"url": S}, ["url"]),
-    _fn("screenshot", "See the main screen. The image arrives next; its pixels are screen points for mouse.", {}),
+    _fn("screenshot", "Look at a screen. Defaults to the display his front window is on; display=N or app=Name to look elsewhere.", {"display": I, "app": S}),
     _fn("mouse", "Mouse at screen points: move, click, double_click, right_click, drag (to x2,y2), scroll (dy).",
         {"action": S, "x": I, "y": I, "x2": I, "y2": I, "dy": I}, ["action"]),
     _fn("keyboard", "Type text, or press keys like 'cmd+s', 'return', 'cmd+shift+4'.", {"text": S, "keys": S}),
@@ -122,6 +124,74 @@ def _clip(text, n=OUT_CHARS):
 def _path(p, cwd):
     p = Path(os.path.expanduser(str(p or "")))
     return p if p.is_absolute() else Path(cwd) / p
+
+
+IGNORE_WINDOWS = {"WindowManager", "Dock", "Control Center", "Window Server", "Notification Center", "Jarvis Orb",
+                  "Jarvis Hands", "Jarvis Click", "pointer_cursor", "pointer_arrow"}
+
+
+def displays_from_cocoa(frames: list) -> list:
+    """NSScreen frames (Cocoa: bottom-left origin, main first) -> global top-left boxes, the space mouse points use."""
+    main_h = frames[0][3] if frames else 0
+    return [{"n": i + 1, "x": int(x), "y": int(main_h - (y + h)), "w": int(w), "h": int(h)} for i, (x, y, w, h) in enumerate(frames)]
+
+
+def pick_display(displays: list, windows: list, app: str | None = None, index: int | None = None) -> dict:
+    """The display to look at: the one asked for, else the one holding that app's (or the front) window's centre."""
+    if index:
+        for d in displays:
+            if d["n"] == int(index):
+                return d
+    for owner, (x, y, w, h) in windows:
+        if owner in IGNORE_WINDOWS or (app and owner.lower() != app.lower()):
+            continue
+        cx, cy = x + w / 2, y + h / 2
+        for d in displays:
+            if d["x"] <= cx < d["x"] + d["w"] and d["y"] <= cy < d["y"] + d["h"]:
+                return d
+        break
+    return displays[0] if displays else {"n": 1, "x": 0, "y": 0, "w": 1440, "h": 900}
+
+
+_JXA_SCREENS = ('ObjC.import("AppKit");var s=$.NSScreen.screens,o=[];for(var i=0;i<s.count;i++){var f=s.objectAtIndex(i).frame;'
+                'o.push([f.origin.x,f.origin.y,f.size.width,f.size.height].join(","))}o.join("|")')
+_JXA_WINDOWS = ('ObjC.import("CoreGraphics");ObjC.import("Foundation");var l=ObjC.castRefToObject($.CGWindowListCopyWindowInfo('
+                '$.kCGWindowListOptionOnScreenOnly|$.kCGWindowListExcludeDesktopElements,$.kCGNullWindowID)),o=[];'
+                'for(var i=0;i<l.count&&o.length<12;i++){var w=l.objectAtIndex(i);if(ObjC.unwrap(w.objectForKey("kCGWindowLayer"))!==0)continue;'
+                'var b=w.objectForKey("kCGWindowBounds");o.push(ObjC.unwrap(w.objectForKey("kCGWindowOwnerName"))+"@"+'
+                '[ObjC.unwrap(b.objectForKey("X")),ObjC.unwrap(b.objectForKey("Y")),ObjC.unwrap(b.objectForKey("Width")),'
+                'ObjC.unwrap(b.objectForKey("Height"))].join(","))}o.join("|")')
+
+
+def _jxa(src: str) -> str:
+    return subprocess.run(["osascript", "-l", "JavaScript", "-e", src], capture_output=True, text=True, timeout=10).stdout.strip()
+
+
+def live_screens() -> tuple[list, list]:
+    frames = [tuple(float(v) for v in part.split(",")) for part in _jxa(_JXA_SCREENS).split("|") if part.count(",") == 3]
+    windows = []
+    for part in _jxa(_JXA_WINDOWS).split("|"):
+        if "@" in part:
+            owner, box = part.rsplit("@", 1)
+            vals = [float(v) for v in box.split(",") if v]
+            if len(vals) == 4:
+                windows.append((owner, tuple(vals)))
+    return displays_from_cocoa(frames), windows
+
+
+REPEAT_NUDGE, REPEAT_STOP = 3, 5
+
+
+def repetition(task, tool: str, args: dict) -> str | None:
+    """None, "nudge" (3rd identical action) or "stop" (5th). Live 10-16: it re-opened Spotify 18 times."""
+    sig = tool + " " + json.dumps(args, sort_keys=True)[:400]
+    st = task.read("state.json", {})
+    seen = st.get("seen") or {}
+    seen[sig] = seen.get(sig, 0) + 1
+    st["seen"] = seen
+    task.write("state.json", st)
+    n = seen[sig]
+    return "stop" if n >= REPEAT_STOP else "nudge" if n == REPEAT_NUDGE else None
 
 
 class Tools:
@@ -230,19 +300,22 @@ class Tools:
         return {"text": _clip(re.sub(r"\s+", " ", text).strip())}
 
     def screenshot(self, a):
+        """The display his front window (or the named app, or display N) is on; pixels map to global mouse points."""
         shot = Path(tempfile.mkstemp(suffix=".png")[1])
         try:
-            subprocess.run(["screencapture", "-x", "-m", str(shot)], check=True, timeout=10)
-            info = subprocess.run(["osascript", "-l", "JavaScript", "-e",
-                                   "ObjC.import('AppKit');var f=$.NSScreen.mainScreen.frame;f.size.width+'x'+f.size.height"],
-                                  capture_output=True, text=True, timeout=10).stdout.strip()
-            w = int(float(info.split("x")[0])) if "x" in info else 1440
-            subprocess.run(["sips", "-Z", str(w), "-s", "format", "jpeg", str(shot), "--out", str(shot) + ".jpg"],
+            displays, windows = live_screens()
+            d = pick_display(displays, windows, app=a.get("app"), index=a.get("display"))
+            subprocess.run(["screencapture", "-x", "-D", str(d["n"]), str(shot)], check=True, timeout=10)
+            subprocess.run(["sips", "-Z", str(d["w"]), "-s", "format", "jpeg", str(shot), "--out", str(shot) + ".jpg"],
                            capture_output=True, timeout=20)
             data = base64.b64encode(Path(str(shot) + ".jpg").read_bytes()).decode()
-            return {"text": f"screenshot of the main screen ({info} points); image pixels = mouse points",
+            others = "; ".join(f"display {o['n']} at ({o['x']},{o['y']}) {o['w']}x{o['h']}" for o in displays if o["n"] != d["n"])
+            front = next((o for o, _ in windows if o not in IGNORE_WINDOWS), "")
+            return {"text": (f"screenshot of display {d['n']} of {len(displays)} ({d['w']}x{d['h']} points); front app: {front}. "
+                             f"Image pixel (px,py) = mouse point ({d['x']}+px, {d['y']}+py). "
+                             + (f"Other displays: {others}. Pass display=N or app=Name to look there." if others else "")),
                     "image": "data:image/jpeg;base64," + data}
-        except (subprocess.SubprocessError, OSError) as exc:
+        except (subprocess.SubprocessError, OSError, ValueError) as exc:
             return {"text": f"screenshot failed: {exc}. Screen Recording permission may be missing for Jarvis."}
         finally:
             for f in (shot, Path(str(shot) + ".jpg")):
@@ -550,6 +623,12 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
     images, terminal = [], None
     for c in calls:
         name, args = c["tool"], c["args"] or {}
+        rep = repetition(task, name, args) if name not in TERMINAL and name not in ("screenshot", "say") else None
+        if rep == "stop":
+            task.speak("I kept trying the same thing without getting anywhere, so I stopped. Tell me how you want it done.")
+            terminal = ("WAITING_OWNER", {"question": f"I repeated {name} five times without progress."})
+            messages.append({"role": "tool", "tool_call_id": c["call_id"], "content": "stopped: repeated without progress"})
+            continue
         decision, why = _authority().authorize(name, args)
         if name in TERMINAL:
             result = {"text": "ok"}
@@ -568,6 +647,9 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
         if decision == "allow" and str(why).startswith("flag"):
             # Evens 10-16: secrets are flagged, never a stop; values stay masked in messages, trace and the model
             result = {**result, "text": "Heads up: this holds secrets; values are masked. " + _scrub(str(result.get("text") or ""))}
+        if rep == "nudge":
+            result = {**result, "text": str(result.get("text") or "") + "\nNOTE: this is the third time you ran exactly this. "
+                      "It is not working; do something different (look at the right screen, use another way) or ask Evens."}
         task.trace({"event": "tool", "tool": name, "args": args, "decision": decision, "result": result.get("text", "")[:2000]})
         messages.append({"role": "tool", "tool_call_id": c["call_id"], "content": result.get("text", "")})
         if result.get("image"):
