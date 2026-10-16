@@ -48,6 +48,11 @@ class OneLoop(unittest.TestCase):
         self.assertEqual(msgs[-1], {"role": "user", "content": "make it 10 seconds instead"})
         self.assertTrue(O.running(self.hive))
 
+    def test_a_dead_worker_is_not_running(self):
+        t = O.Task.create(self.hive, "old job")
+        st = t.read("state.json"); st.update(status="RUNNING", pid=999999); t.write("state.json", st)
+        self.assertFalse(O.running(self.hive)); self.assertFalse(O.tell(self.hive, "new ask")["ok"])
+
     def test_the_conversation_carries(self):
         t = O.Task.create(self.hive, "open FilmCraft", turns=[{"user": "open Blender", "jarvis": "Blender is open."}])
         msgs = t.read("messages.json")
