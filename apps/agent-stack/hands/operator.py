@@ -40,11 +40,8 @@ SYSTEM = (
     "not open tools for arithmetic or general knowledge), what you are about to do, what you just found, or a snag. "
     "Speak like a capable colleague: plain English, short, no markdown, no file slugs, no model names, no step numbers, "
     "no 'I have not run an executor'. One or two sentences at a time.\n"
-    "Working: prefer shell and files when they do the job. For anything on the web use browser: navigate, then "
-    "browser_snapshot to read the page and act on element refs (click, type, press keys); it is one window that stays "
-    "open between your steps and between his requests, so never open the same page twice. It is its own window, not his "
-    "Safari: if a site needs his account (Spotify, Gmail, LinkedIn) and the browser shows a login wall, use his Safari "
-    "or the site's Mac app (Spotify.app) with computer instead of asking him to log in. For desktop apps use "
+    "Working: prefer shell and files when they do the job. His browser is Safari; never open Chrome or another browser unless he names it. For anything on the web he wants in his browser, use safari (his Safari, signed in): navigate, snapshot, click and type by element number, and check the page that comes back; do not route around the page with shell, gh or open when he asked for the browser, and leave the result in his front tab. (Background research without a browser: web_search and fetch_url.) If a site wants a login he has in "
+    "an app instead (Spotify.app), use the app with computer. For desktop apps use "
     "computer: take a screenshot, click/type/scroll at pixels of that screenshot (your blue cursor shows him where), "
     "and look at the screenshot that comes back after every action. He has more than one screen: if you cannot see "
     "the app, screenshot with app=Name. If an action did the wrong thing, fix it on the screen (go back, close, undo, "
@@ -107,13 +104,13 @@ TOOLS = [
          "coordinate": {"type": "array", "items": I}, "start_coordinate": {"type": "array", "items": I},
          "text": S, "scroll_direction": {"type": "string", "enum": ["up", "down", "left", "right"]},
          "scroll_amount": I, "duration": I, "display": I, "app": S}, ["action"]),
-    _fn("browser", "A real web browser you drive by page structure (Playwright), visible to Evens; tabs, logins and "
-        "history last for the whole conversation. Call with tool + args, e.g. {tool: browser_navigate, args: {url}}, "
-        "{tool: browser_snapshot} (the page as an accessibility tree with element refs), {tool: browser_click, args: "
-        "{element, ref}}, {tool: browser_type, args: {element, ref, text, submit}}, browser_press_key {key}, "
-        "browser_navigate_back, browser_tabs {action: list|select|close}, browser_wait_for {text|time}, "
-        "browser_take_screenshot. Prefer this over computer for anything on the web.",
-        {"tool": S, "args": {"type": "object"}}, ["tool"]),
+    _fn("safari", "Evens's OWN Safari: his tabs and logins, on his screen. Use it whenever he wants something on the web "
+        "done in his browser. snapshot lists the page's links/buttons/fields with numbers; click ref=N (real mouse, he "
+        "sees the cursor), type ref=N text=... (submit=true presses Return), navigate url=... (changes his current tab, "
+        "no new tabs), key keys=cmd+f, scroll direction=down, back, read (full page text), tabs, switch_tab index=N. "
+        "Every action returns the page after it.",
+        {"action": {"type": "string", "enum": ["snapshot", "navigate", "click", "type", "key", "scroll", "back", "tabs", "switch_tab", "read"]}, "ref": S, "text": S, "url": S, "keys": S,
+         "direction": S, "amount": I, "index": I, "submit": B}, ["action"]),
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
     _fn("mcp", "Call a tool on a connected MCP server.", {"server": S, "tool": S, "arguments": {"type": "object"}},
         ["server", "tool"]),
@@ -137,6 +134,7 @@ def _load(name, file):
 CU = _load("computer_use", "computer_use.py")
 BS = _load("browser_session", "browser_session.py")
 HX = _load("harness", "harness.py")
+SD = _load("safari_dom", "safari_dom.py")
 
 
 def _clip(text, n=OUT_CHARS):
@@ -418,6 +416,9 @@ class Tools:
             return got
         CU.settle(action)
         return self._shot(d, displays, windows, f"Did {action}. ")
+
+    def safari(self, a):
+        return SD.SafariDOM(self._hands, self._show_cursor).act(a)
 
     def browser(self, a):
         if self.web is None:
@@ -740,7 +741,8 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
     for c in calls:
         name, args = c["tool"], c["args"] or {}
         looking = name == "say" or (name == "computer" and args.get("action") in ("screenshot", "wait", "cursor_position")) \
-            or (name == "browser" and str(args.get("tool") or "").endswith(("snapshot", "take_screenshot", "wait_for")))
+            or (name == "browser" and str(args.get("tool") or "").endswith(("snapshot", "take_screenshot", "wait_for"))) \
+            or (name == "safari" and args.get("action") in ("snapshot", "read", "tabs"))
         rep = repetition(task, name, args) if name not in TERMINAL and not looking else None
         if rep == "stop":
             task.speak("I kept trying the same thing without getting anywhere, so I stopped. Tell me how you want it done.")
