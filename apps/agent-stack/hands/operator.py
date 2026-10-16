@@ -98,11 +98,11 @@ TOOLS = [
     _fn("web_search", "Search the internet.", {"query": S}, ["query"]),
     _fn("fetch_url", "Download a public web page as text.", {"url": S}, ["url"]),
     _fn("computer", "Use the Mac like a person: the screen, the mouse and the keyboard. Actions: screenshot, left_click, "
-        "right_click, double_click, mouse_move, left_click_drag, scroll, type, key, wait, cursor_position. coordinate is "
+        "right_click, double_click, triple_click, mouse_move, left_click_drag, scroll, type, key, wait, cursor_position. coordinate is "
         "[x, y] in pixels of the LAST screenshot you got; every action that changes the screen returns a new screenshot "
         "of the same display, so check it and fix mistakes on screen (undo with key cmd+z, go back, close what you "
         "opened). key takes combos like cmd+l, cmd+t, return, escape. display=N or app=Name picks the screen to look at.",
-        {"action": {"type": "string", "enum": ["screenshot", "left_click", "right_click", "double_click", "mouse_move",
+        {"action": {"type": "string", "enum": ["screenshot", "left_click", "right_click", "double_click", "triple_click", "mouse_move",
                                                "left_click_drag", "scroll", "type", "key", "wait", "cursor_position"]},
          "coordinate": {"type": "array", "items": I}, "start_coordinate": {"type": "array", "items": I},
          "text": S, "scroll_direction": {"type": "string", "enum": ["up", "down", "left", "right"]},
@@ -286,11 +286,17 @@ class Tools:
             self._save()
             return {"text": f"started background job {jid} (pid {pr.pid}); check it with job"}
         mark = "__JARVIS_CWD__"
+        apple = "osascript" in cmd
+        # live 10-16: Spotify AppleScript hung 125s+26s+47s of a 326s job; fail fast, the screen is the fallback
+        limit = int(a.get("timeout_s") or (15 if apple else 120))
         try:
             cp = subprocess.run(["/bin/zsh", "-lc", f"{cmd}\nprintf '\\n{mark}%s' \"$PWD\""], cwd=self.cwd,
-                                capture_output=True, text=True, timeout=int(a.get("timeout_s") or 120))
+                                capture_output=True, text=True, timeout=limit)
         except subprocess.TimeoutExpired:
-            return {"text": "timed out; rerun with background=true for long commands"}
+            if apple:
+                return {"text": f"timed out after {limit}s: AppleScript to an app hangs when macOS is waiting for Automation "
+                                "permission. Do it on the screen with computer instead; do not retry AppleScript for this app."}
+            return {"text": f"timed out after {limit}s; rerun with background=true for long commands"}
         out, _, where = cp.stdout.rpartition(mark)
         if where.strip() and Path(where.strip()).is_dir():
             self.cwd = where.strip()  # cd persists between commands, like a terminal

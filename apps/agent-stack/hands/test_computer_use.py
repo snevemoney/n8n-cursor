@@ -25,6 +25,7 @@ class Mapping(unittest.TestCase):
 
     def test_requests(self):
         self.assertEqual(CU.hands_request("double_click", {"coordinate": [0, 0]}, BUILTIN)["count"], 2)
+        self.assertEqual(CU.hands_request("triple_click", {"coordinate": [0, 0]}, BUILTIN)["count"], 3)  # live: model asked for it
         self.assertEqual(CU.hands_request("scroll", {"scroll_direction": "down", "scroll_amount": 5}, BUILTIN)["dy"], -5)
         self.assertEqual(CU.hands_request("key", {"text": "cmd+l"}, BUILTIN), {"op": "key", "keys": "cmd+l"})
 
@@ -53,6 +54,19 @@ class ComputerTool(unittest.TestCase):
         with mock.patch.object(O.Tools, "computer", return_value={"text": "shot", "image": "data:x"}):
             st = O.run(task.path, model_fn=lambda m, tools: next(rounds))
         self.assertEqual(st["status"], "DONE")
+
+
+class AppleScriptFailsFast(unittest.TestCase):
+    def test_hung_osascript_gives_up_fast_and_points_to_the_screen(self):  # live 10-16: 198s lost to hung AppleScript
+        t = O.Tools(Path(tempfile.mkdtemp()))
+        seen = {}
+
+        def hang(*a, **k):
+            seen["timeout"] = k.get("timeout")
+            raise O.subprocess.TimeoutExpired(a[0], k.get("timeout"))
+        with mock.patch.object(O.subprocess, "run", side_effect=hang):
+            got = t.shell({"command": "osascript -e 'tell application \"Spotify\" to play'"})
+        self.assertEqual(seen["timeout"], 15); self.assertIn("on the screen", got["text"])
 
 
 class LiveSession(unittest.TestCase):

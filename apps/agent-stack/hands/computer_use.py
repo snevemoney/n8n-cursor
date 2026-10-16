@@ -15,9 +15,9 @@ from __future__ import annotations
 import time
 
 MAX_W = 1280  # screenshots are sent at most this wide: the size computer-use models are most accurate at
-ACTIONS = ("screenshot", "left_click", "right_click", "double_click", "mouse_move", "left_click_drag", "scroll", "type",
+ACTIONS = ("screenshot", "left_click", "right_click", "double_click", "triple_click", "mouse_move", "left_click_drag", "scroll", "type",
            "key", "wait", "cursor_position")
-CHANGES_SCREEN = {"left_click", "right_click", "double_click", "left_click_drag", "scroll", "type", "key"}
+CHANGES_SCREEN = {"left_click", "right_click", "double_click", "triple_click", "left_click_drag", "scroll", "type", "key"}
 
 
 def image_scale(display: dict) -> float:
@@ -38,11 +38,11 @@ def to_image(display: dict, gx: float, gy: float) -> tuple[int, int]:
 
 def hands_request(action: str, a: dict, display: dict) -> dict | None:
     """The Jarvis Hands request for one action (None for actions that need no input event)."""
-    if action in ("left_click", "right_click", "double_click", "mouse_move"):
+    if action in ("left_click", "right_click", "double_click", "triple_click", "mouse_move"):
         x, y = to_global(display, a["coordinate"][0], a["coordinate"][1])
         if action == "mouse_move":
             return {"op": "move", "x": x, "y": y}
-        return {"op": "click", "x": x, "y": y, "count": 2 if action == "double_click" else 1,
+        return {"op": "click", "x": x, "y": y, "count": {"double_click": 2, "triple_click": 3}.get(action, 1),
                 "button": "right" if action == "right_click" else "left"}
     if action == "left_click_drag":
         x, y = to_global(display, *a["start_coordinate"])
@@ -65,4 +65,4 @@ def hands_request(action: str, a: dict, display: dict) -> dict | None:
 
 def settle(action: str) -> None:
     """Give the screen a moment to change before the after-shot (pages and menus animate)."""
-    time.sleep(0.6 if action in ("left_click", "double_click", "key", "type") else 0.3)
+    time.sleep(0.6 if action in ("left_click", "double_click", "triple_click", "key", "type") else 0.3)

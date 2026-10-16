@@ -75,7 +75,7 @@ def _path(trace_rows: list) -> list:
         if r.get("tool") == "computer" and a.get("action") in ("screenshot", "wait", "cursor_position"):
             continue
         key = a.get("command") or a.get("target") or a.get("action") or a.get("tool") or a.get("path") or a.get("query") or ""
-        bad = str(r.get("result") or "").startswith(("error", "needs Evens", "refused", "exit 1", "browser error"))
+        bad = str(r.get("result") or "").startswith(("error", "needs Evens", "refused", "exit 1", "browser error", "timed out", "unknown action"))
         steps.append(f"{r['tool']} {str(key)[:80]}" + (" (failed)" if bad else ""))
     return steps[-14:]
 
