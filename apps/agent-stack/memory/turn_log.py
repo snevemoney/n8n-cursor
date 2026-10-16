@@ -71,8 +71,9 @@ def build_row(*, started: float, ended: float, events: list[dict], talk: dict | 
         "usage_cost_usd": (talk.get("usage") or {}).get("cost_usd"),
         "usage_gen_id": (talk.get("usage") or {}).get("gen_id") or None,
         "injected_context": list(talk.get("injected") or inject.get("files") or []),
+        # Privacy audit 2026-10-16: names only. Vault note headings are note content, so they are not logged.
         "retrieved": [
-            {"file": str(r.get("file") or ""), "heading": str(r.get("heading") or "")[:120]}
+            {"file": str(r.get("file") or "")}
             for r in (talk.get("retrieved") or []) if isinstance(r, dict)
         ],
         "tools": tools,

@@ -152,7 +152,8 @@ def _live() -> bool:
 def _observe_running(app: str) -> bool | None:
     """What macOS reports, not what the launch command returned. None = could not observe."""
     try:
-        cp = subprocess.run(["osascript", "-e", f'application "{app}" is running'], capture_output=True, text=True, timeout=5)
+        cp = subprocess.run(["osascript", "-e", "on run argv", "-e", "return application (item 1 of argv) is running", "-e", "end run", app],
+                            capture_output=True, text=True, timeout=5)  # name as an argument, never in the script source
     except (OSError, subprocess.TimeoutExpired):
         return None
     out = (cp.stdout or "").strip().lower()
@@ -190,7 +191,10 @@ def run(utterance: str, *, bundles: dict[str, Path] | None = None, runner=None, 
                 "spoken": f"I couldn't find an app called {raw} on your Mac." + (f" Closest: {', '.join(close)}." if close else "")}
     app, path = hit
     quit_ = verb in ("quit", "close", "ferme", "fermer", "quitte", "quitter")
-    cmd = (["osascript", "-e", f'tell application "{app}" to quit'] if quit_ else ["open", "-a", str(path)])
+    # Privacy audit 2026-10-16: the bundle name is passed as an argument, never pasted into AppleScript source (a folder
+    # named with a quote and a newline could run "do shell script").
+    cmd = (["osascript", "-e", "on run argv", "-e", "tell application (item 1 of argv) to quit", "-e", "end run", app]
+           if quit_ else ["open", "-a", str(path)])
     if runner is None and not _live():
         return {"ok": False, "tool": "apps", "app": app, "path": str(path), "outcome": "NOT_EXECUTED", "executed": False,
                 "task_verified": False, "spoken": f"Nothing was {'quit' if quit_ else 'opened'}: app control only runs on the Mac."}

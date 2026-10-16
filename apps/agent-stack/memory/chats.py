@@ -232,7 +232,7 @@ def _secret_patterns():
     name = "agent_stack_secret_patterns"
     if name not in _sys.modules:
         spec = _u.spec_from_file_location(name, _P(__file__).resolve().parents[1] / "brain" / "secret_patterns.py")
-        mod = _u.module_from_spec(spec); _sys.modules[name] = mod; spec.loader.exec_module(mod)
+        mod = _u.module_from_spec(spec); spec.loader.exec_module(mod); _sys.modules[name] = mod  # publish only when built
     return _sys.modules[name]
 
 
@@ -508,13 +508,15 @@ def append_jarvis_turn(
         dest = root / SESSIONS_REL / "jarvis" / f"{day}.md"
         dest.parent.mkdir(parents=True, exist_ok=True)
         # Latency loop: append, never re-read + rewrite the whole day's log (cost grew with the file).
-        if dest.is_file():
-            with dest.open("a", encoding="utf-8") as fh:
+        # Concurrency audit 2026-10-16: two first-of-the-day writers shared one fixed .tmp and lost a turn. Create the
+        # day file exclusively (the winner writes the header), everyone else appends; never crash on odd characters.
+        try:
+            fd = os.open(dest, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8", errors="replace") as fh:
+                fh.write(header + block)
+        except FileExistsError:
+            with dest.open("a", encoding="utf-8", errors="replace") as fh:
                 fh.write(block)
-        else:
-            tmp = dest.with_name(dest.name + ".tmp")
-            tmp.write_text(header + block, encoding="utf-8")
-            os.replace(tmp, dest)
         written.append(dest)
     return written
 

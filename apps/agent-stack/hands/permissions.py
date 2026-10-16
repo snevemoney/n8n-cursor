@@ -53,11 +53,29 @@ def auto_accept_edits() -> bool:
     return bool(mode().get("auto_accept_edits"))
 
 
-def set_auto_accept(on: bool) -> dict:
+def _update_mode(key: str, on: bool) -> dict:
+    """Locked read-modify-write with a unique temp file (concurrency audit 2026-10-16: the fixed mode.json.tmp raised
+    FileNotFoundError on concurrent grants, and set_auto_accept lost the other flag 199/200 times)."""
+    import fcntl
+    import tempfile
     f = _mode_file()
     f.parent.mkdir(parents=True, exist_ok=True)
-    data = {**mode(), "auto_accept_edits": bool(on), "updated": datetime.now().isoformat(timespec="seconds")}
-    f.write_text(json.dumps(data, indent=1), encoding="utf-8")
+    with open(f.with_name(f.name + ".lock"), "a+") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            data = {**mode(), key: bool(on), "updated": datetime.now().isoformat(timespec="seconds")}
+            fd, tmp = tempfile.mkstemp(prefix=f.name + ".", dir=str(f.parent))
+            with os.fdopen(fd, "w", encoding="utf-8") as out:
+                out.write(json.dumps(data, indent=1)); out.flush(); os.fsync(out.fileno())
+            os.chmod(tmp, 0o600)
+            os.replace(tmp, f)
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+    return data
+
+
+def set_auto_accept(on: bool) -> dict:
+    data = _update_mode("auto_accept_edits", on)
     log_action("mode", "auto_accept_edits", "on" if on else "off")
     return data
 
@@ -159,13 +177,7 @@ def open_access() -> bool:
 
 
 def set_open_access(on: bool) -> dict:
-    f = _mode_file()
-    f.parent.mkdir(parents=True, exist_ok=True)
-    data = {**mode(), "open_access": bool(on), "updated": datetime.now().isoformat(timespec="seconds")}
-    tmp = f.with_name(f.name + ".tmp")
-    tmp.write_text(json.dumps(data, indent=1), encoding="utf-8")
-    os.chmod(tmp, 0o600)
-    os.replace(tmp, f)
+    data = _update_mode("open_access", on)
     log_action("mode", "open_access", "on" if on else "off")
     return data
 

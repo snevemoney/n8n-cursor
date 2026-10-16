@@ -1593,23 +1593,11 @@ def _code_author_hand():
 
 
 def _web_search_hand():
-    name = "agent_stack_web_search"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "web_search.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_web_search", STACK / "hands" / "web_search.py")  # locked (audit 2026-10-16)
 
 
 def _mcp_inventory_hand():
-    name = "agent_stack_mcp_inventory"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "mcp_inventory.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_mcp_inventory", STACK / "hands" / "mcp_inventory.py")  # locked (audit 2026-10-16)
 
 
 def _agent_tools_hand():
@@ -1726,13 +1714,7 @@ def _coding_mission_hand():
 
 
 def _permissions_hand():
-    name = "agent_stack_permissions"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "permissions.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_permissions", STACK / "hands" / "permissions.py")  # locked (audit 2026-10-16)
 
 
 def _open_access() -> bool:
@@ -1772,73 +1754,31 @@ def _blocked_request(prior_turns: list) -> str:
 
 
 def _code_run_hand():
-    name = "agent_stack_code_run"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "code_run.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_code_run", STACK / "hands" / "code_run.py")  # locked (audit 2026-10-16)
 
 
 def _apps_hand():
-    name = "agent_stack_apps"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "apps.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_apps", STACK / "hands" / "apps.py")  # locked (audit 2026-10-16)
 
 
 def _capability_hand():
-    name = "agent_stack_capability"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "capability.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_capability", STACK / "hands" / "capability.py")  # locked (audit 2026-10-16)
 
 
 def _repo_hand():
-    name = "agent_stack_repo"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "repo.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_repo", STACK / "hands" / "repo.py")  # locked (audit 2026-10-16)
 
 
 def _desk_dispatch_hand():
-    name = "agent_stack_desk_dispatch"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "desk_dispatch.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_desk_dispatch", STACK / "hands" / "desk_dispatch.py")  # locked (audit 2026-10-16)
 
 
 def _loop_hand():
-    name = "agent_stack_loop"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "loop.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_loop", STACK / "hands" / "loop.py")  # locked (audit 2026-10-16)
 
 
 def _voice_engine_hand():
-    name = "agent_stack_voice_engine"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "voice_engine.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_voice_engine", STACK / "hands" / "voice_engine.py")  # locked (audit 2026-10-16)
 
 
 def _screen_see_hand():
@@ -1856,33 +1796,15 @@ def _screen_see_hand():
 
 
 def _plan_hand():
-    name = "agent_stack_plan"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "plan.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_plan", STACK / "hands" / "plan.py")  # locked (audit 2026-10-16)
 
 
 def _results_mem():
-    key = "agent_stack_results_mem"
-    if key not in sys.modules:
-        spec = importlib.util.spec_from_file_location(key, STACK / "memory" / "results.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[key] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[key]
+    return _load_ready_hand("agent_stack_results_mem", STACK / "memory" / "results.py")  # locked: no half-built module (audit 2026-10-16)
 
 
 def _prebrief_hand():
-    key = "agent_stack_prebrief"
-    if key not in sys.modules:
-        spec = importlib.util.spec_from_file_location(key, STACK / "hands" / "prebrief.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[key] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[key]
+    return _load_ready_hand("agent_stack_prebrief", STACK / "hands" / "prebrief.py")  # locked: no half-built module (audit 2026-10-16)
 
 
 PREBRIEF_PUMP_SEC = 120
@@ -1963,13 +1885,7 @@ def _start_prebrief_pump() -> None:
 
 
 def _cost_hand():
-    key = "agent_stack_cost_card"
-    if key not in sys.modules:
-        spec = importlib.util.spec_from_file_location(key, STACK / "hands" / "cost_card.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[key] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[key]
+    return _load_ready_hand("agent_stack_cost_card", STACK / "hands" / "cost_card.py")  # locked: no half-built module (audit 2026-10-16)
 
 
 def _pointer_hand():
@@ -1977,53 +1893,23 @@ def _pointer_hand():
 
 
 def _pickup_hand():
-    key = "agent_stack_pickup"
-    if key not in sys.modules:
-        spec = importlib.util.spec_from_file_location(key, STACK / "hands" / "pickup.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[key] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[key]
+    return _load_ready_hand("agent_stack_pickup", STACK / "hands" / "pickup.py")  # locked: no half-built module (audit 2026-10-16)
 
 
 def _drafts_hand():
-    name = "agent_stack_drafts"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "drafts.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_drafts", STACK / "hands" / "drafts.py")  # locked (audit 2026-10-16)
 
 
 def _workbench_hand():
-    name = "agent_stack_workbench"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "workbench.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_workbench", STACK / "hands" / "workbench.py")  # locked (audit 2026-10-16)
 
 
 def _mcp_call_hand():
-    name = "agent_stack_mcp_call"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "mcp_call.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_mcp_call", STACK / "hands" / "mcp_call.py")  # locked (audit 2026-10-16)
 
 
 def _skills_hand():
-    name = "agent_stack_skills"
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, STACK / "hands" / "skills.py")
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_skills", STACK / "hands" / "skills.py")  # locked (audit 2026-10-16)
 
 
 def _workspace_read_hand():
@@ -5943,14 +5829,7 @@ def _evidence_line(speak: str, evidence: str) -> str:
 
 def browser_runtime():
     """Lazy dependency-free bridge; Browser Use imports only in its worker."""
-    name = "agent_stack_browser_runtime"
-    if name not in sys.modules:
-        path = STACK / "hands" / "browser_runtime.py"
-        spec = importlib.util.spec_from_file_location(name, path)
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules[name] = mod
-        spec.loader.exec_module(mod)
-    return sys.modules[name]
+    return _load_ready_hand("agent_stack_browser_runtime", STACK / "hands" / "browser_runtime.py")  # locked (audit 2026-10-16)
 
 
 def hooked_result(result):

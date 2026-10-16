@@ -36,7 +36,7 @@ def _secret_patterns():
     name = "agent_stack_secret_patterns"
     if name not in _sys.modules:
         spec = _u.spec_from_file_location(name, _P(__file__).resolve().parents[1] / "brain" / "secret_patterns.py")
-        mod = _u.module_from_spec(spec); _sys.modules[name] = mod; spec.loader.exec_module(mod)
+        mod = _u.module_from_spec(spec); spec.loader.exec_module(mod); _sys.modules[name] = mod  # publish only when built
     return _sys.modules[name]
 
 

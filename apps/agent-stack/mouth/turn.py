@@ -1031,14 +1031,27 @@ def _placeholders(text: str, utterance: str) -> str:
     return re.sub(r"\$?\d[\d,.]*%?", sub, text)
 
 
+def _redact(text: str) -> str:
+    """The shared secret detector (brain/secret_patterns.py) for anything this module writes to disk or the bus."""
+    try:
+        return PIPELINE.hooks.redact(text) if hasattr(PIPELINE, "hooks") else text
+    except Exception:  # noqa: BLE001
+        return "[withheld]"
+
+
 def _turn_crash_log(utterance: str, exc: BaseException) -> None:
+    import hashlib
     import traceback
     try:
         p = Path(PIPELINE.ROOT) / "logs" / "turn-errors.jsonl"
         p.parent.mkdir(exist_ok=True)
-        with p.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"ts": time.time(), "utterance": str(utterance or "")[:120], "error": f"{type(exc).__name__}: {exc}"[:300],
-                                 "trace": "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))[-2500:]}) + "\n")
+        # Privacy audit 2026-10-16: the row kept the utterance and a traceback quoting document/JSON content; now a hash
+        # of the utterance and a redacted error/trace.
+        said = str(utterance or "")
+        with p.open("a", encoding="utf-8", errors="replace") as fh:
+            fh.write(json.dumps({"ts": time.time(), "utterance_sha256": hashlib.sha256(said.encode("utf-8", "replace")).hexdigest()[:16],
+                                 "utterance_chars": len(said), "error": _redact(f"{type(exc).__name__}: {exc}")[:300],
+                                 "trace": _redact("".join(traceback.format_exception(type(exc), exc, exc.__traceback__))[-2500:])}) + "\n")
     except Exception:  # noqa: BLE001
         pass
 
@@ -1104,7 +1117,7 @@ def apply_turn_iter(utterance: str, **kw):
         reflex = _reflex(utterance)
         if isinstance(reflex, dict):
             reflex = dict(reflex, ms=round((_time.perf_counter() - t0) * 1000, 1))
-            card = dict(reflex, ts=_time.time(), ask=str(utterance or "")[:80])
+            card = dict(reflex, ts=_time.time(), ask=_redact(str(utterance or ""))[:80])
             PIPELINE.mutate_bus(kw.get("hive") or HIVE, lambda bus: dict(bus, reflex=card))
         _lp = PIPELINE._load("agent_stack_lapse", PIPELINE.STACK / "hands" / "lapse.py")  # Z56: a new turn answers an open question
         PIPELINE.mutate_bus(kw.get("hive") or HIVE, _lp.answered)

@@ -352,7 +352,11 @@ def run(args: dict, utterance: str, *, model_fn, session_fn=session, budget_sec:
     """
     deadline = time.monotonic() + (BUDGET_SEC if budget_sec is None else budget_sec)
     app = str((args or {}).get("app") or "").strip().lower()
-    task = str((args or {}).get("task") or utterance or "").strip()
+    # Privacy audit 2026-10-16: a model-chosen task (after reading web pages or files) must not replace the owner's
+    # words. The task arg is used only when it is part of what the owner said (the fixed route's own trimming).
+    picked = str((args or {}).get("task") or "").strip()
+    said = str(utterance or "").strip()
+    task = picked if picked and (not said or picked.lower() in said.lower()) else (said or picked)
     if app not in APPS:
         return {"ok": False, "wire": "craft", "spoken": f"I do not have a Craft app called {app or 'that'}.", "steps": []}
     if not task:

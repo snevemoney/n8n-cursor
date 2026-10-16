@@ -20,20 +20,39 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def load_json(path: Path) -> dict:
-    """Read JSON. Retry a torn write. Never treat a mid-write as an empty bus."""
+class CorruptBus(ValueError):
+    """The bus file exists but is not readable JSON (concurrency audit 2026-10-16)."""
+
+
+def _load_strict(path: Path) -> dict:
     if not path.is_file():
         return {}
     for attempt in range(3):
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
+        except (OSError, ValueError):  # ValueError covers JSONDecodeError and UnicodeDecodeError
             if attempt == 2:
-                return {}
+                raise CorruptBus(str(path))
             time.sleep(0.01)
             continue
         return data if isinstance(data, dict) else {}
-    return {}
+    raise CorruptBus(str(path))
+
+
+def load_json(path: Path) -> dict:
+    """Read JSON. Retry a torn write. Never treat a mid-write as an empty bus; unreadable reads as {} for readers."""
+    try:
+        return _load_strict(path)
+    except CorruptBus:
+        return {}
+
+
+def _quarantine(path: Path) -> None:
+    """Keep the unreadable file for diagnosis instead of overwriting it with {} (which wiped turns and cancel_gen)."""
+    try:
+        os.replace(path, path.with_name(f"{path.name}.corrupt-{int(time.time())}"))
+    except OSError:
+        pass
 
 
 def write_json(path: Path, data: dict) -> None:
@@ -44,6 +63,8 @@ def write_json(path: Path, data: dict) -> None:
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())  # a crash between write and replace must not leave an empty bus
         os.replace(tmp_name, path)
     except Exception:
         try:
@@ -88,13 +109,19 @@ def mutate_bus(hive: Path, apply: Callable[[dict], dict | None]) -> dict:
         with open(lock_path, "a+", encoding="utf-8") as handle:
             fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
             try:
-                bus = load_json(path)
+                try:
+                    bus = _load_strict(path)
+                except CorruptBus:
+                    _quarantine(path)
+                    bus = {}
+                before = json.dumps(bus, sort_keys=True, default=str)
                 out = apply(bus)
                 if out is None:
                     out = bus
                 if not isinstance(out, dict):
                     out = bus
-                write_json(path, out)
+                if not path.is_file() or json.dumps(out, sort_keys=True, default=str) != before:
+                    write_json(path, out)  # an unchanged bus is not rewritten (peeks rewrote it every 0.2s)
                 return out
             finally:
                 fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
