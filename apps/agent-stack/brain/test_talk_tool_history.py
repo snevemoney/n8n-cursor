@@ -2,6 +2,7 @@
 import copy
 import importlib.util
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -82,7 +83,8 @@ class ToolHistory(unittest.TestCase):
 
  def test_canonical_dispatch_preserves_history_without_worker_transport(self):
   history=P._provider_hand_exchange(selection(),selection(),receipt())
-  with patch.object(P.ONLINE,'call_grok',return_value={'ok':True,'spoken':'actual response'}) as talk:
+  # suite runs set AGENT_STACK_CURSOR_DRY=1, which returns before dispatch; call_grok is mocked, so no live HTTP
+  with patch.dict(os.environ,{'AGENT_STACK_CURSOR_DRY':'0'}),patch.object(P.ONLINE,'call_grok',return_value={'ok':True,'spoken':'actual response'}) as talk:
    P.online_talk('ordinary request','actual receipts',tool_history=history)
   self.assertEqual(talk.call_args.kwargs['tool_history'],history)
   with patch.object(O,'openrouter_api_key',return_value='fixture-only'),patch.object(O,'call_openrouter',return_value={'ok':True,'spoken':'actual response'}) as canonical:

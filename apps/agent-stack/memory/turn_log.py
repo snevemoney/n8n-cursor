@@ -43,6 +43,9 @@ def cost_bucket(model: str | None) -> str:
     return "cheap" if _CHEAP_RE.search(str(model)) else "frontier"
 
 
+_SUMMARY_KEYS = {"executor", "dispatched", "advisory_only", "approval_pending", "task_verified", "outcome"}
+
+
 def build_row(*, started: float, ended: float, events: list[dict], talk: dict | None, inject: dict | None,
               first_ms: int | None = None) -> dict:
     tools: list[str] = []
@@ -79,7 +82,10 @@ def build_row(*, started: float, ended: float, events: list[dict], talk: dict | 
         "verb": final.get("verb"),
         "ok": bool(final.get("ok", True)),
         "task_verified": final.get("task_verified") is True,
-        "execution_summary": final.get("execution_summary"),
+        # Executor name, booleans and outcome code only; any other key (or text) is dropped.
+        "execution_summary": {k: v for k, v in final["execution_summary"].items()
+                              if k in _SUMMARY_KEYS and (v is None or isinstance(v, (bool, int, str)))}
+                             if isinstance(final.get("execution_summary"), dict) else None,
         "awaiting_approval": final.get("outcome") == "AWAITING_APPROVAL",
         "outcome": final.get("outcome"),
         "gen": final.get("gen"),

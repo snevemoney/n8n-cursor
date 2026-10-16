@@ -18,7 +18,8 @@ class WorkspaceReloadTests(unittest.TestCase):
  def test_legacy_cached_module_then_same_second_same_size_new_bytes_load_actual_new_api(self):
   with tempfile.TemporaryDirectory() as tmp:
    stack,path=self.fixture(tmp);name='agent_stack_workspace_read'
-   legacy_spec=importlib.util.spec_from_file_location(name,path);legacy=importlib.util.module_from_spec(legacy_spec);legacy_spec.loader.exec_module(legacy)
+   legacy_spec=importlib.util.spec_from_file_location(name,path);legacy=importlib.util.module_from_spec(legacy_spec)
+   with patch.object(sys,'dont_write_bytecode',False):legacy_spec.loader.exec_module(legacy)  # the stale .pyc is the fixture, even under PYTHONDONTWRITEBYTECODE
    self.assertEqual(legacy.version(),'old');self.assertTrue(any((path.parent/'__pycache__').glob('workspace_read*.pyc')))
    previous=sys.modules.get(name)
    try:

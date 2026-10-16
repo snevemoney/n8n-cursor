@@ -32,7 +32,8 @@ class TurnLogTest(unittest.TestCase):
         t0 = time.time()
         secret_ask, secret_reply = "my bank pin is 4417 zebra", "Sir. Your pin 4417 zebra is noted."
         events = [{"verb": "converse", "ok": True, "spoken": secret_reply, "utterance": secret_ask,
-                   "spoken_delta": secret_reply, "cites": [{"snippet": secret_reply}], "args": {"q": secret_ask}}]
+                   "spoken_delta": secret_reply, "cites": [{"snippet": secret_reply}], "args": {"q": secret_ask},
+                   "execution_summary": {"executor": "converse", "task_verified": False, "spoken": secret_reply}}]
         talk = {"t": t0 + 0.1, "model": "m/x", "prompt": secret_ask, "spoken": secret_reply}
         line = json.dumps(TL.build_row(started=t0, ended=t0 + 1, events=events, talk=talk, inject={}))
         self.assertNotIn("4417", line)
@@ -41,7 +42,8 @@ class TurnLogTest(unittest.TestCase):
                    "est_tokens_out", "injected_context", "retrieved", "tools", "verb", "ok", "outcome", "gen",
                    "finish_reason", "resume",  # both metadata only: a finish code and resume counts
                    "tool_ms", "first_chunk_ms", "roadblock", "cost_bucket",  # timings and codes, never text
-                   "usage_tokens_in", "usage_tokens_out", "usage_cost_usd", "usage_gen_id"}  # metered numbers + provider id
+                   "usage_tokens_in", "usage_tokens_out", "usage_cost_usd", "usage_gen_id",  # metered numbers + provider id
+                   "task_verified", "awaiting_approval", "execution_summary"}  # booleans + executor/outcome codes
         self.assertEqual(set(json.loads(line)), allowed)
 
     def test_stale_talk_record_is_not_this_turn(self):

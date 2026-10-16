@@ -16,7 +16,7 @@ class SecretPathTestModules(unittest.TestCase):
             self.assertFalse(P.is_secret_path(path), path)
 
     def test_real_secret_shapes_still_match(self):
-        for path in ("x/.env", ".env.local", "a/token.json", "tokens.py", "my_tokens.txt", "secrets/test_a.py",
+        for path in ("x/.env", ".env.local", "a/token.json", "tokens.json", "my_tokens.txt", "secrets/test_a.py",
                      "/Users/x/.ssh/test_x.py", "x/test_token.pem", "certs/server.key", "id_ed25519",
                      "/Users/x/.grok-private/jarvis-mode.json", "credentials.json", "Keychains/login"):
             self.assertTrue(P.is_secret_path(path), path)

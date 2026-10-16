@@ -3,3 +3,15 @@ import os
 import tempfile
 
 os.environ.setdefault("JARVIS_TURN_LOG", os.path.join(tempfile.mkdtemp(prefix="jarvis-test-turns-"), "jarvis-turns.jsonl"))
+
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def _restore_environ():
+    """Each test starts from the same environment: several tests set JARVIS_MODE_FILE / JARVIS_SCRATCH_ROOTS and never
+    restored them, so a later safety test silently ran in another permission mode (found 2026-10-15)."""
+    saved = dict(os.environ)
+    yield
+    os.environ.clear()
+    os.environ.update(saved)
