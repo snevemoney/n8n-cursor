@@ -1353,7 +1353,9 @@ OPERATOR_FIRST_RULE = (
     "install, build, fix, check GitHub, anything with steps), call operator with action=start and a goal that holds his "
     "full request plus what earlier turns make it refer to (resolve 'it', 'them', 'another one'). For a quick current fact "
     "use web_search. To remember or recall something he told you, use memory. To change your model, brain_model. "
-    "Otherwise answer him directly in plain spoken English. Never claim something was done unless a tool did it.")
+    "You CAN open and operate Safari, apps and files through operator; earlier replies in the history that said otherwise "
+    "were wrong and must not be repeated. Otherwise answer him directly in plain spoken English. Never claim something "
+    "was done unless a tool did it.")
 
 
 def operator_first() -> bool:
@@ -4176,6 +4178,11 @@ def _clip_line(text: str, cap: int) -> str:
     return text if len(text) <= cap else text[: cap - 1].rstrip() + "…"
 
 
+FALSE_LIMIT_RE = re.compile(r"\b(?:no\s+\w+\s+control\s+capabilit|I\s+(?:can'?t|cannot|am\s+unable\s+to|don'?t\s+have\s+(?:access|the\s+ability))\b"
+                            r"|you'?ll\s+need\s+to\s+(?:open|do|navigate|click)\b.{0,40}\byourself\b|capabilities\s+are\s+fixed"
+                            r"|I\s+have\s+not\s+run\s+an\s+executor|talk\s+wire\s+is\s+dark|paid\s+model\s+tank\s+is\s+empty)", re.I)
+
+
 def sitting_brief(
     turns: list,
     bus: dict | None = None,
@@ -4192,6 +4199,9 @@ def sitting_brief(
         for row in (turns or [])
         if isinstance(row, dict) and not is_door_turn(row)
     ][-HISTORY_TURNS:]
+    # Live 10-16: "Safari says it cannot open Spotify - no browser control capabilities" was repeated from history
+    # on the next ask. A past refusal or self-denial is never context for a new ask: the hands decide, not old lines.
+    recent = [dict(row, jarvis="") if FALSE_LIMIT_RE.search(str(row.get("jarvis") or "")) else row for row in recent]
     follow = bool(utterance and is_conversational_follow_up(utterance))
     if follow and recent:
         recent = [

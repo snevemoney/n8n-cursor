@@ -45,6 +45,23 @@ SYSTEM = (
 )
 
 
+def profile_lines(limit: int = 1200) -> str:
+    """Who Evens is, from the shared operator profile (his repos, agents, preferences). Empty when the file is missing."""
+    try:
+        text = (Path.home() / ".grok-shared" / "OPERATOR_PROFILE.md").read_text(encoding="utf-8")
+    except OSError:
+        return ""
+    keep = [ln.strip() for ln in text.splitlines() if ln.strip().startswith("- ")]
+    return "\n".join(keep)[:limit]
+
+
+def system_prompt() -> str:
+    prof = profile_lines()
+    base = SYSTEM + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "")
+    return base + ("\nHis coding agents are Claude Code, Codex and Cursor; 'Claude Code's changes' means their commits "
+                   "and PRs on HIS repo snevemoney/n8n-cursor (Jarvis lives in apps/agent-stack), never Anthropic's repos.")
+
+
 def _fn(name, desc, props, required=()):
     return {"type": "function", "function": {"name": name, "description": desc,
             "parameters": {"type": "object", "properties": props, "required": list(required)}}}
@@ -302,7 +319,7 @@ class Task:
         d.mkdir(parents=True)
         t = cls(d)
         t.write("request.json", {"task_id": tid, "goal": goal, "created": time.time()})
-        t.write("messages.json", [{"role": "system", "content": SYSTEM}, {"role": "user", "content": goal}])
+        t.write("messages.json", [{"role": "system", "content": system_prompt()}, {"role": "user", "content": goal}])
         t.write("state.json", {"task_id": tid, "status": "QUEUED", "step": 0})
         (Path(hive) / "operator-tasks" / "latest.json").write_text(json.dumps({"task_id": tid}))
         return t
@@ -347,7 +364,8 @@ def _model_fn():
     if hasattr(online, "load_existing_env"):
         online.load_existing_env()
     agent = _load("agent_tools", "agent_tools.py")  # the coding chain Jarvis already uses (models unchanged)
-    chain = (agent.CODE_MODEL, agent.CODE_MODEL_BACKUP)
+    # Cost (live 10-16: eight Opus jobs emptied the OpenRouter balance mid-run). Sonnet first; "use opus" switches.
+    chain = ((os.environ.get("JARVIS_OPERATOR_MODEL") or "anthropic/claude-sonnet-5.5").strip(), agent.CODE_MODEL)
     return lambda messages, tools: online.call_openrouter_messages(messages, tools, model_chain=chain, max_tokens=12000,
                                                                    allow_reasoning=True, attempt_sec=120.0)
 
