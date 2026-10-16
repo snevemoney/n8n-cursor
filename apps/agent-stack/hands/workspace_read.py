@@ -374,43 +374,51 @@ def _find_documents(args, rs):
     found, seen, errors, count = [], set(), [], 0
     complete = True
     deadline = time.monotonic() + FIND_SECONDS
-    for root in scan_roots:
-        if not root.is_dir():
-            errors.append(f"{root.name}: unavailable")
-            continue
-        def onerror(exc):
-            errors.append(f"{Path(exc.filename or root).name}: inaccessible")
-        for directory, dirs, files in os.walk(root, followlinks=False, onerror=onerror):
-            dirs[:] = sorted((d for d in dirs if not d.startswith(".") and not _secret_name(d) and not _skip_dir(directory, d)
-                              and not (Path(directory) / d).is_symlink()), key=lambda d: (d not in _FIRST, d))
-            count += len(dirs) + len(files)
-            if count > FIND_MAX_ENTRIES or time.monotonic() >= deadline:
-                complete = False
-                break
-            for name in sorted(files):
-                if time.monotonic() >= deadline:
+
+    def scan():
+        nonlocal complete, count
+        for root in scan_roots:
+            if not root.is_dir():
+                errors.append(f"{root.name}: unavailable")
+                continue
+            def onerror(exc):
+                errors.append(f"{Path(exc.filename or root).name}: inaccessible")
+            for directory, dirs, files in os.walk(root, followlinks=False, onerror=onerror):
+                dirs[:] = sorted((d for d in dirs if not d.startswith(".") and not _secret_name(d) and not _skip_dir(directory, d)
+                                  and not (Path(directory) / d).is_symlink()), key=lambda d: (d not in _FIRST, d))
+                count += len(dirs) + len(files)
+                if count > FIND_MAX_ENTRIES or time.monotonic() >= deadline:
                     complete = False
                     break
-                if (suffixes and Path(name).suffix.lower() not in suffixes) or _secret_name(name):
-                    continue
-                if query and not all(w in name.lower() for w in query.split()):
-                    continue
-                if topic and not (_name_tokens(name) & set(topic)):
-                    continue
-                path = Path(directory) / name
-                if path.is_symlink():
-                    continue
-                resolved, _ = _resolve(str(path), rs)
-                if resolved is None or not resolved.is_file() or str(resolved) in seen:
-                    continue
-                seen.add(str(resolved)); found.append(str(resolved))
-                if len(found) >= FIND_MAX_RESULTS:
-                    complete = False
+                for name in sorted(files):
+                    if time.monotonic() >= deadline:
+                        complete = False
+                        break
+                    if (suffixes and Path(name).suffix.lower() not in suffixes) or _secret_name(name):
+                        continue
+                    if query and not all(w in name.lower() for w in query.split()):
+                        continue
+                    if topic and not (_name_tokens(name) & set(topic)):
+                        continue
+                    path = Path(directory) / name
+                    if path.is_symlink():
+                        continue
+                    resolved, _ = _resolve(str(path), rs)
+                    if resolved is None or not resolved.is_file() or str(resolved) in seen:
+                        continue
+                    seen.add(str(resolved)); found.append(str(resolved))
+                    if len(found) >= FIND_MAX_RESULTS:
+                        complete = False
+                        break
+                if not complete:
                     break
             if not complete:
                 break
-        if not complete:
-            break
+    # one listing can block inside os.walk (iCloud files not on this Mac, live 10-16): answer at the budget anyway
+    worker = threading.Thread(target=scan, daemon=True); worker.start(); worker.join(FIND_SECONDS + 0.5)
+    if worker.is_alive():
+        complete = False
+    found, errors = list(found), list(errors)
     complete = complete and not errors
     found.sort(key=str.casefold)
     scope = args.get('scope_label') or ("the requested allowed folder" if raw else "my currently allowed folders")

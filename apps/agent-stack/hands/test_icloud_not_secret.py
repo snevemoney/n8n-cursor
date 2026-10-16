@@ -21,3 +21,29 @@ class ICloud(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SlowFolder(unittest.TestCase):
+    """Live 2026-10-16: an iCloud listing blocked inside os.walk; the 5 s find budget never ran and the turn hit
+    the 60 s wall ("talk wire is dark"). The search must answer at its budget with what it found."""
+
+    def test_a_blocking_listing_cannot_hold_the_answer(self):
+        import tempfile
+        import time
+        from unittest import mock
+        real_walk = W.os.walk
+
+        def walk(root, **kw):
+            if Path(root).name == "hang":
+                time.sleep(10)
+            return real_walk(root, **kw)
+        with tempfile.TemporaryDirectory() as t:
+            home = Path(t).resolve()
+            (home / "a").mkdir(); (home / "a" / "AI book.pdf").write_bytes(b"%PDF-1.4"); (home / "hang").mkdir()
+            with mock.patch.object(W.os, "walk", side_effect=walk), mock.patch.object(W, "FIND_SECONDS", 1.0):
+                t0 = time.monotonic()
+                got = W._find_documents({"op": "find", "extensions": [".pdf"]}, [home / "a", home / "hang"])
+                took = time.monotonic() - t0
+        self.assertLess(took, 3.0)
+        self.assertEqual(len(got["files"]), 1)
+        self.assertFalse(got["complete"])
