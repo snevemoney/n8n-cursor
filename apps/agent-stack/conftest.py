@@ -12,6 +12,9 @@ def _restore_environ():
     """Each test starts from the same environment: several tests set JARVIS_MODE_FILE / JARVIS_SCRATCH_ROOTS and never
     restored them, so a later safety test silently ran in another permission mode (found 2026-10-15)."""
     saved = dict(os.environ)
+    # Tests never read the live model switch (~/.grok-private/jarvis-brain.json): a live "switch to Sonnet" during a run
+    # changed model-identity answers (2026-10-16).
+    os.environ.setdefault("JARVIS_BRAIN_FILE", os.devnull + ".jarvis-brain-none")
     yield
     os.environ.clear()
     os.environ.update(saved)

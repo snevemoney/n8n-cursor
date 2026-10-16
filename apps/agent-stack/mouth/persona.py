@@ -814,6 +814,28 @@ def witty_beat(verb: str, *, repeat: bool = False) -> str:
     return WIT.get(key, "")
 
 
+# Plain speech (Evens 2026-10-16: "jarvis is not talking in plain english"): what a person would say out loud.
+_PLAIN_SUBS = (
+    (re.compile(r"\*\*|__|`"), ""),                                                   # markdown emphasis / code ticks
+    (re.compile(r"(?m)^\s{0,3}#{1,6}\s+"), ""),                                       # markdown headings
+    (re.compile(r"com~apple~CloudDocs"), "iCloud Drive"),
+    (re.compile(r"\banthropic/claude-([a-z]+)-(\d+(?:\.\d+)?)\b"), lambda m: f"Claude {m.group(1).capitalize()} {m.group(2)}"),
+    (re.compile(r"\bdeepseek/deepseek-[\w.-]*[\w]"), "DeepSeek"),
+    # a long hash used as a file name: "158b2d…72.pdf" -> "an untitled PDF"
+    (re.compile(r"\b[0-9a-f]{24,}\.([A-Za-z0-9]{2,5})\b"), lambda m: f"an untitled {m.group(1).upper()}"),
+    # a dated note slug: "20260227-cursor-ide-browser-...-3654c269" -> "cursor ide browser ..."
+    (re.compile(r"\b20\d{6}-((?:[a-z0-9]+-)*?[a-z0-9]+?)(?:-[0-9a-f]{6,10})?\b(?![-\w])"),
+     lambda m: m.group(1).replace("-", " ")),
+)
+
+
+def plain_speech(text: str) -> str:
+    out = text or ""
+    for rx, rep in _PLAIN_SUBS:
+        out = rx.sub(rep, out)
+    return out
+
+
 def wrap(
     spoken: str,
     *,
@@ -824,7 +846,7 @@ def wrap(
     scars: list[dict] | None = None,
 ) -> str:
     """Sir. Then the payload. A rare hand beat only when it is earned."""
-    raw = scrub_unspeakable(spoken or "", utterance=utterance)
+    raw = plain_speech(scrub_unspeakable(spoken or "", utterance=utterance))
     if is_dump(raw):
         return f"{FAILURE_TEMPLATE} {DUMP_SPOKEN}"
     if (verb or "").strip().lower() == "wire":

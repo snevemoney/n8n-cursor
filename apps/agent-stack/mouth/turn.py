@@ -730,11 +730,8 @@ def _apply_turn_iter_inner(
                         got = {"ok": True, "tool": "vault_read", "spoken": _line, "cites": [nb["path"]], "wires": ["vault_read", "path_match"], "sent": False}
                         yield _door_speak(hive, spoken, _line, "vault_read", retrieve_roots, gen=token, execution=got)
                         return
-                _names = "; ".join(f"{d['stem']} in {Path(d['path']).parent.name}" for d in pm)
-                _line = f"No note matches that exactly, sir. Closest: {_names}. Say which and I'll open it."
-                yield _door_speak(hive, spoken, _line, "vault_read", retrieve_roots, gen=token,
-                                  execution={"ok": True, "tool": "vault_read", "spoken": _line, "cites": [d["path"] for d in pm], "wires": ["path_match"], "sent": False})
-                return
+                # No note covers the ask: step aside (live 10-16: "open my browser and open Gmail" got three note file
+                # names read aloud). The normal turn decides what he meant.
     except Exception:  # noqa: BLE001
         pass
     # Round-2 frontier: Z86/Z87 automation contract+proof, Z89-91 enrich, Z93 preflight, Z95/Z97 panel, Z66 review->do.
