@@ -44,6 +44,11 @@ def _segments(command: str) -> list[list[str]]:
     return out
 
 
+def _looks_like_path(arg: str) -> bool:
+    """A search phrase like 'token budget' is not a file; paths have a slash, ~, a leading dot or an extension."""
+    return not arg.startswith("-") and bool(re.search(r"/|^~|^\.|\.[A-Za-z0-9]{1,8}$", arg))
+
+
 def cli_needs_owner(argv) -> bool:
     """True when a shell command touches one of Evens's kept stops or harms the machine."""
     if isinstance(argv, str):
@@ -51,11 +56,23 @@ def cli_needs_owner(argv) -> bool:
     args = [str(a) for a in (argv or [])]
     line = " ".join(args)
     return bool(CLI_HARD.search(line) or CLI_MORE.search(line) or CLI_MACHINE.search(line)
-                or any(SECRET_ARG.search(os.path.expanduser(a)) for a in args[1:]))
+                or any(is_secret_path(a) for a in args[1:] if _looks_like_path(a)))
+
+
+def _permissions():
+    import importlib.util as _u
+    import sys as _s
+    mod = _s.modules.get("agent_stack_permissions")
+    if mod is None:
+        spec = _u.spec_from_file_location("agent_stack_permissions", Path(__file__).with_name("permissions.py"))
+        mod = _u.module_from_spec(spec); _s.modules["agent_stack_permissions"] = mod; spec.loader.exec_module(mod)
+    return mod
 
 
 def is_secret_path(path) -> bool:
-    return bool(SECRET_ARG.search(os.path.expanduser(str(path))))
+    """One answer for files and shell arguments: hands/permissions.py (code named for tokens is not a secret)."""
+    expanded = os.path.expanduser(str(path))
+    return bool(_permissions().is_secret_path(expanded) or re.search(r"/\.config/gh/", expanded))
 
 
 def authorize(tool: str, args: dict, *, home: Path | None = None) -> tuple[str, str]:

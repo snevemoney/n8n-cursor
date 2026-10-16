@@ -94,6 +94,7 @@ class Recovery(unittest.TestCase):
    with a,b:
     raw=path.read_bytes();E.approve_source_exception(h,F.ID,relative,hashlib.sha256(raw).hexdigest(),authority=E.source_review_authority(),evidence={'offline_independent_review':True})
     blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest();E._source_exceptions(h,F.ID,fetch_public=True,fetch_fn=lambda *a,**k:json.dumps({'sha':blob,'encoding':'base64','content':base64.b64encode(raw).decode()}).encode())
+    (root/'source_revision_review.json').unlink();E.host_review_source_revision(h,F.ID)  # fixture pre-approves its setup commit; review the commit this test added
     baseline,receipt,ready=f.prepare(h,repo,runtime,scratch);self.assertTrue(ready['ok'],ready);owned=Path(ready['working_copy']);allowed=E.source_exception_guard(h,F.ID,owned)
     with self.assertRaises(Exception):hand.code_repo_snapshot(owned)
     with hand.source_exception_scope(allowed):self.assertIn(relative,hand.code_repo_snapshot(owned)['files']);self.assertIn(relative,hand._committed_files(owned))
@@ -156,6 +157,7 @@ class Recovery(unittest.TestCase):
     with a,b:
      raw=path.read_bytes();E.approve_source_exception(h,F.ID,relative,hashlib.sha256(raw).hexdigest(),authority=E.source_review_authority(),evidence={'offline_independent_review':True})
      blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest();E._source_exceptions(h,F.ID,fetch_public=True,fetch_fn=lambda *a,**k:json.dumps({'sha':blob,'encoding':'base64','content':base64.b64encode(raw).decode()}).encode())
+     (root/'source_revision_review.json').unlink();E.host_review_source_revision(h,F.ID)  # review the commit this test added
      baseline=E.capture_runtime_baseline(runtime,R._git(runtime));receipt=E.make_receipt(h,F.ID,runtime_baseline=baseline);prepare=W.prepare
      def prepared(*args,**kw):
       result=prepare(*args,**kw);self.assertTrue(result['ok'],result);raise RuntimeError('offline failure before guard')
