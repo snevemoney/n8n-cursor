@@ -1162,7 +1162,7 @@
 
     // FINISH_MS: a pause mid-sentence is not the end of the thought.
     // Buffer final results; interjections (stop / wait) bypass instantly.
-    const FINISH_MS = 900;
+    const FINISH_MS = 1400;  // Evens 10-16 "Jarvis should not interrupt me when I'm talking"
     let finishTimer = 0;
     let pendingHeard = "";
     function clearHeardBuffer() {
@@ -1174,6 +1174,15 @@
       const bit = (t || "").trim();
       if (!bit) return;
       pendingHeard = pendingHeard ? `${pendingHeard} ${bit}` : bit;
+      clearTimeout(finishTimer);
+      finishTimer = setTimeout(() => {
+        const said = pendingHeard;
+        pendingHeard = "";
+        finishTimer = 0;
+        if (said) handleHeard(said);
+      }, midSentence(pendingHeard) ? FINISH_MS + MID_SENTENCE_EXTRA_MS : FINISH_MS);
+    }
+    function holdFinish() {
       clearTimeout(finishTimer);
       finishTimer = setTimeout(() => {
         const said = pendingHeard;
@@ -1224,7 +1233,10 @@
 
     // Z03 barge-in: while Jarvis speaks and the mic is live, sustained voice on the mic (louder than the
     // echo-cancelled TTS bleed) cuts the speech off and hands the floor back. Mic level only; no audio leaves.
-    const BARGE = { floor: 0.045, ratio: 1.8, holdMs: 260, tick: 60 };
+    // Evens 10-16 "I should be able to interrupt it": the old rule compared the echo-cancelled mic with the RAW TTS
+    // output level, which is always louder, so it almost never fired. Now: mic vs the bleed the mic itself hears
+    // while Jarvis talks (median of the last ~2 s of mic levels during speech).
+    const BARGE = { floor: 0.03, ratio: 2.2, holdMs: 260, tick: 60, bleedWindow: 33 };
     let bargeTimer = null, bargeSince = 0, micAnalyser = null, micBuf = null;
     function micLevel(an, buf) {
       an.getFloatTimeDomainData(buf);
@@ -1232,9 +1244,10 @@
       for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
       return Math.sqrt(sum / buf.length);
     }
-    function bargeHit(mic, tts, heldMs) {
-      return mic > BARGE.floor && mic > tts * BARGE.ratio && heldMs >= BARGE.holdMs;
+    function bargeHit(mic, bleed, heldMs) {
+      return mic > BARGE.floor && mic > bleed * BARGE.ratio && heldMs >= BARGE.holdMs;
     }
+    function median(xs) { const a = xs.slice().sort((p, q) => p - q); return a.length ? a[a.length >> 1] : 0; }
     window.__jarvisBarge = { BARGE, bargeHit };
     function startBargeWatch() {
       if (bargeTimer || !streamLive()) return;
@@ -1246,23 +1259,21 @@
         micBuf = new Float32Array(micAnalyser.fftSize);
         audioCtx.createMediaStreamSource(state.stream).connect(micAnalyser);
       } catch (e) { micAnalyser = null; return; }
-      let ttsBuf = null;
+      let levels = [];
       bargeTimer = setInterval(() => {
-        if (!micAnalyser || !state.armed || !ttsSpeaking()) { bargeSince = 0; return; }
+        if (!micAnalyser || !state.armed || !ttsSpeaking()) { bargeSince = 0; levels = []; return; }
         const mic = micLevel(micAnalyser, micBuf);
-        let tts = 0;
-        if (ttsAnalyser) {
-          if (!ttsBuf || ttsBuf.length !== ttsAnalyser.fftSize) ttsBuf = new Float32Array(ttsAnalyser.fftSize);
-          tts = micLevel(ttsAnalyser, ttsBuf);
-        }
+        const bleed = levels.length >= 8 ? median(levels) : mic;  // first ~0.5 s of speech: learn the bleed
+        levels.push(mic);
+        if (levels.length > BARGE.bleedWindow) levels.shift();
         const now = Date.now();
-        if (mic > BARGE.floor && mic > tts * BARGE.ratio) {
+        if (levels.length >= 8 && mic > BARGE.floor && mic > bleed * BARGE.ratio) {
           if (!bargeSince) bargeSince = now;
-          if (bargeHit(mic, tts, now - bargeSince)) {
-            bargeSince = 0;
+          if (bargeHit(mic, bleed, now - bargeSince)) {
+            bargeSince = 0; levels = [];
             pressStop();
             $("spoken").textContent = "Go ahead, I'm listening.";
-            scheduleRestart(TTS_COOLDOWN);
+            scheduleRestart(RESTART_MIN);  // listen at once so his first words are not lost
           }
         } else {
           bargeSince = 0;
@@ -1309,6 +1320,7 @@
         if (ttsSpeaking() || state.turning) return;
         $("spoken").textContent = pendingHeard ? `${pendingHeard} ${t}` : t;
         if (last.isFinal) queueHeard(t);
+        else if (finishTimer && (t || "").trim()) holdFinish();  // he is still talking: the pause clock restarts
       };
       rec.onerror = (e) => {
         const err = (e && e.error) || "";

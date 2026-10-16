@@ -307,8 +307,13 @@ def worktree() -> Path:
     if not (WORKTREE / ".git").exists():
         subprocess.run(["git", "-C", str(REPO_MAIN), "fetch", "-q", "origin", "main"], check=False, timeout=180)
         has = subprocess.run(["git", "-C", str(REPO_MAIN), "rev-parse", "--verify", "-q", BRANCH], capture_output=True).returncode == 0
-        args = ["git", "-C", str(REPO_MAIN), "worktree", "add", str(WORKTREE)] + ([BRANCH] if has else ["-b", BRANCH, "origin/main"])
+        args = ["git", "-C", str(REPO_MAIN), "worktree", "add", "--no-checkout", str(WORKTREE)] + (
+            [BRANCH] if has else ["-b", BRANCH, "origin/main"])
         subprocess.run(args, check=True, capture_output=True, text=True, timeout=600)
+        # only the packets folder: a full checkout is ~2.4 GB and his disk is nearly full
+        subprocess.run(["git", "-C", str(WORKTREE), "sparse-checkout", "set", "--no-cone", f"/{PACKETS}/"], check=True,
+                       capture_output=True, text=True, timeout=120)
+        subprocess.run(["git", "-C", str(WORKTREE), "checkout"], check=True, capture_output=True, text=True, timeout=600)
     return WORKTREE
 
 

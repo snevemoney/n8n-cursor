@@ -41,6 +41,14 @@ class OneLoop(unittest.TestCase):
         said = [r["text"] for r in t.rows("speech.jsonl")]
         self.assertEqual(said, ["Opening Safari now.", "Read it."])
 
+    def test_the_answer_is_not_spoken_twice(self):  # live 10-16: say + done carried the same answer, both spoken
+        t = O.Task.create(self.hive, "search facebook for juliana")
+        line = "I searched Facebook for Juliana in your Safari. The top results are a post by Juliana Carisle."
+        model = scripted([("say", {"text": line})], [("done", {"summary": "Searched Facebook for Juliana in a background "
+                                                                       "Safari tab. The top results are a post by Juliana Carisle."})])
+        O.run(t.path, model_fn=model)
+        self.assertEqual([r["text"] for r in t.rows("speech.jsonl")], [line])
+
     def test_a_new_line_reaches_the_running_loop(self):
         t = O.Task.create(self.hive, "render a video")
         O.tell(self.hive, "make it 10 seconds instead")

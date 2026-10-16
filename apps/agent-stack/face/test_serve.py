@@ -194,7 +194,7 @@ class FaceServeTest(unittest.TestCase):
         self.assertIn("if (state.armed) enqueueSpeak(line)", html.split("watch_notice", 1)[1][:800])
         self.assertIn("else if (!WIDGET)", html)
         self.assertIn('document.addEventListener("pointerdown", unlockAudio, true)', html)
-        self.assertIn("const FINISH_MS = 900", html)
+        self.assertIn("const FINISH_MS = 1400", html)
         self.assertIn("function queueHeard", html)
         self.assertIn("clearHeardBuffer()", html)
         self.assertIn("queueHeard(t)", html)

@@ -74,6 +74,13 @@ class Background(unittest.TestCase):
         f.driver({"safari_tab": [77, 15]}).act({"action": "click", "ref": 1})
         self.assertEqual(f.cursor, [(400, 1301)]); self.assertEqual(f.hands, [])
 
+    def test_show_puts_it_on_his_screen(self):
+        f = FakeSafari()
+        f.driver({"safari_tab": [77, 15]}).act({"action": "show"})
+        script = " ".join(" ".join(l) for l, _ in f.osa_calls)
+        self.assertIn("set current tab of window id 77 to tab 15", script)
+        self.assertIn("set index of window id 77 to 1", script); self.assertIn("activate", script)
+
     def test_his_tabs_are_never_closed(self):
         f = FakeSafari()
         got = f.driver({"safari_tab": [77, 3]}).act({"action": "close_tab"})

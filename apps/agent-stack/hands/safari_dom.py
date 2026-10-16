@@ -285,10 +285,12 @@ class SafariDOM:
         return self.snapshot("Working in that tab now. ")
 
     def _show(self, a):
-        """Bring the working tab into view (only when he asked to see it)."""
+        """Put the working tab on his screen (Evens 10-16: "let me see / put it on my screen"): that tab current,
+        its window in front, Safari active."""
         w, i = self._tab()
-        self.osa([f'tell application "Safari" to set current tab of window id {w} to tab {i} of window id {w}'])
-        return self.snapshot("It's the tab he sees now. ")
+        self.osa(['tell application "Safari"', f"set current tab of window id {w} to tab {i} of window id {w}",
+                  f"set index of window id {w} to 1", "activate", "end tell"])
+        return self.snapshot("It's on his screen now. ")
 
     def _close_tab(self, a):
         w, i = self._tab()

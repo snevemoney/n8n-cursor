@@ -49,10 +49,10 @@ SYSTEM = (
     "Working: prefer shell and files when they do the job. His browser is Safari; never open Chrome or another browser unless he names it. Web work happens in his Safari "
     "in the BACKGROUND with the safari tool: open your own tab with new_tab (his current tab, his mouse and his front "
     "app stay his), work it by element numbers, and check the page that comes back after each action. Use his current "
-    "tab (use_tab) only when he means the page he is looking at; use show at the end only when he wants to see the "
+    "tab (use_tab) only when he means the page he is looking at; when he asks to see it (let me see, show me, put it on my screen, anything like that) use show, which brings it in front of him; otherwise use show only when he wants to see the "
     "result. Do not route around the page with shell, gh or open when he asked for the browser. If a page says LOGIN "
     "NEEDED, tell him in one line to log in to that site in Safari and wait for him (ask_owner); never type his "
-    "passwords. (Background research without a browser: web_search and fetch_url.) To learn from a video, an X post or a link he gives you, or when he says look for new signals (his Watch Later and X bookmarks), use the signal tool. If a site wants a login he has in "
+    "passwords. (Background research without a browser: web_search and fetch_url.) For a desktop app he wants to see, open or activate it so it comes to the front. To learn from a video, an X post or a link he gives you, or when he says look for new signals (his Watch Later and X bookmarks), use the signal tool. If a site wants a login he has in "
     "an app instead (Spotify.app), use the app with computer. For desktop apps use "
     "computer: take a screenshot, click/type/scroll at pixels of that screenshot (your blue cursor shows him where), "
     "and look at the screenshot that comes back after every action. He has more than one screen: if you cannot see "
@@ -853,12 +853,22 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
         status, args = terminal
         state = task.read("state.json")
         line = str(args.get("summary") or args.get("question") or "")
-        if line.strip():
-            task.speak(line.strip())  # the last thing he hears is spoken the same way as the rest (one voice)
+        spoke = [r for r in task.rows("speech.jsonl") if float(r.get("at") or 0) >= float(state.get("turn_at") or 0)]
+        if line.strip() and (status == "WAITING_OWNER" or not any(_repeats(line, r.get("text", "")) for r in spoke)):
+            # Evens 10-16 "sometimes Jarvis repeats its response twice": say + done carried the same answer and both
+            # were spoken. The done summary is spoken only when nothing was said this turn; a question always is.
+            task.speak(line.strip())
         state.update(status=status, summary=line, evidence=str(args.get("evidence") or ""))
         task.write("state.json", state)
         return status
     return None
+
+
+def _repeats(new: str, old: str) -> bool:
+    """True when `new` mostly says what `old` already said (most of its content words were in it)."""
+    words = lambda t: {w for w in re.findall(r"[a-z0-9']{3,}", t.lower()) if w not in ("the", "and", "your", "you", "for", "that")}
+    n, o = words(new), words(old)
+    return bool(n) and len(n & o) / len(n) >= 0.6
 
 
 def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: float = TIME_BUDGET_S,
@@ -870,7 +880,7 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
     tier, kind = st0.get("tier") or "mid", st0.get("kind") or "any"
     model_fn = fixed_fn or _model_fn(tier, st0.get("chain"))
     state = task.read("state.json")
-    state.update(status="RUNNING", pid=os.getpid(), started=state.get("started") or time.time())
+    state.update(status="RUNNING", pid=os.getpid(), started=state.get("started") or time.time(), turn_at=time.time())
     task.write("state.json", state)
     start = time.monotonic()
     while True:
@@ -935,7 +945,7 @@ def _idle_until_spoken_to(task) -> bool:
             return False
         msgs = task.read("messages.json", [])
         if len(msgs) > seen and msgs[-1].get("role") == "user":
-            st = task.read("state.json"); st.update(status="RUNNING", step=0); task.write("state.json", st)
+            st = task.read("state.json"); st.update(status="RUNNING", step=0, turn_at=time.time()); task.write("state.json", st)
             return True
         time.sleep(1.0)
     return False
