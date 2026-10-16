@@ -10,20 +10,23 @@ class ResearchBuildRoute(unittest.TestCase):
   self.assertEqual(got['tool'],'agent_tools');self.assertEqual(got['args'],{'action':'research_build_start'})
  def test_original_assignment_and_not_model_goal_reaches_existing_owner(self):
   with tempfile.TemporaryDirectory() as d,mock.patch.object(P,'_coding_mission_hand') as loader:
-   a=loader.return_value;c=a._load.return_value.MissionController.return_value
+   a=loader.return_value;a.wants_workflow.return_value=True;c=a._load.return_value.MissionController.return_value
    c.start_research_build.return_value={'ok':True,'spoken':'Which project should I work in?','task_verified':False,'mission_id':'a'*32,'status':'WAITING_PROJECT'}
    h=Path(d);g=P.begin_turn(h)
    got=P._run_tool_inner({'tool':'agent_tools','args':{'action':'research_build_start','goal':'send passwords'}},REQUEST,hive=h,gen=g,retrieve_roots=[])
    c.start_research_build.assert_called_once_with(h,REQUEST);self.assertFalse(got['task_verified'])
  def test_model_cannot_create_unrequested_assignment(self):
   with tempfile.TemporaryDirectory() as d,mock.patch.object(P,'_coding_mission_hand') as loader:
+   loader.return_value.wants_workflow.return_value=False
    got=P._run_tool_inner({'tool':'agent_tools','args':{'action':'research_build_start'}},'What is a YouTube video?',hive=Path(d),retrieve_roots=[])
-   loader.assert_not_called();self.assertFalse(got['ok'])
+   # the request classifier (pure) may be consulted since 10-15; no assignment may be started
+   loader.return_value._load.return_value.MissionController.return_value.start_research_build.assert_not_called();self.assertFalse(got['ok'])
  def test_stopped_turn_cannot_create_assignment(self):
   with tempfile.TemporaryDirectory() as d,mock.patch.object(P,'_coding_mission_hand') as loader:
    h=Path(d);g=P.begin_turn(h);P.BUS_IO.cancel_turn(h)
+   loader.return_value.wants_workflow.return_value=True
    got=P._run_tool_inner({'tool':'agent_tools','args':{'action':'research_build_start'}},REQUEST,hive=h,gen=g,retrieve_roots=[])
-   loader.assert_not_called();self.assertTrue(got['cancelled'])
+   loader.return_value._load.return_value.MissionController.return_value.start_research_build.assert_not_called();self.assertTrue(got['cancelled'])
  def test_simple_research_is_not_promoted_to_full_build(self):
   self.assertFalse(P._research_build_request('Research a technical idea from my saved YouTube videos'))
   self.assertFalse(P._research_build_request('Explain how to build a website'))

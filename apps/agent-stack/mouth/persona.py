@@ -220,7 +220,7 @@ WIT = {
     "safari": "The tab, not the face.",
     "safari_see": "The tab, not the face.",
     "cursor_ask": "The repo, not a rumor.",
-    "refuse_hard_step": "That stays with you.",
+    "refuse_hard_step": "Your call.",  # was "That stays with you."; kept stops ask first (Evens 10-15), they don't refuse
     "refuse": "That stays with you.",
     "stop": "Noted.",
     "heal": "Logged.",

@@ -780,7 +780,9 @@ def _document_snapshot_followup(text):
         return False
     return bool(DOCUMENT_FOLLOWUP_RE.search(line) and (
         re.search(r"\b(?:it|this|that|these|those|both|previous|just|comparison|results|document|files?|sources?)\b", line, re.I)
-        or re.fullmatch(r"(?:please\s+)?(?:summari[sz]e|explain|analy[sz]e)(?:\s+it)?[.!?]*", line, re.I)))
+        or re.fullmatch(r"(?:please\s+)?(?:summari[sz]e|explain|analy[sz]e)(?:\s+it)?[.!?]*", line, re.I)
+        # "What is the conclusion?" right after a read asks about that read
+        or re.match(r"(?:what|which|where|how)\b[^?]{0,40}\b(?:conclusion|summary|main points|key points)\b", line, re.I)))
 
 
 def _document_context_hand():
@@ -1448,7 +1450,14 @@ def _workflow_followup_route(utterance, hive):
             return {"tool":"agent_tools","args":{"action":"research_build_continue","mission_id":matches[0]},"speak":""}
         if len(matches)>1:
             return {"tool":"say","args":{},"speak":"I have more than one unfinished project matching that. Which project should I continue?"}
-        return {"tool":"say","args":{},"speak":"I could not identify an active project matching that request. Which project do you mean? Cancelled work remains stopped."}
+        # Nothing active: plain "continue" resumes the most recent workflow even after a cancel (Evens 10-15: no workflow
+        # numbers needed). Its approvals were dropped by the cancel, so nothing is edited until he approves again.
+        latest=Path(hive)/'coding-missions'/ident
+        if (adapter.read_json(latest/'request.json').get('worker_kind')=='research_build'
+                and adapter.wants_workflow_continuation(text,adapter.read_json(latest/'request.json').get('objective','')) is True
+                and adapter.read_json(latest/'state.json').get('status') not in {'COMPLETED','FAILED','EXPIRED'}):
+            return {"tool":"agent_tools","args":{"action":"research_build_continue","mission_id":ident},"speak":""}
+        return {"tool":"say","args":{},"speak":"I could not identify a project matching that request. Which project do you mean?"}
     if status_query and len(named)<=1:
         return {"tool":"agent_tools", "args":{"action":"research_build_status","mission_id":ident}, "speak":""}
     # A complete new assignment retains its own objective before contextual
@@ -5765,6 +5774,7 @@ TOOL_HEARTBEAT = "Still checking, sir; the wires are being fashionably slow."
 HAND_LOOP_MAX_HANDS = 4
 # Screen-overlay hands finish the turn themselves: a second model pass replaced "The red arrow is on it" with its own
 # line, and a repeat pointer pick re-captured the screen (hide_overlays) or ended the turn as a failed duplicate.
+BARE_READ_RE = re.compile(r"(?:please\s+)?(?:read|open|show(?:\s+me)?|cat)\s+(?:the\s+file\s+)?(?:\"[^\"]+\"|'[^']+'|\S+)[.!]?", re.I)  # "read X" only
 COMPLETE_READ_OPS = {'open_document', 'screenshot_reference', 'repos', 'list', 'git', 'status'}  # the hand's own reply is the whole answer; no model pass
 TERMINAL_HANDS = frozenset({"pointer", "pointer_click", "pointer_demo", "apps", "capability", "code_run", "operator"})  # code_run: live 18:08 the model narrated a fake syntax error over real output 45
 # A model-free (fixed) route already answered a single ask; only a compound ask ("read A and B and compare")
@@ -6414,7 +6424,9 @@ def _run_tool_inner(
                         'task_verified':False,'wires':[tool],'cites':[],'sent':False}
         if args.get("action") in {"research_build_bind", "research_build_continue", "research_build_sources", "research_build_approve", "research_build_read_access", "research_build_permission_info", "research_build_repo_context", "research_build_repo_sources", "research_build_status"}:
             owner_pick = _workflow_followup_route(utterance, hive)
-            if not owner_pick or owner_pick["args"]["action"] != args.get("action"):
+            if owner_pick and owner_pick.get("tool") == "say":  # the route has a question for Evens; ask it
+                return {"ok":False,"tool":tool,"spoken":owner_pick.get("speak",""),"task_verified":False,"wires":[tool],"cites":[],"sent":False}
+            if not owner_pick or (owner_pick.get("args") or {}).get("action") != args.get("action"):
                 return {"ok":False,"tool":tool,"spoken":"No project binding or workflow continuation was requested.","task_verified":False,"wires":[tool],"cites":[],"sent":False}
             if gen is not None and turn_cancelled(hive, gen):
                 return {"ok":False,"tool":tool,"spoken":"Stopped. The assignment is preserved.","task_verified":False,"cancelled":True,"wires":[tool],"cites":[],"sent":False}
@@ -8744,7 +8756,8 @@ def apply_pipeline_iter(
     if (isinstance(ran,dict) and pick_tool in HANDS and pick_tool != "browser_mission" and pick_tool not in TERMINAL_HANDS
         and not (pick_tool=='skills' and (ran.get('skills_meta') or {}).get('op')=='run')
         and not (fixed_pick and pick_tool=='skills' and not COMPOUND_ASK_RE.search(spoken_in or ''))
-        and not (fixed_pick and (pick_tool not in LOOP_READ_HANDS or str((ran or {}).get('workspace_meta',{}).get('op') or (ran or {}).get('op') or ((pick or {}).get('args') or {}).get('op')) in COMPLETE_READ_OPS) and not COMPOUND_ASK_RE.search(spoken_in or ""))
+        and not (fixed_pick and (pick_tool not in LOOP_READ_HANDS or (str((ran or {}).get('workspace_meta',{}).get('op') or (ran or {}).get('op') or ((pick or {}).get('args') or {}).get('op')) in COMPLETE_READ_OPS
+                     or (((ran or {}).get('workspace_complete') or (ran or {}).get('document_context')) and (ran or {}).get('ok') and BARE_READ_RE.fullmatch((spoken_in or '').strip())))) and not COMPOUND_ASK_RE.search(spoken_in or ""))
         and not (token and turn_cancelled(hive,token))):
         loop_brief=provider_brief or sitting_brief(prior_turns,bus_now,retrieve_roots,spoken_in)
         ran=yield from _continue_hand_loop(pick,ran,spoken_in,hive=hive,token=token,brain=brain,
@@ -8785,7 +8798,9 @@ def apply_pipeline_iter(
         or ran.get("from_store")
         or is_dark_cursor(got)
     ) else False
-    if cursor_fn is None and live_cursor_ready():
+    if tool == "refuse_hard_step":
+        login_said = False  # a fixed kept-stop answer says nothing about Cursor login (it used to come via the model, 10-15)
+    elif cursor_fn is None and live_cursor_ready():
         login_said = False
     elif login_already_said(hive) and not login_said:
         login_said = True

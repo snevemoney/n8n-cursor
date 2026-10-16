@@ -1265,7 +1265,7 @@ def self_test() -> dict:
         if refused.get("verb") != "refuse_hard_step" or refused.get("ask"):
             return {"ok": False, "errors": ["send this email must propose, not send"], "got": refused}
         refused_spoken = refused.get("spoken") or ""
-        if "exact action, target and content" not in refused_spoken:
+        if "your OK first" not in refused_spoken:  # Evens 10-15: kept stops ask for his OK in fixed words
             return {"ok": False, "errors": ["hard step must request the missing action details"], "got": refused}
         if "talk wire is dark" in refused_spoken.lower():
             return {"ok": False, "errors": ["hard step must not hide behind a provider failure"], "got": refused}
