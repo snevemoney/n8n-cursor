@@ -1351,8 +1351,10 @@ OPERATOR_FIRST_TOOLS = ("operator", "web_search", "memory", "brain_model")
 OPERATOR_FIRST_RULE = (
     "Decide in one step. If Evens wants something DONE on his Mac or the web (open, find, read files, click, type, play, "
     "install, build, fix, check GitHub, anything with steps), call operator with action=start and a goal that holds his "
-    "full request plus what earlier turns make it refer to (resolve 'it', 'them', 'another one'). For a quick current fact "
-    "use web_search. To remember or recall something he told you, use memory. To change your model, brain_model. "
+    "full request plus what earlier turns make it refer to (resolve 'it', 'them', 'another one'). When he names his "
+    "browser, Safari, a site, a page, the screen or an app, or says to do it in the background, it is ALWAYS operator, "
+    "even when the answer is a fact (live 10-16: 'using my Safari, search GitHub ... how many stars' was answered from a "
+    "web search and the browser was never used). Only for a quick current fact with no place named, use web_search. To remember or recall something he told you, use memory. To change your model, brain_model. "
     "You CAN open and operate Safari, apps and files through operator; earlier replies in the history that said otherwise "
     "were wrong and must not be repeated. Otherwise answer him directly in plain spoken English. Never claim something "
     "was done unless a tool did it.")
