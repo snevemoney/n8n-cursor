@@ -417,6 +417,20 @@ def _ingest(url: str, force: bool = False) -> dict:
 
 
 # ---- scan his lists --------------------------------------------------------------------------------------------
+WL_ALL_JS = r"""const cfg=(window.ytcfg&&ytcfg.data_)||{};const key=cfg.INNERTUBE_API_KEY,ctx=cfg.INNERTUBE_CONTEXT;
+if(!key||!ctx)return JSON.stringify({error:'no innertube config on this page'});
+const ids=new Set();let tok=null;let lastStatus=0;
+function walk(o){if(!o||typeof o!=='object')return;if(o.playlistVideoRenderer&&o.playlistVideoRenderer.videoId)ids.add(o.playlistVideoRenderer.videoId);
+ if(o.continuationCommand&&o.continuationCommand.token)tok=o.continuationCommand.token;for(const k in o)walk(o[k]);}
+walk(window.ytInitialData);let pages=0;
+while(tok&&pages<60){const t=tok;tok=null;pages++;
+ const h={'Content-Type':'application/json','X-Goog-AuthUser':'0','X-Origin':location.origin};
+ const sid=(document.cookie.match(/(?:^|; )(?:SAPISID|__Secure-3PAPISID)=([^;]+)/)||[])[1];
+ if(sid){const ts=Math.floor(Date.now()/1000);const buf=await crypto.subtle.digest('SHA-1',new TextEncoder().encode(ts+' '+sid+' '+location.origin));
+  h['Authorization']='SAPISIDHASH '+ts+'_'+[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');}
+ const r=await fetch('/youtubei/v1/browse?key='+key+'&prettyPrint=false',{method:'POST',credentials:'include',headers:h,body:JSON.stringify({context:ctx,continuation:t})});
+ if(!r.ok){lastStatus=r.status;break;}walk(await r.json());}
+return JSON.stringify({ids:[...ids],pages:pages,http:lastStatus,signin:!!document.querySelector('a[href*="ServiceLogin"]')})"""
 WL_JS = r"""return JSON.stringify({ids:[...new Set([...document.querySelectorAll('a[href*="watch?v="]')].map(a=>(a.href.match(/v=([A-Za-z0-9_-]{11})/)||[])[1]).filter(Boolean))],
  signin:!!document.querySelector('a[href*="ServiceLogin"]')})"""
 XB_JS = r"""return JSON.stringify({ids:[...new Set([...document.querySelectorAll('article a[href*="/status/"]')].map(a=>(a.href.match(/(?:x|twitter)\.com\/[^/]+\/status\/\d+/)||[])[0]).filter(Boolean))],
@@ -434,8 +448,22 @@ def scan(source: str = "all", scrolls: int = 12) -> dict:
         try:
             d.act({"action": "new_tab", "url": url})
             seen, still = set(), 0
+            if name == "youtube":
+                # the whole list (live 10-16: scrolling a hidden tab stopped at 100 of ~1,800): page through it the way
+                # YouTube's own page does, inside his signed-in tab; Safari does not await, so poll for the result
+                d.js(SD.J.wrap("window.__jwl=null;(async()=>{try{window.__jwl=await (async()=>{" + WL_ALL_JS +
+                               "})()}catch(e){window.__jwl=JSON.stringify({error:String(e)})}})();return JSON.stringify({ok:1})"))
+                for _ in range(90):
+                    time.sleep(2)
+                    got = d.js(SD.J.wrap("return window.__jwl||JSON.stringify({pending:1})"))
+                    if not got.get("pending"):
+                        break
+                if got.get("ids"):
+                    seen |= set(got["ids"])
+                    notes.append(f"youtube: whole list, {got.get('pages')} pages" + (f" (stopped on HTTP {got['http']})" if got.get("http") else ""))
+                    scrolls = 0  # done; the scroll pass below is the fallback
             for _ in range(scrolls):
-                got = d.js(SD.J.wrap(js))
+                got = d.js(SD.J.wrap(js))  # fallback / X bookmarks: read what is rendered, scroll, repeat
                 if got.get("signin"):
                     notes.append(f"LOGIN NEEDED: {name} wants him signed in in Safari")
                     break

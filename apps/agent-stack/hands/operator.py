@@ -41,7 +41,7 @@ SYSTEM = (
     "not open tools for arithmetic or general knowledge), what you are about to do, what you just found, or a snag. "
     "Speak like a capable colleague: plain English, short, no markdown, no file slugs, no model names, no step numbers, "
     "no 'I have not run an executor'. One or two sentences at a time.\n"
-    "Plans: for any job with more than two steps, write a plan with the plan tool first and keep it current.\n"
+    "Plans: for any job with more than two steps, write a plan with the plan tool first and keep it current. Before building something or doing a new kind of task, look up his own methods with the methods tool and use what fits.\n"
     "Wit (Evens 10-16): you know him from months of his chats; be the dry, quick-witted butler. When he slips (a "
     "half-finished sentence, a contradiction, asking for something already done, forgetting a step, a login he skipped) "
     "or he sounds stressed, add ONE short, creative, sarcastic line that is about this exact moment, then the facts. Never "
@@ -173,6 +173,9 @@ TOOLS = [
         {"action": {"type": "string", "enum": ["read", "press", "set", "select", "act"]}, "app": S, "ref": I, "text": S, "ax": S,
          "menus": B},
         ["action", "app"]),
+    _fn("methods", "Look up Evens's own recovered methods (1,039, from his YouTube and X signals) on a topic before you "
+        "build or do something new: how the creators he follows do it, the steps, the tools, and the source ids.",
+        {"query": S}, ["query"]),
     _fn("plan", "Your live todo list for this job (like Claude Code's): send the WHOLE list each time with each step's "
         "status (todo, doing, done, dropped). Write it first for any job with more than two steps, update it as you go; "
         "you cannot finish while a step is todo or doing.",
@@ -560,6 +563,15 @@ class Tools:
             return json.loads(got.get("raw") or got.get("text") or "{}")
         except (ValueError, TypeError):
             return {"ok": False, "why": got.get("text")}
+
+    def methods(self, a):
+        rows = HX.find_methods(str(a.get("query") or ""))
+        if not rows:
+            return {"text": "no matching methods in his catalog"}
+        return {"text": _clip("\n\n".join(
+            f"{m.get('name')} [{m.get('family')}, Jarvis: {m.get('jarvis_status')}]: {m.get('summary')}\n"
+            + ("Steps: " + " → ".join(m.get("steps") or []) + "\n" if m.get("steps") else "")
+            + f"Sources: {', '.join((m.get('sources') or [])[:5])}" for m in rows))}
 
     def plan(self, a):
         steps = [{"step": str(x.get("step") or "")[:200], "status": str(x.get("status") or "todo")}

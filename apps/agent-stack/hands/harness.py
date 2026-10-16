@@ -114,3 +114,24 @@ def recall_text(hive: Path, goal: str) -> str:
              for r in rows]
     return ("\n\nYou did similar jobs before (use what worked, skip what failed; still check the screen):\n"
             + "\n".join(parts))
+
+
+CATALOG = Path(os.environ.get("JARVIS_METHODS_CATALOG") or Path.home() / "jarvis-proof/signals-corpus-20261016/methods-catalog.jsonl")
+
+
+def find_methods(query: str, k: int = 8) -> list:
+    """His recovered signal methods (1,039 from 754 sources, 2026-10-16) that match the query by shared words."""
+    if not CATALOG.exists():
+        return []
+    want = _words(query)
+    scored = []
+    for line in CATALOG.read_text().splitlines():
+        try:
+            m = json.loads(line)
+        except ValueError:
+            continue
+        hay = _words(" ".join([m.get("name", ""), m.get("summary", ""), m.get("family", ""), " ".join(m.get("tools_repos") or [])]))
+        n = len(want & hay)
+        if n:
+            scored.append((n, m))
+    return [m for _, m in sorted(scored, key=lambda t: -t[0])[:k]]
