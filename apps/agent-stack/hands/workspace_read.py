@@ -371,7 +371,9 @@ def _find_documents(args, rs):
         kind += f" about {args.get('topic')} (matched by title)"
     spoken = f"Found {len(found)} {kind} in {scope}. "
     if found:
-        spoken += "Candidates: " + "; ".join(found[:12]) + ". "
+        # Names, not paths: the mouth strips ~/ and /Users paths, which cut the candidate list to "; ; ."
+        # Full paths stay in "files" for the next step (open / read).
+        spoken += "Candidates: " + "; ".join(f"{Path(f).name} (in {Path(f).parent.name})" for f in found[:12]) + ". "
         if len(found) > 12:
             spoken += f"The inventory contains all {len(found)} paths; only the first 12 are spoken. "
     if not anytype:

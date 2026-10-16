@@ -98,6 +98,19 @@ class RepoListing(unittest.TestCase):
         self.assertEqual(M.strip_factory(sp, utterance="What repos do you have installed"), sp)
 
 
+class BookCandidates(unittest.TestCase):
+    def test_candidates_are_spoken_as_names_and_survive_the_mouth(self):
+        home = Path(tempfile.mkdtemp()); (home / "Books").mkdir()
+        (home / "Books" / "Deep Learning AI.pdf").write_bytes(b"%PDF-1.4")
+        W = P._workspace_read_hand()
+        got = W._find_documents({"op": "find", "extensions": [".pdf"], "topic": "AI", "path": ""}, [home])
+        self.assertTrue(got["files"][0].endswith("Deep Learning AI.pdf"))
+        self.assertIn("Deep Learning AI.pdf (in Books)", got["spoken"])
+        spec = importlib.util.spec_from_file_location("agent_stack_persona_book_test", STACK / "mouth" / "persona.py")
+        M = importlib.util.module_from_spec(spec); spec.loader.exec_module(M)
+        self.assertIn("Deep Learning AI.pdf (in Books)", M.strip_factory(got["spoken"], utterance="find books about AI"))
+
+
 class PidReuse(unittest.TestCase):
     def setUp(self):
         spec = importlib.util.spec_from_file_location("agent_stack_coding_mission_pid_test", STACK / "hands" / "coding_mission.py")
