@@ -783,6 +783,8 @@ WORKSPACE_READ_RE = re.compile(
     r"\b(?:list|show)\s+(?:me\s+)?(?:my\s+|the\s+)?(?:downloads|desktop|documents)\b.{0,20}\b(?:folder|files|contents)\b|"
     r"\b(?:list|show)\b.{0,30}\b(?:files|folder|contents)\b.{0,30}\b(?:downloads|desktop|documents)\b|"
     r"\bgit\s+status\b|\buncommitted\s+changes\b|\b(?:working\s+)?tree\s+(?:is\s+)?clean\b|"
+    # live 10-16: "what are the latest changes you see" was answered with an invented git log
+    r"\b(?:latest|recent|last|newest)\s+(?:\w+\s+)?(?:changes|commits|updates)\b|\bgit\s+log\b|\bwhat(?:'s|\s+has)?\s+changed\b|"
     r"\b(?:read|open|show|cat)\b.{0,30}(?:\.env\b|\bid_(?:rsa|dsa|ecdsa|ed25519)\b|\.ssh/|\.grok-private/)",
     re.I,
 )
@@ -1297,6 +1299,24 @@ VAULT_SEARCH_RE = re.compile(r"^(?:search|look\s+(?:in|through)|check|grep)\s+(?
 
 
 CORRECTION_LEAD_RE = re.compile(r"^\s*no[,.!]?\s+(?=(?:use|do|open|try|run|go|make|put|pick|take)\b)", re.I)
+
+
+# Speech-to-text hears Evens's own names wrong (live 10-16: "club code", "look on the gate hug", "Kodex").
+# One fixed glossary, applied once where his words enter the turn, so every hand and the model read the real name.
+HEARD_AS = (
+    (re.compile(r"\b(?:club|clawed|cloud|clod)\s+code\b", re.I), "Claude Code"),
+    (re.compile(r"\b(?:the\s+)?gate\s*hug\b|\bget\s*hub\b|\bgit\s+hub\b", re.I), "GitHub"),
+    (re.compile(r"\bkodex\b|\bcode\s+x\b", re.I), "Codex"),
+    (re.compile(r"\bopen\s*router\b", re.I), "OpenRouter"),
+    (re.compile(r"\bdeep\s+seek\b", re.I), "DeepSeek"),
+)
+
+
+def heard(text: str) -> str:
+    out = text or ""
+    for rx, name in HEARD_AS:
+        out = rx.sub(name, out)
+    return out
 
 
 def correction_text(spoken_in: str) -> str:
@@ -6136,7 +6156,7 @@ HAND_LOOP_MAX_HANDS = 4
 # Screen-overlay hands finish the turn themselves: a second model pass replaced "The red arrow is on it" with its own
 # line, and a repeat pointer pick re-captured the screen (hide_overlays) or ended the turn as a failed duplicate.
 BARE_READ_RE = re.compile(r"(?:please\s+)?(?:read|open|show(?:\s+me)?|cat)\s+(?:the\s+file\s+)?(?:\"[^\"]+\"|'[^']+'|\S+)[.!]?", re.I)  # "read X" only
-COMPLETE_READ_OPS = {'open_document', 'screenshot_reference', 'repos', 'list', 'git', 'status'}  # the hand's own reply is the whole answer; no model pass
+COMPLETE_READ_OPS = {'open_document', 'screenshot_reference', 'repos', 'list', 'git', 'status', 'log'}  # the hand's own reply is the whole answer; no model pass
 TERMINAL_HANDS = frozenset({"pointer", "pointer_click", "pointer_demo", "apps", "capability", "code_run", "operator"})  # code_run: live 18:08 the model narrated a fake syntax error over real output 45
 # A model-free (fixed) route already answered a single ask; only a compound ask ("read A and B and compare")
 # earns the follow-up model pass. Without this the loop re-talked over Obsidian reads, stack as-of, calendar,
@@ -6586,9 +6606,31 @@ def _run_tool_heartbeat(pick: dict, utterance: str, *, hive, token, brain, **kw)
     return box["ran"]
 
 
+# Simulator (Evens 10-16: "simulate the actual jarvis outputs so you can fix them all ... instead of testing it live"):
+# with JARVIS_SIM=1 a hand that would act on the Mac records what it would do and does nothing; read-only hands run.
+SIM_ACTING_TOOLS = frozenset({"apps", "pointer", "pointer_click", "pointer_demo", "screen_see", "safari_see", "operator",
+                              "agent_tools", "code_run", "craft", "desk_dispatch", "loop", "mcp_call", "browser_mission",
+                              "cursor_ask", "drafts", "memory", "voice_engine", "repo", "workbench", "multistep", "handback"})
+
+
+def simulating() -> bool:
+    return (os.environ.get("JARVIS_SIM") or "").strip() == "1"
+
+
 def run_tool(pick: dict, utterance: str, **kw) -> dict:
     """Tool entry point: pre_tool gate, then the hand, then post_tool + stop_check."""
     tool = str((pick or {}).get("tool") or "")
+    if simulating() and tool in SIM_ACTING_TOOLS:
+        args = {k: v for k, v in ((pick or {}).get("args") or {}).items() if not str(k).startswith("_")}
+        if tool == "apps":  # the real hand resolves the app; a fake launcher opens nothing
+            try:
+                fake = lambda cmd: type("R", (), {"returncode": 0, "stdout": "", "stderr": ""})()
+                got = _apps_hand().run(utterance, runner=fake, observe=lambda app: True)
+                args = {**args, "app": got.get("app") or "", "resolved": bool(got.get("app")), "would_say": got.get("spoken")}
+            except Exception as exc:  # noqa: BLE001 - the simulator reports, it does not crash the turn
+                args = {**args, "error": type(exc).__name__}
+        return {"ok": True, "tool": tool, "simulated": True, "sim_args": args, "wires": [tool], "cites": [], "sent": False,
+                "task_verified": False, "spoken": f"[simulated] I would run {tool}" + (f" with {json.dumps(args)[:300]}" if args else "") + "."}
     gate = hooks.pre_tool(tool, utterance)
     if not gate["allow"]:
         return hooked_result({

@@ -8,7 +8,9 @@ APPS = {"figma": "Figma", "notion": "Notion", "canva": "Canva", "airtable": "Air
         "hubspot": "HubSpot", "salesforce": "Salesforce", "shopify": "Shopify", "quickbooks": "QuickBooks", "stripe": "Stripe",
         "zapier": "Zapier", "mailchimp": "Mailchimp", "clickup": "ClickUp", "monday": "Monday.com", "linkedin": "LinkedIn",
         "instagram": "Instagram", "tiktok": "TikTok", "dropbox": "Dropbox", "zoom": "Zoom", "spotify": "Spotify"}
-ACT_RE = re.compile(r"\b(?:check|open|get|pull|post|update|create|add|send|read|look|find|show|list|change|edit|publish|upload)\b", re.I)
+# Only actions that need the service's own connection. Opening, reading or checking a site works in Safari and the
+# operator can drive the browser (live 10-16: "open LinkedIn" / "open Notion in Safari" got "isn't in your arsenal").
+ACT_RE = re.compile(r"\b(?:post|update|create|add|send|change|edit|publish|upload|sync|import|export)\b", re.I)
 
 
 def gap(utterance: str, inventory_names: list[str]) -> str | None:

@@ -54,7 +54,9 @@ def _norm(s: str) -> str:
 # Spoken names for apps whose bundle name differs (routing audit 2026-10-16: "open code" opened Xcode).
 APP_ALIASES = {"vscode": "visualstudiocode", "vs": "visualstudiocode", "code": "visualstudiocode", "chrome": "googlechrome",
                "settings": "systemsettings", "quicktime": "quicktimeplayer", "activity": "activitymonitor", "finalcut": "finalcutpro",
-               "logic": "logicpro"}
+               "logic": "logicpro",
+               # live 10-16: "open my browser" fell through to a note search; his browser is Safari
+               "browser": "safari", "webbrowser": "safari", "internet": "safari", "theinternet": "safari"}
 
 
 def resolve(name: str, bundles: dict[str, Path] | None = None) -> tuple[str, Path] | None:

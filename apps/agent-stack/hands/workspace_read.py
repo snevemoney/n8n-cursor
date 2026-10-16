@@ -608,6 +608,21 @@ def run(args: dict, roots=None) -> dict[str, Any]:
         where = "detached at" if branch == "detached" else f"on branch {branch} at"
         return {"ok": True, "op": op, "repo": repo, "branch": branch, "head": head,
                 "spoken": f"I'm in {repo}, {where} {head}."}
+    if op == "log":  # the real last commits, said plainly (live 10-16: an invented "latest changes" list)
+        d = path if path.is_dir() else path.parent
+        rc, top = _git(d, "rev-parse", "--show-toplevel")
+        if rc != 0:
+            return _deny("not a git repo", op)
+        rc, out = _git(Path(top), "log", "-5", "--format=%ar\t%s")
+        if rc != 0 or not out.strip():
+            return _deny("git log failed", op)
+        items = []
+        for line in out.splitlines():
+            when, _, subject = line.partition("\t")
+            subject = re.sub(r"^[a-z]+(?:\([^)]*\))?!?:\s*", "", subject).strip()  # drop "feat(jarvis): "
+            items.append(f"{subject} ({when})")
+        return {"ok": True, "op": op, "repo": Path(top).name, "commits": items,
+                "spoken": f"The last {len(items)} changes in {Path(top).name}: " + "; ".join(items) + "."}
     if op == "status":
         d = path if path.is_dir() else path.parent
         rc, top = _git(d, "rev-parse", "--show-toplevel")
@@ -661,6 +676,8 @@ def args_from_utterance(u: str) -> dict:
     sec = _SECRET_ASK.search(s)
     if sec and re.search(r"\b(read|open|show|cat|print|display|what'?s in)\b", s, re.I):
         return {"op": "read", "path": sec.group(1)}
+    if re.search(r"\b(?:latest|recent|last|newest)\s+(?:\w+\s+)?(?:changes|commits|updates)\b|\bgit\s+log\b|\bwhat(?:'s|\s+has)?\s+changed\b", s, re.I):
+        return {"op": "log", "path": ""}
     if re.search(r"\b(repo|branch|head)\b", s, re.I) and not _FILE.search(s) and not re.search(r"\brepos\b", s, re.I):
         return {"op": "git", "path": ""}
     if re.search(r"\brepos\b|\brepositories\b", s, re.I):

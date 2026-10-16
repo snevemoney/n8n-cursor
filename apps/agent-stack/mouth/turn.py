@@ -456,6 +456,16 @@ def _door_speak(
     return event
 
 
+def _note_route_ok(spoken: str) -> bool:
+    """The "pull up my X" note routes yield when the turn's own routing proposes another hand (live 10-16: "open my
+    Gmail" / "open my browser" read a note aloud)."""
+    try:
+        pick = PIPELINE.turn_fixed_pick(spoken)
+    except Exception:  # noqa: BLE001
+        return True
+    return not pick or pick.get("tool") in ("vault_read", "say")
+
+
 def _apply_turn_iter_inner(
     utterance: str,
     *,
@@ -707,7 +717,8 @@ def _apply_turn_iter_inner(
     try:
         _rx = _reflex(spoken) or {}
         if (_rx.get("vault_note") and float(_rx.get("vault_hit") or 0) >= 0.6 and _rx.get("lane") in ("converse", "other")
-                and re.search(r"\b(?:pull|bring)\s+up\b|\b(?:show|open|find)\s+(?:me\s+)?my\b", spoken or "", re.I)):
+                and re.search(r"\b(?:pull|bring)\s+up\b|\b(?:show|open|find)\s+(?:me\s+)?my\b", spoken or "", re.I)
+                and _note_route_ok(spoken)):
             nb = _REFLEX.note_brief(_rx["vault_note"]) if _REFLEX is not None else {"ok": False}
             if nb.get("ok"):
                 got = {"ok": True, "tool": "vault_read", "spoken": f"Your {nb['name']} note is up. {nb['gist']}",
@@ -719,7 +730,8 @@ def _apply_turn_iter_inner(
     # Z70: a 'pull up my X' with no strong title hit -> match on folder path; read a full-cover hit, else name the closest three honestly.
     try:
         if _REFLEX is not None and re.search(r"\b(?:pull|bring)\s+up\b|\b(?:show|open|find)\s+(?:me\s+)?my\b", spoken or "", re.I) \
-                and not re.search(r"\b(?:screen|window|calendar|email|inbox|mail|cost|meter|results?)\b", spoken or "", re.I):
+                and not re.search(r"\b(?:screen|window|calendar|email|inbox|mail|cost|meter|results?)\b", spoken or "", re.I) \
+                and _note_route_ok(spoken):
             pm = _REFLEX.path_matches(spoken)
             if pm:
                 if pm[0]["covers"]:
@@ -1135,6 +1147,10 @@ def apply_turn_iter(utterance: str, **kw):
 
     # Detect sensitive input before reflex cards, crash logs, or fallback calls.
     # Keep the original only for the dedicated local interceptor.
+    try:
+        utterance = PIPELINE.heard(utterance) if hasattr(PIPELINE, "heard") else utterance
+    except Exception as _exc:  # noqa: BLE001 - a glossary slip must not cost the turn
+        _note_failure("heard", _exc)
     _interceptor_input = utterance
     _secret_input = False
     try:
