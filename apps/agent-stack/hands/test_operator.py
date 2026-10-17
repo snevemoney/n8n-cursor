@@ -294,6 +294,17 @@ class CancelReachesBackgroundJobs(unittest.TestCase):  # matrix "conc": cancella
         self.assertEqual(subprocess.run(["pgrep", "-g", str(pid)], capture_output=True, text=True).stdout.strip(), "")
 
 
+class AxOwners(unittest.TestCase):  # axcontrol: repeated labels say whose they are
+    def test_close_tab_buttons_name_their_tab(self):
+        els = [{"path": [0], "role": "AXWindow", "label": "proof.pdf"},
+               {"path": [0, 2, 0], "role": "AXRadioButton", "label": "GitHub audit review.png"},
+               {"path": [0, 2, 0, 0], "role": "AXButton", "label": "Close tab"},
+               {"path": [0, 2, 1], "role": "AXRadioButton", "label": "proof.pdf"},
+               {"path": [0, 2, 1, 0], "role": "AXButton", "label": "Close tab"},
+               {"path": [0, 3], "role": "AXButton", "label": "Share"}]
+        self.assertEqual(O._ax_owners(els), {2: "GitHub audit review.png", 4: "proof.pdf"})
+
+
 class OpenWith(unittest.TestCase):  # macread: his default PDF app is PdfCraft; "in Preview" must mean Preview
     def test_with_names_the_app(self):
         seen = []

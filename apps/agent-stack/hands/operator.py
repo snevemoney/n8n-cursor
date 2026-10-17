@@ -908,7 +908,9 @@ class Tools:
             self.state.setdefault("ax_keys", {})[name.lower()] = [[e.get("role"), e.get("label")] for e in els]
             self.state.setdefault("ax_read_at", {})[name.lower()] = time.time()
             self._save()
-            lines = [f"{i + 1} {e['role'].replace('AX', '')} {e['label']!r}" + (f" = {e['value']!r}" if e.get("value") else "")
+            owner = _ax_owners(els)  # live 10-17: two "Close tab" buttons, one was his document's; name whose each is
+            lines = [f"{i + 1} {e['role'].replace('AX', '')} {e['label']!r}" + (f" in {owner[i]!r}" if owner.get(i) else "")
+                     + (f" = {e['value']!r}" if e.get("value") else "")
                      + ("" if e.get("enabled", True) else " [disabled]") + (f" ({', '.join(x.replace('AX', '') for x in e['actions'])})" if e.get("actions") else "")
                      for i, e in enumerate(els)]
             return {"text": _clip(f"{name}: {len(els)} elements (use ref=N)\n" + "\n".join(lines))}
@@ -2275,6 +2277,28 @@ def _words(t: str) -> str:
 SIGHT_RE = re.compile(r"\b(?:your screen (?:shows|has)|i (?:can )?see (?:a|an|the|your)\b|"
                       r"(?:is|are) (?:open|showing|displayed) (?:on|in) (?:your|the) (?:screen|window|display))", re.I)
 LOOK_TOOLS = {"computer", "screenshot", "app", "safari", "mcp", "browser"}
+
+
+OWNER_ROLES = {"AXRadioButton", "AXTab", "AXRow", "AXOutlineRow", "AXCell", "AXWindow", "AXSheet"}
+
+
+def _ax_owners(els: list) -> dict:
+    """For elements whose label repeats, the nearest labelled ancestor (tab, row, window) found from the AX paths."""
+    by_path = {tuple(e.get("path") or ()): e for e in els}
+    counts = {}
+    for e in els:
+        counts[(e.get("role"), e.get("label"))] = counts.get((e.get("role"), e.get("label")), 0) + 1
+    out = {}
+    for i, e in enumerate(els):
+        if counts[(e.get("role"), e.get("label"))] < 2:
+            continue
+        path = tuple(e.get("path") or ())
+        for cut in range(len(path) - 1, 0, -1):
+            anc = by_path.get(path[:cut])
+            if anc and anc.get("role") in OWNER_ROLES and (anc.get("label") or anc.get("value")):
+                out[i] = anc.get("label") or anc.get("value")
+                break
+    return out
 
 
 def _done_gate(task, name: str, args: dict) -> str:
