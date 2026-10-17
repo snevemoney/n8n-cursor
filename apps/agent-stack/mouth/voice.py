@@ -447,6 +447,7 @@ def _kokoro_engine():
 
 def _kokoro_once(text: str) -> bytes:
     engine = _kokoro_engine()
+    text = strip_tags(text)
     samples, rate = engine.create(text[:TEXT_CAP], voice=voice_style(engine, kokoro_voice()), speed=1.0, lang="en-gb")
     return _wav_bytes(samples, rate)
 
@@ -685,7 +686,7 @@ _URL = re.compile(r"https?://[^\s)>\]]+")
 _SHOUT = re.compile(r"\b[A-Z][A-Z'-]{4,}\b")
 
 
-def speakable(text: str) -> str:
+def speakable(text: str) -> str:  # plain engines never read the tag words aloud; see strip_tags / speakable_keep_tags
     """Owner canvas Z61 (TTS cleanup): what the voice reads aloud, not what the card shows. Markdown marks, headings,
     bullets and raw URLs are not spoken; shouted ALL-CAPS words (5+ letters) are read as words; short acronyms stay."""
     t = str(text or "")
@@ -705,6 +706,13 @@ def speakable(text: str) -> str:
 SPOKEN_CAP = 360  # live 10-17: 11 of 93 spoken lines were over 400 chars (one 3,784) and TEXT_CAP cut them mid-word
 
 
+def speakable_keep_tags(text: str) -> str:
+    """speakable() for a performed line: the expressive tags survive the cleanup."""
+    keep = TAG_RE.sub(lambda m: f"§{m.group(1).replace(' ', '_')}§", text)
+    out = speakable(keep)
+    return re.sub(r"§([a-z_]+)§", lambda m: "[" + m.group(1).replace("_", " ") + "]", out, flags=re.I)
+
+
 def spoken_cut(t: str, cap: int = SPOKEN_CAP) -> str:
     """The voice says whole sentences up to the cap; the rest stays on the board (the card shows the full text)."""
     if len(t) <= cap:
@@ -715,13 +723,102 @@ def spoken_cut(t: str, cap: int = SPOKEN_CAP) -> str:
     return head.strip() + " The rest is on the board."
 
 
+# Evens 10-17 "v3-like expressiveness": Voicebox (jamiepine/voicebox, MIT, installed) runs Chatterbox Turbo locally with
+# paralinguistic tags. A line that carries a tag is a performed line and goes there; everything else stays on instant Kokoro.
+VOICEBOX_URL = os.environ.get("AGENT_STACK_VOICEBOX_URL") or "http://127.0.0.1:17493"
+VOICEBOX_PROFILE = os.environ.get("AGENT_STACK_VOICEBOX_PROFILE") or "Jarvis"   # synthetic reference, never a real person
+VOICEBOX_ENGINE = "chatterbox_turbo"
+VOICEBOX_SERVER = Path("/Applications/Voicebox.app/Contents/MacOS/voicebox-server")
+VOICEBOX_DATA = Path.home() / "Library/Application Support/sh.voicebox.app"
+TAG_RE = re.compile(r"\[(laugh|chuckle|gasp|cough|sigh|groan|sniff|shush|clear throat|angry|crying|dramatic|fear|happy|"
+                    r"narration|sarcastic|surprised|whispering)\]", re.I)
+_VB_STARTED = [0.0]
+
+
+def performed(text: str) -> bool:
+    return bool(TAG_RE.search(text or ""))
+
+
+def strip_tags(text: str) -> str:
+    return re.sub(r"\s{2,}", " ", TAG_RE.sub("", text or "")).strip()
+
+
+def voicebox_up(timeout: float = 2.0) -> bool:
+    try:
+        with urllib.request.urlopen(VOICEBOX_URL + "/health", timeout=timeout) as r:
+            return r.status == 200
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def ensure_voicebox() -> bool:
+    """Start the bundled server once (nice, headless) if the app is not open; the first performed line after a cold start
+    still goes to Kokoro while the model loads (minutes on first download, seconds after)."""
+    if voicebox_up():
+        return True
+    if not VOICEBOX_SERVER.is_file() or time.time() - _VB_STARTED[0] < 300:
+        return False
+    _VB_STARTED[0] = time.time()
+    try:
+        subprocess.Popen(["nice", "-n", "10", str(VOICEBOX_SERVER), "--host", "127.0.0.1", "--port", "17493", "--data-dir",
+                          str(VOICEBOX_DATA)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError:
+        return False
+    return False
+
+
+def _voicebox_bytes(text: str) -> bytes:
+    """WAV from Voicebox (Chatterbox Turbo, tags kept), or b"" so the caller falls back to Kokoro."""
+    if not ensure_voicebox():
+        return b""
+    try:
+        def call(method, path, data=None):
+            req = urllib.request.Request(VOICEBOX_URL + path, data=json.dumps(data).encode() if data is not None else None,
+                                         method=method, headers={"Content-Type": "application/json", "X-Voicebox-Client-Id": "jarvis"})
+            with urllib.request.urlopen(req, timeout=120) as r:
+                raw = r.read()
+                return json.loads(raw) if raw.strip() else {}
+        prof = next((p for p in call("GET", "/profiles") if str(p.get("name", "")).lower() == VOICEBOX_PROFILE.lower()), None)
+        if not prof:
+            return b""
+        g = call("POST", "/generate", {"profile_id": prof["id"], "engine": VOICEBOX_ENGINE, "language": "en", "text": text[:TEXT_CAP * 2]})
+        gid = g.get("id")
+        deadline = time.time() + 90
+        while time.time() < deadline:
+            st = _vb_row(gid)
+            if st and st[0] in ("completed", "complete"):
+                p = VOICEBOX_DATA / st[1]
+                return p.read_bytes() if p.is_file() else b""
+            if st and st[0] in ("failed", "error"):
+                return b""
+            time.sleep(0.5)
+    except Exception:  # noqa: BLE001 - any snag: Kokoro speaks
+        return b""
+    return b""
+
+
+def _vb_row(gid: str):
+    import sqlite3
+    try:
+        db = sqlite3.connect(str(VOICEBOX_DATA / "voicebox.db"))
+        return db.execute("select status, audio_path from generations where id=?", (gid,)).fetchone()
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def tts_audio(text: str, *, gen: int | None = None, hive: Path | None = None) -> tuple[bytes, str]:
     start = _TTS_TOKEN
-    text = speakable(text)
+    raw = str(text or "")
+    text = speakable(raw)
     if dry() or not (text or "").strip():
         return b"", ""
     if _tts_stale(gen, hive, start):
         return b"", ""
+    if performed(raw):
+        wav = _voicebox_bytes(speakable_keep_tags(raw))
+        if wav and not _tts_stale(gen, hive, start):
+            return wav, "audio/wav"
+        text = strip_tags(text)
     mp3 = _elevenlabs_bytes(text)
     if _tts_stale(gen, hive, start):
         return b"", ""

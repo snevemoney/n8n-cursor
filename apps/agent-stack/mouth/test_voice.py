@@ -27,6 +27,8 @@ MOD = _load()
 # tests never read Evens's own voice/personality settings (Evens 10-17: ~/.config/brain/voice.txt holds his pick)
 MOD.VOICE_FILE = Path(__file__).resolve().parent / "no-such-voice.txt"
 MOD._personality_voice = lambda: ""
+MOD.voicebox_up = lambda timeout=2.0: False   # tests never start or talk to Voicebox
+MOD.ensure_voicebox = lambda: False
 os.environ.pop("AGENT_STACK_KOKORO_VOICE", None)
 
 
@@ -505,3 +507,26 @@ class SpokenCut(unittest.TestCase):  # live 10-17: essays were read aloud and cu
         self.assertTrue(out.replace(" The rest is on the board.", "").endswith("clear."))
         self.assertEqual(MOD.spoken_cut("Short line."), "Short line.")
         self.assertIn("The rest is on the board", MOD.speakable("word " * 200))
+
+
+class Performed(unittest.TestCase):  # Evens 10-17: v3-like lines through Voicebox/Chatterbox Turbo; Kokoro for the rest
+    def test_tags_mark_a_performed_line_and_are_stripped_for_kokoro(self):
+        self.assertTrue(MOD.performed("Good evening. [chuckle] It passed."))
+        self.assertFalse(MOD.performed("Good evening. It passed."))
+        self.assertEqual(MOD.strip_tags("Good evening. [chuckle] It passed. [sigh]"), "Good evening. It passed.")
+        self.assertEqual(MOD.speakable_keep_tags("**Good** evening. [clear throat] It passed."), "Good evening. [clear throat] It passed.")
+
+    def test_voicebox_down_falls_back_to_kokoro_without_tags(self):
+        seen = []
+        with unittest.mock.patch.object(MOD, "_voicebox_bytes", return_value=b""), \
+             unittest.mock.patch.object(MOD, "_elevenlabs_bytes", return_value=b""), \
+             unittest.mock.patch.object(MOD, "_kokoro_bytes", side_effect=lambda t: seen.append(t) or b"RIFF"), \
+             unittest.mock.patch.object(MOD, "dry", return_value=False):
+            audio, mime = MOD.tts_audio("Good evening. [chuckle] It passed.")
+        self.assertEqual((audio, mime), (b"RIFF", "audio/wav")); self.assertEqual(seen, ["Good evening. It passed."])
+
+    def test_voicebox_up_takes_the_performed_line(self):
+        with unittest.mock.patch.object(MOD, "_voicebox_bytes", return_value=b"RIFFvb") as vb, \
+             unittest.mock.patch.object(MOD, "dry", return_value=False):
+            audio, mime = MOD.tts_audio("Good evening. [chuckle] It passed.")
+        self.assertEqual((audio, mime), (b"RIFFvb", "audio/wav")); self.assertIn("[chuckle]", vb.call_args[0][0])
