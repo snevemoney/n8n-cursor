@@ -24,7 +24,7 @@ def refresh(names: list, list_fn, cache: Path = CACHE) -> dict:
             got = list_fn(n)
         except Exception as exc:  # noqa: BLE001 - one bad server never sinks the catalog
             got = {"ok": False, "spoken": f"{type(exc).__name__}"}
-        return n, {"ok": bool(got.get("ok")), "tools": list(got.get("tools") or []),
+        return n, {"ok": bool(got.get("ok")), "tools": list(got.get("tools") or []), "required": dict(got.get("required") or {}),
                    "why": "" if got.get("ok") else str(got.get("spoken") or "")[:160]}
 
     with cf.ThreadPoolExecutor(max_workers=WORKERS) as ex:
@@ -53,3 +53,12 @@ def search(query: str, cache: Path = CACHE) -> str:
     if not hits:
         return f"{head} No tool matches {query!r}."
     return f"{head} {len(hits)} match {query!r}:\n" + "\n".join(f"- {s}: {t}" for s, t in hits[:40])
+
+
+def missing_args(server: str, tool: str, args: dict, cache: Path = CACHE) -> list:
+    """mcpschemas: required arguments the call leaves out, from the catalog (empty when unknown)."""
+    try:
+        req = json.loads(cache.read_text())["servers"][server].get("required", {}).get(tool) or []
+    except (OSError, ValueError, KeyError):
+        return []
+    return [k for k in req if (args or {}).get(k) in (None, "")]

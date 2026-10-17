@@ -19,6 +19,13 @@ class ToolCatalog(unittest.TestCase):
         self.assertIn("- deckcraft: save_presentation", out); self.assertIn("- pdfcraft: doc_save", out)
         self.assertIn("No tool matches", C.search("calendar", cache))
 
+    def test_missing_required_arguments_come_from_the_servers_schema(self):
+        cache = Path(tempfile.mkdtemp()) / "cat.json"
+        C.refresh(["deckcraft"], lambda n: {"ok": True, "tools": ["save_presentation"], "required": {"save_presentation": ["path"]}}, cache)
+        self.assertEqual(C.missing_args("deckcraft", "save_presentation", {}, cache), ["path"])
+        self.assertEqual(C.missing_args("deckcraft", "save_presentation", {"path": "/x.pptx"}, cache), [])
+        self.assertEqual(C.missing_args("unknown", "t", {}, cache), [])
+
     def test_no_catalog_yet_says_so(self):
         self.assertIn("refresh it first", C.search("x", Path(tempfile.mkdtemp()) / "none.json"))
 

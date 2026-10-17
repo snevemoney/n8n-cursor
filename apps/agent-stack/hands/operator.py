@@ -1374,6 +1374,11 @@ class Tools:
         return {"text": "said"}
 
     def mcp(self, a, approved=False):
+        steps = a.get("steps") or [{"tool": a.get("tool"), "arguments": a.get("arguments") or {}}]
+        gaps = [f"{st.get('tool')} needs {', '.join(m)}" for st in steps if isinstance(st, dict)
+                for m in [TCAT.missing_args(str(a.get("server") or ""), str(st.get("tool") or ""), st.get("arguments") or {})] if m]
+        if gaps:  # mcpschemas: the server's own schema, checked before the call (not a server-side error mid-session)
+            return {"text": "Not run: " + "; ".join(gaps) + ". Call it again with that filled in."}
         if str(a.get("server")) == "cua-driver" and CUA_DRIVER.is_file():
             # live 10-17 hand proof: every MCP call opened a fresh connection, and cua-driver ties a named session to one
             # connection, so "session is not available to this transport" on every second call. Its own `call` goes

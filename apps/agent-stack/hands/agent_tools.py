@@ -1172,9 +1172,15 @@ def _http_rpc(spec: dict, calls: list[dict], deadline: float) -> list[dict | Non
     return out
 
 
-def _stdio_list(spec: dict, deadline: float) -> tuple[bool, list[str], str]:
+def _required_of(tools: list) -> dict:
+    """mcpschemas: each tool's required argument names, from its inputSchema."""
+    return {str(t["name"]): list((t.get("inputSchema") or {}).get("required") or []) for t in tools
+            if isinstance(t, dict) and t.get("name")}
+
+
+def _stdio_list(spec: dict, deadline: float, sink: list | None = None) -> tuple[bool, list[str], str]:
     mc = _load("mcp_call", "mcp_call.py")
-    tools = mc._list_tools(spec, deadline)
+    tools = mc._list_tools(spec, deadline, metadata_fn=(sink.extend if sink is not None else None))
     return (tools is not None), (tools or []), ("" if tools is not None else "no answer in time")
 
 
@@ -1186,7 +1192,8 @@ def op_mcp_list(server: str, deadline: float = 30) -> dict:
     spec = _load("mcp_inventory", "mcp_inventory.py").server_spec(server)
     try:
         if spec:
-            ok, tools, why = _stdio_list(spec, deadline)
+            meta: list = []
+            ok, tools, why = _stdio_list(spec, deadline, meta)
             kind = "stdio"
         else:
             hs = http_spec(server)
@@ -1194,13 +1201,14 @@ def op_mcp_list(server: str, deadline: float = 30) -> dict:
                 return {"ok": False, "verified": False, "spoken": f"no config for {server}"}
             kind = "http"
             res = _http_rpc(hs, [{"method": "tools/list", "params": {}}], deadline)[0] or {}
+            meta = [t for t in ((res.get("result") or {}).get("tools") or []) if isinstance(t, dict)]
             tools = sorted(str(t.get("name")) for t in ((res.get("result") or {}).get("tools") or []) if isinstance(t, dict))
             ok, why = bool(res.get("result")), str((res.get("error") or {}).get("message") or "")[:200]
     except Exception as e:  # noqa: BLE001
         code = getattr(e, "code", "")
         return {"ok": False, "verified": False, "server": server,
                 "spoken": f"{server} failed: {type(e).__name__} {code}".strip()}
-    return {"ok": ok, "verified": ok and bool(tools), "server": server, "kind": kind, "tools": tools,
+    return {"ok": ok, "verified": ok and bool(tools), "server": server, "kind": kind, "tools": tools, "required": _required_of(meta),
             "spoken": (f"{server} ({kind}) offers {len(tools)} tools: " + ", ".join(tools[:12]) + ("…" if len(tools) > 12 else ""))
             if ok else f"{server} ({kind}) failed: {why}"}
 
