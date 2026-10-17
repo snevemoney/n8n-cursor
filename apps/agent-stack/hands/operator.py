@@ -2611,7 +2611,8 @@ def orb_view(hive: Path) -> dict:
     return {"task_id": tid, "status": st.get("status"), "step": st.get("step"), "cost_usd": st.get("cost_usd"), "tier": st.get("tier"),
             "model": st.get("model"), "kind": st.get("kind"), "jev": {k: jev.get(k) for k in ("tier", "ne", "picked") if k in jev},
             "driving": st.get("driving"), "verified": st.get("verified"), "tools_run": tools_run, "chips": chips[:4],
-            "graph_focus": st.get("graph_focus")}
+            "graph_focus": st.get("graph_focus"),
+            "plan": [{"step": x.get("step"), "status": x.get("status")} for x in (st.get("plan") or [])][:30]}
 
 
 if __name__ == "__main__":

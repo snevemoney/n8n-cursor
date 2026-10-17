@@ -348,6 +348,7 @@
     }
     @keyframes drivePulse { 50% { border-color: rgba(255, 90, 90, 1); } }
     #receipt { font: 10px "Share Tech Mono", ui-monospace, monospace; color: rgba(190, 255, 205, .55); letter-spacing: .08em; margin-top: 6px; min-height: 12px; }
+    #planBoard { font: 11px "Share Tech Mono", ui-monospace, monospace; color: rgba(190, 255, 205, .75); margin-top: 6px; white-space: pre-line; }
     #chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
     #chips button { background: rgba(2, 10, 6, .7); color: var(--mint, #3dff6a); border: 1px solid rgba(61, 255, 106, .35);
       font: 10px "Share Tech Mono", ui-monospace, monospace; letter-spacing: .1em; padding: 4px 8px; cursor: pointer; }
@@ -430,6 +431,7 @@
     <div class="line" id="spoken"></div>
       <div id="chips" aria-label="suggestions"></div>
       <div id="receipt" aria-label="tool receipt"></div>
+      <div id="planBoard" aria-label="plan" hidden></div>
       <details id="resultHistory" hidden><summary>Earlier updates</summary><div id="conversationHistory"></div><div id="browserResults"></div></details>
   </div>
   <div id="driveBadge" role="status" hidden>JARVIS IS DRIVING · touch the mouse or keyboard to take over</div>
@@ -1944,6 +1946,14 @@
         const cost = op.cost_usd ? "$" + Number(op.cost_usd).toFixed(3) : "";
         const parts = [tools, pick, cost, op.rev ? "rev " + String(op.rev).slice(0, 7) : "", op.verified === false ? "unverified" : ""].filter(Boolean);
         rc.textContent = parts.join("  ·  ");
+      }
+      const pb = $("planBoard");  // Z102 / C01: the job's plan, step by step (text only, never HTML)
+      if (pb) {
+        const steps = Array.isArray(op.plan) ? op.plan : [];
+        const mark = { done: "✓", doing: "→", todo: "·", dropped: "–" };
+        pb.hidden = !steps.length;
+        pb.textContent = steps.slice(0, 8).map((x) => (mark[x.status] || "·") + " " + String(x.step || "").slice(0, 80)).join("\n")
+          + (steps.length > 8 ? "\n… " + (steps.length - 8) + " more" : "");
       }
       if (ch) {
         const want = JSON.stringify(op.chips || []);

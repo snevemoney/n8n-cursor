@@ -9,11 +9,11 @@ const start = html.indexOf('    function paintOperator(op)');
 const end = html.indexOf('    function paintInbox(bus)', start);
 assert.ok(start > 0 && end > start, 'paintOperator slice');
 const el = (id) => ({ id, hidden: true, textContent: '', innerHTML: '', dataset: {}, kids: [], appendChild(k) { this.kids.push(k); } });
-const els = { driveBadge: el('driveBadge'), receipt: el('receipt'), chips: el('chips') };
+const els = { driveBadge: el('driveBadge'), receipt: el('receipt'), chips: el('chips'), planBoard: el('planBoard') };
 const turns = [];
 const ctx = { $(id) { return els[id] || null; }, turn(u) { turns.push(u); },
   document: { createElement() { const b = { listeners: {}, addEventListener(n, f) { this.listeners[n] = f; } }; return b; } },
-  Object, JSON, Number, String };
+  Object, JSON, Number, String, Array };
 vm.createContext(ctx);
 vm.runInContext(html.slice(start, end), ctx);
 ctx.paintOperator({ driving: { tool: 'app', since: 1 }, tools_run: { app: 3, shell: 1 }, tier: 'cheap', kind: 'screen', jev: { ne: 0.13 },
@@ -26,4 +26,9 @@ assert.deepStrictEqual(turns, ['How is it going?'], 'a chip sends its text as a 
 ctx.paintOperator({ driving: null, tools_run: {}, chips: ['How is it going?', 'Good morning, what\'s on today?'] });
 assert.strictEqual(els.driveBadge.hidden, true, 'badge hides when not driving');
 assert.strictEqual(els.chips.kids.length, 2, 'same chips are not re-rendered');
+ctx.paintOperator({ plan: [{ step: 'export the deck', status: 'done' }, { step: '<b>attach</b> it', status: 'doing' }, { step: 'send draft', status: 'todo' }] });
+assert.strictEqual(els.planBoard.hidden, false);
+assert.strictEqual(els.planBoard.textContent, '✓ export the deck\n→ <b>attach</b> it\n· send draft', 'plan as plain text, never HTML');
+ctx.paintOperator({ plan: [] });
+assert.strictEqual(els.planBoard.hidden, true, 'no plan, no board');
 console.log('ok operator card');
