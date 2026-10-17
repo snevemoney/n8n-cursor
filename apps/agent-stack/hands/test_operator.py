@@ -153,7 +153,21 @@ class CompletionTruth(OperatorLoop):  # matrix audit 10-16: success must be real
         pop.assert_called_once()
 
 
-class LivingArtifacts(OperatorLoop):  # Evens 10-16: artifacts (dashboards, trackers, plans...) that update as we build
+class JevPicksTheTool(unittest.TestCase):  # Evens 10-16: Jev decides which tool class to reach for, never a stop
+    def test_hint_names_the_tool_class_and_keeps_the_stops(self):
+        h = O.jev_tool_hint({"kind": "screen", "why": "jev mid/screen 0.81"})
+        self.assertIn("Accessibility", h); self.assertIn("stay Evens's", h)
+        self.assertEqual(O.jev_tool_hint({"kind": "any"}), "")
+
+
+class LivingArtifacts(OperatorLoop):
+    def test_mermaid_blocks_render_in_html_artifacts(self):
+        with mock.patch.object(O, "ARTIFACTS", self.home / "ARTIFACTS"), mock.patch.object(O.subprocess, "run"):
+            t = O.Tools(O.Task.create(self.hive, "chart").path)
+            t.artifact({"name": "Roadmap", "content": "<h1>r</h1>\n```mermaid\ngraph TD; A-->B\n```", "kind": "html"})
+        page = (self.home / "ARTIFACTS/Jarvis/roadmap/roadmap.html").read_text()
+        self.assertIn('<pre class="mermaid">graph TD; A-->B', page); self.assertIn("mermaid.min.js", page)
+  # Evens 10-16: artifacts (dashboards, trackers, plans...) that update as we build
     def test_publish_then_update_keeps_history_and_index(self):
         with mock.patch.object(O, "ARTIFACTS", self.home / "ARTIFACTS"), mock.patch.object(O.subprocess, "run") as run:
             t = O.Tools(O.Task.create(self.hive, "dash").path)

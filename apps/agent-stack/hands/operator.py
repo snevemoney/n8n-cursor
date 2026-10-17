@@ -392,6 +392,8 @@ JOB_EXIT = "__JARVIS_EXIT__"  # matrix audit 10-16: a background job's exit code
 
 
 ARTIFACTS = Path.home() / "ArtCraft Studio/00 Private/Projects/Jarvis/ARTIFACTS"
+MERMAID_TAG = ('\n<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>'
+               '<script>mermaid.initialize({startOnLoad:true});</script>\n')
 
 
 class Tools:
@@ -796,7 +798,10 @@ class Tools:
             (root / "history").mkdir(exist_ok=True)
             page.rename(root / "history" / f"{time.strftime('%Y%m%d-%H%M%S')}.{kind}")
         root.mkdir(parents=True, exist_ok=True)
-        page.write_text(str(a["content"]))
+        body = str(a["content"])
+        if kind == "html" and ("class=\"mermaid\"" in body or "```mermaid" in body) and "mermaid.min.js" not in body:
+            body = re.sub(r"```mermaid\n(.*?)```", r'<pre class="mermaid">\1</pre>', body, flags=re.S) + MERMAID_TAG
+        page.write_text(body)
         index = ARTIFACTS / "INDEX.md"
         line = f"- [{a['name']}]({page.relative_to(ARTIFACTS)}) — {kind}, updated {time.strftime('%Y-%m-%d %H:%M')}"
         lines = [l for l in (index.read_text().splitlines() if index.exists() else ["# Jarvis artifacts", ""])
@@ -845,9 +850,9 @@ class Task:
                 history.append({"role": "user", "content": str(row["user"])[:1500]})
             if str(row.get("jarvis") or "").strip():
                 history.append({"role": "assistant", "content": str(row["jarvis"])[:1500]})
-        t.write("messages.json", [{"role": "system", "content": system_prompt() + HX.recall_text(hive, goal)}, *history,
-                                  {"role": "user", "content": goal}])
         pick = choose_model(goal)
+        t.write("messages.json", [{"role": "system", "content": system_prompt() + HX.recall_text(hive, goal)
+                                   + jev_tool_hint(pick)}, *history, {"role": "user", "content": goal}])
         t.write("state.json", {"task_id": tid, "status": "QUEUED", "step": 0, "tier": pick["tier"], "model": pick["model"],
                                "kind": pick.get("kind", "any"), "chain": pick.get("chain") or [pick["model"]],
                                "model_why": pick["why"]})
@@ -1000,6 +1005,24 @@ def _owner_model() -> str:
         return _load("brain_model", "brain_model.py").current()
     except Exception:  # noqa: BLE001
         return ""
+
+
+TOOL_BY_KIND = {  # Evens 10-16 "use jev to decide which tool to use": Jev's preflight kind -> first tool to reach for
+    "files": "native files (read_file, write_file, edit_file, list_dir, grep) before any app or browser",
+    "code": "shell + files in the repo (tests first), MCP when a connector fits; never the screen for code",
+    "research": "web_search then fetch_url / safari read on the real pages; cite what you opened",
+    "screen": "safari (DOM) for sites, Accessibility actions for apps, computer (pixels) only as the last resort",
+    "creative": "the installed ArtCraft app through mcp, or an artifact page; save native + export",
+    "chat": "answer with say; no tools unless he asks for an action",
+}
+
+
+def jev_tool_hint(pick: dict) -> str:
+    kind = pick.get("kind") or "any"
+    if kind not in TOOL_BY_KIND:
+        return ""
+    return (f"\nJev's preflight reads this as a {kind} job ({pick.get('why', '')}): start with {TOOL_BY_KIND[kind]}. "
+            "It is a pick, not a stop: send, post, pay, delete, merge and publish stay Evens's.")
 
 
 def choose_model(goal: str) -> dict:

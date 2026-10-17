@@ -47,6 +47,15 @@ VENV_PY = _voice_path("AGENT_STACK_VOICE_PYTHON", STACK / ".venv-voice" / "bin" 
 KOKORO_MODEL = CACHE / "kokoro-v1.0.int8.onnx"
 KOKORO_VOICES = CACHE / "voices-v1.0.bin"
 KOKORO_VOICE = "bm_lewis"
+VOICE_FILE = Path.home() / ".config/brain/voice.txt"  # Evens 10-17 "change Jarvis's voice for free": one line, e.g. bm_george
+
+
+def kokoro_voice() -> str:
+    """The Kokoro voice to speak with: env, then ~/.config/brain/voice.txt, then the default. No code change to switch."""
+    for cand in (os.environ.get("AGENT_STACK_KOKORO_VOICE"), VOICE_FILE.read_text().strip() if VOICE_FILE.is_file() else ""):
+        if cand and re.fullmatch(r"[abmf][fm]_[a-z]+", cand.strip()):
+            return cand.strip()
+    return KOKORO_VOICE
 TARQUIN_VOICE_ID = "7cOBG34AiHrAzs842Rdi"
 ELEVEN_V3 = "eleven_v3"
 ELEVEN_TTV_V3 = "eleven_ttv_v3"
@@ -207,16 +216,16 @@ def voice_report() -> dict:
         speak_voice_id = elevenlabs_voice_id()
         speak_model = ELEVEN_V3
     elif kokoro_ready() and voice_python() is not None:
-        engine, voice = "kokoro", KOKORO_VOICE
-        speak_voice_id = KOKORO_VOICE
+        engine, voice = "kokoro", kokoro_voice()
+        speak_voice_id = kokoro_voice()
         speak_model = "kokoro"
     elif kokoro_ready():
-        engine, voice = "kokoro-dark-python", KOKORO_VOICE
-        speak_voice_id = KOKORO_VOICE
+        engine, voice = "kokoro-dark-python", kokoro_voice()
+        speak_voice_id = kokoro_voice()
         speak_model = "kokoro"
     else:
-        engine, voice = "dark", KOKORO_VOICE
-        speak_voice_id = KOKORO_VOICE
+        engine, voice = "dark", kokoro_voice()
+        speak_voice_id = kokoro_voice()
         speak_model = "dark"
     if key_on:
         fallback_reason = ""
@@ -234,7 +243,7 @@ def voice_report() -> dict:
         "key_present": key_on,
         "voice_id_present": bool(key_on and (vid_on or TARQUIN_VOICE_ID)),
         "lang": "en-GB",
-        "repo": {"kokoro": KOKORO_VOICE, "elevenlabs": ELEVEN_V3, "design": ELEVEN_TTV_V3},
+        "repo": {"kokoro": kokoro_voice(), "elevenlabs": ELEVEN_V3, "design": ELEVEN_TTV_V3},
         "fallback": "speechSynthesis last-resort, never the product",
         "fallback_reason": fallback_reason,
     }
@@ -414,7 +423,7 @@ def _kokoro_engine():
 
 def _kokoro_once(text: str) -> bytes:
     engine = _kokoro_engine()
-    samples, rate = engine.create(text[:TEXT_CAP], voice=KOKORO_VOICE, speed=1.0, lang="en-gb")
+    samples, rate = engine.create(text[:TEXT_CAP], voice=kokoro_voice(), speed=1.0, lang="en-gb")
     return _wav_bytes(samples, rate)
 
 
@@ -438,7 +447,7 @@ def worker_loop() -> None:
                 from kokoro_onnx import Kokoro
 
                 engine = Kokoro(str(KOKORO_MODEL), str(KOKORO_VOICES))
-            samples, rate = engine.create(text[:TEXT_CAP], voice=KOKORO_VOICE, speed=1.0, lang="en-gb")
+            samples, rate = engine.create(text[:TEXT_CAP], voice=kokoro_voice(), speed=1.0, lang="en-gb")
             audio = _wav_bytes(samples, rate)
             print(json.dumps({"ok": True, "mime": "audio/wav", "b64": base64.b64encode(audio).decode("ascii")}), flush=True)
         except Exception as exc:  # noqa: BLE001 — worker must stay up
@@ -759,7 +768,7 @@ def self_test() -> dict:
     report = voice_report()
     if report.get("voice") in {"Samantha", "Daniel"}:
         return {"ok": False, "errors": ["product voice must not be a macOS remap"], "report": report}
-    if report.get("repo", {}).get("kokoro") != KOKORO_VOICE:
+    if report.get("repo", {}).get("kokoro") != kokoro_voice():
         return {"ok": False, "errors": ["repo voice must stay bm_lewis"], "report": report}
     if report.get("lang") != "en-GB":
         return {"ok": False, "errors": ["repo voice is British"], "report": report}
