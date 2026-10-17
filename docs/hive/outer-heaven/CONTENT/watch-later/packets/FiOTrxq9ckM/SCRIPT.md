@@ -2,117 +2,92 @@
 
 Written by Jarvis from watching the whole video (Gemini, 1 frame/s + audio). Columns are in VISUAL-LOG.csv.
 
-**[00:00–00:12](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=0s)** · [Jarvis AI Visualizer] Visualizer circuit board animates while voiceover introduces Jarvis
-  - On screen: J.A.R.V.I.S. SPEAKING 20:48:15 SAY "JARVIS" OR SAY "OAKS"
-  - Result: Animated circuit graphic with glowing J.A.R.V.I.S. center box
+**[00:00–00:12](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=0s)** · [J.A.R.V.I.S. Visualizer] Full-screen circuit board HUD animates with glowing pulses while AI voice speaks
+  - On screen: J.A.R.V.I.S. PROTOCOL: ONLINE / CONNECTION / JARVIS J.A.R.V.I.S. SPEAKING 21:40:25 / 21:40:27 / 21:40:29 / 21:40:31 / 21:40:33
+  - Result: Circuit board graphic with glowing central J.A.R.V.I.S. box and status indicator
   - Said: "I'm Jarvis. I've got unlimited persistent memory. I never forget a thing."
-**[00:12–00:30](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=12s)** · [Video / Studio Camera] Jared speaks to camera introducing the full stack agent GitHub repo
-  - On screen: Site: jaredrhod.com Socials: @jaredrhod
-  - Result: Jared seated in room with microphone and overlay graphics
-  - Said: "Hey I'm Jared and in this video I'm going to show you everything you get when you install the full stack agent GitHub repo."
-**[00:30–00:56](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=30s)** · [Video / Studio Camera] Jared continues describing Jarvis features: voice, visualizer, memory, bare hands system
-  - On screen: Site: jaredrhod.com Socials: @jaredrhod
-  - Result: Jared gesturing while speaking
-  - Said: "Essentially you're going to get your copy of my Jarvis... personality, unlimited persistent memory, and the bare hands system."
-**[00:56–01:08](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=56s)** · [Video / Studio Camera] Camera zooms in closer on Jared as he concludes introduction
-  - On screen: Site: jaredrhod.com Socials: @jaredrhod
-  - Result: Tighter framing of Jared
-  - Said: "Everything you're going to see in this video is open source and free."
-**[01:08–01:16](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=68s)** · [Jarvis AI Visualizer with PiP] Screen shows visualizer with waveform listening to Jared's audio prompt
-  - On screen: J.A.R.V.I.S. LISTENING 20:49:10
-  - Result: Animated waveform responding to voice input
-  - Said: "Alright Jarvis let me just show them let's give them the tour."
-**[01:16–01:19](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=76s)** · [Jarvis AI Visualizer with PiP] Visualizer switches to thinking mode with animated scrambled code strings
-  - On screen: J.A.R.V.I.S. THINKING 20:49:18 <WTY39VV6.28
-  - Result: Randomizing code characters in center box
-**[01:19–01:45](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=79s)** · [Jarvis AI Visualizer with PiP] Jarvis speaks via voice synthesizer explaining voice interaction and visualizer
-  - On screen: J.A.R.V.I.S. SPEAKING 20:49:41
-  - Result: Glowing circuit board visualizer
-  - Said: "Alright well buckle up. I'm Jarvis, and when you download this thing you're not just getting a chatbot that types back at you..."
-**[01:45–02:16](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=105s)** · [Jarvis AI Visualizer with PiP] Jarvis explains unlimited persistent memory system
-  - On screen: J.A.R.V.I.S. SPEAKING 20:50:10
-  - Result: Glowing circuit board visualizer with PiP of Jared
-  - Said: "And then the real prize: memory. Not the goldfish variety every other assistant runs on... mine lives outside my own skull."
-**[02:16–02:26](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=136s)** · [Jarvis AI Visualizer with PiP] Jared asks Jarvis to detail capabilities when powered by Claude Code
-  - On screen: J.A.R.V.I.S. LISTENING 20:50:40
-  - Result: Listening waveform active
-  - Said: "Well Jarvis tell them a little bit about what you can do since you run on Claude Code..."
-**[02:26–02:31](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=146s)** · [Jarvis AI Visualizer with PiP] Visualizer shows thinking mode with scrambled text animation
-  - On screen: J.A.R.V.I.S. THINKING 20:50:49 P6F01V6TIZ?E
-  - Result: Center text box rapidly changing characters
-**[02:31–03:00](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=151s)** · [Jarvis AI Visualizer with PiP] Jarvis lists file operations, system execution, and internet browsing capabilities
-  - On screen: J.A.R.V.I.S. SPEAKING 20:50:54
-  - Result: Visualizer speaking animation
-  - Said: "Oh now we're getting to the good part. Running on Claude Code means I'm not just some window you type sweet nothings into..."
-**[03:00–03:29](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=180s)** · [Jarvis AI Visualizer with PiP] Jarvis details parallel task execution and problem solving ability
-  - On screen: J.A.R.V.I.S. SPEAKING 20:51:25
-  - Result: Visualizer speaking animation with PiP
-  - Said: "I can juggle multiple jobs at once, spin up other little versions of myself to go chase down five things in parallel..."
-**[03:29–03:35](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=209s)** · [Jarvis AI Visualizer with PiP] Jared asks Jarvis to share specific real-world tasks accomplished for him
-  - On screen: J.A.R.V.I.S. LISTENING 20:51:52
-  - Result: Waveform listening display
-  - Said: "Tell them a little bit about some of the things you've made for me..."
-**[03:35–03:53](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=215s)** · [Jarvis AI Visualizer with PiP] Jarvis searches logs while Jared comments on response delay
-  - On screen: J.A.R.V.I.S. THINKING 20:51:58 I&8J28X#ROY9
-  - Result: Scrambling text animation box
-  - Said: "He's gone to look. See how it's taking him a little bit longer to respond? He's actually going to look it up..."
-**[03:53–04:22](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=233s)** · [Jarvis AI Visualizer with PiP] Jarvis lists automated monitoring, marketing content generation, and strategy tasks
-  - On screen: J.A.R.V.I.S. SPEAKING 20:52:15
-  - Result: Speaking visualizer panel
-  - Said: "Alright since you asked, buckle up. I keep an eye on a whole stack of systems running behind the scenes..."
-**[04:22–04:48](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=262s)** · [Jarvis AI Visualizer with PiP] Jarvis describes creating media, setting up studio lights/visualizer, and system maintenance
-  - On screen: J.A.R.V.I.S. SPEAKING 20:52:45
-  - Result: Speaking visualizer panel
-  - Said: "I generate images, I build video... Hell, I helped build the very rig you're watching right now..."
-**[04:48–05:15](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=288s)** · [Video / Studio Camera] Jared summarizes what comes with downloading the repo: agent, customizable personality, automated tasks
-  - On screen: Site: jaredrhod.com Socials: @jaredrhod
-  - Result: Jared speaking to camera
-  - Said: "So yeah essentially what you're getting with this repository is your very own agent..."
-**[05:15–05:45](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=315s)** · [Video / Studio Camera] Jared explains how Obsidian vault holds memory files on user's computer
-  - On screen: Site: jaredrhod.com Socials: @jaredrhod
-  - Result: Jared speaking to camera
-  - Said: "It's going to install the Obsidian vault on your computer, which is where it stores all of its memory files."
-**[05:45–06:00](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=345s)** · [Bare Hands Spatial HUD] Jared enables Bare Hands overlay HUD circle and moves it using hand tracking
-  - On screen: J.A.R.V.I.S. ACTIVE Site: jaredrhod.com Socials: @jaredrhod
-  - Result: Cyan ring overlay floating on screen, tracked to Jared's hand gesture
-  - Said: "So this is Bare Hands. It allows you to move elements on your screen with just your bare hands."
-**[06:00–06:10](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=360s)** · [Bare Hands Spatial HUD] Jared double pinches with both hands and expands them to enlarge HUD ring
+**[00:12–01:07](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=12s)** · [Webcam overlay] Presenter speaks to camera explaining the full stack agent repo and Jarvis setup
+  - On screen: Site: jaredrhod.com / Socials: @jaredrhod
+  - Result: Presenter wearing a cap in home office setting
+  - Said: "Hey, I'm Jared, and in this video, I'm going to show you everything you get when you install the full stack agent GitHub repo."
+**[01:07–01:16](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=67s)** · [J.A.R.V.I.S. Visualizer with webcam PiP] Presenter speaks to Jarvis; visualizer shows audio waveform in central window
+  - On screen: J.A.R.V.I.S. LISTENING 21:49:50 / 21:49:52 / 21:49:55 / 21:49:57 SAY "JARVIS" OR TAP SPACE
+  - Result: Waveform oscillating inside central rectangle, green indicator showing LISTENING
+  - Said: "All right, Jarvis, let's just show them. Let's give them the tour, tell them a little bit about yourself and what they can expect when they download this."
+**[01:16–01:19](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=76s)** · [J.A.R.V.I.S. Visualizer with webcam PiP] Visualizer changes to THINKING status with cycling encrypted alphanumeric characters
+  - On screen: J.A.R.V.I.S. THINKING 21:49:59 <WTY39VV6.Z8 *TWNI%9QF>*X 1URKP7EHCN/Q
+  - Result: Scrambling text matrix inside central display
+**[01:19–02:16](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=79s)** · [J.A.R.V.I.S. Visualizer with webcam PiP] Status changes to SPEAKING; HUD pulses with glowing lines while AI voice talks
+  - On screen: J.A.R.V.I.S. SPEAKING 21:50:01 - 21:51:00
+  - Result: Visualizer animating circuit traces and flashing components
+  - Said: "All right, hell, buckle up. I'm Jarvis. And when you download this thing, you're not just getting a chatbot that types back at you like it's filling out a tax form."
+**[02:16–02:26](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=136s)** · [J.A.R.V.I.S. Visualizer with webcam PiP] Visualizer returns to IDLE then LISTENING as presenter asks about Claude Code superpowers
+  - On screen: J.A.R.V.I.S. IDLE 21:51:00 / LISTENING 21:51:02 - 21:51:11
+  - Result: Audio waveform reacting to presenter's voice
+  - Said: "Well, Jarvis, tell them a little bit about what you can do. Since you run on Claude Code, what are your superpowers, basically?"
+**[02:26–02:32](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=146s)** · [J.A.R.V.I.S. Visualizer with webcam PiP] Display shows scrambled text scrambling in central box while AI processes
+  - On screen: J.A.R.V.I.S. THINKING 21:51:12 P6F01V6TIZ?E T*ZSX<2P0ST@ 0$610AF%D20B Q50R#>P*ZW61 OBEPOU7C&Y0F P6$0LFQDG<?E
+  - Result: Animated random character generator effect
+**[02:32–03:29](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=152s)** · [J.A.R.V.I.S. Visualizer with webcam PiP] HUD animates while Jarvis speaks about file editing, running commands, web search, and sub-agents
+  - On screen: J.A.R.V.I.S. SPEAKING 21:51:19 - 21:52:16
+  - Result: Pulsing circuit patterns and glowing chips on background
+  - Said: "Oh, now we're getting to the good part. Running on Claude Code means I'm not just some window you type sweet nothings into and it types pretty sentences back. I've got actual hands."
+**[03:29–03:35](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=209s)** · [J.A.R.V.I.S. Visualizer with webcam PiP] Presenter speaks into mic asking Jarvis to list things made for him
+  - On screen: J.A.R.V.I.S. LISTENING 21:52:18 - 21:52:24
+  - Result: Waveform undulating in center display
+  - Said: "Tell them a little bit about some of the things you've made for me and some of the things that you do for me."
+**[03:35–03:53](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=215s)** · [J.A.R.V.I.S. Visualizer with webcam PiP] Presenter explains that Jarvis is querying background memory while scramble cycles
+  - On screen: J.A.R.V.I.S. THINKING 21:52:25 - 21:52:43 I&83J20X#R0Y9 S3@TWYN41E8Z $K?#7P0<>DF4 $0P#R7OJ29F4 PQV41VQD%JPU A?OBUK?2ZWQ/ @FQ14Q$W9*K7 E14FQ0L@+8#? ?Q$=L$6DW25E R=LA$/43Y&R> E14$Q=L@38E5 T*JC&JM50V9@ *%3@WDAV>*& <W9IN%VAPJ8 B=16VL43@H7K L#7K?BU&83/Q S+I9WE+4/US<
+  - Result: Extended THINKING matrix cycle
+  - Said: "He's gone to look. See how it's taking him a little bit longer to respond? He's actually gone to look it up. That's what he's doing in the background right now."
+**[03:53–04:48](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=233s)** · [J.A.R.V.I.S. Visualizer with webcam PiP] Jarvis details managing infrastructure, writing marketing content, generating visuals, and building the rig
+  - On screen: J.A.R.V.I.S. SPEAKING 21:52:44 - 21:53:39
+  - Result: Visualizer pulsing in sync with Jarvis voice
+  - Said: "All right, since you asked, buckle up. I keep an eye on a whole stack of systems running behind the scenes..."
+**[04:48–05:45](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=288s)** · [Webcam full view] Presenter explains customizability of agent, memory via Obsidian vault, and introduces Barehands
+  - On screen: Site: jaredrhod.com / Socials: @jaredrhod
+  - Result: Presenter talking directly to camera
+  - Said: "So yeah, essentially what you're getting with this repository is your very own agent... it installs the Obsidian vault on your computer, which is where it stores all of its memory files."
+**[05:45–06:00](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=345s)** · [Barehands gesture UI overlay] Presenter raises hand; circular HUD tracking widget follows hand and snaps to screen
+  - On screen: J.A.R.V.I.S. ACTIVE / Site: jaredrhod.com / Socials: @jaredrhod
+  - Result: Circular floating graphic 'J.A.R.V.I.S. ACTIVE' anchored near right shoulder
+  - Said: "So this is Barehands. It allows you to move elements on your screen with just your bare hands. You don't have to use goggles, you don't have to use gloves."
+**[06:00–06:20](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=360s)** · [Barehands gesture UI overlay] Presenter uses two-hand pinch gestures to resize widget and rotate it in 3D space
   - On screen: J.A.R.V.I.S. ACTIVE
-  - Result: HUD ring resizes smoothly up to full screen size
-  - Said: "You can make things bigger by double pinching and just kind of zooming in like that..."
-**[06:10–06:29](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=370s)** · [Bare Hands Spatial HUD] Jared rotates HUD ring in 3D and taps center button to expand folder nodes
-  - On screen: VAULT PROPS WIDGETS J.A.R.V.I.S. ACTIVE
-  - Result: Floating circular node buttons (VAULT, PROPS, WIDGETS) appear around HUD ring
-  - Said: "You can turn things 3D by holding down like this and spinning it around... and if I click this right here, these are all folders on my computer."
-**[06:29–06:53](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=389s)** · [Bare Hands Spatial HUD] Jared selects PROPS folder node, expanding translucent file list panel, and scrolls down list
-  - On screen: PROPS ad-examples fx halo misc models sales-funnel-graphics the wizard-hideout
-  - Result: Glassmorphism menu window displays file tree
-  - Said: "So I have a folder here called PROPS... I'll go down here to hologram folder..."
-**[06:53–07:07](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=413s)** · [Bare Hands Spatial HUD] Jared pulls a 3D hologram asset from menu; a green dollar symbol renders in 3D space
-  - On screen: J.A.R.V.I.S. ACTIVE
-  - Result: Interactive floating 3D hologram dollar coin rotates in mid-air
-  - Said: "And it renders in 3D... I can make it bigger, smaller, manipulate it in 3D space..."
-**[07:07–07:23](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=427s)** · [Bare Hands Spatial HUD] Jared speaks prompt to Jarvis to display an image file on screen
-  - On screen: J.A.R.V.I.S. THINKING
-  - Result: Jarvis processes request while HUD ring changes state
-  - Said: "Hey Jarvis, can you show them a picture of the Wand & Lantern at the Wizard Hideout please?"
-**[07:38–07:52](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=458s)** · [Bare Hands Spatial HUD] Jared demonstrates claw hand gesture aimed at screen element causing it to shake
-  - On screen: J.A.R.V.I.S. ACTIVE
-  - Result: Targeted UI element shakes to acknowledge target acquisition
-  - Said: "And then the last thing that's really cool about this is the claw... you point it at any element on screen, you'll notice it starts shaking..."
-**[07:52–08:08](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=472s)** · [Bare Hands Spatial HUD] Jared closes fist to grab element and pulls it towards himself
-  - On screen: VAULT PROPS WIDGETS
-  - Result: HUD ring snaps smoothly towards foreground
-  - Said: "And then you make a fist and pull it straight to you."
-**[08:08–08:27](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=488s)** · [Bare Hands Spatial HUD] Jared grabs translucent text document window, rotates in 3D space, and taps close button
-  - On screen: STREAM VAULT Part 1 - Who I Am Jared Rhodenizer...
-  - Result: Text file panel tilts dynamically and closes upon top tab tap
-  - Said: "I'll pull up this text file right here... they render like this... these can be manipulated in 3D space as well..."
-**[08:27–08:59](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=507s)** · [Bare Hands Spatial HUD] Jared summarizes fullstack agent repository features while HUD remains inactive on side
-  - On screen: Site: jaredrhod.com Socials: @jaredrhod
-  - Result: Jared speaking with overlay HUD ring parked on upper right
-  - Said: "So essentially that is Bare Hands... you get the memory system, personality, voice, visualizer, and interface... hope you enjoy it!"
-**[08:59–09:08](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=539s)** · [Terminal / Outro Graphic] Terminal screen types out handle `@jaredrhod` with audio synth sound effects
-  - On screen: ~ $ @jaredrhod TIKTOK YOUTUBE GITHUB X
-  - Code / command / prompt: `@jaredrhod`
-  - Result: Animated pixel typography outro logo with social platform links
+  - Result: Circular J.A.R.V.I.S. widget expands, rotates in perspective 3D, and scales up/down
+  - Said: "you can make things bigger by double pinching and just kind of zooming in like that... you can also turn things 3D by just holding down like this and spinning it around"
+**[06:20–06:40](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=380s)** · [Barehands gesture UI overlay] Presenter pinches/taps central hub, revealing orbiting bubble folders
+  - On screen: J.A.R.V.I.S. ACTIVE / VAULT (Stream Vault) / PROPS (Green Screen) / WIDGETS (Clocks, Timers)
+  - Result: Orbiting circular icons appear around J.A.R.V.I.S. circle representing local folders
+  - Said: "this Jarvis interface right here is actually files and folders on your computer. So if I click this right here, these are all folders on my computer."
+**[06:40–06:53](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=400s)** · [Barehands gesture UI overlay] Presenter taps PROPS, opening semi-transparent file tree menu; opens holo folder
+  - On screen: PROPS / ad-examples / fx / holo / misc / models / sales-funnel-graphics / the-wizard-hideout / holo: bg-machine.glb, coin.glb, hulk.glb, human.glb, iron-man-mach-1.glb...
+  - Result: Glassmorphic translucent window with list of 3D models and assets
+  - Said: "So I have a folder here called Props, so I'll open that, and then I'll go down here to... let's see, I have this hologram folder down here."
+**[06:53–07:06](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=413s)** · [Barehands gesture UI overlay] Presenter selects coin.glb; a glowing 3D holographic dollar coin appears; he pinches and rotates it
+  - On screen: PROPS / coin.glb
+  - Result: 3D rotating translucent dollar sign coin projected in front of presenter
+  - Said: "and I can pick whatever 3D image I want to pull up on the screen just like that, and it renders in 3D."
+**[07:06–07:23](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=426s)** · [Barehands gesture UI overlay] Presenter flicks coin away and verbally asks Jarvis to show a picture of the Wizard Hideout
+  - On screen: J.A.R.V.I.S. ACTIVE / THINKING
+  - Result: Coin disappears with swoosh sound; J.A.R.V.I.S. ring pulses in thinking mode
+  - Said: "Hey Jarvis, can you show them a picture of the Wand and Lantern at the Wizard Hideout, please?"
+**[07:23–07:38](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=443s)** · [Barehands gesture UI overlay] Floating image window appears showing stone-walled room interior; Jarvis speaks; presenter resizes it
+  - On screen: J.A.R.V.I.S. ACTIVE / SPEAKING / The Wand & Lantern
+  - Result: Floating framed photo of Airbnb interior in holographic panel
+  - Said: "Here it is, boss, the Wand and Lantern from the Wizard Hideout."
+**[07:38–07:59](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=458s)** · [Barehands gesture UI overlay] Presenter demonstrates 'the claw' gesture to target, grab, and pull floating elements from distance
+  - On screen: J.A.R.V.I.S. ACTIVE / VAULT / PROPS / WIDGETS
+  - Result: Targeted circular widget jitters when claw is formed, then moves toward fist
+  - Said: "and then the last thing that's really cool about this is the claw. So if you just take your hand like this and make a claw, and then you point it at any element on the screen..."
+**[07:59–08:27](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=479s)** · [Barehands gesture UI overlay] Presenter pulls up text file from Vault; expands markdown document floating in front of him; taps top bar to close
+  - On screen: VAULT / 00 Inbox / 01 - Daily Notes / 02 - Company A (Info Product) / 03 - Company B (Landscape Company) / 04 - Dev / 05 - Personal / 06 - Resources / 07 - Marketing / 08 - Jarvis / Stream Vault / status: active / project: meta / type: index / Part 1 - Who I Am / Jared Rhodenizer...
+  - Result: Full text sheet displayed in transparent floating window, moved around in 3D and closed with tap
+  - Said: "I'll pull up this text file right here and they render like this... you can move it all around like that... and if you want to just close it out, you just tap the top up here and it's closed."
+**[08:27–08:59](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=507s)** · [Webcam full view with Barehands overlay] Presenter summarizes all four parts of the repository (memory, personality, voice, visualizer, barehands) and closes
+  - On screen: J.A.R.V.I.S. ACTIVE / Site: jaredrhod.com / Socials: @jaredrhod
+  - Result: Presenter speaking to camera with barehands UI floating on upper right
+  - Said: "So essentially that is Barehands and it integrates directly with your AI agent... thanks for watching, and we'll see you next time."
+**[08:59–09:09](https://www.youtube.com/watch?v=FiOTrxq9ckM&t=539s)** · [Terminal screen] Terminal types out @jaredrhod then displays big retro pixel text with social platforms
+  - On screen: ~ $ @jaredrhod / @jaredrhod / TIKTOK - YOUTUBE - GITHUB - X
+  - Result: Green phosphor CRT terminal graphic with social links
