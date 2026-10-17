@@ -98,10 +98,37 @@ def senses(bus: dict | None = None) -> tuple[str, str]:
     return "GREEN", (line + ears).strip()
 
 
+BRAIN = Path.home() / ".grok-private/jarvis-brain.json"
+VOICE = Path.home() / ".config/brain/voice.txt"
+
+
+def settings(brain: dict | None = None, voice: str | None = None) -> tuple[str, str]:
+    """Canvas modellockcheck: the model pin and voice are his decisions; say what they are and who set the pin."""
+    import time as _t
+    try:
+        brain = brain if brain is not None else json.loads(BRAIN.read_text())
+    except (OSError, ValueError):
+        brain = {}
+    try:
+        voice = voice if voice is not None else VOICE.read_text().strip()
+    except OSError:
+        voice = ""
+    model = str(brain.get("model") or "")
+    if not model:
+        line = "No model pin: each job picks its own model."
+        state = "GREEN"
+    else:
+        when = _t.strftime("%m-%d %H:%M", _t.localtime(float(brain.get("at") or 0))) if brain.get("at") else "unknown time"
+        who = str(brain.get("by") or "unknown")
+        line = f"Model pin: {model.split('/')[-1]}, set by {'Evens' if who == 'evens' else who} on {when}."
+        state = "GREEN" if who == "evens" else "AMBER"  # only his own switch may pin the model
+    return state, line + (f" Voice: {voice}." if voice else "")
+
+
 def report(**fakes) -> dict:
     rows = {"budget": credit(fakes.get("credit")), "local model": local_model(fakes.get("models")),
             "permissions": permissions(fakes.get("perms")), "disk": disk(), "routes": routes(fakes.get("routes")),
-            "senses": senses(fakes.get("bus"))}
+            "senses": senses(fakes.get("bus")), "settings": settings(fakes.get("brain"), fakes.get("voice"))}
     worst = "RED" if any(s == "RED" for s, _ in rows.values()) else "AMBER" if any(s == "AMBER" for s, _ in rows.values()) else "GREEN"
     bad = [line for s, line in rows.values() if s != "GREEN"]
     spoken = "Everything I need to work is ready." if worst == "GREEN" else " ".join(bad)
