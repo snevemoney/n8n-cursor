@@ -276,6 +276,24 @@ class OpenableRows(unittest.TestCase):  # live 10-17: Finder rows refused AXPres
         self.assertEqual([c.get("action") for c in calls if c.get("op") == "ax_act"], ["AXPress", "AXOpen"])
 
 
+class CancelReachesBackgroundJobs(unittest.TestCase):  # matrix "conc": cancellation propagation
+    def test_stop_ends_the_jobs_background_commands(self):
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        task = O.Task.create(Path(tmp.name), "long thing")
+        calls = {"n": 0}
+        def model(m, t):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                return {"ok": True, "tool": "shell", "args": {"command": "sleep 60", "background": True}, "call_id": "c0",
+                        "calls": [{"tool": "shell", "args": {"command": "sleep 60", "background": True}, "call_id": "c0"}]}
+            task.write("control.json", {"cancel": True})  # he says stop while it waits
+            return {"ok": True, "tool": "say", "args": {"text": "waiting"}, "call_id": "c1", "calls": [{"tool": "say", "args": {"text": "waiting"}, "call_id": "c1"}]}
+        state = O.run(task.path, model_fn=model)
+        self.assertEqual(state["status"], "CANCELLED"); self.assertEqual(len(state.get("stopped_jobs") or []), 1)
+        pid = json.loads((task.path / "tools_state.json").read_text())["jobs"][state["stopped_jobs"][0]]["pid"]
+        self.assertEqual(subprocess.run(["pgrep", "-g", str(pid)], capture_output=True, text=True).stdout.strip(), "")
+
+
 class NoCreditIsNotDone(unittest.TestCase):  # live 10-17: "I couldn't ... Add credits" closed jobs as DONE
     def test_the_local_refusal_ends_the_job_as_model_unavailable_spoken_once(self):
         tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)

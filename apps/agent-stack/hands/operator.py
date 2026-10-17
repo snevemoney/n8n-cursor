@@ -1933,6 +1933,10 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
                 continue
         state = task.read("state.json")
         state.update(status=status, finished=time.time())
+        if status == "CANCELLED":  # matrix "conc": his stop reaches the background commands this job started
+            stopped = [jid for jid in list(tools.jobs) if tools.job({"job_id": jid, "action": "stop"})["text"].startswith("stopped by me")]
+            if stopped:
+                state["stopped_jobs"] = stopped
         task.write("state.json", state)
         verified = status == "DONE" and not state.get("unverified")
         if status == "DONE":
