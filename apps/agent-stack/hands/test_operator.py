@@ -364,6 +364,16 @@ class DeliverNeverCopiesSecrets(unittest.TestCase):
         self.assertIn("deliver refused", got); self.assertIn("never bundled", got)
 
 
+class ScreenClicksInSensitiveApps(unittest.TestCase):
+    def test_click_with_settings_in_front_is_held(self):
+        t = O.Tools(Path(tempfile.mkdtemp()))
+        with mock.patch.object(O, "_front_app", return_value="System Settings"):
+            self.assertIn("System Settings", t.preflight("computer", {"action": "left_click", "coordinate": [1, 2]}))
+            self.assertEqual(t.preflight("computer", {"action": "screenshot"}), "")
+        with mock.patch.object(O, "_front_app", return_value="Calculator"):
+            self.assertEqual(t.preflight("computer", {"action": "left_click", "coordinate": [1, 2]}), "")
+
+
 class OpenWith(unittest.TestCase):  # macread: his default PDF app is PdfCraft; "in Preview" must mean Preview
     def test_with_names_the_app(self):
         seen = []

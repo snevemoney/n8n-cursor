@@ -1105,6 +1105,12 @@ class Tools:
         """A kept stop the generic authority cannot see from the arguments alone (the label of a page button)."""
         if name == "safari":
             return SD.SafariDOM(self.state, self._hands, self._show_cursor).stop_reason(args)
+        act = str(args.get("action") or "")
+        if name in ("computer", "mouse", "keyboard") and act not in ("screenshot", "wait", "cursor_position", "zoom", ""):
+            # screen clicks name no app: check what is in front (System Settings, Keychain, password managers are his)
+            front = _front_app()
+            if _authority().SENSITIVE_APP.search(front):
+                return f"clicks or types in {front}, which holds system, security or password settings"
         return ""
 
     def browser(self, a):
@@ -1516,6 +1522,17 @@ def _mask_env_secrets(text: str) -> str:
         if v in text:
             text = text.replace(v, "[REDACTED SECRET]")
     return text
+
+
+def _front_app() -> str:
+    """The frontmost app's name via lsappinfo (no Automation prompt); '' when unknown."""
+    try:
+        asn = subprocess.run(["lsappinfo", "front"], capture_output=True, text=True, timeout=3).stdout.strip()
+        out = subprocess.run(["lsappinfo", "info", "-only", "name", asn], capture_output=True, text=True, timeout=3).stdout
+        m = re.search(r'"([^"]+)"', out)
+        return m.group(1) if m else ""
+    except (OSError, subprocess.SubprocessError):
+        return ""
 
 
 def _his_words(text: str) -> str:
