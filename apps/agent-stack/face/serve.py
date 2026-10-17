@@ -34,6 +34,25 @@ def _release_rev():
     except Exception:  # noqa: BLE001 - health must answer even if the rev cannot be read
         return None
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
+
+
+def _plain_fn():
+    mod = sys.modules.get("agent_stack_operator_view")
+    if mod is None:
+        spec = importlib.util.spec_from_file_location("agent_stack_operator_view", ROOT / "apps/agent-stack/hands/operator.py")
+        mod = importlib.util.module_from_spec(spec); sys.modules["agent_stack_operator_view"] = mod; spec.loader.exec_module(mod)
+    return mod.plain
+
+
+def plain_payload(payload):
+    """Evens 10-17 "Jarvis is still not always talking plain English": every line that leaves the Face (JSON replies and
+    the reply stream) passes the operator's plain() once: file names not paths, words not tool names."""
+    if not isinstance(payload, dict) or not isinstance(payload.get("spoken"), str) or not payload["spoken"]:
+        return payload
+    try:
+        return {**payload, "spoken": _plain_fn()(payload["spoken"])}
+    except Exception:  # noqa: BLE001 - never lose a reply over the cleanup
+        return payload
 OS_DIR = ROOT / "docs/hive/outer-heaven/CONTENT/os"
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("AGENT_STACK_FACE_PORT") or "4018")
@@ -616,7 +635,7 @@ class Handler(BaseHTTPRequestHandler):
             return
 
     def _json(self, code: int, payload: dict) -> None:
-        self._send(code, (json.dumps(payload, indent=2) + "\n").encode("utf-8"), "application/json")
+        self._send(code, (json.dumps(plain_payload(payload), indent=2) + "\n").encode("utf-8"), "application/json")
 
     def _trusted_request(self) -> bool:
         """Privacy audit 2026-10-16: any website could POST /api/turn ("permission granted ...", then "confirm") and a
@@ -1055,7 +1074,7 @@ class Handler(BaseHTTPRequestHandler):
         detached = False
         try:
             beat = think_heartbeat(utterance)
-            self.wfile.write((f"data: {json.dumps(beat)}\n\n").encode("utf-8"))
+            self.wfile.write((f"data: {json.dumps(plain_payload(beat))}\n\n").encode("utf-8"))
             self.wfile.flush()
         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, OSError):
             return
@@ -1125,7 +1144,7 @@ class Handler(BaseHTTPRequestHandler):
         def emit_dark() -> None:
             dark = self._scrub_turn(live_mouth, wire_dark_event(utterance))
             try:
-                self.wfile.write((f"data: {json.dumps(dark)}\n\n").encode("utf-8"))
+                self.wfile.write((f"data: {json.dumps(plain_payload(dark))}\n\n").encode("utf-8"))
                 self.wfile.flush()
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, OSError):
                 pass
@@ -1138,7 +1157,7 @@ class Handler(BaseHTTPRequestHandler):
             kept = self._committed_model_event(utterance, own_gen_now())
             if kept:
                 try:
-                    self.wfile.write((f"data: {json.dumps(kept)}\n\n").encode("utf-8"))
+                    self.wfile.write((f"data: {json.dumps(plain_payload(kept))}\n\n").encode("utf-8"))
                     self.wfile.flush()
                 except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, OSError):
                     pass
