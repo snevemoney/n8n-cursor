@@ -113,13 +113,14 @@ def _path(trace_rows: list) -> list:
 RESEARCHY = re.compile(r"\b(research|latest|current|right now|compare|most popular|top \d+|stars|price|news)\b", re.I)
 
 
-def remember(hive: Path, goal: str, summary: str, trace_rows: list, model: str = "") -> None:
+def remember(hive: Path, goal: str, summary: str, trace_rows: list, model: str = "", failed: str = "") -> None:
     """Append one procedure note for a finished job (bounded file). Research answers are facts that go stale, so they
     are not kept (bench 10-16: a wrong first answer was replayed by the next run)."""
     if RESEARCHY.search(goal):
         return
     f = Path(hive) / PROC_FILE
-    row = {"at": time.time(), "goal": goal[:300], "summary": summary[:600], "path": _path(trace_rows), "model": model}
+    row = {"at": time.time(), "goal": goal[:300], "summary": summary[:600], "path": _path(trace_rows), "model": model,
+           **({"failed": failed[:300]} if failed else {})}  # canvas scars: what did NOT work is remembered too
     rows = [l for l in (f.read_text().splitlines() if f.exists() else []) if l.strip()][-(PROC_KEEP - 1):]
     f.write_text("\n".join(rows + [json.dumps(row)]) + "\n")
 
@@ -146,8 +147,9 @@ def recall_text(hive: Path, goal: str) -> str:
     rows = recall(hive, goal)
     if not rows:
         return ""
-    parts = [f"- Asked: {r['goal']}\n  Outcome: {r['summary']}\n  What worked: {'; '.join(r.get('path') or []) or 'n/a'}"
-             for r in rows]
+    parts = [f"- Asked: {r['goal']}\n  Outcome: {r['summary']}\n  " + (
+                 f"DID NOT WORK ({r['failed']}); tried: {'; '.join(r.get('path') or []) or 'n/a'}. Take another way."
+                 if r.get("failed") else f"What worked: {'; '.join(r.get('path') or []) or 'n/a'}") for r in rows]
     return ("\n\nYou did similar jobs before (reuse the METHOD that worked, skip what failed; their facts may be stale "
             "or wrong, so verify everything again):\n"
             + "\n".join(parts))

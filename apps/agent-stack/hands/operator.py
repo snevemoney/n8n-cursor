@@ -2007,6 +2007,15 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
                             rows, str(state.get("model") or ""))
             except (OSError, ValueError):
                 pass  # a missing note never fails the job
+        failed = (f"ran out of {'steps' if status == 'STEP_LIMIT' else 'time'}" if status in ("STEP_LIMIT", "TIME_LIMIT")
+                  else f"finished unverified: {state.get('unverified')}" if status == "DONE" and state.get("unverified") else "")
+        if failed and not fixed_fn:  # canvas scars: a failed method is remembered so the next similar job avoids it
+            try:
+                rows = [json.loads(l) for l in (task.path / "trace.jsonl").read_text().splitlines() if l.strip()]
+                HX.remember(task.path.parent.parent, task.read("request.json").get("goal", ""), state.get("summary") or "",
+                            rows, str(state.get("model") or ""), failed=failed)
+            except (OSError, ValueError):
+                pass
         if state.get("tier") != "owner" and status in ("DONE", "MODEL_UNAVAILABLE", "STEP_LIMIT", "TIME_LIMIT"):
             record_outcome(state.get("kind") or "any", str(state.get("model") or ""), verified)
         if status in ("DONE", "WAITING_OWNER") and session and not task.read("state.json").get("helper"):

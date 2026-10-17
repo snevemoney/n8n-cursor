@@ -70,3 +70,15 @@ class Procedures(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FailuresAreRemembered(unittest.TestCase):  # canvas scars
+    def test_a_failed_method_is_recalled_as_did_not_work(self):
+        import importlib.util as _u, tempfile as _t
+        sp = _u.spec_from_file_location("harness_scars_t", Path(__file__).with_name("harness.py"))
+        H = _u.module_from_spec(sp); sp.loader.exec_module(H)
+        hive = Path(_t.mkdtemp())
+        rows = [{"event": "tool", "tool": "computer", "args": {"action": "click"}}]
+        H.remember(hive, "close the old export tab in Preview", "could not close it", rows, failed="ran out of steps")
+        text = H.recall_text(hive, "close the export tab in Preview")
+        self.assertIn("DID NOT WORK (ran out of steps)", text); self.assertIn("Take another way", text)
