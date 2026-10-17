@@ -1699,7 +1699,7 @@ def _local():
     return mod
 
 
-JARVIS_NOTE_RE = re.compile(r"^\s*(?:Before you finish|Not run|\(It has been|\(While you were|Heads up:)")
+JARVIS_NOTE_RE = re.compile(r"^\s*(?:Before you finish|Not run|\(It has been|Heads up:)")  # "(While you were…" carries his words
 
 
 def _goal_of(messages: list) -> str:

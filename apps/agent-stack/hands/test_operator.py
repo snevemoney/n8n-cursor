@@ -354,6 +354,8 @@ class GoalIsHisWords(unittest.TestCase):  # live 10:53: a check-back note was ju
         msgs = [{"role": "user", "content": "Open Calculator."}, {"role": "assistant", "content": "Calculator is open."},
                 {"role": "user", "content": "Before you finish: prove it. Check the result for real (run a check command)."}]
         self.assertEqual(O._goal_of(msgs), "Open Calculator.")
+        mid = msgs + [{"role": "user", "content": "(While you were working, Evens added the following.)\nalso open Notes"}]
+        self.assertIn("also open Notes", O._goal_of(mid))  # his mid-job words are his request
 
 
 class OpenWith(unittest.TestCase):  # macread: his default PDF app is PdfCraft; "in Preview" must mean Preview
