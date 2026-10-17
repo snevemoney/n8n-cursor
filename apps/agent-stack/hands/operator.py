@@ -1843,9 +1843,14 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
                 slow.daemon = True
                 if name not in ("say", "plan", "done", "ask_owner"):
                     slow.start()
+                missing = [k for k in _required().get(name, ()) if args.get(k) in (None, "")]
                 try:
+                    if missing:  # toolcontract: a clear refusal, not "error: KeyError: 'content'"
+                        raise _Missing(f"Not run: {name} needs {', '.join(missing)}. Call it again with that filled in.")
                     with input_lease(name, task.path.name):
                         result = getattr(tools, name)(args)
+                except _Missing as gap:
+                    result = {"text": str(gap)}
                 except LeaseBusy as busy:
                     result = {"text": f"Not run: {busy}. Wait a moment or work in the background (app, app_type) instead."}
                 except Exception as exc:  # noqa: BLE001 — every failure is data for the model
@@ -1863,7 +1868,7 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
             result = {**result, "text": str(result.get("text") or "") + "\nNOTE: this is the third time you ran exactly this. "
                       "It is not working; do something different (look at the right screen, use another way) or ask Evens."}
         result = {**result, "text": _scrub(str(result.get("text") or ""))}  # credential handles: never a secret value in context or logs
-        task.trace({"event": "tool", "tool": name, "args": args, "decision": decision, "result": result.get("text", "")[:2000]})
+        task.trace({"event": "tool", "tool": name, "call_id": c["call_id"], "args": args, "decision": decision, "result": result.get("text", "")[:2000]})
         messages.append({"role": "tool", "tool_call_id": c["call_id"], "content": result.get("text", "")})
         if result.get("image"):
             images.append(result["image"])
@@ -2304,6 +2309,14 @@ def _ax_owners(els: list) -> dict:
                 out[i] = anc.get("label") or anc.get("value")
                 break
     return out
+
+
+class _Missing(Exception):
+    pass
+
+
+def _required() -> dict:
+    return {t["function"]["name"]: tuple(t["function"]["parameters"].get("required") or ()) for t in TOOLS}
 
 
 def _done_gate(task, name: str, args: dict) -> str:

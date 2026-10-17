@@ -317,6 +317,18 @@ class PressThatChangedNothing(unittest.TestCase):  # axcontrol: no false "Did pr
         self.assertIn("CHECK: nothing in the app changed", got)
 
 
+class ToolContract(unittest.TestCase):  # toolcontract: missing args are a plain refusal; trace rows carry the call id
+    def test_missing_required_argument_is_refused_plainly(self):
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        task = O.Task.create(Path(tmp.name), "how is the background job going?")
+        model = scripted([("job", {})],
+                         [("done", {"summary": "The job id was missing, so nothing was checked.", "evidence": "refused"})])
+        O.run(task.path, model_fn=model)
+        row = next(r for r in task.rows("trace.jsonl") if r.get("tool") == "job")
+        self.assertEqual(row["result"], "Not run: job needs job_id. Call it again with that filled in.")
+        self.assertEqual(row["call_id"], "c0")
+
+
 class OpenWith(unittest.TestCase):  # macread: his default PDF app is PdfCraft; "in Preview" must mean Preview
     def test_with_names_the_app(self):
         seen = []
