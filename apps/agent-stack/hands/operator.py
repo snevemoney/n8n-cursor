@@ -1202,7 +1202,8 @@ for _t, _env in (("cheap", "JARVIS_TIER_CHEAP"), ("mid", "JARVIS_TIER_MID"), ("f
         POOLS[_t] = {"any": [os.environ[_env].strip()]}
 TIER_MODELS = {t: POOLS[t]["any"][0] for t in TIERS}
 CHEAP_FIRST = (os.environ.get("JARVIS_CHEAP_FIRST") or "1") != "0"
-CHEAP_ESCALATE_STEPS = int(os.environ.get("JARVIS_CHEAP_ESCALATE_STEPS") or 8)  # Evens 10-17 "make it cost 0.01 or less"
+CHEAP_ESCALATE_STEPS = int(os.environ.get("JARVIS_CHEAP_ESCALATE_STEPS") or 8)
+CHEAP_NE = float(os.environ.get("JARVIS_CHEAP_NEEDS_EXPENSIVE") or 0.2)  # Jev's needs_expensive below this = cheap job  # Evens 10-17 "make it cost 0.01 or less"
 JEV_MIN_CONF = 0.6  # below it Jev has no opinion and the job goes UP a tier, never down (jev-preflight rule)
 SCORES = Path.home() / "Library" / "Caches" / "jarvis" / "model-scores.json"
 MIN_SAMPLES = 3
@@ -1258,6 +1259,11 @@ def _jev_tier(goal: str) -> dict | None:
         conf = float((live or {}).get("model_tier_conf") or 0)
         ne = (live or {}).get("needs_expensive")
         JEV_LAST.clear(); JEV_LAST.update(live=bool(live), tier=tier, ne=ne, keys=sorted((live or {}).keys())[:12])
+        if isinstance(ne, (int, float)) and ne < CHEAP_NE and tier != "cheap":
+            # live 10-17: Jev labelled a 3-step Calculator click "mid" at needs_expensive 0.14, so it ran on the Sonnet pin
+            # ($0.07). Evens: "make it cost 0.01 or less". A job Jev itself rates this cheap starts cheap; it escalates
+            # to his pin after CHEAP_ESCALATE_STEPS steps if it is still going.
+            tier, conf = "cheap", round(1 - ne, 3)
         if tier not in TIERS and isinstance(ne, (int, float)):
             # live 10-17: Jev answered in 0.3 s but without model_tier, so every job fell to the Sonnet pin ($0.05 for one line)
             tier = "cheap" if ne < 0.35 else "mid" if ne < 0.7 else "frontier"

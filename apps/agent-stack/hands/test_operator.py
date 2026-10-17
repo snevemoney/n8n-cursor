@@ -285,6 +285,18 @@ class JevNeedsExpensive(unittest.TestCase):  # live 10-17: Jev omitted model_tie
         self.assertEqual(got["tier"], "cheap"); self.assertGreaterEqual(got["conf"], O.JEV_MIN_CONF)
         self.assertEqual(O.JEV_LAST["ne"], 0.19)
 
+    def test_a_job_jev_rates_very_cheap_starts_cheap_even_if_it_says_mid(self):
+        class PF:
+            def __init__(self, live): self.live = live
+            def result(self, wait=True): return self.live
+        class J:
+            live = {"handler": "tool", "confidence": 1.0, "needs_expensive": 0.14, "model_tier": "mid", "model_tier_conf": 0.66, "task_kind": "screen"}
+            @classmethod
+            def start(cls, g, live=True): return PF(cls.live)
+        with mock.patch.object(O, "_load_brain", return_value=J):
+            got = O._jev_tier("click 12 times 7 in Calculator")
+        self.assertEqual(got["tier"], "cheap"); self.assertGreaterEqual(got["conf"], O.JEV_MIN_CONF)
+
     def test_a_failing_jev_call_is_recorded_not_hidden(self):
         with mock.patch.object(O, "_load_brain", side_effect=RuntimeError("no router")):
             self.assertIsNone(O._jev_tier("x"))
