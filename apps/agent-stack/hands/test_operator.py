@@ -324,6 +324,20 @@ class DrivingAndTakeover(unittest.TestCase):  # Z29: badge while driving, hands 
         self.assertEqual(v["jev"]["ne"], 0.13); self.assertIn("How is it going?", v["chips"]); self.assertIn("click 12 times 7 in Calculator", v["chips"])
 
 
+class CuaThroughDaemon(unittest.TestCase):  # live 10-17: "session is not available to this transport" on every MCP call
+    def test_cua_calls_go_through_the_daemon_with_jarvis_session_and_keep_the_write_gate(self):
+        tools = O.Tools(Path(tempfile.mkdtemp()))
+        with mock.patch.object(O, "_cua_cursor"), mock.patch.object(O.subprocess, "run", return_value=mock.Mock(returncode=0, stdout="{\"apps\": []}", stderr="")) as run:
+            got = tools.mcp({"server": "cua-driver", "tool": "list_apps", "arguments": {}})
+        self.assertIn("answered", got["text"])
+        argv = run.call_args[0][0]
+        self.assertEqual(argv[1:3], ["call", "list_apps"]); self.assertEqual(json.loads(argv[3])["session"], "jarvis")
+        at = O._load("agent_tools", "agent_tools.py")
+        with mock.patch.object(at, "_open_access", return_value=False), mock.patch.object(O.subprocess, "run") as run2:
+            got = tools.mcp({"server": "cua-driver", "tool": "kill_app", "arguments": {"pid": 1}})
+        self.assertIn("needs Evens", got["text"]); run2.assert_not_called()
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")

@@ -1101,8 +1101,25 @@ class Tools:
         return {"text": "said"}
 
     def mcp(self, a, approved=False):
-        if str(a.get("server")) == "cua-driver":
-            _cua_cursor(str((a.get("arguments") or {}).get("session") or ""))
+        if str(a.get("server")) == "cua-driver" and CUA_DRIVER.is_file():
+            # live 10-17 hand proof: every MCP call opened a fresh connection, and cua-driver ties a named session to one
+            # connection, so "session is not available to this transport" on every second call. Its own `call` goes
+            # through the persistent daemon where Jarvis's session lives. The same write gate applies first.
+            at = _load("agent_tools", "agent_tools.py")
+            tool, args = str(a.get("tool") or ""), dict(a.get("arguments") or {})
+            if not at.NAME_OK.match(tool):
+                return {"text": "cua-driver needs a tool name"}
+            writing = bool(at.WRITE_TOOL.search(tool) or not at.READ_TOOL.match(tool))
+            if writing and approved is not True and not (at._open_access() and not at.OPEN_MCP_HARD.search(tool)):
+                return {"text": f"cua-driver.{tool} could change something; that needs Evens first. I didn't call it."}
+            args.setdefault("session", "jarvis")
+            _cua_cursor(args["session"])
+            try:
+                cp = subprocess.run([str(CUA_DRIVER), "call", tool, json.dumps(args)], capture_output=True, text=True, timeout=120)
+            except (OSError, subprocess.SubprocessError) as exc:
+                return {"text": f"cua-driver.{tool} failed: {exc}"}
+            out = (cp.stdout or "").strip() or (cp.stderr or "").strip()
+            return {"text": _clip((f"cua-driver.{tool} answered: " if cp.returncode == 0 else f"cua-driver.{tool} failed: ") + out)}
         got = _load("agent_tools", "agent_tools.py").op_mcp(str(a["server"]), str(a["tool"]), a.get("arguments") or {},
                                                             approved=approved)
         return {"text": _clip(got.get("spoken") or json.dumps(got, default=str))}
