@@ -13,6 +13,8 @@ class DeliverableBundle(unittest.TestCase):
             self.assertFalse(got["ok"]); self.assertTrue(Path(got["folder"]).name.endswith("weekly-plan"))
             self.assertEqual([r["check"] for r in man["files"]], ["text, 2 lines", "check failed: not a PDF"])
             self.assertTrue((src / "notes.md").exists())  # originals stay
+            idx = (Path(t) / "out" / "INDEX.md").read_text()
+            self.assertIn("[Weekly Plan!](", idx); self.assertIn("a check failed", idx)
             with self.assertRaises(ValueError): D.bundle("x", [src / "nope.md"], root=Path(t) / "out")
 
     @unittest.skipUnless(shutil.which("ffmpeg"), "ffmpeg")

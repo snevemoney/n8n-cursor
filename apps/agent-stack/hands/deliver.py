@@ -60,4 +60,11 @@ def bundle(title: str, files: list, note: str = "", root: Path = ROOT, now: floa
                                                    "files": rows}, indent=1))
     (out / "README.md").write_text(f"# {title}\n\n{note}\n\n" + "\n".join(f"- **{r['file']}** — {r['check']} (from {r['from']})"
                                                                      for r in rows) + "\n")
+    # canvas sig_x29: every delivery is findable from one index note, newest last
+    index = root / "INDEX.md"
+    if not index.exists():
+        index.write_text("# Jarvis deliveries\n\nEvery finished deliverable, with its checks. Newest last.\n\n")
+    with index.open("a", encoding="utf-8") as fh:
+        fh.write(f"- {time.strftime('%Y-%m-%d %H:%M')} [{title}]({out.name}/README.md) — "
+                 f"{len(rows)} file(s), {'all checks passed' if ok else 'a check failed'}\n")
     return {"ok": ok, "folder": str(out), "files": rows}
