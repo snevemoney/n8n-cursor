@@ -3,6 +3,7 @@ when no runner is alive; expired loops are not listed as active."""
 import importlib.util
 import os
 import tempfile
+import time
 import threading
 import unittest
 from datetime import datetime, timedelta
@@ -82,6 +83,14 @@ class MorningBrief(unittest.TestCase):  # Z20 / X36: a daily brief at a set time
             self.assertEqual(R.tick(L, now=datetime(2026, 10, 18, 10, 0), checker=chk), [])      # once a day
             self.assertEqual(len(R.tick(L, now=datetime(2026, 10, 19, 6, 1), checker=chk)), 1)
             self.assertEqual(L.run({"op": "start", "what": "reports my morning brief", "at": "25:00"})["ok"], False)
+
+    def test_brief_names_shared_notes_nobody_refreshed_in_two_weeks(self):
+        d = Path(tempfile.mkdtemp()); shared = d / "shared"; shared.mkdir()
+        (shared / "CURRENT_STATE.md").write_text("fresh"); old = shared / "ACTIVE_TASKS.md"; old.write_text("old")
+        os.utime(old, (0, time.time() - 20 * 86400))
+        with mock.patch.object(R, "PRIVATE", d), mock.patch.object(R, "SHARED", shared):
+            ok, text = R.check("reports my morning brief")
+        self.assertIn("1 shared notes are over 14 days old: ACTIVE_TASKS.", text); self.assertNotIn("CURRENT_STATE", text)
 
     def test_brief_reads_his_files(self):
         d = Path(tempfile.mkdtemp()); (d / "Ops Watch").mkdir()

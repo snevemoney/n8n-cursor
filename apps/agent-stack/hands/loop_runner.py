@@ -50,6 +50,7 @@ def _health(m) -> tuple[bool, str]:
 
 PRIVATE = Path.home() / "ArtCraft Studio/00 Private/Studio Operations"
 SHARED = Path.home() / ".grok-shared"
+STALE_DAYS = 14
 
 
 def _lines(path: Path, n: int, pat: str = r"^\s*[-*] ") -> list[str]:
@@ -87,6 +88,11 @@ def _brief(_m) -> tuple[bool, str]:
     if asks:
         parts.append(f"{len(asks)} decisions wait for you; newest: "
                      + re.split(r"(?<=[.!?])\s", re.sub(r"^\d{4}-\d\d-\d\d \d\d:\d\d \([^)]*\):\s*", "", asks[-1]))[0][:160])
+    # X13 daily compilation: shared fleet notes nobody has refreshed in two weeks are named (contradictions: not covered)
+    old = sorted((p for p in SHARED.glob("*.md") if time.time() - p.stat().st_mtime > STALE_DAYS * 86400),
+                 key=lambda p: p.stat().st_mtime)
+    if old:
+        parts.append(f"{len(old)} shared notes are over {STALE_DAYS} days old: " + ", ".join(p.stem for p in old[:4]) + ".")
     u = shutil.disk_usage(str(Path.home()))
     parts.append(f"Disk {u.free / 1e9:.0f} GB free.")
     return True, " ".join(parts)[:900]
