@@ -1624,7 +1624,8 @@
       if (talk === "openrouter" || wires.openrouter === "talk") mouth = "OPENROUTER";
       else if (talk === "xai" || wires.grok === "talk") mouth = "XAI";
       else if (talk === "grokbot" || wires.grokbot === "live") mouth = "GROKBOT";
-      $("link").textContent = "NEURAL LINK - " + mouth + (model && mouth !== "DARK" ? " · " + model : "");
+      $("link").textContent = "NEURAL LINK - " + mouth + (model && mouth !== "DARK" ? " · " + model : "")
+        + (report && report.credit_empty ? " · NO CREDIT · FREE LOCAL MODEL" : "");  // Z64: say what really answers
     }
     function paintMode(bus, report) {
       if (!$("mode")) return;
@@ -1942,7 +1943,7 @@
       if (gf && gf.note && gf.at !== lastGraphFocusAt) { lastGraphFocusAt = gf.at; lightNote(String(gf.note)); }  // Z70
       if (rc) {
         const tools = Object.entries(op.tools_run || {}).map(([k, n]) => n > 1 ? k + " ×" + n : k).join(" · ");
-        const pick = op.tier ? (op.tier + (op.kind ? "/" + op.kind : "") + (op.jev && op.jev.ne !== undefined ? " · jev " + op.jev.ne : "")) : "";
+        const pick = op.tier ? (op.tier + (op.kind ? "/" + op.kind : "") + (op.jev && op.jev.ne != null ? " · jev " + op.jev.ne : "")) : "";
         const cost = op.cost_usd ? "$" + Number(op.cost_usd).toFixed(3) : "";
         const parts = [tools, pick, cost, op.rev ? "rev " + String(op.rev).slice(0, 7) : "", op.verified === false ? "unverified" : ""].filter(Boolean);
         rc.textContent = parts.join("  ·  ");

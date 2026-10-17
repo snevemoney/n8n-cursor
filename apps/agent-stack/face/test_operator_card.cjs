@@ -31,4 +31,6 @@ assert.strictEqual(els.planBoard.hidden, false);
 assert.strictEqual(els.planBoard.textContent, '✓ export the deck\n→ <b>attach</b> it\n· send draft', 'plan as plain text, never HTML');
 ctx.paintOperator({ plan: [] });
 assert.strictEqual(els.planBoard.hidden, true, 'no plan, no board');
+ctx.paintOperator({ tools_run: { open: 1 }, tier: 'owner', kind: 'any', jev: { ne: null }, rev: 'bf7c2cdb29e5' });
+assert.ok(!els.receipt.textContent.includes('null'), 'no "null" on the receipt: ' + els.receipt.textContent);
 console.log('ok operator card');

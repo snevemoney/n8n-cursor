@@ -36,6 +36,22 @@ def _release_rev():
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 
 
+_CREDIT: dict = {}
+
+
+def _credit_empty() -> bool:
+    """Z64 mode truth for the header: is OpenRouter out of credit (cached 5 min; one read-only call, key by name)."""
+    import time as _t
+    if _t.time() - float(_CREDIT.get("at") or 0) > 300:
+        try:
+            spec = importlib.util.spec_from_file_location("serve_readiness", ROOT / "apps/agent-stack/hands/readiness.py")
+            rd = importlib.util.module_from_spec(spec); spec.loader.exec_module(rd)
+            _CREDIT.update(at=_t.time(), empty=rd.credit()[0] == "RED")
+        except Exception:  # noqa: BLE001 - unknown credit is not shown as empty
+            _CREDIT.update(at=_t.time(), empty=False)
+    return bool(_CREDIT.get("empty"))
+
+
 def _operator_view_mod():
     mod = sys.modules.get("agent_stack_operator_view")
     if mod is None:
@@ -721,7 +737,7 @@ class Handler(BaseHTTPRequestHandler):
             live = online()
             if hasattr(live, "load_existing_env"):
                 live.load_existing_env()
-            self._json(200, live.wire_report())
+            self._json(200, {**live.wire_report(), "credit_empty": _credit_empty()})
             return
         if path == "/api/voice":
             self._json(200, voice().voice_report())
