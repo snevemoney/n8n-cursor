@@ -351,9 +351,11 @@ TOOLS = [
         "report, index, SOP, brief...): a named HTML/Markdown/CSV/JSON/SVG page in ArtCraft Studio that he can open; the same "
         "name updates it in place and keeps the previous versions. Opens it in his browser on the first publish or when open=true.",
         {"name": S, "content": S, "kind": {"type": "string", "enum": ["html", "md", "csv", "json", "svg"]}, "project": S,
+         "file": {"type": "string", "description": "instead of content: a file you made (ArtCraft app export or native file, image, "
+                  "video, audio/podcast, deck, sheet, doc, pdf, 3D/CAD model, ebook) to keep as this artifact's newest version"},
          "open": {"type": "boolean"},
          "refresh": {"type": "string", "description": "optional shell command that prints the page; it is re-run every 30 min and the page updates itself when the output changes"}},
-        ["name", "content"]),
+        ["name"]),
     _fn("mcp", "Call a tool on a connected MCP server.", {"server": S, "tool": S, "arguments": {"type": "object"}},
         ["server", "tool"]),
     _fn("say", "Say something to Evens right now and keep working: your answer to a plain question, what you are "
@@ -941,7 +943,12 @@ class Tools:
     def artifact(self, a):
         """Evens 10-16: interactive artifacts that update as we build. One folder per artifact, newest file is the page,
         history/ keeps every earlier version, INDEX.md lists them all for any agent or Obsidian."""
-        kind = str(a.get("kind") or "html").lower()
+        src = Path(os.path.expanduser(str(a.get("file") or ""))) if a.get("file") else None
+        if src is not None and not src.is_file():
+            return {"text": f"no such file: {src}"}
+        if src is None and a.get("content") is None:
+            return {"text": "artifact needs content (a page) or file (anything you made)"}
+        kind = (src.suffix[1:].lower() if src is not None else str(a.get("kind") or "html").lower()) or "bin"
         slug = re.sub(r"[^a-z0-9]+", "-", str(a["name"]).lower()).strip("-")[:60] or "artifact"
         root = ARTIFACTS / re.sub(r"[^A-Za-z0-9 _-]+", "", str(a.get("project") or "Jarvis")).strip() / slug
         page = root / f"{slug}.{kind}"
@@ -950,10 +957,16 @@ class Tools:
             (root / "history").mkdir(exist_ok=True)
             page.rename(root / "history" / f"{time.strftime('%Y%m%d-%H%M%S')}.{kind}")
         root.mkdir(parents=True, exist_ok=True)
-        body = str(a["content"])
-        if kind == "html" and ("class=\"mermaid\"" in body or "```mermaid" in body) and "mermaid.min.js" not in body:
-            body = re.sub(r"```mermaid\n(.*?)```", r'<pre class="mermaid">\1</pre>', body, flags=re.S) + MERMAID_TAG
-        page.write_text(body)
+        if src is not None:
+            import shutil
+            shutil.copy2(src, page)
+            body = None
+        else:
+            body = str(a["content"])
+        if body is not None:
+            if kind == "html" and ("class=\"mermaid\"" in body or "```mermaid" in body) and "mermaid.min.js" not in body:
+                body = re.sub(r"```mermaid\n(.*?)```", r'<pre class="mermaid">\1</pre>', body, flags=re.S) + MERMAID_TAG
+            page.write_text(body)
         index = ARTIFACTS / "INDEX.md"
         line = f"- [{a['name']}]({page.relative_to(ARTIFACTS)}) — {kind}, updated {time.strftime('%Y-%m-%d %H:%M')}"
         lines = [l for l in (index.read_text().splitlines() if index.exists() else ["# Jarvis artifacts", ""])

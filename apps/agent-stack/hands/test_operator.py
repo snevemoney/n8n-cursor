@@ -243,6 +243,17 @@ class JevPicksTheTool(unittest.TestCase):  # Evens 10-16: Jev decides which tool
 
 
 class LivingArtifacts(OperatorLoop):
+    def test_any_file_becomes_a_versioned_artifact(self):  # images, videos, podcasts, decks, 3D: same history and index
+        f1 = self.home / "cover.png"; f1.write_bytes(b"\x89PNG v1"); f2 = self.home / "cover2.png"; f2.write_bytes(b"\x89PNG v2")
+        with mock.patch.object(O, "ARTIFACTS", self.home / "ARTIFACTS"), mock.patch.object(O.subprocess, "run"):
+            t = O.Tools(O.Task.create(self.hive, "cover").path)
+            self.assertIn("published", t.artifact({"name": "Ebook Cover", "file": str(f1)})["text"])
+            self.assertIn("updated", t.artifact({"name": "Ebook Cover", "file": str(f2)})["text"])
+            self.assertIn("no such file", t.artifact({"name": "X", "file": str(self.home / "nope.mp4")})["text"])
+            self.assertIn("needs content", t.artifact({"name": "Y"})["text"])
+        page = self.home / "ARTIFACTS/Jarvis/ebook-cover/ebook-cover.png"
+        self.assertEqual(page.read_bytes(), b"\x89PNG v2"); self.assertEqual(len(list((page.parent / "history").glob("*.png"))), 1)
+
     def test_mermaid_blocks_render_in_html_artifacts(self):
         with mock.patch.object(O, "ARTIFACTS", self.home / "ARTIFACTS"), mock.patch.object(O.subprocess, "run"):
             t = O.Tools(O.Task.create(self.hive, "chart").path)
