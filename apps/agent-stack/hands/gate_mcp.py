@@ -37,7 +37,7 @@ def ask(question: str, kind: str, options=None, by: str = "an agent") -> dict:
     if kind not in KINDS or not 5 <= len(q) <= 300:
         raise ValueError(f"kind is one of {KINDS}; question is 5-300 characters")
     opts = _options(kind, options)
-    gid = "GATE-" + hashlib.sha1(f"{q}|{time.time()}".encode()).hexdigest()[:6]
+    gid = "GATE-" + hashlib.sha256(f"{q}|{time.time()}".encode()).hexdigest()[:6]
     who = re.sub(r"[^\w .-]", "", str(by))[:30] or "an agent"
     line = f"- {time.strftime('%Y-%m-%d %H:%M')} ({who}) {gid}: {q} [{' / '.join(opts)}] answer: \n"
     with _file().open("a", encoding="utf-8") as f:
