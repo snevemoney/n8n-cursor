@@ -395,6 +395,10 @@ TOOLS = [
                                                "upload", "dialog"]},
          "ref": I, "text": S, "url": S, "keys": S, "direction": S, "amount": I, "window": I, "index": I, "submit": B,
          "replace": B, "checked": B, "code": S, "path": S, "timeout_s": I, "real": B}, ["action"]),
+    _fn("recall", "How often and when something really happened in his history (his chats on every platform): pattern "
+        "(words or a regex), since=YYYY-MM-DD, platform=codex|claude_code|cursor|grok|chatgpt|jarvis. Returns the real "
+        "count, dates and dated quotes. Use it before saying he usually/often/always does something; never estimate.",
+        {"pattern": S, "since": S, "platform": S}, ["pattern"]),
     _fn("web_helper", "Reuse a Safari procedure that already worked. save name=... steps=[safari actions, label=<visible "
         "text> instead of ref, {var} for values] expect=<text the page shows when it worked> about=...; run name=... "
         "vars={...}; list. Save only steps you just saw succeed. Each step passes the same checks as a safari call.",
@@ -504,6 +508,7 @@ BS = _load("browser_session", "browser_session.py")
 HX = _load("harness", "harness.py")
 SD = _load("safari_dom", "safari_dom.py")
 WH = _load("web_helpers", "web_helpers.py")
+PR = _load("pattern_recall", "pattern_recall.py")
 WEB_HELPERS = CONFIG_DIR / "web-helpers"
 
 
@@ -936,6 +941,14 @@ class Tools:
         got = SD.SafariDOM(self.state, self._hands, self._show_cursor).act(a)
         self._save()  # the working tab and the tabs Jarvis opened survive between steps
         return got
+
+    def recall(self, a):
+        try:
+            got = PR.recall(str(a.get("pattern") or ""), [CHAT_CORPUS], since=str(a.get("since") or ""),
+                            platform=str(a.get("platform") or ""))
+        except ValueError as exc:
+            return {"text": f"recall: {exc}"}
+        return {"text": PR.say(got, str(a.get("pattern")))}
 
     def web_helper(self, a):
         act = str(a.get("action") or "list")
