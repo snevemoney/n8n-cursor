@@ -402,6 +402,9 @@ TOOLS = [
         "(words or a regex), since=YYYY-MM-DD, platform=codex|claude_code|cursor|grok|chatgpt|jarvis. Returns the real "
         "count, dates and dated quotes. Use it before saying he usually/often/always does something; never estimate.",
         {"pattern": S, "since": S, "platform": S}, ["pattern"]),
+    _fn("scroll_video", "Make a scroll-scrubbed website video: src=video file, out_dir=folder, seconds (max 30), start. "
+        "Writes clip.mp4 (720p, every frame a keyframe so scrolling seeks instantly) and index.html; reports what ffprobe "
+        "measured.", {"src": S, "out_dir": S, "seconds": I, "start": I}, ["src", "out_dir"]),
     _fn("web_helper", "Reuse a Safari procedure that already worked. save name=... steps=[safari actions, label=<visible "
         "text> instead of ref, {var} for values] expect=<text the page shows when it worked> about=...; run name=... "
         "vars={...}; list. Save only steps you just saw succeed. Each step passes the same checks as a safari call.",
@@ -512,6 +515,7 @@ HX = _load("harness", "harness.py")
 SD = _load("safari_dom", "safari_dom.py")
 WH = _load("web_helpers", "web_helpers.py")
 PR = _load("pattern_recall", "pattern_recall.py")
+SV = _load("scroll_video", "scroll_video.py")
 WEB_HELPERS = CONFIG_DIR / "web-helpers"
 
 
@@ -944,6 +948,15 @@ class Tools:
         got = SD.SafariDOM(self.state, self._hands, self._show_cursor).act(a)
         self._save()  # the working tab and the tabs Jarvis opened survive between steps
         return got
+
+    def scroll_video(self, a):
+        try:
+            got = SV.make(str(a.get("src") or ""), str(a.get("out_dir") or ""), seconds=float(a.get("seconds") or 30),
+                          start=float(a.get("start") or 0))
+        except (ValueError, OSError, subprocess.SubprocessError) as exc:
+            return {"text": f"scroll video: {exc}"}
+        return {"text": ("made" if got["ok"] else "made, but the check failed") + f": {got['page']} with {got['clip']} "
+                        f"({got['height']}p, {got['seconds']} s, {got['keyframes']}/{got['frames']} keyframes, {got['bytes']} bytes)"}
 
     def recall(self, a):
         try:
@@ -1592,9 +1605,12 @@ def _model_fn(tier: str = "mid", chain: list | None = None):
         online.load_existing_env()
     owner = _owner_model()
     if tier == "owner" and owner:
-        chain = tuple([owner, *[m for m in (chain or []) if m != owner]])  # his pin first; the job's own chain behind it
+        chain = [owner, *(chain or [])]  # his pin first; the job's own chain behind it
     else:
-        chain = tuple(chain or pool(tier, "any"))  # the job's pool; the next one only answers if the first errors
+        chain = list(chain or pool(tier, "any"))  # the job's pool; the next one only answers if the first errors
+    # live 10-17 (Z15 run): the pin had no credit and the job fell straight to the free local model while DeepSeek
+    # still answered. The cheap pool always rides last, before the local model.
+    chain = tuple(dict.fromkeys([*chain, *pool("cheap", "any")]))
     return _with_local_fallback(lambda messages, tools: online.call_openrouter_messages(
         messages, tools, model_chain=chain, max_tokens=12000, allow_reasoning=True, attempt_sec=120.0))
 
@@ -2127,7 +2143,7 @@ class input_lease:
         return False
 
 
-ACTING_TOOLS = {"web_helper", "computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app", "schedule", "focus"}
+ACTING_TOOLS = {"web_helper", "scroll_video", "computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app", "schedule", "focus"}
 
 
 # Evens 10-17 "Jarvis is still not always talking plain English": the card read "Used app_type to create and type into

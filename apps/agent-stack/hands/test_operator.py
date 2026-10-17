@@ -580,7 +580,10 @@ class EscalationKeepsTheCheapChain(unittest.TestCase):  # live 10-17: escalated 
                 seen["chain"] = model_chain; return {"ok": True}
         with mock.patch.dict(sys.modules, {"op_online": On}), mock.patch.object(O, "_owner_model", return_value="anthropic/claude-sonnet-5.5"):
             O._model_fn("owner", ["deepseek/deepseek-v4-flash", "anthropic/claude-haiku-5.5"])([], [])
-        self.assertEqual(seen["chain"], ("anthropic/claude-sonnet-5.5", "deepseek/deepseek-v4-flash", "anthropic/claude-haiku-5.5"))
+        self.assertEqual(seen["chain"][:3], ("anthropic/claude-sonnet-5.5", "deepseek/deepseek-v4-flash", "anthropic/claude-haiku-5.5"))
+        self.assertEqual(len(seen["chain"]), len(set(seen["chain"])))
+        O._model_fn("owner", None)([], [])  # the pin alone: the cheap pool still stands behind it (no credit -> DeepSeek, not local)
+        self.assertEqual(seen["chain"][0], "anthropic/claude-sonnet-5.5"); self.assertIn("deepseek/deepseek-v4-flash", seen["chain"])
         self.assertGreaterEqual(O.CHEAP_ESCALATE_STEPS, 20)
 
 
