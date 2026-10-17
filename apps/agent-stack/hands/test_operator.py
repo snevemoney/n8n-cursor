@@ -330,7 +330,7 @@ class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_t
         self.assertEqual(got, "Sir. Used background typing to create and type into “jarvis-bg-test4.txt” in the background.")
 
     def test_paths_with_spaces_urls_and_quotes_survive(self):
-        self.assertEqual(O.plain("Saved to /Users/evenslouis/ArtCraft Studio/00 Private/x.html in the folder."), "Saved to “x.html” in the folder.")
+        self.assertEqual(O.plain("Saved to /Users/someone/My Studio/Some Folder/x.html in the folder."), "Saved to “x.html” in the folder.")
         self.assertEqual(O.plain("see https://x.com/a_b?c_d=1 and `raw_name` and \"my_file\""), "see https://x.com/a_b?c_d=1 and `raw_name` and \"my_file\"")
         self.assertEqual(O.plain("The display reads 84."), "The display reads 84.")
         self.assertEqual(O.plain("press_on failed with AXPress"), "press on failed with a click")
