@@ -15,6 +15,9 @@ def _restore_environ():
     saved = dict(os.environ)
     # Tests never read the live model switch (~/.grok-private/jarvis-brain.json): a live "switch to Sonnet" during a run
     # changed model-identity answers (2026-10-16).
+    os.environ["JARVIS_NO_ENV_FILES"] = "1"  # no test may load a real API key from the env files (no paid calls in tests)
+    for k in ("OPENROUTER_API_KEY", "XAI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "PERPLEXITY_API_KEY"):
+        os.environ.pop(k, None)
     os.environ.setdefault("JARVIS_OPERATOR_FIRST", "0")  # routed-turn tests; brain/test_operator_first.py opts in
     os.environ.setdefault("JARVIS_ONE_LOOP", "0")  # the front-door model tests; test_one_loop_turn.py opts in
     if "JARVIS_BRAIN_FILE" not in os.environ:

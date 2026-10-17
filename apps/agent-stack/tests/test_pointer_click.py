@@ -212,6 +212,9 @@ class DrawCursorLiveTest(unittest.TestCase):
     def test_cursor_start_passes_hold_and_replaces_the_previous_cursor(self):
         a, b, c = self._live()
         with a, b, c, mock.patch.object(subprocess, "run") as run, mock.patch.object(subprocess, "Popen") as pop:
+            self.assertFalse(PT.cursor_start((10, 20), (300, 400), 120))  # Evens 10-17: off by default, cua-driver's cursor only
+            os.environ["JARVIS_OWN_CURSOR"] = "1"
+            self.addCleanup(os.environ.pop, "JARVIS_OWN_CURSOR", None)
             self.assertTrue(PT.cursor_start((10, 20), (300, 400), 120))
             self.assertEqual(run.call_args.args[0], ["pkill", "-TERM", "-f", "Caches/jarvis/pointer_cursor"])
             self.assertEqual(pop.call_args.args[0], ["/x/pointer_cursor", "10.0", "20.0", "300.0", "400.0", "--hold", "120", "--label", "Jarvis"])

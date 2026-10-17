@@ -28,9 +28,9 @@ class Plan(unittest.TestCase):
     def test_open_steps_block_done(self):
         hive = Path(tempfile.mkdtemp())
         t = O.Task.create(hive, "render and save")
-        model = scripted([("plan", {"steps": [{"step": "render", "status": "doing"}, {"step": "save", "status": "todo"}]})],
+        model = scripted([("shell", {"command": "true"}), ("plan", {"steps": [{"step": "render", "status": "doing"}, {"step": "save", "status": "todo"}]})],
                          [("done", {"summary": "rendered", "evidence": "file"})],
-                         [("plan", {"steps": [{"step": "render", "status": "done"}, {"step": "save", "status": "done"}]})],
+                         [("shell", {"command": "true"}), ("plan", {"steps": [{"step": "render", "status": "done"}, {"step": "save", "status": "done"}]})],
                          [("done", {"summary": "rendered and saved", "evidence": "ls shows out.mp4"})])
         st = O.run(t.path, model_fn=model)
         self.assertEqual(st["status"], "DONE"); self.assertEqual(st["summary"], "rendered and saved")

@@ -1035,6 +1035,8 @@ def parse_dotenv(path: Path) -> dict[str, str]:
 
 def default_env_files() -> list[Path]:
     """Existing files only. Face used to skip these and miss a brain already on disk."""
+    if os.environ.get("JARVIS_NO_ENV_FILES") == "1":  # tests: never load a real key (10-17: tests hit live OpenRouter, got 402)
+        return []
     return [
         ROOT / ".env",
         ROOT / ".env.dev",

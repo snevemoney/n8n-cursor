@@ -1518,8 +1518,9 @@ def self_test() -> dict:
             return {"ok": False, "errors": ["/api/voice missing British repo voice"], "body": voice_body}
         if str(voice_body.get("voice") or "") in {"Samantha", "Daniel"}:
             return {"ok": False, "errors": ["/api/voice still a macOS remap"], "body": voice_body}
-        if voice_body.get("repo", {}).get("kokoro") != "bm_lewis":
-            return {"ok": False, "errors": ["/api/voice lost bm_lewis"], "body": voice_body}
+        kv = str(voice_body.get("repo", {}).get("kokoro") or "")
+        if not kv or kv != str(voice_body.get("voice") or ""):  # his chosen voice (a blend like bm_lewis:50+am_michael:50 is fine)
+            return {"ok": False, "errors": [f"/api/voice lost the configured voice ({kv or 'none'})"], "body": voice_body}
         if voice_body.get("model") != "eleven_v3" or voice_body.get("design_model") != "eleven_ttv_v3":
             return {"ok": False, "errors": ["/api/voice missing official v3 slugs"], "body": voice_body}
         speak_engine = str(voice_body.get("speak_engine") or voice_body.get("engine") or "")

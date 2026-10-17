@@ -41,7 +41,8 @@ class OneLoop(unittest.TestCase):
         model = scripted([("say", {"text": "Opening Safari now."})], [("done", {"summary": "Read it."})])
         O.run(t.path, model_fn=model)
         said = [r["text"] for r in t.rows("speech.jsonl")]
-        self.assertEqual(said, ["Opening Safari now.", "Read it."])
+        # Evens 10-17 "Jarvis repeats itself": the done summary is spoken only when nothing was said this turn (card keeps it)
+        self.assertEqual(said, ["Opening Safari now."])
 
     def test_the_answer_is_not_spoken_twice(self):  # live 10-16: say + done carried the same answer, both spoken
         t = O.Task.create(self.hive, "search facebook for juliana")

@@ -1875,7 +1875,9 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
     if images:
         st = task.read("state.json")
         if st.get("model") in VISION_FREE:  # this model cannot see: same tier, a screen-capable pool
-            chain = best_in_pool(st.get("tier") or "mid", "screen")
+            # the cheap screen pool leads with DeepSeek for text-only app reads; an image needs a model that can see
+            chain = [m for m in best_in_pool(st.get("tier") or "mid", "screen") if m not in VISION_FREE] or \
+                [m for m in best_in_pool("mid", "screen") if m not in VISION_FREE]
             st.update(kind="screen", model=chain[0], chain=chain, model_why="needs to see the screen")
             task.write("state.json", st)
     for img in images[-1:]:  # only the newest screenshot rides along
@@ -2347,7 +2349,8 @@ def _done_gate(task, name: str, args: dict) -> str:
         why = ("Before you finish: he asked a question. Your summary reports on your work instead of answering it. "
                "Call done again with the answer itself, the way you would say it to him (for example: \"It's 5:21 in the "
                "morning, sir.\"), and keep the proof in evidence.")
-    elif ACTION_RE.search(goal) and not acted and n < 2 and not st.get("told_into"):
+    elif ACTION_RE.search(goal) and not acted and n < 2 and not st.get("told_into") \
+            and not (RESEARCH_RE.search(goal) and read_pages):  # research that read its sources did the work
         # matrix "vrec"/"honesty": a request to do something was closed with prose and no tool ever acted
         why = ("Before you finish: he asked you to do something, and no tool acted this turn. Do it (app, computer, "
                "shell, files, Safari, MCP), or finish with exactly what blocked you and the error you saw.")

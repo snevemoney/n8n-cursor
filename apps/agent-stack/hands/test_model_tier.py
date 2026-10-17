@@ -47,7 +47,7 @@ class Tier(unittest.TestCase):
 
     def test_his_switch_wins(self):
         Path(os.environ["JARVIS_BRAIN_FILE"]).write_text('{"model": "anthropic/claude-opus-5.5", "by": "evens"}')
-        got = self.pick({"tier": "cheap", "conf": 0.95})
+        got = self.pick({"tier": "mid", "conf": 0.95})  # cheap questions skip the pin by his cost rule (10-17); real work takes it
         self.assertEqual(got["model"], "anthropic/claude-opus-5.5"); self.assertEqual(got["tier"], "owner")
 
     def test_escalation_is_one_step(self):
@@ -68,7 +68,7 @@ class Tier(unittest.TestCase):
         rounds = iter([{"ok": True, "calls": [{"tool": "screenshot", "args": {}, "call_id": "a"}]},
                        {"ok": True, "calls": [{"tool": "done", "args": {"summary": "played"}, "call_id": "b"}]}])
         with mock.patch.object(O.Tools, "screenshot", return_value={"text": "shot", "image": "data:image/png;base64,AA"}):
-            O.run(t.path, model_fn=lambda m, tools: next(rounds))
+            O.run(t.path, model_fn=lambda m, tools: next(rounds, {"ok": True, "calls": [{"tool": "done", "args": {"summary": "played", "evidence": "screen shows playing"}, "call_id": "z"}]}))
         st = t.read("state.json")
         self.assertEqual(st["kind"], "screen"); self.assertNotIn(st["model"], O.VISION_FREE)
 
