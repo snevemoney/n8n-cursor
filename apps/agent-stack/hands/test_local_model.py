@@ -151,6 +151,13 @@ class ThinkingIsNeverAReply(unittest.TestCase):  # live 10-17: the local model's
             got = L.call([{"role": "user", "content": "x"}], [])
         self.assertTrue(got["refused"]); self.assertIn("free local model", got["text"])
 
+    def test_tool_docs_are_short_for_the_small_model(self):
+        long = {"type": "function", "function": {"name": "safari", "description": "Drive his Safari in the background. " + "x" * 900,
+                                                 "parameters": {"type": "object", "properties": {"action": {"type": "string"}}}}}
+        got = L._short(long)
+        self.assertEqual(got["function"]["description"], "Drive his Safari in the background.")
+        self.assertEqual(got["function"]["parameters"], long["function"]["parameters"])
+
     def test_the_clock_is_in_the_brief(self):
         seen = {}
         with mock.patch.object(L, "_post", side_effect=lambda url, data, *a, **k: seen.update(body=data) or {"message": {"content": "It's 10:20."}}):

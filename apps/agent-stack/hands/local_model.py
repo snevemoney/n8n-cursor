@@ -109,10 +109,19 @@ REASONING_RE = re.compile(r"\s*(?:okay|ok|alright|hmm|so)[,.]?\s+(?:let'?s|let m
 THINKING_RE = re.compile(r"\bthe user(?:'s)?\b|\b(?:let me (?:check|think|see|figure)|wait, (?:no|in the|the))\b", re.I)
 
 
+def _short(tool: dict) -> dict:
+    """A 4B model chokes on paragraph-long tool docs (live 10-17: one short tool -> clean call; Jarvis's 15 long ones ->
+    reasoning or nothing). First sentence only, capped; the parameters are unchanged."""
+    fn = dict(tool.get("function") or {})
+    d = str(fn.get("description") or "")
+    fn["description"] = (re.split(r"(?<=[.:;])\s", d, maxsplit=1)[0])[:160]
+    return {**tool, "function": fn}
+
+
 def call(messages: list, tools: list) -> dict:
     """One operator turn on the local model (Ollama native chat: small context, unloads when idle), returned in the
     same shape as online.call_openrouter_messages."""
-    safe = [t for t in tools if (t.get("function") or {}).get("name") in SAFE_TOOLS]
+    safe = [_short(t) for t in tools if (t.get("function") or {}).get("name") in SAFE_TOOLS]
     try:
         data = _post(LOCAL_BASE + "/api/chat",
                      {"model": LOCAL_MODEL, "messages": _compact(messages), "tools": safe, "stream": False,
