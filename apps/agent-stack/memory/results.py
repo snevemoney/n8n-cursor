@@ -15,6 +15,9 @@ import tempfile
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
+_VAULT_ROOT = Path(os.environ.get("JARVIS_VAULT_DIR") or os.environ.get("JARVIS_VAULT") or next(
+    (p for p in (Path.home() / "Vaults/My_Billion_Dollar_Vault", Path.home() / "Documents/My_Billion_Dollar_Vault") if p.is_dir()),
+    Path.home() / "Vaults/My_Billion_Dollar_Vault")).expanduser()  # Evens 10-17: the vault lives in ~/Vaults now
 
 PRODUCERS = {"drafts", "workbench", "pickup", "web_search", "code_run", "loop", "desk_dispatch", "mcp_call",
              "multistep", "cost_card", "pointer", "plan", "skills"}
@@ -87,7 +90,7 @@ def write_back(hand: str, ask: str, got: dict) -> bool:
     return True
 
 
-VAULT_INBOX = Path.home() / "Documents" / "My_Billion_Dollar_Vault" / "00_Outer_Heaven" / "JARVIS-INBOX"
+VAULT_INBOX = _VAULT_ROOT / "00_Outer_Heaven" / "JARVIS-INBOX"
 TITLE = {"code_run": "Code run", "web_search": "Research", "drafts": "Draft", "workbench": "Build", "mcp_call": "Tool run",
          "pickup": "Picked up", "multistep": "Task", "skills": "Skill run", "craft": "Made", "desk_dispatch": "Desk handoff"}
 

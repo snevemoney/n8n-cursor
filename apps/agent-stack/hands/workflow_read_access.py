@@ -12,6 +12,9 @@ import re
 import stat
 import tempfile
 from pathlib import Path
+_VAULT_ROOT = Path(os.environ.get("JARVIS_VAULT_DIR") or os.environ.get("JARVIS_VAULT") or next(
+    (p for p in (Path.home() / "Vaults/My_Billion_Dollar_Vault", Path.home() / "Documents/My_Billion_Dollar_Vault") if p.is_dir()),
+    Path.home() / "Vaults/My_Billion_Dollar_Vault")).expanduser()  # Evens 10-17: the vault lives in ~/Vaults now
 
 LIMIT=64000
 TERMINAL={'COMPLETED','DONE','SUCCEEDED','SUCCESS','VERIFIED','CANCELLED','FAILED','BLOCKED','EXPIRED'}
@@ -162,7 +165,7 @@ def delivery_targets(owner_request,mission_id):
     folder=Path.home()/'ArtCraft Studio'/'00 Private'/'Projects'/('JARVIS-'+mission_id)
     default={'native':str(folder/'source/Implementation.deckcraft'),'export':str(folder/'exports/Implementation.pdf'),
         'preview':str(folder/'previews/Implementation.png'),
-        'note':str(Path.home()/'Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/shared/inbox'/('Jarvis-implementation-'+mission_id+'.md'))}
+        'note':str(_VAULT_ROOT/'00_Outer_Heaven/shared/inbox'/('Jarvis-implementation-'+mission_id+'.md'))}
     literals=[m.group(2) for m in re.finditer(r"([\"'])(/[^\"'\n]+)\1",owner_request or '')]
     chosen={}
     suffix={'.deckcraft':'native','.pdf':'export','.png':'preview','.md':'note'}
@@ -179,7 +182,7 @@ def delivery_targets(owner_request,mission_id):
         or chosen['native']!=project/'source/Implementation-Jarvis-native.deckcraft'
         or chosen['export']!=project/'exports/Implementation-Jarvis-native.pdf'
         or chosen['preview']!=project/'previews/Implementation-Jarvis-native.png'
-        or chosen['note']!=Path.home()/'Documents/My_Billion_Dollar_Vault/00_Outer_Heaven/shared/inbox'/('Jarvis-implementation-'+project.name[7:]+'-Jarvis-native.md')):
+        or chosen['note']!=_VAULT_ROOT/'00_Outer_Heaven/shared/inbox'/('Jarvis-implementation-'+project.name[7:]+'-Jarvis-native.md')):
         raise ValueError('fresh private delivery targets outside exact owner scope')
     if any(p.is_symlink() for target in chosen.values() for p in (target,*target.parents)):
         raise ValueError('linked delivery target requires review')

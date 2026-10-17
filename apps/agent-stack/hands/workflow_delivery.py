@@ -8,6 +8,10 @@ from __future__ import annotations
 import hashlib,json,os,re,stat,time,subprocess,sys,uuid
 from urllib.parse import unquote,urlparse
 from pathlib import Path
+import os
+_VAULT_ROOT = Path(os.environ.get("JARVIS_VAULT_DIR") or os.environ.get("JARVIS_VAULT") or next(
+    (p for p in (Path.home() / "Vaults/My_Billion_Dollar_Vault", Path.home() / "Documents/My_Billion_Dollar_Vault") if p.is_dir()),
+    Path.home() / "Vaults/My_Billion_Dollar_Vault")).expanduser()  # Evens 10-17: the vault lives in ~/Vaults now
 
 LIMIT=5_000_000
 REVIEW_KEY=object()
@@ -47,7 +51,7 @@ def enable_headless_notes(adapter,hive,mission_id,*,owner_answer,vault_root=None
     if ('obsidian' not in request.get('objective','').lower() or request.get('worker_kind')!='research_build'
         or adapter.read_json(root/'control.json').get('cancel') is not False or (root/'result.json').exists()):
         raise ValueError('current_requested_note_required')
-    vault=Path(vault_root or Path.home()/'Documents/My_Billion_Dollar_Vault').absolute()
+    vault=Path(vault_root or _VAULT_ROOT).absolute()
     inbox=vault/'00_Outer_Heaven/shared/inbox'
     if any(p.is_symlink() for p in (inbox,*inbox.parents)) or not inbox.is_dir() or not (vault/'.obsidian').is_dir():
         raise ValueError('headless_vault_identity_required')
@@ -288,7 +292,7 @@ class Delivery:
         native=Path(scope['native']) if scope else folder/'source/Implementation.deckcraft'
         pdf=Path(scope['export']) if scope else folder/'exports/Implementation.pdf'
         preview=Path(scope['preview']) if scope else folder/'previews/Implementation.png'
-        note=str(Path(scope['note']).relative_to(Path.home()/'Documents/My_Billion_Dollar_Vault')) if scope else '00_Outer_Heaven/shared/inbox/Jarvis-implementation-'+self.ident+'.md'
+        note=str(Path(scope['note']).relative_to(_VAULT_ROOT)) if scope else '00_Outer_Heaven/shared/inbox/Jarvis-implementation-'+self.ident+'.md'
         content=(evidence['implementation_document']['content']+'\n\n---\nProvenance\nSaved video: '+str(evidence['saved_video_url'])+'\nOriginal: '+str(evidence['origin_url'])+'\nOrigin commit: '+str(evidence['origin_commit'])+'\nImplementation mode: '+str(evidence['implementation_mode'])+'\nObserved license: '+str(evidence['observed_license'])+'\nUpstream reuse authorized: '+str(evidence['reuse_authorized'])+'\nImplementation commit: '+evidence['implementation_head']+'\nDocumentation SHA256: '+evidence['implementation_document']['sha256']+'\nNative: '+str(native)+'\nExport: '+str(pdf)+'\nPreview: '+str(preview)+'\n')
         if len(content.encode())>20000:raise ValueError('implementation_note_budget')
         pm=self.a._load('delivery_project_methods',self.a.STACK/'hands/project_methods.py');pm.clean_text(content)

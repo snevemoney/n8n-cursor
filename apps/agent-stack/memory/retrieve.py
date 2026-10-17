@@ -13,13 +13,16 @@ import re
 import threading
 import time
 from pathlib import Path
+_VAULT_ROOT = Path(os.environ.get("JARVIS_VAULT_DIR") or os.environ.get("JARVIS_VAULT") or next(
+    (p for p in (Path.home() / "Vaults/My_Billion_Dollar_Vault", Path.home() / "Documents/My_Billion_Dollar_Vault") if p.is_dir()),
+    Path.home() / "Vaults/My_Billion_Dollar_Vault")).expanduser()  # Evens 10-17: the vault lives in ~/Vaults now
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 REPO_OH = ROOT / "docs/hive/outer-heaven"
 # Public repo: no absolute user paths. JARVIS_VAULT_DIR overrides; HOME-relative default.
-DEFAULT_VAULT = Path(os.environ.get("JARVIS_VAULT_DIR") or (Path.home() / "Documents/My_Billion_Dollar_Vault")).expanduser()
+DEFAULT_VAULT = _VAULT_ROOT
 LANES = ROOT / "scripts/hive/business-lanes.json"
 
 ALLOW_REL = (

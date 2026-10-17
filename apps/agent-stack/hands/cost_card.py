@@ -8,11 +8,15 @@ $ is an ESTIMATE and is always said as one. Your keys, pay-per-use, no subscript
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+_VAULT_ROOT = Path(os.environ.get("JARVIS_VAULT_DIR") or os.environ.get("JARVIS_VAULT") or next(
+    (p for p in (Path.home() / "Vaults/My_Billion_Dollar_Vault", Path.home() / "Documents/My_Billion_Dollar_Vault") if p.is_dir()),
+    Path.home() / "Vaults/My_Billion_Dollar_Vault")).expanduser()  # Evens 10-17: the vault lives in ~/Vaults now
 
 ROOT = Path(__file__).resolve().parents[3]
 CACHE = Path.home() / "Library" / "Caches" / "jarvis" / "or-prices.json"
@@ -132,7 +136,7 @@ def _rows(path: Path) -> list[dict]:
     return rows
 
 
-METER = Path.home() / "Documents" / "My_Billion_Dollar_Vault" / "00_Outer_Heaven" / "JARVIS-INBOX" / "THE-METER-EVERYDAY.md"
+METER = _VAULT_ROOT / "00_Outer_Heaven" / "JARVIS-INBOX" / "THE-METER-EVERYDAY.md"
 ROWS = [("reply", "Answers you, by voice or text", "A spoken or typed reply from the talk model."),
         ("tool", "Notes, tools, calendar, files", "A hand answers on this Mac; no model call."),
         ("web", "Live web research", "One sourced search (sonar) plus its request fee."),

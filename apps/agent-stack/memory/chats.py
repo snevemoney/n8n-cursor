@@ -8,11 +8,14 @@ import os
 import re
 from datetime import date, datetime, timezone
 from pathlib import Path
+_VAULT_ROOT = Path(os.environ.get("JARVIS_VAULT_DIR") or os.environ.get("JARVIS_VAULT") or next(
+    (p for p in (Path.home() / "Vaults/My_Billion_Dollar_Vault", Path.home() / "Documents/My_Billion_Dollar_Vault") if p.is_dir()),
+    Path.home() / "Vaults/My_Billion_Dollar_Vault")).expanduser()  # Evens 10-17: the vault lives in ~/Vaults now
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 REPO_OH = ROOT / "docs/hive/outer-heaven"
-DEFAULT_VAULT_OH = Path(os.environ.get("JARVIS_VAULT_DIR") or (Path.home() / "Documents/My_Billion_Dollar_Vault")).expanduser() / "00_Outer_Heaven"
+DEFAULT_VAULT_OH = _VAULT_ROOT / "00_Outer_Heaven"
 CACHE_OH = Path.home() / ".grokbot/outer-heaven"
 SESSIONS_REL = Path("CONTENT/os/sessions")
 SURFACES = (

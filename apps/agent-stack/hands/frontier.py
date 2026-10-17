@@ -6,9 +6,13 @@ from __future__ import annotations
 import csv, importlib.util, json, re, time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+import os
+_VAULT_ROOT = Path(os.environ.get("JARVIS_VAULT_DIR") or os.environ.get("JARVIS_VAULT") or next(
+    (p for p in (Path.home() / "Vaults/My_Billion_Dollar_Vault", Path.home() / "Documents/My_Billion_Dollar_Vault") if p.is_dir()),
+    Path.home() / "Vaults/My_Billion_Dollar_Vault")).expanduser()  # Evens 10-17: the vault lives in ~/Vaults now
 
 HERE = Path(__file__).resolve().parent
-INBOX = Path.home() / "Documents" / "My_Billion_Dollar_Vault" / "00_Outer_Heaven" / "JARVIS-INBOX"
+INBOX = _VAULT_ROOT / "00_Outer_Heaven" / "JARVIS-INBOX"
 
 
 def _mod(name):
