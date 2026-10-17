@@ -109,7 +109,7 @@ class Light(unittest.TestCase):  # live 10-16: qwen3:4b froze his 8 GB Mac — s
         self.assertLessEqual(sent["options"]["num_ctx"], 4096)
         self.assertLess(len(json.dumps(sent["messages"])), 9000)      # short brief, recent turns only
         self.assertIn("turn 29", json.dumps(sent["messages"]))         # newest turn kept
-        self.assertNotIn("think", sent)  # 10-17 probe (Ollama 0.40): think=false puts reasoning INTO the answer; on, it stays in message.thinking
+        self.assertFalse(sent.get("think", True))  # on, the 800-token budget went to thinking and the answer was empty (10-17)
 
     def test_native_tool_calls_are_read(self):
         reply = {"message": {"tool_calls": [{"function": {"name": "open", "arguments": {"target": "Calculator"}}}]}}
@@ -145,6 +145,11 @@ class ThinkingIsNeverAReply(unittest.TestCase):  # live 10-17: the local model's
             with mock.patch.object(L, "_post", return_value={"message": {"content": text}}):
                 got = L.call([{"role": "user", "content": "x"}], [])
             self.assertNotIn("The user", got["text"]); self.assertIn("free local model", got["text"]); self.assertTrue(got.get("refused"))
+
+    def test_an_empty_answer_is_said_plainly_never_silence(self):
+        with mock.patch.object(L, "_post", return_value={"message": {"content": "", "thinking": "long reasoning"}}):
+            got = L.call([{"role": "user", "content": "x"}], [])
+        self.assertTrue(got["refused"]); self.assertIn("free local model", got["text"])
 
     def test_the_clock_is_in_the_brief(self):
         seen = {}

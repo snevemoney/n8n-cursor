@@ -116,7 +116,7 @@ def call(messages: list, tools: list) -> dict:
     try:
         data = _post(LOCAL_BASE + "/api/chat",
                      {"model": LOCAL_MODEL, "messages": _compact(messages), "tools": safe, "stream": False,
-                      "keep_alive": KEEP_ALIVE, "options": {"num_ctx": NUM_CTX, "temperature": 0.2,
+                      "think": False, "keep_alive": KEEP_ALIVE, "options": {"num_ctx": NUM_CTX, "temperature": 0.2,
                                                                           "num_predict": 800}})
     except Exception as exc:  # noqa: BLE001
         return {"ok": False, "unknown": True, "error": f"local model: {type(exc).__name__}"}
@@ -133,12 +133,14 @@ def call(messages: list, tools: list) -> dict:
         return {"ok": True, "calls": calls, "tool": calls[0]["tool"], "args": calls[0]["args"],
                 "call_id": calls[0]["call_id"], "text": "", "model": "local:" + LOCAL_MODEL}
     text = re.sub(r"(?s)^.*</think>", "", str(msg.get("content") or "")).strip()  # drop leftover reasoning
-    # Ollama 0.40 + qwen3: think=false still reasons but INTO the answer; left on, reasoning goes to message.thinking,
-    # which is never read here (live probe 10-17: clean tool call with it on, reasoning in content with it off)
+    # think stays False: left on, qwen3's reasoning used up the 800-token budget inside Jarvis's prompt and the answer
+    # came back empty (live 10-17 11:12); off, it can leak reasoning into the text, which this filter replaces
     if REASONING_RE.match(text) or THINKING_RE.search(text[:400]):  # live 10-17 10:18: "Okay, the user is asking…" was spoken
         # live 10-17: with credits at $0 the local model's thinking ("Okay, let's break this down. The user is saying…")
         # was spoken to Evens. Thinking is never a reply.
         return {"ok": True, "tool": "", "args": {}, "call_id": "", "model": "local:" + LOCAL_MODEL, "refused": True,
                 "text": f"I couldn't work that out with the free local model. {ADD_CREDITS}"}
-    return {"ok": bool(text), "tool": "", "args": {}, "call_id": "", "text": text, "model": "local:" + LOCAL_MODEL,
-            **({} if text else {"unknown": True, "error": "local model: empty"})}
+    if not text:  # live 11:12: an empty answer ended the job in silence; say it plainly instead
+        return {"ok": True, "tool": "", "args": {}, "call_id": "", "model": "local:" + LOCAL_MODEL, "refused": True,
+                "text": f"I couldn't work that out with the free local model. {ADD_CREDITS}"}
+    return {"ok": True, "tool": "", "args": {}, "call_id": "", "text": text, "model": "local:" + LOCAL_MODEL}
