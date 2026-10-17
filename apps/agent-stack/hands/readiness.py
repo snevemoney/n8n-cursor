@@ -67,9 +67,21 @@ def disk() -> tuple[str, str]:
     return ("GREEN" if free >= LOW_DISK_GB else "AMBER"), f"{free:.0f} GB free on the Mac."
 
 
+def routes(probe=None) -> tuple[str, str]:
+    """X02: every place the code says a thing lives still exists."""
+    if probe is None:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("route_probes_rd", Path(__file__).with_name("route_probes.py"))
+        rp = importlib.util.module_from_spec(spec); spec.loader.exec_module(rp)
+        probe = rp.probe
+    broken, all_ = probe()
+    return ("GREEN", f"All {len(all_)} places my code points to exist.") if not broken else \
+        ("AMBER", f"{len(broken)} of {len(all_)} places my code points to are missing: {', '.join(broken[:4])}.")
+
+
 def report(**fakes) -> dict:
     rows = {"budget": credit(fakes.get("credit")), "local model": local_model(fakes.get("models")),
-            "permissions": permissions(fakes.get("perms")), "disk": disk()}
+            "permissions": permissions(fakes.get("perms")), "disk": disk(), "routes": routes(fakes.get("routes"))}
     worst = "RED" if any(s == "RED" for s, _ in rows.values()) else "AMBER" if any(s == "AMBER" for s, _ in rows.values()) else "GREEN"
     bad = [line for s, line in rows.values() if s != "GREEN"]
     spoken = "Everything I need to work is ready." if worst == "GREEN" else " ".join(bad)
