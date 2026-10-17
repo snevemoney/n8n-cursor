@@ -1261,8 +1261,18 @@
     }
     function median(xs) { const a = xs.slice().sort((p, q) => p - q); return a.length ? a[a.length >> 1] : 0; }
     window.__jarvisBarge = { BARGE, bargeHit, duckHit, last: null };
+    let bargeBeaconAt = 0;
+    function bargeBeacon(extra) {  // one row a second while he speaks; levels only, never audio
+      const now = Date.now();
+      if (now - bargeBeaconAt < 1000) return;
+      bargeBeaconAt = now;
+      const last = window.__jarvisBarge.last || {};
+      fetch("/api/barge", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mic: last.mic, bleed: last.bleed, ducked: last.ducked, armed: !!state.armed,
+          ctx: audioCtx ? audioCtx.state : "none", speaking: ttsSpeaking(), ...(extra || {}) }) }).catch(() => {});
+    }
     function startBargeWatch() {
-      if (bargeTimer || !streamLive()) return;
+      if (bargeTimer || !streamLive()) { if (!streamLive()) bargeBeacon({ note: "no mic stream" }); return; }
       try {
         unlockAudio();
         if (!audioCtx) return;
@@ -1270,16 +1280,18 @@
         micAnalyser.fftSize = 1024;
         micBuf = new Float32Array(micAnalyser.fftSize);
         audioCtx.createMediaStreamSource(state.stream).connect(micAnalyser);
-      } catch (e) { micAnalyser = null; console.warn("barge watch off: no mic analyser", e); return; }
+      } catch (e) { micAnalyser = null; console.warn("barge watch off: no mic analyser", e); bargeBeacon({ note: "no analyser: " + e }); return; }
       let levels = [];
       bargeTimer = setInterval(() => {
         if (!micAnalyser || !state.armed || !ttsSpeaking()) { bargeSince = 0; levels = []; return; }
+        if (audioCtx && audioCtx.state === "suspended") { try { audioCtx.resume(); } catch (e) {} }
         const mic = micLevel(micAnalyser, micBuf);
         const bleed = levels.length >= 8 ? median(levels) : mic;  // first ~0.5 s of speech: learn the bleed
         levels.push(mic);
         if (levels.length > BARGE.bleedWindow) levels.shift();
         const now = Date.now();
         window.__jarvisBarge.last = { mic, bleed, ducked: !!duckedSince };
+        bargeBeacon();
         if (levels.length >= 8 && duckHit(mic, bleed)) {
           quietSince = 0;
           if (!duckedSince) { duckedSince = now; duckTts(true); }
@@ -1287,6 +1299,7 @@
           if (bargeHit(mic, bleed, now - bargeSince)) {
             bargeSince = 0; duckedSince = 0; levels = [];
             pressStop();
+            bargeBeacon({ note: "BARGE fired" });
             $("spoken").textContent = "Go ahead, I'm listening.";
             scheduleRestart(RESTART_MIN);  // listen at once so his first words are not lost
           }

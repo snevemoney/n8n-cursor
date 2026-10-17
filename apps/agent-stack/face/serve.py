@@ -797,6 +797,16 @@ class Handler(BaseHTTPRequestHandler):
             bus = live_mouth.set_listen(HIVE, bool(data.get("live")), gen=gen)
             self._json(200, {"ok": True, **bus})
             return
+        if path == "/api/barge":  # Evens 10-17: the Orb reports what the mic hears while Jarvis speaks (diagnosis, no audio)
+            try:
+                row = {k: data.get(k) for k in ("mic", "bleed", "ducked", "armed", "ctx", "speaking", "note")}
+                row["at"] = time.time()
+                with (HIVE / "barge.jsonl").open("a", encoding="utf-8") as fh:
+                    fh.write(json.dumps(row) + "\n")
+            except OSError:
+                pass
+            self._json(200, {"ok": True})
+            return
         if path == "/api/stop" and hasattr(live_mouth, "cancel_scoped"):
             # Ported from main: scoped stop (speak / tool / job / mission / watch).
             out = live_mouth.cancel_scoped(
