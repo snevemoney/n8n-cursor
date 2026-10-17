@@ -344,7 +344,8 @@ class AppTypeWaitsForWindow(unittest.TestCase):  # live 10-17: "opened bg2.txt b
         seen = {"n": 0}
         def run(argv, **kw):
             tool = argv[2]
-            if tool == "launch_app": out = {"pid": 42}
+            if tool == "launch_app": out = {"pid": -1, "launch_state": {"window_ready": False}}   # app already running
+            elif tool == "list_apps": out = {"apps": [{"bundle_id": "com.apple.TextEdit", "running": True, "pid": 42}]}
             elif tool == "list_windows":
                 seen["n"] += 1
                 out = {"windows": [] if seen["n"] < 3 else [{"window_id": 7, "title": "late.txt", "is_on_screen": True}]}

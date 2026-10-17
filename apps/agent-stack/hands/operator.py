@@ -953,6 +953,12 @@ class Tools:
         _cua_cursor("jarvis")
         app = cua("launch_app", {"bundle_id": bundle, "urls": [f.as_uri()]})
         pid = app.get("pid")
+        if not isinstance(pid, int) or pid <= 0:
+            # live 10-17 (REA #1, the driver's own answer): with the app already running, launch_app returns pid -1 and
+            # window_ready false. The running process is in list_apps.
+            apps = cua("list_apps", {})
+            pid = next((x.get("pid") for x in (apps.get("apps", []) if isinstance(apps, dict) else [])
+                        if x.get("bundle_id") == bundle and x.get("running") and int(x.get("pid") or 0) > 0), None)
         if not pid:
             return {"text": f"could not open {f.name} in {bundle}: {str(app)[:200]}"}
         wid, end = None, time.time() + APP_WINDOW_WAIT_S
