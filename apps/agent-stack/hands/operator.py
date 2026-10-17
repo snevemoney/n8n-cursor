@@ -1562,7 +1562,7 @@ APP_WINDOW_WAIT_S = 6.0
 CHEAP_ESCALATE_STEPS = int(os.environ.get("JARVIS_CHEAP_ESCALATE_STEPS") or 25)  # live 10-17: a calculator sum is 5+ presses; 8 cut a working job
 CHEAP_NE = float(os.environ.get("JARVIS_CHEAP_NEEDS_EXPENSIVE") or 0.2)  # Jev's needs_expensive below this = cheap job  # Evens 10-17 "make it cost 0.01 or less"
 JEV_MIN_CONF = 0.6  # below it Jev has no opinion and the job goes UP a tier, never down (jev-preflight rule)
-SCORES = Path.home() / "Library" / "Caches" / "jarvis" / "model-scores.json"
+SCORES = Path(os.environ.get("JARVIS_SCORES_FILE") or Path.home() / "Library/Caches/jarvis/model-scores.json")  # tests: temp file
 MIN_SAMPLES = 3
 
 

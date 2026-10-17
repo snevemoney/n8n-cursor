@@ -5,6 +5,8 @@ import tempfile
 
 # 10-17: a Safari test said "yes, send it" and wrote fake "Evens approved a send" rows into his real approval log
 os.environ.setdefault("JARVIS_APPROVALS_FILE", os.path.join(tempfile.mkdtemp(prefix="jarvis-test-approvals-"), "approvals.jsonl"))
+# 10-17: test outcomes were written into the live model scorecard that picks real jobs' models
+os.environ.setdefault("JARVIS_SCORES_FILE", os.path.join(tempfile.mkdtemp(prefix="jarvis-test-scores-"), "model-scores.json"))
 os.environ.setdefault("JARVIS_TURN_LOG", os.path.join(tempfile.mkdtemp(prefix="jarvis-test-turns-"), "jarvis-turns.jsonl"))
 
 import pytest
