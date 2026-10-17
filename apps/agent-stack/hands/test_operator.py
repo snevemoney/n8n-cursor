@@ -210,6 +210,17 @@ class FeatureLoops(OperatorLoop):  # Evens 10-16/17: looping capabilities, insid
             self.assertIn("exit 0", got["text"]); self.assertIn("--approval 'yes, happy with these'", run.call_args[0][0][-1])
 
 
+class OneBlueCursor(unittest.TestCase):  # Evens 10-17: cua's cursor in Jarvis blue; Jarvis's own overlay off
+    def test_cua_session_gets_the_theme_once_and_own_cursor_is_off(self):
+        calls = []
+        with mock.patch.object(O, "_CUA_THEMED", set()), mock.patch.object(O.CUA_DRIVER.__class__, "is_file", return_value=True), \
+             mock.patch.object(O.subprocess, "run", side_effect=lambda argv, **k: calls.append(argv)):
+            O._cua_cursor("jarvis"); O._cua_cursor("jarvis")
+        self.assertEqual([c[2] for c in calls], ["set_agent_cursor_theme", "set_agent_cursor_enabled"])
+        self.assertIn('"theme_id": "jarvis.blue"', calls[0][3])
+        self.assertFalse(O.OWN_CURSOR)
+
+
 class CheapFirst(unittest.TestCase):  # Evens 10-17: $0.01 or less for simple jobs, even with his Sonnet pin
     def test_cheap_jobs_skip_the_pin_and_real_work_keeps_it(self):
         with mock.patch.object(O, "_owner_model", return_value="anthropic/claude-sonnet-5.5"), \

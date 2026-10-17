@@ -193,8 +193,9 @@ def dismiss() -> None:
 
 
 def cursor_start(frm: tuple, to: tuple, hold: float, label: str = "Jarvis") -> bool:
-    """Jarvis's own blue cursor: appears at Evens's pointer, glides to `to`, then HOLDS (bobbing, pulsing) for `hold` seconds."""
-    if not live():
+    """Jarvis's own blue cursor: appears at Evens's pointer, glides to `to`, then HOLDS (bobbing, pulsing) for `hold` seconds.
+    Evens 10-17: off by default — the one cursor on screen is cua-driver's, themed Jarvis blue. JARVIS_OWN_CURSOR=1 restores it."""
+    if os.environ.get("JARVIS_OWN_CURSOR", "0") != "1" or not live():
         return False
     cur = _bin("pointer_cursor")
     if cur is None:

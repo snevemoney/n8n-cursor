@@ -259,6 +259,23 @@ def system_prompt() -> str:
 
 
 CUA_DRIVER = Path("/Applications/CuaDriver.app/Contents/MacOS/cua-driver")
+CUA_THEME = "jarvis.blue"   # cua.default recoloured to Jarvis's blue (0.05, 0.65, 0.95); ~/tools/cua-driver/theme-jarvis-blue
+OWN_CURSOR = (os.environ.get("JARVIS_OWN_CURSOR") or "0") == "1"
+_CUA_THEMED: set = set()
+
+
+def _cua_cursor(session: str) -> None:
+    """One cursor on screen: cua-driver's, in Jarvis blue, for every session Jarvis drives (once per session)."""
+    key = session or "(anonymous)"
+    if key in _CUA_THEMED or not CUA_DRIVER.is_file():
+        return
+    for tool, args in (("set_agent_cursor_theme", {"theme_id": CUA_THEME}), ("set_agent_cursor_enabled", {"enabled": True})):
+        try:
+            subprocess.run([str(CUA_DRIVER), "call", tool, json.dumps({**args, **({"session": session} if session else {})})],
+                           capture_output=True, text=True, timeout=20)
+        except (OSError, subprocess.SubprocessError):
+            return
+    _CUA_THEMED.add(key)
 LOOP_KIT = Path(os.environ.get("JARVIS_LOOP_KIT") or Path.home() / ".feature-loop/kit")
 CONFIG_DIR = Path.home() / ".config/brain"
 CONFIG_KEYS = {  # key -> (file, validator regex). Jarvis may change these; nothing else (no keys, rules, stops, plists).
@@ -849,7 +866,10 @@ class Tools:
 
     def _show_cursor(self, x, y) -> None:
         """Evens 10-16: "still no floating cursor". Jarvis's blue cursor glides to the target before the action lands
-        (the same overlay the Watch clicks use). Best effort: a missing overlay never blocks the action."""
+        (the same overlay the Watch clicks use). Best effort: a missing overlay never blocks the action.
+        Evens 10-17: "so jarvis's cursor is off" — the cua-driver cursor (Jarvis Blue theme) is the one cursor now."""
+        if not OWN_CURSOR:
+            return
         try:
             spec = importlib.util.spec_from_file_location("agent_stack_pointer_operator", Path(__file__).with_name("pointer.py"))
             ph = importlib.util.module_from_spec(spec); spec.loader.exec_module(ph)
@@ -902,7 +922,7 @@ class Tools:
             except ValueError:
                 return {"error": (cp.stdout + cp.stderr)[-300:]}
 
-        cua("set_agent_cursor_enabled", {"enabled": False})  # Jarvis's own blue cursor is the only one on screen
+        _cua_cursor("jarvis")
         app = cua("launch_app", {"bundle_id": bundle, "urls": [f.as_uri()]})
         pid = app.get("pid")
         if not pid:
@@ -1053,6 +1073,8 @@ class Tools:
         return {"text": "said"}
 
     def mcp(self, a, approved=False):
+        if str(a.get("server")) == "cua-driver":
+            _cua_cursor(str((a.get("arguments") or {}).get("session") or ""))
         got = _load("agent_tools", "agent_tools.py").op_mcp(str(a["server"]), str(a["tool"]), a.get("arguments") or {},
                                                             approved=approved)
         return {"text": _clip(got.get("spoken") or json.dumps(got, default=str))}
