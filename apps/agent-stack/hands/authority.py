@@ -41,6 +41,7 @@ PERSIST_PATH = re.compile(_PERSIST)
 CLI_PERSIST = re.compile(r"(?:>>?|\btee\b(?:\s+-a)?|\bcp\b|\bmv\b|\bln\b)[^|;&]*(?:Library/Launch(?:Agents|Daemons)|\.(?:zshrc|zprofile|zshenv|bashrc|bash_profile|profile)\b|"
                          r"\.claude/settings|\.claude\.json|\.cursor/mcp\.json|\.codex/config\.toml)|\bcrontab\s+(?!-l\b)\S|\|\s*crontab\b|"
                          r"\blaunchctl\s+(?:load|bootstrap|enable)\b|\bosascript\b[^|;&]*login item", re.I)
+RUNNABLE_RE = re.compile(r"\.(?:command|sh|zsh|bash|tool|terminal|pkg|mpkg|scpt|applescript|workflow|jar|py)$", re.I)
 PAGE_EXFIL = re.compile(r"\b(?:fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource|importScripts|indexedDB|localStorage|"
                         r"sessionStorage|caches)\b|document\.cookie|window\.open|(?:location|location\.href)\s*=|\.submit\s*\(|"
                         r"new\s+Image\b|\.src\s*=", re.I)
@@ -132,6 +133,12 @@ def authorize(tool: str, args: dict, *, home: Path | None = None) -> tuple[str, 
         if is_secret_path(path):
             return ALLOW, "flag: that file holds secrets"  # Evens 10-16: flag, never stop
         return ALLOW, ""
+    if tool == "open":
+        t = os.path.expanduser(str(args.get("target") or "")).rstrip("/")
+        runs = RUNNABLE_RE.search(t) or (t.lower().endswith(".app") and "/" in t
+                                         and not t.startswith(("/Applications/", "/System/Applications/", str(home / "Applications") + "/")))
+        if runs:  # 10-17 security pass: open runs scripts, installers and downloaded apps
+            return ASK, "that runs a program or installer"
     if tool == "safari" and str(args.get("action") or "") == "eval" and PAGE_EXFIL.search(str(args.get("code") or "")):
         # 10-17 security pass: page code in his logged-in Safari could read cookies/storage and send them anywhere
         return ASK, "that runs page code that could read your logins or send data off the page"

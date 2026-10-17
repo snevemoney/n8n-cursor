@@ -42,3 +42,14 @@ class PageCodeCannotLeak(unittest.TestCase):  # safari eval in his logged-in bro
     def test_plain_reads_still_run(self):
         for code in ("return document.title", "return [...document.querySelectorAll('h2')].map(h => h.innerText)"):
             self.assertEqual(A.authorize("safari", {"action": "eval", "code": code})[0], "allow", code)
+
+
+
+class OpeningProgramsAsks(unittest.TestCase):
+    def test_scripts_installers_and_downloaded_apps_ask(self):
+        for t in ("~/Downloads/setup.command", "~/Downloads/installer.pkg", "~/Downloads/Tool.app", "~/Downloads/run.sh", "~/Downloads/a.workflow"):
+            self.assertEqual(A.authorize("open", {"target": t})[0], "ask", t)
+
+    def test_apps_documents_and_links_open(self):
+        for t in ("Safari", "/Applications/Preview.app", "~/Documents/notes.pdf", "https://example.com"):
+            self.assertEqual(A.authorize("open", {"target": t})[0], "allow", t)
