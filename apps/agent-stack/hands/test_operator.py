@@ -431,6 +431,18 @@ class TakeoverSpeed(unittest.TestCase):  # Z05
             self.assertFalse(O.owner_touched(1.0)); self.assertTrue(O.owner_touched(0.5))
 
 
+class ScheduleTool(unittest.TestCase):  # canvas wire sched -> pipe: the operator brain can schedule what he asks
+    def test_schedule_registers_lists_and_cancels_through_the_loop_registry(self):
+        d = Path(tempfile.mkdtemp())
+        with mock.patch.dict(os.environ, {"JARVIS_LOOPS_FILE": str(d / "loops.json")}):
+            tools = O.Tools(d / "t")
+            self.assertIn("every day at 06:00", tools.schedule({"op": "start", "what": "reports my morning brief", "at": "06:00"})["text"])
+            self.assertIn("morning brief", tools.schedule({"op": "list"})["text"])
+            self.assertIn("won't loop", tools.schedule({"op": "start", "what": "sends an email to Bob"})["text"])
+            self.assertIn("Cancelled", tools.schedule({"op": "cancel", "id": "reports my morning brief"})["text"])
+        self.assertIn("schedule", [t["function"]["name"] for t in O.TOOLS]); self.assertIn("schedule", O.ACTING_TOOLS)
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")

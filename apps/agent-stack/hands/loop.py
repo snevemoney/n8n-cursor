@@ -22,7 +22,7 @@ MAX_EVERY = 24 * 60
 # Allowlist, not just a denylist: a loop must open with a read verb and name a known read-only subject.
 ALLOW_RE = re.compile(
     r"^(?:checks?|watch(?:es)?|monitors?|reports?|looks?\s+at|tells?\s+me)\s+(?:on\s+|the\s+|my\s+|if\s+|whether\s+)*"
-    r"(?:free\s+)?(?:disk\s+space|disk|storage|memory|ram|cpu|load|battery|uptime|healthz?|"
+    r"(?:free\s+)?(?:morning\s+brief(?:ing)?|daily\s+brief(?:ing)?|brief(?:ing)?|disk\s+space|disk|storage|memory|ram|cpu|load|battery|uptime|healthz?|"
     r"(?:the\s+)?(?:face|jarvis|service|server|site|vps|ci|build|tests?|pr\s*#?\d+|pull\s+request\s*#?\d+|port\s+\d+)"
     r"(?:\s+(?:status|health|is\s+up|is\s+down|passing|green))?)\b[\w\s,.%#-]{0,120}$",
     re.I,
@@ -148,14 +148,19 @@ def _run(args: dict | None = None) -> dict:
             return {"ok": False, "op": op, "spoken": f"That would pass today's cap of {DAILY_CAP} loops. Cancel one or wait until tomorrow."}
         every = _int(args.get("every_min"), 15, MIN_EVERY, MAX_EVERY)
         now = datetime.now()
-        loop = {"id": uuid.uuid4().hex[:8], "what": what, "every_min": every, "read_only": True,
+        at = str(args.get("at") or "").strip()
+        if at and not re.fullmatch(r"(?:[01]?\d|2[0-3]):[0-5]\d", at):
+            return {"ok": False, "op": op, "spoken": f"I need a time like 06:00 for a daily loop, not {at!r}."}
+        daily = bool(at)  # Z20 morning brief: once a day at that time; a missed time (Mac asleep) runs at the next tick
+        loop = {"id": uuid.uuid4().hex[:8], "what": what, "every_min": 1440 if daily else every, "read_only": True,
                 "stop_when": str(args.get("stop_when") or "Evens cancels it, max_runs reached, or it expires"),
-                "max_runs": _int(args.get("max_runs"), DEFAULT_MAX_RUNS, 1, MAX_RUNS_CAP),
-                "expires": (now + timedelta(hours=24)).isoformat(timespec="seconds"),
-                "created": now.isoformat(timespec="seconds"), "runs": 0, "status": "active"}
+                "max_runs": _int(args.get("max_runs"), 31 if daily else DEFAULT_MAX_RUNS, 1, MAX_RUNS_CAP),
+                "expires": (now + timedelta(days=31 if daily else 1)).isoformat(timespec="seconds"),
+                "created": now.isoformat(timespec="seconds"), "runs": 0, "status": "active", **({"at": at} if daily else {})}
         rows.append(loop); _save(rows)
         return {"ok": True, "op": op, "loop": loop,
-                "spoken": f"Loop registered (read-only): {what}, every {every} minutes, up to {loop['max_runs']} runs, expires in 24 hours. "
+                "spoken": (f"Scheduled (read-only): {what}, every day at {at}, for a month. " if daily else
+                           f"Loop registered (read-only): {what}, every {every} minutes, up to {loop['max_runs']} runs, expires in 24 hours. ")
                           + ("The loop runner checks it on schedule." if _runner_alive() else
                              "No loop runner is active yet, so it is saved but not running.") + " Say cancel to stop it."}
     return {"ok": False, "op": op, "spoken": "Unknown loop op."}

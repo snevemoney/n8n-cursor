@@ -48,7 +48,37 @@ def _health(m) -> tuple[bool, str]:
         return False, f"{url} did not answer ({type(exc).__name__})"
 
 
+PRIVATE = Path.home() / "ArtCraft Studio/00 Private/Studio Operations"
+SHARED = Path.home() / ".grok-shared"
+
+
+def _lines(path: Path, n: int, pat: str = r"^\s*[-*] ") -> list[str]:
+    try:
+        rows = [l.strip(" -*\t") for l in path.read_text(encoding="utf-8").splitlines() if re.match(pat, l)]
+    except OSError:
+        return []
+    return rows[-n:]
+
+
+def _brief(_m) -> tuple[bool, str]:
+    """Z20 / X36 morning brief, built from his own files with no model call: what needs him, what is red, what is active."""
+    parts = []
+    asks = _lines(PRIVATE / "Decisions Needed.md", 50)
+    if asks:
+        parts.append(f"{len(asks)} decisions wait for you; newest: " + re.sub(r"^\d{4}-\d\d-\d\d \d\d:\d\d \([^)]*\):\s*", "", asks[-1])[:160])
+    red = [l for l in _lines(PRIVATE / "Ops Watch" / "STATUS.md", 200) if re.search(r"\bRED\b|\bdown\b|\bfail", l, re.I)]
+    if red:
+        parts.append(f"{len(red)} red in Ops Watch: " + red[0][:140])
+    active = _lines(SHARED / "ACTIVE_TASKS.md", 3)
+    if active:
+        parts.append("Active: " + "; ".join(a[:70] for a in active))
+    u = shutil.disk_usage(str(Path.home()))
+    parts.append(f"Disk {u.free / 1e9:.0f} GB free.")
+    return True, " ".join(parts)[:900]
+
+
 CHECKS = (
+    (re.compile(r"\bbrief(?:ing)?\b", re.I), _brief),
     (re.compile(r"\b(?:disk\s+space|disk|storage)\b", re.I), _disk),
     (re.compile(r"\bbattery\b", re.I), lambda m: _run(["pmset", "-g", "batt"])),
     (re.compile(r"\b(?:uptime|load|cpu)\b", re.I), lambda m: _run(["uptime"])),
@@ -94,7 +124,12 @@ def tick(loop_mod, *, now: datetime | None = None, notify=None, checker=check) -
             if int(r.get("runs") or 0) >= int(r.get("max_runs") or 1):
                 r["status"] = "done"; changed = True; continue
             last = r.get("last_run")
-            if last and (now - datetime.fromisoformat(last)).total_seconds() < 60 * int(r.get("every_min") or 15):
+            if r.get("at"):
+                hh, mm = (int(x) for x in str(r["at"]).split(":"))
+                due_at = now.replace(hour=hh, minute=mm, second=0, microsecond=0)
+                if now < due_at or (last and datetime.fromisoformat(last) >= due_at):
+                    continue  # daily: once after its time each day; a missed time runs at the first tick after it
+            elif last and (now - datetime.fromisoformat(last)).total_seconds() < 60 * int(r.get("every_min") or 15):
                 continue
             ok, summary = checker(str(r.get("what") or ""))
             prev = r.get("last_result")

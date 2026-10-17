@@ -595,6 +595,14 @@
       else synth.onvoiceschanged = pickEnglishVoice;
     }
 
+    function micLine() {
+      // Z64 mode truth: say what the mic is really doing, never imply listening when it is not
+      if (!state.armed) return "MIC OFF - TAP TO ARM";
+      if (state.phase === "speak") return state.listening ? 'MIC ON - SAY "STOP" TO INTERRUPT' : "MIC PAUSED WHILE I SPEAK";
+      if (state.phase === "think") return state.listening ? 'MIC ON - SAY "STOP" TO CANCEL' : "MIC PAUSED WHILE I WORK";
+      if (state.listening || state.phase === "listen") return "MIC - LISTENING";
+      return 'MIC - LISTENING FOR "JARVIS"';
+    }
     function paintPhase(phase) {
       state.phase = phase || "idle";
       const extras = [];
@@ -605,9 +613,7 @@
       if (state.phase === "think") $("hint").textContent = "PROCESSING...";
       else if (!state.armed) $("hint").textContent = "TAP BOARD OR SPACE TO TALK";
       else $("hint").textContent = 'SAY "JARVIS" OR TAP SPACE · MIC LIVE';
-      if (state.listening || state.phase === "listen") $("micline").textContent = "MIC - LISTENING";
-      else if (state.armed) $("micline").textContent = 'MIC - LISTENING FOR "JARVIS"';
-      else $("micline").textContent = "MIC - TAP TO ARM";
+      $("micline").textContent = micLine();
       if ($("micBtn")) {
         $("micBtn").classList.toggle("on", !!state.armed);
         $("micBtn").setAttribute("aria-pressed", state.armed ? "true" : "false");

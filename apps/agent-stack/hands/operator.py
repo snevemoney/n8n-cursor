@@ -396,6 +396,10 @@ TOOLS = [
         "reads the file back; his front app and pointer never move). Use it instead of many cua-driver steps.",
         {"file": S, "text": S, "app": {"type": "string", "description": "bundle id, default com.apple.TextEdit"},
          "save": {"type": "boolean"}}, ["file", "text"]),
+    _fn("schedule", "Scheduled read-only loops he asks for (the Face's loop runner runs them; cards land in his Orb inbox): "
+        "op=start what='checks disk space' every_min=15 | op=start what='reports my morning brief' at='06:00' (daily) | "
+        "op=list | op=cancel id=<id or what>. Only checks and briefs, never actions.",
+        {"op": S, "what": S, "every_min": I, "at": S, "max_runs": I, "id": S}, ["op"]),
     _fn("loop", "Feature loop (AGENT_RULES §13, the shared kit): build ONE feature with a keep-if-better loop. Order: init "
         "(writes the check templates) -> write checks in checks/drafts/<feature>/ -> show (one plain line per check) -> ask "
         "Evens with ask_owner -> lock with his exact words -> round (a fresh builder per round, scored, kept only if better) "
@@ -1009,6 +1013,10 @@ class Tools:
         ok = str(a["text"]) in on_disk
         return {"text": f"typed {len(str(a['text']))} chars into {f.name} in the background (confirmed by read-back); "
                         f"{'saved, file on disk contains it' if ok else 'NOT on disk yet'}; front app untouched"}
+
+    def schedule(self, a):
+        got = _load("loop_hand", "loop.py").run({k: v for k, v in a.items() if v not in (None, "")})
+        return {"text": str(got.get("spoken") or got)}
 
     def loop(self, a):
         """Evens 10-16/17 'looping capabilities': the kit at ~/.feature-loop/kit, with its rules enforced here too."""
@@ -1933,7 +1941,7 @@ class input_lease:
         return False
 
 
-ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app"}
+ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app", "schedule"}
 
 
 # Evens 10-17 "Jarvis is still not always talking plain English": the card read "Used app_type to create and type into

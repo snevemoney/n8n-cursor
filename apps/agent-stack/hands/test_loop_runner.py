@@ -61,3 +61,32 @@ class LoopRunner(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MorningBrief(unittest.TestCase):  # Z20 / X36: a daily brief at a set time from his own files, missed time runs later
+    def setUp(self):
+        global L, R
+        L = _load("agent_stack_loop_test_b", "hands/loop.py")
+        R = _load("agent_stack_loop_runner_test_b", "hands/loop_runner.py")
+
+    def test_daily_brief_runs_once_after_its_time_and_catches_up(self):
+        from datetime import datetime
+        d = Path(tempfile.mkdtemp())
+        with mock.patch.dict(os.environ, {"JARVIS_LOOPS_FILE": str(d / "loops.json")}):
+            got = L.run({"op": "start", "what": "reports my morning brief", "at": "06:00"})
+            self.assertTrue(got["ok"], got); self.assertIn("every day at 06:00", got["spoken"])
+            calls = []
+            chk = lambda w: (calls.append(w), (True, "brief text"))[1]
+            self.assertEqual(R.tick(L, now=datetime(2026, 10, 18, 5, 59), checker=chk), [])
+            self.assertEqual(len(R.tick(L, now=datetime(2026, 10, 18, 9, 30), checker=chk)), 1)   # Mac asleep at 6: runs at 9:30
+            self.assertEqual(R.tick(L, now=datetime(2026, 10, 18, 10, 0), checker=chk), [])      # once a day
+            self.assertEqual(len(R.tick(L, now=datetime(2026, 10, 19, 6, 1), checker=chk)), 1)
+            self.assertEqual(L.run({"op": "start", "what": "reports my morning brief", "at": "25:00"})["ok"], False)
+
+    def test_brief_reads_his_files(self):
+        d = Path(tempfile.mkdtemp()); (d / "Ops Watch").mkdir()
+        (d / "Decisions Needed.md").write_text("- 2026-10-17 03:20 (Claude Code): OpenRouter is at $0.\n")
+        (d / "Ops Watch" / "STATUS.md").write_text("- VPS RED: down since 10-09\n- disk ok\n")
+        with mock.patch.object(R, "PRIVATE", d), mock.patch.object(R, "SHARED", d):
+            ok, text = R.check("reports my morning brief")
+        self.assertTrue(ok); self.assertIn("1 decisions wait", text); self.assertIn("OpenRouter is at $0", text); self.assertIn("1 red", text)
