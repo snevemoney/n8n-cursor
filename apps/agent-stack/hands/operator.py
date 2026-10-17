@@ -1699,9 +1699,15 @@ def _local():
     return mod
 
 
+JARVIS_NOTE_RE = re.compile(r"^\s*(?:Before you finish|Not run|\(It has been|\(While you were|Heads up:)")
+
+
 def _goal_of(messages: list) -> str:
+    """His latest request: Jarvis's own check-backs are user-role notes and are skipped (live 10-17 10:53: the 'prove it'
+    note was judged as the request and the local model refused 'Open Calculator' as coding)."""
     for m in reversed(messages):
-        if m.get("role") == "user" and isinstance(m.get("content"), str) and m["content"].strip():
+        if m.get("role") == "user" and isinstance(m.get("content"), str) and m["content"].strip() \
+                and not JARVIS_NOTE_RE.match(m["content"]):
             return m["content"]
     return ""
 

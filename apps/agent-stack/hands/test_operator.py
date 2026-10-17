@@ -349,6 +349,13 @@ class SourceQuality(unittest.TestCase):  # X16
         self.assertTrue(O._only_secondhand("https://someone.substack.com/p/x"))
 
 
+class GoalIsHisWords(unittest.TestCase):  # live 10:53: a check-back note was judged as his request
+    def test_check_back_notes_are_not_the_goal(self):
+        msgs = [{"role": "user", "content": "Open Calculator."}, {"role": "assistant", "content": "Calculator is open."},
+                {"role": "user", "content": "Before you finish: prove it. Check the result for real (run a check command)."}]
+        self.assertEqual(O._goal_of(msgs), "Open Calculator.")
+
+
 class OpenWith(unittest.TestCase):  # macread: his default PDF app is PdfCraft; "in Preview" must mean Preview
     def test_with_names_the_app(self):
         seen = []
