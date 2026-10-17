@@ -143,7 +143,7 @@ def _daily_summary(_m, now: float | None = None) -> tuple[bool, str]:
             f"${float(st.get('cost_usd') or 0):.4f} · {_cut(' '.join(str(st.get('summary') or '(no summary)').split()), 160)}" for st in jobs]
     try:
         DAILY.mkdir(parents=True, exist_ok=True)
-        note.write_text(f"---\ntype: daily-summary\nupdated-by: jarvis\ndate: {day.isoformat()}\n---\n# Jarvis, {day.isoformat()}\n\n{line}\n\n" + "\n".join(rows) + "\n")
+        note.write_text(f"---\ntype: daily-summary\nstatus: final\nupdated-by: jarvis\ndate: {day.isoformat()}\ntags: [jarvis, daily]\n---\n# Jarvis, {day.isoformat()}\n\n{line}\n\n" + "\n".join(rows) + "\n")
     except OSError as exc:
         return False, f"{line} Could not save today's note: {exc}."
     return True, line + " Saved today's note in the Jarvis inbox."

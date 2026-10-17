@@ -22,6 +22,7 @@ class OperatorQuestionLapses(unittest.TestCase):  # Z56 for operator jobs
         line = L.op_tick(self.hive, mutate_fn=self.mutate, inbox=inbox, now=now)
         self.assertIn("question lapsed", line); self.assertIn("book the dentist for Tuesday", line)
         self.assertEqual(self.bus["say"]["text"], line); self.assertEqual(len(list(inbox.iterdir())), 1)
+        self.assertIn("type: question-lapsed", next(inbox.iterdir()).read_text())
         self.assertIsNone(L.op_tick(self.hive, mutate_fn=self.mutate, inbox=inbox, now=now + 60))  # once
 
     def test_answered_or_recent_questions_stay_quiet(self):

@@ -55,7 +55,8 @@ def tick(hive: Path, *, mutate_fn, inbox: Path | None = None, now: float | None 
         try:
             inbox.mkdir(parents=True, exist_ok=True)
             (inbox / f"{time.strftime('%Y-%m-%d %H%M', time.localtime(now))} question lapsed.md").write_text(
-                f"# Question lapsed\n\n{said['text']}\n", encoding="utf-8")
+                f"---\ntype: question-lapsed\nstatus: open\nupdated-by: jarvis\ndate: {time.strftime('%Y-%m-%d', time.localtime(now))}\n"
+                f"tags: [jarvis, lapse]\n---\n# Question lapsed\n\n{said['text']}\n", encoding="utf-8")
         except OSError:
             pass
     return said.get("text")
