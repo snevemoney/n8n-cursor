@@ -497,6 +497,17 @@ class VaultGraphFocus(unittest.TestCase):  # Z70: focus puts the note on his Orb
         self.assertEqual(O.orb_view(d)["graph_focus"]["note"], "Strategy")
 
 
+class CourseIndex(unittest.TestCase):  # Saylor: all his courses known on every turn
+    def test_course_skills_are_listed_and_others_are_not(self):
+        d = Path(tempfile.mkdtemp()); sk = d / ".claude/skills"
+        for n in ("ug-american-government", "grad-brand-management-equity-architecture", "prdv-time-stress-goal-productivity", "react-patterns"):
+            (sk / n).mkdir(parents=True)
+        with mock.patch.object(O.Path, "home", return_value=d), mock.patch.object(O, "_COURSES", []):
+            got = O.course_index()
+        self.assertIn("3: grad-brand-management-equity-architecture, prdv-time-stress-goal-productivity, ug-american-government", got)
+        self.assertNotIn("react-patterns", got)
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")

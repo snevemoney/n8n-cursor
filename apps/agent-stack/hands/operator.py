@@ -68,6 +68,9 @@ SYSTEM = (
     "bring_to_front only when he allows it. It refuses with a code (minimized_or_hidden_window, off_space_or_ax_unresolved, "
     "element_outside_target_window, stale token): read the code, re-snapshot, and use the exact element action it names; "
     "never guess a pixel. Windows parked in Stage Manager's side strip are thumbnails: say so instead of clicking blind. "
+    "Answer in the language he used (English or French), with the same tools and checks either way (Z45). If a "
+    "high-stakes detail is missing and nothing on his Mac or vault has it, ask exactly one fill-in question instead of "
+    "guessing (Z52). After finishing something that has a natural next step, offer it in one short line (Z34). "
     "Never invent a number: a figure you did not read from a source or compute from data is written as [number needed: "
     "what and where from] (Z67). When you must ask him, ask one matter: a short apology if you interrupt, the facts he "
     "needs, one question, then let him go (Z59). "
@@ -275,12 +278,31 @@ def brain_context() -> str:
             f"platform in {CHAT_CORPUS} and the notes under ~/.grok-shared before asking him to repeat himself.")
 
 
+COURSE_RE = re.compile(r"^(ug|grad|prdv|undergrad|ma\d+|esl|engl|gkt\d+|bio\d+|chem\d+|phys\d+|cs\d+|intro|biz|corpfin|finacct|"
+                       r"mgracct|mktg|mgmt|ob|strat|hrm|mis|ops|cpp|sdv\d+|saylor|entrepreneurial|firm|layered|hard-money|"
+                       r"austrian|bitcoin|what-is-money|custsvc|comm|negotiations|arth|bizcomm|bizdoc|bizethics|"
+                       r"intro-programming|intro-python3|intro-java)[-\w]*$")
+_COURSES: list = []
+
+
+def course_index() -> str:
+    """Evens Sept 20: his 164 Saylor courses as knowledge on every turn. All names ride in the prompt (cached); the
+    matching course's SKILL.md is read before answering in that subject."""
+    if not _COURSES:
+        root = Path.home() / ".claude/skills"
+        _COURSES.extend(sorted(d.name for d in root.iterdir() if d.is_dir() and COURSE_RE.match(d.name)) if root.is_dir() else [])
+    if not _COURSES:
+        return ""
+    return ("\n\nHis courses (each is a skill folder ~/.claude/skills/<name>/SKILL.md; for a question in that subject, "
+            f"read it first and use its method) — {len(_COURSES)}: " + ", ".join(_COURSES))
+
+
 def system_prompt() -> str:
     prof = profile_lines()
     today = time.strftime("%A %Y-%m-%d, %H:%M") + " Eastern"
     base = (SYSTEM + f"\nToday is {today}. Anything you know from training may be out of date; for anything current, check it now.\n"
             + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "") + operator_profile() + personality()
-            + brain_context() + ops_alerts())
+            + brain_context() + ops_alerts() + course_index())
     return base + ("\nHis coding agents are Claude Code, Codex and Cursor; 'Claude Code's changes' means their commits "
                    "and PRs on HIS repo snevemoney/n8n-cursor (Jarvis lives in apps/agent-stack), never Anthropic's repos.")
 
