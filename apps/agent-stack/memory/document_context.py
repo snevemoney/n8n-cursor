@@ -37,7 +37,11 @@ _TOKEN_PATTERNS = (
     re.compile(r"\b(?:sk-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|"
                r"xox[baprs]-[A-Za-z0-9-]{20,}|AIza[A-Za-z0-9_-]{30,})\b"),
     re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._~+/=-]{20,}"),
-    re.compile(r"(?i)\b[A-Z0-9_]*(?:API_KEY|ACCESS_TOKEN|CLIENT_SECRET|PASSWORD)\s*[:=]\s*['\"]?[A-Za-z0-9._~+/=-]{16,}['\"]?"),
+    re.compile(r"(?i)\b[A-Z0-9_]*(?:API_KEY|ACCESS_TOKEN|CLIENT_SECRET|PASSWORD|_TOKEN|_SECRET|_KEY)\s*[:=]\s*['\"]?[A-Za-z0-9._~+/=-]{16,}['\"]?"),
+    # 10-17 security pass: formats that leaked through
+    re.compile(r"\b(?:xai-[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{16,}|sk_[A-Za-z0-9]{32,})\b"),
+    re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b"),  # JWT
+    re.compile(r"(?i)\b[a-z][a-z0-9+.-]*://[^\s:/@]+:[^\s@/]+@"),  # password inside a URL (postgres://user:pass@host)
 )
 
 
