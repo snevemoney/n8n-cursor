@@ -518,6 +518,8 @@ class AnswerTheQuestion(unittest.TestCase):  # live 10-17: "What time is it?" ->
     def test_a_report_about_the_work_is_sent_back(self):
         self.assertIn("answer itself", self._gate("What time is it?", "Proved the current time."))
         self.assertIn("answer itself", self._gate("Quelle heure est-il ?", "Verified the time."))
+        self.assertIn("answer itself", self._gate("What time is it?", "Reported the current time"))
+        self.assertIn("answer itself", self._gate("What time is it?", "Sir. Checked the clock for you."))
 
     def test_the_answer_itself_passes(self):
         self.assertEqual(self._gate("What time is it?", "It's 5:21 in the morning, sir."), "")

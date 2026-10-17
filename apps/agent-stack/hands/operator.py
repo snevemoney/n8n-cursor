@@ -1908,8 +1908,9 @@ def _unread_cited(text: str, rows: list) -> list:
 
 QUESTION_RE = re.compile(r"\?\s*$|^\s*(?:what|when|who|whom|whose|where|which|why|how|is|are|was|were|do|does|did|can|could|"
                          r"will|would|should|quel(?:le)?s?|quand|qui|où|ou|comment|pourquoi|combien|est-ce)\b", re.I)
-META_DONE_RE = re.compile(r"\s*(?:sir[,.]?\s*)?(?:i\s+)?(?:proved|verified|confirmed|checked|completed|finished|done|answered|"
-                          r"retrieved|got|found|determined|looked up|provided)\b(?:\s+(?:the|his|your|a|an))?\s+[\w\s'-]{0,40}[.!]?\s*$", re.I)
+META_DONE_RE = re.compile(  # a short line that reports on the work ("Reported the current time") instead of answering
+    r"\s*(?:sir[,.]?\s*)?(?:i\s+(?:have\s+)?)?(?:[a-z]+ed|got|found|gave|told|said|did|ran|made|showed|shown|done|"
+    r"answered|sent|brought|fetched)\b(?:\s+[\w'-]+){0,6}\s*[.!]?\s*$", re.I)
 
 
 def _his_line(goal: str) -> str:
