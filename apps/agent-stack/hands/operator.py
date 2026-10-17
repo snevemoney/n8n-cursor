@@ -455,7 +455,8 @@ TOOLS = [
         {"file": S, "text": S, "app": {"type": "string", "description": "bundle id, default com.apple.TextEdit"},
          "save": {"type": "boolean"}}, ["file", "text"]),
     _fn("vault_graph", "His Obsidian vault's link graph: op=focus name=<note> puts that note on his Orb graph; op=backlinks|links "
-        "name=<note>; op=orphans|dead_ends|unresolved|tags for the whole vault. Read-only.",
+        "name=<note>; op=orphans|dead_ends|unresolved|tags for the whole vault; op=map name=<folder> drafts that folder's map "
+        "note (one topic per file, the most-linked pinned). Read-only.",
         {"op": S, "name": S}, ["op"]),
     _fn("repo_map", "Ranked map of a code repo: which files define the most-used functions and classes. Read it before "
         "editing an unfamiliar repo. path=<folder> focus=<optional path part, e.g. hands/>.", {"path": S, "focus": S}, ["path"]),
@@ -1179,7 +1180,7 @@ class Tools:
         if got.get("ok") and str(a.get("op")) == "focus" and self.dir.parent.name == "operator-tasks":
             t = Task(self.dir)  # Z70: the Orb lights this note (orb_view carries it)
             t.write("state.json", {**t.read("state.json"), "graph_focus": {"note": got["note"], "at": time.time()}})
-        return {"text": got["text"]}
+        return {"text": _clip(got["text"] + (f"\n\n{got['map']}" if got.get("map") else ""))}
 
     def repo_map(self, a):
         return {"text": _clip(_load("repo_map", "repo_map.py").answer(str(a.get("path") or self.cwd), str(a.get("focus") or ""))["text"])}

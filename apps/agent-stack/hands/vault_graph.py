@@ -90,4 +90,22 @@ def answer(op: str, name: str = "", limit: int = 15, root: Path | None = None) -
     if op == "tags":
         top = g["tags"].most_common(limit)
         return {"ok": True, "text": f"{len(g['tags'])} tags; most used: " + ", ".join(f"#{t} ({c})" for t, c in top)}
-    return {"ok": False, "text": "vault_graph op is one of: focus, backlinks, links, orphans, dead_ends, unresolved, tags"}
+    if op == "map":
+        # X14: one topic per file, so the map is the folder's file names; only the most-linked few get a pin
+        folder = (g["root"] / name).resolve() if name else g["root"].resolve()
+        if g["root"].resolve() not in (folder, *folder.parents):
+            return {"ok": False, "text": "map takes a folder inside the vault"}
+        here = sorted((k for k, p in g["notes"].items() if p.resolve().parent == folder and k != "map"), key=lambda k: _name(g, k).lower())
+        if not here:
+            return {"ok": False, "text": f"No notes directly in {name or 'the vault root'}."}
+        pins = sorted(here, key=lambda k: -len(g["in"].get(k, ())))[:3]
+        pins = [k for k in pins if g["in"].get(k)]
+        lines = [f"# Map: {folder.name}", "", *(["Pinned (most linked): " + ", ".join(f"@[[{_name(g, k)}]]" for k in pins), ""] if pins else []),
+                 *[f"- [[{_name(g, k)}]]" for k in here]]
+        names = {_name(g, k) for k in here}
+        copies = sorted(n for n in names if re.fullmatch(r"(.+) \d+", n) and re.fullmatch(r"(.+) \d+", n).group(1) in names)
+        warn = (f" {len(copies)} look like sync-conflict copies of another note (one topic per file is broken; nothing was "
+                f"deleted): {', '.join(copies[:8])}.") if copies else ""
+        return {"ok": True, "count": len(here), "copies": copies, "map": "\n".join(lines) + "\n",
+                "text": f"Map of {folder.name}: {len(here)} topics, {len(pins)} pinned.{warn} Write it as MAP.md in that folder if he wants it saved."}
+    return {"ok": False, "text": "vault_graph op is one of: focus, backlinks, links, orphans, dead_ends, unresolved, tags, map"}

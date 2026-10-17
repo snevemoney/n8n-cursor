@@ -32,3 +32,17 @@ class VaultGraph(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class VaultMap(unittest.TestCase):  # X14: one topic per file + a map note with sparse pins
+    def test_map_lists_each_topic_once_and_pins_only_linked_notes(self):
+        root = Path(tempfile.mkdtemp()); (root / "Projects").mkdir()
+        (root / "Projects" / "Jarvis.md").write_text("x"); (root / "Projects" / "Studio.md").write_text("x")
+        (root / "Index.md").write_text("[[Jarvis]] [[Jarvis]]")
+        got = V.answer("map", "Projects", root=root)
+        self.assertEqual(got["count"], 2)
+        self.assertIn("Pinned (most linked): @[[Jarvis]]", got["map"]); self.assertNotIn("@[[Studio]]", got["map"])
+        self.assertIn("- [[Studio]]", got["map"])
+        self.assertFalse(V.answer("map", "../..", root=root)["ok"])
+        (root / "Projects" / "Jarvis 2.md").write_text("conflict copy")
+        self.assertEqual(V.answer("map", "Projects", root=root)["copies"], ["Jarvis 2"])
