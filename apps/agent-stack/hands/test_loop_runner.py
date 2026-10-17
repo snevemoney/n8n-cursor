@@ -86,7 +86,7 @@ class MorningBrief(unittest.TestCase):  # Z20 / X36: a daily brief at a set time
     def test_brief_reads_his_files(self):
         d = Path(tempfile.mkdtemp()); (d / "Ops Watch").mkdir()
         (d / "Decisions Needed.md").write_text("- 2026-10-17 03:20 (Claude Code): OpenRouter is at $0.\n")
-        (d / "Ops Watch" / "STATUS.md").write_text("- VPS RED: down since 10-09\n- disk ok\n")
+        (d / "Ops Watch" / "STATUS.md").write_text("| | Item | Detail | Fix | Owner |\n|---|---|---|---|---|\n| 🔴 RED | No backup | d | f | Evens |\n| 🟠 AMBER | Disk full | d | f | Evens |\n| 🟢 GREEN | Jarvis up | | | |\n")
         with mock.patch.object(R, "PRIVATE", d), mock.patch.object(R, "SHARED", d):
             ok, text = R.check("reports my morning brief")
-        self.assertTrue(ok); self.assertIn("1 decisions wait", text); self.assertIn("OpenRouter is at $0", text); self.assertIn("1 red", text)
+        self.assertTrue(ok); self.assertIn("1 decisions wait", text); self.assertIn("OpenRouter is at $0", text); self.assertIn("1 red: No backup.", text); self.assertIn("1 amber, 1 of them yours", text)

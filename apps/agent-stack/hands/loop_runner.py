@@ -60,18 +60,33 @@ def _lines(path: Path, n: int, pat: str = r"^\s*[-*] ") -> list[str]:
     return rows[-n:]
 
 
+def _ops_rows(path: Path) -> list[tuple[str, str, str]]:
+    """Ops Watch STATUS.md table rows as (level, item, owner)."""
+    out = []
+    try:
+        for l in path.read_text(encoding="utf-8").splitlines():
+            cells = [c.strip() for c in l.strip().strip("|").split("|")]
+            if len(cells) >= 5 and re.search(r"\b(RED|AMBER|GREEN|INFO)\b", cells[0]):
+                out.append((re.search(r"\b(RED|AMBER|GREEN|INFO)\b", cells[0]).group(1), cells[1], cells[-1]))
+    except OSError:
+        pass
+    return out
+
+
 def _brief(_m) -> tuple[bool, str]:
-    """Z20 / X36 morning brief, built from his own files with no model call: what needs him, what is red, what is active."""
+    """Z20 / X36 morning brief, built from his own files with no model call: what is red, what needs him."""
     parts = []
+    rows = _ops_rows(PRIVATE / "Ops Watch" / "STATUS.md")
+    red = [r for r in rows if r[0] == "RED"]
+    amber = [r for r in rows if r[0] == "AMBER"]
+    if red:
+        parts.append(f"{len(red)} red: " + "; ".join(r[1] for r in red) + ".")
+    if amber:
+        parts.append(f"{len(amber)} amber, " + str(sum(1 for r in amber if "Evens" in r[2])) + " of them yours.")
     asks = _lines(PRIVATE / "Decisions Needed.md", 50)
     if asks:
-        parts.append(f"{len(asks)} decisions wait for you; newest: " + re.sub(r"^\d{4}-\d\d-\d\d \d\d:\d\d \([^)]*\):\s*", "", asks[-1])[:160])
-    red = [l for l in _lines(PRIVATE / "Ops Watch" / "STATUS.md", 200) if re.search(r"\bRED\b|\bdown\b|\bfail", l, re.I)]
-    if red:
-        parts.append(f"{len(red)} red in Ops Watch: " + red[0][:140])
-    active = _lines(SHARED / "ACTIVE_TASKS.md", 3)
-    if active:
-        parts.append("Active: " + "; ".join(a[:70] for a in active))
+        parts.append(f"{len(asks)} decisions wait for you; newest: "
+                     + re.split(r"(?<=[.!?])\s", re.sub(r"^\d{4}-\d\d-\d\d \d\d:\d\d \([^)]*\):\s*", "", asks[-1]))[0][:160])
     u = shutil.disk_usage(str(Path.home()))
     parts.append(f"Disk {u.free / 1e9:.0f} GB free.")
     return True, " ".join(parts)[:900]
