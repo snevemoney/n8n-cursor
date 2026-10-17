@@ -28,15 +28,15 @@ def recall(pattern: str, sources: list, *, since: str = "", platform: str = "", 
     words = str(pattern or "").strip()
     if len(words) < 3:
         raise ValueError("pattern: at least 3 characters")
-    try:
-        rx = re.compile(words, re.I)
-    except re.error:
-        rx = re.compile(re.escape(words), re.I)
+    # plain words, every one must appear (a model-written regex over 10k lines could hang the job: never compile it)
+    terms = [w.lower() for w in words.split()]
+    rx = re.compile(re.escape(terms[0]), re.I)  # only to place the quote; matching is plain substrings (linear)
     seen, hits = set(), []
     for src in sources:
         for row in _rows(Path(src)):
             ts, text = str(row.get("ts") or ""), row["text"]
-            if (since and ts[:10] < since) or (platform and row.get("platform") != platform) or not rx.search(text):
+            low = text.lower()
+            if (since and ts[:10] < since) or (platform and row.get("platform") != platform) or not all(t in low for t in terms):
                 continue
             key = " ".join(text.lower().split())
             if key in seen:

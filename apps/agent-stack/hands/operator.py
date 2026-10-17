@@ -412,7 +412,7 @@ TOOLS = [
          "ref": I, "text": S, "url": S, "keys": S, "direction": S, "amount": I, "window": I, "index": I, "submit": B,
          "replace": B, "checked": B, "code": S, "path": S, "timeout_s": I, "real": B}, ["action"]),
     _fn("recall", "How often and when something really happened in his history (his chats on every platform): pattern "
-        "(words or a regex), since=YYYY-MM-DD, platform=codex|claude_code|cursor|grok|chatgpt|jarvis. Returns the real "
+        "(words; all must appear), since=YYYY-MM-DD, platform=codex|claude_code|cursor|grok|chatgpt|jarvis. Returns the real "
         "count, dates and dated quotes. Use it before saying he usually/often/always does something; never estimate.",
         {"pattern": S, "since": S, "platform": S}, ["pattern"]),
     _fn("scroll_video", "Make a scroll-scrubbed website video: src=video file, out_dir=folder, seconds (max 30), start. "

@@ -26,6 +26,8 @@ class PatternRecall(unittest.TestCase):
         self.assertEqual(R.recall("push", [self.f], since="2026-10-01")["count"], 1)
         self.assertEqual(R.recall("push", [self.f], platform="codex")["count"], 1)
         self.assertEqual(R.recall("what (time", [self.f])["count"], 0)
+        self.assertEqual(R.recall("main push", [self.f])["count"], 2)  # every word, any order
+        import time as _t; t0 = _t.time(); R.recall("(a+)+$", [self.f]); self.assertLess(_t.time() - t0, 1)  # no regex
         with self.assertRaises(ValueError): R.recall("x", [self.f])
 
 if __name__ == "__main__": unittest.main()
