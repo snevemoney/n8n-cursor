@@ -101,3 +101,13 @@ class TurnLogTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PastedKeyIsMasked(unittest.TestCase):  # sig_z99
+    def test_a_key_he_says_never_lands_in_the_log(self):
+        import importlib.util, json, tempfile
+        spec = importlib.util.spec_from_file_location("turn_log_mask_t", Path(__file__).with_name("turn_log.py"))
+        T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
+        d = Path(tempfile.mkdtemp()) / "t.jsonl"; key = "sk-or-v1-" + "e" * 48
+        T.append({"utterance": f"use {key}", "reply": "ok"}, d)
+        self.assertNotIn(key, d.read_text()); self.assertEqual(json.loads(d.read_text())["reply"], "ok")

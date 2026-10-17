@@ -154,6 +154,18 @@ def build_row(*, started: float, ended: float, events: list[dict], talk: dict | 
     }
 
 
+def _masked(line: str) -> str:
+    """Canvas sig_z99: a key he says or pastes never lands in the turn log (same scrubber as replies and receipts)."""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("turn_log_scrub", Path(__file__).with_name("document_context.py"))
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        out = mod.scrub_text(line)
+        return out[0] if isinstance(out, tuple) else out
+    except Exception:  # noqa: BLE001 - never write a row we could not mask
+        return json.dumps({"masking_failed": True})
+
+
 def append(row: dict, path: Path | None = None) -> Path | None:
     dest = path or log_path()
     if dest is None:
@@ -166,7 +178,7 @@ def append(row: dict, path: Path | None = None) -> Path | None:
         except OSError:
             pass
         with _LOCK, dest.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+            fh.write(_masked(json.dumps(row, ensure_ascii=False, sort_keys=True)) + "\n")
     except OSError:
         return None
     return dest

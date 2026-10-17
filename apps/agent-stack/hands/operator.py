@@ -1399,11 +1399,12 @@ class Task:
         d = Path(hive) / "operator-tasks" / tid
         d.mkdir(parents=True)
         t = cls(d)
+        goal = _his_words(goal)
         t.write("request.json", {"task_id": tid, "goal": goal, "created": time.time()})
         history = []
         for row in (turns or [])[-6:]:  # the conversation continues: "another one", "it", "do that again"
             if str(row.get("user") or "").strip():
-                history.append({"role": "user", "content": str(row["user"])[:1500]})
+                history.append({"role": "user", "content": _his_words(str(row["user"]))[:1500]})
             if str(row.get("jarvis") or "").strip():
                 history.append({"role": "assistant", "content": str(row["jarvis"])[:1500]})
         pick = choose_model(goal)
@@ -1474,6 +1475,15 @@ def _mask_env_secrets(text: str) -> str:
         if v in text:
             text = text.replace(v, "[REDACTED SECRET]")
     return text
+
+
+def _his_words(text: str) -> str:
+    """Canvas sig_z99: a key he pastes in chat never reaches the model, the job files or the logs."""
+    masked = _scrub(text)
+    if masked == text:
+        return text
+    return masked + ("\n(He pasted a secret; it was masked and you never saw it. Tell him plainly it is safer in his env "
+                     "file under its name, e.g. OPENROUTER_API_KEY in ~/.config/brain/env, and never ask him to paste it.)")
 
 
 def _scrub(text: str) -> str:
@@ -2441,7 +2451,7 @@ def tell(hive: Path, line: str) -> dict:
         if duplicate_line(task, str(line)):
             return {"ok": True, "task_id": tid, "duplicate": True}
         with (task.path / "inbox.jsonl").open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"at": time.time(), "text": str(line)[:4000]}) + "\n")
+            fh.write(json.dumps({"at": time.time(), "text": _his_words(str(line))[:4000]}) + "\n")
     return {"ok": True, "task_id": tid}
 
 

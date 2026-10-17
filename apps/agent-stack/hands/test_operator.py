@@ -329,6 +329,18 @@ class ToolContract(unittest.TestCase):  # toolcontract: missing args are a plain
         self.assertEqual(row["call_id"], "c0")
 
 
+class SecretsHeSays(unittest.TestCase):  # sig_z99: a pasted key never reaches the model or the job files
+    def test_pasted_key_is_masked_in_the_job_and_the_inbox(self):
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        key = "sk-or-v1-" + "f" * 48
+        task = O.Task.create(Path(tmp.name), f"use this key {key} for the research")
+        files = " ".join(p.read_text() for p in task.path.iterdir() if p.is_file())
+        self.assertNotIn(key, files); self.assertIn("never ask him to paste it", files)
+        with mock.patch.object(O, "status", return_value={"task_id": task.path.name}), mock.patch.object(O, "running", return_value=True):
+            O.tell(Path(tmp.name), f"oh and the other one is {key}")
+        self.assertNotIn(key, (task.path / "inbox.jsonl").read_text())
+
+
 class OpenWith(unittest.TestCase):  # macread: his default PDF app is PdfCraft; "in Preview" must mean Preview
     def test_with_names_the_app(self):
         seen = []
