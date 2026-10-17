@@ -45,7 +45,8 @@ SYSTEM = (
     "Background app control: the cua-driver MCP server (mcp server=cua-driver) drives native Mac apps without stealing his "
     "focus or moving his pointer — get_desktop_state / get_accessibility_tree to look, click / type / drag to act, "
     "check_permissions first. Prefer it over the computer tool for apps when he is using the Mac. "
-    "cua-driver recipe (live 10-17; learning it cost $1.22, do not rediscover it): pass the same \"session\" (e.g. \"jv\") on "
+    "To type into a document in an app in the background, call app_type once (it does the whole recipe in code). "
+    "cua-driver recipe for anything else (live 10-17; learning it cost $1.22, do not rediscover it): pass the same \"session\" (e.g. \"jv\") on "
     "EVERY call; element_token values look like s0000000a:12 and are valid only for the latest get_window_state in that "
     "session. To type: launch_app (bundle_id, urls) -> list_windows {pid} -> get_window_state {pid, window_id, session, "
     "include_screenshot:false, query:\"AXTextArea\"} -> type_text {pid, window_id, session, element_token, text}. To save "
@@ -257,6 +258,7 @@ def system_prompt() -> str:
                    "and PRs on HIS repo snevemoney/n8n-cursor (Jarvis lives in apps/agent-stack), never Anthropic's repos.")
 
 
+CUA_DRIVER = Path("/Applications/CuaDriver.app/Contents/MacOS/cua-driver")
 LOOP_KIT = Path(os.environ.get("JARVIS_LOOP_KIT") or Path.home() / ".feature-loop/kit")
 CONFIG_DIR = Path.home() / ".config/brain"
 CONFIG_KEYS = {  # key -> (file, validator regex). Jarvis may change these; nothing else (no keys, rules, stops, plists).
@@ -344,6 +346,10 @@ TOOLS = [
          "again": B, "lens": {"type": "string", "enum": ["auto", "learn", "studio"]}},
         ["action"]),
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
+    _fn("app_type", "ONE call that types text into a document in a Mac app in the background (opens it hidden, types, saves, "
+        "reads the file back; his front app and pointer never move). Use it instead of many cua-driver steps.",
+        {"file": S, "text": S, "app": {"type": "string", "description": "bundle id, default com.apple.TextEdit"},
+         "save": {"type": "boolean"}}, ["file", "text"]),
     _fn("loop", "Feature loop (AGENT_RULES §13, the shared kit): build ONE feature with a keep-if-better loop. Order: init "
         "(writes the check templates) -> write checks in checks/drafts/<feature>/ -> show (one plain line per check) -> ask "
         "Evens with ask_owner -> lock with his exact words -> round (a fresh builder per round, scored, kept only if better) "
@@ -878,6 +884,50 @@ class Tools:
             return self._hands({"op": "key", "keys": str(a["keys"])})
         return self._hands({"op": "type", "text": str(a.get("text") or "")})
 
+    def app_type(self, a):
+        """Evens 10-17 "make it cost 0.01 or less": the whole background-typing recipe in code, no model steps.
+        Live recipe: launch_app (focus suppressed) -> list_windows -> get_window_state AXTextArea token (same session)
+        -> type_text (accessibility route, read back) -> AppleScript save -> read the file."""
+        f = Path(os.path.expanduser(str(a["file"]))).resolve()
+        bundle = str(a.get("app") or "com.apple.TextEdit")
+        if not f.parent.is_dir():
+            return {"text": f"no such folder: {f.parent}"}
+        f.touch(exist_ok=True)
+
+        def cua(tool, args):
+            cp = subprocess.run([str(CUA_DRIVER), "call", tool, json.dumps({**args, "session": "jarvis"})],
+                                capture_output=True, text=True, timeout=60)
+            try:
+                return json.loads(cp.stdout)
+            except ValueError:
+                return {"error": (cp.stdout + cp.stderr)[-300:]}
+
+        cua("set_agent_cursor_enabled", {"enabled": False})  # Jarvis's own blue cursor is the only one on screen
+        app = cua("launch_app", {"bundle_id": bundle, "urls": [f.as_uri()]})
+        pid = app.get("pid")
+        if not pid:
+            return {"text": f"could not open {f.name} in {bundle}: {str(app)[:200]}"}
+        wins = cua("list_windows", {"pid": pid})
+        wins = wins.get("windows", []) if isinstance(wins, dict) else []
+        wid = next((w.get("window_id") for w in wins if f.name in str(w.get("title", ""))), None)
+        if wid is None:
+            return {"text": f"opened {f.name} but found no window for it"}
+        state = cua("get_window_state", {"pid": pid, "window_id": wid, "include_screenshot": False, "query": "AXTextArea"})
+        tok = next((e.get("element_token") for e in state.get("elements", []) if e.get("role") == "AXTextArea"), None)
+        if not tok:
+            return {"text": "no text area in that window"}
+        typed = cua("type_text", {"pid": pid, "window_id": wid, "element_token": tok, "text": str(a["text"])})
+        if typed.get("effect") != "confirmed":
+            return {"text": f"typing not confirmed: {str(typed)[:200]}"}
+        if a.get("save", True):
+            name = (app.get("name") or "TextEdit").replace('"', "")
+            subprocess.run(["osascript", "-e", f'tell application "{name}" to save document "{f.name}"'],
+                           capture_output=True, text=True, timeout=30)
+        on_disk = f.read_text(errors="replace")
+        ok = str(a["text"]) in on_disk
+        return {"text": f"typed {len(str(a['text']))} chars into {f.name} in the background (confirmed by read-back); "
+                        f"{'saved, file on disk contains it' if ok else 'NOT on disk yet'}; front app untouched"}
+
     def loop(self, a):
         """Evens 10-16/17 'looping capabilities': the kit at ~/.feature-loop/kit, with its rules enforced here too."""
         kit = LOOP_KIT
@@ -1117,6 +1167,7 @@ for _t, _env in (("cheap", "JARVIS_TIER_CHEAP"), ("mid", "JARVIS_TIER_MID"), ("f
     if os.environ.get(_env):  # one-model override per tier
         POOLS[_t] = {"any": [os.environ[_env].strip()]}
 TIER_MODELS = {t: POOLS[t]["any"][0] for t in TIERS}
+CHEAP_FIRST = (os.environ.get("JARVIS_CHEAP_FIRST") or "1") != "0"  # Evens 10-17 "make it cost 0.01 or less"
 JEV_MIN_CONF = 0.6  # below it Jev has no opinion and the job goes UP a tier, never down (jev-preflight rule)
 SCORES = Path.home() / "Library" / "Caches" / "jarvis" / "model-scores.json"
 MIN_SAMPLES = 3
@@ -1205,9 +1256,9 @@ def jev_tool_hint(pick: dict) -> str:
 def choose_model(goal: str) -> dict:
     """{"tier", "model", "why"}: his own switch wins; else Jev's tier; no opinion -> mid."""
     owner = _owner_model()
-    if owner:
-        return {"tier": "owner", "model": owner, "why": "Evens switched the model"}
     jev = _jev_tier(goal)
+    if owner and not (CHEAP_FIRST and jev and jev.get("tier") == "cheap" and jev.get("conf", 0) >= JEV_MIN_CONF):
+        return {"tier": "owner", "model": owner, "why": "Evens switched the model"}
     kind = (jev or {}).get("kind") or "any"
     if jev and jev.get("conf", 0) >= JEV_MIN_CONF:
         tier, why = jev["tier"], f"jev {jev['tier']}/{kind} {jev['conf']:.2f}"
@@ -1648,7 +1699,7 @@ RESEARCH_RE = re.compile(r"\b(research|look up|latest|current(?:ly)?|right now|t
                          r"most popular|top \d+|stars|price|prices|news|what'?s new|review of)\b", re.I)
 CANT_RE = re.compile(r"\b(i\s+can(?:'|no)?t|cannot|i\s+don'?t\s+have\s+(?:access|a\s+way|the\s+ability)|unable\s+to|"
                      r"isn'?t\s+available|not\s+available|no\s+\w+(?:\s+\w+)?\s+tool|outside\s+what\s+i\s+can)\b", re.I)
-ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop"}
+ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type"}
 
 
 def _done_gate(task, name: str, args: dict) -> str:

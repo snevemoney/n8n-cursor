@@ -210,6 +210,19 @@ class FeatureLoops(OperatorLoop):  # Evens 10-16/17: looping capabilities, insid
             self.assertIn("exit 0", got["text"]); self.assertIn("--approval 'yes, happy with these'", run.call_args[0][0][-1])
 
 
+class CheapFirst(unittest.TestCase):  # Evens 10-17: $0.01 or less for simple jobs, even with his Sonnet pin
+    def test_cheap_jobs_skip_the_pin_and_real_work_keeps_it(self):
+        with mock.patch.object(O, "_owner_model", return_value="anthropic/claude-sonnet-5.5"), \
+             mock.patch.object(O, "_jev_tier", return_value={"tier": "cheap", "conf": 0.9, "kind": "any"}):
+            self.assertEqual(O.choose_model("type a line in a file")["tier"], "cheap")
+        with mock.patch.object(O, "_owner_model", return_value="anthropic/claude-sonnet-5.5"), \
+             mock.patch.object(O, "_jev_tier", return_value={"tier": "frontier", "conf": 0.9, "kind": "code"}):
+            self.assertEqual(O.choose_model("refactor the operator")["model"], "anthropic/claude-sonnet-5.5")
+        with mock.patch.object(O, "_owner_model", return_value="anthropic/claude-sonnet-5.5"), \
+             mock.patch.object(O, "_jev_tier", return_value={"tier": "cheap", "conf": 0.3, "kind": "any"}):
+            self.assertEqual(O.choose_model("hm")["tier"], "owner")          # unsure Jev: his pin stands
+
+
 class SelfConfig(OperatorLoop):  # Evens 10-17: Jarvis has access to its own configs and changes what makes sense
     def test_set_get_history_and_refusals(self):
         d = self.home / "cfg"; pers = self.home / "pers"; pers.mkdir(); (pers / "alfred.md").write_text("voice: bm_george\n# A")

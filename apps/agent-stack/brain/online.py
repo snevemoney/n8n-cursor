@@ -1719,6 +1719,34 @@ def _tool_pick_from_message(msg: dict) -> dict | None:
 WORKER_MAX_TOKENS = int(os.environ.get("JARVIS_WORKER_MAX_TOKENS") or 600)
 
 
+CACHE_FAMILIES = ("anthropic/", "google/gemini")  # providers that honour cache_control breakpoints through OpenRouter
+
+
+def with_cache_marks(messages: list[dict], model: str) -> list[dict]:
+    """Evens 10-17: "$0.23 is super expensive for this" — a 14-step job re-sent ~300K input tokens because the ~8K-token
+    system prompt and the growing history were billed in full every step. Two cache breakpoints (the system prompt and
+    the newest message) let the provider bill the repeated prefix at the cached rate (~10%). New list; input untouched."""
+    if not str(model).startswith(CACHE_FAMILIES) or not messages:
+        return messages
+
+    def mark(m: dict) -> dict:
+        c = m.get("content")
+        if isinstance(c, str) and c:
+            return {**m, "content": [{"type": "text", "text": c, "cache_control": {"type": "ephemeral"}}]}
+        if isinstance(c, list) and c and isinstance(c[-1], dict) and c[-1].get("type") == "text":
+            return {**m, "content": [*c[:-1], {**c[-1], "cache_control": {"type": "ephemeral"}}]}
+        return m
+
+    out = list(messages)
+    if out[0].get("role") == "system":
+        out[0] = mark(out[0])
+    for i in range(len(out) - 1, 0, -1):
+        if out[i].get("role") in ("user", "tool") and out[i].get("content"):
+            out[i] = mark(out[i])
+            break
+    return out
+
+
 def call_openrouter_messages(
     messages: list[dict],
     tools: list[dict],
@@ -1741,7 +1769,7 @@ def call_openrouter_messages(
     for mid in [m for m in model_chain if m]:
         body = {
             "model": mid,
-            "messages": messages,
+            "messages": with_cache_marks(messages, mid),
             "tools": tools,
             "tool_choice": "auto",
             "parallel_tool_calls": True,
