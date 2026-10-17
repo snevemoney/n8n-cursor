@@ -61,6 +61,9 @@ SYSTEM = (
     "keys, rules and kept stops are not settings. "
     "Talking: use say whenever you have something for him — the answer to a plain question (answer it and finish; do "
     "not open tools for arithmetic or general knowledge), what you are about to do, what you just found, or a snag. "
+    "REA (mcp server rea, Evens's reverse-engineering tool) is yours for what you can't do properly: when an app action is "
+    "refused or a result can't be confirmed twice, look at the real window with observe_native_ui before trying again; "
+    "for a tool or app we can't install, or a competitor, write a study packet from REA's evidence instead of guessing. "
     "Speak like a capable colleague: plain English, short, no markdown, no file slugs, no model names, no step numbers, "
     "no 'I have not run an executor'. One or two sentences at a time.\n"
     "Plans: for any job with more than two steps, write a plan with the plan tool first and keep it current. When he "
@@ -1104,7 +1107,7 @@ class Task:
                                    + jev_tool_hint(pick)}, *history, {"role": "user", "content": goal}])
         t.write("state.json", {"task_id": tid, "status": "QUEUED", "step": 0, "tier": pick["tier"], "model": pick["model"],
                                "kind": pick.get("kind", "any"), "chain": pick.get("chain") or [pick["model"]],
-                               "model_why": pick["why"]})
+                               "model_why": pick["why"], "jev": pick.get("jev") or {}})
         if not child:  # a helper job never becomes the job his next line talks to
             (Path(hive) / "operator-tasks" / "latest.json").write_text(json.dumps({"task_id": tid}))
         return t
@@ -1120,7 +1123,7 @@ class Task:
     def speak(self, line: str) -> None:
         """One spoken line, now. The Face streams these while the loop keeps working."""
         with (self.path / "speech.jsonl").open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"at": time.time(), "text": line}) + "\n")
+            fh.write(json.dumps({"at": time.time(), "text": plain(line)}) + "\n")
 
     def rows(self, name: str) -> list:
         out = []
@@ -1172,7 +1175,7 @@ KINDS = ("chat", "screen", "code", "research", "creative", "files")
 # Claude only where it is the strongest pick for the job (screen control, frontier code/design).
 POOLS = {
     "cheap": {"any": ["deepseek/deepseek-v4-flash", "openai/gpt-6-luna", "google/gemini-2.5-flash-lite"],
-              "screen": ["anthropic/claude-haiku-5.5", "openai/gpt-6-luna", "google/gemini-2.5-flash-lite"],
+              "screen": ["deepseek/deepseek-v4-flash", "anthropic/claude-haiku-5.5", "google/gemini-2.5-flash-lite"],  # Evens 10-17 "pick deepseek when needed": app reads are text
               "code": ["deepseek/deepseek-v4-flash", "openai/gpt-5.1-codex-mini", "openai/gpt-6-luna"]},
     "mid": {"any": ["deepseek/deepseek-v4-pro", "x-ai/grok-4.3", "google/gemini-3.6-flash"],
             "screen": ["anthropic/claude-sonnet-5.5", "openai/gpt-6.1-sol", "google/gemini-3.6-flash"],
@@ -1245,6 +1248,7 @@ def _jev_tier(goal: str) -> dict | None:
         tier = (live or {}).get("model_tier")
         conf = float((live or {}).get("model_tier_conf") or 0)
         ne = (live or {}).get("needs_expensive")
+        JEV_LAST.clear(); JEV_LAST.update(live=bool(live), tier=tier, ne=ne, keys=sorted((live or {}).keys())[:12])
         if tier not in TIERS and isinstance(ne, (int, float)):
             # live 10-17: Jev answered in 0.3 s but without model_tier, so every job fell to the Sonnet pin ($0.05 for one line)
             tier = "cheap" if ne < 0.35 else "mid" if ne < 0.7 else "frontier"
@@ -1252,9 +1256,13 @@ def _jev_tier(goal: str) -> dict | None:
         if tier in TIERS:
             kind = (live or {}).get("task_kind")
             return {"tier": tier, "conf": conf, "kind": kind if kind in KINDS else "any"}
-    except Exception:  # noqa: BLE001
+    except Exception as e:  # noqa: BLE001
+        JEV_LAST.clear(); JEV_LAST.update(error=f"{type(e).__name__}: {e}"[:200])
         return None
     return None
+
+
+JEV_LAST: dict = {}  # live 10-17: jobs fell to the Sonnet pin with no record of what Jev said; choose_model writes this out
 
 
 def _owner_model() -> str:
@@ -1287,14 +1295,14 @@ def choose_model(goal: str) -> dict:
     owner = _owner_model()
     jev = _jev_tier(goal)
     if owner and not (CHEAP_FIRST and jev and jev.get("tier") == "cheap" and jev.get("conf", 0) >= JEV_MIN_CONF):
-        return {"tier": "owner", "model": owner, "why": "Evens switched the model"}
+        return {"tier": "owner", "model": owner, "why": "Evens switched the model", "jev": dict(JEV_LAST, picked=jev)}
     kind = (jev or {}).get("kind") or "any"
     if jev and jev.get("conf", 0) >= JEV_MIN_CONF:
         tier, why = jev["tier"], f"jev {jev['tier']}/{kind} {jev['conf']:.2f}"
     else:
         tier, why = "mid", ("jev no opinion" if not jev else f"jev low conf {jev['conf']:.2f}")
     chain = best_in_pool(tier, kind)
-    return {"tier": tier, "kind": kind, "model": chain[0], "chain": chain, "why": why}
+    return {"tier": tier, "kind": kind, "model": chain[0], "chain": chain, "why": why, "jev": dict(JEV_LAST, picked=jev)}
 
 
 def _load_brain(name: str):
@@ -1508,7 +1516,7 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
             # Evens 10-16 "sometimes Jarvis repeats its response twice": say + done carried the same answer and both
             # were spoken. The done summary is spoken only when nothing was said this turn; a question always is.
             task.speak(line.strip())
-        state.update(status=status, summary=line, evidence=str(args.get("evidence") or ""))
+        state.update(status=status, summary=plain(line), evidence=str(args.get("evidence") or ""))
         task.write("state.json", state)
         return status
     return None
@@ -1737,6 +1745,40 @@ RESEARCH_RE = re.compile(r"\b(research|look up|latest|current(?:ly)?|right now|t
 CANT_RE = re.compile(r"\b(i\s+can(?:'|no)?t|cannot|i\s+don'?t\s+have\s+(?:access|a\s+way|the\s+ability)|unable\s+to|"
                      r"isn'?t\s+available|not\s+available|no\s+\w+(?:\s+\w+)?\s+tool|outside\s+what\s+i\s+can)\b", re.I)
 ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type"}
+
+
+# Evens 10-17 "Jarvis is still not always talking plain English": the card read "Used app_type to create and type into
+# /private in the background". The prompt asks for plain English; the model slips, so every line he sees or hears passes here.
+TOOL_WORDS = {"app_type": "background typing", "read_file": "reading the file", "write_file": "writing the file",
+              "edit_file": "editing the file", "list_dir": "listing the folder", "find_files": "a file search",
+              "grep": "a text search", "shell": "a command", "web_search": "a web search", "fetch_url": "opening the page",
+              "computer": "the screen", "safari": "Safari", "mcp": "a connected tool", "ask_owner": "asking you",
+              "cua-driver": "background control", "cua_driver": "background control", "osascript": "a script",
+              "AppleScript": "a script", "AXPress": "a click", "AXOpen": "opening it", "get_window_state": "reading the window"}
+_SEG = r"[^\s/,;:)\]'\"]+"
+_PATH_RE = re.compile(r"(?<![\w.])(?:~|/(?:private|tmp|Users|var|opt|Applications|Volumes|Library))"  # spaces only inside folders
+                      r"(?:/" + _SEG + r"(?: " + _SEG + r")*(?=/))*(?:/" + _SEG + r")?/?")
+_TOOL_RE = re.compile(r"\b(" + "|".join(re.escape(k) for k in sorted(TOOL_WORDS, key=len, reverse=True)) + r")\b")
+_SNAKE_RE = re.compile(r"\b[a-z]+(?:_[a-z0-9]+)+\b")
+
+
+_KEEP_RE = re.compile(r"https?://[^\s)>\]]+|`[^`]*`|“[^”]*”|\"[^\"]*\"")
+
+
+def plain(line: str) -> str:
+    """What he reads and hears: file names instead of paths, words instead of tool and function names.
+    URLs, quoted and backticked text are left exactly as written."""
+    t = _PATH_RE.sub(lambda m: (lambda base: f"“{base}”" if base else "a folder")(m.group(0).rstrip("/.").rsplit("/", 1)[-1]), str(line or ""))
+    out, pos = [], 0
+    for m in _KEEP_RE.finditer(t):
+        out.append(_words(t[pos:m.start()])); out.append(m.group(0)); pos = m.end()
+    out.append(_words(t[pos:]))
+    return "".join(out)
+
+
+def _words(t: str) -> str:
+    t = _TOOL_RE.sub(lambda m: TOOL_WORDS[m.group(1)], t)
+    return _SNAKE_RE.sub(lambda m: m.group(0).replace("_", " "), t)
 
 
 def _done_gate(task, name: str, args: dict) -> str:

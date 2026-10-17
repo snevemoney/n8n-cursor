@@ -221,6 +221,23 @@ class OneBlueCursor(unittest.TestCase):  # Evens 10-17: cua's cursor in Jarvis b
         self.assertFalse(O.OWN_CURSOR)
 
 
+class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
+    def test_his_screenshot_line_becomes_words_and_a_file_name(self):
+        got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")
+        self.assertEqual(got, "Sir. Used background typing to create and type into “jarvis-bg-test4.txt” in the background.")
+
+    def test_paths_with_spaces_urls_and_quotes_survive(self):
+        self.assertEqual(O.plain("Saved to /Users/evenslouis/ArtCraft Studio/00 Private/x.html in the folder."), "Saved to “x.html” in the folder.")
+        self.assertEqual(O.plain("see https://x.com/a_b?c_d=1 and `raw_name` and \"my_file\""), "see https://x.com/a_b?c_d=1 and `raw_name` and \"my_file\"")
+        self.assertEqual(O.plain("The display reads 84."), "The display reads 84.")
+        self.assertEqual(O.plain("press_on failed with AXPress"), "press on failed with a click")
+
+    def test_speak_and_done_go_through_plain(self):
+        d = Path(tempfile.mkdtemp()); task = O.Task(d / "t"); task.path.mkdir(parents=True)
+        task.speak("Used app_type on /tmp/x/file.txt")
+        self.assertEqual(task.rows("speech.jsonl")[0]["text"], "Used background typing on “file.txt”")
+
+
 class JevNeedsExpensive(unittest.TestCase):  # live 10-17: Jev omitted model_tier; needs_expensive still says cheap
     def test_tier_is_derived_from_needs_expensive(self):
         class PF:
@@ -233,6 +250,18 @@ class JevNeedsExpensive(unittest.TestCase):  # live 10-17: Jev omitted model_tie
         with mock.patch.object(O, "_load_brain", return_value=J):
             got = O._jev_tier("type a line")
         self.assertEqual(got["tier"], "cheap"); self.assertGreaterEqual(got["conf"], O.JEV_MIN_CONF)
+        self.assertEqual(O.JEV_LAST["ne"], 0.19)
+
+    def test_a_failing_jev_call_is_recorded_not_hidden(self):
+        with mock.patch.object(O, "_load_brain", side_effect=RuntimeError("no router")):
+            self.assertIsNone(O._jev_tier("x"))
+        self.assertIn("RuntimeError", O.JEV_LAST["error"])
+        with mock.patch.object(O, "_owner_model", return_value="anthropic/claude-sonnet-5.5"), \
+             mock.patch.object(O, "_load_brain", side_effect=RuntimeError("no router")):
+            self.assertIn("RuntimeError", O.choose_model("x")["jev"]["error"])
+
+    def test_screen_jobs_start_on_deepseek(self):
+        self.assertEqual(O.POOLS["cheap"]["screen"][0], "deepseek/deepseek-v4-flash")
 
 
 class CheapFirst(unittest.TestCase):  # Evens 10-17: $0.01 or less for simple jobs, even with his Sonnet pin
