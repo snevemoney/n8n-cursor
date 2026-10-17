@@ -58,6 +58,8 @@ RUNNABLE_RE = re.compile(r"\.(?:command|sh|zsh|bash|tool|terminal|pkg|mpkg|scpt|
 PAGE_EXFIL = re.compile(r"\b(?:fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource|importScripts|indexedDB|localStorage|"
                         r"sessionStorage|caches)\b|document\.cookie|window\.open|(?:location|location\.href)\s*=|\.submit\s*\(|"
                         r"new\s+Image\b|\.src\s*=", re.I)
+CLI_KEYCHAIN_WRITE = re.compile(r"\bsecurity\s+(?:add-|set-|import|unlock-keychain|create-keychain|default-keychain|"
+                                r"authorizationdb|trust-settings-import|add-trusted)", re.I)
 CLI_TRASH = re.compile(r"(?:^|\s)(?:mv\b[^|;&]*\.Trash\b|trash\s)", re.I)
 SECRET_ARG = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.pgpass|\.docker|\.kube|\.git-credentials|"
                         r"id_(?:rsa|dsa|ecdsa|ed25519)[^/]*|[^/]*\.(?:pem|key|p12|kdbx)|credentials[^/]*|secrets?(?:\.[a-z0-9]+)?|"
@@ -124,6 +126,10 @@ def authorize(tool: str, args: dict, *, home: Path | None = None) -> tuple[str, 
             return ASK, "that command changes a macOS system setting"
         if CLI_TRASH.search(cmd):
             return ASK, "that command moves files to the Trash"
+        if CLI_KEYCHAIN_WRITE.search(cmd):
+            return ASK, "that command changes your Keychain"
+        if re.search(r"\bosascript\b", cmd) and SENSITIVE_APP.search(cmd):
+            return ASK, "that command scripts a system, security or password app"
         if CLI_PERSIST.search(cmd):
             return ASK, "that command makes something run on its own or changes how your agents are set up"
         if cli_needs_owner(cmd):

@@ -72,3 +72,12 @@ class CuaDriverInSensitiveApps(unittest.TestCase):  # open access lets cua-drive
             self.assertEqual(A.authorize("mcp", {"server": "cua-driver", "tool": "get_window_state", "arguments": {"pid": 111}})[0], "allow")
         with mock.patch.object(A, "_app_of_pid", lambda pid: "/System/Applications/Calculator.app/Contents/MacOS/Calculator"):
             self.assertEqual(A.authorize("mcp", {"server": "cua-driver", "tool": "click", "arguments": {"pid": 222}})[0], "allow")
+
+
+
+class KeychainAndSettingsScripting(unittest.TestCase):
+    def test_changing_keychain_or_scripting_settings_asks(self):
+        for c in ("security add-generic-password -s x -a y -w z", "security unlock-keychain",
+                  "osascript -e 'tell application \"System Settings\" to activate'"):
+            self.assertEqual(A.authorize("shell", {"command": c})[0], "ask", c)
+        self.assertEqual(A.authorize("shell", {"command": "osascript -e 'tell application \"Music\" to play'"})[0], "allow")
