@@ -2164,6 +2164,16 @@ def _his_last_words(messages: list) -> str:
 
 HELPER_FENCED = {"web_helper", "computer", "safari", "open", "write_file", "edit_file", "mcp", "signal", "delegate", "say", "ask_owner"}
 
+SECONDHAND = ("medium.com", "reddit.com", "quora.com", "x.com", "twitter.com", "youtube.com", "youtu.be", "tiktok.com",
+              "facebook.com", "instagram.com", "linkedin.com/pulse", "linkedin.com/posts", "substack.com")
+
+
+def _only_secondhand(text: str) -> bool:
+    """True when links are cited and every one is a post/forum/video page rather than a primary source."""
+    urls = re.findall(r"https?://(?:www\.)?([^\s)\]>\"']+)", text)
+    return bool(urls) and all(any(u.lower().startswith(d) or f".{d}" in u.lower().split("/")[0] for d in SECONDHAND) for u in urls)
+
+
 def _unread_cited(text: str, rows: list) -> list:
     """GitHub projects cited in what he gets but never opened in this job (bench 10-16: a license 'not listed in the
     search snippet' because the repo page was never read)."""
@@ -2368,6 +2378,11 @@ def _done_gate(task, name: str, args: dict) -> str:
     elif RESEARCH_RE.search(goal) and n < 2 and _unread_cited(summary + " " + wrote, rows):
         why = ("Before you finish: you cite pages you never opened in this job: " + ", ".join(_unread_cited(summary + " " + wrote, rows)[:5])
                + ". Open each one and correct anything taken from search snippets.")
+    elif RESEARCH_RE.search(goal) and n < 2 and _only_secondhand(summary + " " + wrote):
+        # X16 source quality: errors spread from secondhand pages; one primary source per claim
+        why = ("Before you finish: every source you cite is secondhand (posts, forums, videos). Open at least one primary "
+               "source for the main claims (the official site, the repository, the paper or the data itself), check the "
+               "facts against it, and cite it.")
     elif QUESTION_RE.search(_his_line(goal)) and META_DONE_RE.match(summary) and n < 2:
         # live 10-17: "What time is it?" -> date said 05:21, but he heard "Proved the current time."
         why = ("Before you finish: he asked a question. Your summary reports on your work instead of answering it. "

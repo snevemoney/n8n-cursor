@@ -341,6 +341,14 @@ class SecretsHeSays(unittest.TestCase):  # sig_z99: a pasted key never reaches t
         self.assertNotIn(key, (task.path / "inbox.jsonl").read_text())
 
 
+class SourceQuality(unittest.TestCase):  # X16
+    def test_only_secondhand_sources_are_sent_back_once(self):
+        self.assertTrue(O._only_secondhand("see https://medium.com/@a/post and https://www.reddit.com/r/x"))
+        self.assertFalse(O._only_secondhand("see https://medium.com/@a/post and https://github.com/browser-use/browser-use"))
+        self.assertFalse(O._only_secondhand("no links here"))
+        self.assertTrue(O._only_secondhand("https://someone.substack.com/p/x"))
+
+
 class OpenWith(unittest.TestCase):  # macread: his default PDF app is PdfCraft; "in Preview" must mean Preview
     def test_with_names_the_app(self):
         seen = []
