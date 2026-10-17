@@ -135,6 +135,8 @@ def _daily_summary(_m, now: float | None = None) -> tuple[bool, str]:
     line = (f"Today Jarvis ran {len(jobs)} jobs" + (f" ({ends})" if ends else "")
             + (f"; {short} of them ended saying it could not finish" if short else "") + f", ${cost:.2f} billed.")
     note = DAILY / f"{day.isoformat()}.md"
+    if os.environ.get("JARVIS_LOOP_SAMPLE") == "1":
+        return True, line + " (sample run: today's note is written at the scheduled time)"
     if note.exists():
         return True, line + " Today's note was already written."
     rows = [f"- {time.strftime('%H:%M', time.localtime(float(st.get('started') or 0)))} · {st.get('status')} · "

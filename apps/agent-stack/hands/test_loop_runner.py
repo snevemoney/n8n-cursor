@@ -146,3 +146,14 @@ class DailySummary(unittest.TestCase):  # X33 / Z58: one note a day of what Jarv
         self.assertIn("already written", again)
         with mock.patch.dict(os.environ, {"JARVIS_LOOPS_FILE": str(d / "loops.json")}):
             self.assertTrue(L.run({"op": "start", "what": "reports my daily summary", "at": "21:00"})["ok"])
+
+
+class SampleBeforeScheduling(unittest.TestCase):  # Z87: a loop is only promised after one real sample run
+    def test_new_loop_reports_its_first_check_and_unknown_subjects_are_refused(self):
+        L = _load("agent_stack_loop_test_s", "hands/loop.py")
+        d = Path(tempfile.mkdtemp())
+        with mock.patch.dict(os.environ, {"JARVIS_LOOPS_FILE": str(d / "loops.json")}):
+            got = L.run({"op": "start", "what": "checks disk space", "every_min": 30})
+            self.assertTrue(got["ok"]); self.assertIn("First check now:", got["spoken"]); self.assertIn("free", got["first"])
+            bad = L.run({"op": "start", "what": "checks the vps status", "every_min": 30})
+            self.assertFalse(bad["ok"]); self.assertIn("no way to check that yet", bad["spoken"])

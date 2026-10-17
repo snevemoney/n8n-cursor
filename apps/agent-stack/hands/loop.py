@@ -98,6 +98,21 @@ class _locked:
         return False
 
 
+def _sample(what: str) -> tuple:
+    """The loop's check, run once now with no side effects (JARVIS_LOOP_SAMPLE tells writers to only report)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("loop_runner_sample", Path(__file__).with_name("loop_runner.py"))
+    lr = importlib.util.module_from_spec(spec); spec.loader.exec_module(lr)
+    old = os.environ.get("JARVIS_LOOP_SAMPLE")
+    os.environ["JARVIS_LOOP_SAMPLE"] = "1"
+    try:
+        return lr.check(what)
+    except Exception as exc:  # noqa: BLE001 - a failing sample is reported, not raised
+        return False, f"the first check failed: {type(exc).__name__}"
+    finally:
+        os.environ.pop("JARVIS_LOOP_SAMPLE", None) if old is None else os.environ.__setitem__("JARVIS_LOOP_SAMPLE", old)
+
+
 def _runner_alive() -> bool:
     """True only when a loop runner has written a heartbeat in the last 5 minutes (loop_runner.py)."""
     beat = _path().with_name("jarvis-loops-runner.json")
@@ -162,12 +177,18 @@ def _run(args: dict | None = None) -> dict:
                 "expires": (now + timedelta(days=31 if daily else 1)).isoformat(timespec="seconds"),
                 "created": now.isoformat(timespec="seconds"), "runs": 0, "status": "active", **({"at": at} if daily else {}),
                 **({"weekday": weekday} if daily and weekday else {})}
+        # Z87 event check: one sample run before saying the loop works; a subject nothing can check is refused
+        ok, first = _sample(what)
+        if ok is None:
+            return {"ok": False, "op": op, "spoken": f"I have no way to check that yet ({first}), so a loop would never report. Not scheduled."}
+        loop["sample"] = {"ok": ok, "text": first[:300], "at": now.isoformat(timespec="seconds")}
         rows.append(loop); _save(rows)
-        return {"ok": True, "op": op, "loop": loop,
+        return {"ok": True, "op": op, "loop": loop, "first": first,
                 "spoken": (f"Scheduled (read-only): {what}, every {WEEKDAY.get(weekday, 'day')} at {at}, for a month. " if daily else
                            f"Loop registered (read-only): {what}, every {every} minutes, up to {loop['max_runs']} runs, expires in 24 hours. ")
                           + ("The loop runner checks it on schedule." if _runner_alive() else
-                             "No loop runner is active yet, so it is saved but not running.") + " Say cancel to stop it."}
+                             "No loop runner is active yet, so it is saved but not running.") + " Say cancel to stop it."
+                          + f" First check now: {first[:240]}"}
     return {"ok": False, "op": op, "spoken": "Unknown loop op."}
 
 
