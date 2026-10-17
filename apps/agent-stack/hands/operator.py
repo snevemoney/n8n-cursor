@@ -1324,7 +1324,7 @@ for _t, _env in (("cheap", "JARVIS_TIER_CHEAP"), ("mid", "JARVIS_TIER_MID"), ("f
 TIER_MODELS = {t: POOLS[t]["any"][0] for t in TIERS}
 CHEAP_FIRST = (os.environ.get("JARVIS_CHEAP_FIRST") or "1") != "0"
 APP_WINDOW_WAIT_S = 6.0
-CHEAP_ESCALATE_STEPS = int(os.environ.get("JARVIS_CHEAP_ESCALATE_STEPS") or 8)
+CHEAP_ESCALATE_STEPS = int(os.environ.get("JARVIS_CHEAP_ESCALATE_STEPS") or 25)  # live 10-17: a calculator sum is 5+ presses; 8 cut a working job
 CHEAP_NE = float(os.environ.get("JARVIS_CHEAP_NEEDS_EXPENSIVE") or 0.2)  # Jev's needs_expensive below this = cheap job  # Evens 10-17 "make it cost 0.01 or less"
 JEV_MIN_CONF = 0.6  # below it Jev has no opinion and the job goes UP a tier, never down (jev-preflight rule)
 SCORES = Path.home() / "Library" / "Caches" / "jarvis" / "model-scores.json"
@@ -1498,7 +1498,7 @@ def _model_fn(tier: str = "mid", chain: list | None = None):
         online.load_existing_env()
     owner = _owner_model()
     if tier == "owner" and owner:
-        chain = (owner,)
+        chain = tuple([owner, *[m for m in (chain or []) if m != owner]])  # his pin first; the job's own chain behind it
     else:
         chain = tuple(chain or pool(tier, "any"))  # the job's pool; the next one only answers if the first errors
     return _with_local_fallback(lambda messages, tools: online.call_openrouter_messages(
@@ -1728,10 +1728,13 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
             owner_pin = _owner_model() if CHEAP_FIRST else ""
             if status is None and tier == "cheap" and owner_pin and now.get("step", 0) >= CHEAP_ESCALATE_STEPS:
                 # cheap-first safety net: a job still going after N cheap steps is not cheap; his pinned model takes it
-                now.update(tier="owner", model=owner_pin, chain=[owner_pin], model_why=f"still working after {CHEAP_ESCALATE_STEPS} cheap steps")
+                # live 10-17: the pinned model failed (no credits) and the job fell to the local model mid-task. The cheap
+                # chain that was doing the work stays behind the pin as its fallback.
+                fallback = [m for m in (now.get("chain") or []) if m != owner_pin]
+                now.update(tier="owner", model=owner_pin, chain=[owner_pin, *fallback], model_why=f"still working after {CHEAP_ESCALATE_STEPS} cheap steps")
                 task.write("state.json", now); task.trace({"event": "escalate", "to": "owner", "model": owner_pin})
                 tier = "owner"
-                model_fn = fixed_fn if fixed_fn else _model_fn(tier, [owner_pin])
+                model_fn = fixed_fn if fixed_fn else _model_fn(tier, now["chain"])
                 continue
             if status == "MODEL_UNAVAILABLE" and tier in TIERS and next_tier(tier):
                 # the cheaper model failed: escalate ONE tier and keep the same job (match-model-to-task)

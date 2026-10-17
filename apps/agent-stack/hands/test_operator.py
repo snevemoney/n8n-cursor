@@ -272,7 +272,7 @@ class RepickPerRequest(unittest.TestCase):  # live 10-17: cheap requests inherit
         task.write("messages.json", [])
         (task.path / "inbox.jsonl").write_text(json.dumps({"at": 1, "text": "click 12 times 7"}) + "\n")
         with mock.patch.object(O, "IDLE_S", 3), mock.patch.object(O, "_jev_tier", return_value={"tier": "cheap", "conf": 0.95, "kind": "screen"}), \
-             mock.patch.object(O, "_owner_model", return_value="anthropic/claude-sonnet-5.5"):
+             mock.patch.object(O, "_owner_model", return_value="anthropic/claude-sonnet-5.5"), mock.patch.object(O, "_scores", return_value={}):
             self.assertTrue(O._idle_until_spoken_to(task))
         st = task.read("state.json")
         self.assertEqual(st["tier"], "cheap"); self.assertEqual(st["model"], "deepseek/deepseek-v4-flash")
@@ -566,6 +566,21 @@ class FocusTool(unittest.TestCase):  # Z17: the operator brain can start and sto
             self.assertIn("Standing down", tools.focus({"op": "stop"})["text"])
         fake.focus_arm.assert_called_once(); self.assertEqual(fake.focus_arm.call_args[0][1], 1)
         self.assertIn("focus", O.ACTING_TOOLS)
+
+
+class EscalationKeepsTheCheapChain(unittest.TestCase):  # live 10-17: escalated to a dead pin and fell to the local model
+    def test_owner_chain_keeps_the_cheap_models_behind_the_pin(self):
+        seen = {}
+        class On:
+            @staticmethod
+            def load_existing_env(): pass
+            @staticmethod
+            def call_openrouter_messages(messages, tools, model_chain=(), **kw):
+                seen["chain"] = model_chain; return {"ok": True}
+        with mock.patch.dict(sys.modules, {"op_online": On}), mock.patch.object(O, "_owner_model", return_value="anthropic/claude-sonnet-5.5"):
+            O._model_fn("owner", ["deepseek/deepseek-v4-flash", "anthropic/claude-haiku-5.5"])([], [])
+        self.assertEqual(seen["chain"], ("anthropic/claude-sonnet-5.5", "deepseek/deepseek-v4-flash", "anthropic/claude-haiku-5.5"))
+        self.assertGreaterEqual(O.CHEAP_ESCALATE_STEPS, 20)
 
 
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
