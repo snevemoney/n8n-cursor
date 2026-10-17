@@ -446,6 +446,13 @@
     const synth = window.speechSynthesis;
     const YES_RE = /^(yes|yeah|yep|do it|approve|ok|okay)\s*[.!]?\s*$/i;
     const STOP_RE = /^(?:hey\s+)?(?:jarvis[,.]?\s*)?(stop|cancel|never mind|forget it|shut up)\s*[.!?]?\s*$/i;
+    // Z75 hush: quiet the voice only; the job keeps going and the mic keeps its mode ("stop" still cancels the job)
+    const HUSH_RE = /^(?:hey\s+)?(?:jarvis[,.]?\s*)?(quiet|hush|shh+|shush|be quiet|quiet please|enough|silence|not now)\s*[.!?]?\s*$/i;
+    function hush() {
+      stopSpeech();
+      $("spoken").textContent = "Quiet. I'm still on it.";
+      return true;
+    }
     const WAKE_RE = /^(?:hey\s+)?jarvis[,.]?\s*/i;
     const RESTART_MIN = 400;
     const RESTART_MAX = 800;
@@ -1178,6 +1185,7 @@
       const woke = WAKE_RE.test(said);
       said = said.replace(WAKE_RE, "").trim() || (woke ? "" : said);
       if (!said) { greet(); return; }
+      if (HUSH_RE.test(said)) { hush(); return; }
       if (state.pending && YES_RE.test(said)) turn(state.pending, true, true);
       else turn(said, false, true);
     }
@@ -1334,6 +1342,11 @@
       rec.onresult = (e) => {
         const last = e.results[e.results.length - 1];
         const t = last[0].transcript;
+        if (last.isFinal && HUSH_RE.test((t || "").trim())) {
+          clearHeardBuffer();
+          hush();
+          return;
+        }
         if (last.isFinal && STOP_RE.test((t || "").trim())) {
           clearHeardBuffer();
           handleHeard(t);
