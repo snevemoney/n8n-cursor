@@ -1656,6 +1656,33 @@
     }
 
     let eyesStream = null;
+    // Z39 graph path trace: first click focuses a note and its neighbours; a second note traces the shortest path; the
+    // same note again clears. Pure state so it is testable; painting only recolours nodes and links.
+    let graphSel = { a: null, b: null, near: [], path: [] };
+    function linkEnds(l) { return [l.source && l.source.id !== undefined ? l.source.id : l.source, l.target && l.target.id !== undefined ? l.target.id : l.target]; }
+    function graphPick(sel, id, links) {
+      if (sel.a === id && !sel.b) return { a: null, b: null, near: [], path: [] };
+      const adj = new Map();
+      for (const l of links || []) { const [s, t] = linkEnds(l); if (!adj.has(s)) adj.set(s, []); if (!adj.has(t)) adj.set(t, []); adj.get(s).push(t); adj.get(t).push(s); }
+      if (!sel.a || sel.b) return { a: id, b: null, near: [id].concat(adj.get(id) || []), path: [] };
+      const prev = new Map([[sel.a, null]]); const q = [sel.a];
+      while (q.length && !prev.has(id)) { const cur = q.shift(); for (const nx of adj.get(cur) || []) if (!prev.has(nx)) { prev.set(nx, cur); q.push(nx); } }
+      if (!prev.has(id)) return { a: sel.a, b: id, near: [sel.a, id], path: [] };
+      const path = []; for (let c = id; c !== null; c = prev.get(c)) path.unshift(c);
+      return { a: sel.a, b: id, near: path.slice(), path };
+    }
+    function nodeName(id) {
+      const n = vaultGraph && vaultGraph.graphData().nodes.find((x) => x.id === id);
+      return (n && (n.name || n.id)) || String(id);
+    }
+    function paintGraphSel() {
+      if (!vaultGraph) return;
+      const near = new Set(graphSel.near); const onPath = new Set();
+      for (let i = 1; i < graphSel.path.length; i += 1) onPath.add(graphSel.path[i - 1] + "|" + graphSel.path[i]);
+      const lit = (l) => { const [s, t] = linkEnds(l); return onPath.has(s + "|" + t) || onPath.has(t + "|" + s); };
+      vaultGraph.nodeColor((x) => (graphSel.path.includes(x.id) ? "#ff3df0" : near.size && near.has(x.id) ? "#7dfcff" : near.size ? "rgba(61,255,106,0.25)" : (x.color || "#3dff6a")))
+        .linkColor((l) => (lit(l) ? "#ff3df0" : "rgba(61,255,106,0.28)")).linkWidth((l) => (lit(l) ? 2.5 : 0));
+    }
     async function mountVaultGraph() {
       const host = $("graph");
       let data = { nodes: [], links: [], nodeCount: 0, linkCount: 0 };
@@ -1685,7 +1712,11 @@
         .d3AlphaDecay(0.006)
         .d3VelocityDecay(0.28)
         .onNodeClick((n) => {
-          if ($("spoken") && n && n.name) $("spoken").textContent = n.name;
+          if (!n) return;
+          graphSel = graphPick(graphSel, n.id, vaultGraph.graphData().links);  // Z39: focus, then trace a path
+          paintGraphSel();
+          if ($("spoken") && n.name) $("spoken").textContent = graphSel.path.length > 1
+            ? "Path: " + graphSel.path.map((id) => nodeName(id)).join(" → ") : n.name;
         });
       const ctrls = vaultGraph.controls && vaultGraph.controls();
       if (ctrls) {
@@ -1899,11 +1930,14 @@
       const q = ev.task ? "?task=" + encodeURIComponent(ev.task) + "&since=" + (ev.seq || 0) : "";
       applyEvents(await api("/api/operator/events" + q));
     }
+    let lastGraphFocusAt = null;
     function paintOperator(op) {
       // matrix nodes: driving badge (Z29), tool receipt footer, routing line (gatehud), suggestion chips (Z46)
       const badge = $("driveBadge"), rc = $("receipt"), ch = $("chips");
       if (!op || typeof op !== "object") return;
       if (badge) badge.hidden = !(op.driving && op.driving.tool);
+      const gf = op.graph_focus;
+      if (gf && gf.note && gf.at !== lastGraphFocusAt) { lastGraphFocusAt = gf.at; lightNote(String(gf.note)); }  // Z70
       if (rc) {
         const tools = Object.entries(op.tools_run || {}).map(([k, n]) => n > 1 ? k + " ×" + n : k).join(" · ");
         const pick = op.tier ? (op.tier + (op.kind ? "/" + op.kind : "") + (op.jev && op.jev.ne !== undefined ? " · jev " + op.jev.ne : "")) : "";

@@ -486,6 +486,17 @@ class VoiceSpeed(unittest.TestCase):  # X07
             self.assertIn("refused", tools.config({"key": "voice_speed", "action": "set", "value": "3"})["text"])
 
 
+class VaultGraphFocus(unittest.TestCase):  # Z70: focus puts the note on his Orb graph through the job state
+    def test_focus_is_recorded_for_the_orb(self):
+        d = Path(tempfile.mkdtemp()); vault = d / "v"; vault.mkdir(); (vault / "Strategy.md").write_text("x")
+        task_dir = d / "operator-tasks" / "t1"; task_dir.mkdir(parents=True); O.Task(task_dir).write("state.json", {"task_id": "t1"})
+        (d / "operator-tasks" / "latest.json").write_text(json.dumps({"task_id": "t1"}))
+        with mock.patch.dict(os.environ, {"JARVIS_VAULT": str(vault)}):
+            got = O.Tools(task_dir).vault_graph({"op": "focus", "name": "strategy"})
+        self.assertIn("Showing Strategy", got["text"])
+        self.assertEqual(O.orb_view(d)["graph_focus"]["note"], "Strategy")
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")

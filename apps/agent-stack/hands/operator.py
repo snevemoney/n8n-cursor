@@ -398,6 +398,9 @@ TOOLS = [
         "reads the file back; his front app and pointer never move). Use it instead of many cua-driver steps.",
         {"file": S, "text": S, "app": {"type": "string", "description": "bundle id, default com.apple.TextEdit"},
          "save": {"type": "boolean"}}, ["file", "text"]),
+    _fn("vault_graph", "His Obsidian vault's link graph: op=focus name=<note> puts that note on his Orb graph; op=backlinks|links "
+        "name=<note>; op=orphans|dead_ends|unresolved|tags for the whole vault. Read-only.",
+        {"op": S, "name": S}, ["op"]),
     _fn("schedule", "Scheduled read-only loops he asks for (the Face's loop runner runs them; cards land in his Orb inbox): "
         "op=start what='checks disk space' every_min=15 | op=start what='reports my morning brief' at='06:00' (daily) | "
         "op=list | op=cancel id=<id or what>. Only checks and briefs, never actions.",
@@ -1015,6 +1018,13 @@ class Tools:
         ok = str(a["text"]) in on_disk
         return {"text": f"typed {len(str(a['text']))} chars into {f.name} in the background (confirmed by read-back); "
                         f"{'saved, file on disk contains it' if ok else 'NOT on disk yet'}; front app untouched"}
+
+    def vault_graph(self, a):
+        got = _load("vault_graph", "vault_graph.py").answer(str(a.get("op") or ""), str(a.get("name") or ""))
+        if got.get("ok") and str(a.get("op")) == "focus" and self.dir.parent.name == "operator-tasks":
+            t = Task(self.dir)  # Z70: the Orb lights this note (orb_view carries it)
+            t.write("state.json", {**t.read("state.json"), "graph_focus": {"note": got["note"], "at": time.time()}})
+        return {"text": got["text"]}
 
     def schedule(self, a):
         got = _load("loop_hand", "loop.py").run({k: v for k, v in a.items() if v not in (None, "")})
@@ -2190,7 +2200,8 @@ def orb_view(hive: Path) -> dict:
     jev = st.get("jev") or {}
     return {"task_id": tid, "status": st.get("status"), "step": st.get("step"), "cost_usd": st.get("cost_usd"), "tier": st.get("tier"),
             "model": st.get("model"), "kind": st.get("kind"), "jev": {k: jev.get(k) for k in ("tier", "ne", "picked") if k in jev},
-            "driving": st.get("driving"), "verified": st.get("verified"), "tools_run": tools_run, "chips": chips[:4]}
+            "driving": st.get("driving"), "verified": st.get("verified"), "tools_run": tools_run, "chips": chips[:4],
+            "graph_focus": st.get("graph_focus")}
 
 
 if __name__ == "__main__":
