@@ -82,3 +82,20 @@ class FailuresAreRemembered(unittest.TestCase):  # canvas scars
         H.remember(hive, "close the old export tab in Preview", "could not close it", rows, failed="ran out of steps")
         text = H.recall_text(hive, "close the export tab in Preview")
         self.assertIn("DID NOT WORK (ran out of steps)", text); self.assertIn("Take another way", text)
+
+
+
+class CompactionKeepsHisWordsAndThePlan(unittest.TestCase):  # canvas "compact"
+    def test_requests_and_plan_survive_the_fold(self):
+        msgs = [{"role": "system", "content": "sys"}, {"role": "user", "content": "old history line"},
+                {"role": "user", "content": "Export the deck and email it to Bob"}]
+        for i in range(HX.COMPACT_AT + 10):
+            msgs.append({"role": "assistant", "content": f"step {i}"})
+            msgs.append({"role": "user", "content": "(It has been over 10 minutes. Give Evens one line of progress)"} if i == 5
+                        else {"role": "user", "content": "also attach the PDF version"} if i == 9 else {"role": "tool", "content": "ok"})
+        trace = [{"event": "tool", "tool": "plan", "args": {"steps": [{"step": "export", "status": "done"}, {"step": "email Bob", "status": "todo"}]}}]
+        out = HX.compact(msgs, trace)
+        digest = next(m["content"] for m in out if str(m.get("content")).startswith("Progress so far"))
+        self.assertIn("Export the deck and email it to Bob", digest); self.assertIn("also attach the PDF version", digest)
+        self.assertNotIn("It has been over 10 minutes", digest); self.assertIn("[todo] email Bob", digest)
+        self.assertLess(len(out), len(msgs))

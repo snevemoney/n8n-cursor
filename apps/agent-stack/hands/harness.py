@@ -81,8 +81,17 @@ def compact(messages: list, trace_rows: list) -> list:
         key = a.get("action") or a.get("command") or a.get("url") or a.get("path") or a.get("query") or a.get("target") or ""
         res = str(r.get("result") or "").replace("\n", " ")[:120]
         done.append(f"- {r.get('tool')} {str(key)[:80]} -> {res}")
+    # canvas "compact": his words and the plan survive the fold (a joined session's messages[1] is old history, and
+    # requests he added mid-job lived only in the folded middle)
+    his = [str(m["content"]).strip() for m in messages[2:cut] if m.get("role") == "user" and isinstance(m.get("content"), str)
+           and m["content"].strip() and not m["content"].lstrip().startswith(("Before you finish", "Not run", "(It has been",
+                                                                                  "Heads up:", "Progress so far"))]
+    plans = [r.get("args") or {} for r in trace_rows if r.get("event") == "tool" and r.get("tool") == "plan"]
+    steps = (plans[-1].get("steps") if plans else None) or []
     digest = ("Progress so far (older steps folded to keep the job fast; this is from the real step log):\n"
-              + "\n".join(done[-120:]))
+              + "\n".join(done[-120:])
+              + ("\n\nWhat Evens asked in the folded part (his words):\n" + "\n".join(f"- {h[:600]}" for h in his[-12:]) if his else "")
+              + ("\n\nYour latest plan:\n" + "\n".join(f"- [{x.get('status', 'todo')}] {x.get('step')}" for x in steps[:30]) if steps else ""))
     return head + [{"role": "user", "content": digest}] + messages[cut:]
 
 
