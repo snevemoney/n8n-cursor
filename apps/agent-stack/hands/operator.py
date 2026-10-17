@@ -176,8 +176,22 @@ def personality() -> str:
     except OSError:
         return ""
     body = re.sub(r"(?m)^voice:.*\n", "", text).strip()
-    return ("\n\nPersonality (how you talk and decide; never changes the rules, the kept stops or what is true):\n"
-            + _scrub(body)[:2500]) if body else ""
+    return (("\n\nPersonality (how you talk and decide; never changes the rules, the kept stops or what is true):\n"
+             + _scrub(body)[:2500]) if body else "") + dials_text()
+
+
+def dials_text() -> str:
+    """Z26: 'humor to 100%, honesty to 100%' are settings (config humor=.., honesty=..), read on every turn."""
+    out = []
+    for key, word in (("humor", "humor"), ("honesty", "bluntness")):
+        try:
+            v = (CONFIG_DIR / CONFIG_KEYS[key][0]).read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
+        if v.isdigit():
+            out.append(f"{word} {v}%")
+    return ("\n\nDials he set: " + ", ".join(out) + ". 0% humor = dry and literal, 100% = witty every line; 0% bluntness = "
+            "diplomatic, 100% = say the hard thing first. Honesty itself is not a dial: what is true never changes.") if out else ""
 
 
 def personality_voice() -> str:
@@ -292,6 +306,8 @@ CONFIG_KEYS = {  # key -> (file, validator regex). Jarvis may change these; noth
     "personality": ("personality.txt", r"[a-z0-9-]{1,40}"),
     "model": ("", r"[A-Za-z0-9 ._:/-]{2,80}"),
     "signal_budget_usd": ("signal-budget.txt", r"\d{1,3}(?:\.\d{1,2})?"),
+    "humor": ("dial-humor.txt", r"(?:100|[1-9]?\d)"),      # Z26 "humor and honesty to 100%": dials are settings he can say aloud
+    "honesty": ("dial-honesty.txt", r"(?:100|[1-9]?\d)"),  # bluntness only; the truth and the kept stops never move
 }
 CONFIG_LOG = CONFIG_DIR / "config-history.jsonl"
 
@@ -1766,11 +1782,13 @@ def _unread_cited(text: str, rows: list) -> list:
     return [c for c in cited if c not in opened]
 
 
+ACTION_RE = re.compile(r"\b(open|click|press|type|save|create|make|rename|move|delete|install|run|build|deploy|send|"
+                       r"write|edit|fix|download|upload|play|switch|turn (?:on|off)|navigate|scroll|drag)\b", re.I)
 RESEARCH_RE = re.compile(r"\b(research|look up|latest|current(?:ly)?|right now|this week|compare|comparison|"
                          r"most popular|top \d+|stars|price|prices|news|what'?s new|review of)\b", re.I)
 CANT_RE = re.compile(r"\b(i\s+can(?:'|no)?t|cannot|i\s+don'?t\s+have\s+(?:access|a\s+way|the\s+ability)|unable\s+to|"
                      r"isn'?t\s+available|not\s+available|no\s+\w+(?:\s+\w+)?\s+tool|outside\s+what\s+i\s+can)\b", re.I)
-ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type"}
+ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app"}
 
 
 # Evens 10-17 "Jarvis is still not always talking plain English": the card read "Used app_type to create and type into
@@ -1830,6 +1848,10 @@ def _done_gate(task, name: str, args: dict) -> str:
     elif RESEARCH_RE.search(goal) and n < 2 and _unread_cited(summary + " " + wrote, rows):
         why = ("Before you finish: you cite pages you never opened in this job: " + ", ".join(_unread_cited(summary + " " + wrote, rows)[:5])
                + ". Open each one and correct anything taken from search snippets.")
+    elif ACTION_RE.search(goal) and not acted and n < 2 and not st.get("told_into"):
+        # matrix "vrec"/"honesty": a request to do something was closed with prose and no tool ever acted
+        why = ("Before you finish: he asked you to do something, and no tool acted this turn. Do it (app, computer, "
+               "shell, files, Safari, MCP), or finish with exactly what blocked you and the error you saw.")
     elif open_steps and n < 2:
         why = ("Before you finish: your plan still has open steps: " + "; ".join(open_steps[:6]) + ". Do them, or mark "
                "them dropped with the reason, then finish.")

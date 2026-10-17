@@ -283,6 +283,27 @@ class ShellExitTruth(unittest.TestCase):  # matrix "honesty"/"term": the cwd pri
         self.assertTrue(got["text"].startswith("exit 1"), got["text"][:80])
 
 
+class ProseOnlyDone(unittest.TestCase):  # matrix "vrec": an action request closed with prose, nothing acted
+    def test_done_without_any_action_on_an_action_request_is_sent_back_once(self):
+        d = Path(tempfile.mkdtemp()); task = O.Task(d / "t"); task.path.mkdir(parents=True)
+        task.write("request.json", {"goal": "open Calculator and click 2 plus 2"}); task.write("state.json", {"turn_at": 1})
+        why = O._done_gate(task, "done", {"summary": "Done, the answer is 4."})
+        self.assertIn("no tool acted", why)
+        task.trace({"event": "tool", "tool": "app", "args": {}, "at": 2})
+        self.assertNotIn("no tool acted", O._done_gate(task, "done", {"summary": "Done.", "evidence": "display 4"}))
+
+
+class PersonalityDials(unittest.TestCase):  # Z26
+    def test_dials_are_config_keys_and_reach_the_prompt(self):
+        d = Path(tempfile.mkdtemp())
+        with mock.patch.object(O, "CONFIG_DIR", d), mock.patch.object(O, "CONFIG_LOG", d / "h.jsonl"), mock.patch.object(O, "PERSONALITIES", d):
+            tools = O.Tools(d / "task"); tools.dir.mkdir(parents=True, exist_ok=True)
+            got = tools.config({"key": "humor", "action": "set", "value": "100"}); self.assertIn("100", got["text"])
+            self.assertIn("humor 100%", O.dials_text())
+            self.assertIn("never changes", O.personality())
+            bad = tools.config({"key": "honesty", "action": "set", "value": "250"}); self.assertNotIn("250%", O.dials_text())
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")
