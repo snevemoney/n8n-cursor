@@ -338,6 +338,25 @@ class CuaThroughDaemon(unittest.TestCase):  # live 10-17: "session is not availa
         self.assertIn("needs Evens", got["text"]); run2.assert_not_called()
 
 
+class AppTypeWaitsForWindow(unittest.TestCase):  # live 10-17: "opened bg2.txt but found no window for it"
+    def test_window_that_appears_late_is_found(self):
+        f = Path(tempfile.mkdtemp()) / "late.txt"; f.write_text("")
+        seen = {"n": 0}
+        def run(argv, **kw):
+            tool = argv[2]
+            if tool == "launch_app": out = {"pid": 42}
+            elif tool == "list_windows":
+                seen["n"] += 1
+                out = {"windows": [] if seen["n"] < 3 else [{"window_id": 7, "title": "late.txt", "is_on_screen": True}]}
+            elif tool == "get_window_state": out = {"elements": [{"role": "AXTextArea", "element_token": "s1:3"}], "snapshot_id": "s1"}
+            else: out = {"ok": True}
+            return mock.Mock(returncode=0, stdout=json.dumps(out), stderr="")
+        tools = O.Tools(Path(tempfile.mkdtemp()))
+        with mock.patch.object(O.subprocess, "run", side_effect=run), mock.patch.object(O, "_cua_cursor"), mock.patch.object(O.time, "sleep"):
+            got = tools.app_type({"file": str(f), "text": "hello"})
+        self.assertNotIn("found no window", got["text"]); self.assertGreaterEqual(seen["n"], 3)
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")

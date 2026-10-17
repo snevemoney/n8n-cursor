@@ -955,9 +955,17 @@ class Tools:
         pid = app.get("pid")
         if not pid:
             return {"text": f"could not open {f.name} in {bundle}: {str(app)[:200]}"}
-        wins = cua("list_windows", {"pid": pid})
-        wins = wins.get("windows", []) if isinstance(wins, dict) else []
-        wid = next((w.get("window_id") for w in wins if f.name in str(w.get("title", ""))), None)
+        wid, end = None, time.time() + APP_WINDOW_WAIT_S
+        while wid is None:
+            # live 10-17 hand proof: the window appears a moment after launch returns; one look missed it
+            wins = cua("list_windows", {"pid": pid})
+            wins = [w for w in (wins.get("windows", []) if isinstance(wins, dict) else []) if f.name in str(w.get("title", ""))]
+            wins.sort(key=lambda w: not w.get("is_on_screen"))  # the same file opened twice: the visible copy first
+            wid = wins[0].get("window_id") if wins else None
+            if wid is None and time.time() > end:
+                break
+            if wid is None:
+                time.sleep(0.4)
         if wid is None:
             return {"text": f"opened {f.name} but found no window for it"}
         state = cua("get_window_state", {"pid": pid, "window_id": wid, "include_screenshot": False, "query": "AXTextArea"})
@@ -1235,6 +1243,7 @@ for _t, _env in (("cheap", "JARVIS_TIER_CHEAP"), ("mid", "JARVIS_TIER_MID"), ("f
         POOLS[_t] = {"any": [os.environ[_env].strip()]}
 TIER_MODELS = {t: POOLS[t]["any"][0] for t in TIERS}
 CHEAP_FIRST = (os.environ.get("JARVIS_CHEAP_FIRST") or "1") != "0"
+APP_WINDOW_WAIT_S = 6.0
 CHEAP_ESCALATE_STEPS = int(os.environ.get("JARVIS_CHEAP_ESCALATE_STEPS") or 8)
 CHEAP_NE = float(os.environ.get("JARVIS_CHEAP_NEEDS_EXPENSIVE") or 0.2)  # Jev's needs_expensive below this = cheap job  # Evens 10-17 "make it cost 0.01 or less"
 JEV_MIN_CONF = 0.6  # below it Jev has no opinion and the job goes UP a tier, never down (jev-preflight rule)
