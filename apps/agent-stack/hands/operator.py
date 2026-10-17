@@ -18,6 +18,7 @@ import os
 import re
 import shlex
 import subprocess
+import threading
 import sys
 import tempfile
 import time
@@ -311,7 +312,8 @@ CONFIG_KEYS = {  # key -> (file, validator regex). Jarvis may change these; noth
     "signal_budget_usd": ("signal-budget.txt", r"\d{1,3}(?:\.\d{1,2})?"),
     "humor": ("dial-humor.txt", r"(?:100|[1-9]?\d)"),      # Z26 "humor and honesty to 100%": dials are settings he can say aloud
     "honesty": ("dial-honesty.txt", r"(?:100|[1-9]?\d)"),  # bluntness only; the truth and the kept stops never move
-    "takeover_speed": ("takeover-speed.txt", r"fast|balanced"),  # Z05: how quickly his own mouse/keys take the Mac back
+    "takeover_speed": ("takeover-speed.txt", r"fast|balanced"),
+    "voice_speed": ("voice-speed.txt", r"(?:0\.[89]\d?|1(?:\.[0-3]\d?)?)"),  # X07: how fast he speaks, 0.8-1.3  # Z05: how quickly his own mouse/keys take the Mac back
 }
 CONFIG_LOG = CONFIG_DIR / "config-history.jsonl"
 
@@ -1591,6 +1593,10 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
             else:
                 if name in DRIVING_TOOLS:
                     task.write("state.json", {**task.read("state.json"), "driving": {"tool": name, "since": time.time()}})
+                slow = threading.Timer(SLOW_TOOL_S, lambda: task.speak(slow_line(name)))  # Z81: never silent on a slow tool
+                slow.daemon = True
+                if name not in ("say", "plan", "done", "ask_owner"):
+                    slow.start()
                 try:
                     with input_lease(name, task.path.name):
                         result = getattr(tools, name)(args)
@@ -1598,6 +1604,8 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
                     result = {"text": f"Not run: {busy}. Wait a moment or work in the background (app, app_type) instead."}
                 except Exception as exc:  # noqa: BLE001 — every failure is data for the model
                     result = {"text": f"error: {type(exc).__name__}: {exc}"}
+                finally:
+                    slow.cancel()
                 if name in DRIVING_TOOLS:
                     task.write("state.json", {**task.read("state.json"), "driving": None})
                 if name in ACTING_TOOLS and re.match(r"(?:error:|.*\btimed? ?out\b)", str(result.get("text") or ""), re.I | re.S):
@@ -1896,6 +1904,16 @@ def takeover_window() -> float:
     except OSError:
         mode = ""
     return 0.7 if mode == "fast" else TAKEOVER_S
+
+
+SLOW_TOOL_S = float(os.environ.get("JARVIS_SLOW_TOOL_S") or 20)
+SLOW_WORDS = {"shell": "that command", "job": "that job", "web_search": "the search", "fetch_url": "that page",
+              "delegate": "the helper", "signal": "the video", "artifact": "the page", "mcp": "that tool",
+              "computer": "the screen", "safari": "Safari", "app": "that app", "app_type": "the typing", "open": "opening it"}
+
+
+def slow_line(tool: str) -> str:
+    return f"Still on it; {SLOW_WORDS.get(tool, 'this step')} is taking a moment."
 
 
 AX_FRESH_S = 20.0

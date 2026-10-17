@@ -47,7 +47,16 @@ VENV_PY = _voice_path("AGENT_STACK_VOICE_PYTHON", STACK / ".venv-voice" / "bin" 
 KOKORO_MODEL = CACHE / "kokoro-v1.0.int8.onnx"
 KOKORO_VOICES = CACHE / "voices-v1.0.bin"
 KOKORO_VOICE = "bm_lewis"
-VOICE_FILE = Path.home() / ".config/brain/voice.txt"  # Evens 10-17 "change Jarvis's voice for free": one line, e.g. bm_george
+VOICE_FILE = Path.home() / ".config/brain/voice.txt"
+SPEED_FILE = Path.home() / ".config/brain/voice-speed.txt"  # X07 voice parameters: 0.8-1.3, one line, Jarvis may change it
+
+
+def voice_speed() -> float:
+    try:
+        v = float(SPEED_FILE.read_text().strip())
+    except (OSError, ValueError):
+        return 1.0
+    return min(1.3, max(0.8, v))  # Evens 10-17 "change Jarvis's voice for free": one line, e.g. bm_george
 
 
 def _personality_voice() -> str:
@@ -448,7 +457,7 @@ def _kokoro_engine():
 def _kokoro_once(text: str) -> bytes:
     engine = _kokoro_engine()
     text = strip_tags(text)
-    samples, rate = engine.create(text[:TEXT_CAP], voice=voice_style(engine, kokoro_voice()), speed=1.0, lang="en-gb")
+    samples, rate = engine.create(text[:TEXT_CAP], voice=voice_style(engine, kokoro_voice()), speed=voice_speed(), lang="en-gb")
     return _wav_bytes(samples, rate)
 
 
@@ -472,7 +481,7 @@ def worker_loop() -> None:
                 from kokoro_onnx import Kokoro
 
                 engine = Kokoro(str(KOKORO_MODEL), str(KOKORO_VOICES))
-            samples, rate = engine.create(text[:TEXT_CAP], voice=voice_style(engine, kokoro_voice()), speed=1.0, lang="en-gb")
+            samples, rate = engine.create(text[:TEXT_CAP], voice=voice_style(engine, kokoro_voice()), speed=voice_speed(), lang="en-gb")
             audio = _wav_bytes(samples, rate)
             print(json.dumps({"ok": True, "mime": "audio/wav", "b64": base64.b64encode(audio).decode("ascii")}), flush=True)
         except Exception as exc:  # noqa: BLE001 — worker must stay up

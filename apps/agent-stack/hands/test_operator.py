@@ -458,6 +458,34 @@ class EventReplay(unittest.TestCase):  # matrix "eventreplay"
         self.assertEqual(O.events(d, "../etc", 0)["task_id"], "t1")      # a bad id never escapes the task folder
 
 
+class SlowToolStatus(unittest.TestCase):  # Z81
+    def test_a_slow_tool_gets_one_plain_line_and_a_fast_one_none(self):
+        d = Path(tempfile.mkdtemp()); task = O.Task(d / "t"); task.path.mkdir(parents=True)
+        task.write("state.json", {"status": "RUNNING", "turn_at": 1}); task.write("request.json", {"goal": "g"})
+        class Tl:
+            def shell(self, a):
+                time.sleep(float(a["s"])); return {"text": "exit 0"}
+        def model(s):
+            return lambda m, t: {"ok": True, "calls": [{"tool": "shell", "args": {"command": "x", "s": s}, "call_id": "c"}]}
+        task.write("messages.json", [{"role": "user", "content": "g"}])
+        with mock.patch.object(O, "_authority") as au, mock.patch.object(O, "SLOW_TOOL_S", 0.3):
+            au.return_value.authorize.return_value = ("allow", "")
+            O.step_once(task, Tl(), model(0.05)); time.sleep(0.4)
+            self.assertEqual(task.rows("speech.jsonl"), [])
+            O.step_once(task, Tl(), model(0.6))
+        lines = [r["text"] for r in task.rows("speech.jsonl")]
+        self.assertEqual(lines, ["Still on it; that command is taking a moment."])
+
+
+class VoiceSpeed(unittest.TestCase):  # X07
+    def test_speed_setting_is_validated_and_clamped(self):
+        d = Path(tempfile.mkdtemp())
+        with mock.patch.object(O, "CONFIG_DIR", d), mock.patch.object(O, "CONFIG_LOG", d / "h.jsonl"):
+            (d / "t").mkdir(); tools = O.Tools(d / "t")
+            self.assertIn("1.1", tools.config({"key": "voice_speed", "action": "set", "value": "1.1"})["text"])
+            self.assertIn("refused", tools.config({"key": "voice_speed", "action": "set", "value": "3"})["text"])
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")
