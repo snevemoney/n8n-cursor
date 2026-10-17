@@ -395,6 +395,11 @@ TOOLS = [
                                                "upload", "dialog"]},
          "ref": I, "text": S, "url": S, "keys": S, "direction": S, "amount": I, "window": I, "index": I, "submit": B,
          "replace": B, "checked": B, "code": S, "path": S, "timeout_s": I, "real": B}, ["action"]),
+    _fn("web_helper", "Reuse a Safari procedure that already worked. save name=... steps=[safari actions, label=<visible "
+        "text> instead of ref, {var} for values] expect=<text the page shows when it worked> about=...; run name=... "
+        "vars={...}; list. Save only steps you just saw succeed. Each step passes the same checks as a safari call.",
+        {"action": {"type": "string", "enum": ["save", "run", "list"]}, "name": S, "about": S, "expect": S,
+         "steps": {"type": "array", "items": {"type": "object"}}, "vars": {"type": "object"}}, ["action"]),
     _fn("app", "Drive a Mac app in the BACKGROUND through Accessibility (his mouse, keyboard and front app stay his): "
         "read app=Name lists its windows' buttons, fields and lists with numbers (menus=true reads its menu bar instead); press ref=N clicks one; set ref=N "
         "text=... fills a field; select ref=N selects a row or tab; act ref=N action=AXShowMenu|AXConfirm|AXIncrement|AXDecrement|AXCancel. Prefer it over "
@@ -498,6 +503,8 @@ CU = _load("computer_use", "computer_use.py")
 BS = _load("browser_session", "browser_session.py")
 HX = _load("harness", "harness.py")
 SD = _load("safari_dom", "safari_dom.py")
+WH = _load("web_helpers", "web_helpers.py")
+WEB_HELPERS = CONFIG_DIR / "web-helpers"
 
 
 def _clip(text, n=OUT_CHARS):
@@ -929,6 +936,21 @@ class Tools:
         got = SD.SafariDOM(self.state, self._hands, self._show_cursor).act(a)
         self._save()  # the working tab and the tabs Jarvis opened survive between steps
         return got
+
+    def web_helper(self, a):
+        act = str(a.get("action") or "list")
+        try:
+            if act == "save":
+                h = WH.save(WEB_HELPERS, str(a.get("name") or ""), a.get("steps"), str(a.get("expect") or ""), str(a.get("about") or ""))
+                return {"text": f"saved helper {h['name']} v{h['version']} ({h['status']}); run it once to prove it"}
+            if act == "run":
+                def gate(step):
+                    decision, why = _authority().authorize("safari", step)
+                    return why if decision != "allow" else self.preflight("safari", step)
+                return {"text": WH.run(WEB_HELPERS, str(a.get("name") or ""), a.get("vars") or {}, self.safari, gate)["text"]}
+            return {"text": WH.listing(WEB_HELPERS)}
+        except (ValueError, OSError) as exc:
+            return {"text": f"web helper: {exc}"}
 
     def preflight(self, name: str, args: dict) -> str:
         """A kept stop the generic authority cannot see from the arguments alone (the label of a page button)."""
@@ -1978,7 +2000,7 @@ def _his_last_words(messages: list) -> str:
     return next((str(m.get("content")) for m in reversed(messages) if m.get("role") == "user" and isinstance(m.get("content"), str)), "")
 
 
-HELPER_FENCED = {"computer", "safari", "open", "write_file", "edit_file", "mcp", "signal", "delegate", "say", "ask_owner"}
+HELPER_FENCED = {"web_helper", "computer", "safari", "open", "write_file", "edit_file", "mcp", "signal", "delegate", "say", "ask_owner"}
 
 def _unread_cited(text: str, rows: list) -> list:
     """GitHub projects cited in what he gets but never opened in this job (bench 10-16: a license 'not listed in the
@@ -2007,7 +2029,7 @@ RESEARCH_RE = re.compile(r"\b(research|look up|latest|current(?:ly)?|right now|t
                          r"most popular|top \d+|stars|price|prices|news|what'?s new|review of)\b", re.I)
 CANT_RE = re.compile(r"\b(i\s+can(?:'|no)?t|cannot|i\s+don'?t\s+have\s+(?:access|a\s+way|the\s+ability)|unable\s+to|"
                      r"isn'?t\s+available|not\s+available|no\s+\w+(?:\s+\w+)?\s+tool|outside\s+what\s+i\s+can)\b", re.I)
-DRIVING_TOOLS = {"app", "computer", "app_type", "safari", "open"}   # the ones that move things on his Mac
+DRIVING_TOOLS = {"web_helper", "app", "computer", "app_type", "safari", "open"}   # the ones that move things on his Mac
 TAKEOVER_S = float(os.environ.get("JARVIS_TAKEOVER_S") or 2.0)
 
 
@@ -2089,7 +2111,7 @@ class input_lease:
         return False
 
 
-ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app", "schedule", "focus"}
+ACTING_TOOLS = {"web_helper", "computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app", "schedule", "focus"}
 
 
 # Evens 10-17 "Jarvis is still not always talking plain English": the card read "Used app_type to create and type into
