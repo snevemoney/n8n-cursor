@@ -454,7 +454,8 @@ TOOLS = [
         {"action": {"type": "string", "enum": ["ingest", "scan", "status", "push", "watch_later", "add"]}, "url": S, "source": S, "ingest": I, "why": S,
          "again": B, "lens": {"type": "string", "enum": ["auto", "learn", "studio"]}},
         ["action"]),
-    _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
+    _fn("open", "Open an app by name, or a file/folder/URL with its default app; with=App opens it in that app instead "
+        "(his default for PDFs may not be Preview).", {"target": S, "with": S}, ["target"]),
     _fn("app_type", "ONE call that types text into a document in a Mac app in the background (opens it hidden, types, saves, "
         "reads the file back; his front app and pointer never move). Use it instead of many cua-driver steps.",
         {"file": S, "text": S, "app": {"type": "string", "description": "bundle id, default com.apple.TextEdit"},
@@ -1340,6 +1341,8 @@ class Tools:
         t = str(a["target"])
         looks_path = t.startswith(("/", "~", ".")) or bool(re.match(r"^[a-z][a-z0-9+.-]*:", t))  # paths, URLs, spotify: URIs
         argv = ["open", os.path.expanduser(t)] if looks_path else ["open", "-a", t]
+        if looks_path and str(a.get("with") or "").strip():  # macread: "open it in Preview" when PdfCraft owns .pdf
+            argv = ["open", "-a", str(a["with"]).strip(), os.path.expanduser(t)]
         cp = subprocess.run(argv, capture_output=True, text=True, timeout=20)
         return {"text": f"exit {cp.returncode} {cp.stderr.strip()}".strip()}
 

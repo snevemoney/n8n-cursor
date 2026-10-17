@@ -294,6 +294,15 @@ class CancelReachesBackgroundJobs(unittest.TestCase):  # matrix "conc": cancella
         self.assertEqual(subprocess.run(["pgrep", "-g", str(pid)], capture_output=True, text=True).stdout.strip(), "")
 
 
+class OpenWith(unittest.TestCase):  # macread: his default PDF app is PdfCraft; "in Preview" must mean Preview
+    def test_with_names_the_app(self):
+        seen = []
+        with mock.patch.object(O.subprocess, "run", side_effect=lambda argv, **k: seen.append(argv) or O.subprocess.CompletedProcess(argv, 0, "", "")):
+            O.Tools(Path(tempfile.mkdtemp())).open({"target": "~/a.pdf", "with": "Preview"})
+            O.Tools(Path(tempfile.mkdtemp())).open({"target": "~/a.pdf"})
+        self.assertEqual(seen[0][:3], ["open", "-a", "Preview"]); self.assertEqual(len(seen[1]), 2)
+
+
 class NoSightWithoutLooking(unittest.TestCase):  # Z54
     def test_describing_the_screen_without_looking_is_sent_back(self):
         tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
