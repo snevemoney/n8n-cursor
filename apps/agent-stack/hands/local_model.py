@@ -116,7 +116,7 @@ def call(messages: list, tools: list) -> dict:
     try:
         data = _post(LOCAL_BASE + "/api/chat",
                      {"model": LOCAL_MODEL, "messages": _compact(messages), "tools": safe, "stream": False,
-                      "think": False, "keep_alive": KEEP_ALIVE, "options": {"num_ctx": NUM_CTX, "temperature": 0.2,
+                      "keep_alive": KEEP_ALIVE, "options": {"num_ctx": NUM_CTX, "temperature": 0.2,
                                                                           "num_predict": 800}})
     except Exception as exc:  # noqa: BLE001
         return {"ok": False, "unknown": True, "error": f"local model: {type(exc).__name__}"}
@@ -133,6 +133,8 @@ def call(messages: list, tools: list) -> dict:
         return {"ok": True, "calls": calls, "tool": calls[0]["tool"], "args": calls[0]["args"],
                 "call_id": calls[0]["call_id"], "text": "", "model": "local:" + LOCAL_MODEL}
     text = re.sub(r"(?s)^.*</think>", "", str(msg.get("content") or "")).strip()  # drop leftover reasoning
+    # Ollama 0.40 + qwen3: think=false still reasons but INTO the answer; left on, reasoning goes to message.thinking,
+    # which is never read here (live probe 10-17: clean tool call with it on, reasoning in content with it off)
     if REASONING_RE.match(text) or THINKING_RE.search(text[:400]):  # live 10-17 10:18: "Okay, the user is asking…" was spoken
         # live 10-17: with credits at $0 the local model's thinking ("Okay, let's break this down. The user is saying…")
         # was spoken to Evens. Thinking is never a reply.

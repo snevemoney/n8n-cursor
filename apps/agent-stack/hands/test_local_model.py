@@ -109,7 +109,7 @@ class Light(unittest.TestCase):  # live 10-16: qwen3:4b froze his 8 GB Mac — s
         self.assertLessEqual(sent["options"]["num_ctx"], 4096)
         self.assertLess(len(json.dumps(sent["messages"])), 9000)      # short brief, recent turns only
         self.assertIn("turn 29", json.dumps(sent["messages"]))         # newest turn kept
-        self.assertFalse(sent.get("think", True))
+        self.assertNotIn("think", sent)  # 10-17 probe (Ollama 0.40): think=false puts reasoning INTO the answer; on, it stays in message.thinking
 
     def test_native_tool_calls_are_read(self):
         reply = {"message": {"tool_calls": [{"function": {"name": "open", "arguments": {"target": "Calculator"}}}]}}
