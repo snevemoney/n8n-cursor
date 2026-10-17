@@ -74,6 +74,14 @@ def _ops_rows(path: Path) -> list[tuple[str, str, str]]:
     return out
 
 
+def _cut(text: str, n: int) -> str:
+    """Spoken text is cut at a word, never mid-word, and says it was cut."""
+    text = text.strip()
+    if len(text) <= n:
+        return text if text.endswith((".", "!", "?")) else text + "."
+    return text[:n].rsplit(" ", 1)[0].rstrip(",;:(") + "…"
+
+
 def _brief(_m) -> tuple[bool, str]:
     """Z20 / X36 morning brief, built from his own files with no model call: what is red, what needs him."""
     parts = []
@@ -87,7 +95,7 @@ def _brief(_m) -> tuple[bool, str]:
     asks = _lines(PRIVATE / "Decisions Needed.md", 50)
     if asks:
         parts.append(f"{len(asks)} decisions wait for you; newest: "
-                     + re.split(r"(?<=[.!?])\s", re.sub(r"^\d{4}-\d\d-\d\d \d\d:\d\d \([^)]*\):\s*", "", asks[-1]))[0][:160])
+                     + _cut(re.split(r"(?<=[.!?])\s", re.sub(r"^\d{4}-\d\d-\d\d \d\d:\d\d \([^)]*\):\s*", "", asks[-1]))[0], 160))
     # X13 daily compilation: shared fleet notes nobody has refreshed in two weeks are named (contradictions: not covered)
     old = sorted((p for p in SHARED.glob("*.md") if time.time() - p.stat().st_mtime > STALE_DAYS * 86400),
                  key=lambda p: p.stat().st_mtime)

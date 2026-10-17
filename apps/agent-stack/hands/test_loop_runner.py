@@ -91,6 +91,7 @@ class MorningBrief(unittest.TestCase):  # Z20 / X36: a daily brief at a set time
         with mock.patch.object(R, "PRIVATE", d), mock.patch.object(R, "SHARED", shared):
             ok, text = R.check("reports my morning brief")
         self.assertIn("1 shared notes are over 14 days old: ACTIVE_TASKS.", text); self.assertNotIn("CURRENT_STATE", text)
+        self.assertEqual(R._cut("word " * 50, 23), "word word word word…"); self.assertEqual(R._cut("short", 50), "short.")
 
     def test_brief_reads_his_files(self):
         d = Path(tempfile.mkdtemp()); (d / "Ops Watch").mkdir()
