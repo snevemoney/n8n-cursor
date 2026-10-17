@@ -1,0 +1,12 @@
+# Tool / repo: Zapier MCP
+- used in **Expose Jev through a Zapier MCP server** ([_0RRAUw-mT0](../../packets/_0RRAUw-mT0/LEARNED.md))
+- used in **Provision only intended managed actions** ([_0RRAUw-mT0](../../packets/_0RRAUw-mT0/LEARNED.md))
+- used in **Keep provider and MCP credentials in separate homes** ([_0RRAUw-mT0](../../packets/_0RRAUw-mT0/LEARNED.md))
+- used in **Validate structured output types at the tool boundary** ([_0RRAUw-mT0](../../packets/_0RRAUw-mT0/LEARNED.md))
+- used in **Inspect the error behind every fallback** ([_0RRAUw-mT0](../../packets/_0RRAUw-mT0/LEARNED.md))
+- used in **Match managed-tool wiring to the configured server** ([_0RRAUw-mT0](../../packets/_0RRAUw-mT0/LEARNED.md))
+- used in **Separate assistant-specific MCP server inventories** ([_0RRAUw-mT0](../../packets/_0RRAUw-mT0/LEARNED.md))
+- used in **Zapier MCP Server Setup & App Authorization** ([rW3eyvrSqio](../../packets/rW3eyvrSqio/LEARNED.md))
+- used in **Automated Missing-Skill Fallback via Plugin-Management** ([rW3eyvrSqio](../../packets/rW3eyvrSqio/LEARNED.md))
+- used in **Natural Language Agent Workflow Construction Prompt Pattern** ([rW3eyvrSqio](../../packets/rW3eyvrSqio/LEARNED.md))
+- used in **Autonomous Agent Data Verification & Historical Sampling Loop** ([rW3eyvrSqio](../../packets/rW3eyvrSqio/LEARNED.md))

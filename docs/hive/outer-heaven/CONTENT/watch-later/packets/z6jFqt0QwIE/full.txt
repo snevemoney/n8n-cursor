@@ -1,0 +1,387 @@
+[00:00] Jarvis runs about 85% of my business.
+[00:02] These are the exact tools I use to
+[00:04] manage it. Everybody keeps building
+[00:05] these beautiful Jarvis dashboards. They
+[00:07] have glowing circles, voice animators,
+[00:09] moving charts, and a giant button in the
+[00:11] middle, but most of them do absolutely
+[00:14] nothing. The dashboard is not Jarvis.
+[00:16] Jarvis is the system running underneath
+[00:18] it. It is the computer that stays awake,
+[00:19] the AI model doing the thinking, the
+[00:21] connections that let you use the tools,
+[00:23] and the schedules that allow it to
+[00:24] complete tasks without you ever opening
+[00:26] a chat window. So, in this video, I'm
+[00:28] going to show you the actual
+[00:30] architecture for building your own
+[00:31] Jarvis. Not just something you can talk
+[00:33] to, but something that can actually
+[00:35] monitor your business, complete
+[00:37] repeatable work, remember what happened,
+[00:39] and bring you the things that need
+[00:40] attention. To make this simple, we are
+[00:42] going to build this in six layers,
+[00:43] Jarvis, J A R V I S. Before we start,
+[00:47] let's define what Jarvis actually is.
+[00:49] Jarvis is not one AI model. It's not
+[00:52] ChatGPT, it's not Claude, and it's not a
+[00:54] single piece of software. Jarvis is a
+[00:56] system made up of multiple components.
+[00:58] You have a computer that stays online,
+[01:00] an agent harness that controls the
+[01:01] systems, an LLM that acts as the brain,
+[01:04] and connections that give it access to
+[01:06] your tools. Then, you have instructions,
+[01:08] memory, skills, and schedules that allow
+[01:10] it to repeatedly perform work. Think of
+[01:12] it like building an employee. The
+[01:13] computer is the office, the LLM is the
+[01:15] brain, the tools are the employee's
+[01:17] hands. The memory is what the employee
+[01:19] knows, the SOPs explain how the job gets
+[01:21] done, and the schedules tell the
+[01:24] employee when to show up. If one of
+[01:25] those pieces is missing, you do not
+[01:27] really have a Jarvis. You literally just
+[01:29] have a chatbot. So, let's build the
+[01:31] stack. J is for job runner. The first
+[01:33] layer is the job runner. This is the
+[01:35] computer that keeps the entire system
+[01:37] alive. For most people, the easiest
+[01:39] option is something like a Mac mini.
+[01:41] It's small, quiet, relatively power
+[01:43] efficient, and it can stay plugged in 24
+[01:44] hours a day. You can also use a Windows
+[01:46] computer, a Linux machine, or a cloud
+[01:49] server. The specific machine is not the
+[01:51] most important part. The important part
+[01:52] is uptime. If your agent is supposed to
+[01:54] check your email every a minutes, it
+[01:55] literally cannot live on a laptop that's
+[01:57] asleep inside of your backpack. If it's
+[01:59] supposed to create a report every
+[02:00] morning, the system has to be online
+[02:02] when that report is scheduled. That's
+[02:03] why I like having a dedicated computer.
+[02:05] It becomes a physical home for the
+[02:07] agent. This machine holds the files,
+[02:09] runs the automations, and keeps
+[02:11] everything operating while your main
+[02:12] computer is turned off.
+[02:14] You also do not need the most powerful
+[02:15] computer in the world. If you are
+[02:17] connecting OpenAI or Claude through an
+[02:19] API, most of the actual computation is
+[02:21] happening in the cloud. The computer is
+[02:23] mainly just coordinating work. However,
+[02:26] RAM becomes more important if you want
+[02:27] to run local models. A local model is an
+[02:29] LLM running directly on your machine
+[02:31] instead of sending every request to
+[02:33] another company. That can be useful for
+[02:35] repetitive work, private information, or
+[02:37] tasks where you don't want to pay for
+[02:38] every API call. The trade-off is that
+[02:40] local models normally require more RAM
+[02:42] and may not be as capable as the best
+[02:44] cloud models. So, your first decision or
+[02:47] both. Use a local model for cheap
+[02:49] repetitive tasks, then escalate
+[02:51] difficult work to stronger cloud models.
+[02:53] The second layer is the agent harness.
+[02:55] An agent harness is the software that
+[02:56] sits between the AI model and the rest
+[02:59] of your computer.
+[03:00] You could use something like Hermes or
+[03:01] another agent framework that can access
+[03:03] files, run commands, use tools, and
+[03:05] perform multi-step tasks. The harness is
+[03:08] what turns an LLM from something that
+[03:10] answers questions into something that
+[03:11] can actually take action. Without a
+[03:13] harness, you can ask an AI to write an
+[03:16] email. With a harness, AI can read the
+[03:18] email, check the relevant context,
+[03:20] create a draft, and bring it to you for
+[03:22] approval inside your Gmail. That is the
+[03:24] major difference. The model provides
+[03:26] intelligence, the harness provides
+[03:28] agency. The harness controls what the
+[03:29] model can access, which tool it can use,
+[03:31] how long it can work, and what happens
+[03:34] when it encounters a problem. This is
+[03:35] also where loops become possible.
+[03:37] Instead of giving AI one prompt and
+[03:39] receiving one answer, the harness can
+[03:40] allow the model to read the task, create
+[03:42] a plan, use a tool, review the result,
+[03:45] and continue until the task is complete.
+[03:47] That loop is what makes agents feel
+[03:49] different from from chatbots. But, this
+[03:51] is also where people get into trouble.
+[03:53] Do not give your agent unlimited access
+[03:55] to everything on day one. Start with a
+[03:57] small sandbox. Give it one folder, one
+[04:00] email label, and read-only access
+[04:01] wherever possible. Then, expand its
+[04:03] permissions as you understand how it
+[04:05] behaves. An agent with full access and
+[04:07] bad introductions does not become more
+[04:09] useful. It just becomes more dangerous.
+[04:12] R is for reasoning model. The third
+[04:14] layer is the reasoning model. This is
+[04:15] the LLM. LLM stands for a large language
+[04:18] model. You can connect your harness to
+[04:20] OpenAI, Claude, Gemini, or a local model
+[04:23] running on your computer. And, you do
+[04:24] not have to choose only one. One of the
+[04:26] biggest advantages of using an agent
+[04:28] harness is that your entire system is
+[04:29] not locked to one AI company. You can
+[04:32] route different tasks to different
+[04:33] models. A small model could classify
+[04:36] emails, a local model could organize
+[04:37] information, a stronger reasoning model
+[04:39] could analyze a complicated problem.
+[04:41] Think about this like assigning
+[04:42] different employees different jobs. You
+[04:44] would not pay your highest-level
+[04:45] strategist to rename files all day. Your
+[04:48] Jarvis works the same way. You can
+[04:50] create a basic routing system. Tier one
+[04:52] tasks are cheap, repetitive. Tier two
+[04:54] tasks require better writing or
+[04:55] judgment. Tier three tasks require deep
+[04:57] reasoning and should only run when
+[04:59] necessary. This matters because API
+[05:01] costs increase quickly if every tiny job
+[05:03] is being sent to the most expensive
+[05:04] model. The goal is not to use the best
+[05:06] model for everything. The goal is to use
+[05:07] the least expensive model that can
+[05:09] reliably complete each task. The fourth
+[05:11] layer is virtual connections. This is
+[05:13] where Jarvis gets access to the tools
+[05:14] you already use. There are two acronyms
+[05:16] you need to understand here: API and
+[05:18] MCP.
+[05:20] API stands for application programming
+[05:22] interface.
+[05:23] An API is essentially a structured way
+[05:26] for one piece of software to communicate
+[05:27] with another. An email API could allow
+[05:29] your agent to read messages or create
+[05:31] drafts. A CRM API could allow you to
+[05:33] update a contact. An analytics API could
+[05:36] allow it to retrieve business data. MCP
+[05:38] stands for model context protocol. MCP
+[05:40] gives AI models a standardized way to
+[05:42] connect with tools and data. Instead of
+[05:44] creating a completely custom connection
+[05:46] for every application, an MCP server can
+[05:48] expose specific tools that the agent is
+[05:50] allowed to use. For example, you could
+[05:52] connect your agent to your email, CRM,
+[05:54] file files, browser, and analytics. This
+[05:58] is the layer where the agent gets hands.
+[06:00] But access should be intentional. For
+[06:02] each connection, decide whether the
+[06:04] agent can read, write, delete, or send.
+[06:06] Reading is normally lower risk. Writing
+[06:08] introduces moderate risk. Deleting and
+[06:10] sending should require the most caution.
+[06:12] For example, my agent might be able to
+[06:14] read an email and create a draft, but I
+[06:16] would not immediately allow it to send
+[06:18] that email without approval. That
+[06:19] approval step is called HITL, which
+[06:21] stands for human in the loop. HITL means
+[06:24] that AI completes most of the work, but
+[06:26] a human remains involved at an important
+[06:28] decision point. The agent might prepare
+[06:30] a proposal, but you approve the pricing.
+[06:33] It might draft an email, but you approve
+[06:34] the message.
+[06:35] That is how you get the speed of AI
+[06:37] without handing over every important
+[06:38] decision. The fifth layer is
+[06:39] instructions and memory. This is
+[06:41] probably the most important part of the
+[06:43] entire system, so listen up. People
+[06:45] assume the intelligence comes from the
+[06:47] model, but the quality of the system
+[06:49] often comes from the context surrounding
+[06:51] the model. Your agent needs to know who
+[06:54] you are, what your company does, what
+[06:56] you are currently working on, how you
+[06:58] want things done, and what it should
+[06:59] never ever do. The easiest way to start
+[07:02] is with markdown files. Markdown is just
+[07:04] a simple text format. You do not need a
+[07:05] complicated database to begin. Create
+[07:07] one main file that explains the
+[07:09] business. Include the company overview,
+[07:11] current goals, products, ideal
+[07:13] customers, and important rules. Then
+[07:15] create SOPs for individual tasks. SOP
+[07:18] stands for standard operating procedure.
+[07:20] For example, an email SOP could explain
+[07:21] which emails matter, when the agent
+[07:23] should create a draft, and which
+[07:24] messages it should never answer. A
+[07:26] reporting SOP could explain which KPIs
+[07:29] to retrieve, what counts as an unusual
+[07:31] change, and how the report should be
+[07:33] formatted. KPI stands for key
+[07:35] performance indicator. These are the
+[07:36] numbers that show whether the business
+[07:38] is moving in the right direction. Your
+[07:40] agent should not just collect numbers,
+[07:42] it should understand which numbers
+[07:43] matter. The same thing applies to
+[07:45] content. You can create a content SOP
+[07:47] that includes your audience, tone,
+[07:48] examples of successful content, and
+[07:50] phrases you don't use. This is where
+[07:52] people make a major mistake. They write
+[07:54] one giant prompt and expect the AI to
+[07:56] remember it forever. Do not treat this
+[07:58] like a prompt. Treat it like an employee
+[08:00] training. If you would explain something
+[08:01] to a new employee, put it in the file.
+[08:03] If you correct the agent twice, update
+[08:05] the SOP. Every correction should improve
+[08:07] the system. That's how our Jarvis
+[08:09] compounds over time. A normal chat
+[08:11] disappears, a file gets better. Memory
+[08:13] works the exact same way. The agent
+[08:15] would not save everything. It should
+[08:17] save the preferences, decisions, product
+[08:19] updates, and lessons that would matter
+[08:21] during a future task. Memory is not a
+[08:22] transcript of everything that happened.
+[08:24] Memory is the information you do not
+[08:25] want to explain again. The final layer
+[08:28] is skills, schedules, and speech. A
+[08:30] skill is a repeatable capability. It
+[08:32] could check the inbox, build a report,
+[08:33] create a proposal, research a prospect,
+[08:36] or repurpose content. Each skill should
+[08:37] have a clear input, process, output, and
+[08:40] stopping condition. The stopping
+[08:42] condition matters because the agent
+[08:43] needs to know when the task is finished.
+[08:45] It also needs to know when it should
+[08:47] stop and ask for help. For example, if
+[08:49] pricing information is missing, it
+[08:51] should not create the final proposal. If
+[08:53] the customer is angry, it should not
+[08:54] send a response. If an action can be
+[08:56] resolved, it should ask for approval.
+[08:58] If an action can cannot If an action
+[09:00] cannot be resolved, it should ask for
+[09:02] approval. Once you have skills, you can
+[09:03] attach schedules. A schedule is what
+[09:06] allows work to happen without you
+[09:07] manually starting it. This could be a
+[09:08] cron job. Cron is a scheduling system
+[09:10] that runs commands at specific times.
+[09:12] You could create a schedule that checks
+[09:13] for urgent emails every few minutes,
+[09:15] builds a business report every morning,
+[09:16] and summarizes unfinished projects every
+[09:18] single Friday. You can also use triggers
+[09:20] instead of schedules. A trigger starts a
+[09:22] workflow when something happens, such as
+[09:24] a new lead entering the CRM, a customer
+[09:26] submitting a form, or payment failing.
+[09:28] The trigger launches the skill, the
+[09:29] skills follow the SOPs, the agent uses
+[09:32] the necessary tools, and then the result
+[09:34] either gets completed or sent to you for
+[09:36] approval. This is an actual AI employee
+[09:38] workflow. The last piece is speech. TTS
+[09:41] stands for text-to-speech. A tool like
+[09:43] 11 Labs can turn your agentic text
+[09:45] responses into realistic voice. You can
+[09:47] also connect STT, which stands for
+[09:49] speech-to-text. That allows you to speak
+[09:51] to the agent instead of typing. Your
+[09:53] voice gets converted into text, the
+[09:55] agent processes the request, and TTS
+[09:58] converts the answer back into audio.
+[09:59] Now, you can walk into your office and
+[10:01] say, "What needs my attention today?"
+[10:03] The agent checks the connected system
+[10:05] and gives you a spoken summary. Pretty
+[10:06] cool. The voice is impressive, but
+[10:08] remember, the voice is the final layer.
+[10:11] It is not the system. Do not start with
+[10:13] a glowing dashboard and voice assistant.
+[10:15] Start with one useful workflow. Here is
+[10:16] the exact type of workflow I would start
+[10:18] with: an email and daily business
+[10:20] briefing agent. Every morning, the agent
+[10:22] runs automatically. First, it checks our
+[10:24] calendar and important unread emails.
+[10:26] Then, it checks your CRM for leads that
+[10:28] need attention. After that, it retrieves
+[10:30] a small set of KPIs and compares them to
+[10:32] previous performance. Finally, it
+[10:34] creates a short briefing that includes
+[10:35] your messages, the emails that require
+[10:37] responses, the leads that need
+[10:39] follow-up, and the actions that matter
+[10:41] most. The agent could send a briefing to
+[10:42] Telegram, Slack, email, or a simple
+[10:44] interface. Later, you could connect 11
+[10:47] Labs and have it read you the briefing
+[10:48] aloud. That one workflow teaches you
+[10:50] almost everything you need to understand
+[10:52] permissions, memory, SOPs, schedules,
+[10:55] tool connections, and human approval. Do
+[10:57] not begin by asking your agent to run an
+[10:59] entire company. Give it one job, make
+[11:02] the job reliable, then add the next one.
+[11:04] There is one final point that matters.
+[11:06] The goal is not complete autonomy. The
+[11:08] goal is useful leverage. Your agent
+[11:10] should handle repetitive work,
+[11:11] information gathering, organization,
+[11:13] drafting, and monitoring. You should
+[11:15] still own judgment, relationships,
+[11:17] strategy, and irreversible decisions. I
+[11:20] would not let an early version of this
+[11:21] system independently send sensitive
+[11:23] messages, move money, delete important
+[11:25] files, or publish work without review.
+[11:27] The agent can prepare those actions, it
+[11:28] can recommend those actions, it can even
+[11:30] is the reasoning model, the cloud or
+[11:32] local AI that handles the thinking. V is
+[11:34] virtual connections, the APIs and MCPs
+[11:37] that connect the agent to your tools. I
+[11:39] is instructions and memory, including
+[11:41] your business contacts, SOPs, rules,
+[11:43] preferences, and decisions. And finally,
+[11:46] S is skills, schedules, and speech,
+[11:48] including repeatable workflows,
+[11:50] automatic triggers, and voice interface.
+[11:52] That's Jarvis. Not the dashboard, not
+[11:55] the glowing animation, not the voice.
+[11:58] Those things can make for a fun
+[11:59] experience, but the real value is in the
+[12:01] infrastructure underneath them. A
+[12:02] computer that is always available, an AI
+[12:04] that understands you and your business,
+[12:06] tools that allow it to take action, and
+[12:08] documented systems that tell you exactly
+[12:09] what to get done. Start with one
+[12:11] machine, one agent harness, one model,
+[12:13] one folder of instructions, and one
+[12:15] workflow that saves you time every
+[12:17] single day. If you want to see exactly
+[12:19] how to build Jarvis, go ahead and follow
+[12:20] and subscribe because I'll be building
+[12:22] my own Jarvis here in the next video.

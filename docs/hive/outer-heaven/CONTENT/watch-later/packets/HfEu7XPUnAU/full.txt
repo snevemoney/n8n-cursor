@@ -1,0 +1,485 @@
+[00:00] Did you guys know that majority of
+[00:01] retail traders lose money? And it's not
+[00:03] because they're dumb, it's because
+[00:04] they're making decisions based on gut
+[00:06] feeling instead of actual research. They
+[00:09] see a stock trending on social media,
+[00:11] they throw money at it, and they wonder
+[00:12] why they're down 40%. Now, the problem
+[00:15] isn't trading itself, it's that most
+[00:17] people don't have a research process.
+[00:19] They're not looking at the technical,
+[00:20] the fundamentals, the sentiment, the
+[00:22] risk, they're just guessing. So, I built
+[00:24] an AI trading analyst team with Claude
+[00:26] code that does all of that research for
+[00:28] you completely for free. It analyzes any
+[00:31] stock across five dimensions
+[00:33] simultaneously. Technical analysis,
+[00:35] fundamentals, sentiment, risk
+[00:37] assessment, and it even builds you a
+[00:39] complete investment thesis with entry
+[00:41] and exit points. 16 skills, five AI
+[00:44] agents, one command. Now, let me be
+[00:46] clear, this is not a trading bot or
+[00:48] financial advice. This does not touch
+[00:50] your money, this does not make trades
+[00:52] for you. This is a research tool that
+[00:54] gives you the analysis so you can make
+[00:56] better decisions. So, in this video, I'm
+[00:58] going to run this on a real stock so you
+[01:00] can see exactly what it produces. Then
+[01:02] I'm going to walk you through
+[01:03] step-by-step how to install this
+[01:05] regardless of your background, so that
+[01:07] way you can run it on any stock you're
+[01:08] looking at. And if you're new here, my
+[01:10] name is Zubair. I've had my own AI
+[01:11] agency for the past 2 years, and now I
+[01:13] run a community teaching other people
+[01:15] how to start theirs. So, with that being
+[01:17] said, let's jump right in. All right, so
+[01:19] now before I show you how this works and
+[01:20] how to install this, let me show you
+[01:22] what this produces because it's amazing.
+[01:23] So, I ran one command on Nvidia, again,
+[01:26] that's one command, and it generated
+[01:27] this entire investment thesis report.
+[01:30] Thesis score 78 out of 100, strong
+[01:32] conviction. Every key metric laid out,
+[01:35] revenue growth 73%, net margin 55%,
+[01:38] analyst target 49% above current price.
+[01:41] It scores across five dimensions,
+[01:43] catalyst clarity, timing, asymmetry,
+[01:46] edge, and conviction.
+[01:48] Full bull case with price targets, full
+[01:50] bear case with every risk. Again,
+[01:52] nothing is sugarcoated here. And look at
+[01:54] this, a specific entry zone, stop loss,
+[01:57] three profit targets, position sizing,
+[02:00] scaling strategy, and risk-reward ratio.
+[02:02] This is what a hedge fund analyst
+[02:04] produces. It even gives you a full risk
+[02:06] matrix with probability, impact, and
+[02:09] mitigation for every single threat.
+[02:11] Again, this entire report was only
+[02:13] generated with one command using this
+[02:14] tool. So, now let me show you how this
+[02:16] works. I'm going to run this live on
+[02:17] Tesla, then on another stock so you can
+[02:19] see how the results compare, and then
+[02:21] I'll break down the skills, the agents,
+[02:23] and how you can install this on your
+[02:25] computer completely for free. All right,
+[02:26] so I'm going to click on Claude code
+[02:27] here. Again, don't worry if you don't
+[02:29] know how to use this, I'm going to show
+[02:30] you exactly how to install this and how
+[02:32] to use this inside Claude code. So, what
+[02:34] I'm going to do is enter slash, and I'm
+[02:36] going to do trade, and as you can see,
+[02:38] all of these skills are available for
+[02:39] me. I'm going to actually scroll down to
+[02:41] trade analyze, and just put the Tesla
+[02:43] ticker. And I'm going to press enter.
+[02:45] So, now Claude code is going to run this
+[02:48] trade analyze skill,
+[02:50] which consists of multiple agents and
+[02:53] multiple skills that are all inside the
+[02:55] skills.md file. So, it has multiple
+[02:57] phases. The first phase is going to be
+[02:58] discovery, searching for Tesla itself.
+[03:00] So, as you can see, that's what it's
+[03:01] doing. It's doing web search on Tesla
+[03:03] stock price today, the market cap
+[03:05] volume. It's doing the Tesla company
+[03:07] overview, business description, the
+[03:08] Tesla stock news, latest news, right?
+[03:10] It's going to search all of these
+[03:12] different resources, and then the next
+[03:14] stage is going to be running five
+[03:16] parallel agents, and all of this is
+[03:19] going to happen because the skills.md
+[03:21] file, which is inside this AI trade tool
+[03:24] that I'm going to again explain a little
+[03:25] bit. So, this trade analyze, that's
+[03:27] exactly what we ran, right? So, it's
+[03:28] it's doing the full stock analysis.
+[03:30] Phase one is going to do discovery. Now,
+[03:32] phase two is going to be parallel
+[03:34] agents. So, it's going to deploy five
+[03:36] different agents.
+[03:37] First agent is going to do technical
+[03:39] analysis. The second agent is going to
+[03:41] do fundamental analysis. The third agent
+[03:43] is going to sentiment analysis. The
+[03:45] fourth one, risk assessment. And the
+[03:47] fifth one, thesis synthesis, right? All
+[03:49] of these instructions are inside the
+[03:51] skills.md file. So, if we go back,
+[03:53] that's exactly what's happening. Right
+[03:54] now, as you can see, it's still going
+[03:56] through the discovery phase. So, what
+[03:57] I'm going to do is just quickly fast
+[03:58] forward this cuz otherwise it's going to
+[03:59] take a couple of minutes so that I can
+[04:01] show you the results. And then on the
+[04:02] next one, I'm going to explain all of
+[04:04] these skills and all of the agents
+[04:05] what's going on. So, as you can see
+[04:06] right here, it says discovery data
+[04:08] compiled, now launching five
+[04:10] analysis agents in parallel. So, the
+[04:12] first one, second one, third one. So,
+[04:13] let me go ahead and fast forward this.
+[04:15] And there you go. So, it completed all
+[04:17] of the analysis, the five agents and
+[04:18] everything, and it generated this
+[04:20] report. So, if I let let me quickly zoom
+[04:21] in here for you guys. So, AI trading
+[04:24] analyst report, Tesla, right? Tesla Inc.
+[04:26] Generated April 8, 2026. It gives it
+[04:28] this trading score of 43 out of 100,
+[04:31] says caution. So, now I'm going to
+[04:32] quickly go through the different PDF
+[04:34] sections in a bit more detail, and then
+[04:36] I'm going to show you how to install
+[04:37] this and run this yourself. All right,
+[04:38] so the first one is going to be score
+[04:40] dashboard, right? This is going to run
+[04:41] that show you exactly the different
+[04:43] scores, the weight, the statuses. So,
+[04:45] the technical strength, fundamental
+[04:46] quality, sentiment, risk profile, and
+[04:48] thesis conviction. All of this is based
+[04:50] on those agents that we ran. You have
+[04:52] the technical overview, the key levels,
+[04:53] right? It gives you the different levels
+[04:55] for the price resistance, and the notes
+[04:57] which one is, you know, 52-week high,
+[04:59] the Fibonacci replacement, and all of
+[05:01] these technical things that, you know,
+[05:03] are usually an actual analyst in hedge
+[05:06] funds go through actually. So, it gives
+[05:07] you the indicator readings, right?
+[05:08] Again, like I mentioned before, this is
+[05:10] not an investment tool, it's more of a
+[05:13] research tool for you to understand
+[05:15] exactly how everything works and know
+[05:17] everything about there is for a
+[05:18] particular stock that you're looking at.
+[05:20] So, it gives you the fundamental
+[05:21] overview, the key metrics, right? It's
+[05:23] going to give you the valuation
+[05:25] assessment, the competitive mode, and
+[05:26] then also gives you the investment
+[05:28] thesis, the bull case, the bear case.
+[05:29] Again, it's not sugarcoating anything
+[05:31] regardless of whatever stock you're
+[05:32] looking at, it's going to give you all
+[05:33] of the different information, the
+[05:35] positives, the negatives, and everything
+[05:37] else so that way you can be aware of
+[05:38] what's going on. It gives you the
+[05:40] catalyst timeline. This is amazing,
+[05:41] right? It gives you exactly what are the
+[05:42] events that are coming up and what kind
+[05:44] of potential impact it might have in
+[05:46] that stock price. It gives you the entry
+[05:48] and exit strategy. It gives you the risk
+[05:51] and positioning sizing, right? So, it
+[05:52] gives you exactly the risk and reward
+[05:54] analysis, the recommended position size,
+[05:56] the max drawdown scenario, the
+[05:57] volatility profile, market correlation,
+[06:00] and it also gives you a position sizing
+[06:02] methodology, how to position everything
+[06:04] based on the bull case, bear case, and
+[06:05] the base case, right? And a bunch of
+[06:07] other details you can pull from this.
+[06:08] So, that's with just one skill that we
+[06:10] ran, which is the skills trade. Now,
+[06:12] inside this tool itself, so if I go
+[06:14] back,
+[06:17] so all of these skills that exist,
+[06:19] again, there's 16 commands, and each
+[06:21] command does something different. We
+[06:22] just ran this trade analyze, right? This
+[06:24] is the flagship command, which is going
+[06:26] to do full stock analysis with five
+[06:28] agents and returns the trade score and
+[06:30] everything else. You can do a trade
+[06:31] quick, this is going to do a 60-second
+[06:33] stock snapshot on a particular stock.
+[06:36] So, let's say if you're you just want
+[06:37] quick information and not the full
+[06:38] analysis, you run this. You can get a
+[06:40] technical technical analysis, you can
+[06:42] get the fundamentals. You can do the
+[06:45] trade sentiment based on the news and
+[06:47] social sentiment cuz it's going to
+[06:48] actually analyze and research what are
+[06:50] the sentiment for that particular stock
+[06:52] in the social media, in news, and
+[06:54] everything else that's going on, which
+[06:55] is incredibly important because stock
+[06:58] market and trading in general is not
+[06:59] just about the technical fundamentals,
+[07:01] it's it's also about the perceived value
+[07:04] and also the social sentiment of that
+[07:07] company itself.
+[07:09] So, the thesis and strategy, again, this
+[07:11] is where you can compare actually
+[07:13] head-to-head stock comparison, you can
+[07:14] compare different stocks. You can do
+[07:16] trade options. Now, option is obviously
+[07:18] the risky one,
+[07:19] but it also gives you that information
+[07:21] as well. And then also again, scoring
+[07:23] methodology explaining everything, and I
+[07:25] have like a little sample outfall so if
+[07:26] you output if you just analyze Apple,
+[07:29] it's going to give you all of the
+[07:30] different details, but of course we went
+[07:31] through and I showed you exactly what
+[07:33] type of PDF reports it's capable of
+[07:35] generating. And it also gives you the
+[07:36] use cases, who is this useful for,
+[07:38] right? Day traders, swing traders,
+[07:39] long-term investor, option trader,
+[07:41] portfolio manager. This is for everybody
+[07:42] because again, this is just a research
+[07:44] tool, a pure research tool that gives
+[07:46] you all of this data that usually you
+[07:48] would have to do manually, and it would
+[07:50] take you a week or two. This is doing it
+[07:52] in one command. Absolutely incredible.
+[07:54] We live in amazing time right here. All
+[07:57] right, so that's what basically this
+[07:58] tool does. Now, let me show you how to
+[08:00] install this so that way you can run
+[08:01] this on whatever stock you're looking at
+[08:04] yourself. All right, so first things
+[08:05] first, you want to make sure you have
+[08:06] Visual Studio Code installed. Now,
+[08:08] again, this is just an IDE because we
+[08:09] want to make sure we run Claude code
+[08:11] through here so that way we can have all
+[08:12] the files in one cohesive place. This is
+[08:15] completely free, so go ahead and install
+[08:16] this. Once you download this, this is
+[08:18] what the interface inter interface, I
+[08:21] can't even talk. The interface looks
+[08:22] like. So, if I open this Claude code,
+[08:24] this is what this looks like. All your
+[08:26] files here on the left-hand side
+[08:27] basically is in the folder that you
+[08:31] open here. So, in order to install
+[08:33] Claude code, you want to make sure you
+[08:34] come to the extension right here, and
+[08:36] you look for Claude code, and you can
+[08:37] just install this. Again, this is
+[08:39] completely free, so this is by
+[08:40] Anthropic. Make sure you're installing
+[08:41] the correct one, and then it will ask
+[08:43] you to connect to your obviously you
+[08:44] have to have a paid subscription. So,
+[08:46] once you install that, this little sign
+[08:48] right here, this little icon for Claude
+[08:50] code is going to be available on top
+[08:52] here. You're going to click on this, and
+[08:53] it will open a new instance of Claude
+[08:55] code. Now, what you want to do first of
+[08:57] all is create a
+[08:59] a new folder. You're going to click on
+[09:00] new folder, name it whatever you want,
+[09:02] right? Since I already have this YouTube
+[09:04] demo folder, it's going to look
+[09:05] something like this. Now, here's how you
+[09:07] can install these skills because as you
+[09:09] can see right now, when I press the
+[09:10] slash and do trade,
+[09:13] right? All of these skills are available
+[09:15] for me. In order to get this, what you
+[09:17] need to do is install I've put all of
+[09:19] this together in a nice little zip file
+[09:21] for you guys. So, all you have to do is
+[09:22] click on the link in the description.
+[09:24] This is the free community that I have,
+[09:25] again, this is completely free. All you
+[09:27] have to do is go to the classroom
+[09:28] section. You're going to click on
+[09:30] YouTube resources, and you're going to
+[09:31] go to Claude code and scroll to the
+[09:33] bottom. I have a bunch of stuff other
+[09:34] stuff that I've built here, but you're
+[09:36] going to click on this AI trade research
+[09:37] analyst team, and right here in the
+[09:39] bottom, I have this zip file. And you're
+[09:42] going to download this, this is going to
+[09:43] download the zip file for you, and I'm
+[09:44] going to show that in a little bit how
+[09:45] you can put this inside that folder. And
+[09:47] if you're part of my paid community, of
+[09:49] course, I've made life very easy for you
+[09:51] guys. All you have to do is go to the
+[09:53] build and sell course with Claude code,
+[09:56] and you're going to come to the bottom.
+[09:57] All you have to do is just copy this.
+[09:59] I'm just going to copy this. It's just
+[10:00] one command because you guys have access
+[10:02] to the private repo from my GitHub. Um
+[10:05] and you're going to copy this. You're
+[10:06] going to go back to your Visual Studio
+[10:07] Code. You're going to click on this
+[10:09] terminal, and then all you have to do is
+[10:10] just paste that one command. Let me
+[10:13] actually make this a little bigger.
+[10:15] Press enter, and it's going to download
+[10:17] all of these skills for you, these, you
+[10:19] know, trade analyze technicals and
+[10:20] everything else. So, now all you have to
+[10:22] do is click on the Cloud Code here, and
+[10:24] then press the slash command. And now,
+[10:26] if you just try trade, all of these
+[10:28] different commands will be available for
+[10:30] you. Okay? So, that's for the paid
+[10:31] community. You have access to this one
+[10:33] command uh installation process. And
+[10:36] then also, for the ones that are not
+[10:38] part of the paid community, if you just
+[10:40] installed or if you just downloaded that
+[10:42] folder with zip file, all you have to do
+[10:44] is just unzip it and click on skills.
+[10:46] You're going to have all of these skills
+[10:47] available. You're going to copy all of
+[10:49] that, come back to your folder that you
+[10:51] just created, and paste it there in your
+[10:53] dot cloud file or dot cloud file. And
+[10:56] that's it. You'll be able to Same thing,
+[10:57] open up a new uh Cloud Code instance,
+[11:00] and you will have access to all of these
+[11:02] uh um
+[11:04] skills there. Okay? So, now let's go
+[11:05] ahead and take a look at this and run
+[11:07] this on another stock. So, I'm just
+[11:09] going to go ahead and now do slash
+[11:12] trade, right? So, now you have all of
+[11:13] these options available for you.
+[11:16] So, this time I'm going to actually go
+[11:17] ahead and do trade quick. So, let's do
+[11:20] trade quick this time. So, I'm going to
+[11:21] just scroll here and press uh
+[11:23] trade {dash} quick. And then, uh there's
+[11:25] another company called Rivian, which is
+[11:27] a competitor of Tesla. Actually, that's
+[11:28] not how you That's not their ticket.
+[11:30] It's RIVN. They're a competitor of our
+[11:32] Tesla. They're another big uh electric
+[11:34] car company. So, I'm going to press
+[11:35] enter. So, now it's going to go ahead
+[11:37] and actually do a quick analysis for the
+[11:40] Rivian, which is again a electric car
+[11:42] company. So, as you can see, now it's
+[11:43] going to do the web research to find out
+[11:45] all of the different details about the
+[11:47] stock pricing today, the market cap, and
+[11:50] the high and low and everything else.
+[11:51] So, let's go ahead and let this thing
+[11:53] finish. Now, while this is loading, of
+[11:54] course, for those of you who are not
+[11:56] part of the paid community, if you're
+[11:57] interested in learning how to build
+[11:58] these tools, not just this This is of
+[12:00] course just for personal reasons, right?
+[12:02] You just want to run trade. But if
+[12:03] you're interested in building uh Cloud
+[12:05] Code projects that you can sell to
+[12:07] different businesses and make money with
+[12:09] it, that's where you can join the
+[12:10] community. We have different projects.
+[12:12] So, at GEO, we just started our agency
+[12:14] that we're servicing uh GEO clients for
+[12:17] with Cloud Code. So, we're going to
+[12:18] share all of the different results that
+[12:20] we get with customers. And then also, AI
+[12:22] reputation builder, everything. This is
+[12:24] designed for you to sell this to
+[12:26] businesses and make money with it
+[12:27] because of course Cloud Code is fun to
+[12:29] learn, but if you don't make real
+[12:30] projects that solve real business pain
+[12:33] points, nobody's going to pay you,
+[12:34] right? So, all of that is inside the
+[12:36] classroom section. And of course, if
+[12:37] you're interested in starting your AI
+[12:38] agency, I have a step-by-step guide,
+[12:40] like day-to-day accountability guide, on
+[12:42] how to start your AI agency. So, check
+[12:44] out the link in the description. Uh join
+[12:46] us. We'd love to have you there. All
+[12:47] right. So, let's go ahead and back take
+[12:48] a look at it and see what's going on.
+[12:49] All right. This looks like it finished.
+[12:51] It only took like 20-30 seconds, but it
+[12:53] gives you like a gives you like a quick
+[12:55] snapshot. You know, it says Rivian
+[12:56] Technologies
+[12:58] uh AI trading analyst, right? 20 Yeah,
+[13:00] that's April 8th. Gives you the price,
+[13:02] the market cap, the 52-week low,
+[13:05] uh volume. It gives you the signal,
+[13:07] hold, bullish factors, bearish factors,
+[13:09] key levels, thesis, one night EV maker
+[13:12] at a fundamental flexion, first gross
+[13:14] profit, R2 launch imminent, but
+[13:16] technical downtrend and cash burn
+[13:18] warrant patience. Wait for a break above
+[13:20] $15.72 or pull back to 13 support.
+[13:23] Again, by the way, and that's why I have
+[13:25] the disclaimer here. This is just for
+[13:26] your research. Of course, this is not
+[13:28] any kind of trading advice. Uh that's
+[13:30] why I mentioned that a lot of people on
+[13:31] YouTube who are building like these
+[13:33] trading bots and telling you, "Oh, do
+[13:34] this, do that." That's not a good idea
+[13:36] because for most people, you have to
+[13:38] understand that trading is a very
+[13:40] complex project. That's why a lot of
+[13:41] times people just buy um
+[13:44] the S&P 500 or something like that. But
+[13:46] for those of you This is for people who
+[13:48] are doing day trading or interested in
+[13:49] learning how to do those things or just
+[13:51] in general, if they want to do trading,
+[13:53] this gives you that tool. This tool
+[13:55] gives you that research arm that
+[13:58] otherwise you would uh spend months or
+[14:01] weeks doing this manually, right? So,
+[14:03] that's what this is for. So, take a look
+[14:05] at it. Again, play around with the other
+[14:06] ones. All of the uh different skills
+[14:09] that are here are are very useful. Um
+[14:12] and of course, the more, you know, you
+[14:13] run this on different stocks, the more
+[14:16] you will understand how amazing this
+[14:18] tool is and how much research it
+[14:20] provides actually. Again, Cloud Code is
+[14:22] absolutely incredible. And the fact that
+[14:25] we have access to things like this is
+[14:27] amazing. Again, these are things that
+[14:29] before would be only accessible to the
+[14:32] hedge fund managers, to different
+[14:34] companies, but now we can build tools
+[14:36] like this, which is absolutely
+[14:38] mind-boggling. Anyways, hopefully you
+[14:40] found that helpful. Make sure you like,
+[14:41] subscribe because I've got a lot more
+[14:42] content that I'm planning to build with
+[14:44] Cloud Code, especially these kind of
+[14:46] tools teams that are in the research
+[14:48] space that I think is going to be super
+[14:50] useful that you don't want to miss.
+[14:51] Thanks for watching, and I'll see you on
+[14:52] the next one.

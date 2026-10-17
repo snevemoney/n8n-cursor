@@ -1,0 +1,315 @@
+start,end,scene,app_or_ui,on_screen_text,action,code_or_command,result_shown,said,link
+0:00:00,0:00:30,Intro,Nate Herkelman / On Camera,,Nate introduces the challenge of building an AI SaaS product in one day live on camera.,,,Today I'm going to be building an AI SAS product right in front of you guys pretty much live.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=0s
+0:00:30,0:01:10,The Six Ps Overview,Presentation Slide,"6Ps of SaaS Sprint
+Pain
+Promise
+Product
+Plumbing
+Packaging
+Proof","Nate explains the first three Ps: Pain, Promise, and Product.",,,So there's six major P's that we're going to be focusing on today when we're building this sort of like SAS sprint.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=30s
+0:01:10,0:01:34,Plumbing Explanation,Presentation Slide,"6Ps of SaaS Sprint
+Pain Plumbing
+Promise
+Product",Nate highlights Plumbing as the fourth P covering payment processing and auth.,,,The fourth one is the plumbing. So we're going to have to wire up things like the payment processing...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=70s
+0:01:34,0:02:01,Packaging Explanation,Presentation Slide,"6Ps of SaaS Sprint
+Pain Plumbing
+Promise Packaging
+Product","Nate highlights Packaging covering brand guidelines, colors, and landing page setup.",,,The fifth one we have is the packaging. So making sure we have stuff like the brand guidelines...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=94s
+0:02:01,0:02:30,Proof Explanation,Presentation Slide,"6Ps of SaaS Sprint
+Pain Plumbing
+Promise Packaging
+Product Proof",Nate highlights Proof and verification through AI testing.,,,And then the last one is proof. So basically all throughout this whole thing we're going to be doing so much verification...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=121s
+0:02:30,0:02:50,Tech Stack Overview - Codex,ChatGPT Desktop Website,Download ChatGPT for desktop,Nate shows ChatGPT Desktop / Codex as part of the tech stack.,,,So I'm sure you guys are curious about what tech stack we're going to be using today...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=150s
+0:02:50,0:03:01,Tech Stack Overview - Claude,Claude Desktop Website,"Download Claude
+Chat, Code, Cowork, and Claude Code, all in one place.",Nate shows the Claude Desktop app site.,,,"I'm also going to be using Claude, so Claude Code inside of the Claude desktop app.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=170s
+0:03:01,0:03:38,Tech Stack Overview - Glido,Glaido Website,"Glaido
+The voice layer for every app",Nate demonstrates Glaido as the voice dictation layer for rapid prompting.,,,And then finally we're going to be using Glido to actually talk to everything.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=181s
+0:03:38,0:03:45,Claude Code Interface,Claude Code Desktop App,"Welcome back, Nate
+Sessions",Nate displays the Claude Code desktop UI where coding sessions will run.,,,"Okay. Now, how do I think about the difference between our friend Claude and our friend ChatGPT or Codex...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=218s
+0:03:45,0:04:22,Nate Explains Model Roles,Nate Herkelman / On Camera,,Nate explains the difference between Claude (creative thought partner) and Codex (execution Rottweiler).,,,So I really like to think of Claude as my kind of like thought partner. It feels more creative...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=225s
+0:04:22,0:04:39,Project Directory Setup,Windows File Explorer / Claude Code,"AI SaaS Sprint
+OtherWorlds",Nate shows the empty `AI SaaS Sprint` directory inside his Herk-2 project.,,,"And by the way, if you guys are curious on where I'm actually building this, what I did is inside of my Herk 2 project...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=262s
+0:04:39,0:06:11,Research Prompt Dictation via Glaido,Claude Code Desktop App,"Describe a task or ask a question
+[Glaido voice input overlay]",Nate uses Glaido to dictate a research & ideation prompt into Claude Code.,"I want you to act as the orchestrator. I want you to spin up different sub-agents and I want you to do research, scrape different methods, and then at the end come back, consolidate everything, and give me clear signals...",Prompt typed verbatim into terminal input,"All right, so what I'm trying to do today is build an AI SaaS product. I'm trying to show my audience how much they can actually do...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=279s
+0:06:11,0:06:59,Research Sub-Agents Launch,Claude Code Desktop App,"Good - I have YouTube API, Skool community access, X (TwitterAPIs), Firecrawl, and Perplexity. Spinning up five research agents in parallel.","Claude Code launches 5 parallel research sub-agents scraping YouTube, Skool, Twitter, Reddit, and market sources.",,Running 5 parallel background tasks,"Because you can see here my Claude Code was able to have a YouTube API, school community access, X, Firecrawl, Perplexity...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=371s
+0:06:59,0:07:44,Parallel Strategy Explanation,Presentation Slide / Nate Overlay,6Ps of SaaS Sprint,Nate explains why stacking parallel agent tasks saves time during the sprint.,,,So throughout this challenge I'm going to be thinking about how can we do multiple things at once...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=419s
+0:07:44,0:07:55,Waiting for Agents,Nate at Desk,I really gotta clean up these cords...,Nate drinks coffee while waiting for background research agents to finish.,,,It's okay though because while we wait I can have some coffee...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=464s
+0:07:55,0:07:58,Timestamp Card,Title Card,"8:45 am
+9:55 am",Time jump transition showing research completed at 9:55 am.,,,,https://www.youtube.com/watch?v=IVx8OSMbTss&t=475s
+0:07:58,0:08:09,Time Check,Nate Herkelman / On Camera,,Nate holds up his phone showing 9:55 AM.,,,"Okay guys, so it's almost 10:00 now. So that took quite a while, but this is arguably the most important part...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=478s
+0:08:09,0:08:28,Scraped Data Summary,Claude Code Desktop App,"What actually scraped
+Source | Volume | Window | Status
+YouTube comments | 16,125 pulled | Oct 2024 - Aug 2026 | Clean
+Skool (AIS Plus) | 4,410 posts, 7,826 comments | Nov 2024 - Aug 2026 | Clean
+X/Twitter | 4,993 tweets, 136 queries | Aug 2025 - Aug 2026 | Clean
+Reddit | 5,034 unique posts, 19,888 comments","Claude Code displays a table summarizing ~60,000 scraped community posts and comments.",,Data summary table generated,"Let's take a look at what this scraped. It looked through about 16,000 YouTube comments, about 8,000 comments in my Plus community...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=489s
+0:08:28,0:08:47,Data-Backed Ideation,Nate Herkelman / On Camera,,Nate explains outsourcing data collection without outsourcing product understanding.,,,"So this is the whole idea of being able to outsource the thinking and the data collection, but not outsourcing the understanding.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=508s
+0:08:47,0:09:30,Final Three Recommendations,Claude Code Desktop App,"Final three
+1. Client Proposal / Handoff Pack - build this
+2. Social Visual Generator (Carousel, Flyer, Infographic)
+3. Ad Creative Resizer",Claude Code presents the top 3 product ideas derived from user pain points.,,3 product choices recommended,"And it basically gave us these final three recommendations: Client proposal and handoff pack, Social visual generator, and Ad creative resizer.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=527s
+0:09:30,10:23,Selecting Idea #1,Nate Herkelman / On Camera,The 'moat' would be the prompt. My experiences and frameworks that are baked in.,Nate chooses the Client Proposal & Handoff Pack idea and discusses product defensibility.,,,I think that first one fits more with what my audience is actually looking for...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=570s
+0:10:23,0:10:57,Pricing Data Discovery,Claude Code Desktop App,"Two findings that should change your plan
+Your price is too low, and now I have direct quotes. Reddit surfaced 835 price sentences with a consistent band:
+• 'Just a tool that does one boring thing and charges $50/month'
+• 'you need 100 to 200 people paying $25 to $50/month for something that saves them time every week'",Claude Code reveals pricing data from Reddit recommending $25-$50/month pricing.,,Reddit pricing quotes displayed,Initially remember how I said maybe $5 to $25 a month? It said based on the data that price is too low...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=623s
+0:10:57,0:11:06,Sprint Framework Progress,Presentation Slide,"6Ps of SaaS Sprint
+Pain Plumbing
+Promise Packaging
+Product Proof",Nate transitions from Pain identification to Packaging & Planning.,,,So let's say we're going to go off and build this client proposal handoff pack sort of product...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=657s
+0:11:06,0:11:46,Project Folder Setup,Claude Code Desktop App / File Tree,"research/
+01-youtube-comments.md
+02-skool-community.md
+03-reddit.md
+04-linkedin.md
+05-competitive-landscape.md",Nate shows the generated markdown research files in the project workspace.,,5 research markdown files created,"Before we get going, let's just make sure our files are all set up so we're able to stay organized...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=666s
+0:11:46 decline_check,0:12:46,Scaffold Setup Prompt,Claude Code Desktop App,Write the build spec for the Handoff pack whenever you are.,Nate prompts Claude Code to generate `CLAUDE.md` and `AGENTS.md` project spec files.,"So now that we know this is the direction we're going to take this product in, let's go ahead and set up a CLAUDE.md file and just duplicate that over to another one called AGENTS.md...",Generating specs,"So now that we know this is the direction we're going to take this product in, let's go ahead and set up a CLAUDE.md file...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=0s
+0:12:46,0:13:00,6Ps Packaging Step,Presentation Slide,"6Ps of SaaS Sprint
+Packaging",Nate selects Packaging as the next parallel workstream.,,,"Before we do that, what I want to do is I want to get started on the packaging before we actually start building this thing out...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=766s
+0:13:00,0:14:07,Codex Branding Prompt,Codex Desktop App,What should we build in AI SaaS Sprint?,Nate dictates a branding and visual identity prompt into Codex using Glaido.,"Design client management brand
+Ask me any questions if you have any about it so that we can go ahead and design the name of it and you can give me a bunch of different logo variations and color schemes...",Prompt submitted to Codex,I'm going to be using Codex for this because it has GPT Image 2...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=780s
+0:14:07,0:14:24,Codex Brand Management Plan,Codex Desktop App,"Design client management brand
+Working for 16s...",Codex reads the research folder and begins analyzing brand naming territories.,,Codex reviewing research markdown files,And remember these things are working in the exact same folder. You can see here AGENTS.md and CLAUDE.md just got created...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=847s
+0:14:24,0:14:46,Claude Code Session Handoff,Claude Code Desktop App,"Session Handoff - Product discovery -> locked on Client Handoff Pack, project scaffolded",Claude Code outputs a full session handoff summary file.,/session-handoff,Session handoff text block produced,What I'm going to do now is I'm going to use a skill called session handoff...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=864s
+0:14:46,0:14:55,Free Resources Link,Skool Community - AI Automation Society,"AI Automation Society Classroom
+All YouTube Resources",Nate demonstrates where to download his free prompts and session handoff skills.,,,"If you guys want access to this skill completely free, all you have to do is go to my free Skool community...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=886s
+0:14:55,0:15:21,New Claude Session Initialization,Claude Code Desktop App,"/clear
+[Session Handoff block pasted]",Nate clears the Claude Code context window and pastes the session handoff summary to continue smoothly.,/clear,"Context reset, project state restored","I can basically just copy that message, clear out this session because we were at half context window, paste it back in...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=895s
+0:15:21,0:15:53,Codex Brand Questions,Codex Desktop App,"Design client management brand
+1. Is the main moment before the project, after the project, or both?
+2. Which naming style feels most like you?
+3. How should the brand feel?
+4. Should it be visibly associated with Nate Herk, or operate as a completely independent product?
+5. Is an available .com required?
+6. Are there any colors, brands, logos, or visual styles you strongly like or dislike?",Codex presents 6 branding questions for Nate to answer.,,6 branding questions displayed,Let's jump back over to Codex because it has some questions for us...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=921s
+0:15:53,0:16:13,Codex Brand Positioning Summary,Codex Desktop App,"The strongest positioning is:
+Turn messy project notes and workflows into polished, client-ready deliverables in minutes.",Codex displays core positioning thesis based on research.,,Positioning statement rendered,The strongest positioning it says here is to turn messy project notes into polished client-ready deliverables...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=953s
+0:16:13,0:18:10,Answering Branding Questions via Glaido,Codex Desktop App,[Glaido voice overlay dictating answers to 6 questions],"Nate uses Glaido to dictate answers: post-sales moment, literal naming style, premium consultancy feel, independent brand, no red color.","So to question number one, I would say the main moment here is after they have gone through discovery calls... For number two, literal naming... Feel like premium consultancy... Independent of my brand... No red color...",Answers populated into Codex prompt box,"So to question number 1, I would say the main moment here is after they've gone through discovery calls...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=973s
+0:18:10,0:18:25,Codex Brand Processing,Codex Desktop App,Working for 3s... Thinking,Codex begins generating logo variations and brand identity concepts based on Nate's answers.,,Codex generating assets,"So now that that's off and running, I'm going to let this thing cook.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=1090s
+0:18:25,0:18:53,Planning Strategy in Claude,Nate Herkelman / On Camera,,Nate explains switching Claude Code to Fable 5 model to act as project manager for build planning.,,,I'm going to hop back over to the Claude session and we're going to get going on the planning...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=1105s
+0:18:53,0:19:14,Claude Code Fable Model Selection,Claude Code Desktop App,Auto -> Fable 5 High,Nate switches model to Fable 5 for orchestration.,,Fable 5 active,So what I'm actually going to do is switch over to Fable...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=1133s
+0:19:14,0:20:03,Prompting Fable 5 for Build Plan,Claude Code Desktop App,"Describe a task or ask a question
+[Glaido voice dictation]",Nate prompts Fable 5 to generate a comprehensive `BUILD-PLAN.md` file rather than executing code directly.,"Your job in this session, you're Fable 5, you're super intelligent, you need to help me figure out and plan out the actual build. What that means is your deliverable right now is a plan document...",Task assigned to Fable 5,"Your job in this session, you're Fable 5... You need to help me figure out and plan out the actual build.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=1154s
+0:20:03,0:22:55,Explaining Product Vision to Fable,Claude Code Desktop App,[Dictating full product architecture vision],"Nate dictates product requirements: 10-slide sales proposal deck generated from discovery call transcripts, reframing client pain, metrics, ROI math, case study integration.",,Full vision transcript captured in Claude Code,So here's my vision. Version 1 is we are going to turn basically a discovery call transcript...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=1203s
+0:22:55,0:23:45,Fable 5 Analyzing Build Plan,Claude Code Desktop App,Fable 5 - thinking... 402 tokens,Fable 5 processes product requirements and creates structured build phases.,,Fable 5 generating build plan,So that was a ton of information that I just said in there...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=1375s
+0:23:45,0:24:15,Codex Brand Directions Output,Codex Desktop App,"ClientPack directions
+A. Editorial Fold
+B. Consulting Grid, recommended
+C. Signature Frame
+ClientPack | ScopePack | ProposalReady",Codex presents 3 brand names and logo concepts generated with GPT Image 2.,,3 brand concepts & generated logos displayed,"Hopping back into Codex, let's see how it's coming along over here with the branding side...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=1425s
+0:24:15,0:24:49,Reviewing ClientPack Logos,Codex Image Viewer,"ClientPack
+Discovery in. Client-ready out.
+#172033 | #F4F0EB | #2E756D",Nate inspects generated logo variants and color palettes for ClientPack.,,Logo image previewed,So we have ClientPack... I actually really like this. It's like there's a C and a P...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=1455s
+0:24:49,0:25:08,Locking Brand Direction A,Codex Desktop App,"A. Editorial Fold
+Modern, approachable, and balanced between SaaS and consultancy.",Nate chooses ClientPack Option A (Editorial Fold).,"Alright, so I want to go with A. I like the ClientPack editorial fold version. Let's go ahead and lock that in.",Brand direction locked,I want to go with A. I like the ClientPack editorial fold version.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=1489s
+0:25:08,0:26:16,Persona Feedback Test Prompt,Codex Desktop App,[Dictating persona feedback request via Glaido],"Nate asks Codex to spin up 4 agent personas (Business Owner, Agency Owner, Small Business Owner, CEO) to evaluate the chosen branding.","Spin up a few different agent personas: business owners, agency owners, small business owners, CEOs, and I want you to have them read the messaging, look at the logo and the name, and tell us what they think about the branding...",Persona simulation task started,So what I want you to do now on the messaging... Spin up a few different agent personas...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=1508s
+0:26:16,0:27:06,Persona Feedback Results,Codex Desktop App,"First Impressions
+• Business owner: Trusted the navy, cream, and teal identity.
+• AI agency owner: Immediately understood the workflow.
+• Small business owner: Saw it as a professional proposal and document packer.
+• CEO: Found it credible enough to investigate further.
+Recommended messaging:
+Headline: Turn discovery calls into client-ready proposal packs.",Codex outputs persona feedback and refined tagline messaging.,,Persona feedback breakdown displayed,"Okay, so it went through this kind of like sweep of different personas...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=1576s
+0:27:06,0:28:09,Refining Product Vision,Nate Herkelman / On Camera,,Nate discusses how initial product features serve as a hub / OS for future agency tools.,,,Obviously this in itself is not enough to be a SaaS product... But this is a good V1 for us to build on top of.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=1626s
+0:28:09,0:28:28,Codex Waitlist Page Setup,Codex Desktop App,/goal,Nate enters goal mode in Codex to build the ClientPack waitlist landing page.,/goal,Goal mode activated in Codex,Two of the things I want to kick off now. We're going to go back to Codex...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=1689s
+0:28:28,0:29:05,Landing Page Dictation Prompt,Codex Desktop App,[Dictating waitlist page requirement prompt],Nate instructs Codex to create a functional waitlist landing page with email capture and verification loop.,"Create a really simple, professional, one-page landing page. What this means is I want you to create a waiting list for people to be able to sign up for access once this product is ready... Don't stop until you've validated it.",Waitlist generation started,"Create a really simple, professional, one-page landing page.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=1708s
+0:29:05,0:29:27,Codex Building Landing Page,Codex Desktop App,"Working for 12s...
+[Browser UI preview rendered]",Codex builds the Next.js waitlist landing page and tests form submission in headless browser.,,Landing page rendered in embedded browser,"So we should have obviously the logo up top, the headline and promise up top...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=1745s
+0:29:27,0:30:20,Verification Loop Explained,Nate Herkelman / On Camera,,Nate highlights forcing AI agents to run automated QA checks rather than returning untested code.,,,"So that was me working in verification. Because if I just told it without saying that, it would probably give me a landing page that wouldn't work.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=1767s
+0:30:20,0:30:58,Fable 5 Build Plan Output,Claude Code Desktop App,"Build Plan - Pre-sale Deck Generator
+BUILD-PLAN.md
+Product name: ClientPack
+Locked decisions (2026-08-09):
+• V1 artifact is the pre-sale persuasion deck.
+• 10-page 16:9 PDF generated from structured output.
+• Tech stack: Next.js App Router, Supabase, Stripe, Claude-sonnet-5.",Claude Code outputs `BUILD-PLAN.md` drafted by Fable 5.,,BUILD-PLAN.md created,"Okay, so now I'm going to go back over to our Claude session where we had Fable give us this plan.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=1820s
+0:30:58,0:31:48,Inspecting BUILD-PLAN.md,Claude Code Markdown Viewer,"Deck structure (v1 slide list):
+1. Cover
+2. Where you are today
+3. The real constraint
+4. The plan
+5. What moves
+6. The math
+7. How it works
+8. Why us
+9. Scope
+10. Investment & next steps
+Workstreams:
+Phase 0 - Foundation
+Phase 1 - Parallel build (worktrees A through H)","Nate reviews the 10-slide deck spec, database schema, and 8 parallel build workstreams.",,Full build plan specification reviewed,"Here's the structure of the deck... We have Phase 0 foundation, Phase 1 parallel build... A through H workstreams.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=1858s
+0:31:48,0:32:12,Prompting Parallel Build Goal,Claude Code Desktop App,/goal,Nate triggers goal mode in Claude Code for Fable 5.,/goal,Goal prompt input box ready,So here's what we're going to do now. I'm going to do a /goal prompt in Claude Code as well.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=1908s
+0:32:12,0:33:02,Project Orchestration Philosophy,Nate Herkelman / On Camera,,Nate explains delegating build tasks across Opus/Sonnet sub-agents while maintaining project control.,,,I'm once again telling Fable 5 that it is the project manager. It should not be executing anything...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=1932s
+0:33:02,0:34:33,Fable Orchestrator Goal Prompt,Claude Code Desktop App,[Dictating orchestrator goal prompt],"Nate dictates goal prompt instructing Fable 5 to act as project manager, spawn parallel sub-agents across isolated worktrees, and verify end-to-end functionality.","Okay, so you are the project manager of this entire project... Work through these phases by delegating work to different sub-agents using Opus or Sonnet... Anything that can be done in parallel, do them in parallel...",Orchestrator goal prompt sent,"Okay, so you are the project manager of this entire project...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=1982s
+0:34:33,0:35:23,Fable Spawning Parallel Agents,Claude Code Desktop App,"Goal acknowledged. I'm executing the build plan now.
+Checking git, Root, Docker, Supabase/Stripe/Vercel CLI
+Launching six workstream agents in parallel worktrees...",Fable 5 initializes git worktrees and spawns 6 parallel coding sub-agents simultaneously.,,6 background sub-agents spawned,Goal acknowledged. I'm executing the build plan now.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2073s
+0:35:23,0:35:40,Enabling Remote Control,Claude Code Desktop App,"Remote Control [On]
+https://claude.ai/c/...",Nate enables Claude Code Remote Control to manage session execution from his phone.,,Remote control active,So what I'm going to do though is I'm able to use this session on my phone.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2123s
+0:35:40,0:35:56,Phone Remote Control Demo,Nate Herkelman holding iPhone,[Claude mobile Web UI showing active session logs],Nate shows his phone displaying live Claude Code terminal execution via remote control.,,,"So right here, I'm not sure if you can see, but this is the prompt that I just sent off...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2140s
+0:35:56,0:36:22,Nate Explains Async Building,Nate Herkelman / On Camera,,Nate explains stepping away while parallel sub-agents build the full stack.,,,"I'm gonna be able to maybe go make a quick bit of lunch, maybe go on a walk, maybe go down to the gym...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2156s
+0:36:22,0:36:43,Codex Landing Page Build Status,Codex Desktop App,"Working for 7m 5s...
+ClientPack
+Discovery in. Client-ready out.",Codex completes landing page build and verifies waitlist form capture.,,Waitlist page previewed in Codex,We have Claude over here working on the actual build. We have Codex over here working on the packaging...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2182s
+0:36:43,0:37:18,Fable Sub-Agents Progress,Claude Code Desktop App / Background tasks,"WS E deck slides, viewer, PDF - Stopped (took 1m 43s)
+WS D AI pipeline - Running (58s)
+WS A auth + portal - Running (1m 12s)
+WS B data layer + API routes - Running (1m 01s)",Claude Code displays progress of 9 parallel background workstream tasks.,,Sub-agent completion status displayed,It's running a bunch of different agents in parallel as you can see.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2203s
+0:37:18,0:38:09,Inspecting Sub-Agent Transcripts,Claude Code Desktop App,"WS G billing, caps, admin - Transcript view
+WS F brand kit + case studies UI - Stopped (took 1m 28s)",Nate inspects sub-agent transcripts in Claude Code.,,Transcript details reviewed,Now I can view the transcript and I can see exactly what they did...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2238s
+0:38:09,0:39:03,Token Efficiency Explanation,Claude Code Desktop App / Context Window Menu,Weekly - Fable: 3% (Resets in 8 hr 12 min),Nate highlights using only 3% of weekly Fable limits by delegating heavy coding tasks to Sonnet/Opus sub-agents.,,Usage metrics overlay displayed,"We have a weekly Fable limit which we've only used 3% of, even though we've done so much work already...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2289s
+0:39:03,0:39:05,Timestamp Card,Title Card,11:00 am,Time jump transition to 11:00 AM.,,,,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2343s
+0:39:05,0:39:10,Codex Verification Checks,Codex Desktop App,"Verified
+Check | Result
+Public anonymous access | PASS
+Desktop layout | PASS
+Mobile layout | PASS
+New waitlist signup | PASS
+Production database capture | PASS
+Duplicate handling | PASS
+Invalid email rejection | PASS
+Production build | PASS",Codex passes all 8 landing page QA verification checks.,,All QA checks PASS,"Okay guys, so take a look at this. The ClientPack landing page is done.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2345s
+0:39:10,0:39:37,Live Landing Page Inspection,Web Browser / ClientPack Waitlist,"ClientPack
+Turn discovery calls into client-ready proposal packs.
+Join the waitlist",Nate reviews the live waitlist landing page generated by Codex.,,Landing page loaded in browser,"So we can go ahead and open it up and it looks like this. Honestly, I think it looks really good.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2350s
+0:39:37,0:40:05,Requesting Waitlist Admin Access,Codex Desktop App,so how can I access the emails when people sign up?,Nate asks Codex how to access captured waitlist emails.,so how can I access the emails when people sign up?,Codex builds password-protected admin page,"The next question I had for it then was like, 'Okay, so how are the emails being stored?'",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2377s
+0:40:05,0:40:20,Waitlist Admin Page,Web Browser / ClientPack Waitlist Admin,"ClientPack PRIVATE ADMIN
+Waitlist signups
+Total signups: 2 | Last 24 hours: 2 | Last 7 days: 2",Nate opens the password-protected admin dashboard created at `/admin/waitlist`.,,Admin signups dashboard loaded,Now we have a different admin page that I can go ahead and sign into...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2405s
+0:40:20,0:40:42,Testing Waitlist Form,Web Browser / ClientPack Waitlist,Enter your work email: [nate@ai.com] -> Join the waitlist!,Nate submits test email `nate@ai.com` on waitlist form.,,Confirmation: 'You are on the list',"So let's see if this actually works. I'll go into here, I'll put in a fake email...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2420s
+0:40:42,0:40:48,Verifying Admin Signup Capture,Web Browser / ClientPack Waitlist Admin,"Waitlist signups
+Total signups: 3 | Last 24 hours: 3 | Last 7 days: 3
+Contacts: nate@ai.com",Nate refreshes admin dashboard and verifies new signup appeared immediately.,,Total signups increased from 2 to 3,We'll go back into the admin. Let's see if we can give this a refresh. There we go.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2442s
+0:40:48,0:41:29,Nate Explains Domain Strategy,Nate Herkelman / On Camera,,Nate explains transitioning waitlist page to custom domain via GitHub & Vercel.,,,"So the next step now, while Claude is still building out all the stuff...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2448s
+0:41:29,0:41:48,Codex GitHub Push Prompt,Codex Desktop App,[Dictating GitHub repo creation prompt],Nate prompts Codex to create a GitHub repository `clientpack-landing-page` and prepare Vercel deployment.,"I want you to create a new GitHub repository for this. You can just call it the ClientPack landing page... And then once you've got that pushed, I'm going to connect that to Vercel...",Repository creation initiated,I want you to create a new GitHub repository for this.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2489s
+0:41:48,0:42:15,GitHub Dashboard Overview,GitHub Website,"GitHub Dashboard
+Home",Nate demonstrates GitHub interface and account syncing.,,,"Now if you've never used GitHub before, it's very very simple...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2508s
+0:42:15,0:42:22,Vercel Dashboard Overview,Vercel Website,"Vercel Overview
+Projects",Nate opens Vercel dashboard.,,,And then you're going to also go to Vercel...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2535s
+0:42:22,0:42:52,Searching Domain on Vercel,Vercel Domains Page,"Add a custom domain
+getclientpack.com - Available ($11.25/yr)",Nate searches for available custom domain `getclientpack.com` inside Vercel.,,`getclientpack.com` available for purchase,"So for example, for ClientPack I could say clientpack.com... What if I do getclientpack.com? This one's available.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2542s
+0:42:52,0:43:23,Codex GitHub Repository Created,Codex Desktop App,"Created and pushed the private GitHub repository:
+ClientPack landing page
+Repository: nateherk/clientpack-landing-page
+Branch: main",Codex confirms private repo `nateherk/clientpack-landing-page` created and pushed.,,Repository URL link created,"Okay, so that obviously worked super quick here. It pushed this to a GitHub account...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2572s
+0:43:23,0:43:55,Inspecting GitHub Repository,GitHub Repository Page,"nateherk / clientpack-landing-page
+ClientPack early access landing page",Nate opens the newly created repository on GitHub showing commit history.,,Files and commits listed,This is what the GitHub looks like. It has basically all of the files and folders that we need...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2603s
+0:43:55,0:44:22,Deploying Repo to Vercel,Vercel New Project Page,"Import Git Repository
+clientpack-landing-page -> Import -> Deploying",Nate imports `clientpack-landing-page` repo into Vercel and clicks Deploy.,,Deployment build started,You're going to import the Git repository... I can literally just click on import and then I can deploy this.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2635s
+0:44:22,0:44:42,Vercel 404 Error Encountered,Web Browser,"404 NOT_FOUND
+Code: NOT_FOUND",Vercel deployment yields a 404 NOT_FOUND error on initial load.,,404 error page displayed,"Okay, but there is an issue here, which sometimes happens with deployment. So I'm kind of glad this happened...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2662s
+0:44:42,0:45:03,Codex Fixes Vercel 404 Error,Codex Desktop App,"[Pasted 404 screenshot into Codex prompt]
+Working for 7m 45s...
+Edited files, ran commands -> Fixed",Nate pastes a screenshot of the 404 error into Codex. Codex rewrites build output routing to standard Vercel Next.js framework preset and redeploys.,,"Build script fixed, route rewritten",I'm going to take a screenshot of this because Codex will know how to actually solve this...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2682s
+0:45:03,0:45:18,Waitlist Page Live on Vercel,Vercel Dashboard / Web Browser,"Deployment
+clientpack-landing-page-17-nateherks-projects.vercel.app
+Status: Ready",Nate verifies the landing page is live and fully working on Vercel.,,Live site loaded successfully,"And just like that, you guys can see it's still working, but it's already fixed the issue.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2703s
+0:45:18,0:45:33,6Ps Packaging Check,Presentation Slide,"6Ps of SaaS Sprint
+Packaging",Nate marks Packaging complete.,,,"So for the most part our packaging has been done, even though the product isn't yet done.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2718s
+0:45:33,0:45:40,Codex Verification Confirmation,Codex Desktop App,"Fixed and live on Vercel!
+• Production landing page returns 200
+• Waitlist API is working
+• Signups still pass using the durable backend",Codex confirms automated verification passed for Vercel production build.,,All checks green,"And then we even had Codex, without asking, go ahead and verify that all of that is working.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2733s
+0:45:40,0:45:51,Claude Code Main App Build Status,Claude Code Desktop App,"Running background shell...
+11 running tasks",Nate switches back to Claude Code to monitor core app build progress.,,Fable 5 background agents still running,"And Fable is still cooking up over here, so I'm just going to keep letting it do its thing.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2740s
+0:45:51,0:45:53,Timestamp Card,Title Card,1:00 pm,Time jump transition to 1:00 PM.,,,,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2751s
+0:45:53,0:46:04,Claude Code V1 POC Finished,Claude Code Desktop App,"V1 POC is done. 32 commits on the sprint repo, production build passing, everything verified built. v1 demo running. No keys needed.",Claude Code completes V1 POC build for the core ClientPack app.,run dev,V1 POC build complete,"Okay, so I have not looked at this at all yet. It says that it's done. It says version 1 POC has been finished.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2753s
+0:46:04,0:47:28,Reviewing Claude Code Verification Report,Claude Code Desktop App,"What got verified, not just built:
+1. Full customer journey with real model calls... 9-page -> 10-page branded 16:9 PDF
+2. The deck is actually good. I screenshotted every generated PDF and looked... 5 layout defects found and fixed
+3. Honest numbers by design... ROI math is computed in code
+4. Cost per pack: ~$0.16-$0.19
+5. Caps enforced server-side on a rolling window","Nate reviews Claude Code's self-verification report detailing PDF rendering quality, defect fixes, and per-pack token costs.","open up the demo in a local host, not 3000",Local dev server started on port 3010,"Here's what got verified, not just built... Full customer journey with real model calls... Deck is actually good, screenshotted every PDF... Cost per pack: 16 to 19 cents.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2764s
+0:47:28,0:47:38,ClientPack App Home Screen (Localhost),Web Browser / ClientPack App,"ClientPack
+Projects
+Your client decks
+1. Radiant Skin Med Spa - READY
+2. Northline Heating & Air - DRAFT",Nate opens local demo at `http://localhost:3010`.,,ClientPack dashboard loaded with seed projects,So the demo is live. We can go ahead and open up our local host...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2848s
+0:47:38,0:48:03,ClientPack Brand & Case Studies Settings,Web Browser / ClientPack App,"Settings -> Brand kit | Case studies
+Agency name: Meridian Automation
+Accent color: #2E756D
+Case studies: No-shows cut 61% at a four-room med spa | Every inbound inquiry answered in under five minutes",Nate explores the Brand Kit and Case Studies configuration interface.,,Brand kit & case studies panel rendered,"This is ClientPack. We have projects, we have brand and case studies...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2858s
+0:48:03,0:48:15,ClientPack Billing Page,Web Browser / ClientPack App,"Billing
+Free plan - Decks 0 of 1
+Go paid: $39 / month | $390 / year",Nate inspects the in-app billing status page.,,Billing tier limits displayed,"We also have billing here. So right now we're on a free plan, zero out of one decks...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2883s
+0:48:15,0:48:24,Opening Radiant Skin Project,Web Browser / ClientPack App,"Radiant Skin Med Spa
+Status: READY | Deck: Ready",Nate clicks into the ready seed project `Radiant Skin Med Spa`.,,Project details screen loaded,Let's just go ahead and click on the ready one real quick...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2895s
+0:48:24,0:49:02,Project Details & Transcripts,Web Browser / ClientPack App,"Radiant Skin Med Spa
+The deck is ready. Version 1, built Aug 8, 2026.
+Panes: 4 | Investment: $6,500 | Value per month: $6,930
+Transcripts (2,488 words):
+Discovery call 8/2 | Follow-up call 8/6",Nate inspects uploaded transcripts and project details.,,"Project portal rendered with options to view deck, edit findings, or add transcripts",It basically opens it up in a little project portal right here...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=2904s
+0:49:02,0:50:03,Generated Deck Viewer - Slide 1 & 2,Web Browser / ClientPack Deck Viewer,"MERIDIAN AUTOMATION
+Prepared for Radiant Skin Med Spa
+Fill the chairs you already booked, without raising ad spend.
+Slide 2: Where you are today
+- Five appointment slots a week go empty
+- Inquiries you already paid for wait days for a reply
+- Botox clients need a touch-up at twelve weeks",Nate opens the interactive 10-slide presentation deck generated from discovery transcripts.,,10-slide deck loaded with client quotes & custom brand colors,"Okay, so it opens it up right here, and we have 10 slides that we can flip through...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=2942s
+0:50:03,0:51:22,Deck Viewer - Slides 3-6,Web Browser / ClientPack Deck Viewer,"Slide 3: The real constraint - We need more leads -> You need 30 min after inquiry and 12 weeks after visit
+Slide 4: The plan - Two-way appointment confirmation | Five-minute inbound responder | Twelve-week Botox recall
+Slide 5: What moves - No-shows 5 -> 2/wk | First reply 2 days -> 5 min | Bookings 4 -> 10/mo
+Slide 6: The math - Invest $6,500 | Return $83,160 | 12.8x ROI","Nate walks through slides showing problem reframing, proposed solutions, commitments, and 12.8x ROI calculations.",,Data-backed ROI slides displayed,This is the real constraint... Here is the plan... The metrics we're trying to move... Here we get into the math...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3003s
+0:51:22,0:52:14,Deck Viewer - Slides 7-10,Web Browser / ClientPack Deck Viewer,"Slide 7: How it works - Visual process flow diagram
+Slide 8: Why us - Case study proof
+Slide 9: Scope - Included vs Not included
+Slide 10: Investment and next steps - $6,500","Nate reviews process flow diagram, scope boundaries, and investment proposal slides.",,Final slides reviewed,Here we can see we dig into the actual processes... Why us... Scope... Investment and next steps.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3082s
+0:52:14,0:52:36,Editing Inferred Findings,Web Browser / ClientPack App,"Edit findings
+Where they are today | Severity: High / Medium / Low
+Pain 1, Pain 2, Pain 3, Pain 4
+The real constraint | The plan and the numbers",Nate opens the findings editor where agency owners can tweak AI-extracted pain severity and metrics before generating the final deck.,,Findings editor UI displayed,"Now once again I could go back to this project, I could edit the findings if I wanted...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=3134s
+0:52:36,0:53:09,Draft Project View,Web Browser / ClientPack App,"Northline Heating & Air
+Add a transcript first. There is nothing to read yet.",Nate checks draft project `Northline Heating & Air` requiring transcript upload to trigger AI analysis.,,Draft state displayed,I'm curious what this one looks like in draft mode... I think the only reason this is a draft is because there's not yet a transcript in there.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3156s
+0:53:09,0:53:28,Nate Explains POC Success,Nate Herkelman / On Camera,,Nate highlights that the core transcript-to-proposal engine is fully functioning.,,,So for a first POC with the main functionality here being taking transcripts and turning it into decks... I'm pretty happy with this.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3189s
+0:53:28,0:53:58,Fable Token Usage Check,Claude Code Desktop App / Context Window,Weekly - Fable: 1% (Resets in 5 hr 44 min),Nate shows that orchestrating sub-agents through Fable used only 1% of Fable credits since the last check.,,Fable 1% usage confirmed,Look at this. We only used 1% of Fable since we last checked in.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3208s
+0:53:58,0:54:09,Claude Session Handoff,Claude Code Desktop App,/session-handoff,Nate executes session handoff in Claude Code.,/session-handoff,Session handoff text produced,So I'm going to go ahead and once again do a session handoff...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3238s
+0:54:09,0:54:23,Claude Session Reset,Claude Code Desktop App,"/clear
+[Pasted handoff block]",Nate clears Claude Code context and pastes session handoff summary.,/clear,Session reset & context loaded,"I'm going to clear this chat, paste that back in...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=3249s
+0:54:23,0:54:43,Codex Session Reset,Codex Desktop App,"/clear
+[Pasted handoff block]",Nate initializes a fresh Codex session with the handoff summary for automated app QA testing.,/clear,Codex workspace restored,Now I'm also going to open up Codex and I'm going to open up a new chat...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3263s
+0:54:43,0:54:57,Computer Use QA Prompt Strategy,Nate Herkelman / On Camera,,Nate explains using Codex computer use to click through every UI button and stress-test the local app.,,,"Codex is much better with computer use. And what I want it to do is I want it to basically come in here, spin up a new project...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=3283s
+0:54:57,0:55:03,Submitting Codex QA Prompt,Codex Desktop App,"Okay, Codex, here's what I want you to do. This is V1 of ClientPack... I want you to use your computer use and click every button... try to find bugs.",Nate prompts Codex to run a comprehensive computer use QA suite.,What I want you to do is I want you to use your computer use and I want you to click every button... try to break this... try to find bugs...,Computer use QA started,"Okay, Codex, here's what I want you to do. This is V1 of ClientPack...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=3297s
+0:55:03,0:55:20,Codex Computer Use QA Running,Codex Desktop App / Embedded Browser,"Working for 1m...
+[Codex mouse controlling local browser]",Codex launches its embedded browser and begins automated UI testing.,,Codex clicking through local app UI,So this is going to open up the browser. It's going to start to play around with it a little bit.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3303s
+0:55:20,0:55:48,Prompting Onboarding Flow in Claude Code,Claude Code Desktop App,[Dictating onboarding flow requirements],"Nate instructs Claude Code (Fable 5) to build out the full authentication, signup, and onboarding wizard flow.",Now I'm curious about the onboarding flow. We have to figure out what does it look like from the beginning into the actual dashboard when a client comes in and they pay...,Onboarding build task initiated,Now what I'm curious about from you is... the onboarding flow.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3320s
+0:55:48,0:56:17,Parallel Testing & Building,Nate Herkelman / On Camera,,Nate explains having Codex test V1 in the browser while Claude Code builds the onboarding flow simultaneously.,,,So right now I have Codex testing everything... And in another session we have Claude Code building out the onboarding flow.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3348s
+0:56:17,0:56:40,Codex QA Browser Interactions,Codex Desktop App / Embedded Browser,"Settings -> Brand kit
+Accent color: RED [Error: Accent color needs to be a valid hex value]",Codex enters invalid text 'RED' into accent color field and catches form validation behavior.,,Form validation error captured,Right here you can see it tried to enter an accent color like it tried to type in red...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3377s
+0:56:40,0:57:01,Codex Hex Color Correction,Codex Desktop App / Embedded Browser,Accent color: #2E756D,Codex corrects input to valid hex `#2E756D` and verifies save action.,,Form saved successfully,So now it put that in. So this mouse right here is Codex...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3400s
+0:57:01,0:57:21,Claude Code Onboarding Plan,Claude Code Desktop App,"Good setup. While Codex hammers the demo, I'll get the onboarding and payment funnel designed properly.
+Map auth -> billing surface",Claude Code outputs architectural plan mapping Supabase Auth to Stripe billing.,,Auth and billing mapping plan created,"Good setup. While Codex hammers the demo, I'll get the onboarding and payment funnel designed...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=3421s
+0:57:21,0:57:35,Nate Adjusts Lighting,Nate Herkelman / On Camera,,Nate turns on background LED lighting as dark storm clouds gather outside.,,,"Oh, I just realized that these lights weren't turned on. There we go.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=3441s
+0:57:35,0:58:05,Claude Code Side Chat Prompt,Claude Code Desktop App,"/btw While you're thinking about this, I'm curious the tech stack that we're going to use on the back end for authentication. I'm not sure if you were planning on using Supabase or Stripe...",Nate uses `/btw` side-chat command to ask Claude Code about required auth & database backend services without interrupting current task execution.,"/btw While you're thinking about this, I'm curious the tech stack that we're going to use on the back end for authentication...",Side chat popup opened,"Let me show you something real quick, which is a slash by the way...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=3455s
+1:01:46,1:02:12,Claude Code .env.local Setup,Claude Code Desktop App,create us the .env file,Nate prompts Claude Code to generate the template `.env.local` file.,create us the .env file,.env.local file generated in file tree,I'm just going to tell it create us the .env file...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3706s
+1:05:22,1:06:02,Explaining Sandbox Integration,Nate Herkelman / On Camera,,Nate explains testing end-to-end flows safely in sandbox before swapping live production keys.,,,We do all of our testing here in a sandbox and then as soon as once everything's confirmed...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3922s
+1:06:02,1:06:34,Codex Browser QA Progress,Codex Desktop App / Embedded Browser,"Working for 19m 52s...
+[Codex mouse testing forms in browser]",Codex continues automated computer use QA testing in background browser.,,Codex QA log updated,Sole over here in Codex is still chugging away. It's been over 20 minutes...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=3962s
+1:06:34,1:07:05,Claude Code Database Migration SQL,Claude Code Desktop App,"I just re-copied the SQL to your clipboard in case it got overwritten.
+1. Supabase dashboard -> SQL Editor
+2. Paste (Ctrl+V) -> Run",Claude Code copies database schema creation SQL to clipboard.,,SQL script ready in clipboard,It said 'I just recopied the SQL editor command to your clipboard...',https://www.youtube.com/watch?v=IVx8OSMbTss&t=3994s
+1:07:05,1:07:43,Running Database Migration in Supabase,Web Browser / Supabase SQL Editor,"SQL Editor
+create table public.brand_profiles...
+create table public.case_studies...
+create table public.decks...
+create table public.findings...
+create table public.projects...
+create table public.subscriptions...
+create table public.transcripts...
+create table public.usage_events...
+-> Success. No rows returned.",Nate pastes SQL script into Supabase SQL Editor and clicks Run. 8 database tables are created automatically.,,8 database tables created in Supabase,This is the actual query that it wrote up that's going to create the right table. So now I just hit run.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=4025s
+1:08:23,1:09:00,Informing Claude of Database Migration,Claude Code Desktop App,"Okay, I ran the migration in the SQL editor.",Nate confirms database tables are live in Claude Code.,"Okay, I ran the migration in the SQL editor.",Claude Code proceeds to auth & billing integration,That worked amazing. We now have those eight tables in our Supabase.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=4103s
+1:09:21,1:09:44,Assigning Bug Fixes to Codex,Codex Desktop App,/goal,Nate prompts Codex in goal mode to orchestrate sub-agents to fix all identified launch blockers and high-priority bugs.,"/goal Okay, cool. So now you are in charge of managing all of these things that you found. You're in charge of fixing the blockers and fixing the high priority bugs...",Codex goal mode task started,So what I'm going to do is I'm going to do a /goal and I'm going to say...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=4161s
+1:09:44,1:10:13,Nate Adjusts Room Lights,Nate Herkelman / On Camera,,Nate turns on main desk lamps as thunderstorm darkens room.,,,It just got really dark out of nowhere. Let's see if I turn on that light if that helps at all...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=4184s
+1:10:42,1:11:15,Claude Code Integration Progress,Claude Code Desktop App,"Test user created in Supabase. Now the full customer-journey smoke test in the browser.
+[Embedded browser testing auth & billing]",Claude Code runs end-to-end smoke test through Supabase Auth and Stripe Sandbox.,,Full onboarding & payment smoke test passing,"Claude is working on the actual connection with Supabase, connection with Stripe...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=4242s
+1:11:21,1:11:23,Timestamp Card,Title Card,1:39 pm,Time jump transition to 1:39 PM.,,,,https://www.youtube.com/watch?v=IVx8OSMbTss&t=4281s
+1:12:38,1:13:17,Status Update & Time Check,Nate Herkelman / On Camera,,Nate holds up phone showing 1:39 PM.,,,"It is currently 1:40, 1:39 p.m. Keep in mind I also went off, I had lunch, I went down to the gym...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=4358s
+1:21:13,1:21:43,Supabase Subscriptions Data,Web Browser / Supabase Table Editor,brand_profiles | case_studies | decks | findings | projects | subscriptions,Nate reviews foreign key relationships connecting `user_id` across all database tables.,,Relational data schema verified,"This user ID is associated with me, so in case studies it's there, in decks it's there...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=4873s
+1:24:24,1:25:03,Submitting Security Audit in Codex,Codex Desktop App,[Pasted OWASP repo URL into Codex security prompt],Nate submits the security audit prompt to Codex.,,Security audit analyzing codebase,So what I'm going to do is copy the link to this GitHub repo...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=5064s
+1:25:03,1:25:18,Timestamp Card,Title Card,3:15 pm,Time jump transition to 3:15 PM.,,,,https://www.youtube.com/watch?v=IVx8OSMbTss&t=5103s
+1:26:30,1:27:05,Goal Prompt to Fix Security Blockers,Codex Desktop App,"/goal Awesome, I'm glad you found these vulnerabilities so that before we push it into production... I want you to fix those vulnerabilities that you found.",Nate sets a `/goal` prompt in Codex to orchestrate sub-agents until all security vulnerabilities are remediated.,"/goal Awesome, I'm glad you found these vulnerabilities so that before we push it into production and have actual customers start using it, we can fix these things...",Codex goal mode task started,I'm going to use this as a /goal prompt because I want it to continuously iterate and verify...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=5190s
+1:31:06,1:31:10,Timestamp Card,Title Card,4:14 pm,Time jump transition to 4:14 PM.,,,,https://www.youtube.com/watch?v=IVx8OSMbTss&t=5466s
+1:31:10,1:31:31,Time Check - 7 Hours In,Nate Herkelman / On Camera,,Nate holds up phone showing 4:14 PM (~7.5 hours since starting sprint).,,,"Okay, it's now 4:14, 4:14 p.m. Which means that we've been working on this pretty much since 9:00 a.m.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=5470s
+1:34:05,1:34:44,Codex Updating Vercel Production Environment,Codex Desktop App,"I'm correcting the production-canonical URL to https://www.getclientpack.com which is the domain you are actually using, and this redeploying...",Codex updates `NEXT_PUBLIC_SITE_URL` in Vercel to `https://www.getclientpack.com` and redeploys.,,Vercel env updated & redeployed,I'm correcting the production canonical URL to getclientpack.com...,https://www.youtube.com/watch?v=IVx8OSMbTss&t=5645s
+1:36:23,1:37:10,Time Check - 8 Hours Total,Codex Desktop App / Nate Herkelman,5:10 pm,Nate holds up phone showing 5:10 PM (~8 hours total elapsed time).,,,"So it is 5:10 p.m., which means that we've been working on this pretty much since 9:00 a.m., so about 8 hours.",https://www.youtube.com/watch?v=IVx8OSMbTss&t=5783s
+1:41:06,1:42:12,Manual Work Creates Proof,Presentation Slide,Search shows what people want. Manual work creates proof. Repetition brings more buyers.,Nate explains why founders must do manual unscalable work to build initial case study proof.,,,"He was in Reddit threads... answering people's questions, giving them free demos...",https://www.youtube.com/watch?v=IVx8OSMbTss&t=6066s
+1:55:10,1:55:31,Outro & Conclusion,Nate Herkelman / On Camera,,"Nate wraps up the video, asks for likes, and signs off.",,,That is going to do it for this video. I really hope that you guys enjoyed and I hope you learned something new... I will see you all in the next one. Thanks everyone.,https://www.youtube.com/watch?v=IVx8OSMbTss&t=6910s

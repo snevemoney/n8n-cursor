@@ -1,0 +1,12 @@
+# Family: architecture
+- **3D Interactive System Knowledge Graph Visualizer** — Renders an interactive 3D knowledge graph UI categorizing agent skills, document stores, and prompt modules. ([1ILapFgLf2E](../../packets/1ILapFgLf2E/LEARNED.md), 00:20)
+- **n8n_sequential_batch_looping** — Loop over incoming dataset rows with batch size 1 to prevent API rate limit breaches and state contamination during LLM tool calls. ([57EkKWCsu_4](../../packets/57EkKWCsu_4/LEARNED.md), 04:27)
+- **model_brain_selector_hot_swapping** — Model switching interface allowing runtime selection between model backends. ([Acw0NtkyNtM](../../packets/Acw0NtkyNtM/LEARNED.md), 01:21)
+- **Head-to-Head Comparative Slash Command Architecture** — Designs slash commands specifically tasked with multi-entity comparison to produce comparative evaluation matrices in CLI. ([HfEu7XPUnAU](../../packets/HfEu7XPUnAU/LEARNED.md), 07:11)
+- **serve_3d_brain_ui** — Host a local web dashboard rendering a 3D interactive force-directed graph of system notes. ([acsXZP3SA6w](../../packets/acsXZP3SA6w/LEARNED.md), 00:00)
+- **jev_agent_safety_guardrail_middleware** — Intercept agent tool execution to perform sub-second risk assessment using Jev binary decision scoring. ([fMV6JKkQVfE](../../packets/fMV6JKkQVfE/LEARNED.md), 01:02)
+- **hybrid_system_one_system_two_architecture** — Position Jev as a System One reflex layer in front of a System Two generative LLM to balance speed and reasoning. ([fMV6JKkQVfE](../../packets/fMV6JKkQVfE/LEARNED.md), 01:04)
+- **Symbolic-Compiled Decoupled Architecture** — Separate high-level symbolic natural language parsing from low-level compiled hardware execution routines to ensure both flexible reasoning and deterministic low-latency control. ([j64eMjwm2Ko](../../packets/j64eMjwm2Ko/LEARNED.md), 07:53)
+- **Polyglot Home Assistant Service Stack** — Architect a home assistant by combining web backends, device scripting, and mobile native bridges across multiple existing language ecosystems. ([j64eMjwm2Ko](../../packets/j64eMjwm2Ko/LEARNED.md), 08:33)
+- **Model-Agnostic Assistant Architecture** — Decouples core system mechanics (screen monitoring, tool calls, Telegram bridge) from backend LLM models via standard Web APIs and local wrapper scripts. ([mitzci4FsOg](../../packets/mitzci4FsOg/LEARNED.md), 00:50)
+- **3d_graph_os_visualization** — Visualize real-time AI agent interactions, call logs, and state node networks on a local 3D web graph. ([whIp1SOahOM](../../packets/whIp1SOahOM/LEARNED.md), 00:00)

@@ -1,0 +1,11 @@
+# Tool / repo: SPARK
+- used in **creator-voice-cloning-prompting** ([qfpD1FWdyTs](../../packets/qfpD1FWdyTs/LEARNED.md))
+- used in **hype-and-spice-tone-sliders** ([qfpD1FWdyTs](../../packets/qfpD1FWdyTs/LEARNED.md))
+- used in **weekly-content-pitch-prompt** ([qfpD1FWdyTs](../../packets/qfpD1FWdyTs/LEARNED.md))
+- used in **human-in-the-loop-approve-desk** ([qfpD1FWdyTs](../../packets/qfpD1FWdyTs/LEARNED.md))
+- used in **dm-deliverability-cta-link-pattern** ([qfpD1FWdyTs](../../packets/qfpD1FWdyTs/LEARNED.md))
+- used in **instagram-auto-dm-keyword-trigger-setup** ([qfpD1FWdyTs](../../packets/qfpD1FWdyTs/LEARNED.md))
+- used in **randomized-comment-reply-rotation** ([qfpD1FWdyTs](../../packets/qfpD1FWdyTs/LEARNED.md))
+- used in **blotato-unified-social-api-integration** ([qfpD1FWdyTs](../../packets/qfpD1FWdyTs/LEARNED.md))
+- used in **higgsfield-ai-visual-asset-generation** ([qfpD1FWdyTs](../../packets/qfpD1FWdyTs/LEARNED.md))
+- used in **crm-deals-kanban-board-automation** ([qfpD1FWdyTs](../../packets/qfpD1FWdyTs/LEARNED.md))

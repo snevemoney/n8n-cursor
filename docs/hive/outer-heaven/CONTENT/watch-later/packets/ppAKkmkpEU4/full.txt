@@ -1,0 +1,26 @@
+[00:00] Look at the new Buddha agent workbench
+[00:03] UI. So I'm chatting with an AI agent
+[00:06] here asking it to build a small browser
+[00:09] platform game called mushroom jump.
+[00:11] While the agent is doing its thing, it
+[00:13] creates files and a short game design. I
+[00:16] can just click this markdown file and
+[00:19] boom, it opens in the side panel on the
+[00:22] right while our chat stays right in the
+[00:24] center.
+[00:26] Then I can open up the local browser on
+[00:28] the side to preview the game the agent
+[00:30] just built. Now I can actually move the
+[00:33] cat, jump over blocks, collect coins,
+[00:36] and see the game running.
+[00:40] At the bottom, there's also a bottom
+[00:42] panel for tools like the terminal. I can
+[00:45] keep them down there and quickly check
+[00:47] the game files or confirm the local
+[00:49] preview is running without covering up
+[00:50] the conversation. This is the new Buddha
+[00:52] agent workbench UI. Files, game views,
+[00:55] and terminal outputs all sit right
+[00:58] around the agent chat. So the AI can
+[01:01] keep building while you inspect, play,
+[01:03] and tweak things at any time.

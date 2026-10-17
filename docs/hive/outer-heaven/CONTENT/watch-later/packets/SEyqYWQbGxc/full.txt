@@ -1,0 +1,148 @@
+[00:00] All protocols active and running
+[00:02] smoothly. Good day, boss. What are we up
+[00:04] to today? Hardware performance optimal.
+[00:07] Thermals operating well within safe
+[00:09] parameters.
+[00:11] >> Seamlessly, without interruption, let's
+[00:13] make the most powerful personal AI
+[00:15] assistant 4.0. Now, let's create a free
+[00:18] Gemini API key. Yes, the API key is
+[00:21] surprisingly free. Head toward your
+[00:23] browser and type Google AI studio.
+[00:26] Search for the official google.com link,
+[00:28] then open it.
+[00:29] Make sure you are logged in.
+[00:32] Now, head toward the dashboard.
+[00:37] Here, click on create API key.
+[00:42] You can name it anything you want.
+[00:45] Just for you guys to know which API key
+[00:47] this is, I will go with Jarvis version
+[00:49] 4.0.
+[00:51] Wait patiently for it to create your
+[00:53] personal API key.
+[00:55] Warning.
+[00:56] Never share your API key with anyone.
+[00:59] Copy this key and save it in a notepad
+[01:01] for later use.
+[01:05] Click on the link provided in the
+[01:07] description. This is an AI created by
+[01:09] Fadi Makes, and it's one of the best
+[01:11] personal AI assistants I have ever
+[01:13] found. It comes with many interesting
+[01:15] and useful features that we're going to
+[01:17] explore throughout this video. First,
+[01:19] we're going to install the code directly
+[01:21] from his GitHub. Now, click on Markel 4,
+[01:25] which is the latest and most powerful
+[01:26] version available. Then, click on code.
+[01:30] From here, download the zip file, just
+[01:32] like I'm showing you on the screen.
+[01:37] Once the download is complete, locate
+[01:40] the downloaded folder and right click on
+[01:42] it. Then, click on extract all and
+[01:44] choose any folder or location where you
+[01:46] want to extract the files.
+[01:50] Open your browser and search Python
+[01:52] download.
+[01:56] Open the official python.org.
+[02:00] Now click on downloads and select your
+[02:02] operating system.
+[02:04] Download any version above 3.11. I'm
+[02:07] going to be downloading 3.13.14.
+[02:11] Patiently wait for Python to be
+[02:13] installed.
+[02:17] After the installation is complete,
+[02:18] right-click on the open file.
+[02:21] Click on the add python.exe to path.
+[02:24] This is the most important step.
+[02:26] Now click on install now.
+[02:33] Setup was successful, so now let's move
+[02:35] to next step.
+[02:36] Click on the close button.
+[02:42] Now open Visual Studio and then head
+[02:44] over to file and click on open folder.
+[02:49] Next, locate the folder you extracted
+[02:51] earlier and select it. Once you open the
+[02:54] extracted folder, you'll see all of the
+[02:56] project's code right in front of you.
+[02:58] Now, move over to the terminal and click
+[03:00] on it. Then, select new terminal. In the
+[03:03] terminal, type py setup.py
+[03:07] and press enter. This will begin
+[03:09] downloading and installing all the
+[03:11] libraries required for your personal AI
+[03:13] assistant. If you run into any errors or
+[03:15] difficulties along the way, feel free to
+[03:18] drop them in the comments section. Now,
+[03:20] be patient and wait for the installation
+[03:22] to finish. Once you see this green
+[03:24] success message, you'll know everything
+[03:26] has been installed correctly. If you can
+[03:28] see this message on your screen,
+[03:30] congratulations. You've successfully set
+[03:33] up your very own advanced personal AI
+[03:35] assistant. To launch it, go back to the
+[03:37] terminal and type py main.py.
+[03:41] Then, press enter.
+[03:45] Next, paste the API key you created and
+[03:47] saved earlier. And once again, I
+[03:50] strongly recommend that you never share
+[03:52] your personal API key with anyone. Keep
+[03:54] it private and secure. After that,
+[03:57] select your operating system, Windows,
+[03:59] macOS, or Linux. I'm using Windows, so
+[04:03] I'll select Windows. Finally, initialize
+[04:06] the system and you're all set.
+[04:08] >> Good afternoon, sir. It is 4:37 p.m. and
+[04:12] I'm fetching today's news right now.
+[04:16] >> Let's talk about the amazing
+[04:17] capabilities of Jarvis 4.0. Holographic
+[04:21] avatar, an animated human head that
+[04:23] brings Jarvis to life. Real lip sync,
+[04:26] natural, precise mouth movements that
+[04:28] match every word in real time.
+[04:30] >> Good evening, sir. Systems are fully
+[04:33] operational. Facial tracking is active,
+[04:35] audio is synchronized, and I'm ready to
+[04:37] assist. Shall we begin?
+[04:39] >> Hardware monitoring, real-time awareness
+[04:42] of system health, performance,
+[04:44] temperature, and resource usage.
+[04:46] >> CPU usage has increased to roughly 37%
+[04:50] and RAM utilization is at 54%. Still no
+[04:53] temperature data available and the
+[04:55] uptime remains about 98 hours.
+[04:57] >> Recallable memory, remembers important
+[04:59] conversations, preferences, and context
+[05:02] to make every interaction more personal.
+[05:05] >> Sir, you asked me to remind you about
+[05:07] the project deadline. It's tomorrow at
+[05:09] 5:00 p.m. and I've already added it to
+[05:11] your schedule.
+[05:13] >> System control, let's Jarvis manage and
+[05:15] control your computer, apps, and basic
+[05:18] system functions using simple commands.
+[05:21] >> Hey Jarvis, initiate workspace.
+[05:26] >> Visual Studio Code is open and I have
+[05:28] listed the contents of the Ultron folder
+[05:30] for you.
+[05:32] >> Jarvis also comes with many other
+[05:34] powerful and unique features, which you
+[05:36] can see on your screen right now.
+[05:43] In my previous video, many of you asked
+[05:45] the same question. How can we make
+[05:47] Jarvis restart automatically? Well, it's
+[05:50] very simple. First, open Jarvis. Then,
+[05:54] look for the settings icon in the top
+[05:55] left corner and click on it. Now, you'll
+[05:58] see the auto start option. If it's
+[06:00] turned off, simply turn it on. And
+[06:03] that's it. Jarvis will now start
+[06:05] automatically whenever you launch your
+[06:06] system, so you won't have to worry about
+[06:08] starting it manually every time.
+[06:11] >> Code credit goes to Fatih makes. That's
+[06:13] all for today. Thanks for watching.
+[06:16] Don't forget to like, share, and
+[06:18] subscribe. We'll see you in another
+[06:20] interesting video. Goodbye.

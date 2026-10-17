@@ -1,0 +1,11 @@
+# Tool / repo: Gmail
+- used in **telegram_bot_crm_invoice_email_automation** ([Acw0NtkyNtM](../../packets/Acw0NtkyNtM/LEARNED.md))
+- used in **Zapier MCP Server Setup & App Authorization** ([rW3eyvrSqio](../../packets/rW3eyvrSqio/LEARNED.md))
+- used in **Autonomous Agent Data Verification & Historical Sampling Loop** ([rW3eyvrSqio](../../packets/rW3eyvrSqio/LEARNED.md))
+- used in **Subscription Receipt Extraction & USD Currency Normalization Pipeline** ([rW3eyvrSqio](../../packets/rW3eyvrSqio/LEARNED.md))
+- used in **Sender Self-Address Exclusion Rule to Prevent Infinite Loops** ([rW3eyvrSqio](../../packets/rW3eyvrSqio/LEARNED.md))
+- used in **Multi-Condition Filtering for High-Value & Annual Renewal Alerts** ([rW3eyvrSqio](../../packets/rW3eyvrSqio/LEARNED.md))
+- used in **AI Email Inquiry Handling with Slack DM Operator Notification** ([rW3eyvrSqio](../../packets/rW3eyvrSqio/LEARNED.md))
+- used in **Sandboxed Scope Access Control** ([z6jFqt0QwIE](../../packets/z6jFqt0QwIE/LEARNED.md))
+- used in **Human-In-The-Loop (HITL) Checkpoint Gatekeeping** ([z6jFqt0QwIE](../../packets/z6jFqt0QwIE/LEARNED.md))
+- used in **Daily Business Briefing Starter Workflow** ([z6jFqt0QwIE](../../packets/z6jFqt0QwIE/LEARNED.md))

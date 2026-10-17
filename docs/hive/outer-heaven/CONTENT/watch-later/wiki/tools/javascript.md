@@ -1,0 +1,12 @@
+# Tool / repo: JavaScript
+- used in **n8n_code_node_output_formatter** ([57EkKWCsu_4](../../packets/57EkKWCsu_4/LEARNED.md))
+- used in **buffered_web_speech_recognition** ([acsXZP3SA6w](../../packets/acsXZP3SA6w/LEARNED.md))
+- used in **silent_testing_mode_flag** ([acsXZP3SA6w](../../packets/acsXZP3SA6w/LEARNED.md))
+- used in **Speech-to-Text Debounce Buffer Control** ([mitzci4FsOg](../../packets/mitzci4FsOg/LEARNED.md))
+- used in **TTS Mute Toggle via URL Parameter** ([mitzci4FsOg](../../packets/mitzci4FsOg/LEARNED.md))
+- used in **Model-Agnostic Assistant Architecture** ([mitzci4FsOg](../../packets/mitzci4FsOg/LEARNED.md))
+- used in **Single-Pinch Spatial Node Dragging with Momentum** ([wJ3CFmzMbtA](../../packets/wJ3CFmzMbtA/LEARNED.md))
+- used in **Quick Pinch-Tap Object Expansion and Opening** ([wJ3CFmzMbtA](../../packets/wJ3CFmzMbtA/LEARNED.md))
+- used in **Off-Screen Flick Edge Evaporation** ([wJ3CFmzMbtA](../../packets/wJ3CFmzMbtA/LEARNED.md))
+- used in **Two-Hand Stretch Full-Screen Note Expansion** ([wJ3CFmzMbtA](../../packets/wJ3CFmzMbtA/LEARNED.md))
+- used in **Peace Sign Spatial Grid Layout Auto-Arrangement** ([wJ3CFmzMbtA](../../packets/wJ3CFmzMbtA/LEARNED.md))
