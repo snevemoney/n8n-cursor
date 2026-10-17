@@ -1061,6 +1061,9 @@ class Tools:
         return {"text": f"{got['state']}: {got['spoken']}\n" + "\n".join(f"- {k}: {v['state']} — {v['line']}" for k, v in got["rows"].items())}
 
     def deliver(self, a):
+        secret = [f for f in (a.get("files") or []) if _authority().is_secret_path(Path(os.path.expanduser(str(f))))]
+        if secret:  # a bundle is a copy: secret files (keys, tokens, .env) are never copied into one
+            return {"text": f"deliver refused: {', '.join(Path(str(f)).name for f in secret)} holds secrets and is never bundled."}
         try:
             got = DLV.bundle(str(a.get("title") or ""), a.get("files") or [], str(a.get("note") or ""))
         except (ValueError, OSError) as exc:

@@ -28,7 +28,8 @@ SECRET_RE = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.grok-pri
 STRONG_SECRET_RE = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.grok-private|id_[a-z0-9]+|[^/]*\.pem|[^/]*\.key|"
                               r"[^/]*\.p12|[^/]*\.pfx|[^/]*\.kdbx|\.git-credentials|Keychains?|\.docker|\.kube|\.npmrc|\.pypirc|\.gh|"
                               r"\.config/gh|\.config/gcloud|\.azure|\.terraform\.d|\.vercel|\.stripe|\.password-store|1Password[^/]*|"
-                              r"\.?secrets?|credentials|\.?tokens?)(/|$)", re.I)
+                              r"\.?secrets?|credentials|\.?tokens?|[^/]+\.env|\.config/brain/env[^/]*)(/|$)", re.I)
+# 10-17: Jarvis's own key store (~/.config/brain/env, its .bak copies, gemini.env) was not classed secret
 WEAK_SECRET_WORD = re.compile(r"credential|secret|token", re.I)
 # Source code is never a secret store by its name alone: test_tokens.py, tokenizer.py, secret_scanner.ts.
 # (2026-10-15: the saved-video build stopped at preparation because a test file had "tokens" in its name.)

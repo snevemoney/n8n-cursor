@@ -358,6 +358,12 @@ class GoalIsHisWords(unittest.TestCase):  # live 10:53: a check-back note was ju
         self.assertIn("also open Notes", O._goal_of(mid))  # his mid-job words are his request
 
 
+class DeliverNeverCopiesSecrets(unittest.TestCase):
+    def test_env_file_is_refused(self):
+        got = O.Tools(Path(tempfile.mkdtemp())).deliver({"title": "x", "files": ["~/.config/brain/env", "~/project/.env"]})["text"]
+        self.assertIn("deliver refused", got); self.assertIn("never bundled", got)
+
+
 class OpenWith(unittest.TestCase):  # macread: his default PDF app is PdfCraft; "in Preview" must mean Preview
     def test_with_names_the_app(self):
         seen = []
