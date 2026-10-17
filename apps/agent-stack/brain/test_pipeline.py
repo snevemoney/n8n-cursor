@@ -2,6 +2,8 @@
 """Pipeline pick: one Cursor call. Do not loop agent -p on login UNKNOWN."""
 from __future__ import annotations
 
+import os as _os
+_os.environ.setdefault("JARVIS_OPERATOR_FIRST", "0")  # these tests cover the legacy routed turn; the default turn is the general operator (Oct 15), tested in hands/test_operator.py
 import importlib.util
 import json
 import re
