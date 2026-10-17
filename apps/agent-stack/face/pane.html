@@ -843,6 +843,8 @@
       const audio = new Audio(url);
       audio.playbackRate = PLAY_SPEED;
       ttsAudio = audio;
+      duckedSince = 0; quietSince = 0;
+      startBargeWatch();  // Evens 10-17: a watch that could not start before audio was unlocked starts now
       try {
         await audio.play();
       } catch (e) {
@@ -1236,8 +1238,15 @@
     // Evens 10-16 "I should be able to interrupt it": the old rule compared the echo-cancelled mic with the RAW TTS
     // output level, which is always louder, so it almost never fired. Now: mic vs the bleed the mic itself hears
     // while Jarvis talks (median of the last ~2 s of mic levels during speech).
-    const BARGE = { floor: 0.03, ratio: 2.2, holdMs: 260, tick: 60, bleedWindow: 33 };
-    let bargeTimer = null, bargeSince = 0, micAnalyser = null, micBuf = null;
+    // Evens 10-17 "Jarvis doesn't let me interrupt him": on a MacBook the mic hears the speakers almost as loud as him,
+    // so 2.2x over the bleed rarely happened. Now two stages: any voice above the floor DUCKS Jarvis to 20% at once (the
+    // bleed collapses), then a voice still there for holdMs stops him; silence restores the volume.
+    const BARGE = { floor: 0.03, ratio: 1.5, holdMs: 220, tick: 60, bleedWindow: 33, duckAt: 1.3, duckTo: 0.2, releaseMs: 350 };
+    let bargeTimer = null, bargeSince = 0, micAnalyser = null, micBuf = null, duckedSince = 0, quietSince = 0;
+    function duckTts(on) {
+      if (!ttsAudio) return;
+      try { ttsAudio.volume = on ? BARGE.duckTo : 1; } catch (e) {}
+    }
     function micLevel(an, buf) {
       an.getFloatTimeDomainData(buf);
       let sum = 0;
@@ -1247,8 +1256,11 @@
     function bargeHit(mic, bleed, heldMs) {
       return mic > BARGE.floor && mic > bleed * BARGE.ratio && heldMs >= BARGE.holdMs;
     }
+    function duckHit(mic, bleed) {  // stage 1: cheap and early — any voice over the bleed ducks the speaker
+      return mic > BARGE.floor && mic > bleed * BARGE.duckAt;
+    }
     function median(xs) { const a = xs.slice().sort((p, q) => p - q); return a.length ? a[a.length >> 1] : 0; }
-    window.__jarvisBarge = { BARGE, bargeHit };
+    window.__jarvisBarge = { BARGE, bargeHit, duckHit, last: null };
     function startBargeWatch() {
       if (bargeTimer || !streamLive()) return;
       try {
@@ -1258,7 +1270,7 @@
         micAnalyser.fftSize = 1024;
         micBuf = new Float32Array(micAnalyser.fftSize);
         audioCtx.createMediaStreamSource(state.stream).connect(micAnalyser);
-      } catch (e) { micAnalyser = null; return; }
+      } catch (e) { micAnalyser = null; console.warn("barge watch off: no mic analyser", e); return; }
       let levels = [];
       bargeTimer = setInterval(() => {
         if (!micAnalyser || !state.armed || !ttsSpeaking()) { bargeSince = 0; levels = []; return; }
@@ -1267,16 +1279,23 @@
         levels.push(mic);
         if (levels.length > BARGE.bleedWindow) levels.shift();
         const now = Date.now();
-        if (levels.length >= 8 && mic > BARGE.floor && mic > bleed * BARGE.ratio) {
+        window.__jarvisBarge.last = { mic, bleed, ducked: !!duckedSince };
+        if (levels.length >= 8 && duckHit(mic, bleed)) {
+          quietSince = 0;
+          if (!duckedSince) { duckedSince = now; duckTts(true); }
           if (!bargeSince) bargeSince = now;
           if (bargeHit(mic, bleed, now - bargeSince)) {
-            bargeSince = 0; levels = [];
+            bargeSince = 0; duckedSince = 0; levels = [];
             pressStop();
             $("spoken").textContent = "Go ahead, I'm listening.";
             scheduleRestart(RESTART_MIN);  // listen at once so his first words are not lost
           }
         } else {
           bargeSince = 0;
+          if (duckedSince) {
+            if (!quietSince) quietSince = now;
+            if (now - quietSince >= BARGE.releaseMs) { duckedSince = 0; quietSince = 0; duckTts(false); }
+          }
         }
       }, BARGE.tick);
     }
