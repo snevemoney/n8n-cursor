@@ -583,6 +583,21 @@ class EscalationKeepsTheCheapChain(unittest.TestCase):  # live 10-17: escalated 
         self.assertGreaterEqual(O.CHEAP_ESCALATE_STEPS, 20)
 
 
+class McpSteps(unittest.TestCase):  # canvas "apps": stateful servers need new -> edit -> save in ONE session
+    def test_steps_run_in_one_session_and_each_step_is_gated(self):
+        at = O._load("agent_tools", "agent_tools.py")
+        with mock.patch.object(at, "_mcp_session", return_value=[(True, "doc 0"), (True, "slide 1"), (True, "saved")]) as sess, \
+             mock.patch.object(at, "_open_access", return_value=True), \
+             mock.patch.object(O._load("mcp_inventory", "mcp_inventory.py"), "server_spec", return_value={"command": "x"}):
+            got = at.op_mcp_steps("deckcraft", [{"tool": "new_presentation"}, {"tool": "add_slide", "arguments": {"title": "t"}},
+                                                {"tool": "save_presentation", "arguments": {"path": "/tmp/a.pptx"}}])
+        self.assertTrue(got["ok"]); self.assertEqual(sess.call_count, 1)
+        self.assertEqual([c[0] for c in sess.call_args[0][1]], ["new_presentation", "add_slide", "save_presentation"])
+        with mock.patch.object(at, "_mcp_session") as sess2, mock.patch.object(at, "_open_access", return_value=True):
+            got = at.op_mcp_steps("gmail", [{"tool": "read_inbox"}, {"tool": "send_email", "arguments": {}}])
+        self.assertTrue(got.get("gated")); sess2.assert_not_called()   # a send anywhere in the list stops all steps
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")

@@ -454,8 +454,12 @@ TOOLS = [
          "open": {"type": "boolean"},
          "refresh": {"type": "string", "description": "optional shell command that prints the page; it is re-run every 30 min and the page updates itself when the output changes"}},
         ["name"]),
-    _fn("mcp", "Call a tool on a connected MCP server.", {"server": S, "tool": S, "arguments": {"type": "object"}},
-        ["server", "tool"]),
+    _fn("mcp", "Call a tool on a connected MCP server. For a stateful app (ArtCraft: DeckCraft, WordCraft, DesignCraft, "
+        "GridCraft, VectorCraft, …) pass steps=[{tool, arguments}, …] instead of tool: they run in ONE session, so new → "
+        "edit → save works; save to a real path and check the file.",
+        {"server": S, "tool": S, "arguments": {"type": "object"},
+         "steps": {"type": "array", "items": {"type": "object", "properties": {"tool": S, "arguments": {"type": "object"}}}}},
+        ["server"]),
     _fn("say", "Say something to Evens right now and keep working: your answer to a plain question, what you are "
                "about to do, or what you just found. Speak plain English, one or two sentences.", {"text": S}, ["text"]),
     _fn("ask_owner", "Stop and ask Evens a question or for an OK.", {"question": S}, ["question"]),
@@ -1212,6 +1216,9 @@ class Tools:
                 return {"text": f"cua-driver.{tool} failed: {exc}"}
             out = (cp.stdout or "").strip() or (cp.stderr or "").strip()
             return {"text": _clip((f"cua-driver.{tool} answered: " if cp.returncode == 0 else f"cua-driver.{tool} failed: ") + out)}
+        if isinstance(a.get("steps"), list):  # one session for a stateful workflow (new -> edit -> save)
+            got = _load("agent_tools", "agent_tools.py").op_mcp_steps(str(a["server"]), a["steps"], approved=approved)
+            return {"text": _clip(str(got.get("spoken") or got))}
         got = _load("agent_tools", "agent_tools.py").op_mcp(str(a["server"]), str(a["tool"]), a.get("arguments") or {},
                                                             approved=approved)
         return {"text": _clip(got.get("spoken") or json.dumps(got, default=str))}

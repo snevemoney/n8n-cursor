@@ -212,6 +212,31 @@ def op_mcp(server: str, tool: str, arguments: dict | None = None, approved: bool
                        else f"{server}.{tool} answered: " if ok else f"{server}.{tool} failed: ") + text[:600]}
 
 
+def op_mcp_steps(server: str, steps: list, approved: bool = False) -> dict:
+    """Several calls in ONE server session (canvas "apps": ArtCraft and other stateful servers keep the open document in
+    their process, so new -> edit -> save only works inside one session). Every step passes the same gate as op_mcp."""
+    if not NAME_OK.match(server or "") or not isinstance(steps, list) or not 1 <= len(steps) <= 40:
+        return {"ok": False, "spoken": "I need a server name and 1-40 steps of {tool, arguments}."}
+    calls = []
+    for st in steps:
+        tool = str((st or {}).get("tool") or "")
+        if not NAME_OK.match(tool):
+            return {"ok": False, "spoken": f"bad step: {st!r}"}
+        writing = bool(WRITE_TOOL.search(tool) or not READ_TOOL.match(tool))
+        if writing and approved is not True and not (_open_access() and not OPEN_MCP_HARD.search(tool)):
+            PERM().log_action("mcp_write", f"{server}.{tool}", "confirm")
+            return {"ok": False, "gated": True, "spoken": f"{server}.{tool} needs Evens first; I ran none of the steps."}
+        calls.append((tool, (st or {}).get("arguments") or {}))
+    spec = _load("mcp_inventory", "mcp_inventory.py").server_spec(server)
+    if not spec:
+        return {"ok": False, "spoken": f"No local config for {server}; steps need a local (stdio) server."}
+    for tool, _ in calls:
+        PERM().log_action("mcp_steps", f"{server}.{tool}", "allow")
+    got = _mcp_session(spec, calls, MCP_DEADLINE_S * 2)
+    lines = [f"{i + 1}. {calls[i][0]}: {'ok' if ok else 'FAILED'} — {text[:400]}" for i, (ok, text) in enumerate(got)]
+    return {"ok": all(ok for ok, _ in got) and len(got) == len(calls), "spoken": "\n".join(lines) or "no steps ran"}
+
+
 # ---------------------------------------------------------------- cli
 GWS_SERVICES = "gmail|calendar|drive|docs|sheets|slides|tasks|people|keep|meet|forms|classroom|chat"
 CLI_ALLOW = {
