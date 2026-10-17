@@ -1273,7 +1273,11 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
         state = task.read("state.json")
         state.update(status=status, finished=time.time())
         task.write("state.json", state)
-        if status == "DONE" and not fixed_fn:
+        verified = status == "DONE" and not state.get("unverified")
+        if status == "DONE":
+            state["verified"] = verified
+            task.write("state.json", state)
+        if verified and not fixed_fn:  # audit 10-16: never learn a procedure from an unproven finish
             try:
                 rows = [json.loads(l) for l in (task.path / "trace.jsonl").read_text().splitlines() if l.strip()]
                 HX.remember(task.path.parent.parent, task.read("request.json").get("goal", ""), state.get("summary") or "",
@@ -1281,7 +1285,7 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
             except (OSError, ValueError):
                 pass  # a missing note never fails the job
         if state.get("tier") != "owner" and status in ("DONE", "MODEL_UNAVAILABLE", "STEP_LIMIT", "TIME_LIMIT"):
-            record_outcome(state.get("kind") or "any", str(state.get("model") or ""), status == "DONE")
+            record_outcome(state.get("kind") or "any", str(state.get("model") or ""), verified)
         if status in ("DONE", "WAITING_OWNER") and session and not task.read("state.json").get("helper"):
             # A live session like Codex/Claude Code: the page stays open and his next line continues THIS agent.
             if _idle_until_spoken_to(task):

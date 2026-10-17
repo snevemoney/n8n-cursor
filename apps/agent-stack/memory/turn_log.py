@@ -26,6 +26,10 @@ def release_rev() -> str | None:
         rev = None
         try:
             git = ROOT / ".git"
+            if git.is_file():  # audit 10-16: a git worktree's .git is a file -> rev was always null
+                git = Path((git.read_text(encoding="utf-8").split(":", 1)[1]).strip())
+                if not git.is_absolute():
+                    git = (ROOT / git).resolve()
             head = (git / "HEAD").read_text(encoding="utf-8").strip()
             if head.startswith("ref: "):
                 ref = head[5:]
@@ -33,13 +37,26 @@ def release_rev() -> str | None:
                 if p.is_file():
                     rev = p.read_text(encoding="utf-8").strip()
                 else:
-                    for line in (git / "packed-refs").read_text(encoding="utf-8").splitlines():
-                        if line.endswith(" " + ref):
-                            rev = line.split()[0]
+                    common = git / "commondir"  # worktree: refs live in the main .git
+                    base = (git / common.read_text(encoding="utf-8").strip()).resolve() if common.is_file() else git
+                    p = base / ref
+                    if p.is_file():
+                        rev = p.read_text(encoding="utf-8").strip()
+                    else:
+                        for line in (base / "packed-refs").read_text(encoding="utf-8").splitlines():
+                            if line.endswith(" " + ref):
+                                rev = line.split()[0]
             else:
                 rev = head
         except OSError:
             rev = None
+        if not rev:
+            try:
+                import subprocess
+                rev = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True,
+                                     timeout=10).stdout.strip() or None
+            except (OSError, subprocess.SubprocessError):
+                rev = None
         _REV.append(rev[:12] if rev else None)
     return _REV[0]
 

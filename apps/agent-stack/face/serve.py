@@ -23,6 +23,16 @@ from urllib.parse import urlparse, parse_qs
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
+
+
+def _release_rev():
+    """The commit this server runs (audit 10-16: drift between checkout and running code was invisible)."""
+    try:
+        spec = importlib.util.spec_from_file_location("agent_stack_turn_log_rev", ROOT / "apps/agent-stack/memory/turn_log.py")
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        return mod.release_rev()
+    except Exception:  # noqa: BLE001 - health must answer even if the rev cannot be read
+        return None
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 OS_DIR = ROOT / "docs/hive/outer-heaven/CONTENT/os"
 HOST = "127.0.0.1"
@@ -632,7 +642,8 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200,runtime_evidence())
             return
         if path == "/healthz":
-            self._json(200, {"ok": True, "online": True, "bind": f"{HOST}:{PORT}", "kind": "agent-stack-face"})
+            self._json(200, {"ok": True, "online": True, "bind": f"{HOST}:{PORT}", "kind": "agent-stack-face",
+                             "rev": _release_rev()})
             return
         if not self._trusted_request():
             self._refuse_untrusted()

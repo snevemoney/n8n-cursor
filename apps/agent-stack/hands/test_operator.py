@@ -138,9 +138,11 @@ class CompletionTruth(OperatorLoop):  # matrix audit 10-16: success must be real
     def test_unproven_finish_after_two_checks_is_marked_unverified(self):
         model = scripted([("shell", {"command": "echo x"})], [("done", {"summary": "did it"})],
                          [("done", {"summary": "did it"})], [("done", {"summary": "did it"})])
-        state = O.run(O.Task.create(self.hive, "do it").path, model_fn=model)
+        with mock.patch.object(O, "record_outcome") as rec:
+            state = O.run(O.Task.create(self.hive, "do it").path, model_fn=model)
         self.assertEqual(state["status"], "DONE")
-        self.assertTrue(state.get("unverified"))
+        self.assertTrue(state.get("unverified")); self.assertFalse(state.get("verified"))
+        self.assertTrue(rec.called and rec.call_args[0][2] is False)   # not scored as a success
 
     def test_resume_relaunches_a_dead_running_worker(self):
         task = O.Task.create(self.hive, "long job")

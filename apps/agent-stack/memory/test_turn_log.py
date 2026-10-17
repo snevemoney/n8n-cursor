@@ -14,6 +14,20 @@ TL = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(TL)
 
 
+class ReleaseRev(unittest.TestCase):  # audit 10-16: rev was null because live Jarvis runs from a git worktree
+    def test_rev_resolves_inside_a_worktree(self):
+        import subprocess
+        d = Path(tempfile.mkdtemp())
+        g = lambda *a, cwd: subprocess.run(["git", *a], cwd=cwd, check=True, capture_output=True)
+        g("init", "-q", "main", cwd=d); m = d / "main"
+        for k, v in (("user.email", "t@t"), ("user.name", "t")): g("config", k, v, cwd=m)
+        (m / "a").write_text("a"); g("add", "a", cwd=m); g("commit", "-q", "-m", "one", cwd=m)
+        g("worktree", "add", "-q", str(d / "wt"), "-b", "side", cwd=m)
+        sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=d / "wt", capture_output=True, text=True).stdout.strip()
+        with mock.patch.object(TL, "ROOT", d / "wt"), mock.patch.object(TL, "_REV", []):
+            self.assertEqual(TL.release_rev(), sha[:12])
+
+
 class TurnLogTest(unittest.TestCase):
     def test_row_fields(self):
         t0 = time.time()

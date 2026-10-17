@@ -112,6 +112,25 @@ class Queue:
         return {"learned": learned, "stopped": stopped or f"batch of {max_videos} done", **self.counts()}
 
 
+REFRESH_S = 24 * 3600
+
+
+def _refresh_saved(S) -> tuple:
+    """Once a day, re-read his Watch Later and X bookmarks from his signed-in Safari (audit 10-16: nothing refreshed
+    watch-later.json, so new saves never reached the queue). Returns True when the list changed."""
+    wl = S.CACHE / "watch-later.json"
+    if wl.exists() and time.time() - wl.stat().st_mtime < REFRESH_S:
+        return False, []
+    try:
+        before = wl.read_text() if wl.exists() else ""
+        got = S.scan("all")
+        print(json.dumps({"refresh": got.get("notes"), "new": len(got.get("new") or [])}))
+        return (wl.exists() and wl.read_text() != before), list(got.get("new") or [])
+    except Exception as exc:  # noqa: BLE001 - Safari may be busy or signed out; the queue still runs on the old list
+        print(json.dumps({"refresh": "skipped", "why": str(exc)[:200]}))
+        return False, []
+
+
 def _shared_list(S, idx: Path) -> dict:
     """SIGNALS.csv (signal_ledger.py), the list every agent shares: refreshed from Watch Later, triage and the packets
     each run; Jarvis claims a video there before learning it and writes the outcome back. A push that fails (offline)
@@ -140,7 +159,11 @@ def _shared_list(S, idx: Path) -> dict:
         else:
             change(lambda rows: L.finish(rows, vid, "jarvis", state, result=f"{S.PACKETS}/{vid}" if state == "learned" else "",
                                          error=info), f"signals list: jarvis {state} {vid}")
-    return {"claim": claim, "report": report}
+    def add_many(urls: list) -> None:
+        change(lambda rows: [L.add(rows, u, source=S.classify(u)["kind"], added="saved") for u in urls],
+               f"signals list: {len(urls)} new saves from his Safari")
+
+    return {"claim": claim, "report": report, "add_many": add_many}
 
 
 def main(argv: list) -> int:
@@ -149,10 +172,13 @@ def main(argv: list) -> int:
     import signal_triage as T
     q = Queue(S.CACHE / "queue.db")
     idx = S.worktree() / S.INDEX
-    if not (idx / "triage.csv").exists():
+    refreshed, new_urls = _refresh_saved(S)
+    if refreshed or not (idx / "triage.csv").exists():
         T.run(S.CACHE / "watch-later.json", S.known_ids(), idx)
     added = q.sync(idx / "triage.csv", S.known_ids())
     shared = _shared_list(S, idx)
+    if new_urls:
+        shared["add_many"](new_urls)   # X bookmarks and other saves that are not in watch-later.json
     if argv and argv[0] == "run":
         n = int(argv[argv.index("--max") + 1]) if "--max" in argv else 20
         out = q.run(S.ingest, budget_wait=S.BudgetWait, max_videos=n, claim=shared["claim"], report=shared["report"])
