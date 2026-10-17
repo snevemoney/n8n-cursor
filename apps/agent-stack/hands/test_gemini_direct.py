@@ -67,5 +67,32 @@ class Session(unittest.TestCase):
         self.assertEqual(p.call_args_list[1][0][0]["previous_interaction_id"], "a")
 
 
+class Pacing(unittest.TestCase):  # live 10-16: free tier hit a per-minute limit on the 3rd video; minutes later it answered
+    def test_429_waits_and_retries_then_succeeds(self):
+        import urllib.error
+        calls = []
+        def urlopen(req, timeout=0):
+            calls.append(1)
+            if len(calls) < 3:
+                raise urllib.error.HTTPError("u", 429, "Too Many Requests", {}, None)
+            class R:
+                def __enter__(s): return s
+                def __exit__(s, *a): return False
+                def read(s): return b'{"id": "i", "output_text": "ok"}'
+            return R()
+        sleeps = []
+        with mock.patch.object(G.urllib.request, "urlopen", side_effect=urlopen), \
+             mock.patch.object(G.time, "sleep", side_effect=sleeps.append), mock.patch.object(G, "_key", return_value="k"):
+            self.assertEqual(G._post({"model": "m"})["output_text"], "ok")
+        self.assertEqual([x for x in sleeps if x >= 30], [30, 60])   # pacing gaps aside
+
+    def test_gives_up_after_the_last_wait(self):
+        import urllib.error
+        with mock.patch.object(G.urllib.request, "urlopen", side_effect=urllib.error.HTTPError("u", 429, "x", {}, None)), \
+             mock.patch.object(G.time, "sleep"), mock.patch.object(G, "_key", return_value="k"):
+            with self.assertRaises(urllib.error.HTTPError):
+                G._post({"model": "m"})
+
+
 if __name__ == "__main__":
     unittest.main()

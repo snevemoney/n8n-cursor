@@ -12,6 +12,8 @@ import datetime as dt
 import json
 import os
 import re
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -69,11 +71,28 @@ def _count_free(seconds: int) -> None:
     FREE_STATE.write_text(json.dumps({"day": _today(), "seconds": _free_used() + int(seconds)}))
 
 
+RETRY_WAITS = (30, 60, 120, 240)   # live 10-16: the free tier limits requests per minute; it answers again minutes later
+MIN_GAP_S = 6                       # pace requests so a video's passes do not burst
+_last = [0.0]
+
+
 def _post(body: dict) -> dict:
-    req = urllib.request.Request(ENDPOINT, data=json.dumps(body).encode(),
-                                 headers={"Content-Type": "application/json", "x-goog-api-key": _key()})
-    with urllib.request.urlopen(req, timeout=1800) as r:
-        return json.loads(r.read() or b"{}")
+    for wait in (*RETRY_WAITS, None):
+        gap = MIN_GAP_S - (time.time() - _last[0])
+        if gap > 0:
+            time.sleep(gap)
+        req = urllib.request.Request(ENDPOINT, data=json.dumps(body).encode(),
+                                     headers={"Content-Type": "application/json", "x-goog-api-key": _key()})
+        try:
+            with urllib.request.urlopen(req, timeout=1800) as r:
+                _last[0] = time.time()
+                return json.loads(r.read() or b"{}")
+        except urllib.error.HTTPError as exc:
+            _last[0] = time.time()
+            if exc.code != 429 or wait is None:
+                raise
+            time.sleep(wait)
+    raise RuntimeError("unreachable")
 
 
 def _text(data: dict) -> str:
