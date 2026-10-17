@@ -83,6 +83,10 @@ def _compact(messages: list) -> list:
                                                "arguments": _args((tc.get("function") or {}).get("arguments"))}}
                                  for tc in m["tool_calls"] if isinstance(tc, dict)]
         out.append(row)
+    for row in reversed(out):  # qwen3 soft switch: answer directly (the API's think=false is not always honoured)
+        if row["role"] == "user":
+            row["content"] = f"{row['content']} /no_think"
+            break
     return out
 
 
@@ -119,6 +123,6 @@ def call(messages: list, tools: list) -> dict:
     if calls:
         return {"ok": True, "calls": calls, "tool": calls[0]["tool"], "args": calls[0]["args"],
                 "call_id": calls[0]["call_id"], "text": "", "model": "local:" + LOCAL_MODEL}
-    text = re.sub(r"(?s)<think>.*?</think>", "", str(msg.get("content") or "")).strip()
+    text = re.sub(r"(?s)^.*</think>", "", str(msg.get("content") or "")).strip()  # drop leftover reasoning
     return {"ok": bool(text), "tool": "", "args": {}, "call_id": "", "text": text, "model": "local:" + LOCAL_MODEL,
             **({} if text else {"unknown": True, "error": "local model: empty"})}

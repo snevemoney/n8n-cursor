@@ -118,5 +118,17 @@ class Light(unittest.TestCase):  # live 10-16: qwen3:4b froze his 8 GB Mac — s
         self.assertEqual(got["calls"][0]["tool"], "open"); self.assertEqual(got["calls"][0]["args"], {"target": "Calculator"})
 
 
+class NoThinking(unittest.TestCase):  # live 10-16: think=false was ignored; 38 s of visible reasoning before "Paris"
+    def test_soft_switch_is_sent_and_leftover_reasoning_is_dropped(self):
+        sent = {}
+        def post(url, data, headers=None, timeout=0):
+            sent.update(data)
+            return {"message": {"content": "Okay, the user asks... let me think.\n</think>\n\nParis"}}
+        with mock.patch.object(L, "_post", side_effect=post):
+            got = L.call(msgs("capital of France?"), TOOLS)
+        self.assertEqual(got["text"], "Paris")
+        self.assertIn("/no_think", sent["messages"][-1]["content"])
+
+
 if __name__ == "__main__":
     unittest.main()
