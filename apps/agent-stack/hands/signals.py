@@ -58,6 +58,9 @@ def _load(name: str, file: str):
     return mod
 
 
+G = _load("agent_stack_gemini_direct", "gemini_direct.py")  # Google AI Studio free tier (watch his Watch Later free)
+
+
 def log(msg: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
@@ -484,21 +487,83 @@ SOURCE: {title} ({meta})"""
 GAP_ROUNDS = 3
 
 
-def watch_visual_log(url: str, duration: float, lens: str, body: str) -> list:
+SIGNAL_BUDGET_USD = float(os.environ.get("JARVIS_SIGNAL_BUDGET_USD") or 20)   # Evens 10-16: $0-20 for the whole Watch Later
+BUDGET_SINCE = float(os.environ.get("JARVIS_SIGNAL_BUDGET_SINCE") or 1792198800)  # 2026-10-16 21:00 ET: start of the $20 budget
+
+
+class BudgetWait(RuntimeError):
+    """Free tier full for today and the paid budget is used up: the queue waits (never spends past his cap)."""
+
+
+def paid_spent() -> float:
+    """Paid model spend on signals since the budget started (free-tier calls cost nothing and are not counted)."""
+    if not LEDGER.exists():
+        return 0.0
+    total = 0.0
+    for line in LEDGER.read_text(errors="ignore").splitlines():
+        try:
+            r = json.loads(line)
+        except ValueError:
+            continue
+        if r.get("event") == "model" and float(r.get("at", 0)) >= BUDGET_SINCE and not r.get("free"):
+            total += float((r.get("usage") or {}).get("cost") or 0)
+    return total
+
+
+def spot_sampled(video_id: str) -> bool:
+    """1 video in 10 gets the independent spot-check (a fresh watch grades the log) — a statistical quality sample."""
+    import hashlib
+    return int(hashlib.sha256(str(video_id).encode()).hexdigest()[:4], 16) % 10 == 0
+
+
+class _PaidWatcher:
+    """OpenRouter: every pass re-sends the video."""
+
+    def __init__(self, url: str, duration: float, lens: str):
+        self.video = video_part(url, duration, lens)
+        self.free = False
+
+    def ask(self, prompt: str) -> str:
+        return _watch([{"role": "user", "content": [self.video, {"type": "text", "text": prompt}]}])
+
+
+class _FreeWatcher:
+    """Google AI Studio free tier: one stateful session per video."""
+
+    def __init__(self, url: str, duration: float, fps: float):
+        self.s = G.VideoSession(url, int(duration or 0), fps)
+        self.free = True
+
+    def ask(self, prompt: str) -> str:
+        t = self.s.ask(prompt)
+        ledger({"event": "model", "model": "google/" + G.MODEL, "free": True, "watch": True, "chars": len(t),
+                "usage": {"cost": 0, "prompt_tokens": getattr(self.s, "input_tokens", 0)}})
+        return t
+
+
+def make_watcher(url: str, duration: float, lens: str, fps: float = 0.0):
+    """Free first (his Gemini key, within today's 8 h), paid only inside SIGNAL_BUDGET_USD, else wait."""
+    if G.has_key() and G.free_room(int(duration or 0)):
+        rate = fps or (min(STUDIO_MAX_FPS, 5.0) if lens == "studio" else 1.0)
+        return _FreeWatcher(url, duration, rate)
+    if paid_spent() >= SIGNAL_BUDGET_USD:
+        raise BudgetWait(f"free tier full for today and the ${SIGNAL_BUDGET_USD:g} signal budget is used; waiting for tomorrow")
+    return _PaidWatcher(url, duration, lens)
+
+
+def watch_visual_log(url: str, duration: float, lens: str, body: str, watcher=None) -> list:
     """The log of everything shown. Live 10-16: on a 2h22m course the log stopped at 118:13, so every stretch with no
     row is sent back for another watch (the whole video again, rows only for the missing stretch) until none is left."""
     fields = STUDIO_FIELDS if lens == "studio" else VISUAL_FIELDS
     head = STUDIO_PROMPT if lens == "studio" else VISUAL_PROMPT
-    video = video_part(url, duration, lens)
-    rows = parse_visual_rows(_watch([{"role": "user", "content": [video, {"type": "text", "text": head
-                                      + "\n\nTRANSCRIPT (aid only):\n" + body[:300000]}]}]), fields)
+    w = watcher or _PaidWatcher(url, duration, lens)
+    rows = parse_visual_rows(w.ask(head + "\n\nTRANSCRIPT (aid only):\n" + body[:300000]), fields)
     for _ in range(GAP_ROUNDS):
         gaps = coverage_gaps(rows, duration) if rows else []
         if not gaps:
             break
-        more = parse_visual_rows(_watch([{"role": "user", "content": [video, {"type": "text", "text": head
-                                          + "\n\nYour log so far is MISSING these stretches of the video: " + ", ".join(gaps)
-                                          + ". Watch them and write rows ONLY for those stretches, same format, to their last second."}]}]),
+        more = parse_visual_rows(w.ask(head + "\n\nYour log so far is MISSING these stretches of the video: " + ", ".join(gaps)
+                                       + ". Watch them and write rows ONLY for those stretches, same format, to their last second."),
                                  fields)
         if not more:
             break
@@ -814,21 +879,21 @@ def extract(sig: dict, got: dict) -> dict:
     try:
         return _extract_watch(sig, got)
     except Exception as exc:  # noqa: BLE001
-        if not watch_blocked(exc):
-            raise  # a bad answer is not a reason to download; the operator retries the watch
+        if isinstance(exc, BudgetWait) or not watch_blocked(exc):
+            raise  # a bad answer or the budget is not a reason to download; the queue retries later
         log(f"{sig['id']}: Google would not open the video ({str(exc)[:160]}); frame route")
         return watch_fallback(sig, got)
 
 
 def _extract_watch(sig: dict, got: dict) -> dict:
     lens = pick_lens(got, got.get("lens") or "")
-    video = video_part(sig["url"], got.get("duration") or 0, lens)
+    w = make_watcher(sig["url"], got.get("duration") or 0, lens, float(got.get("fps") or 0))
     body = got.get("transcript") or "(no captions)"
     if got.get("description"):
         body = f"DESCRIPTION:\n{got['description'][:4000]}\n\nTRANSCRIPT (aid only):\n{body}"
     meta = f"channel {got.get('channel')}, {got.get('duration')} s"
     # 1. the log of everything shown, timestamped (Evens 10-16: any agent reads what happened on screen)
-    rows = watch_visual_log(sig["url"], got.get("duration") or 0, lens, body)
+    rows = watch_visual_log(sig["url"], got.get("duration") or 0, lens, body, w)
     if not rows:
         raise RuntimeError("the watch returned no visual log")  # never a packet that is blind to the screen
     rows = add_links(rows, sig["url"])
@@ -842,24 +907,32 @@ def _extract_watch(sig: dict, got: dict) -> dict:
         prompt = WATCH_PROMPT_HEAD + EXTRACT_PROMPT.format(every=1, title=got.get("title"), kind="youtube video", meta=meta,
                                                            body=body[:600000])
     prompt += "\n\nLOG (your own shot-by-shot watch, cite its times):\n" + vis[:1500000]
-    out = parse_extract_rows(_watch([{"role": "user", "content": [video, {"type": "text", "text": prompt + ROWS_FORMAT}]}]))
+    out = parse_extract_rows(w.ask(prompt + ROWS_FORMAT))
     if not out["methods"]:
         raise RuntimeError("the watch returned no methods")
     out["visual_log"], out["lens"] = rows, lens
-    try:
-        spot = spot_check(sig["url"], got.get("duration") or 0, rows, lens=lens)
-    except Exception as exc:  # noqa: BLE001 - recorded, never hidden
-        spot = {"checked": 0, "matched": 0, "error": str(exc)[:200]}
+    if spot_sampled(sig["id"]):
+        try:
+            spot = spot_check(sig["url"], got.get("duration") or 0, rows, lens=lens)
+        except Exception as exc:  # noqa: BLE001 - recorded, never hidden
+            spot = {"checked": 0, "matched": 0, "error": str(exc)[:200]}
+    else:
+        spot = {"checked": 0, "matched": 0, "sampled": False, "note": "not in this video's 1-in-10 quality sample"}
     out["visual_check"] = {"rows": len(rows), "gaps": gaps, "spot_check": spot}
     # 3. atomic sweep from the written record (no extra watch)
-    sweep = parse_extract_rows(_watch([{"role": "user", "content": SWEEP_PROMPT.format(
+    sweep_ask = w.ask if getattr(w, "free", False) else (lambda text: _watch([{"role": "user", "content": text}]))
+    sweep = parse_extract_rows(sweep_ask(SWEEP_PROMPT.format(
         learned=str(out.get("learned_md") or "")[:200000], first=json.dumps(out["methods"])[:100000],
         body=("LOG:\n" + vis + "\n\nTRANSCRIPT:\n" + body)[:900000])
-        + "\n\nOUTPUT FORMAT (replaces the JSON shape above): JSON Lines, one {\"kind\":\"method\", ...fields} per line."}]))
+        + "\n\nOUTPUT FORMAT (replaces the JSON shape above): JSON Lines, one {\"kind\":\"method\", ...fields} per line."))
     if isinstance(sweep.get("methods"), list) and len(sweep["methods"]) >= len(out["methods"]):
         out["methods"] = sweep["methods"]
-    fps = (video["video_url"].get("processing") or {}).get("fps", 1)
-    out["coverage"] = {"watched": f"whole video by Gemini from the YouTube link, {fps} frame/s + audio, {lens} lens, no download"}
+    if getattr(w, "free", False):
+        how = f"whole video by Gemini ({G.MODEL}, Google AI Studio free tier) from the YouTube link, {getattr(w.s, "fps", 1.0):g} frame/s + audio"
+    else:
+        fps = (w.video["video_url"].get("processing") or {}).get("fps", 1)
+        how = f"whole video by Gemini (paid, OpenRouter) from the YouTube link, {fps} frame/s + audio"
+    out["coverage"] = {"watched": f"{how}, {lens} lens, no download"}
     return out
 
 

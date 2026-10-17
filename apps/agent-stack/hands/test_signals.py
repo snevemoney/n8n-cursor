@@ -12,6 +12,9 @@ spec = importlib.util.spec_from_file_location("sig_test", H / "signals.py"); S =
 # live 10-16: tests that fake model replies wrote them into the REAL ledger and were misread as live failures.
 # Every test in this file uses a throwaway cache/ledger.
 S.CACHE = Path(tempfile.mkdtemp()); S.LEDGER = S.CACHE / "ledger.jsonl"
+# 2026-10-16: tests never reach Google with his real key (they did once it existed); a test opts in with mocks.
+S.G.KEY_FILE = S.CACHE / "no-key.env"; S.G.FREE_STATE = S.CACHE / "free.json"
+S.G.os.environ.pop("GEMINI_API_KEY", None)
 spec = importlib.util.spec_from_file_location("op_sig_test", H / "operator.py"); O = importlib.util.module_from_spec(spec); spec.loader.exec_module(O)
 spec = importlib.util.spec_from_file_location("auth_sig_test", H / "authority.py"); A = importlib.util.module_from_spec(spec); spec.loader.exec_module(A)
 
@@ -19,6 +22,9 @@ spec = importlib.util.spec_from_file_location("auth_sig_test", H / "authority.py
 class Isolation(unittest.TestCase):
     def test_tests_never_write_the_real_ledger(self):
         self.assertNotIn("Library/Caches", str(S.LEDGER))
+
+    def test_tests_never_use_the_real_gemini_key(self):
+        self.assertFalse(S.G.has_key())
 
 
 class Classify(unittest.TestCase):
@@ -116,7 +122,8 @@ class WatchTheVideo(unittest.TestCase):  # Evens 10-16: no download, watch the a
             if len(sent) == 1:
                 return '{"start": "00:00", "end": "2:00:00", "action": "opens the app"}\n'
             return '{"kind": "learned_md", "text": "x"}\n{"kind": "method", "name": "m"}\n{"kind": "capability", "name": "c"}\n'
-        with mock.patch.object(S, "_watch", side_effect=fake), mock.patch.object(S, "download") as dl:
+        with mock.patch.object(S, "_watch", side_effect=fake), mock.patch.object(S, "download") as dl, \
+             mock.patch.object(S, "spot_sampled", return_value=True):
             out = S.extract(self.SIG, {"title": "t", "duration": 7200, "transcript": "[00:01] hi", "watch": True})
         dl.assert_not_called()
         watched = [c for c in sent if isinstance(c[0]["content"], list) and c[0]["content"][0].get("type") == "video_url"]
@@ -195,7 +202,7 @@ class VisualLog(unittest.TestCase):  # Evens 10-16: any agent can read what happ
             if len(sent) == 1:
                 return self.ROWS
             return '{"kind": "learned_md", "text": "x"}\n{"kind": "method", "name": "m"}\n'
-        with mock.patch.object(S, "_watch", side_effect=fake):
+        with mock.patch.object(S, "_watch", side_effect=fake), mock.patch.object(S, "spot_sampled", return_value=True):
             out = S.extract(self.SIG, {"title": "t", "duration": 10, "transcript": "", "watch": True})
         self.assertEqual(sent[0][0]["content"][0]["type"], "video_url")          # 1: watch -> visual log
         self.assertIn("clicks Run", sent[1][0]["content"][1]["text"])            # 2: methods see the log
@@ -420,6 +427,37 @@ class LongWatchCompleteness(unittest.TestCase):  # live 10-16: 2h22m log stopped
 
     def test_density_is_asked_for(self):
         self.assertIn("5-15 s", S.VISUAL_PROMPT)
+
+
+class FreeFirst(unittest.TestCase):  # Evens 10-16: $0-20 without lowering quality — free tier, watch once, budget guard
+    SIG = {"kind": "youtube", "id": "abcdefghij0", "url": "https://www.youtube.com/watch?v=abcdefghij0"}
+
+    def test_free_session_watches_once_for_all_passes(self):
+        asked = []
+        class Sess:
+            def __init__(self, url, seconds, fps=1.0): asked.append(("new", url, fps))
+            def ask(self, prompt):
+                asked.append(("ask", prompt[:30]))
+                if len([a for a in asked if a[0] == "ask"]) == 1:
+                    return '{"start": "00:00", "end": "00:59", "action": "opens app"}\n'
+                return '{"kind": "method", "name": "m"}\n'
+        with mock.patch.object(S.G, "has_key", return_value=True), mock.patch.object(S.G, "free_room", return_value=True), \
+             mock.patch.object(S.G, "VideoSession", Sess), mock.patch.object(S, "spot_sampled", return_value=False), \
+             mock.patch.object(S, "_watch", side_effect=AssertionError("paid route must not be used")):
+            out = S.extract(self.SIG, {"title": "t", "duration": 60, "transcript": "", "watch": True})
+        self.assertEqual(sum(1 for a in asked if a[0] == "new"), 1)   # one watch for log, methods and sweep
+        self.assertIn("free", out["coverage"]["watched"])
+
+    def test_paid_route_stops_at_the_budget(self):
+        with mock.patch.object(S.G, "has_key", return_value=True), mock.patch.object(S.G, "free_room", return_value=False), \
+             mock.patch.object(S, "paid_spent", return_value=25.0), mock.patch.object(S, "SIGNAL_BUDGET_USD", 20.0):
+            with self.assertRaises(S.BudgetWait):
+                S.extract(self.SIG, {"title": "t", "duration": 60, "transcript": "", "watch": True})
+
+    def test_spot_check_is_a_one_in_ten_sample(self):
+        ids = [f"vid{i:08d}x" for i in range(200)]
+        n = sum(1 for i in ids if S.spot_sampled(i))
+        self.assertTrue(10 <= n <= 35, n)
 
 
 if __name__ == "__main__":
