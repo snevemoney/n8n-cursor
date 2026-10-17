@@ -79,9 +79,27 @@ def routes(probe=None) -> tuple[str, str]:
         ("AMBER", f"{len(broken)} of {len(all_)} places my code points to are missing: {', '.join(broken[:4])}.")
 
 
+BUS = Path(__file__).resolve().parents[3] / "docs/hive/outer-heaven/.hive/bus/state.json"
+SENSE_COST = {"watch": "paid vision", "eyes": "paid vision", "focus": "free, local"}
+
+
+def senses(bus: dict | None = None) -> tuple[str, str]:
+    """Z55: each sense is its own switch; say which are on and what each costs while on."""
+    if bus is None:
+        try:
+            bus = json.loads(BUS.read_text())
+        except (OSError, ValueError):
+            return "AMBER", "Could not read the sense switches."
+    on = [k for k in SENSE_COST if isinstance(bus.get(k), dict) and (bus[k].get("armed") or bus[k].get("active"))]
+    off = [k for k in SENSE_COST if k not in on]
+    line = (f"On: {', '.join(f'{k} ({SENSE_COST[k]})' for k in on)}. " if on else "") + (f"Off: {', '.join(off)}." if off else "")
+    return "GREEN", line.strip()
+
+
 def report(**fakes) -> dict:
     rows = {"budget": credit(fakes.get("credit")), "local model": local_model(fakes.get("models")),
-            "permissions": permissions(fakes.get("perms")), "disk": disk(), "routes": routes(fakes.get("routes"))}
+            "permissions": permissions(fakes.get("perms")), "disk": disk(), "routes": routes(fakes.get("routes")),
+            "senses": senses(fakes.get("bus"))}
     worst = "RED" if any(s == "RED" for s, _ in rows.values()) else "AMBER" if any(s == "AMBER" for s, _ in rows.values()) else "GREEN"
     bad = [line for s, line in rows.values() if s != "GREEN"]
     spoken = "Everything I need to work is ready." if worst == "GREEN" else " ".join(bad)
