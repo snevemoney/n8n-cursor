@@ -419,6 +419,9 @@ TOOLS = [
     _fn("deliver", "Hand him a finished deliverable: title, files=[paths], note. Copies the files into one dated folder in "
         "his Jarvis Deliveries with a manifest and readme; each file is checked (video plays, image size, PDF pages, text). "
         "Say where it is and whether every check passed.", {"title": S, "files": {"type": "array", "items": S}, "note": S}, ["title", "files"]),
+    _fn("tool_catalog", "His connected tools: action=search query=<words> finds MCP tools by name across every server "
+        "(from the catalog); action=refresh asks every configured server for its tools again (slow, read-only).",
+        {"action": {"type": "string", "enum": ["search", "refresh"]}, "query": S}, []),
     _fn("web_helper", "Reuse a Safari procedure that already worked. save name=... steps=[safari actions, label=<visible "
         "text> instead of ref, {var} for values] expect=<text the page shows when it worked> about=...; run name=... "
         "vars={...}; list. Save only steps you just saw succeed. Each step passes the same checks as a safari call.",
@@ -536,6 +539,7 @@ UJ = _load("undo_journal", "undo_journal.py")
 CBF = _load("cost_by_feature", "cost_by_feature.py")
 RDY = _load("readiness", "readiness.py")
 DLV = _load("deliver", "deliver.py")
+TCAT = _load("tool_catalog", "tool_catalog.py")
 COST_PAGE = Path.home() / "ArtCraft Studio/00 Private/Studio Operations/Ops Watch/Cost by feature.md"
 WEB_HELPERS = CONFIG_DIR / "web-helpers"
 
@@ -1044,6 +1048,13 @@ class Tools:
             return {"text": f"deliver: {exc}"}
         return {"text": ("Delivered, every file checked: " if got["ok"] else "Delivered, but a check failed: ") + got["folder"]
                         + "\n" + "\n".join(f"- {r['file']}: {r['check']}" for r in got["files"])}
+
+    def tool_catalog(self, a):
+        if a.get("action") == "refresh":
+            at = _load("agent_tools", "agent_tools.py")
+            names = [x["name"] for x in _load("mcp_inventory", "mcp_inventory.py").inventory()[0]]
+            TCAT.refresh(names, lambda n: at.op_mcp_list(n, TCAT.PER_SERVER_S))
+        return {"text": TCAT.search(str(a.get("query") or ""))}
 
     def recall(self, a):
         try:
