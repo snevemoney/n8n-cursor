@@ -60,7 +60,12 @@ class Queue:
                                    .fetchone()[0]) / 3600, 1)
         return out
 
+    UPDATABLE = ("state", "attempts", "error", "methods")
+
     def _set(self, vid: str, **kw) -> None:
+        bad = set(kw) - set(self.UPDATABLE)
+        if bad:  # column names are never taken from outside input; values always go through ? placeholders
+            raise ValueError(f"not an updatable column: {sorted(bad)}")
         cols = ", ".join(f"{k}=?" for k in kw)
         self.db.execute(f"update videos set {cols}, updated=? where id=?", (*kw.values(), time.time(), vid))
         self.db.commit()
