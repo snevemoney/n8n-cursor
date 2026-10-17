@@ -11,7 +11,7 @@ assert.ok(/scheduleRestart\(RESTART_MIN\);  \/\/ listen at once/.test(html), "af
 assert.ok(/else if \(finishTimer && \(t \|\| ""\)\.trim\(\)\) holdFinish\(\);/.test(html), "new words restart the pause clock");
 assert.ok(!bargeHit(0.02, 0.0, 900), "room noise under floor -> no barge");
 assert.ok(/applyConstraints\(\{ echoCancellation: true/.test(html), "mic asks for echo cancellation");
-assert.ok(/startBargeWatch\(\);/.test(html) && /pressStop\(\);\s*\n\s*\$\("spoken"\)\.textContent = "Go ahead, I'm listening\."/.test(html), "barge stops speech and listens");
+assert.ok(/startBargeWatch\(\);/.test(html) && /pressStop\(\);\s*\n(?:\s*bargeBeacon\([^)]*\);\s*\n)?\s*\$\("spoken"\)\.textContent = "Go ahead, I'm listening\."/.test(html), "barge stops speech and listens");
 // Evens 10-17: ducking stage — voice over the bleed ducks Jarvis before the full barge rule fires
 const dsrc = html.match(/function duckHit\([^)]*\) \{[\s\S]*?\n    \}/)[0];
 const { duckHit } = new Function(src + "; " + dsrc + "; return { duckHit };")();
