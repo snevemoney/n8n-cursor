@@ -176,6 +176,23 @@ class SpokenOnce(OperatorLoop):  # live 10-17: say + done 12 ms apart were both 
         self.assertFalse(O.tell(self.hive, "and open the first one").get("duplicate"))
 
 
+class SignalAdd(OperatorLoop):  # rule §15: links found along the way go on the shared list through Jarvis's own tool
+    def test_add_puts_the_link_on_the_shared_list(self):
+        added = []
+        class FakeL:
+            @staticmethod
+            def add(rows, url, title="", source="", **k): added.append(url); return {"id": "web-x", "status": "new"}
+            @staticmethod
+            def shared(root, fn, msg, push=True): return fn({})
+        class FakeS:
+            @staticmethod
+            def worktree(): return Path("/tmp")
+        with mock.patch.object(O, "_load", side_effect=lambda name, f: FakeL if "ledger" in f else FakeS):
+            t = O.Tools(O.Task.create(self.hive, "x").path)
+            self.assertIn("on the list: web-x", t.signal({"action": "add", "url": "https://github.com/a/b", "why": "seen in video"})["text"])
+        self.assertEqual(added, ["https://github.com/a/b"])
+
+
 class SelfConfig(OperatorLoop):  # Evens 10-17: Jarvis has access to its own configs and changes what makes sense
     def test_set_get_history_and_refusals(self):
         d = self.home / "cfg"; pers = self.home / "pers"; pers.mkdir(); (pers / "alfred.md").write_text("voice: bm_george\n# A")

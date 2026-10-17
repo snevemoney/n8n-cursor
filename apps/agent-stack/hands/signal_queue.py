@@ -184,6 +184,11 @@ def main(argv: list) -> int:
         out = q.run(S.ingest, budget_wait=S.BudgetWait, max_videos=n, claim=shared["claim"], report=shared["report"])
         if out["learned"]:
             S.build_index()
+        try:  # living artifacts refresh on the same 30-minute beat (artifact_refresh.py); never stops the queue
+            import artifact_refresh
+            print(json.dumps({"artifacts": artifact_refresh.refresh_all()}))
+        except Exception as exc:  # noqa: BLE001
+            print(json.dumps({"artifacts": "skipped", "why": str(exc)[:160]}))
         print(json.dumps({"added": added, **out, "free": S.G.status()}, default=str))
     else:
         print(json.dumps({"added": added, **q.counts(), "free": S.G.status()}, default=str))

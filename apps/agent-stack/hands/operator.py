@@ -38,6 +38,10 @@ SYSTEM = (
     "You are Jarvis, Evens's assistant on his Mac. You work the way Claude Code, Codex and the other frontier agents "
     "work: ONE agent in a loop. You read the whole conversation, decide, use tools, check the real result, and keep "
     "going until the thing is actually done. There is no other brain behind you and nobody to hand work to.\n"
+    "Study packets (rule §15): a repo, post or tool found along the way that we cannot use (no licence, AGPL, non-commercial, "
+    "another Jarvis build, a paid product) gets a study packet, never a code copy: artifact kind md, project STUDY-PACKETS, "
+    "name <owner--repo>, with: what it is, the methods worth having, the design decisions, what Jarvis already has, what to "
+    "rebuild from scratch and why, the licence line. Add every such link to the signals list with signal add. "
     "Your own settings: you may change them with config when the situation calls for it (a quieter voice late at night, a "
     "cheaper model for a long dull job, a tighter learning budget when credits are low) — say what you changed and why; "
     "keys, rules and kept stops are not settings. "
@@ -322,7 +326,7 @@ TOOLS = [
         "it from the title. "
         "watch_later returns his WHOLE Watch Later (every video's title, channel, length, link) as a JSON file in about a "
         "minute, read in his signed-in Safari in the background; use it for any question about his Watch Later.",
-        {"action": {"type": "string", "enum": ["ingest", "scan", "status", "push", "watch_later"]}, "url": S, "source": S, "ingest": I,
+        {"action": {"type": "string", "enum": ["ingest", "scan", "status", "push", "watch_later", "add"]}, "url": S, "source": S, "ingest": I, "why": S,
          "again": B, "lens": {"type": "string", "enum": ["auto", "learn", "studio"]}},
         ["action"]),
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
@@ -335,7 +339,9 @@ TOOLS = [
         "report, index, SOP, brief...): a named HTML/Markdown/CSV/JSON/SVG page in ArtCraft Studio that he can open; the same "
         "name updates it in place and keeps the previous versions. Opens it in his browser on the first publish or when open=true.",
         {"name": S, "content": S, "kind": {"type": "string", "enum": ["html", "md", "csv", "json", "svg"]}, "project": S,
-         "open": {"type": "boolean"}}, ["name", "content"]),
+         "open": {"type": "boolean"},
+         "refresh": {"type": "string", "description": "optional shell command that prints the page; it is re-run every 30 min and the page updates itself when the output changes"}},
+        ["name", "content"]),
     _fn("mcp", "Call a tool on a connected MCP server.", {"server": S, "tool": S, "arguments": {"type": "object"}},
         ["server", "tool"]),
     _fn("say", "Say something to Evens right now and keep working: your answer to a plain question, what you are "
@@ -747,6 +753,17 @@ class Tools:
                 return {"text": "ingest needs url"}
             cmd = f"{sys.executable} {shlex.quote(str(script))} ingest {shlex.quote(str(a['url']).strip())}" + (" --force" if a.get("again") else "") \
                 + (f" --lens {a['lens']}" if a.get("lens") in ("learn", "studio") else "")
+        elif act == "add":  # rule §15: a repo, post or tool found along the way joins the shared signals list
+            url = str(a.get("url") or "").strip()
+            if not url:
+                return {"text": "add needs url"}
+            L = _load("agent_stack_signal_ledger", "signal_ledger.py"); S = _load("agent_stack_signals_for_add", "signals.py")
+            try:
+                row = L.shared(S.worktree(), lambda rows: dict(L.add(rows, url, title=str(a.get("why") or "")[:120], source=str(a.get("source") or ""))),
+                               f"signals list: jarvis added {url[:80]}")
+                return {"text": f"on the list: {row.get('id')} ({row.get('status')})"}
+            except Exception as exc:  # noqa: BLE001
+                return {"text": f"could not add to the shared list: {exc}"}
         elif act == "scan":
             n = int(a.get("ingest") or 0)
             cmd = f"{sys.executable} {shlex.quote(str(script))} scan {shlex.quote(str(a.get('source') or 'all'))}" + (f" --ingest {n}" if n else "")
@@ -894,6 +911,8 @@ class Tools:
         lines = [l for l in (index.read_text().splitlines() if index.exists() else ["# Jarvis artifacts", ""])
                  if not l.startswith(f"- [{a['name']}](")]
         index.write_text("\n".join(lines + [line]) + "\n")
+        if a.get("refresh"):
+            (root / "refresh.json").write_text(json.dumps({"command": str(a["refresh"]), "set": time.strftime("%Y-%m-%d %H:%M")}))
         if first or a.get("open"):
             subprocess.run(["open", str(page)], capture_output=True, timeout=20)
         n = len(list((root / "history").glob("*"))) if (root / "history").exists() else 0
