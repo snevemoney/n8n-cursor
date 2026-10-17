@@ -1,6 +1,6 @@
 """Canvas sig_z37 (tool armory): one searchable catalog of every configured MCP server's tools and its connection state.
 
-refresh: ask each configured server for its tools (read-only tools/list, a few at a time, bounded); cache the result.
+refresh: ask each configured server for its tools (read-only tools/list, one at a time, bounded); cache the result.
 search: find tools by words across all servers from the cache, saying when the catalog was made and which servers failed.
 """
 from __future__ import annotations
@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 
 CACHE = Path.home() / "Library/Caches/jarvis/mcp-catalog.json"
-WORKERS = 4
+WORKERS = 1  # live 10-17: in parallel, lazily loaded helper modules raced (AttributeError on 24 of 25 servers)
 PER_SERVER_S = 25
 
 
