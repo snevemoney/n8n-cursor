@@ -41,6 +41,9 @@ PERSIST_PATH = re.compile(_PERSIST)
 CLI_PERSIST = re.compile(r"(?:>>?|\btee\b(?:\s+-a)?|\bcp\b|\bmv\b|\bln\b)[^|;&]*(?:Library/Launch(?:Agents|Daemons)|\.(?:zshrc|zprofile|zshenv|bashrc|bash_profile|profile)\b|"
                          r"\.claude/settings|\.claude\.json|\.cursor/mcp\.json|\.codex/config\.toml)|\bcrontab\s+(?!-l\b)\S|\|\s*crontab\b|"
                          r"\blaunchctl\s+(?:load|bootstrap|enable)\b|\bosascript\b[^|;&]*login item", re.I)
+PAGE_EXFIL = re.compile(r"\b(?:fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource|importScripts|indexedDB|localStorage|"
+                        r"sessionStorage|caches)\b|document\.cookie|window\.open|(?:location|location\.href)\s*=|\.submit\s*\(|"
+                        r"new\s+Image\b|\.src\s*=", re.I)
 CLI_TRASH = re.compile(r"(?:^|\s)(?:mv\b[^|;&]*\.Trash\b|trash\s)", re.I)
 SECRET_ARG = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.pgpass|\.docker|\.kube|\.git-credentials|"
                         r"id_(?:rsa|dsa|ecdsa|ed25519)[^/]*|[^/]*\.(?:pem|key|p12|kdbx)|credentials[^/]*|secrets?(?:\.[a-z0-9]+)?|"
@@ -129,6 +132,9 @@ def authorize(tool: str, args: dict, *, home: Path | None = None) -> tuple[str, 
         if is_secret_path(path):
             return ALLOW, "flag: that file holds secrets"  # Evens 10-16: flag, never stop
         return ALLOW, ""
+    if tool == "safari" and str(args.get("action") or "") == "eval" and PAGE_EXFIL.search(str(args.get("code") or "")):
+        # 10-17 security pass: page code in his logged-in Safari could read cookies/storage and send them anywhere
+        return ASK, "that runs page code that could read your logins or send data off the page"
     if tool == "signal" and str(args.get("action") or "") == "push":
         return ASK, "that pushes the signal packets to his public GitHub repo"
     if tool == "mcp" and MCP_STOP.search(str(args.get("tool") or "")):
