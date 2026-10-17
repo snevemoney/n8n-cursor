@@ -280,6 +280,11 @@ TOOLS = [
          "again": B, "lens": {"type": "string", "enum": ["auto", "learn", "studio"]}},
         ["action"]),
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
+    _fn("artifact", "Publish or update a living artifact for Evens (dashboard, tracker, flowchart, plan, roadmap, score, "
+        "report, index, SOP, brief...): a named HTML/Markdown/CSV/JSON/SVG page in ArtCraft Studio that he can open; the same "
+        "name updates it in place and keeps the previous versions. Opens it in his browser on the first publish or when open=true.",
+        {"name": S, "content": S, "kind": {"type": "string", "enum": ["html", "md", "csv", "json", "svg"]}, "project": S,
+         "open": {"type": "boolean"}}, ["name", "content"]),
     _fn("mcp", "Call a tool on a connected MCP server.", {"server": S, "tool": S, "arguments": {"type": "object"}},
         ["server", "tool"]),
     _fn("say", "Say something to Evens right now and keep working: your answer to a plain question, what you are "
@@ -384,6 +389,9 @@ def repetition(task, tool: str, args: dict) -> str | None:
 
 
 JOB_EXIT = "__JARVIS_EXIT__"  # matrix audit 10-16: a background job's exit code was lost; the log keeps it
+
+
+ARTIFACTS = Path.home() / "ArtCraft Studio/00 Private/Projects/Jarvis/ARTIFACTS"
 
 
 class Tools:
@@ -775,6 +783,29 @@ class Tools:
         if a.get("keys"):
             return self._hands({"op": "key", "keys": str(a["keys"])})
         return self._hands({"op": "type", "text": str(a.get("text") or "")})
+
+    def artifact(self, a):
+        """Evens 10-16: interactive artifacts that update as we build. One folder per artifact, newest file is the page,
+        history/ keeps every earlier version, INDEX.md lists them all for any agent or Obsidian."""
+        kind = str(a.get("kind") or "html").lower()
+        slug = re.sub(r"[^a-z0-9]+", "-", str(a["name"]).lower()).strip("-")[:60] or "artifact"
+        root = ARTIFACTS / re.sub(r"[^A-Za-z0-9 _-]+", "", str(a.get("project") or "Jarvis")).strip() / slug
+        page = root / f"{slug}.{kind}"
+        first = not page.exists()
+        if not first:
+            (root / "history").mkdir(exist_ok=True)
+            page.rename(root / "history" / f"{time.strftime('%Y%m%d-%H%M%S')}.{kind}")
+        root.mkdir(parents=True, exist_ok=True)
+        page.write_text(str(a["content"]))
+        index = ARTIFACTS / "INDEX.md"
+        line = f"- [{a['name']}]({page.relative_to(ARTIFACTS)}) — {kind}, updated {time.strftime('%Y-%m-%d %H:%M')}"
+        lines = [l for l in (index.read_text().splitlines() if index.exists() else ["# Jarvis artifacts", ""])
+                 if not l.startswith(f"- [{a['name']}](")]
+        index.write_text("\n".join(lines + [line]) + "\n")
+        if first or a.get("open"):
+            subprocess.run(["open", str(page)], capture_output=True, timeout=20)
+        n = len(list((root / "history").glob("*"))) if (root / "history").exists() else 0
+        return {"text": f"{'published' if first else 'updated'} {page} ({n} earlier versions kept){' and opened it' if first or a.get('open') else ''}"}
 
     def open(self, a):
         t = str(a["target"])
@@ -1402,7 +1433,7 @@ RESEARCH_RE = re.compile(r"\b(research|look up|latest|current(?:ly)?|right now|t
                          r"most popular|top \d+|stars|price|prices|news|what'?s new|review of)\b", re.I)
 CANT_RE = re.compile(r"\b(i\s+can(?:'|no)?t|cannot|i\s+don'?t\s+have\s+(?:access|a\s+way|the\s+ability)|unable\s+to|"
                      r"isn'?t\s+available|not\s+available|no\s+\w+(?:\s+\w+)?\s+tool|outside\s+what\s+i\s+can)\b", re.I)
-ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal"}
+ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact"}
 
 
 def _done_gate(task, name: str, args: dict) -> str:

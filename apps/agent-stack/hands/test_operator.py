@@ -151,5 +151,19 @@ class CompletionTruth(OperatorLoop):  # matrix audit 10-16: success must be real
         pop.assert_called_once()
 
 
+class LivingArtifacts(OperatorLoop):  # Evens 10-16: artifacts (dashboards, trackers, plans...) that update as we build
+    def test_publish_then_update_keeps_history_and_index(self):
+        with mock.patch.object(O, "ARTIFACTS", self.home / "ARTIFACTS"), mock.patch.object(O.subprocess, "run") as run:
+            t = O.Tools(O.Task.create(self.hive, "dash").path)
+            a = t.artifact({"name": "Credits Tracker", "content": "<h1>v1</h1>", "kind": "html"})
+            b = t.artifact({"name": "Credits Tracker", "content": "<h1>v2</h1>", "kind": "html"})
+        self.assertIn("published", a["text"]); self.assertIn("updated", b["text"])
+        page = self.home / "ARTIFACTS/Jarvis/credits-tracker/credits-tracker.html"
+        self.assertEqual(page.read_text(), "<h1>v2</h1>")
+        self.assertEqual(len(list((page.parent / "history").glob("*.html"))), 1)
+        self.assertEqual((self.home / "ARTIFACTS/INDEX.md").read_text().count("Credits Tracker"), 1)
+        self.assertEqual(run.call_count, 1)   # opened once, on first publish
+
+
 if __name__ == "__main__":
     unittest.main()
