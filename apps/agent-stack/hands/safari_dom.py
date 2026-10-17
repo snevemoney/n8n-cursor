@@ -229,7 +229,8 @@ class SafariDOM:
 
     def _read(self, a):
         d = self.js(J.READ)
-        return {"text": d.get("error") or f"{d.get('title')} — {d.get('url')}\n{d.get('text') or ''}"}
+        lang = f" (page language: {d['lang']})" if d.get("lang") else ""
+        return {"text": d.get("error") or f"{d.get('title')} — {d.get('url')}{lang}\n{d.get('text') or ''}"}
 
     def _history(self, how: str, lead: str):
         self.js(J.wrap(f"{how};return JSON.stringify({{ok:1}})"))

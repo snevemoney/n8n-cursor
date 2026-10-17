@@ -161,5 +161,10 @@ e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('ch
 return JSON.stringify({ok:1,files:e.files.length})""" % (_json.dumps(b64), _json.dumps(name), _json.dumps(mime)))
 
 
-READ = wrap(LIB + "return JSON.stringify({url:location.href,title:document.title,text:(document.body?document.body.innerText:'').slice(0,15000)})")
+# canvas sig_z15 (read + translate): headings come back marked "# " and the page's declared language rides along,
+# so a translation can keep the page's structure section by section
+READ = wrap(LIB + r"""const M='\u2063H\u2063',ms=[...document.querySelectorAll('h1,h2,h3')].map(h=>{const n=document.createTextNode(M);h.prepend(n);return n});
+let raw='';try{raw=document.body?document.body.innerText:''}finally{ms.forEach(n=>n.remove())}
+const t=raw.split('\n').map(l=>l.includes(M)?'# '+l.split(M).join('').trim():l).join('\n');
+return JSON.stringify({url:location.href,title:document.title,lang:document.documentElement.lang||'',text:t.slice(0,15000)})""")
 STATE = wrap("return JSON.stringify({url:location.href,ready:document.readyState,text:(document.body?document.body.innerText:'').slice(0,20000)})")
