@@ -2,6 +2,7 @@
 real results go back, until done. A scripted model stands in for the live one; tools run for real in a temp home."""
 import importlib.util
 import json
+import subprocess
 import time
 import os
 import sys
@@ -615,6 +616,25 @@ class RememberTool(unittest.TestCase):  # memory wired to the operator brain; on
             task.write("messages.json", [{"role": "user", "content": "What's the weather?"}])
             self.assertIn("didn't ask me to remember", tools.remember({"op": "remember", "text": "invented fact"})["text"])
             self.assertEqual(json.loads((d / "mem.json").read_text()), ["my sister's birthday is March 3", "the gate code is blue"])
+
+
+class PidReuse(unittest.TestCase):  # fault trial: a reused pid must not make a dead job look alive
+    def test_a_live_pid_that_is_not_a_jarvis_worker_is_not_alive(self):
+        other = subprocess.Popen(["sleep", "5"])
+        try:
+            self.assertFalse(O._alive(other.pid))           # exists, but it is `sleep`, not a worker
+        finally:
+            other.kill(); other.wait()
+        self.assertTrue(O._alive(os.getpid()))              # the process running the job itself
+        self.assertFalse(O._alive(999999999))
+        d = Path(tempfile.mkdtemp()); (d / "operator-tasks" / "t1").mkdir(parents=True)
+        other = subprocess.Popen(["sleep", "5"])
+        try:
+            (d / "operator-tasks" / "t1" / "state.json").write_text(json.dumps({"task_id": "t1", "status": "RUNNING", "pid": other.pid}))
+            (d / "operator-tasks" / "latest.json").write_text(json.dumps({"task_id": "t1"}))
+            self.assertEqual(O.status(d)["status"], "STALLED")
+        finally:
+            other.kill(); other.wait()
 
 
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"

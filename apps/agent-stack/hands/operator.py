@@ -1899,11 +1899,20 @@ def recover(hive: Path, max_age_s: float = RECOVER_S) -> list:
 
 
 def _alive(pid) -> bool:
+    """A job's worker is alive only if that pid exists AND is still a Jarvis worker (fault trial 10-17: a dead worker's
+    pid reused by an unrelated program made the job look RUNNING forever)."""
     try:
-        os.kill(int(pid), 0)
-        return True
+        pid = int(pid)
+        os.kill(pid, 0)
     except (OSError, ValueError, TypeError):
         return False
+    if pid == os.getpid():
+        return True  # this very process runs the job (in-process runs and tests)
+    try:
+        cmd = subprocess.run(["ps", "-p", str(pid), "-o", "command="], capture_output=True, text=True, timeout=5).stdout
+    except (OSError, subprocess.SubprocessError):
+        return True  # cannot tell: do not declare a live job dead
+    return "operator.py" in cmd or "serve.py" in cmd
 
 
 def running(hive: Path) -> bool:
