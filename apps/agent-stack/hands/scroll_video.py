@@ -17,6 +17,8 @@ const v=document.getElementById('v'),t=document.getElementById('track');let want
 function onScroll(){{const max=t.offsetHeight-innerHeight;want=Math.min(1,Math.max(0,scrollY/max))*(v.duration||0);
 if(!busy){{busy=true;requestAnimationFrame(()=>{{v.currentTime=want;busy=false}})}}}}
 addEventListener('scroll',onScroll,{{passive:true}});v.addEventListener('loadedmetadata',onScroll);
+// hosts without byte ranges cannot seek a streamed video: load it whole once (file:// keeps the plain src)
+fetch('clip.mp4').then(r=>r.ok?r.blob():null).then(b=>{{if(b)v.src=URL.createObjectURL(b)}}).catch(()=>{{}});
 </script>
 """
 

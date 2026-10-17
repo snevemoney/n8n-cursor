@@ -13,7 +13,7 @@ class ScrollVideo(unittest.TestCase):
             page = Path(got["page"]).read_text()
         self.assertTrue(got["ok"]); self.assertEqual(got["height"], 720)
         self.assertEqual(got["keyframes"], got["frames"]); self.assertLessEqual(got["seconds"], 30)
-        self.assertIn("v.currentTime=want", page); self.assertIn('src="clip.mp4"', page)
+        self.assertIn("v.currentTime=want", page); self.assertIn('src="clip.mp4"', page); self.assertIn("createObjectURL", page)
 
     def test_missing_source_is_a_clear_error(self):
         with self.assertRaises(ValueError): V.make("/nonexistent.mov", tempfile.mkdtemp())
