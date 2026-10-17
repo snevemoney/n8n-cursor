@@ -247,6 +247,7 @@ def system_prompt() -> str:
                    "and PRs on HIS repo snevemoney/n8n-cursor (Jarvis lives in apps/agent-stack), never Anthropic's repos.")
 
 
+LOOP_KIT = Path(os.environ.get("JARVIS_LOOP_KIT") or Path.home() / ".feature-loop/kit")
 CONFIG_DIR = Path.home() / ".config/brain"
 CONFIG_KEYS = {  # key -> (file, validator regex). Jarvis may change these; nothing else (no keys, rules, stops, plists).
     "voice": ("voice.txt", r"[abmf][fm]_[a-z]+(?::\d{1,3})?(?:\+[abmf][fm]_[a-z]+(?::\d{1,3})?)*"),
@@ -333,6 +334,14 @@ TOOLS = [
          "again": B, "lens": {"type": "string", "enum": ["auto", "learn", "studio"]}},
         ["action"]),
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
+    _fn("loop", "Feature loop (AGENT_RULES §13, the shared kit): build ONE feature with a keep-if-better loop. Order: init "
+        "(writes the check templates) -> write checks in checks/drafts/<feature>/ -> show (one plain line per check) -> ask "
+        "Evens with ask_owner -> lock with his exact words -> round (a fresh builder per round, scored, kept only if better) "
+        "-> stats. Never the live checkout, never main; ends in one draft PR he merges.",
+        {"action": {"type": "string", "enum": ["init", "show", "lock", "round", "stats"]}, "repo": S, "feature": S,
+         "approval": {"type": "string", "description": "Evens's words approving the checks, verbatim (lock only)"},
+         "builder": {"type": "string", "description": "fresh builder command per round (round only)"},
+         "max_rounds": I}, ["action", "repo"]),
     _fn("config", "Read or change your own settings when the situation calls for it (Evens 10-17): voice (a Kokoro voice "
         "or blend), personality (a file name in Personalities), model (your brain for the next 30 min), signal_budget_usd "
         "(paid cap for the learning queue). Say what you changed and why. Keys, rules and kept stops are not settings.",
@@ -856,6 +865,42 @@ class Tools:
         if a.get("keys"):
             return self._hands({"op": "key", "keys": str(a["keys"])})
         return self._hands({"op": "type", "text": str(a.get("text") or "")})
+
+    def loop(self, a):
+        """Evens 10-16/17 'looping capabilities': the kit at ~/.feature-loop/kit, with its rules enforced here too."""
+        kit = LOOP_KIT
+        if not (kit / "scripts/round.py").is_file():
+            return {"text": f"the loop kit is not installed at {kit}"}
+        if os.environ.get("JARVIS_ONE_MIND", "0") != "1":
+            return {"text": "loops are off for me (JARVIS_ONE_MIND is not 1). Ask Evens to turn them on, or run the kit yourself in shell."}
+        repo = Path(os.path.expanduser(str(a.get("repo") or ""))).resolve()
+        live = Path.home() / "jarvis-main"
+        if not repo.is_dir() or repo == live or live in repo.parents:
+            return {"text": "refused: a loop runs in its own worktree on a loop/* branch, never in the live checkout (~/jarvis-main)."}
+        act, feat = str(a.get("action")), re.sub(r"[^a-z0-9-]", "", str(a.get("feature") or "").lower())
+        if act != "stats" and not feat:
+            return {"text": "feature name needed (letters, digits, dashes)"}
+        if act == "init":
+            cmd = f"bash {shlex.quote(str(kit / 'scripts/init.sh'))} {shlex.quote(str(repo))} {feat}"
+        elif act == "show":
+            cmd = f"{sys.executable} {shlex.quote(str(kit / 'scripts/lock_checks.py'))} show {feat} --root {shlex.quote(str(repo))}"
+        elif act == "lock":
+            words = str(a.get("approval") or "").strip()
+            if len(words) < 3:
+                return {"text": "refused: lock needs Evens's approval words, verbatim (ask him with ask_owner first)."}
+            cmd = (f"{sys.executable} {shlex.quote(str(kit / 'scripts/lock_checks.py'))} lock {feat} --root {shlex.quote(str(repo))} "
+                   f"--approved-by Evens --approval {shlex.quote(words)}")
+        elif act == "round":
+            builder = str(a.get("builder") or "").strip()
+            if not builder:
+                return {"text": "round needs a builder command (a fresh agent per round)."}
+            cmd = (f"{sys.executable} {shlex.quote(str(kit / 'scripts/round.py'))} {feat} --root {shlex.quote(str(repo))} "
+                   f"--builder {shlex.quote(builder)}" + (f" --max {int(a['max_rounds'])}" if a.get("max_rounds") else ""))
+            return self.shell({"command": cmd, "background": True})
+        else:
+            cmd = f"bash {shlex.quote(str(kit / 'scripts/stats.sh'))}"
+        cp = subprocess.run(["/bin/zsh", "-lc", cmd], capture_output=True, text=True, timeout=600, cwd=str(repo))
+        return {"text": _clip(f"exit {cp.returncode}\n{cp.stdout}\n{cp.stderr}")}
 
     def config(self, a):
         key, action = str(a.get("key") or ""), str(a.get("action") or "get")
@@ -1580,7 +1625,7 @@ RESEARCH_RE = re.compile(r"\b(research|look up|latest|current(?:ly)?|right now|t
                          r"most popular|top \d+|stars|price|prices|news|what'?s new|review of)\b", re.I)
 CANT_RE = re.compile(r"\b(i\s+can(?:'|no)?t|cannot|i\s+don'?t\s+have\s+(?:access|a\s+way|the\s+ability)|unable\s+to|"
                      r"isn'?t\s+available|not\s+available|no\s+\w+(?:\s+\w+)?\s+tool|outside\s+what\s+i\s+can)\b", re.I)
-ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config"}
+ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop"}
 
 
 def _done_gate(task, name: str, args: dict) -> str:

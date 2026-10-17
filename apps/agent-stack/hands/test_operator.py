@@ -193,6 +193,23 @@ class SignalAdd(OperatorLoop):  # rule §15: links found along the way go on the
         self.assertEqual(added, ["https://github.com/a/b"])
 
 
+class FeatureLoops(OperatorLoop):  # Evens 10-16/17: looping capabilities, inside the §13 rules
+    def test_gates_then_runs_the_kit(self):
+        kit = self.home / "kit" / "scripts"; kit.mkdir(parents=True)
+        for n in ("round.py", "lock_checks.py", "init.sh", "stats.sh"): (kit / n).write_text("")
+        repo = self.home / "wt"; repo.mkdir()
+        with mock.patch.object(O, "LOOP_KIT", self.home / "kit"), mock.patch.dict(O.os.environ, {"JARVIS_ONE_MIND": "0"}):
+            t = O.Tools(O.Task.create(self.hive, "loop").path)
+            self.assertIn("loops are off", t.loop({"action": "show", "repo": str(repo), "feature": "x"})["text"])
+        with mock.patch.object(O, "LOOP_KIT", self.home / "kit"), mock.patch.dict(O.os.environ, {"JARVIS_ONE_MIND": "1"}), \
+             mock.patch.object(O.subprocess, "run", return_value=mock.Mock(returncode=0, stdout="shown", stderr="")) as run:
+            self.assertIn("refused", t.loop({"action": "show", "repo": str(Path.home() / "jarvis-main"), "feature": "x"})["text"])
+            self.assertIn("refused", t.loop({"action": "lock", "repo": str(repo), "feature": "x"})["text"])           # no approval words
+            self.assertIn("shown", t.loop({"action": "show", "repo": str(repo), "feature": "my-feat"})["text"])
+            got = t.loop({"action": "lock", "repo": str(repo), "feature": "my-feat", "approval": "yes, happy with these"})
+            self.assertIn("exit 0", got["text"]); self.assertIn("--approval 'yes, happy with these'", run.call_args[0][0][-1])
+
+
 class SelfConfig(OperatorLoop):  # Evens 10-17: Jarvis has access to its own configs and changes what makes sense
     def test_set_get_history_and_refusals(self):
         d = self.home / "cfg"; pers = self.home / "pers"; pers.mkdir(); (pers / "alfred.md").write_text("voice: bm_george\n# A")
