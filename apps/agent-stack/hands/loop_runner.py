@@ -51,6 +51,7 @@ def _health(m) -> tuple[bool, str]:
 PRIVATE = Path.home() / "ArtCraft Studio/00 Private/Studio Operations"
 SHARED = Path.home() / ".grok-shared"
 STALE_DAYS = 14
+COULD_NOT_RE = re.compile(r"\b(?:couldn't|could not|can't|cannot|unable to|failed to|add credits)\b", re.I)
 TASKS = Path(__file__).resolve().parents[3] / "docs/hive/outer-heaven/.hive/operator-tasks"
 _VAULT = next((v for v in (Path.home() / "Vaults/My_Billion_Dollar_Vault", Path.home() / "Documents/My_Billion_Dollar_Vault") if v.is_dir()),
               Path.home() / "Vaults/My_Billion_Dollar_Vault")
@@ -129,7 +130,10 @@ def _daily_summary(_m, now: float | None = None) -> tuple[bool, str]:
     cost = sum(float(st.get("cost_usd") or 0) for st in jobs)
     import collections as _c
     ends = ", ".join(f"{n} {str(k or 'unknown').lower().replace('_', ' ')}" for k, n in _c.Counter(st.get("status") for st in jobs).most_common())
-    line = f"Today Jarvis ran {len(jobs)} jobs" + (f" ({ends})" if ends else "") + f", ${cost:.2f} billed."
+    # a closed conversation is DONE even when its last words were "I couldn't"; count those from what it said
+    short = sum(1 for st in jobs if COULD_NOT_RE.search(str(st.get("summary") or "")))
+    line = (f"Today Jarvis ran {len(jobs)} jobs" + (f" ({ends})" if ends else "")
+            + (f"; {short} of them ended saying it could not finish" if short else "") + f", ${cost:.2f} billed.")
     note = DAILY / f"{day.isoformat()}.md"
     if note.exists():
         return True, line + " Today's note was already written."

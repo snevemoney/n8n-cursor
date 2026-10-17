@@ -134,13 +134,14 @@ class DailySummary(unittest.TestCase):  # X33 / Z58: one note a day of what Jarv
         d = Path(tempfile.mkdtemp()); tasks = d / "tasks"; now = time.time()
         for name, st in (("a", {"started": now - 60, "status": "DONE", "cost_usd": 0.02, "summary": "Opened the PDF and read page 2."}),
                          ("b", {"started": now - 120, "status": "WAITING_OWNER", "summary": "Asked about the invoice."}),
+                         ("c", {"started": now - 90, "status": "DONE", "summary": "I couldn't work that out. Add credits to OpenRouter."}),
                          ("old", {"started": now - 3 * 86400, "status": "DONE", "cost_usd": 9})):
             (tasks / name).mkdir(parents=True); (tasks / name / "state.json").write_text(json.dumps(st))
         with mock.patch.object(R, "TASKS", tasks), mock.patch.object(R, "DAILY", d / "daily"):
             ok, line = R._daily_summary(None, now=now)
             note = next((d / "daily").iterdir()).read_text()
             again = R._daily_summary(None, now=now)[1]
-        self.assertTrue(ok); self.assertIn("2 jobs (", line); self.assertIn("1 done", line); self.assertIn("1 waiting owner", line); self.assertIn("$0.02 billed", line)
+        self.assertTrue(ok); self.assertIn("3 jobs (", line); self.assertIn("2 done", line); self.assertIn("1 of them ended saying it could not finish", line); self.assertIn("1 waiting owner", line); self.assertIn("$0.02 billed", line)
         self.assertIn("type: daily-summary", note); self.assertIn("Opened the PDF and read page 2.", note); self.assertNotIn("$9", note)
         self.assertIn("already written", again)
         with mock.patch.dict(os.environ, {"JARVIS_LOOPS_FILE": str(d / "loops.json")}):
