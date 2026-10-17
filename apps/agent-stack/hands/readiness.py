@@ -93,7 +93,9 @@ def senses(bus: dict | None = None) -> tuple[str, str]:
     on = [k for k in SENSE_COST if isinstance(bus.get(k), dict) and (bus[k].get("armed") or bus[k].get("active"))]
     off = [k for k in SENSE_COST if k not in on]
     line = (f"On: {', '.join(f'{k} ({SENSE_COST[k]})' for k in on)}. " if on else "") + (f"Off: {', '.join(off)}." if off else "")
-    return "GREEN", line.strip()
+    # Z64 mode truth: the Orb owns the mic; say plainly whether it is listening
+    ears = {"live": " Ears on: the Orb's mic is listening.", "mute": " Ears off: the Orb's mic is muted."}.get(str(bus.get("mic") or ""), "")
+    return "GREEN", (line + ears).strip()
 
 
 def report(**fakes) -> dict:

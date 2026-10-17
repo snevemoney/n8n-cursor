@@ -18,6 +18,7 @@ class Readiness(unittest.TestCase):
     def test_senses_say_which_are_on_and_what_they_cost(self):
         state, line = R.senses({"watch": {"armed": True}, "focus": {"armed": False}})
         self.assertEqual(line, "On: watch (paid vision). Off: eyes, focus.")
+        self.assertTrue(R.senses({"mic": "mute"})[1].endswith("Ears off: the Orb's mic is muted."))
 
     def test_all_good_is_one_line(self):
         with mock.patch.object(R, "disk", return_value=("GREEN", "90 GB free on the Mac.")):
