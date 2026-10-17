@@ -2269,6 +2269,11 @@ def _words(t: str) -> str:
     return _SNAKE_RE.sub(lambda m: m.group(0).replace("_", " "), t)
 
 
+SIGHT_RE = re.compile(r"\b(?:your screen (?:shows|has)|i (?:can )?see (?:a|an|the|your)\b|"
+                      r"(?:is|are) (?:open|showing|displayed) (?:on|in) (?:your|the) (?:screen|window|display))", re.I)
+LOOK_TOOLS = {"computer", "screenshot", "app", "safari", "mcp", "browser"}
+
+
 def _done_gate(task, name: str, args: dict) -> str:
     """Text that sends `done` back once per turn, or "" to let it finish. Live misreads: false "I can't"/"no tool"
     (10 of 55), and actions reported as done that did not take (typing ignored, clicks that changed nothing)."""
@@ -2304,6 +2309,11 @@ def _done_gate(task, name: str, args: dict) -> str:
     elif open_steps and n < 2:
         why = ("Before you finish: your plan still has open steps: " + "; ".join(open_steps[:6]) + ". Do them, or mark "
                "them dropped with the reason, then finish.")
+    elif SIGHT_RE.search(summary) and not any(r.get("tool") in LOOK_TOOLS for r in rows) and n < 2:
+        # Z54 no-source sight: never describe his screen from memory or guesswork
+        why = ("Before you finish: you describe what is on his screen, but you did not look this turn. Take a screenshot "
+               "(computer), read the app (app read) or the page (safari read), then answer from what you saw; or tell him "
+               "plainly you can't see it.")
     elif CANT_RE.search(summary):
         why = ("Before you finish: you are about to tell him you can't." + (
             " This is the second time: the same idea will not work, change the approach completely." if n else "") + " You have shell, files, his Safari (safari), the "

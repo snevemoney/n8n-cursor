@@ -294,6 +294,16 @@ class CancelReachesBackgroundJobs(unittest.TestCase):  # matrix "conc": cancella
         self.assertEqual(subprocess.run(["pgrep", "-g", str(pid)], capture_output=True, text=True).stdout.strip(), "")
 
 
+class NoSightWithoutLooking(unittest.TestCase):  # Z54
+    def test_describing_the_screen_without_looking_is_sent_back(self):
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        model = scripted("Your screen shows Safari with three tabs open.",
+                         [("done", {"summary": "The screen wire is off, so I have nothing to describe yet.", "evidence": "no look taken"})])
+        state = O.run(O.Task.create(Path(tmp.name), "what's on my screen?").path, model_fn=model)
+        self.assertTrue(any("you did not look this turn" in str(m.get("content")) for m in model.seen[1]))
+        self.assertIn("nothing to describe", state["summary"])
+
+
 class NoCreditIsNotDone(unittest.TestCase):  # live 10-17: "I couldn't ... Add credits" closed jobs as DONE
     def test_the_local_refusal_ends_the_job_as_model_unavailable_spoken_once(self):
         tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
