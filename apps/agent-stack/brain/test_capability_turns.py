@@ -79,7 +79,8 @@ class ThenChains(unittest.TestCase):
         self.assertEqual(P.split_steps("what time is it then what's today's date"), ["what time is it", "what's today's date"])
         hive = Path(tempfile.mkdtemp()); (hive / "bus").mkdir()
         out = list(P.apply_pipeline_iter("what time is it then what's today's date", hive=hive))[-1]
-        self.assertEqual(out["tool"], "multistep"); self.assertIn("Step 2", out["spoken"])
+        self.assertEqual(out["tool"], "multistep")
+        self.assertRegex(out["spoken"], r"\d:\d\d"); self.assertIn("Today is", out["spoken"])  # both answers, said plainly (no "Step 2" labels)
 
     def test_non_chains_and_hard_chains_are_not_split(self):
         self.assertEqual(P.split_steps("I went home and then slept"), [])

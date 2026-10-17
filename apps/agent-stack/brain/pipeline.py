@@ -4593,6 +4593,20 @@ def wants_eyes(utterance: str) -> bool:
 # --- Focus sessions (Jarvis V6 port: lock one app, count drift, speak the score) ---
 FOCUS_DEFAULT_MIN = 30
 FOCUS_TICK_SEC = 5
+# canvas appfocus: offer help only in apps Evens enabled for watching, only when the window says something went wrong
+FOCUS_TROUBLE_RE = re.compile(r"\b(errors?|failed|failure|exception|crash(?:ed)?|warnings?|denied|not responding|conflicts?|traceback)\b", re.I)
+FOCUS_ASSIST_GAP_SEC = 300
+
+
+def _focus_assist(f2: dict, watch: dict, app: str, title: str, ts: float) -> str:
+    if not title or not FOCUS_TROUBLE_RE.search(title) or not FRAME.watch_app_allowed(watch, app):
+        return ""
+    seen = f2.get("assist") if isinstance(f2.get("assist"), dict) else {}
+    last = seen.get(app) if isinstance(seen.get(app), dict) else {}
+    if last.get("title") == title or ts - float(last.get("ts") or 0) < FOCUS_ASSIST_GAP_SEC:
+        return ""
+    f2["assist"] = {**seen, app: {"title": title, "ts": ts}}
+    return f"I see {title[:70]} in {app}. Want me to take a look, sir?"
 FOCUS_RELIEF_SEC = 180
 FOCUS_SELF_APPS = frozenset({"jarvisorb", "jarvis orb", "jarvis-widget"})
 
@@ -4841,6 +4855,12 @@ def focus_tick(
                 out["callout"] = line
             else:
                 f2["updated_at"] = now_iso()
+        if not out.get("callout") and f2.get("armed"):
+            watch = bus2.get("watch") if isinstance(bus2.get("watch"), dict) else {}
+            line = _focus_assist(f2, watch, app, str(front.get("title") or "").strip(), ts)
+            if line:
+                _focus_callout(f2, line)
+                out["callout"] = line
         bus2["focus"] = f2
         return bus2
 
