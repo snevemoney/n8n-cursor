@@ -21,8 +21,13 @@ class StepDownOnLowCredit(unittest.TestCase):
 
     def test_a_too_high_ceiling_is_retried_lower_on_the_same_model(self):
         ok = {"choices": [{"message": {"content": "OK"}, "finish_reason": "stop"}], "usage": {}}
-        got, caps, _ = self.run_with([refused('{"error":{"message":"requires more credits, or fewer max_tokens"}}'), ok])
-        self.assertTrue(got["ok"]); self.assertEqual(got["model"], "m1"); self.assertEqual(caps, [12000, 4000])
+        got, caps, _ = self.run_with([refused('{"error":{"message":"requires more credits, or fewer max_tokens. You requested up to 12000 tokens, but can only afford 3900."}}'), ok])
+        self.assertTrue(got["ok"]); self.assertEqual(got["model"], "m1"); self.assertEqual(caps, [12000, 3900])
+
+    def test_too_little_credit_for_a_real_step_moves_on_without_retrying(self):
+        low = '{"error":{"message":"requires more credits, or fewer max_tokens. You requested up to 12000 tokens, but can only afford 149."}}'
+        got, caps, _ = self.run_with([refused(low), refused(low)])
+        self.assertFalse(got["ok"]); self.assertIn("402", got["error"]); self.assertEqual(caps, [12000, 12000])
 
     def test_other_payment_errors_move_on_and_still_report_402(self):
         got, caps, _ = self.run_with([refused('{"error":{"message":"key disabled"}}'), refused('{"error":{"message":"key disabled"}}')])

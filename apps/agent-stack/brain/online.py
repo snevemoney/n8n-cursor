@@ -1747,7 +1747,7 @@ def with_cache_marks(messages: list[dict], model: str) -> list[dict]:
     return out
 
 
-MAX_TOKENS_STEPDOWN = (4000, 1500)
+MIN_USEFUL_TOKENS = 800  # below this one agent step cannot finish; try the next model instead
 
 
 def _http_error_text(exc) -> str:
@@ -1789,17 +1789,18 @@ def call_openrouter_messages(
         if not allow_reasoning:
             body["reasoning"] = {"enabled": False}  # Opus 5.5 refuses this ("reasoning is mandatory"): operator opts out
         data = None
-        # live 10-17: a low balance refuses a 12000-token ceiling ("requires more credits, or fewer max_tokens") while
-        # the same model answers at 4000; step the ceiling down on the same model before giving up on it
-        for cap in (body["max_tokens"], *[c for c in MAX_TOKENS_STEPDOWN if c < body["max_tokens"]]):
-            body["max_tokens"] = cap
+        # live 10-17: a low balance refuses a 12000-token ceiling ("requires more credits, or fewer max_tokens ... can
+        # only afford N"). Retry the same model once at N when N is enough for a real step; otherwise move on at once.
+        for _ in range(2):
             try:
                 data = _http_json(OPENROUTER_URL, data=body, headers=headers, timeout=attempt_sec)
                 break
             except urllib.error.HTTPError as exc:
                 last_err = f"{mid}: http {exc.code}"
-                if exc.code != 402 or "max_tokens" not in _http_error_text(exc):
+                afford = re.search(r"can only afford (\d+)", _http_error_text(exc)) if exc.code == 402 else None
+                if not afford or not MIN_USEFUL_TOKENS <= int(afford.group(1)) < body["max_tokens"]:
                     break
+                body["max_tokens"] = int(afford.group(1))
             except (urllib.error.URLError, TimeoutError, OSError) as exc:
                 last_err = f"{mid}: {type(exc).__name__}"
                 break
