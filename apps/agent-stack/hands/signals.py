@@ -1095,6 +1095,17 @@ def worktree() -> Path:
     return WORKTREE
 
 
+def _wiki_log(kind: str, line: str) -> None:
+    """Karpathy LLM-wiki log.md: append-only, one grep-able line per ingest/query/lint (`## [date] kind | ...`)."""
+    try:
+        f = worktree() / INDEX / "log.md"
+        f.parent.mkdir(parents=True, exist_ok=True)
+        with f.open("a") as fh:
+            fh.write(f"## [{time.strftime('%Y-%m-%d %H:%M')}] {kind} | {line}\n")
+    except OSError:
+        pass
+
+
 def write_packet(sig: dict, got: dict, ext: dict, work: Path) -> Path:
     root = worktree()
     d = root / PACKETS / sig["id"]
@@ -1179,6 +1190,7 @@ def _ingest(url: str, force: bool = False, lens: str = "", fps: float = 0.0) -> 
             except Exception as exc:  # noqa: BLE001 - the packet is saved; the filing failure is reported
                 ext["studio_path"] = f"not filed in ArtCraft Studio: {exc}"
         ledger({"event": "packet", "id": sig["id"], "methods": len(ext["methods"]), "path": str(d), "coverage": ext.get("coverage")})
+        _wiki_log("ingest", f"{sig['id']} | {str(got.get('title') or '')[:80]} | {len(ext['methods'])} methods")
         extra = [r["url"] for r in found_links(sig, got, ext, d)]
         return {"id": sig["id"], "status": "DONE", "methods": len(ext["methods"]), "packet": str(d), "also_signals": extra,
                 "studio": ext.get("studio_path"),
