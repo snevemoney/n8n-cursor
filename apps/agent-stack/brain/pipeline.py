@@ -6877,7 +6877,8 @@ def _operator_turn(args: dict, utterance: str, hive, turns: list | None = None) 
                 spoken += " I'm still on it; say anything and I'll hear you."
             return {"ok": True, "tool": "operator", "spoken": spoken[:1600], "wires": ["operator"], "cites": [],
                     "sent": False, "task_verified": state.get("status") == "DONE",
-                    "operator_task": state.get("task_id"), "operator_status": state.get("status")}
+                    "operator_task": state.get("task_id"), "operator_status": state.get("status"),
+                    "speech_seq": len(task.rows("speech.jsonl"))}
     return {"ok": state.get("status") != "NONE", "tool": "operator", "spoken": _operator_line(state), "wires": ["operator"],
             "cites": [], "sent": False, "task_verified": state.get("status") == "DONE",
             "operator_task": state.get("task_id"), "operator_status": state.get("status")}

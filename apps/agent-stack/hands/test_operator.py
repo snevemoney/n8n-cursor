@@ -443,6 +443,21 @@ class ScheduleTool(unittest.TestCase):  # canvas wire sched -> pipe: the operato
         self.assertIn("schedule", [t["function"]["name"] for t in O.TOOLS]); self.assertIn("schedule", O.ACTING_TOOLS)
 
 
+class EventReplay(unittest.TestCase):  # matrix "eventreplay"
+    def test_lines_are_numbered_and_replayed_from_a_sequence(self):
+        d = Path(tempfile.mkdtemp()); root = d / "operator-tasks"
+        task = O.Task(root / "t1"); task.path.mkdir(parents=True)
+        task.write("state.json", {"task_id": "t1", "status": "DONE"}); task.write("request.json", {"goal": "g"})
+        (root / "latest.json").write_text(json.dumps({"task_id": "t1"}))
+        for line in ("Starting.", "Halfway.", "Done, the file is saved."):
+            task.speak(line)
+        got = O.events(d, "t1", 1)
+        self.assertEqual([l["seq"] for l in got["lines"]], [1, 2]); self.assertEqual(got["seq"], 3)
+        self.assertEqual(got["lines"][-1]["text"], "Done, the file is saved.")
+        self.assertEqual(O.events(d, "", 0)["task_id"], "t1")            # no task given: the latest job
+        self.assertEqual(O.events(d, "../etc", 0)["task_id"], "t1")      # a bad id never escapes the task folder
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")

@@ -2131,6 +2131,23 @@ def status(hive: Path, task_id: str | None = None) -> dict:
     return {**st, "goal": task.read("request.json", {}).get("goal", "")}
 
 
+def events(hive: Path, task_id: str = "", since: int = 0) -> dict:
+    """matrix "eventreplay": every line a job speaks, numbered, so the Orb shows each exactly once, in order, even after
+    a reconnect or a turn that returned before the job finished. Read-only."""
+    root = Path(hive) / "operator-tasks"
+    latest = status(hive)
+    tid = task_id if task_id and (root / task_id).is_dir() and re.fullmatch(r"[A-Za-z0-9_-]{1,64}", task_id) else str(latest.get("task_id") or "")
+    if not tid:
+        return {"task_id": "", "latest_task_id": "", "seq": 0, "lines": [], "status": "NONE"}
+    rows = Task(root / tid).rows("speech.jsonl")
+    since = max(0, int(since or 0))
+    lines = [{"seq": i, "text": str(r.get("text") or ""), "at": r.get("at")} for i, r in enumerate(rows) if i >= since and str(r.get("text") or "").strip()]
+    lt = str(latest.get("task_id") or "")
+    lseq = len(Task(root / lt).rows("speech.jsonl")) if lt and lt != tid else len(rows)
+    st = status(hive, tid)
+    return {"task_id": tid, "status": st.get("status"), "seq": len(rows), "lines": lines[-50:], "latest_task_id": lt, "latest_seq": lseq}
+
+
 def orb_view(hive: Path) -> dict:
     """What the Orb shows beside the card (matrix: receiptcard, gatehud, driving, chips): tools run this turn, the
     model pick, cost, the driving flag and a few chips to tap. Read-only; never the model's own words."""
@@ -2153,7 +2170,7 @@ def orb_view(hive: Path) -> dict:
     chips = (["How is it going?"] if st.get("status") in ("RUNNING", "QUEUED") else []) + \
             (["Go on"] if st.get("status") == "WAITING_OWNER" else []) + ["Good morning, what's on today?"] + goals[:2]
     jev = st.get("jev") or {}
-    return {"status": st.get("status"), "step": st.get("step"), "cost_usd": st.get("cost_usd"), "tier": st.get("tier"),
+    return {"task_id": tid, "status": st.get("status"), "step": st.get("step"), "cost_usd": st.get("cost_usd"), "tier": st.get("tier"),
             "model": st.get("model"), "kind": st.get("kind"), "jev": {k: jev.get(k) for k in ("tier", "ne", "picked") if k in jev},
             "driving": st.get("driving"), "verified": st.get("verified"), "tools_run": tools_run, "chips": chips[:4]}
 
