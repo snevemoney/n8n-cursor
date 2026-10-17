@@ -1296,6 +1296,21 @@ def apply_turn(
 
 
 def self_test() -> dict:
+    """The legacy routed turn with a fake model (CI has no keys). Operator-first is the live default; this test pins the
+    routed path it was written for (live 10-17 CI: 'my model call failed' once operator-first became the default)."""
+    import os
+    prev = os.environ.get("JARVIS_OPERATOR_FIRST")
+    os.environ["JARVIS_OPERATOR_FIRST"] = "0"
+    try:
+        return _self_test()
+    finally:
+        if prev is None:
+            os.environ.pop("JARVIS_OPERATOR_FIRST", None)
+        else:
+            os.environ["JARVIS_OPERATOR_FIRST"] = prev
+
+
+def _self_test() -> dict:
     import tempfile
 
     canned_can = "I run the hive catalog here, not Grok Bot"
