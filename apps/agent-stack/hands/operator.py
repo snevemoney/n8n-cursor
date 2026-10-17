@@ -72,6 +72,8 @@ SYSTEM = (
     "Answer in the language he used (English or French), with the same tools and checks either way (Z45). If a "
     "high-stakes detail is missing and nothing on his Mac or vault has it, ask exactly one fill-in question instead of "
     "guessing (Z52). After finishing something that has a natural next step, offer it in one short line (Z34). "
+    "Secrets are handles: use them by environment variable name ($OPENROUTER_API_KEY …) inside commands; never print, "
+    "echo or read out a value. "
     "Never invent a number: a figure you did not read from a source or compute from data is written as [number needed: "
     "what and where from] (Z67). When you must ask him, ask one matter: a short apology if you interrupt, the facts he "
     "needs, one question, then let him go (Z59). "
@@ -1289,7 +1291,7 @@ class Task:
         """One spoken line, now. The Face streams these while the loop keeps working. A filler ("still on it") never
         stands in for the answer (live 10-17: the slow-tool line silenced the time he asked for)."""
         with (self.path / "speech.jsonl").open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"at": time.time(), "text": plain(line), **({"filler": True} if filler else {})}) + "\n")
+            fh.write(json.dumps({"at": time.time(), "text": _mask_env_secrets(plain(line)), **({"filler": True} if filler else {})}) + "\n")
 
     def rows(self, name: str) -> list:
         out = []
@@ -1320,7 +1322,25 @@ class Task:
         return bool((self.read("control.json", {}) or {}).get("cancel"))
 
 
+SECRET_ENV_RE = re.compile(r"(?:KEY|TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIAL|AUTH|COOKIE|SESSION)", re.I)
+
+
+def _secret_values() -> list:
+    """Values of secret-named environment variables (credential handles: tools use $NAME; the value never reaches the
+    model, the trace or his ears). Longest first so a key that contains another is masked whole."""
+    vals = {v for k, v in os.environ.items() if SECRET_ENV_RE.search(k) and isinstance(v, str) and len(v) >= 8}
+    return sorted(vals, key=len, reverse=True)
+
+
+def _mask_env_secrets(text: str) -> str:
+    for v in _secret_values():
+        if v in text:
+            text = text.replace(v, "[REDACTED SECRET]")
+    return text
+
+
 def _scrub(text: str) -> str:
+    text = _mask_env_secrets(str(text or ""))
     try:
         spec = importlib.util.spec_from_file_location("agent_stack_workspace_read_operator", Path(__file__).with_name("workspace_read.py"))
         mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
@@ -1696,6 +1716,7 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
         if rep == "nudge":
             result = {**result, "text": str(result.get("text") or "") + "\nNOTE: this is the third time you ran exactly this. "
                       "It is not working; do something different (look at the right screen, use another way) or ask Evens."}
+        result = {**result, "text": _scrub(str(result.get("text") or ""))}  # credential handles: never a secret value in context or logs
         task.trace({"event": "tool", "tool": name, "args": args, "decision": decision, "result": result.get("text", "")[:2000]})
         messages.append({"role": "tool", "tool_call_id": c["call_id"], "content": result.get("text", "")})
         if result.get("image"):

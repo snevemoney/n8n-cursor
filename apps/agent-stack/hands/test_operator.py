@@ -637,6 +637,24 @@ class PidReuse(unittest.TestCase):  # fault trial: a reused pid must not make a 
             other.kill(); other.wait()
 
 
+class CredentialHandles(unittest.TestCase):  # a secret value never reaches the model, the trace or his ears
+    def test_every_tool_result_is_masked_including_odd_shaped_secrets(self):
+        d = Path(tempfile.mkdtemp()); task = O.Task(d / "t"); task.path.mkdir(parents=True)
+        task.write("state.json", {"status": "RUNNING", "turn_at": 1}); task.write("request.json", {"goal": "check the key length"})
+        odd = "q8Zx-not-a-known-format-7731"
+        FAKE_OR = "sk-" + "or-v1-" + "abcdef0123456789" * 3  # built at runtime: no key-shaped literal in the public repo
+        class Tl:
+            def shell(self, a): return {"text": f"exit 0\nkey={odd}\nother={FAKE_OR}"}
+        task.write("messages.json", [{"role": "user", "content": "check the key length"}])
+        model = lambda m, t: {"ok": True, "calls": [{"tool": "shell", "args": {"command": "echo $WEIRD_SERVICE_TOKEN"}, "call_id": "c"}]}
+        with mock.patch.dict(os.environ, {"WEIRD_SERVICE_TOKEN": odd}), mock.patch.object(O, "_authority") as au:
+            au.return_value.authorize.return_value = ("allow", "")
+            O.step_once(task, Tl(), model)
+        blob = (task.path / "trace.jsonl").read_text() + (task.path / "messages.json").read_text()
+        self.assertNotIn(odd, blob); self.assertNotIn(FAKE_OR, blob)
+        self.assertIn("[REDACTED SECRET]", blob)
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")
