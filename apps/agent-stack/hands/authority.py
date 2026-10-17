@@ -29,7 +29,12 @@ CLI_MORE = re.compile(
     r"^stripe\b|^crontab\s+-r\b|^git\s+(?:branch\s+.*-[dD]\b|clean\s+.*-\w*f|checkout\s+--\s|restore\b|reset\s+--hard)|"
     r"\b(?:uninstall|prune)\b", re.I)
 # Machine-destructive: never without Evens (moved from hands/agent_tools.py).
-CLI_MACHINE = re.compile(r"(?:^|\s)(?:sudo|mkfs|dd|shutdown|reboot|halt|diskutil\s+(?:erase|partition)|launchctl\s+(?:unload|remove|bootout))\b", re.I)
+CLI_MACHINE = re.compile(r"(?:^|\s)(?:sudo|mkfs|dd|shutdown|reboot|halt|diskutil\s+(?:erase\w*|partition\w*|zero\w*|secureErase|apfs\s+delete\w*)|"
+                         r"launchctl\s+(?:unload|remove|bootout)|csrutil|spctl|tccutil|nvram|pmset|systemsetup|networksetup)\b", re.I)
+# 10-17 security pass: these ran with no question asked
+CLI_SYSTEM_SETTING = re.compile(r"(?:^|\s)defaults\s+(?:write|delete)\s+(?:-g\b|NSGlobalDomain|com\.apple\.)", re.I)
+CLI_PIPE_EXEC = re.compile(r"\|\s*(?:sudo\s+)?(?:ba|z|da|k)?sh\b|\b(?:ba|z)?sh\s+<\(\s*(?:curl|wget)|\b(?:curl|wget)\b[^|;&]*\|\s*(?:python3?|perl|ruby|node)\s*-?\s*(?:$|[;&|])", re.I)
+CLI_TRASH = re.compile(r"(?:^|\s)(?:mv\b[^|;&]*\.Trash\b|trash\s)", re.I)
 SECRET_ARG = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.pgpass|\.docker|\.kube|\.git-credentials|"
                         r"id_(?:rsa|dsa|ecdsa|ed25519)[^/]*|[^/]*\.(?:pem|key|p12|kdbx)|credentials[^/]*|secrets?(?:\.[a-z0-9]+)?|"
                         r"[^/]*(?:_token|api[_-]?key)[^/]*|Keychains?)(/|$)|/\.config/gh/", re.I)
@@ -89,6 +94,12 @@ def authorize(tool: str, args: dict, *, home: Path | None = None) -> tuple[str, 
         cmd = str(args.get("command") or "")
         if CLI_MACHINE.search(cmd):
             return ASK, "that command can damage the machine"
+        if CLI_PIPE_EXEC.search(cmd):
+            return ASK, "that command runs code downloaded from the internet"
+        if CLI_SYSTEM_SETTING.search(cmd):
+            return ASK, "that command changes a macOS system setting"
+        if CLI_TRASH.search(cmd):
+            return ASK, "that command moves files to the Trash"
         if cli_needs_owner(cmd):
             return ASK, "that command sends, spends, deletes or pushes"
         if SECRET_READ_CMD.search(cmd) or any(is_secret_path(w) for seg in _segments(cmd) for w in seg[1:] if _looks_like_path(w)):
