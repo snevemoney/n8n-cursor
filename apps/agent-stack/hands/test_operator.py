@@ -153,6 +153,16 @@ class CompletionTruth(OperatorLoop):  # matrix audit 10-16: success must be real
         pop.assert_called_once()
 
 
+class Personalities(unittest.TestCase):  # Evens 10-17: personalities and their voices are files; one line switches them
+    def test_switch_by_name_and_voice_line(self):
+        d = Path(tempfile.mkdtemp()); (d / "alfred.md").write_text("voice: bm_george\n# Alfred\nWarm and dry.")
+        f = d / "personality.txt"; f.write_text("alfred")
+        with mock.patch.object(O, "PERSONALITIES", d), mock.patch.object(O, "PERSONALITY_FILE", f):
+            self.assertEqual(O.personality_name(), "alfred"); self.assertEqual(O.personality_voice(), "bm_george")
+            self.assertIn("Warm and dry", O.personality()); self.assertNotIn("voice:", O.personality())
+            f.write_text("../evil"); self.assertEqual(O.personality_name(), "jarvis-valet")
+
+
 class JevPicksTheTool(unittest.TestCase):  # Evens 10-16: Jev decides which tool class to reach for, never a stop
     def test_hint_names_the_tool_class_and_keeps_the_stops(self):
         h = O.jev_tool_hint({"kind": "screen", "why": "jev mid/screen 0.81"})

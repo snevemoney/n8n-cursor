@@ -126,6 +126,38 @@ def _section(text: str, keep: tuple) -> str:
     return "\n".join(out)
 
 
+PERSONALITIES = Path(os.environ.get("JARVIS_PERSONALITIES") or
+                     Path.home() / "ArtCraft Studio/00 Private/Context References/Personalities")
+PERSONALITY_FILE = Path.home() / ".config/brain/personality.txt"
+
+
+def personality_name() -> str:
+    try:
+        name = PERSONALITY_FILE.read_text(encoding="utf-8").strip()
+    except OSError:
+        name = ""
+    return name if re.fullmatch(r"[a-z0-9-]{1,40}", name) and (PERSONALITIES / f"{name}.md").is_file() else "jarvis-valet"
+
+
+def personality() -> str:
+    """Evens 10-17: personalities (and their voices) are files; one line switches them. Rules and stops never change."""
+    try:
+        text = (PERSONALITIES / f"{personality_name()}.md").read_text(encoding="utf-8")
+    except OSError:
+        return ""
+    body = re.sub(r"(?m)^voice:.*\n", "", text).strip()
+    return ("\n\nPersonality (how you talk and decide; never changes the rules, the kept stops or what is true):\n"
+            + _scrub(body)[:2500]) if body else ""
+
+
+def personality_voice() -> str:
+    try:
+        m = re.search(r"(?m)^voice:\s*([abmf][fm]_[a-z]+)", (PERSONALITIES / f"{personality_name()}.md").read_text(encoding="utf-8"))
+        return m.group(1) if m else ""
+    except OSError:
+        return ""
+
+
 def operator_profile() -> str:
     """Evens 10-16: what he wants and cares about, how to read him and how to report to him, from the private Operator
     Profile (ArtCraft Studio), read fresh every job so Jarvis never differs from it."""
@@ -199,7 +231,8 @@ def system_prompt() -> str:
     prof = profile_lines()
     today = time.strftime("%A %Y-%m-%d, %H:%M") + " Eastern"
     base = (SYSTEM + f"\nToday is {today}. Anything you know from training may be out of date; for anything current, check it now.\n"
-            + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "") + operator_profile() + brain_context() + ops_alerts())
+            + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "") + operator_profile() + personality()
+            + brain_context() + ops_alerts())
     return base + ("\nHis coding agents are Claude Code, Codex and Cursor; 'Claude Code's changes' means their commits "
                    "and PRs on HIS repo snevemoney/n8n-cursor (Jarvis lives in apps/agent-stack), never Anthropic's repos.")
 

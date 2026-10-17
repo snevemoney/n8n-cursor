@@ -50,9 +50,21 @@ KOKORO_VOICE = "bm_lewis"
 VOICE_FILE = Path.home() / ".config/brain/voice.txt"  # Evens 10-17 "change Jarvis's voice for free": one line, e.g. bm_george
 
 
+def _personality_voice() -> str:
+    """The active personality's `voice:` line (hands/operator.py personality files); "" when none."""
+    try:
+        name = (Path.home() / ".config/brain/personality.txt").read_text().strip()
+        folder = Path(os.environ.get("JARVIS_PERSONALITIES") or Path.home() / "ArtCraft Studio/00 Private/Context References/Personalities")
+        m = re.search(r"(?m)^voice:\s*([abmf][fm]_[a-z]+)", (folder / f"{name}.md").read_text())
+        return m.group(1) if m else ""
+    except OSError:
+        return ""
+
+
 def kokoro_voice() -> str:
     """The Kokoro voice to speak with: env, then ~/.config/brain/voice.txt, then the default. No code change to switch."""
-    for cand in (os.environ.get("AGENT_STACK_KOKORO_VOICE"), VOICE_FILE.read_text().strip() if VOICE_FILE.is_file() else ""):
+    for cand in (os.environ.get("AGENT_STACK_KOKORO_VOICE"), VOICE_FILE.read_text().strip() if VOICE_FILE.is_file() else "",
+                 _personality_voice()):
         if cand and re.fullmatch(r"[abmf][fm]_[a-z]+", cand.strip()):
             return cand.strip()
     return KOKORO_VOICE
