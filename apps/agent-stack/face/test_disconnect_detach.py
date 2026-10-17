@@ -77,7 +77,7 @@ class DetachTest(unittest.TestCase):
             finished.set()
 
         self.stream(producer, client_gone=lambda: opened.is_set())
-        self.assertTrue(finished.wait(5), "the detached turn did not finish")
+        self.assertTrue(finished.wait(20), "the detached turn did not finish")  # returns at once when done; 5 s flaked in a 20-min full run
         bus = self.bus()
         self.assertEqual(bus["spoken"], "Compared: they agree.")
         self.assertEqual(bus.get("detached_gen"), bus.get("turn_gen"))
