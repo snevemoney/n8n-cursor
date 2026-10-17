@@ -19,6 +19,15 @@ class Undo(unittest.TestCase):
         self.assertIn("back", U.undo(self.job, 1, self.trash)[0]); self.assertEqual(notes.read_text(), "his words\n")
         self.assertIn("nothing", U.undo(self.job, 1, self.trash)[0])
 
+    def test_writes_are_atomic_and_keep_permissions(self):
+        import os, stat
+        f = self.home / "run.sh"; f.write_text("old\n"); f.chmod(0o755)
+        U.write(self.job, f, "new\n")
+        self.assertEqual(f.read_text(), "new\n"); self.assertEqual(stat.S_IMODE(f.stat().st_mode), 0o755)
+        self.assertEqual([p.name for p in self.home.iterdir()], ["run.sh"])  # no temp file left behind
+        link = self.home / "link.sh"; link.symlink_to(f); U.write(self.job, link, "via link\n")
+        self.assertTrue(link.is_symlink()); self.assertEqual(f.read_text(), "via link\n")
+
     def test_a_file_he_changed_afterwards_is_left_alone(self):
         f = self.home / "plan.md"; f.write_text("v1\n")
         U.write(self.job, f, "jarvis v2\n"); f.write_text("Evens edited after\n")

@@ -7,6 +7,7 @@ it is left alone, so undo can never wipe Evens's own edits.
 from __future__ import annotations
 import hashlib
 import json
+import os
 import shutil
 import time
 from pathlib import Path
@@ -23,6 +24,7 @@ def _journal(task_dir: Path) -> tuple[Path, list]:
 
 def write(task_dir: Path, path: Path, text: str) -> None:
     """Write text to path, journaling what was there before."""
+    path = Path(path).resolve()  # write through a symlink, as a plain write would, instead of replacing the link
     j, rows = _journal(task_dir)
     j.parent.mkdir(parents=True, exist_ok=True)
     n = len(rows) + 1
@@ -30,7 +32,12 @@ def write(task_dir: Path, path: Path, text: str) -> None:
     if existed:
         shutil.copy2(path, j.parent / f"{n}.bak")
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text)
+    # atomic: a crash mid-write leaves the old file or the new one, never half of each (canvas nativewrite)
+    tmp = path.with_name(f".{path.name}.jarvis-tmp")
+    tmp.write_text(text)
+    if existed:
+        shutil.copymode(j.parent / f"{n}.bak", tmp)  # keep his file's permissions
+    os.replace(tmp, path)
     rows.append({"n": n, "path": str(path), "existed": existed, "after": _sha(path), "at": time.time(), "undone": False})
     j.write_text(json.dumps(rows, indent=1))
 
