@@ -126,6 +126,25 @@ class CompletionTruth(OperatorLoop):  # matrix audit 10-16: success must be real
             time.sleep(0.1)
         self.assertIn("exit 3", got)
 
+    def test_background_job_streams_stay_apart_and_stop_ends_the_whole_job(self):
+        import time
+        t = O.Tools(O.Task.create(self.hive, "bg2").path)
+        jid = t.shell({"command": "echo out; echo oops >&2; sleep 30 & sleep 30", "background": True})["text"].split()[3]
+        time.sleep(0.5)
+        self.assertTrue(t.job({"job_id": jid})["text"].startswith("running"))
+        got = t.job({"job_id": jid, "action": "stop"})["text"]
+        self.assertTrue(got.startswith("stopped by me"), got)
+        self.assertIn("out", got); self.assertIn("stderr:\noops", got)
+        child = O.subprocess.run(["pgrep", "-g", str(t.jobs[jid]["pid"])], capture_output=True, text=True).stdout.strip()
+        self.assertEqual(child, "")  # the sleeps it started are gone too
+
+    def test_a_reused_pid_is_not_mistaken_for_the_job(self):
+        t = O.Tools(O.Task.create(self.hive, "bg3").path)
+        jid = t.shell({"command": "sleep 0.1", "background": True})["text"].split()[3]
+        t.jobs[jid].update(pid=os.getpid(), started="Mon Jan  1 00:00:00 2001")  # another live process holds the number now
+        import time; time.sleep(0.4)
+        self.assertNotIn("running", t.job({"job_id": jid})["text"].split("\n")[0])
+
     def test_prose_after_acting_is_not_accepted_as_done(self):
         model = scripted([("shell", {"command": "echo made"})], "All done, it worked.",
                          [("done", {"summary": "made it", "evidence": "echo printed made"})])

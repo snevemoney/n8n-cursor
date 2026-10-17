@@ -17,6 +17,7 @@ import json
 import os
 import re
 import shlex
+import signal
 import subprocess
 import threading
 import sys
@@ -373,7 +374,8 @@ TOOLS = [
     _fn("grep", "Search file contents for a regex under a path.", {"pattern": S, "path": S}, ["pattern", "path"]),
     _fn("shell", "Run a shell command (zsh) and get stdout, stderr, exit code. background=true for long jobs.",
         {"command": S, "timeout_s": I, "background": B}, ["command"]),
-    _fn("job", "Output and status of a background shell job.", {"job_id": S}, ["job_id"]),
+    _fn("job", "Status, output and errors of a background shell job; action=stop ends it (and its children).",
+        {"job_id": S, "action": {"type": "string", "enum": ["status", "stop"]}}, ["job_id"]),
     _fn("web_search", "Search the internet.", {"query": S}, ["query"]),
     _fn("fetch_url", "Download a public web page as text.", {"url": S}, ["url"]),
     _fn("computer", "Use the Mac like a person: the screen, the mouse and the keyboard. Actions: screenshot, left_click, "
@@ -603,6 +605,22 @@ def repetition(task, tool: str, args: dict) -> str | None:
 JOB_EXIT = "__JARVIS_EXIT__"  # matrix audit 10-16: a background job's exit code was lost; the log keeps it
 
 
+def _pid_exists(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+
+
+def _proc_start(pid: int) -> str:
+    """The process's start time: with the pid it names one process, so a reused pid is not mistaken for the job."""
+    try:
+        return subprocess.run(["ps", "-o", "lstart=", "-p", str(int(pid))], capture_output=True, text=True, timeout=5).stdout.strip()
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return ""
+
+
 ARTIFACTS = Path.home() / "ArtCraft Studio/00 Private/Projects/Jarvis/ARTIFACTS"
 MERMAID_TAG = ('\n<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>'
                '<script>mermaid.initialize({startOnLoad:true});</script>\n')
@@ -672,10 +690,11 @@ class Tools:
         if a.get("background"):
             jid = uuid.uuid4().hex[:8]
             log = self.dir / f"job-{jid}.log"
-            with open(log, "w") as fh:
-                pr = subprocess.Popen(["/bin/zsh", "-lc", f"(\n{cmd}\n)\nprintf '\\n{JOB_EXIT}%s\\n' $?"], cwd=self.cwd, stdout=fh, stderr=subprocess.STDOUT,
+            err = self.dir / f"job-{jid}.err"
+            with open(log, "w") as fh, open(err, "w") as fe:
+                pr = subprocess.Popen(["/bin/zsh", "-lc", f"(\n{cmd}\n)\nprintf '\\n{JOB_EXIT}%s\\n' $?"], cwd=self.cwd, stdout=fh, stderr=fe,
                                       start_new_session=True)
-            self.jobs[jid] = {"pid": pr.pid, "log": str(log), "command": cmd}
+            self.jobs[jid] = {"pid": pr.pid, "log": str(log), "err": str(err), "command": cmd, "started": _proc_start(pr.pid)}
             self._save()
             return {"text": f"started background job {jid} (pid {pr.pid}); check it with job"}
         mark = "__JARVIS_CWD__"
@@ -702,21 +721,38 @@ class Tools:
         j = self.jobs.get(str(a["job_id"]))
         if not j:
             return {"text": "no such job"}
-        try:
-            os.kill(int(j["pid"]), 0)
-            running = True
-        except OSError:
-            running = False
-        text = Path(j["log"]).read_text(errors="replace")
-        code = re.search(JOB_EXIT + r"(\d+)", text)
-        if code and running:  # the exit line is the truth: a finished child can linger as a zombie of this worker
+        pid = int(j["pid"])
+        alive = lambda: (_proc_start(pid) == j["started"]) if j.get("started") else _pid_exists(pid)
+        if a.get("action") == "stop" and alive():
             try:
-                os.waitpid(int(j["pid"]), os.WNOHANG)
+                os.killpg(pid, signal.SIGTERM)  # the job's own session: the command and everything it started
+                for _ in range(30):
+                    try:
+                        os.waitpid(pid, os.WNOHANG)
+                    except ChildProcessError:
+                        pass
+                    if not alive():
+                        break
+                    time.sleep(0.1)
+                else:
+                    os.killpg(pid, signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass
+            j["stopped"] = time.time()
+            self._save()
+        text = Path(j["log"]).read_text(errors="replace")
+        errs = Path(j["err"]).read_text(errors="replace").strip() if j.get("err") and Path(j["err"]).is_file() else ""
+        code = re.search(JOB_EXIT + r"(\d+)", text)
+        running = alive() and not code  # the exit line is the truth: a finished child can linger as a zombie of this worker
+        if code:
+            try:
+                os.waitpid(pid, os.WNOHANG)
             except (ChildProcessError, OSError):
                 pass
-            running = False
-        head = "running" if running else f"finished, exit {code.group(1)}" if code else "finished, exit code unknown (it exited early)"
-        return {"text": _clip(head + "\n" + text.replace(code.group(0), "") if code else head + "\n" + text)}
+        head = ("running" if running else f"finished, exit {code.group(1)}" if code else
+                "stopped by me before it finished" if j.get("stopped") else "finished, exit code unknown (it exited early)")
+        body = text.replace(code.group(0), "") if code else text
+        return {"text": _clip(head + "\n" + body + (f"\nstderr:\n{errs}" if errs else ""))}
 
     def web_search(self, a):
         got = _load("web_search", "web_search.py").run(str(a["query"]))
