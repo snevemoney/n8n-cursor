@@ -41,6 +41,8 @@ PERSIST_PATH = re.compile(_PERSIST)
 CLI_PERSIST = re.compile(r"(?:>>?|\btee\b(?:\s+-a)?|\bcp\b|\bmv\b|\bln\b)[^|;&]*(?:Library/Launch(?:Agents|Daemons)|\.(?:zshrc|zprofile|zshenv|bashrc|bash_profile|profile)\b|"
                          r"\.claude/settings|\.claude\.json|\.cursor/mcp\.json|\.codex/config\.toml)|\bcrontab\s+(?!-l\b)\S|\|\s*crontab\b|"
                          r"\blaunchctl\s+(?:load|bootstrap|enable)\b|\bosascript\b[^|;&]*login item", re.I)
+SENSITIVE_APP = re.compile(r"\b(?:system settings|system preferences|keychain access|passwords|1password|bitwarden|"
+                           r"com\.apple\.(?:systempreferences|keychainaccess|passwords))\b", re.I)
 RUNNABLE_RE = re.compile(r"\.(?:command|sh|zsh|bash|tool|terminal|pkg|mpkg|scpt|applescript|workflow|jar|py)$", re.I)
 PAGE_EXFIL = re.compile(r"\b(?:fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource|importScripts|indexedDB|localStorage|"
                         r"sessionStorage|caches)\b|document\.cookie|window\.open|(?:location|location\.href)\s*=|\.submit\s*\(|"
@@ -133,6 +135,10 @@ def authorize(tool: str, args: dict, *, home: Path | None = None) -> tuple[str, 
         if is_secret_path(path):
             return ALLOW, "flag: that file holds secrets"  # Evens 10-16: flag, never stop
         return ALLOW, ""
+    if tool in ("app", "app_type") and SENSITIVE_APP.search(str(args.get("app") or "")) \
+            and (tool == "app_type" or str(args.get("action") or "read") != "read"):
+        # 10-17 security pass: system and password settings are his to change (prohibited for agents)
+        return ASK, "that changes a system, security or password setting"
     if tool == "open":
         t = os.path.expanduser(str(args.get("target") or "")).rstrip("/")
         runs = RUNNABLE_RE.search(t) or (t.lower().endswith(".app") and "/" in t

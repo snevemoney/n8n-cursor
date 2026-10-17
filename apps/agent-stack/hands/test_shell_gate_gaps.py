@@ -53,3 +53,12 @@ class OpeningProgramsAsks(unittest.TestCase):
     def test_apps_documents_and_links_open(self):
         for t in ("Safari", "/Applications/Preview.app", "~/Documents/notes.pdf", "https://example.com"):
             self.assertEqual(A.authorize("open", {"target": t})[0], "allow", t)
+
+
+
+class SensitiveAppsAsk(unittest.TestCase):
+    def test_changing_settings_or_passwords_asks_reading_does_not(self):
+        for app in ("System Settings", "Keychain Access", "Passwords"):
+            self.assertEqual(A.authorize("app", {"action": "press", "app": app, "ref": 3})[0], "ask", app)
+            self.assertEqual(A.authorize("app", {"action": "read", "app": app})[0], "allow", app)
+        self.assertEqual(A.authorize("app", {"action": "press", "app": "Calculator", "ref": 3})[0], "allow")
