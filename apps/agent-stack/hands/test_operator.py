@@ -305,6 +305,18 @@ class AxOwners(unittest.TestCase):  # axcontrol: repeated labels say whose they 
         self.assertEqual(O._ax_owners(els), {2: "GitHub audit review.png", 4: "proof.pdf"})
 
 
+class PressThatChangedNothing(unittest.TestCase):  # axcontrol: no false "Did press"
+    def test_unchanged_app_after_a_press_is_flagged(self):
+        tree = {"ok": True, "elements": [{"path": [0], "role": "AXWindow", "label": "proof.pdf"},
+                                         {"path": [0, 1], "role": "AXButton", "label": "Close tab", "actions": ["AXPress"]}]}
+        t = O.Tools(Path(tempfile.mkdtemp()))
+        with mock.patch.object(O.Tools, "_hands_json", side_effect=lambda req: tree if req["op"] == "ax_tree" else {"ok": True}), \
+             mock.patch.object(O.time, "sleep"), mock.patch.object(O.Tools, "_show_cursor", create=True):
+            t.app({"action": "read", "app": "Preview"})
+            got = t.app({"action": "press", "app": "Preview", "ref": 2})["text"]
+        self.assertIn("CHECK: nothing in the app changed", got)
+
+
 class OpenWith(unittest.TestCase):  # macread: his default PDF app is PdfCraft; "in Preview" must mean Preview
     def test_with_names_the_app(self):
         seen = []

@@ -944,9 +944,14 @@ class Tools:
             got = self._hands_json({**req, "action": "AXOpen"}); act = "open"
         if not got.get("ok"):
             return {"text": f"{act} on {n} failed: {got.get('why')}. Read the app again, or use computer."}
+        before = list((self.state.get("ax_keys") or {}).get(name.lower()) or [])
         time.sleep(0.6)
         after = self.app({"action": "read", "app": name})
-        return {"text": f"Did {act} on {n}." + (f" The field now shows {got.get('value')!r}." if act == "set" else "") + "\n" + after["text"]}
+        same = act in ("press", "open") and before and before == list((self.state.get("ax_keys") or {}).get(name.lower()) or [])
+        # live 10-17: "Did press" on a Preview tab's close button in a Stage Manager-parked window; nothing happened
+        check = (" CHECK: nothing in the app changed after that, so it may not have taken (a window parked in Stage "
+                 "Manager often ignores presses). Verify before saying it is done, or try another way.") if same else ""
+        return {"text": f"Did {act} on {n}." + (f" The field now shows {got.get('value')!r}." if act == "set" else "") + check + "\n" + after["text"]}
 
     def _hands_json(self, req: dict) -> dict:
         got = self._hands(req)
