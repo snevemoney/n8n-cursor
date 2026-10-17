@@ -1859,6 +1859,8 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
             # were spoken. The done summary is spoken only when nothing was said this turn; a question always is.
             task.speak(line.strip())
         state.update(status=status, summary=plain(line), evidence=str(args.get("evidence") or ""))
+        if status == "WAITING_OWNER":  # Z56: the lapse pump follows up once if he never answers
+            state.update(asked_at=time.time(), asked=plain(line), lapse_said=False)
         task.write("state.json", state)
         return status
     return None
@@ -1974,6 +1976,7 @@ def _idle_until_spoken_to(task) -> bool:
             st = task.read("state.json")
             # live 10-17: a new request to an idle session hit the ceiling of the LAST job ("cost 1.52 so far, say go on")
             # before doing anything. Each request gets its own budget on top of what the session already spent.
+            st.pop("asked_at", None)  # he answered (or moved on): no lapse
             st.update(status="RUNNING", step=0, turn_at=time.time(), pending_cap=False,
                       cost_cap=round(float(st.get("cost_usd") or 0) + HX.JOB_COST_CAP, 2))
             # live 10-17: five cheap Calculator/Finder requests ran on the Sonnet pin because they joined an idle session

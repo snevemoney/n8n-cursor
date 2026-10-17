@@ -59,3 +59,30 @@ def tick(hive: Path, *, mutate_fn, inbox: Path | None = None, now: float | None 
         except OSError:
             pass
     return said.get("text")
+
+
+def op_tick(hive: Path, *, mutate_fn, inbox: Path | None = None, now: float | None = None) -> str | None:
+    """Z56 for operator jobs: a question Jarvis asked and he never answered lapses ONCE into a status line."""
+    import json
+    now = now or time.time()
+    tasks = Path(hive) / "operator-tasks"
+    try:
+        tid = json.loads((tasks / "latest.json").read_text())["task_id"]
+        path = tasks / tid / "state.json"
+        st = json.loads(path.read_text())
+    except (OSError, ValueError, KeyError):
+        return None
+    if not st.get("asked_at") or st.get("lapse_said") or now - float(st["asked_at"]) < ttl():
+        return None
+    goal = ""
+    try:
+        goal = str(json.loads((tasks / tid / "request.json").read_text()).get("goal") or "")[:120]
+    except (OSError, ValueError):
+        pass
+    path.write_text(json.dumps({**st, "lapse_said": True}))
+    def _m(bus: dict) -> dict:
+        return open_q(bus, topic="last", ask=str(st.get("asked") or ""), now=now - ttl(),
+                      pending=(f"“{goal}” is waiting for your answer; nothing more was done." if goal else
+                               "The job is waiting for your answer; nothing more was done."))
+    mutate_fn(Path(hive), _m)
+    return tick(hive, mutate_fn=mutate_fn, inbox=inbox, now=now)

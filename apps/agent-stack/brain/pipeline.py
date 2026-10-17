@@ -2136,6 +2136,7 @@ def _start_prebrief_pump() -> None:
             try:
                 lp = _load("agent_stack_lapse", STACK / "hands" / "lapse.py")
                 lp.tick(HIVE, mutate_fn=mutate_bus, inbox=Path(_results_mem().VAULT_INBOX))
+                lp.op_tick(HIVE, mutate_fn=mutate_bus, inbox=Path(_results_mem().VAULT_INBOX))
             except Exception:  # noqa: BLE001
                 continue
 
