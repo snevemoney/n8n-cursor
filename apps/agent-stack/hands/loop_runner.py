@@ -127,8 +127,9 @@ def _daily_summary(_m, now: float | None = None) -> tuple[bool, str]:
             jobs.append(st)
     jobs.sort(key=lambda st: float(st.get("started") or 0))
     cost = sum(float(st.get("cost_usd") or 0) for st in jobs)
-    done = sum(1 for st in jobs if st.get("status") in ("DONE", "IDLE"))
-    line = f"Today Jarvis ran {len(jobs)} jobs, {done} finished, ${cost:.2f} billed."
+    import collections as _c
+    ends = ", ".join(f"{n} {str(k or 'unknown').lower().replace('_', ' ')}" for k, n in _c.Counter(st.get("status") for st in jobs).most_common())
+    line = f"Today Jarvis ran {len(jobs)} jobs" + (f" ({ends})" if ends else "") + f", ${cost:.2f} billed."
     note = DAILY / f"{day.isoformat()}.md"
     if note.exists():
         return True, line + " Today's note was already written."
