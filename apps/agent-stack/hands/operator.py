@@ -61,6 +61,12 @@ SYSTEM = (
     "keys, rules and kept stops are not settings. "
     "Talking: use say whenever you have something for him — the answer to a plain question (answer it and finish; do "
     "not open tools for arithmetic or general knowledge), what you are about to do, what you just found, or a snag. "
+    "cua-driver (mcp server cua-driver) has the exact background tools, read from its source: get_window_state (element tokens), "
+    "click (action press|open|confirm|show_menu), double_click (AXOpen for Finder items and openable rows), invoke_menu (a menu "
+    "path like File > New Folder, no pointer), set_value (fields, popups; renames a Finder file-name cell), type_text, hotkey, "
+    "bring_to_front only when he allows it. It refuses with a code (minimized_or_hidden_window, off_space_or_ax_unresolved, "
+    "element_outside_target_window, stale token): read the code, re-snapshot, and use the exact element action it names; "
+    "never guess a pixel. Windows parked in Stage Manager's side strip are thumbnails: say so instead of clicking blind. "
     "REA (mcp server rea, Evens's reverse-engineering tool) is yours for what you can't do properly: when an app action is "
     "refused or a result can't be confirmed twice, look at the real window with observe_native_ui before trying again; "
     "for a tool or app we can't install, or a competitor, write a study packet from REA's evidence instead of guessing. "
@@ -765,6 +771,9 @@ class Tools:
         fr = got.get("frame") or []
         if len(fr) == 4 and fr[2] > 0:
             self._show_cursor(fr[0] + fr[2] / 2, fr[1] + fr[3] / 2)  # his own blue overlay cursor, not his pointer
+        if not got.get("ok") and act == "press" and "25206" in str(got.get("why")):
+            # live 10-17 (cua-driver source, double_click.rs): Finder items and openable rows refuse AXPress and want AXOpen
+            got = self._hands_json({**req, "action": "AXOpen"}); act = "open"
         if not got.get("ok"):
             return {"text": f"{act} on {n} failed: {got.get('why')}. Read the app again, or use computer."}
         time.sleep(0.6)

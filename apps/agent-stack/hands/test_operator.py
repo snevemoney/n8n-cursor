@@ -233,6 +233,27 @@ class FreshBudgetPerRequest(unittest.TestCase):  # live 10-17: a new test line j
         self.assertFalse(O.HX.over_cap(st)); self.assertAlmostEqual(st["cost_cap"], 1.52 + O.HX.JOB_COST_CAP, 2)
 
 
+class OpenableRows(unittest.TestCase):  # live 10-17: Finder rows refused AXPress (-25206); cua-driver's own double_click uses AXOpen
+    def test_press_on_a_row_that_refuses_axpress_falls_back_to_axopen(self):
+        calls = []
+        def hands(req):
+            calls.append(req)
+            if req.get("op") == "ax_act" and req.get("action") == "AXPress":
+                return {"ok": False, "why": "the element refused AXPress (-25206)"}
+            return {"ok": True}
+        tools = O.Tools.__new__(O.Tools); tools.state = {"ax_refs": {"finder": [[0, 1]]}}
+        tools._hands_json = hands; tools._show_cursor = lambda *a: None
+        with mock.patch.object(O.Tools, "app", side_effect=lambda self, a: {"text": "read"} if a.get("action") == "read" else O.Tools.app.__wrapped__(self, a), autospec=True):
+            pass
+        orig_read = O.Tools.app
+        def app(self, a):
+            return {"text": "Finder: 1 elements"} if a.get("action") == "read" else orig_read(self, a)
+        with mock.patch.object(O.Tools, "app", app):
+            got = orig_read(tools, {"action": "press", "app": "Finder", "ref": 1})
+        self.assertIn("Did open on 1", got["text"])
+        self.assertEqual([c.get("action") for c in calls if c.get("op") == "ax_act"], ["AXPress", "AXOpen"])
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")
