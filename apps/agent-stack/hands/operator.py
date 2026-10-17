@@ -441,7 +441,8 @@ TOOLS = [
         "status (todo, doing, done, dropped). Write it first for any job with more than two steps, update it as you go; "
         "you cannot finish while a step is todo or doing.",
         {"steps": {"type": "array", "items": {"type": "object", "properties": {
-            "step": S, "status": {"type": "string", "enum": ["todo", "doing", "done", "dropped"]}}, "required": ["step", "status"]}}},
+            "step": S, "status": {"type": "string", "enum": ["todo", "doing", "done", "dropped"]},
+            "after": {"type": "integer", "description": "number of the step this one waits for"}}, "required": ["step", "status"]}}},
         ["steps"]),
     _fn("delegate", "Run up to 4 helper agents in parallel, each with its own goal (research, reading, comparing, checking). "
         "They are read-only unless write=true (files only, never his screen, Safari or apps). Returns each helper's "
@@ -977,12 +978,24 @@ class Tools:
             + f"Sources: {', '.join((m.get('sources') or [])[:5])}" for m in rows))}
 
     def plan(self, a):
-        steps = [{"step": str(x.get("step") or "")[:200], "status": str(x.get("status") or "todo")}
+        steps = [{"step": str(x.get("step") or "")[:200], "status": str(x.get("status") or "todo"),
+                  **({"after": int(x["after"])} if str(x.get("after") or "").isdigit() else {})}
                  for x in (a.get("steps") or []) if isinstance(x, dict) and x.get("step")][:30]
         task = Task(self.root)
         task.write("state.json", {**task.read("state.json"), "plan": steps})
         mark = {"todo": "[ ]", "doing": "[>]", "done": "[x]", "dropped": "[-]"}
-        return {"text": "Plan:\n" + "\n".join(f"{mark.get(x['status'], '[ ]')} {x['step']}" for x in steps)}
+        warn = []  # canvas "graph": a step that waits on another (after=N) cannot run before N is done
+        for i, x in enumerate(steps, 1):
+            n = x.get("after")
+            if n is None:
+                continue
+            if not 1 <= n <= len(steps) or n == i:
+                warn.append(f"step {i} waits on step {n}, which is not another step in this plan")
+            elif x["status"] in ("doing", "done") and steps[n - 1]["status"] not in ("done", "dropped"):
+                warn.append(f"step {i} is {x['status']} but it waits on step {n} ({steps[n - 1]['step']}), which is not done")
+        return {"text": "Plan:\n" + "\n".join(f"{mark.get(x['status'], '[ ]')} {i}. {x['step']}" + (f" (after {x['after']})" if x.get("after") else "")
+                                        for i, x in enumerate(steps, 1))
+                        + ("\nCHECK: " + "; ".join(warn) + "." if warn else "")}
 
     def signal(self, a):
         script = Path(__file__).with_name("signals.py")

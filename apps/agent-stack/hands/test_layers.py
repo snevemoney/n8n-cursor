@@ -37,6 +37,18 @@ class Plan(unittest.TestCase):
         self.assertTrue(any("open steps" in m["content"] for m in t.read("messages.json") if m.get("role") == "tool"))
 
 
+class PlanDependencies(unittest.TestCase):  # canvas "graph"
+    def test_a_step_cannot_run_before_the_step_it_waits_on(self):
+        t = O.Task.create(Path(tempfile.mkdtemp()), "export then email the deck")
+        got = O.Tools(t.path).plan({"steps": [{"step": "export the deck", "status": "doing"},
+                                              {"step": "attach the export", "status": "done", "after": 1},
+                                              {"step": "oops", "status": "todo", "after": 3}]})["text"]
+        self.assertIn("step 2 is done but it waits on step 1 (export the deck), which is not done", got)
+        self.assertIn("step 3 waits on step 3", got)
+        ok = O.Tools(t.path).plan({"steps": [{"step": "export", "status": "done"}, {"step": "attach", "status": "doing", "after": 1}]})["text"]
+        self.assertNotIn("CHECK", ok); self.assertIn("2. attach (after 1)", ok)
+
+
 class Recover(unittest.TestCase):
     def test_a_cut_off_job_resumes(self):
         hive = Path(tempfile.mkdtemp())
