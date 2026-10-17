@@ -45,30 +45,63 @@ def has_key() -> bool:
 def status() -> dict:
     """Safe to show: never contains the key."""
     used = _free_used()
+    s = _state()
     return {"configured": has_key(), "model": MODEL, "free_seconds_used_today": used,
-            "free_seconds_left_today": max(0, FREE_SECONDS_PER_DAY - used)}
+            "free_seconds_left_today": max(0, FREE_SECONDS_PER_DAY - used),
+            "free_requests_used_today": int(s.get("requests", 0)), "free_requests_per_day": FREE_REQUESTS_PER_DAY,
+            "blocked_until": s.get("blocked_until", 0)}
 
 
 def _today() -> str:
     return dt.date.today().isoformat()
 
 
-def _free_used() -> int:
+FREE_REQUESTS_PER_DAY = int(os.environ.get("JARVIS_GEMINI_FREE_RPD") or 20)  # live 10-16: 3.8-flash free tier = 20 requests/day
+REQUESTS_PER_VIDEO = 6   # log + gap round + methods + sweep + continuations: never start a video the day cannot finish
+LONG_WAIT_S = 900        # a 429 asking for longer than this is the daily quota, not the per-minute limit
+
+
+class DailyQuota(RuntimeError):
+    """Today's free requests are used; Google says when they come back."""
+
+
+def _state() -> dict:
     try:
         s = json.loads(FREE_STATE.read_text())
-        return int(s.get("seconds", 0)) if s.get("day") == _today() else 0
     except (OSError, ValueError):
-        return 0
+        return {"day": _today()}
+    if s.get("day") != _today():  # new day: counters reset, a block that ends later still holds
+        s = {"day": _today(), "blocked_until": s.get("blocked_until", 0)}
+    return s
+
+
+def _save(**kw) -> None:
+    FREE_STATE.parent.mkdir(parents=True, exist_ok=True)
+    FREE_STATE.write_text(json.dumps({**_state(), **kw}))
+
+
+def _free_used() -> int:
+    return int(_state().get("seconds", 0))
 
 
 def free_room(seconds: int) -> bool:
-    """Room left today on the free tier for a video of this length."""
-    return _free_used() + int(seconds) <= FREE_SECONDS_PER_DAY
+    """Room left on the free tier for a whole video: not blocked, enough requests for every pass, within 8 h of video."""
+    s = _state()
+    return (time.time() >= float(s.get("blocked_until") or 0)
+            and int(s.get("requests", 0)) + REQUESTS_PER_VIDEO <= FREE_REQUESTS_PER_DAY
+            and int(s.get("seconds", 0)) + int(seconds) <= FREE_SECONDS_PER_DAY)
 
 
 def _count_free(seconds: int) -> None:
-    FREE_STATE.parent.mkdir(parents=True, exist_ok=True)
-    FREE_STATE.write_text(json.dumps({"day": _today(), "seconds": _free_used() + int(seconds)}))
+    _save(seconds=_free_used() + int(seconds))
+
+
+def _retry_seconds(text: str) -> float:
+    m = re.search(r"retry in ((?:\d+h)?(?:\d+m)?(?:[\d.]+s)?)", text or "")
+    if not m or not m.group(1):
+        return 0
+    parts = {unit: num for num, unit in re.findall(r"([\d.]+)([hms])", m.group(1))}
+    return float(parts.get("h", 0)) * 3600 + float(parts.get("m", 0)) * 60 + float(parts.get("s", 0))
 
 
 RETRY_WAITS = (30, 60, 120, 240)   # live 10-16: the free tier limits requests per minute; it answers again minutes later
@@ -89,9 +122,19 @@ def _post(body: dict) -> dict:
                 return json.loads(r.read() or b"{}")
         except urllib.error.HTTPError as exc:
             _last[0] = time.time()
-            if exc.code != 429 or wait is None:
+            if exc.code != 429:
                 raise
-            time.sleep(wait)
+            try:
+                detail = exc.read().decode(errors="replace")
+            except Exception:  # noqa: BLE001 - the body is only a hint
+                detail = ""
+            delay = _retry_seconds(detail)
+            if delay > LONG_WAIT_S:
+                _save(blocked_until=time.time() + delay, requests=FREE_REQUESTS_PER_DAY)
+                raise DailyQuota(f"Google free tier used for today; back in {delay / 3600:.1f} h") from exc
+            if wait is None:
+                raise
+            time.sleep(max(wait, delay))
     raise RuntimeError("unreachable")
 
 
@@ -141,6 +184,7 @@ class VideoSession:
         out = ""
         for _ in range(MAX_CONTINUE):
             data = _post(body)
+            _save(requests=int(_state().get("requests", 0)) + 1)
             if data.get("error"):
                 raise RuntimeError(f"Gemini: {str(data['error'])[:300]}")
             self.last_id = str(data.get("id") or self.last_id)

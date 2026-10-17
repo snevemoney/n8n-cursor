@@ -524,7 +524,18 @@ class _PaidWatcher:
         self.free = False
 
     def ask(self, prompt: str) -> str:
-        return _watch([{"role": "user", "content": [self.video, {"type": "text", "text": prompt}]}])
+        import urllib.error
+        try:
+            return _watch([{"role": "user", "content": [self.video, {"type": "text", "text": prompt}]}])
+        except urllib.error.HTTPError as exc:
+            if exc.code == 402:  # OpenRouter out of credits: the queue waits, the video is not failed
+                raise BudgetWait("OpenRouter has no credits; waiting for the free tier or a top-up") from exc
+            raise
+
+
+def _paid_ready() -> bool:
+    online = _load("agent_stack_online_signals", "../brain/online.py")
+    return bool(online.openrouter_api_key())
 
 
 class _FreeWatcher:
@@ -538,6 +549,8 @@ class _FreeWatcher:
         import urllib.error
         try:
             t = self.s.ask(prompt)
+        except G.DailyQuota as exc:
+            raise BudgetWait(f"{exc}; resuming then") from exc
         except urllib.error.HTTPError as exc:
             if exc.code == 429:  # free-tier quota for now: pause the queue, resume on its next run
                 raise BudgetWait("Google free tier rate limit reached; resuming on the next run") from exc
@@ -554,6 +567,8 @@ def make_watcher(url: str, duration: float, lens: str, fps: float = 0.0):
         return _FreeWatcher(url, duration, rate)
     if paid_spent() >= SIGNAL_BUDGET_USD:
         raise BudgetWait(f"free tier full for today and the ${SIGNAL_BUDGET_USD:g} signal budget is used; waiting for tomorrow")
+    if not _paid_ready():
+        raise BudgetWait("free tier full for today and no OpenRouter key; waiting for tomorrow")
     return _PaidWatcher(url, duration, lens)
 
 

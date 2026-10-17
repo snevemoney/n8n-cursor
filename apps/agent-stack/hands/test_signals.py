@@ -15,6 +15,7 @@ S.CACHE = Path(tempfile.mkdtemp()); S.LEDGER = S.CACHE / "ledger.jsonl"
 # 2026-10-16: tests never reach Google with his real key (they did once it existed); a test opts in with mocks.
 S.G.KEY_FILE = S.CACHE / "no-key.env"; S.G.FREE_STATE = S.CACHE / "free.json"
 S.G.os.environ.pop("GEMINI_API_KEY", None)
+S._paid_ready = lambda: True  # tests drive the paid route through a mocked _watch; PaidUnavailableWaits patches this off
 spec = importlib.util.spec_from_file_location("op_sig_test", H / "operator.py"); O = importlib.util.module_from_spec(spec); spec.loader.exec_module(O)
 spec = importlib.util.spec_from_file_location("auth_sig_test", H / "authority.py"); A = importlib.util.module_from_spec(spec); spec.loader.exec_module(A)
 
@@ -477,6 +478,29 @@ class FreeRateLimit(unittest.TestCase):
             def ask(self, p): raise urllib.error.HTTPError("u", 429, "Too Many Requests", {}, None)
         with mock.patch.object(S.G, "VideoSession", Sess):
             w = S._FreeWatcher("u", 60, 1.0)
+            with self.assertRaises(S.BudgetWait):
+                w.ask("x")
+
+
+class PaidUnavailableWaits(unittest.TestCase):  # live 10-16 21:05: free used up + OpenRouter empty must not fail 537 videos
+    def test_daily_quota_on_the_free_tier_pauses_the_queue(self):
+        class Sess:
+            def __init__(self, *a, **k): pass
+            def ask(self, p): raise S.G.DailyQuota("back in 22.9 h")
+        with mock.patch.object(S.G, "VideoSession", Sess):
+            with self.assertRaises(S.BudgetWait):
+                S._FreeWatcher("u", 60, 1.0).ask("x")
+
+    def test_no_openrouter_key_waits_instead_of_failing_the_video(self):
+        with mock.patch.object(S.G, "free_room", return_value=False), mock.patch.object(S, "paid_spent", return_value=0.0), \
+             mock.patch.object(S, "_paid_ready", return_value=False):
+            with self.assertRaises(S.BudgetWait):
+                S.make_watcher("u", 60, "learn")
+
+    def test_openrouter_out_of_credits_waits(self):
+        import urllib.error
+        with mock.patch.object(S, "_watch", side_effect=urllib.error.HTTPError("u", 402, "Payment Required", {}, None)):
+            w = S._PaidWatcher.__new__(S._PaidWatcher); w.video, w.free = {}, False
             with self.assertRaises(S.BudgetWait):
                 w.ask("x")
 

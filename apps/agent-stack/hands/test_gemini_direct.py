@@ -94,5 +94,36 @@ class Pacing(unittest.TestCase):  # live 10-16: free tier hit a per-minute limit
                 G._post({"model": "m"})
 
 
+class DailyQuota(unittest.TestCase):  # live 10-16 21:05: free tier = 20 requests/day on 3.8-flash; 429 says "retry in 22h58m"
+    def setUp(self):
+        self.state = Path(tempfile.mkdtemp()) / "free.json"
+        p = mock.patch.object(G, "FREE_STATE", self.state); p.start(); self.addCleanup(p.stop)
+
+    def _429(self, msg):
+        import io, urllib.error
+        return urllib.error.HTTPError("u", 429, "x", {}, io.BytesIO(json.dumps({"error": {"message": msg}}).encode()))
+
+    def test_retry_delay_is_read_from_the_message(self):
+        self.assertAlmostEqual(G._retry_seconds("Please retry in 22h58m11.49s."), 22 * 3600 + 58 * 60 + 11.49, places=1)
+        self.assertEqual(G._retry_seconds("Please retry in 41.2s"), 41.2)
+        self.assertEqual(G._retry_seconds("no hint"), 0)
+
+    def test_daily_quota_stops_at_once_and_blocks_until_reset(self):
+        sleeps = []
+        with mock.patch.object(G.urllib.request, "urlopen", side_effect=self._429("free_tier_requests, limit: 20. Please retry in 22h58m11s")), \
+             mock.patch.object(G.time, "sleep", side_effect=sleeps.append), mock.patch.object(G, "_key", return_value="k"):
+            with self.assertRaises(G.DailyQuota):
+                G._post({"model": "m"})
+            self.assertFalse(G.free_room(60))
+        self.assertFalse([x for x in sleeps if x >= 30])   # no 7.5 minutes of pointless retries
+
+    def test_requests_are_counted_and_a_video_needs_room_for_all_its_passes(self):
+        with mock.patch.object(G, "_post", return_value={"id": "i", "output_text": "ok"}):
+            s = G.VideoSession("u", seconds=60)
+            for _ in range(G.FREE_REQUESTS_PER_DAY - G.REQUESTS_PER_VIDEO + 1):
+                s.ask("x")
+        self.assertFalse(G.free_room(60))
+
+
 if __name__ == "__main__":
     unittest.main()
