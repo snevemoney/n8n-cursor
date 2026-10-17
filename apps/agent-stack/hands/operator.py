@@ -67,6 +67,9 @@ SYSTEM = (
     "bring_to_front only when he allows it. It refuses with a code (minimized_or_hidden_window, off_space_or_ax_unresolved, "
     "element_outside_target_window, stale token): read the code, re-snapshot, and use the exact element action it names; "
     "never guess a pixel. Windows parked in Stage Manager's side strip are thumbnails: say so instead of clicking blind. "
+    "Never invent a number: a figure you did not read from a source or compute from data is written as [number needed: "
+    "what and where from] (Z67). When you must ask him, ask one matter: a short apology if you interrupt, the facts he "
+    "needs, one question, then let him go (Z59). "
     "REA (mcp server rea, Evens's reverse-engineering tool) is yours for what you can't do properly: when an app action is "
     "refused or a result can't be confirmed twice, look at the real window with observe_native_ui before trying again; "
     "for a tool or app we can't install, or a competitor, write a study packet from REA's evidence instead of guessing. "
@@ -308,6 +311,7 @@ CONFIG_KEYS = {  # key -> (file, validator regex). Jarvis may change these; noth
     "signal_budget_usd": ("signal-budget.txt", r"\d{1,3}(?:\.\d{1,2})?"),
     "humor": ("dial-humor.txt", r"(?:100|[1-9]?\d)"),      # Z26 "humor and honesty to 100%": dials are settings he can say aloud
     "honesty": ("dial-honesty.txt", r"(?:100|[1-9]?\d)"),  # bluntness only; the truth and the kept stops never move
+    "takeover_speed": ("takeover-speed.txt", r"fast|balanced"),  # Z05: how quickly his own mouse/keys take the Mac back
 }
 CONFIG_LOG = CONFIG_DIR / "config-history.jsonl"
 
@@ -771,6 +775,8 @@ class Tools:
                 return {"text": f"could not read {name}: {got.get('why') or got.get('text')}"}
             els = got.get("elements") or []
             self.state.setdefault("ax_refs", {})[name.lower()] = [e["path"] for e in els]
+            self.state.setdefault("ax_keys", {})[name.lower()] = [[e.get("role"), e.get("label")] for e in els]
+            self.state.setdefault("ax_read_at", {})[name.lower()] = time.time()
             self._save()
             lines = [f"{i + 1} {e['role'].replace('AX', '')} {e['label']!r}" + (f" = {e['value']!r}" if e.get("value") else "")
                      + ("" if e.get("enabled", True) else " [disabled]") + (f" ({', '.join(x.replace('AX', '') for x in e['actions'])})" if e.get("actions") else "")
@@ -780,6 +786,20 @@ class Tools:
         n = int(a.get("ref") or 0)
         if not 1 <= n <= len(refs):
             return {"text": f"no element {n} in {name}; read the app first"}
+        if time.time() - float((self.state.get("ax_read_at") or {}).get(name.lower()) or 0) > AX_FRESH_S:
+            # matrix "observations": a read older than AX_FRESH_S may point at a moved or replaced element. Re-read and
+            # find the same element (role + label) before acting; never act on a stale address.
+            old = ((self.state.get("ax_keys") or {}).get(name.lower()) or [])
+            want = old[n - 1] if n - 1 < len(old) else None
+            self.app({"action": "read", "app": name, "menus": False})
+            keys = (self.state.get("ax_keys") or {}).get(name.lower()) or []
+            refs = (self.state.get("ax_refs") or {}).get(name.lower()) or []
+            if want is not None and want not in keys:
+                return {"text": f"{name} changed since you read it; element {n} is gone. Read the app again and pick again."}
+            if want is not None:
+                n = keys.index(want) + 1
+            elif not 1 <= n <= len(refs):  # a read saved before labels were recorded: same number, fresh address
+                return {"text": f"no element {n} in {name} any more; read the app again"}
         req = {"op": "ax_set", "app": name, "path": refs[n - 1], "attr": "AXSelected", "bool": True} if act == "select" else \
             {"op": "ax_set", "app": name, "path": refs[n - 1], "value": str(a.get("text") or "")} if act == "set" else \
             {"op": "ax_act", "app": name, "path": refs[n - 1], "action": str(a.get("ax") or "AXPress")}
@@ -1552,14 +1572,28 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
             terminal = ("WAITING_OWNER", {"question": "you took over; say go on to continue"})
             result = {"text": "not run: Evens is using the mouse or keyboard; wait for his go on"}
         else:
-            if name in DRIVING_TOOLS:
-                task.write("state.json", {**task.read("state.json"), "driving": {"tool": name, "since": time.time()}})
-            try:
-                result = getattr(tools, name)(args)
-            except Exception as exc:  # noqa: BLE001 — every failure is data for the model
-                result = {"text": f"error: {type(exc).__name__}: {exc}"}
-            if name in DRIVING_TOOLS:
-                task.write("state.json", {**task.read("state.json"), "driving": None})
+            fp_now = _fingerprint(name, args)
+            st_e = task.read("state.json")
+            if name in ACTING_TOOLS and (st_e.get("uncertain") or {}).get("fp") == fp_now:
+                # matrix "effectretry": the same action errored or timed out last time; it may already have happened
+                task.write("state.json", {**st_e, "uncertain": None})
+                result = {"text": "Not run yet: the last identical attempt errored or timed out, so it may already have taken "
+                                  "effect. Check first (read the file/app/page, take a screenshot); if it did not happen, make "
+                                  "the same call again and it will run."}
+            else:
+                if name in DRIVING_TOOLS:
+                    task.write("state.json", {**task.read("state.json"), "driving": {"tool": name, "since": time.time()}})
+                try:
+                    with input_lease(name, task.path.name):
+                        result = getattr(tools, name)(args)
+                except LeaseBusy as busy:
+                    result = {"text": f"Not run: {busy}. Wait a moment or work in the background (app, app_type) instead."}
+                except Exception as exc:  # noqa: BLE001 — every failure is data for the model
+                    result = {"text": f"error: {type(exc).__name__}: {exc}"}
+                if name in DRIVING_TOOLS:
+                    task.write("state.json", {**task.read("state.json"), "driving": None})
+                if name in ACTING_TOOLS and re.match(r"(?:error:|.*\btimed? ?out\b)", str(result.get("text") or ""), re.I | re.S):
+                    task.write("state.json", {**task.read("state.json"), "uncertain": {"fp": fp_now, "at": time.time()}})
         if decision == "allow" and str(why).startswith("flag"):
             # Evens 10-16: secrets are flagged, never a stop; values stay masked in messages, trace and the model
             result = {**result, "text": "Heads up: this holds secrets; values are masked. " + _scrub(str(result.get("text") or ""))}
@@ -1842,8 +1876,60 @@ def owner_touched(idle_s: float | None = None) -> bool:
             out = subprocess.run(["ioreg", "-c", "IOHIDSystem", "-d", "4"], capture_output=True, text=True, timeout=5).stdout
             m = re.search(r'"HIDIdleTime" = (\d+)', out)
             idle_s = int(m.group(1)) / 1e9 if m else 1e9
-        return idle_s < TAKEOVER_S
+        return idle_s < takeover_window()
     except Exception:  # noqa: BLE001
+        return False
+
+
+def takeover_window() -> float:
+    """Z05 takeover speed: 'fast' hands back after 0.7 s of his input, 'balanced' (default) after 2 s."""
+    try:
+        mode = (CONFIG_DIR / CONFIG_KEYS["takeover_speed"][0]).read_text().strip()
+    except OSError:
+        mode = ""
+    return 0.7 if mode == "fast" else TAKEOVER_S
+
+
+AX_FRESH_S = 20.0
+FOREGROUND_TOOLS = {"computer", "mouse", "keyboard"}   # the ones that move HIS pointer or press real keys
+INPUT_LOCK = Path.home() / ".config/brain/input.lock"
+LEASE_WAIT_S = 20.0
+
+
+class LeaseBusy(Exception):
+    pass
+
+
+class input_lease:
+    """matrix "inputlease": one job at a time may move the real pointer or press real keys (jobs run in parallel
+    processes; two of them clicking at once would fight). Background tools (app, app_type, safari) need no lease."""
+
+    def __init__(self, tool: str, job: str):
+        self.tool, self.job, self.fh = tool, job, None
+
+    def __enter__(self):
+        if self.tool not in FOREGROUND_TOOLS:
+            return self
+        import fcntl
+        INPUT_LOCK.parent.mkdir(parents=True, exist_ok=True)
+        self.fh = open(INPUT_LOCK, "a+")
+        end = time.time() + LEASE_WAIT_S
+        while True:
+            try:
+                fcntl.flock(self.fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except OSError:
+                if time.time() > end:
+                    self.fh.close(); self.fh = None
+                    raise LeaseBusy("another job is using the mouse and keyboard right now")
+                time.sleep(0.3)
+        self.fh.seek(0); self.fh.truncate(); self.fh.write(self.job); self.fh.flush()
+        return self
+
+    def __exit__(self, *exc):
+        if self.fh:
+            import fcntl
+            fcntl.flock(self.fh, fcntl.LOCK_UN); self.fh.close()
         return False
 
 

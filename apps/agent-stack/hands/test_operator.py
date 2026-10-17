@@ -2,6 +2,7 @@
 real results go back, until done. A scripted model stands in for the live one; tools run for real in a temp home."""
 import importlib.util
 import json
+import time
 import os
 import sys
 import tempfile
@@ -356,6 +357,78 @@ class AppTypeWaitsForWindow(unittest.TestCase):  # live 10-17: "opened bg2.txt b
         with mock.patch.object(O.subprocess, "run", side_effect=run), mock.patch.object(O, "_cua_cursor"), mock.patch.object(O.time, "sleep"):
             got = tools.app_type({"file": str(f), "text": "hello"})
         self.assertNotIn("found no window", got["text"]); self.assertGreaterEqual(seen["n"], 3)
+
+
+class InputLease(unittest.TestCase):  # matrix "inputlease"
+    def test_second_job_cannot_take_the_pointer_while_one_holds_it(self):
+        d = Path(tempfile.mkdtemp())
+        with mock.patch.object(O, "INPUT_LOCK", d / "input.lock"), mock.patch.object(O, "LEASE_WAIT_S", 0.5):
+            import subprocess as sp, sys as _s
+            holder = sp.Popen([_s.executable, "-c", f"import fcntl,time;f=open({str(d / 'input.lock')!r},'a+');fcntl.flock(f,fcntl.LOCK_EX);time.sleep(3)"])
+            time.sleep(0.5)
+            with self.assertRaises(O.LeaseBusy):
+                with O.input_lease("computer", "job2"):
+                    pass
+            with O.input_lease("app", "job2"):  # background tools never wait
+                pass
+            holder.wait()
+            with O.input_lease("computer", "job2"):
+                self.assertEqual((d / "input.lock").read_text(), "job2")
+
+
+class EffectAwareRetry(unittest.TestCase):  # matrix "effectretry"
+    def test_identical_action_after_an_error_is_held_once_for_a_check(self):
+        d = Path(tempfile.mkdtemp()); task = O.Task(d / "t"); task.path.mkdir(parents=True)
+        task.write("state.json", {"status": "RUNNING", "turn_at": 1}); task.write("request.json", {"goal": "write it"})
+        calls = []
+        class Tl:
+            def write_file(self, a):
+                calls.append(a); return {"text": "error: TimeoutError: timed out"} if len(calls) == 1 else {"text": "wrote"}
+        tools = Tl()
+        def model(c):
+            return lambda m, t: {"ok": True, "calls": [{"tool": "write_file", "args": {"path": "/tmp/x", "content": "y"}, "call_id": c}]}
+        task.write("messages.json", [{"role": "user", "content": "write it"}])
+        with mock.patch.object(O, "_authority") as au:
+            au.return_value.authorize.return_value = ("allow", "")
+            for i in range(3):
+                O.step_once(task, tools, model(f"c{i}"))
+        self.assertEqual(len(calls), 2)  # first ran (error), second held for a check, third ran
+        held = [r for r in task.rows("trace.jsonl") if "may already have taken effect" in str(r.get("result"))]
+        self.assertEqual(len(held), 1)
+
+
+class StaleRefs(unittest.TestCase):  # matrix "observations"
+    def test_old_read_is_refreshed_and_the_same_element_is_found(self):
+        tools = O.Tools(Path(tempfile.mkdtemp()))
+        reads = [[{"role": "AXButton", "label": "OK", "path": [0, 1]}, {"role": "AXButton", "label": "Cancel", "path": [0, 2]}],
+                 [{"role": "AXButton", "label": "Help", "path": [0, 0]}, {"role": "AXButton", "label": "Cancel", "path": [0, 5]},
+                  {"role": "AXButton", "label": "OK", "path": [0, 6]}]]
+        acted = []
+        def hands(req):
+            if req["op"] == "ax_tree":
+                return {"ok": True, "elements": reads.pop(0)}
+            acted.append(req); return {"ok": True}
+        tools._hands_json = hands; tools._show_cursor = lambda *a: None
+        tools.app({"action": "read", "app": "X"})
+        tools.state["ax_read_at"]["x"] = 0  # pretend the read is old
+        with mock.patch.object(O.time, "sleep"), mock.patch.object(O.Tools, "app", wraps=tools.app) as _:
+            pass
+        orig = O.Tools.app
+        def app(self, a):
+            return {"text": "read"} if a.get("action") == "read" and acted else orig(self, a)
+        with mock.patch.object(O.time, "sleep"), mock.patch.object(O.Tools, "app", app):
+            orig(tools, {"action": "press", "app": "X", "ref": 1})
+        self.assertEqual(acted[0]["path"], [0, 6])  # "OK" moved from position 1 to 3
+
+
+class TakeoverSpeed(unittest.TestCase):  # Z05
+    def test_fast_mode_hands_back_sooner(self):
+        d = Path(tempfile.mkdtemp())
+        with mock.patch.object(O, "CONFIG_DIR", d):
+            self.assertEqual(O.takeover_window(), O.TAKEOVER_S)
+            (d / "takeover-speed.txt").write_text("fast")
+            self.assertEqual(O.takeover_window(), 0.7)
+            self.assertFalse(O.owner_touched(1.0)); self.assertTrue(O.owner_touched(0.5))
 
 
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
