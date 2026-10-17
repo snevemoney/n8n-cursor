@@ -147,6 +147,14 @@ def _daily_summary(_m, now: float | None = None) -> tuple[bool, str]:
     return True, line + " Saved today's note in the Jarvis inbox."
 
 
+def _readiness(_m) -> tuple[bool, str]:
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("readiness_loop", Path(__file__).with_name("readiness.py"))
+    rd = importlib.util.module_from_spec(spec); spec.loader.exec_module(rd)
+    got = rd.report()
+    return got["state"] == "GREEN", got["spoken"]
+
+
 def _vault_lint(_m) -> tuple[bool, str]:
     """X12 weekly vault lint from the link graph: orphans, dead ends, missing link targets (read-only)."""
     import importlib.util
@@ -162,6 +170,7 @@ def _vault_lint(_m) -> tuple[bool, str]:
 
 CHECKS = (
     (re.compile(r"\b(?:daily\s+summary|work\s+recap)\b", re.I), _daily_summary),
+    (re.compile(r"\breadiness\b", re.I), _readiness),
     (re.compile(r"\bvault\b", re.I), _vault_lint),
     (re.compile(r"\bbrief(?:ing)?\b", re.I), _brief),
     (re.compile(r"\b(?:disk\s+space|disk|storage)\b", re.I), _disk),

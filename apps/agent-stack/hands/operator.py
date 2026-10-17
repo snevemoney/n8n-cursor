@@ -411,6 +411,8 @@ TOOLS = [
         "measured.", {"src": S, "out_dir": S, "seconds": I, "start": I}, ["src", "out_dir"]),
     _fn("cost_report", "What his jobs really cost (OpenRouter's billed amounts), by kind of work, model and tool, over the "
         "last N days (default 7). Writes the one-page report to Ops Watch and returns it.", {"days": I}, []),
+    _fn("readiness", "Can you actually work right now: model budget, the free local model, Mac permissions, disk. Check it "
+        "before a long or paid run (video, image generation, a big research job) and tell him plainly if something blocks it.", {}, []),
     _fn("web_helper", "Reuse a Safari procedure that already worked. save name=... steps=[safari actions, label=<visible "
         "text> instead of ref, {var} for values] expect=<text the page shows when it worked> about=...; run name=... "
         "vars={...}; list. Save only steps you just saw succeed. Each step passes the same checks as a safari call.",
@@ -525,6 +527,7 @@ PR = _load("pattern_recall", "pattern_recall.py")
 SV = _load("scroll_video", "scroll_video.py")
 UJ = _load("undo_journal", "undo_journal.py")
 CBF = _load("cost_by_feature", "cost_by_feature.py")
+RDY = _load("readiness", "readiness.py")
 COST_PAGE = Path.home() / "ArtCraft Studio/00 Private/Studio Operations/Ops Watch/Cost by feature.md"
 WEB_HELPERS = CONFIG_DIR / "web-helpers"
 
@@ -1014,6 +1017,10 @@ class Tools:
         except OSError as exc:
             where = f"\n(could not save the page: {exc})"
         return {"text": _clip(page + where)}
+
+    def readiness(self, a):
+        got = RDY.report()
+        return {"text": f"{got['state']}: {got['spoken']}\n" + "\n".join(f"- {k}: {v['state']} — {v['line']}" for k, v in got["rows"].items())}
 
     def recall(self, a):
         try:
