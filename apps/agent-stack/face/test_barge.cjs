@@ -18,7 +18,7 @@ assert.ok(/startBargeWatch\(\);/.test(html) && /pressStop\(\);\s*\n(?:\s*bargeBe
 const dsrc = html.match(/function duckHit\([^)]*\) \{[\s\S]*?\n    \}/)[0];
 const { duckHit } = new Function(src + "; " + dsrc + "; return { duckHit };")();
 assert.ok(duckHit(0.05, 0.03), "voice a bit over the bleed -> duck");
-assert.ok(!duckHit(0.02, 0.01), "under the floor -> no duck");
+assert.ok(!duckHit(0.002, 0.001), "under the floor -> no duck");
 assert.ok(/duckTts\(true\)/.test(html) && /duckTts\(false\)/.test(html), "ducks and releases");
 assert.ok(/startBargeWatch\(\);  \/\/ Evens 10-17/.test(html), "watch (re)starts when speech starts");
 assert.ok(BARGE.floor <= 0.005, "floor is on the echo-cancelled mic's real scale (beacon 10-17)");
