@@ -72,5 +72,27 @@ class Queue(unittest.TestCase):
         self.assertEqual(self.q.sync(f, done={"vid00000001"}), 1)
 
 
+    def test_items_another_agent_holds_are_passed_over_and_outcomes_reported(self):
+        f = triage_csv(self.d, [row(1, prio=1), row(2, prio=2)])
+        self.q.sync(f, done=set())
+        reports = []
+        got = self.q.run(lambda *a, **k: {"status": "DONE", "methods": 3}, budget_wait=RuntimeError, max_videos=5,
+                         claim=lambda vid: vid != "vid00000001", report=lambda *a: reports.append(a))
+        self.assertEqual(got["learned"], ["vid00000002"])
+        self.assertEqual(self.q.get("vid00000001")["state"], "queued")   # left for the agent that holds it
+        self.assertEqual(reports, [("vid00000002", "learned", "")])
+
+    def test_a_pause_hands_the_claim_back(self):
+        f = triage_csv(self.d, [row(1)])
+        self.q.sync(f, done=set())
+        reports = []
+        class Wait(Exception):
+            pass
+        def ingest(*a, **k):
+            raise Wait("quota")
+        self.q.run(ingest, budget_wait=Wait, claim=lambda vid: True, report=lambda *a: reports.append(a))
+        self.assertEqual(reports, [("vid00000001", "released", "")])
+
+
 if __name__ == "__main__":
     unittest.main()

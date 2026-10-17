@@ -105,5 +105,51 @@ class OperatorLoop(unittest.TestCase):
         self.assertIn("Heads up", content); self.assertIn("OPENROUTER_API_KEY", content); self.assertNotIn(fake, content)
 
 
+class CompletionTruth(OperatorLoop):  # matrix audit 10-16: success must be real before Jarvis says DONE
+    def test_failing_command_reports_its_real_exit_code(self):
+        model = scripted([("shell", {"command": "false"})], [("done", {"summary": "ok", "evidence": "x"})])
+        O.run(O.Task.create(self.hive, "check").path, model_fn=model)
+        self.assertIn("exit 1", [m for m in model.seen[1] if m["role"] == "tool"][0]["content"])
+
+    def test_background_job_keeps_its_exit_code(self):
+        import time
+        task = O.Task.create(self.hive, "bg")
+        t = O.Tools(task.path)
+        jid = t.shell({"command": "echo hi; exit 3", "background": True})["text"].split()[3]
+        for _ in range(50):
+            got = t.job({"job_id": jid})["text"]
+            if got.startswith("finished"):
+                break
+            time.sleep(0.1)
+        self.assertIn("exit 3", got)
+
+    def test_prose_after_acting_is_not_accepted_as_done(self):
+        model = scripted([("shell", {"command": "echo made"})], "All done, it worked.",
+                         [("done", {"summary": "made it", "evidence": "echo printed made"})])
+        state = O.run(O.Task.create(self.hive, "make the thing").path, model_fn=model)
+        self.assertEqual(state["status"], "DONE")
+        self.assertEqual(state["evidence"], "echo printed made")
+        self.assertTrue(any("Before you finish" in str(m.get("content")) for m in model.seen[2]))
+
+    def test_plain_answer_without_actions_still_finishes(self):
+        state = O.run(O.Task.create(self.hive, "what is 2+2").path, model_fn=scripted("4"))
+        self.assertEqual(state["status"], "DONE")
+
+    def test_unproven_finish_after_two_checks_is_marked_unverified(self):
+        model = scripted([("shell", {"command": "echo x"})], [("done", {"summary": "did it"})],
+                         [("done", {"summary": "did it"})], [("done", {"summary": "did it"})])
+        state = O.run(O.Task.create(self.hive, "do it").path, model_fn=model)
+        self.assertEqual(state["status"], "DONE")
+        self.assertTrue(state.get("unverified"))
+
+    def test_resume_relaunches_a_dead_running_worker(self):
+        task = O.Task.create(self.hive, "long job")
+        task.write("state.json", {**task.read("state.json"), "status": "RUNNING", "pid": 999999})
+        with mock.patch.object(O.subprocess, "Popen") as pop:
+            got = O.resume(self.hive, task.path.name)
+        self.assertEqual(got["status"], "QUEUED")
+        pop.assert_called_once()
+
+
 if __name__ == "__main__":
     unittest.main()

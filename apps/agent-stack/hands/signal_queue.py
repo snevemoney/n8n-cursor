@@ -46,8 +46,12 @@ class Queue:
         self.db.commit()
         return added
 
-    def next(self):
-        return self.db.execute("select * from videos where state='queued' order by priority, seconds limit 1").fetchone()
+    def next(self, exclude=()):
+        skip = list(exclude)
+        marks = ",".join("?" * len(skip))
+        where = f" and id not in ({marks})" if skip else ""
+        return self.db.execute(f"select * from videos where state='queued'{where} order by priority, seconds limit 1",
+                               skip).fetchone()
 
     def get(self, vid: str):
         return self.db.execute("select * from videos where id=?", (vid,)).fetchone()
@@ -70,31 +74,73 @@ class Queue:
         self.db.execute(f"update videos set {cols}, updated=? where id=?", (*kw.values(), time.time(), vid))
         self.db.commit()
 
-    def run(self, ingest, budget_wait=Exception, max_videos: int = 20) -> dict:
-        learned, stopped = [], ""
+    def run(self, ingest, budget_wait=Exception, max_videos: int = 20, claim=None, report=None) -> dict:
+        """claim(id) -> True when the shared list lets Jarvis take it (False: another agent has it or it is done);
+        report(id, state, info) writes the outcome back to the shared list."""
+        learned, stopped, passed = [], "", set()
         for _ in range(max_videos):
-            v = self.next()
+            v = self.next(exclude=passed)
             if not v:
                 stopped = "queue empty"
                 break
+            if claim and not claim(v["id"]):
+                passed.add(v["id"])
+                continue
             try:
                 r = ingest(v["url"], force=False, lens=v["lens"], fps=v["fps"])
             except budget_wait as exc:
                 stopped = f"budget/free tier: {exc}"
+                if report:
+                    report(v["id"], "released", "")
                 break
             except Exception as exc:  # noqa: BLE001 - one bad video never stops the queue
                 r = {"status": "FAILED", "text": f"{type(exc).__name__}: {exc}"}
             if r.get("status") in ("DONE", "ALREADY"):
                 self._set(v["id"], state="done", methods=int(r.get("methods") or 0), error="")
                 learned.append(v["id"])
+                if report:
+                    report(v["id"], "learned", "")
             else:
                 n = v["attempts"] + 1
                 self._set(v["id"], attempts=n, error=str(r.get("text") or "")[:300],
                           state="failed" if n >= MAX_ATTEMPTS else "queued")
+                if report:
+                    report(v["id"], "failed", str(r.get("text") or ""))
                 if "BudgetWait" in str(r.get("text")) or "budget" in str(r.get("text")).lower():
                     stopped = "budget/free tier"
                     break
         return {"learned": learned, "stopped": stopped or f"batch of {max_videos} done", **self.counts()}
+
+
+def _shared_list(S, idx: Path) -> dict:
+    """SIGNALS.csv (signal_ledger.py), the list every agent shares: refreshed from Watch Later, triage and the packets
+    each run; Jarvis claims a video there before learning it and writes the outcome back. A push that fails (offline)
+    keeps the local commit and the queue goes on."""
+    import signal_ledger as L
+    root = S.worktree()
+
+    def change(fn, msg):
+        try:
+            return L.shared(root, fn, msg)
+        except Exception as exc:  # noqa: BLE001 - the shared list never stops the learning
+            print(json.dumps({"shared_list": "not pushed", "why": str(exc)[:200]}))
+            return L.shared(root, fn, msg, push=False)
+
+    wl = json.loads((S.CACHE / "watch-later.json").read_text()) if (S.CACHE / "watch-later.json").exists() else []
+    triage = list(csv.DictReader((idx / "triage.csv").open())) if (idx / "triage.csv").exists() else []
+    learned = {i: f"{S.PACKETS}/{i}" for i in S.known_ids()}
+    change(lambda rows: L.sync(rows, wl, triage, learned), "signals list: refresh from Watch Later, triage and packets")
+
+    def claim(vid: str) -> bool:
+        return change(lambda rows: L.take(rows, "jarvis", only=vid).get("id") == vid, f"signals list: jarvis took {vid}")
+
+    def report(vid: str, state: str, info: str) -> None:
+        if state == "released":
+            change(lambda rows: L.release(rows, vid, "jarvis"), f"signals list: jarvis released {vid}")
+        else:
+            change(lambda rows: L.finish(rows, vid, "jarvis", state, result=f"{S.PACKETS}/{vid}" if state == "learned" else "",
+                                         error=info), f"signals list: jarvis {state} {vid}")
+    return {"claim": claim, "report": report}
 
 
 def main(argv: list) -> int:
@@ -106,9 +152,10 @@ def main(argv: list) -> int:
     if not (idx / "triage.csv").exists():
         T.run(S.CACHE / "watch-later.json", S.known_ids(), idx)
     added = q.sync(idx / "triage.csv", S.known_ids())
+    shared = _shared_list(S, idx)
     if argv and argv[0] == "run":
         n = int(argv[argv.index("--max") + 1]) if "--max" in argv else 20
-        out = q.run(S.ingest, budget_wait=S.BudgetWait, max_videos=n)
+        out = q.run(S.ingest, budget_wait=S.BudgetWait, max_videos=n, claim=shared["claim"], report=shared["report"])
         if out["learned"]:
             S.build_index()
         print(json.dumps({"added": added, **out, "free": S.G.status()}, default=str))

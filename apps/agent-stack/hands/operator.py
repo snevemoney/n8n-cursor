@@ -383,6 +383,9 @@ def repetition(task, tool: str, args: dict) -> str | None:
     return "stop" if n >= REPEAT_STOP else "nudge" if n == REPEAT_NUDGE else None
 
 
+JOB_EXIT = "__JARVIS_EXIT__"  # matrix audit 10-16: a background job's exit code was lost; the log keeps it
+
+
 class Tools:
     """Executors. Each returns {'text': str, 'image': optional data URL}. ctx carries cwd and the task folder."""
 
@@ -446,7 +449,7 @@ class Tools:
             jid = uuid.uuid4().hex[:8]
             log = self.dir / f"job-{jid}.log"
             with open(log, "w") as fh:
-                pr = subprocess.Popen(["/bin/zsh", "-lc", cmd], cwd=self.cwd, stdout=fh, stderr=subprocess.STDOUT,
+                pr = subprocess.Popen(["/bin/zsh", "-lc", f"(\n{cmd}\n)\nprintf '\\n{JOB_EXIT}%s\\n' $?"], cwd=self.cwd, stdout=fh, stderr=subprocess.STDOUT,
                                       start_new_session=True)
             self.jobs[jid] = {"pid": pr.pid, "log": str(log), "command": cmd}
             self._save()
@@ -456,7 +459,7 @@ class Tools:
         # live 10-16: Spotify AppleScript hung 125s+26s+47s of a 326s job; fail fast, the screen is the fallback
         limit = int(a.get("timeout_s") or (15 if apple else 120))
         try:
-            cp = subprocess.run(["/bin/zsh", "-lc", f"{cmd}\nprintf '\\n{mark}%s' \"$PWD\""], cwd=self.cwd,
+            cp = subprocess.run(["/bin/zsh", "-lc", f"{cmd}\n__rc=$?; printf '\\n{mark}%s' \"$PWD\"; exit $__rc"], cwd=self.cwd,
                                 capture_output=True, text=True, timeout=limit)
         except subprocess.TimeoutExpired:
             if apple:
@@ -480,7 +483,16 @@ class Tools:
             running = True
         except OSError:
             running = False
-        return {"text": _clip(("running" if running else "finished") + "\n" + Path(j["log"]).read_text(errors="replace"))}
+        text = Path(j["log"]).read_text(errors="replace")
+        code = re.search(JOB_EXIT + r"(\d+)", text)
+        if code and running:  # the exit line is the truth: a finished child can linger as a zombie of this worker
+            try:
+                os.waitpid(int(j["pid"]), os.WNOHANG)
+            except (ChildProcessError, OSError):
+                pass
+            running = False
+        head = "running" if running else f"finished, exit {code.group(1)}" if code else "finished, exit code unknown (it exited early)"
+        return {"text": _clip(head + "\n" + text.replace(code.group(0), "") if code else head + "\n" + text)}
 
     def web_search(self, a):
         got = _load("web_search", "web_search.py").run(str(a["query"]))
@@ -1069,6 +1081,12 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
                                  if got.get("tool") else [])
     if not calls:  # plain text with no tool call: treat as the final answer, spoken like every other line
         text = str(got.get("text") or "").strip()
+        held = _done_gate(task, "done", {"summary": text})
+        if held:  # matrix audit 10-16: prose after real actions closed jobs unchecked; it gets the same check as done
+            messages += [{"role": "assistant", "content": text or "(no text)"},
+                         {"role": "user", "content": held + " Finish with the done tool, with what you checked in evidence."}]
+            task.write("messages.json", messages)
+            return None
         if text:
             task.speak(text)  # bench 10-16: "391." was the answer but never reached the speech log
         task.write("state.json", {**task.read("state.json"), "status": "DONE", "summary": text, "evidence": ""})
@@ -1286,7 +1304,7 @@ def start(hive: Path, goal: str, turns: list | None = None) -> dict:
 def resume(hive: Path, task_id: str) -> dict:
     task = Task(Path(hive) / "operator-tasks" / task_id)
     state = task.read("state.json")
-    if state.get("status") in ("RUNNING",):
+    if state.get("status") == "RUNNING" and _alive(state.get("pid")):
         return {"task_id": task_id, "status": "RUNNING"}
     task.write("control.json", {"cancel": False})
     state.update(status="QUEUED")
@@ -1393,8 +1411,6 @@ def _done_gate(task, name: str, args: dict) -> str:
     st = task.read("state.json")
     turn = st.get("turn_at") or 0
     n = int(st.get("gated_n") or 0) if st.get("gated_turn") == turn else 0
-    if n >= 2:
-        return ""
     summary = str(args.get("summary") or "")
     rows = [r for r in task.rows("trace.jsonl") if float(r.get("at") or 0) >= float(turn) and r.get("event") == "tool"]
     acted = any(r.get("tool") in ACTING_TOOLS for r in rows)
@@ -1420,10 +1436,14 @@ def _done_gate(task, name: str, args: dict) -> str:
             " This is the second time: the same idea will not work, change the approach completely." if n else "") + " You have shell, files, his Safari (safari), the "
                "screen (computer), apps (open), MCP, web search and the signal engine. Try once more another way inside "
                "the app or site he named, or finish with exactly what blocked you and the evidence (the error you saw).")
-    elif acted and n == 0 and not str(args.get("evidence") or "").strip():
+    elif acted and not str(args.get("evidence") or "").strip():
         why = ("Before you finish: prove it. Check the result for real (snapshot/read the page, take a screenshot, run a "
                "check command) and call done again with what you saw in evidence. If the check shows it did not work, "
                "fix it instead.")
+    if why and n >= 2:  # two checks sent back: finish rather than loop, but never as a verified result
+        task.write("state.json", {**st, "unverified": why.split(":", 1)[-1].strip()[:300]})
+        task.trace({"event": "unverified_done", "why": why[:300]})
+        return ""
     if why:
         task.write("state.json", {**st, "gated_turn": turn, "gated_n": n + 1})
     return why
