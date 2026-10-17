@@ -139,11 +139,18 @@ class ThinkingIsNeverAReply(unittest.TestCase):  # live 10-17: the local model's
         leaked = ["Okay, let's try to figure this out. The user wants me to click the link on example.com",
                   "Okay, let's see. The user is asking why I'm slow",
                   "Okay, let's break this down. The user is saying that the same approach won't work",
-                  "The user wants me to open Safari", "First, I need to check if Safari is open"]
+                  "The user wants me to open Safari", "First, I need to check if Safari is open",
+                  'Okay, the user is asking "What time is it? /no_think". Let me check the tools available.']  # live 10:18
         for text in leaked:
             with mock.patch.object(L, "_post", return_value={"message": {"content": text}}):
                 got = L.call([{"role": "user", "content": "x"}], [])
-            self.assertNotIn("The user", got["text"]); self.assertIn("free local model", got["text"])
+            self.assertNotIn("The user", got["text"]); self.assertIn("free local model", got["text"]); self.assertTrue(got.get("refused"))
+
+    def test_the_clock_is_in_the_brief(self):
+        seen = {}
+        with mock.patch.object(L, "_post", side_effect=lambda url, data, *a, **k: seen.update(body=data) or {"message": {"content": "It's 10:20."}}):
+            L.call([{"role": "user", "content": "What time is it?"}], [])
+        self.assertIn("on his Mac.", seen["body"]["messages"][0]["content"])
 
     def test_a_real_answer_passes(self):
         with mock.patch.object(L, "_post", return_value={"message": {"content": "Sir, it is 5:12 in the morning."}}):

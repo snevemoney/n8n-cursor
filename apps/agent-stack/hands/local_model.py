@@ -70,7 +70,8 @@ def _compact(messages: list) -> list:
     rest = [m for m in messages if m.get("role") != "system"][-KEEP_TURNS:]
     while rest and rest[0].get("role") == "tool":
         rest = rest[1:]
-    out = [{"role": "system", "content": BRIEF}]
+    import time as _t  # it has no shell: the Mac's clock rides in the brief (live 10-17: "no tool can get the time")
+    out = [{"role": "system", "content": BRIEF + _t.strftime(" It is %A %B %d %Y, %H:%M on his Mac.")}]
     for m in rest:
         c = m.get("content")
         if isinstance(c, list):
@@ -105,6 +106,9 @@ REASONING_RE = re.compile(r"\s*(?:okay|ok|alright|hmm|so)[,.]?\s+(?:let'?s|let m
                           r"first,? i (?:need|should|will)|the user (?:is|wants|asked|said|mentioned|wrote)|i need to (?:figure|check|think))\b", re.I)
 
 
+THINKING_RE = re.compile(r"\bthe user(?:'s)?\b|\b(?:let me (?:check|think|see|figure)|wait, (?:no|in the|the))\b", re.I)
+
+
 def call(messages: list, tools: list) -> dict:
     """One operator turn on the local model (Ollama native chat: small context, unloads when idle), returned in the
     same shape as online.call_openrouter_messages."""
@@ -129,9 +133,10 @@ def call(messages: list, tools: list) -> dict:
         return {"ok": True, "calls": calls, "tool": calls[0]["tool"], "args": calls[0]["args"],
                 "call_id": calls[0]["call_id"], "text": "", "model": "local:" + LOCAL_MODEL}
     text = re.sub(r"(?s)^.*</think>", "", str(msg.get("content") or "")).strip()  # drop leftover reasoning
-    if REASONING_RE.match(text):
+    if REASONING_RE.match(text) or THINKING_RE.search(text[:400]):  # live 10-17 10:18: "Okay, the user is asking…" was spoken
         # live 10-17: with credits at $0 the local model's thinking ("Okay, let's break this down. The user is saying…")
         # was spoken to Evens. Thinking is never a reply.
-        text = f"I couldn't work that out with the free local model. {ADD_CREDITS}"
+        return {"ok": True, "tool": "", "args": {}, "call_id": "", "model": "local:" + LOCAL_MODEL, "refused": True,
+                "text": f"I couldn't work that out with the free local model. {ADD_CREDITS}"}
     return {"ok": bool(text), "tool": "", "args": {}, "call_id": "", "text": text, "model": "local:" + LOCAL_MODEL,
             **({} if text else {"unknown": True, "error": "local model: empty"})}

@@ -1706,7 +1706,8 @@ def _with_local_fallback(paid_fn):
         last_user = max((i for i, m in enumerate(messages) if m.get("role") == "user" and isinstance(m.get("content"), str)), default=0)
         if sum(1 for m in messages[last_user:] if m.get("role") == "assistant") >= L.LOCAL_STEP_CAP:
             return say(f"This free local model can't finish long multi-step tasks. {L.ADD_CREDITS}")
-        return L.call(messages, tools)
+        got = L.call(messages, tools)
+        return {**got, "no_credit": True} if got.get("refused") else got  # its refusal ends the job as model-unavailable
     return fn
 
 
