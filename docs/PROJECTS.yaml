@@ -2,6 +2,30 @@
 # This file defines the contract for what Cursor can and cannot touch
 
 projects:
+  jarvis:
+    name: "Jarvis Agent Stack"
+    description: "Jarvis Face, Orb, Brain, Hands, memory, tests, and bounded shared tooling"
+    allowed_paths:
+      - "apps/agent-stack/**"
+      - "checks/LOCK.json"
+      - "checks/approvals/**"
+      - "checks/locked/**"
+      - "docs/IMPLEMENTATION-1dacbcc1b9174848b8d562d352861931.md"
+      - "docs/METHOD-FIDELITY.md"
+      - "docs/PROJECTS.yaml"
+      - "tooling/scripts/scan-secrets.sh"
+      - "tooling/scripts/test_scan_secrets.py"
+      - ".github/workflows/ai-code-validation.yml"
+      - ".github/workflows/guard.yml"
+      - ".github/workflows/scope-validation.yml"
+      - ".github/workflows/security-scan.yml"
+      - "scripts/validate/security-check.sh"
+      - "package.json"
+    excluded_paths:
+      - "apps/scorpion/**"
+      - "apps/lightningflow/**"
+      - "infra/**"
+
   lfai:
     name: "LightningFlow AI"
     description: "Main LightningFlow AI application and services"

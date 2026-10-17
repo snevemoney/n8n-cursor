@@ -58,8 +58,8 @@ def run(args: dict | None = None) -> dict:
     code = str(args.get("code") or "")
     test = str(args.get("test") or "")
     if not code.strip():
-        return {"ok": True, "ran": False, "passed": False, "timed_out": False, "stdout": "", "stderr": "",
-                "spoken": "I can run Python in a sandbox, but this ask has no code in it. Paste the code (and a test) and I'll run it."}
+        return {"ok": False, "ran": False, "passed": False, "timed_out": False, "stdout": "", "stderr": "",
+                "spoken": "I can run Python in a sandbox, but this ask has no code in it. Paste the code (and a test) to run it."}
     py = _interpreter()
     if not SANDBOX or not py:
         why = "sandbox-exec is missing" if not SANDBOX else "no system Python outside your home folder"
@@ -82,19 +82,21 @@ def run(args: dict | None = None) -> dict:
             except ProcessLookupError:
                 pass
             out, err = proc.communicate()
-            rc, timed, err = -9, True, ""
+            rc, timed = -9, True  # keep whatever it printed before the cap (honesty audit 2026-10-16)
         ms = int((time.monotonic() - t0) * 1000)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     passed = rc == 0 and not timed
     if timed:
-        sp = f"The code ran past the {TIME_CAP} second cap, so I stopped it. It did not pass."
+        tail = (err or out or "").strip()[-200:]
+        sp = f"The code ran past the {TIME_CAP} second cap, so I stopped it. It did not pass." + (f" Last output: {tail}" if tail else "")
     elif passed:
         sp = "It ran in the sandbox and passed" + (" its test." if test else ".") + (f" Output: {out.strip()[:200]}" if out.strip() else "")
     else:
         last = (err.strip().splitlines() or ["no error text"])[-1][:200]
-        sp = f"It ran in the sandbox and failed: {last}"
-    return {"ok": True, "ran": True, "passed": passed, "timed_out": timed, "rc": rc, "ms": ms,
+        sp = f"It ran in the sandbox and failed: {last}" + (f" It printed: {out.strip()[:160]}" if out.strip() else "")
+    # ok means the code ran and passed; a failed or timed-out run is not a finished task.
+    return {"ok": passed, "ran": True, "passed": passed, "timed_out": timed, "rc": rc, "ms": ms,
             "stdout": _cap(out), "stderr": _cap(err), "sandboxed": True, "spoken": sp}
 
 

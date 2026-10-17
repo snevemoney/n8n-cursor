@@ -8,6 +8,9 @@ Vault INDEX: `/Users/evenslouis/Documents/My_Billion_Dollar_Vault/00_Outer_Heave
 
 This file also provides guidance when working with code in this repository.
 
+
+**Read first (2026-10-17):** shared rules `~/.grok-shared/AGENT_RULES.md`; the live product is **Jarvis** in `apps/agent-stack/` (see `apps/agent-stack/AGENTS.md`). Scorpion / OpenClaw / Telegram below are legacy (rule 15: do not revive); the commands and ports in the rest of this file describe that legacy workspace.
+
 ## Project Overview
 
 This is a **monorepo workspace** containing multiple projects:

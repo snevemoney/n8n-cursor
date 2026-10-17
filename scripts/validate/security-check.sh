@@ -68,7 +68,7 @@ for pattern in "${SECRET_PATTERNS[@]}"; do
             --include="*.tsx" \
             --include="*.js" \
             --include="*.jsx" \
-            apps/ packages/ 2>/dev/null | grep -v "process\.env\|import\|require\|type \|interface \|selector\|querySelector\|data-test\|Label\|placeholder\|htmlFor\|confirm\|show\|hide\|className\|useState\|validation\|error\|\.d\.ts\|header" | head -5
+            apps/ packages/ 2>/dev/null | grep -v "process\.env\|import\|require\|type \|interface \|selector\|querySelector\|data-test\|Label\|placeholder\|htmlFor\|confirm\|show\|hide\|className\|useState\|validation\|error\|\.d\.ts\|header" | sed -n '1,5p'
         VIOLATIONS+=("hardcoded_secrets")
     fi
 done
@@ -122,7 +122,7 @@ done
 
 # Check for input validation
 echo "🔍 Checking for input validation..."
-API_FILES=$(find . -name "*.ts" -o -name "*.js" | grep -E "(api|route|handler)" | head -10)
+API_FILES=$(find . -name "*.ts" -o -name "*.js" | grep -E "(api|route|handler)" | sed -n '1,10p')
 for api_file in $API_FILES; do
     if [ -f "$api_file" ]; then
         echo "📄 Checking $api_file"
@@ -152,7 +152,7 @@ done
 
 # Check for proper error handling
 echo "⚠️ Checking for proper error handling..."
-ERROR_FILES=$(find . -name "*.ts" -o -name "*.js" | grep -E "(api|route|handler)" | head -10)
+ERROR_FILES=$(find . -name "*.ts" -o -name "*.js" | grep -E "(api|route|handler)" | sed -n '1,10p')
 for error_file in $ERROR_FILES; do
     if [ -f "$error_file" ]; then
         echo "📄 Checking $error_file"
@@ -167,7 +167,7 @@ done
 
 # Check for proper logging
 echo "📝 Checking for proper logging..."
-LOG_FILES=$(find . -name "*.ts" -o -name "*.js" | grep -E "(api|route|handler)" | head -10)
+LOG_FILES=$(find . -name "*.ts" -o -name "*.js" | grep -E "(api|route|handler)" | sed -n '1,10p')
 for log_file in $LOG_FILES; do
     if [ -f "$log_file" ]; then
         echo "📄 Checking $log_file"

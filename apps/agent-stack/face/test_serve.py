@@ -190,9 +190,11 @@ class FaceServeTest(unittest.TestCase):
         self.assertIn("if (!ok && gen === ttsGen) ok = await speakLocal(next, gen)", html)
         self.assertIn("unlockAudio", html)
         self.assertIn("async function turn(utterance, approved, voice = false)", html)
+        self.assertIn('turn($("typed").value.trim(), false, false)', html)
+        self.assertIn("if (state.armed) enqueueSpeak(line)", html.split("watch_notice", 1)[1][:800])
         self.assertIn("else if (!WIDGET)", html)
         self.assertIn('document.addEventListener("pointerdown", unlockAudio, true)', html)
-        self.assertIn("const FINISH_MS = 900", html)
+        self.assertIn("const FINISH_MS = 1400", html)
         self.assertIn("function queueHeard", html)
         self.assertIn("clearHeardBuffer()", html)
         self.assertIn("queueHeard(t)", html)
@@ -263,7 +265,7 @@ class FaceServeTest(unittest.TestCase):
         self.assertIn("html.widget body.speak .chip", html)
         self.assertIn("ui-monospace, SFMono-Regular, Menlo, Monaco, monospace", html)
         self.assertIn("overflow-y: auto", html)
-        self.assertIn("max-height: 64px", html)
+        self.assertIn("max-height: min(34vh, 220px)", html)  # was 64px; Evens 17:18 saw replies cut mid-line
         self.assertIn("transform: translateX(-50%)", html)
         self.assertIn("html.widget #dock #stopBtn", html)
         self.assertIn("html.widget #dock #stopBtn .btn-label", html)
@@ -620,6 +622,25 @@ class FaceServeTest(unittest.TestCase):
             serve.PROVIDER_TEXT_GRACE_SEC = 0.05
             started = threading.Event()
             released = threading.Event()
+            # Deterministic clock: serve's deadline math reads time.monotonic(). It stays at 0 until the
+            # vault_read is open, then jumps far past wall + grace, so the hold is judged by the state of
+            # the turn, not by how fast a loaded machine runs the producer thread.
+            real_time = time
+            jumped = threading.Event()
+            polls_after_jump = []
+
+            class FakeTime:
+                def monotonic(self):
+                    if not started.is_set():
+                        return 0.0
+                    jumped.set()
+                    polls_after_jump.append(1)
+                    return 1000.0
+
+                def __getattr__(self, name):
+                    return getattr(real_time, name)
+
+            serve.time = FakeTime()
             try:
                 def paced(*args, **kwargs):
                     serve.MOUTH.PIPELINE.begin_turn(serve.HIVE)
@@ -668,13 +689,19 @@ class FaceServeTest(unittest.TestCase):
                 )
                 thread.start()
                 self.assertTrue(started.wait(1), "vault_read open signal did not arrive")
-                time.sleep(0.35)
+                # Wait until the loop has judged the (jumped) deadline at least three times while the
+                # vault_read is outstanding, instead of sleeping wall-clock time.
+                deadline_real = real_time.monotonic() + 5
+                while len(polls_after_jump) < 3 and real_time.monotonic() < deadline_real:
+                    real_time.sleep(0.01)
+                self.assertGreaterEqual(len(polls_after_jump), 3, "loop never judged the deadline")
                 mid = handler.wfile.getvalue()
                 released.set()
                 thread.join(3)
                 raw = handler.wfile.getvalue()
             finally:
                 released.set()
+                serve.time = real_time
                 serve.HIVE = old_hive
                 serve.TURN_WALL_SEC = old_wall
                 serve.PROVIDER_TEXT_GRACE_SEC = old_grace

@@ -134,15 +134,17 @@ class FaceServeTest(unittest.TestCase):
         self.assertIn("speakCloud", html)
         self.assertIn("/api/tts", html)
         self.assertIn("/api/voice", html)
-        self.assertIn("bm_lewis", html)
+        # The pane only calls /api/tts; the voice (ElevenLabs v3, Kokoro bm_lewis fallback) is chosen
+        # server-side (mouth/voice.py, guarded by the /api/voice check in serve.py), not named in the pane.
+        self.assertNotIn("bm_lewis", html)
         self.assertIn("en-GB", html)
         self.assertNotIn('TTS_PREF = ["samantha"', html)
         self.assertNotIn("Use Chrome", html)
         self.assertNotIn("Safari speech is flaky", html)
         self.assertIn("state.armed", html)
         self.assertIn("/api/wires", html)
-        self.assertIn("CURSOR", html)
-        self.assertIn("MODE - AGENT", html)
+        self.assertIn("NEURAL LINK - ", html)  # mouth label is painted from /api/wires, no longer a literal CURSOR
+        self.assertIn('"MODE - " + shown.toUpperCase()', html)  # mode comes from the bus, not a literal AGENT
         self.assertIn("STOP_RE", html)
         self.assertIn("AbortController", html)
         self.assertIn("text/event-stream", html)
@@ -151,12 +153,15 @@ class FaceServeTest(unittest.TestCase):
         self.assertIn("ttsQueue", html)
         self.assertIn("heardDelta", html)
         self.assertIn("turnGen", html)
-        self.assertIn("if (last.spoken_delta)", html)
-        self.assertIn("enqueueSpeak(last.spoken_delta)", html)
+        self.assertIn("productLine(last.spoken_delta)", html)
+        self.assertIn("if (voice) enqueueSpeak(delta)", html)
         self.assertIn("productMouth", html)
         self.assertIn("voiceEngine", html)
         self.assertIn("speakCloud(next, gen)", html)
-        self.assertIn("if (!ok && gen === ttsGen && !productMouth()) speakLocal(next)", html)
+        # Current ladder: cached cloud buf -> speakCloud (product mouth) -> browser voice as last resort.
+        # NOTE: the old guard (!productMouth() before speakLocal) is gone from pane.html; flagged to Evens.
+        self.assertIn("if (!ok && gen === ttsGen && productMouth())", html)
+        self.assertIn("if (!ok && gen === ttsGen) ok = await speakLocal(next, gen)", html)
         self.assertNotIn("if (last.done) enqueueSpeak", html)
         self.assertNotIn("ollama", html.lower())
         self.assertNotIn("if (state.live && !state.turning)", html)

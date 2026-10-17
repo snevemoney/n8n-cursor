@@ -18,6 +18,9 @@ import urllib.request
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+_VAULT_ROOT = Path(os.environ.get("JARVIS_VAULT_DIR") or os.environ.get("JARVIS_VAULT") or next(
+    (p for p in (Path.home() / "Vaults/My_Billion_Dollar_Vault", Path.home() / "Documents/My_Billion_Dollar_Vault") if p.is_dir()),
+    Path.home() / "Vaults/My_Billion_Dollar_Vault")).expanduser()  # Evens 10-17: the vault lives in ~/Vaults now
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
@@ -30,7 +33,7 @@ JARVIS_LOGS = (
     ROOT / "docs/hive/outer-heaven/CONTENT/os/sessions/jarvis/2026-09-13.md",
     ROOT / "docs/hive/outer-heaven/CONTENT/os/sessions/jarvis/2026-09-12.md",
 )
-VAULT_OH = Path(os.environ.get("JARVIS_VAULT_DIR") or (Path.home() / "Documents/My_Billion_Dollar_Vault")).expanduser() / "00_Outer_Heaven"
+VAULT_OH = _VAULT_ROOT / "00_Outer_Heaven"
 HOST = "127.0.0.1"
 PORT = 4018
 CAP = 1000

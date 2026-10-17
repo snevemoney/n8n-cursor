@@ -6,6 +6,8 @@ Bind 127.0.0.1 only. Not evenslouis.ca. Not a second hive.
 from __future__ import annotations
 
 import importlib.util
+import hashlib
+import subprocess
 import json
 import os
 import queue
@@ -21,7 +23,56 @@ from urllib.parse import urlparse, parse_qs
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
+
+
+def _release_rev():
+    """The commit this server runs (audit 10-16: drift between checkout and running code was invisible)."""
+    try:
+        spec = importlib.util.spec_from_file_location("agent_stack_turn_log_rev", ROOT / "apps/agent-stack/memory/turn_log.py")
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        return mod.release_rev()
+    except Exception:  # noqa: BLE001 - health must answer even if the rev cannot be read
+        return None
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
+
+
+_CREDIT: dict = {}
+
+
+def _credit_empty() -> bool:
+    """Z64 mode truth for the header: is OpenRouter out of credit (cached 5 min; one read-only call, key by name)."""
+    import time as _t
+    if _t.time() - float(_CREDIT.get("at") or 0) > 300:
+        try:
+            spec = importlib.util.spec_from_file_location("serve_readiness", ROOT / "apps/agent-stack/hands/readiness.py")
+            rd = importlib.util.module_from_spec(spec); spec.loader.exec_module(rd)
+            _CREDIT.update(at=_t.time(), empty=rd.credit()[0] == "RED")
+        except Exception:  # noqa: BLE001 - unknown credit is not shown as empty
+            _CREDIT.update(at=_t.time(), empty=False)
+    return bool(_CREDIT.get("empty"))
+
+
+def _operator_view_mod():
+    mod = sys.modules.get("agent_stack_operator_view")
+    if mod is None:
+        spec = importlib.util.spec_from_file_location("agent_stack_operator_view", ROOT / "apps/agent-stack/hands/operator.py")
+        mod = importlib.util.module_from_spec(spec); sys.modules["agent_stack_operator_view"] = mod; spec.loader.exec_module(mod)
+    return mod
+
+
+def _plain_fn():
+    return _operator_view_mod().plain
+
+
+def plain_payload(payload):
+    """Evens 10-17 "Jarvis is still not always talking plain English": every line that leaves the Face (JSON replies and
+    the reply stream) passes the operator's plain() once: file names not paths, words not tool names."""
+    if not isinstance(payload, dict) or not isinstance(payload.get("spoken"), str) or not payload["spoken"]:
+        return payload
+    try:
+        return {**payload, "spoken": _plain_fn()(payload["spoken"])}
+    except Exception:  # noqa: BLE001 - never lose a reply over the cleanup
+        return payload
 OS_DIR = ROOT / "docs/hive/outer-heaven/CONTENT/os"
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("AGENT_STACK_FACE_PORT") or "4018")
@@ -35,7 +86,7 @@ def _watch_event_path() -> Path | None:
 
 def _controls():
     return getattr(mouth(), "CONTROLS", None)
-TURN_WALL_SEC = 25.0
+TURN_WALL_SEC = float(os.environ.get("JARVIS_FACE_TURN_WALL_SEC") or 25.0)
 # One provider attempt after the pre-talk partial. Not a longer campaign clock.
 # The standing line waits this long only while that call is still open.
 PROVIDER_TEXT_GRACE_SEC = 10.0
@@ -88,6 +139,39 @@ def vault_read_inflight(ev: dict) -> bool:
         return False
     verb = str(ev.get("verb") or ev.get("tool") or "")
     return verb in ("vault_read", "craft")
+
+
+# Mac review 2026-10-16 (acceptance: "exceed four tool results, survive an Orb disconnect"): only vault_read/craft held
+# the 25 s + 10 s wall, so a general hand loop (45 s budget) was cut to the dark line, and a disconnect cancelled work in
+# flight. Any hand the pipeline has started now holds the wall up to HAND_HOLD_MAX_SEC, and a disconnect while a hand
+# runs detaches the turn instead of cancelling it: the pipeline still commits its own result to the bus.
+HAND_HOLD_MAX_SEC = float(os.environ.get("JARVIS_HAND_HOLD_MAX_SEC") or 240)
+_NOT_HANDS = frozenset({"", "converse", "think", "say", "stop", "vault_read", "craft"})
+
+
+def is_heartbeat(ev: dict) -> bool:
+    return isinstance(ev, dict) and "heartbeat" in (ev.get("wires") or [])
+
+
+def hand_inflight(ev: dict) -> bool:
+    """A hand (not talk) that the pipeline has started and not finished: its open marker or its one heartbeat."""
+    if not isinstance(ev, dict) or not ev.get("partial") or ev.get("done"):
+        return False
+    if str(ev.get("host") or "") != "pipeline":
+        return False
+    verb = str(ev.get("verb") or ev.get("tool") or "")
+    if verb in _NOT_HANDS:
+        return False
+    return not str(ev.get("spoken") or "").strip() or is_heartbeat(ev)
+
+
+def queued_hand(pending: queue.Queue) -> bool:
+    try:
+        with pending.mutex:
+            rows = list(pending.queue)
+    except (AttributeError, TypeError):
+        return False
+    return any(hand_inflight(ev) for ev in rows if isinstance(ev, dict))
 
 
 def queued_vault_read(pending: queue.Queue) -> bool:
@@ -180,6 +264,45 @@ def think_heartbeat(utterance: str = "") -> dict:
     }
 
 
+_LOADED_SOURCE = {}
+_PROCESS_STARTED = time.time()
+_BOOT_SOURCE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+try:
+    _BOOT_CHECKOUT_REVISION=subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True,timeout=2).stdout.strip()
+except (OSError,subprocess.TimeoutExpired):_BOOT_CHECKOUT_REVISION='unavailable'
+def _source_manifest():
+    stack=HERE.parent
+    paths=[*stack.glob('brain/*.py'),*stack.glob('hands/*.py'),*stack.glob('mouth/*.py'),*stack.glob('memory/*.py'),HERE/'serve.py']
+    return {str(p.relative_to(stack)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths if not p.name.startswith('test_')}
+
+
+def runtime_evidence():
+    current=_source_manifest()
+    pipeline=getattr(globals().get('_MOUTH'),'PIPELINE',None)
+    online=getattr(pipeline,'ONLINE',None)
+    loaded={}
+    for name,module in list(sys.modules.items()):
+        filename=getattr(module,'__file__',None)
+        if filename:
+            try:loaded[name]=str(Path(filename).resolve().relative_to(HERE.parent))
+            except (ValueError,OSError):pass
+    coding=sys.modules.get('agent_stack_agent_tools') or sys.modules.get('coding_agent_tools')
+    pointer=sys.modules.get('agent_stack_pointer')
+    models={'configured_chat':online.openrouter_model() if online else None,
+            'last_observed_chat':(getattr(online,'LAST_TALK',{}) or {}).get('model') if online else None,
+            'loaded_coding':getattr(coding,'CODE_MODEL',None),
+            'loaded_pointer':getattr(pointer,'VISION_MODEL',None)}
+    try:revision=subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True,timeout=2).stdout.strip()
+    except (OSError,subprocess.TimeoutExpired):revision='unavailable'
+    return {'pid':os.getpid(),'started_at':_PROCESS_STARTED,'checkout_revision':revision,'boot_checkout_revision':_BOOT_CHECKOUT_REVISION,
+            'boot_source_sha256':_BOOT_SOURCE_SHA256,'loaded_modules':loaded,'model_roles':models,
+            'model_scope':'configured or last observed role; worker processes have separate request/source receipts',
+            'mouth_generation_id':hashlib.sha256(json.dumps(_LOADED_SOURCE,sort_keys=True).encode()).hexdigest(),
+            'mouth_generation_manifest':dict(_LOADED_SOURCE),'disk_matches_generation':current==_LOADED_SOURCE,
+            'revision_scope':'checkout revision and generation baseline; not proof that every lazy hand was imported'
+}
+
+
 def _load_mouth():
     for name in (
         "agent_stack_mouth",
@@ -197,6 +320,8 @@ def _load_mouth():
         raise RuntimeError(f"cannot load {path}")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    _LOADED_SOURCE.clear()
+    _LOADED_SOURCE.update(_source_manifest())
     return mod
 
 
@@ -504,6 +629,16 @@ def mark_pieces_wired() -> None:
     stack_path.write_text(json.dumps(stack, indent=2) + "\n", encoding="utf-8")
 
 
+
+def trusted_request(headers, port: int) -> bool:
+    """POSTs only from this server's own page (Orb/pane) or local scripts (no Origin). A page on another site, or a
+    DNS-rebinding host, must not be able to say "permission granted" (security review 2026-10-15, H4)."""
+    host = str(headers.get("Host") or "").strip().lower()
+    if host not in {f"127.0.0.1:{port}", f"localhost:{port}"}:
+        return False
+    origin = headers.get("Origin")
+    return origin is None or str(origin).strip().lower() in {f"http://127.0.0.1:{port}", f"http://localhost:{port}"}
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt: str, *args) -> None:  # noqa: A003
         sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
@@ -520,12 +655,37 @@ class Handler(BaseHTTPRequestHandler):
             return
 
     def _json(self, code: int, payload: dict) -> None:
-        self._send(code, (json.dumps(payload, indent=2) + "\n").encode("utf-8"), "application/json")
+        self._send(code, (json.dumps(plain_payload(payload), indent=2) + "\n").encode("utf-8"), "application/json")
+
+    def _trusted_request(self) -> bool:
+        """Privacy audit 2026-10-16: any website could POST /api/turn ("permission granted ...", then "confirm") and a
+        DNS-rebinding page could read /api/bus. Only this machine's own clients may talk to the Face: the Host header
+        must name the loopback port, and a browser Origin / Sec-Fetch-Site must be this same origin. The native Orb,
+        pane.html and orb_probe already send exactly that, so nothing they do changes."""
+        port = self.server.server_address[1] if getattr(self, "server", None) else PORT
+        hosts = {f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"}
+        if (self.headers.get("Host") or "").strip().lower() not in hosts:
+            return False
+        origin = (self.headers.get("Origin") or "").strip().lower()
+        if origin and origin not in {f"http://{h}" for h in hosts}:
+            return False
+        site = (self.headers.get("Sec-Fetch-Site") or "").strip().lower()
+        return site in ("", "same-origin", "none")
+
+    def _refuse_untrusted(self) -> None:
+        self._json(403, {"ok": False, "error": "forbidden: only this Mac's Jarvis clients may call the Face"})
 
     def do_GET(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
+        if path == "/api/runtime":
+            self._json(200,runtime_evidence())
+            return
         if path == "/healthz":
-            self._json(200, {"ok": True, "online": True, "bind": f"{HOST}:{PORT}", "kind": "agent-stack-face"})
+            self._json(200, {"ok": True, "online": True, "bind": f"{HOST}:{PORT}", "kind": "agent-stack-face",
+                             "rev": _release_rev()})
+            return
+        if not self._trusted_request():
+            self._refuse_untrusted()
             return
         if path == "/api/bus":
             pipe = getattr(mouth(), "PIPELINE", None)
@@ -554,6 +714,20 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/jobs":
             self._json(200, {"jobs": observe_jobs()})
             return
+        if path == "/api/operator/events":  # matrix "eventreplay": numbered job lines since a sequence number
+            try:
+                qs = parse_qs(urlparse(self.path).query)
+                self._json(200, _operator_view_mod().events(HIVE, (qs.get("task") or [""])[0], int((qs.get("since") or ["0"])[0] or 0)))
+            except (ValueError, Exception) as exc:  # noqa: BLE001
+                self._json(200, {"error": str(exc)[:200], "lines": []})
+            return
+        if path == "/api/operator":  # matrix: receiptcard, gatehud, driving, chips (read-only view of the live job)
+            try:
+                view = _operator_view_mod().orb_view(HIVE)
+            except Exception as exc:  # noqa: BLE001 - the Orb must paint even if the view fails
+                view = {"error": str(exc)[:200]}
+            self._json(200, {**view, "rev": _release_rev()})
+            return
         if path == "/api/stack":
             stack = dict(load_json(HIVE / "agent-stack.json"))
             stack["notes_indexed"] = _notes_indexed()
@@ -563,7 +737,7 @@ class Handler(BaseHTTPRequestHandler):
             live = online()
             if hasattr(live, "load_existing_env"):
                 live.load_existing_env()
-            self._json(200, live.wire_report())
+            self._json(200, {**live.wire_report(), "credit_empty": _credit_empty()})
             return
         if path == "/api/voice":
             self._json(200, voice().voice_report())
@@ -655,6 +829,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
+        if not self._trusted_request():
+            self._refuse_untrusted()
+            return
         data = self._read_json()
         live_mouth = mouth()
         if path == "/api/browser-mission/ack":
@@ -672,6 +849,16 @@ class Handler(BaseHTTPRequestHandler):
                 return
             bus = live_mouth.set_listen(HIVE, bool(data.get("live")), gen=gen)
             self._json(200, {"ok": True, **bus})
+            return
+        if path == "/api/barge":  # Evens 10-17: the Orb reports what the mic hears while Jarvis speaks (diagnosis, no audio)
+            try:
+                row = {k: data.get(k) for k in ("mic", "bleed", "ducked", "armed", "ctx", "speaking", "note")}
+                row["at"] = time.time()
+                with (HIVE / "barge.jsonl").open("a", encoding="utf-8") as fh:
+                    fh.write(json.dumps(row) + "\n")
+            except OSError:
+                pass
+            self._json(200, {"ok": True})
             return
         if path == "/api/stop" and hasattr(live_mouth, "cancel_scoped"):
             # Ported from main: scoped stop (speak / tool / job / mission / watch).
@@ -824,7 +1011,9 @@ class Handler(BaseHTTPRequestHandler):
         worker.start()
         worker.join(TURN_WALL_SEC)
         if worker.is_alive():
-            own_gen = arrival_plain + 1
+            opened = (pipe_plain.BUS_IO.gen_for_thread(HIVE, worker.ident, arrival_plain)
+                      if pipe_plain is not None and hasattr(getattr(pipe_plain, "BUS_IO", None), "gen_for_thread") else None)
+            own_gen = opened or arrival_plain + 1  # the gen this request's own worker opened, not a guess
             current = (
                 int(pipe_plain.peek_gen(HIVE) or 0)
                 if pipe_plain is not None and hasattr(pipe_plain, "peek_gen")
@@ -900,12 +1089,15 @@ class Handler(BaseHTTPRequestHandler):
         halt = threading.Event()
         deadline = time.monotonic() + TURN_WALL_SEC
         seen_gen = 0
+        worker_box: dict = {}
         call_open = False
         heard_provider = False
         tool_open = False
+        hand_open = False
+        detached = False
         try:
             beat = think_heartbeat(utterance)
-            self.wfile.write((f"data: {json.dumps(beat)}\n\n").encode("utf-8"))
+            self.wfile.write((f"data: {json.dumps(plain_payload(beat))}\n\n").encode("utf-8"))
             self.wfile.flush()
         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, OSError):
             return
@@ -926,7 +1118,12 @@ class Handler(BaseHTTPRequestHandler):
                 pending.put(None)
 
         def own_gen_now() -> int:
-            return seen_gen or (arrival + 1)
+            if seen_gen:
+                return seen_gen
+            w = worker_box.get("t")
+            opened = (pipe.BUS_IO.gen_for_thread(HIVE, w.ident, arrival)
+                      if w is not None and pipe is not None and hasattr(getattr(pipe, "BUS_IO", None), "gen_for_thread") else None)
+            return opened or (arrival + 1)
 
         def superseded() -> bool:
             """True when a newer generation owns the bus.
@@ -940,7 +1137,7 @@ class Handler(BaseHTTPRequestHandler):
             current = int(pipe.peek_gen(HIVE) or 0)
             if seen_gen:
                 return current > seen_gen
-            return current > arrival + 1
+            return current > own_gen_now()
 
         def kill_own_turn(*, disconnected: bool = False) -> bool:
             """Close with the dark line only while this request still owns the bus.
@@ -970,7 +1167,7 @@ class Handler(BaseHTTPRequestHandler):
         def emit_dark() -> None:
             dark = self._scrub_turn(live_mouth, wire_dark_event(utterance))
             try:
-                self.wfile.write((f"data: {json.dumps(dark)}\n\n").encode("utf-8"))
+                self.wfile.write((f"data: {json.dumps(plain_payload(dark))}\n\n").encode("utf-8"))
                 self.wfile.flush()
             except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, OSError):
                 pass
@@ -983,14 +1180,46 @@ class Handler(BaseHTTPRequestHandler):
             kept = self._committed_model_event(utterance, own_gen_now())
             if kept:
                 try:
-                    self.wfile.write((f"data: {json.dumps(kept)}\n\n").encode("utf-8"))
+                    self.wfile.write((f"data: {json.dumps(plain_payload(kept))}\n\n").encode("utf-8"))
                     self.wfile.flush()
                 except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, OSError):
                     pass
                 return
             emit_dark()
 
+        def detach() -> bool:
+            """Client gone while a hand runs: let the producer finish on its own (its result lands on the bus) instead
+            of cancelling the work. Bounded by HAND_HOLD_MAX_SEC; a newer turn or Stop still ends it."""
+            nonlocal detached
+            if is_stop or not worker.is_alive() or not (hand_open or tool_open or queued_hand(pending) or queued_vault_read(pending)):
+                return False
+            if superseded() or self._turn_aborted(arrival):
+                return False
+            detached = True
+            limit = time.monotonic() + HAND_HOLD_MAX_SEC
+
+            def drain() -> None:
+                while True:
+                    try:
+                        ev = pending.get(timeout=0.5)
+                    except queue.Empty:
+                        ev = False
+                    if ev is None:
+                        return
+                    if time.monotonic() > limit or superseded():
+                        halt.set()
+                        return
+            threading.Thread(target=drain, daemon=True, name="turn-detached").start()
+            if pipe is not None and hasattr(pipe, "mutate_bus"):
+                gen_now = own_gen_now()
+                try:
+                    pipe.mutate_bus(HIVE, lambda bus: dict(bus, detached_gen=gen_now))
+                except Exception:  # noqa: BLE001 — the marker is a courtesy for the Orb
+                    pass
+            return True
+
         worker = threading.Thread(target=produce, daemon=True)
+        worker_box["t"] = worker
         worker.start()
         try:
             while True:
@@ -1008,6 +1237,7 @@ class Handler(BaseHTTPRequestHandler):
                     owns_turn = not superseded()
                     tool_holding = producer_alive and owns_turn and (
                         tool_open or queued_vault_read(pending)
+                        or ((hand_open or queued_hand(pending)) and now < deadline + HAND_HOLD_MAX_SEC)
                     )
                     in_grace = (
                         producer_alive
@@ -1019,6 +1249,8 @@ class Handler(BaseHTTPRequestHandler):
                         emit_wall()
                         return
                 client_gone = self._client_gone()
+                if client_gone and detach():
+                    return
                 if (not is_stop and self._turn_aborted(arrival)) or client_gone:
                     halt.set()
                     kill_own_turn(disconnected=client_gone)
@@ -1076,28 +1308,48 @@ class Handler(BaseHTTPRequestHandler):
                     halt.set()
                     return
                 clean = self._scrub_turn(live_mouth, ev if isinstance(ev, dict) else {})
-                if provider_sentence(clean):
+                if hand_inflight(clean):
+                    hand_open = True  # a heartbeat is the hand still working, not the provider's answer
+                elif provider_sentence(clean) and not is_heartbeat(clean):
                     heard_provider = True
                     call_open = False
                     tool_open = False
+                    hand_open = False
                 elif vault_read_inflight(clean):
                     tool_open = True
                 elif provider_call_open(clean):
                     call_open = True
                 if clean.get("done"):
                     tool_open = False
+                    hand_open = False
                 payload = (f"data: {json.dumps(clean)}\n\n").encode("utf-8")
                 self.wfile.write(payload)
                 self.wfile.flush()
                 if clean.get("done") or str(clean.get("verb") or "") == "stop":
                     return
         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+            if detach():
+                return
             halt.set()
             kill_own_turn(disconnected=True)
             return
         finally:
-            halt.set()
+            if not detached:
+                halt.set()
             self.close_connection = True
+
+
+def _recover_operator_jobs() -> None:
+    """A job cut off by a restart or reboot carries on by itself (best effort; never blocks the Face)."""
+    try:
+        import importlib.util as _u
+        spec = _u.spec_from_file_location("agent_stack_operator_recover", ROOT / "apps/agent-stack/hands/operator.py")
+        op = _u.module_from_spec(spec); spec.loader.exec_module(op)
+        got = op.recover(HIVE)
+        if got:
+            print(json.dumps({"recovered_operator_jobs": got}))
+    except Exception as exc:  # noqa: BLE001
+        print(json.dumps({"recover_error": str(exc)[:200]}))
 
 
 def serve(port: int = PORT) -> None:
@@ -1116,6 +1368,12 @@ def serve(port: int = PORT) -> None:
         if bus.get("job_status") == "working" and bus.get("phase") == "think":
             bus["phase"] = "idle"
             bus["job_status"] = "done"
+            # Restart audit 2026-10-16: the interrupted turn vanished without a word, and its gen still read as live.
+            if bus.get("turn_gen"):
+                bus["cancel_gen"] = bus["turn_gen"]
+            bus.pop("agent_task_progress", None)
+            bus["spoken"] = "I restarted in the middle of your last request, so it did not finish. Say it again and I'll redo it."
+            bus["response_ok"] = False
         return bus
 
     if pipe is not None and hasattr(pipe, "mutate_bus"):
@@ -1127,6 +1385,7 @@ def serve(port: int = PORT) -> None:
         voice().warm()
     threading.Thread(target=_warm_cursor_chats, daemon=True).start()
     threading.Thread(target=_focus_pump, daemon=True).start()
+    threading.Thread(target=_recover_operator_jobs, daemon=True).start()
     httpd = ThreadingHTTPServer((HOST, port), Handler)
     print(json.dumps({"ok": True, "url": f"http://{HOST}:{port}/", "bind": HOST}, indent=2))
     try:
@@ -1275,8 +1534,9 @@ def self_test() -> dict:
             return {"ok": False, "errors": ["/api/voice missing British repo voice"], "body": voice_body}
         if str(voice_body.get("voice") or "") in {"Samantha", "Daniel"}:
             return {"ok": False, "errors": ["/api/voice still a macOS remap"], "body": voice_body}
-        if voice_body.get("repo", {}).get("kokoro") != "bm_lewis":
-            return {"ok": False, "errors": ["/api/voice lost bm_lewis"], "body": voice_body}
+        kv = str(voice_body.get("repo", {}).get("kokoro") or "")
+        if not kv or kv != str(voice_body.get("voice") or ""):  # his chosen voice (a blend like bm_lewis:50+am_michael:50 is fine)
+            return {"ok": False, "errors": [f"/api/voice lost the configured voice ({kv or 'none'})"], "body": voice_body}
         if voice_body.get("model") != "eleven_v3" or voice_body.get("design_model") != "eleven_ttv_v3":
             return {"ok": False, "errors": ["/api/voice missing official v3 slugs"], "body": voice_body}
         speak_engine = str(voice_body.get("speak_engine") or voice_body.get("engine") or "")

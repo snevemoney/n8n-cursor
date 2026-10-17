@@ -74,7 +74,7 @@ PACK_LEAK_RE = re.compile(
     r"a hand only when you need one|"
     r"thinking process|"
     r"(?:^|\n)\s*(?:here'?s a |my |hidden )?scratchpad\s*:|"
-    r"`[a-z0-9-]{8,}`"
+    r"`(?!(?:gev|jev|gods-eye|artcraft)-|[a-z]+craft-cli)[a-z0-9-]{8,}`"
     r")",
     re.I,
 )
@@ -154,7 +154,7 @@ FACTORY_PHRASE = (
     (re.compile(r"forge\s+typecheck[^.]*\.?", re.I), ""),
     (re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", re.I), ""),
     (re.compile(r"On disk:\s*[^.]+\.?", re.I), ""),
-    (re.compile(r"ASKS\.md", re.I), ""),
+    (re.compile(r"(?<![\w-])ASKS\.md", re.I), ""),
     (re.compile(r"SKILL\.md", re.I), ""),
     (re.compile(r"ask-log\.py", re.I), ""),
     (re.compile(r"scars?\.jsonl", re.I), ""),
@@ -175,7 +175,7 @@ FACTORY_PHRASE = (
     (
         re.compile(
             # HOME-relative user folders (~/Documents, ~/Movies, ...) are where Evens looks; keep them.
-            r"(?:(?:/Users|/home|/tmp|/var|/opt|~/(?!(?:Documents|Movies|Desktop|Downloads|Pictures|Music)\b)|[A-Za-z]:\\)[\w./\\-]+|"
+            r"(?:(?:/Users|/home|/tmp|/var|/opt|~/(?!(?:Documents|Movies|Desktop|Downloads|Pictures|Music|ArtCraft|Applications|\.local/bin|\.grok-shared)\b)|[A-Za-z]:\\)[\w./\\-]+|"
             r"(?:apps|scripts|docs|CONTENT|packages)/[\w./-]+)"
         ),
         "",
@@ -220,7 +220,7 @@ WIT = {
     "safari": "The tab, not the face.",
     "safari_see": "The tab, not the face.",
     "cursor_ask": "The repo, not a rumor.",
-    "refuse_hard_step": "That stays with you.",
+    "refuse_hard_step": "Your call.",  # was "That stays with you."; kept stops ask first (Evens 10-15), they don't refuse
     "refuse": "That stays with you.",
     "stop": "Noted.",
     "heal": "Logged.",
@@ -628,6 +628,23 @@ def named_absence(utterance: str) -> str:
     return f"{thing} was left uncreated. I will not invent it."
 
 
+def _luhn(digits: str) -> bool:
+    total = 0
+    for i, ch in enumerate(reversed(digits)):
+        d = int(ch) * (2 if i % 2 else 1)
+        total += d - 9 if d > 9 else d
+    return total % 10 == 0
+
+
+def _card_like(m: "re.Match") -> str:
+    """Redact a long digit run only when it could be a card: Luhn-valid and not a 20YYMMDD-HHMMSS stamp."""
+    raw = m.group(0)
+    digits = re.sub(r"\D", "", raw)
+    if re.fullmatch(r"20\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[ -]?\d{4,6}", raw.strip()):
+        return raw
+    return "number redacted" if _luhn(digits) else raw
+
+
 def redact_private_ids(text: str) -> str:
     """Card fragments and national-id shapes are not spoken."""
     body = text or ""
@@ -639,7 +656,7 @@ def redact_private_ids(text: str) -> str:
     )
     body = re.sub(r"\blast-?4\s*\d{4}\b", "card last-4 redacted", body, flags=re.I)
     body = re.sub(r"\b\d{3}-\d{2}-\d{4}\b", "id redacted", body)
-    body = re.sub(r"\b(?:\d[ -]?){13,19}\b", "number redacted", body)
+    body = re.sub(r"\b(?:\d[ -]?){13,19}\b", _card_like, body)
     return body
 
 
@@ -797,6 +814,28 @@ def witty_beat(verb: str, *, repeat: bool = False) -> str:
     return WIT.get(key, "")
 
 
+# Plain speech (Evens 2026-10-16: "jarvis is not talking in plain english"): what a person would say out loud.
+_PLAIN_SUBS = (
+    (re.compile(r"\*\*|__|`"), ""),                                                   # markdown emphasis / code ticks
+    (re.compile(r"(?m)^\s{0,3}#{1,6}\s+"), ""),                                       # markdown headings
+    (re.compile(r"com~apple~CloudDocs"), "iCloud Drive"),
+    (re.compile(r"\banthropic/claude-([a-z]+)-(\d+(?:\.\d+)?)\b"), lambda m: f"Claude {m.group(1).capitalize()} {m.group(2)}"),
+    (re.compile(r"\bdeepseek/deepseek-[\w.-]*[\w]"), "DeepSeek"),
+    # a long hash used as a file name: "158b2d…72.pdf" -> "an untitled PDF"
+    (re.compile(r"\b[0-9a-f]{24,}\.([A-Za-z0-9]{2,5})\b"), lambda m: f"an untitled {m.group(1).upper()}"),
+    # a dated note slug: "20260227-cursor-ide-browser-...-3654c269" -> "cursor ide browser ..."
+    (re.compile(r"\b20\d{6}-((?:[a-z0-9]+-)*?[a-z0-9]+?)(?:-[0-9a-f]{6,10})?\b(?![-\w])"),
+     lambda m: m.group(1).replace("-", " ")),
+)
+
+
+def plain_speech(text: str) -> str:
+    out = text or ""
+    for rx, rep in _PLAIN_SUBS:
+        out = rx.sub(rep, out)
+    return out
+
+
 def wrap(
     spoken: str,
     *,
@@ -807,7 +846,7 @@ def wrap(
     scars: list[dict] | None = None,
 ) -> str:
     """Sir. Then the payload. A rare hand beat only when it is earned."""
-    raw = scrub_unspeakable(spoken or "", utterance=utterance)
+    raw = plain_speech(scrub_unspeakable(spoken or "", utterance=utterance))
     if is_dump(raw):
         return f"{FAILURE_TEMPLATE} {DUMP_SPOKEN}"
     if (verb or "").strip().lower() == "wire":
@@ -889,9 +928,29 @@ PROMISE_RE = re.compile(
 CANT_YET_LINE = "I can't do that yet: no tool ran for it, so I won't pretend it's happening."
 
 
+# Honesty audit 2026-10-16: with no tool run, "Done. I've renamed report.txt" / "your reminder is saved" were spoken as
+# fact. A completed-action claim with no tool behind it is dropped exactly like an empty promise.
+DONE_CLAIM_RE = re.compile(
+    r"\bI(?:['\u2019]ve|\s+have|\s+just)\s+(?:now\s+|already\s+|successfully\s+)?(?:renamed|saved|sent|opened|created|deleted|moved|"
+    r"scheduled|booked|installed|uploaded|posted|set\s+up|added|updated|emailed|texted|called|paid|ordered|launched|closed|"
+    r"downloaded|submitted|published|deployed|pushed|merged|recorded|exported|copied)\b"
+    r"|\b(?:your|the)\s+[\w\s'-]{1,40}?\s+(?:is|are|has\s+been|have\s+been)\s+(?:now\s+)?(?:saved|sent|scheduled|created|renamed|"
+    r"booked|set|installed|uploaded|posted|deleted|moved|updated|exported|submitted)\b"
+    # live 10-16: "LinkedIn is open in Safari showing your feed." with no tool run
+    r"|\b[A-Z][\w.]*(?:\s+[A-Z][\w.]*)?\s+(?:is|are)\s+(?:now\s+)?(?:open|opened|up|playing|running|launched|loaded|showing)\b", re.I)
+
+
 def promise_guard(text: str, *, ran_tool: bool) -> str:
-    """Drop promise-only sentences. If nothing real is left, say so honestly."""
+    """Drop promise-only sentences (and, with no tool run, completed-action claims). If nothing real is left, say so."""
     body = (text or "").strip()
+    if body and not ran_tool and DONE_CLAIM_RE.search(body):
+        parts = re.split(r"(?<=[.!?])\s+", body)
+        claim = lambda s: DONE_CLAIM_RE.search(s) and not re.search(r"\bby\s+you\b|\byou\s+(?:said|told|asked)\b", s, re.I)
+        if any(claim(x) for x in parts):
+            rest = " ".join(x for x in parts if not claim(x) and not re.fullmatch(r"(?:done|all\s+set|finished)[.!,]?", x.strip(), re.I)).strip()
+            if len(rest) < 40:
+                return CANT_YET_LINE if not rest else f"{CANT_YET_LINE} {rest}"
+            body = text = rest
     if not body or not PROMISE_RE.search(body):
         return text
     parts = re.split(r"(?<=[.!?])\s+", body)

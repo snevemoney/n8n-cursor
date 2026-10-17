@@ -36,6 +36,11 @@ SECRET_RES = {
     "google api key": re.compile(r"\bAIza[0-9A-Za-z_-]{35}\b"),
     "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |)PRIVATE KEY-----"),
     "bearer literal": re.compile(r"Bearer\s+[A-Za-z0-9._-]{30,}"),
+    # 10-17 probe: these formats passed the guard
+    "xai key": re.compile(r"\bxai-[A-Za-z0-9]{40,}"),
+    "stripe/elevenlabs-style key": re.compile(r"\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{16,}|\bsk_[A-Za-z0-9]{32,}"),
+    "jwt": re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"),
+    "password in url": re.compile(r"\b[a-z][a-z0-9+.-]*://[^\s:/@'\"]+:(?!\$|\{|<|\*)[^\s@/'\"]{4,}@"),
 }
 SKIP_CONTENT_RE = re.compile(r"\.(png|jpe?g|gif|webp|pdf|zip|gz|mp[34]|mov|woff2?|ttf|ico|min\.js)$|(^|/)vendor/", re.I)
 ALLOW_MARK = "public-guard: allow"

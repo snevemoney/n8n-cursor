@@ -1,0 +1,21 @@
+/** Z64 mode truth: the mic line states what the mic is really doing in every phase. */
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+const html = fs.readFileSync(path.join(__dirname, 'pane.html'), 'utf8');
+const start = html.indexOf('    function micLine()');
+const end = html.indexOf('    function paintPhase(phase)', start);
+assert.ok(start > 0 && end > start, 'micLine slice');
+const ctx = { state: {} };
+vm.createContext(ctx);
+vm.runInContext(html.slice(start, end), ctx);
+const line = (s) => { ctx.state = s; return vm.runInContext('micLine()', ctx); };
+assert.strictEqual(line({ armed: false, phase: 'idle' }), 'MIC OFF - TAP TO ARM');
+assert.strictEqual(line({ armed: false, phase: 'speak' }), 'MIC OFF - TAP TO ARM');
+assert.strictEqual(line({ armed: true, phase: 'speak', listening: false }), 'MIC PAUSED WHILE I SPEAK');
+assert.strictEqual(line({ armed: true, phase: 'speak', listening: true }), 'MIC ON - SAY "STOP" TO INTERRUPT');
+assert.strictEqual(line({ armed: true, phase: 'think', listening: false }), 'MIC PAUSED WHILE I WORK');
+assert.strictEqual(line({ armed: true, phase: 'listen' }), 'MIC - LISTENING');
+assert.strictEqual(line({ armed: true, phase: 'idle', listening: false }), 'MIC - LISTENING FOR "JARVIS"');
+console.log('ok mic truth');

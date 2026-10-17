@@ -13,6 +13,7 @@ from __future__ import annotations
 import base64
 import importlib.util
 import json
+import re
 import os
 import subprocess
 import sys
@@ -46,6 +47,48 @@ VENV_PY = _voice_path("AGENT_STACK_VOICE_PYTHON", STACK / ".venv-voice" / "bin" 
 KOKORO_MODEL = CACHE / "kokoro-v1.0.int8.onnx"
 KOKORO_VOICES = CACHE / "voices-v1.0.bin"
 KOKORO_VOICE = "bm_lewis"
+VOICE_FILE = Path.home() / ".config/brain/voice.txt"
+SPEED_FILE = Path.home() / ".config/brain/voice-speed.txt"  # X07 voice parameters: 0.8-1.3, one line, Jarvis may change it
+
+
+def voice_speed() -> float:
+    try:
+        v = float(SPEED_FILE.read_text().strip())
+    except (OSError, ValueError):
+        return 1.0
+    return min(1.3, max(0.8, v))  # Evens 10-17 "change Jarvis's voice for free": one line, e.g. bm_george
+
+
+def _personality_voice() -> str:
+    """The active personality's `voice:` line (hands/operator.py personality files); "" when none."""
+    try:
+        name = (Path.home() / ".config/brain/personality.txt").read_text().strip()
+        folder = Path(os.environ.get("JARVIS_PERSONALITIES") or Path.home() / "ArtCraft Studio/00 Private/Context References/Personalities")
+        m = re.search(r"(?m)^voice:\s*([abmf][fm]_[a-z]+(?:[:+][a-z_:0-9]+)*)", (folder / f"{name}.md").read_text())
+        return m.group(1) if m else ""
+    except OSError:
+        return ""
+
+
+def kokoro_voice() -> str:
+    """The Kokoro voice to speak with: env, then ~/.config/brain/voice.txt, then the default. No code change to switch."""
+    for cand in (os.environ.get("AGENT_STACK_KOKORO_VOICE"), VOICE_FILE.read_text().strip() if VOICE_FILE.is_file() else "",
+                 _personality_voice()):
+        if cand and VOICE_SPEC.fullmatch(cand.strip()):
+            return cand.strip()
+    return KOKORO_VOICE
+
+
+VOICE_SPEC = re.compile(r"[abmf][fm]_[a-z]+(?::\d{1,3})?(?:\+[abmf][fm]_[a-z]+(?::\d{1,3})?)*")
+
+
+def voice_style(engine, spec: str):
+    """A Kokoro voice name, or a blend "bm_lewis:50+am_michael:50" averaged into one style vector."""
+    if "+" not in spec:
+        return spec.split(":")[0]
+    parts = [(p.split(":")[0], float(p.split(":")[1]) if ":" in p else 1.0) for p in spec.split("+")]
+    total = sum(w for _, w in parts) or 1.0
+    return sum(engine.get_voice_style(name) * (w / total) for name, w in parts)
 TARQUIN_VOICE_ID = "7cOBG34AiHrAzs842Rdi"
 ELEVEN_V3 = "eleven_v3"
 ELEVEN_TTV_V3 = "eleven_ttv_v3"
@@ -206,16 +249,16 @@ def voice_report() -> dict:
         speak_voice_id = elevenlabs_voice_id()
         speak_model = ELEVEN_V3
     elif kokoro_ready() and voice_python() is not None:
-        engine, voice = "kokoro", KOKORO_VOICE
-        speak_voice_id = KOKORO_VOICE
+        engine, voice = "kokoro", kokoro_voice()
+        speak_voice_id = kokoro_voice()
         speak_model = "kokoro"
     elif kokoro_ready():
-        engine, voice = "kokoro-dark-python", KOKORO_VOICE
-        speak_voice_id = KOKORO_VOICE
+        engine, voice = "kokoro-dark-python", kokoro_voice()
+        speak_voice_id = kokoro_voice()
         speak_model = "kokoro"
     else:
-        engine, voice = "dark", KOKORO_VOICE
-        speak_voice_id = KOKORO_VOICE
+        engine, voice = "dark", kokoro_voice()
+        speak_voice_id = kokoro_voice()
         speak_model = "dark"
     if key_on:
         fallback_reason = ""
@@ -233,7 +276,7 @@ def voice_report() -> dict:
         "key_present": key_on,
         "voice_id_present": bool(key_on and (vid_on or TARQUIN_VOICE_ID)),
         "lang": "en-GB",
-        "repo": {"kokoro": KOKORO_VOICE, "elevenlabs": ELEVEN_V3, "design": ELEVEN_TTV_V3},
+        "repo": {"kokoro": kokoro_voice(), "elevenlabs": ELEVEN_V3, "design": ELEVEN_TTV_V3},
         "fallback": "speechSynthesis last-resort, never the product",
         "fallback_reason": fallback_reason,
     }
@@ -413,7 +456,8 @@ def _kokoro_engine():
 
 def _kokoro_once(text: str) -> bytes:
     engine = _kokoro_engine()
-    samples, rate = engine.create(text[:TEXT_CAP], voice=KOKORO_VOICE, speed=1.0, lang="en-gb")
+    text = strip_tags(text)
+    samples, rate = engine.create(text[:TEXT_CAP], voice=voice_style(engine, kokoro_voice()), speed=voice_speed(), lang="en-gb")
     return _wav_bytes(samples, rate)
 
 
@@ -437,7 +481,7 @@ def worker_loop() -> None:
                 from kokoro_onnx import Kokoro
 
                 engine = Kokoro(str(KOKORO_MODEL), str(KOKORO_VOICES))
-            samples, rate = engine.create(text[:TEXT_CAP], voice=KOKORO_VOICE, speed=1.0, lang="en-gb")
+            samples, rate = engine.create(text[:TEXT_CAP], voice=voice_style(engine, kokoro_voice()), speed=voice_speed(), lang="en-gb")
             audio = _wav_bytes(samples, rate)
             print(json.dumps({"ok": True, "mime": "audio/wav", "b64": base64.b64encode(audio).decode("ascii")}), flush=True)
         except Exception as exc:  # noqa: BLE001 — worker must stay up
@@ -646,12 +690,144 @@ def _tts_stale(gen: int | None, hive: Path | None, token: int) -> bool:
     return False
 
 
+_MD_LINK = re.compile(r"\[([^\]]{1,200})\]\((?:https?://|/)[^)\s]{1,500}\)")
+_URL = re.compile(r"https?://[^\s)>\]]+")
+_SHOUT = re.compile(r"\b[A-Z][A-Z'-]{4,}\b")
+
+
+def speakable(text: str) -> str:  # plain engines never read the tag words aloud; see strip_tags / speakable_keep_tags
+    """Owner canvas Z61 (TTS cleanup): what the voice reads aloud, not what the card shows. Markdown marks, headings,
+    bullets and raw URLs are not spoken; shouted ALL-CAPS words (5+ letters) are read as words; short acronyms stay."""
+    t = str(text or "")
+    t = _MD_LINK.sub(r"\1", t)
+    t = _URL.sub("the link", t)
+    t = re.sub(r"`{1,3}([^`]*)`{1,3}", r"\1", t)
+    t = re.sub(r"(\*\*|__|~~)(.+?)\1", r"\2", t)
+    t = re.sub(r"(?<![\w*])\*(?!\s)([^*\n]+?)(?<!\s)\*(?![\w*])", r"\1", t)
+    t = re.sub(r"(?m)^\s{0,3}#{1,6}\s+", "", t)
+    t = re.sub(r"(?m)^\s*(?:[-*\u2022]|\d+[.)])\s+", "", t)
+    t = re.sub(r"(?m)^\s*\|.*\|\s*$", "", t)  # table rows are for the card
+    t = _SHOUT.sub(lambda m: m.group(0).lower(), t)
+    t = re.sub(r"[ \t]+", " ", re.sub(r"\n{2,}", "\n", t)).strip()
+    return spoken_cut(t)
+
+
+SPOKEN_CAP = 360  # live 10-17: 11 of 93 spoken lines were over 400 chars (one 3,784) and TEXT_CAP cut them mid-word
+
+
+def speakable_keep_tags(text: str) -> str:
+    """speakable() for a performed line: the expressive tags survive the cleanup."""
+    keep = TAG_RE.sub(lambda m: f"§{m.group(1).replace(' ', '_')}§", text)
+    out = speakable(keep)
+    return re.sub(r"§([a-z_]+)§", lambda m: "[" + m.group(1).replace("_", " ") + "]", out, flags=re.I)
+
+
+def spoken_cut(t: str, cap: int = SPOKEN_CAP) -> str:
+    """The voice says whole sentences up to the cap; the rest stays on the board (the card shows the full text)."""
+    if len(t) <= cap:
+        return t
+    head = t[:cap]
+    stop = max(head.rfind(". "), head.rfind("! "), head.rfind("? "), head.rfind(".\n"))
+    head = head[:stop + 1] if stop > cap // 3 else head.rsplit(" ", 1)[0] + "…"
+    return head.strip() + " The rest is on the board."
+
+
+# Evens 10-17 "v3-like expressiveness": Voicebox (jamiepine/voicebox, MIT, installed) runs Chatterbox Turbo locally with
+# paralinguistic tags. A line that carries a tag is a performed line and goes there; everything else stays on instant Kokoro.
+VOICEBOX_URL = os.environ.get("AGENT_STACK_VOICEBOX_URL") or "http://127.0.0.1:17493"
+VOICEBOX_PROFILE = os.environ.get("AGENT_STACK_VOICEBOX_PROFILE") or "Jarvis"   # synthetic reference, never a real person
+VOICEBOX_ENGINE = "chatterbox_turbo"
+VOICEBOX_SERVER = Path("/Applications/Voicebox.app/Contents/MacOS/voicebox-server")
+VOICEBOX_DATA = Path.home() / "Library/Application Support/sh.voicebox.app"
+TAG_RE = re.compile(r"\[(laugh|chuckle|gasp|cough|sigh|groan|sniff|shush|clear throat|angry|crying|dramatic|fear|happy|"
+                    r"narration|sarcastic|surprised|whispering)\]", re.I)
+_VB_STARTED = [0.0]
+
+
+def performed(text: str) -> bool:
+    return bool(TAG_RE.search(text or ""))
+
+
+def strip_tags(text: str) -> str:
+    return re.sub(r"\s{2,}", " ", TAG_RE.sub("", text or "")).strip()
+
+
+def voicebox_up(timeout: float = 2.0) -> bool:
+    try:
+        with urllib.request.urlopen(VOICEBOX_URL + "/health", timeout=timeout) as r:
+            return r.status == 200
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def ensure_voicebox() -> bool:
+    """Start the bundled server once (nice, headless) if the app is not open; the first performed line after a cold start
+    still goes to Kokoro while the model loads (minutes on first download, seconds after)."""
+    if voicebox_up():
+        return True
+    if not VOICEBOX_SERVER.is_file() or time.time() - _VB_STARTED[0] < 300:
+        return False
+    _VB_STARTED[0] = time.time()
+    try:
+        subprocess.Popen(["nice", "-n", "10", str(VOICEBOX_SERVER), "--host", "127.0.0.1", "--port", "17493", "--data-dir",
+                          str(VOICEBOX_DATA)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError:
+        return False
+    return False
+
+
+def _voicebox_bytes(text: str) -> bytes:
+    """WAV from Voicebox (Chatterbox Turbo, tags kept), or b"" so the caller falls back to Kokoro."""
+    if not ensure_voicebox():
+        return b""
+    try:
+        def call(method, path, data=None):
+            req = urllib.request.Request(VOICEBOX_URL + path, data=json.dumps(data).encode() if data is not None else None,
+                                         method=method, headers={"Content-Type": "application/json", "X-Voicebox-Client-Id": "jarvis"})
+            with urllib.request.urlopen(req, timeout=120) as r:
+                raw = r.read()
+                return json.loads(raw) if raw.strip() else {}
+        prof = next((p for p in call("GET", "/profiles") if str(p.get("name", "")).lower() == VOICEBOX_PROFILE.lower()), None)
+        if not prof:
+            return b""
+        g = call("POST", "/generate", {"profile_id": prof["id"], "engine": VOICEBOX_ENGINE, "language": "en", "text": text[:TEXT_CAP * 2]})
+        gid = g.get("id")
+        deadline = time.time() + 90
+        while time.time() < deadline:
+            st = _vb_row(gid)
+            if st and st[0] in ("completed", "complete"):
+                p = VOICEBOX_DATA / st[1]
+                return p.read_bytes() if p.is_file() else b""
+            if st and st[0] in ("failed", "error"):
+                return b""
+            time.sleep(0.5)
+    except Exception:  # noqa: BLE001 - any snag: Kokoro speaks
+        return b""
+    return b""
+
+
+def _vb_row(gid: str):
+    import sqlite3
+    try:
+        db = sqlite3.connect(str(VOICEBOX_DATA / "voicebox.db"))
+        return db.execute("select status, audio_path from generations where id=?", (gid,)).fetchone()
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def tts_audio(text: str, *, gen: int | None = None, hive: Path | None = None) -> tuple[bytes, str]:
     start = _TTS_TOKEN
+    raw = str(text or "")
+    text = speakable(raw)
     if dry() or not (text or "").strip():
         return b"", ""
     if _tts_stale(gen, hive, start):
         return b"", ""
+    if performed(raw):
+        wav = _voicebox_bytes(speakable_keep_tags(raw))
+        if wav and not _tts_stale(gen, hive, start):
+            return wav, "audio/wav"
+        text = strip_tags(text)
     mp3 = _elevenlabs_bytes(text)
     if _tts_stale(gen, hive, start):
         return b"", ""
@@ -736,7 +912,7 @@ def self_test() -> dict:
     report = voice_report()
     if report.get("voice") in {"Samantha", "Daniel"}:
         return {"ok": False, "errors": ["product voice must not be a macOS remap"], "report": report}
-    if report.get("repo", {}).get("kokoro") != KOKORO_VOICE:
+    if report.get("repo", {}).get("kokoro") != kokoro_voice():
         return {"ok": False, "errors": ["repo voice must stay bm_lewis"], "report": report}
     if report.get("lang") != "en-GB":
         return {"ok": False, "errors": ["repo voice is British"], "report": report}

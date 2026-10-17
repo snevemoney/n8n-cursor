@@ -537,6 +537,22 @@ class AutonomousReplan(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([a['action_id'] for a in result['actions']],['1','2'])
         self.assertEqual(result['retries'],2)
 
+    async def test_replan_with_model_recovery_guidance_field_still_recovers(self):
+        # Live mission 8476865 (10-15 16:58): the repair prompt asks for "recovery guidance"; the model returned a
+        # recovery_guidance key and BrowserFlow(**row) crashed, so no browser task could recover.
+        base=flow(retry_budget=3,action_budget=4);seen=[]
+        class Model(Gateway):
+            async def chat(self,prompt,role,model=None):
+                return {'flow':dict(asdict(base),recovery_guidance='Read the visible title text instead',extra_note='x')}
+        runtime=br.BrowserRuntime(Model(),mission_objective='Read the heading')
+        async def run(f,*args):
+            seen.append(f)
+            return {'flow_id':f.flow_id,'verified':len(seen)==2,'status':'VERIFIED' if len(seen)==2 else 'FAILED','terminal_reason':'postcondition_proven' if len(seen)==2 else 'verification_replan_required','retries':0 if len(seen)==2 else 1,'actions':[]}
+        runtime.run_flow=run
+        result=(await runtime.run([base]))[0]
+        self.assertNotIn('replan_error',result);self.assertTrue(result['verified'],result)
+        self.assertIn('Read the visible title text instead',seen[1].objective)
+
     async def test_amended_authority_survives_autonomous_recovery(self):
         base=flow(retry_budget=3,action_budget=5);control={};seen=[]
         amended=replace(base,revision=1,constraints=('Operator added constraint',),inputs={'origin':'YYZ'},

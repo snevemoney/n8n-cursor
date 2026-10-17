@@ -134,7 +134,7 @@
       text-shadow: none;
     }
     html.widget body, html.widget button, html.widget input, html.widget #spoken {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
       letter-spacing: 0 !important;
       text-shadow: none !important;
       -webkit-text-stroke: 0 !important;
@@ -164,7 +164,7 @@
       background: #020805; border: 0; box-shadow: none !important; animation: none !important;
       top: auto; bottom: 104px; min-height: 0; min-width: 0;
       left: 0; right: 0;
-      width: min(220px, 78vw); max-height: 64px;
+      width: min(220px, 78vw); max-height: min(34vh, 220px);
       margin: 0 auto;
       padding: 6px 8px; border-radius: 8px;
       transform: none;
@@ -176,6 +176,10 @@
       -webkit-user-select: text;
       user-select: text;
     }
+    html.widget .chip { text-align: left; font-size: 13px; line-height: 1.45; color: #f4f6f8; }
+    html.widget .chip .line, html.widget #browserResults p { color: #f4f6f8; font: inherit; overflow-wrap: anywhere; }
+    #resultHistory { margin-top: 8px; font-size: 12px; text-align: left; }
+    #resultHistory summary { cursor: pointer; }
     html.widget body.speak .chip,
     html.widget body.think .chip,
     html.widget body.listen .chip {
@@ -197,6 +201,11 @@
     }
     html.widget #browserResults p { margin: 0 0 8px; }
     html.widget #browserResults p:last-child { margin-bottom: 0; }
+    html.widget .chip #heard {
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+      overflow: hidden; overflow-wrap: anywhere;
+      font-size: 10px; line-height: 1.2;
+    }
     html.widget #orb3d {
       width: 240px; height: 240px; top: 40%; transform: translate(-50%, -50%);
       background: radial-gradient(circle at 50% 48%, rgba(2, 8, 5, .62) 0%, rgba(2, 8, 5, 0) 72%);
@@ -301,6 +310,27 @@
       pointer-events: none;
     }
     #focusline.on { display: block; }
+    #reflexcard {
+      display: none; position: fixed; z-index: 41; left: 6px; right: 6px; top: 6px;
+      font: 10px/1.35 "Share Tech Mono", ui-monospace, monospace; color: #cfe; pointer-events: none;
+      background: rgba(4, 12, 14, 0.9); border: 1px solid rgba(80, 220, 150, 0.35); border-radius: 6px; padding: 5px 7px;
+    }
+    #reflexcard .r { display: grid; grid-template-columns: 70px 1fr 28px 58px; gap: 5px; align-items: center; margin: 2px 0; }
+    #reflexcard .k { color: #fff; } #reflexcard .q { color: #7a8; font-size: 8px; }
+    #reflexcard .bar { position: relative; height: 4px; background: #233; border-radius: 2px; }
+    #reflexcard .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #3ddc84; border-radius: 2px; }
+    #reflexcard .bar b { position: absolute; top: -2px; width: 1px; height: 8px; background: #9ab; }
+    #reflexcard .rxv { border: 1px solid #3a6; border-radius: 8px; text-align: center; font-size: 8px; color: #8fd; }
+    #reflexcard .foot { color: #3ddc84; letter-spacing: 0.1em; margin-top: 3px; font-size: 9px; }
+    #reflexcard.on { display: block; }
+    #inboxcard {
+      display: none; position: fixed; z-index: 42; right: 6px; left: 6px; bottom: 96px; pointer-events: auto;
+      font: 10px/1.4 -apple-system, system-ui, sans-serif; color: #dde; background: rgba(10, 14, 22, 0.94);
+      border: 1px solid rgba(120, 160, 255, 0.35); border-radius: 8px; padding: 6px 8px; max-height: 40vh; overflow: auto;
+    }
+    #inboxcard.on { display: block; }
+    #inboxcard .h { font: 9px "Share Tech Mono", monospace; color: #8ab; letter-spacing: 0.12em; margin-bottom: 3px; }
+    #inboxcard .t { font-weight: 700; color: #fff; } #inboxcard .f { color: #9cf; word-break: break-all; margin: 2px 0; } #inboxcard button { margin-top: 4px; font-size: 9px; }
     html.widget #focusline {
       top: auto; left: 50%; right: auto; bottom: 70px;
       transform: translateX(-50%); z-index: 40; text-align: center;
@@ -310,6 +340,18 @@
       .orb, #board { animation: none !important; }
     }
     /* Ported from main: Face controls (Mic / Stop / Hide). */
+    #driveBadge {
+      position: fixed; z-index: 7; top: 14px; left: 50%; transform: translateX(-50%);
+      background: rgba(10, 2, 2, .85); color: #ffb3b3; border: 1px solid rgba(255, 90, 90, .6);
+      font: 11px "Share Tech Mono", ui-monospace, monospace; letter-spacing: .14em; padding: 6px 12px;
+      animation: drivePulse 1.2s ease-in-out infinite;
+    }
+    @keyframes drivePulse { 50% { border-color: rgba(255, 90, 90, 1); } }
+    #receipt { font: 10px "Share Tech Mono", ui-monospace, monospace; color: rgba(190, 255, 205, .55); letter-spacing: .08em; margin-top: 6px; min-height: 12px; }
+    #planBoard { font: 11px "Share Tech Mono", ui-monospace, monospace; color: rgba(190, 255, 205, .75); margin-top: 6px; white-space: pre-line; }
+    #chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    #chips button { background: rgba(2, 10, 6, .7); color: var(--mint, #3dff6a); border: 1px solid rgba(61, 255, 106, .35);
+      font: 10px "Share Tech Mono", ui-monospace, monospace; letter-spacing: .1em; padding: 4px 8px; cursor: pointer; }
     .controls {
       position: fixed; z-index: 6; left: 28px; bottom: 48px;
       display: flex; gap: 8px; pointer-events: auto;
@@ -370,6 +412,8 @@
     </button>
   </div>
   <div id="focusline" role="status"></div>
+  <div id="reflexcard" role="status" aria-label="reflex decisions"></div>
+  <div id="inboxcard" role="status" aria-label="jarvis inbox"></div>
   <div class="hud tr">
     <div>
       <div class="phase" id="phase">IDLE</div>
@@ -383,9 +427,14 @@
   <div class="chip" id="chip" role="status">
     <canvas id="wave" width="640" height="46"></canvas>
     <div class="mark" id="mark">J.A.R.V.I.S.</div>
+    <div class="line" id="heard" style="opacity:.6;font-size:.8em"></div>
     <div class="line" id="spoken"></div>
-      <div id="browserResults" aria-live="polite"></div>
+      <div id="chips" aria-label="suggestions"></div>
+      <div id="receipt" aria-label="tool receipt"></div>
+      <div id="planBoard" aria-label="plan" hidden></div>
+      <details id="resultHistory" hidden><summary>Earlier updates</summary><div id="conversationHistory"></div><div id="browserResults"></div></details>
   </div>
+  <div id="driveBadge" role="status" hidden>JARVIS IS DRIVING · touch the mouse or keyboard to take over</div>
   <div class="controls" id="controls">
     <button type="button" id="mic">Mic</button>
     <button type="button" id="stop">Stop</button>
@@ -399,6 +448,13 @@
     const synth = window.speechSynthesis;
     const YES_RE = /^(yes|yeah|yep|do it|approve|ok|okay)\s*[.!]?\s*$/i;
     const STOP_RE = /^(?:hey\s+)?(?:jarvis[,.]?\s*)?(stop|cancel|never mind|forget it|shut up)\s*[.!?]?\s*$/i;
+    // Z75 hush: quiet the voice only; the job keeps going and the mic keeps its mode ("stop" still cancels the job)
+    const HUSH_RE = /^(?:hey\s+)?(?:jarvis[,.]?\s*)?(quiet|hush|shh+|shush|be quiet|quiet please|enough|silence|not now)\s*[.!?]?\s*$/i;
+    function hush() {
+      stopSpeech();
+      $("spoken").textContent = "Quiet. I'm still on it.";
+      return true;
+    }
     const WAKE_RE = /^(?:hey\s+)?jarvis[,.]?\s*/i;
     const RESTART_MIN = 400;
     const RESTART_MAX = 800;
@@ -445,13 +501,37 @@
     let ttsGen = 0;
     let speakHeld = false;
     let watchNoticeId = "";
+    // A turn that kept working after this pane lost its stream (reload, sleep, network): show its result once.
+    let detachedShown = 0;
     const ttsAborts = new Set();
     const TTS_FETCH_MS = 15000;
     let lastSpoken = "";
     let nextHandle = "";
     let busGen = 0;
     const ECHO_RE = /adopted path missing|agentic os|i already said cursor|i heard you:|before that you said:|structured long-term memory/i;
-    const ttsSpeaking = () => ttsBusy || !!(synth && synth.speaking) || !!(ttsSource) || !!(ttsAudio && !ttsAudio.paused && !ttsAudio.ended);
+    // Self-echo guard (15:12 runaway loop: the mic heard Jarvis's own voice and kept taking turns):
+    // mic is gated while TTS plays + a tail, and recent Jarvis lines are fuzzy-matched.
+    // No wake word needed: the owner talks to Jarvis directly; the echo checks above catch the loop.
+    let lastTtsBusyAt = 0;
+    const ECHO_TAIL_MS = 1800;
+    const recentSpoken = [];
+    const ttsSpeaking = () => {
+      const busy = ttsBusy || !!(synth && synth.speaking) || !!(ttsSource) || !!(ttsAudio && !ttsAudio.paused && !ttsAudio.ended);
+      if (busy) lastTtsBusyAt = Date.now();
+      return busy;
+    };
+    const echoWords = (t) => String(t || "").toLowerCase().replace(/[^a-z0-9' ]+/g, " ").split(/\s+/).filter((w) => w.length > 2);
+    function soundsLikeJarvis(text) {
+      const w = echoWords(text);
+      if (w.length < 3) return false;
+      for (const line of recentSpoken.concat(lastSpoken ? [lastSpoken] : [])) {
+        const bag = new Set(echoWords(line));
+        if (!bag.size) continue;
+        const hit = w.filter((x) => bag.has(x)).length;
+        if (hit / w.length >= 0.6) return true;
+      }
+      return false;
+    }
     function pageVisible() {
       return document.visibilityState !== "hidden";
     }
@@ -524,6 +604,14 @@
       else synth.onvoiceschanged = pickEnglishVoice;
     }
 
+    function micLine() {
+      // Z64 mode truth: say what the mic is really doing, never imply listening when it is not
+      if (!state.armed) return "MIC OFF - TAP TO ARM";
+      if (state.phase === "speak") return state.listening ? 'MIC ON - SAY "STOP" TO INTERRUPT' : "MIC PAUSED WHILE I SPEAK";
+      if (state.phase === "think") return state.listening ? 'MIC ON - SAY "STOP" TO CANCEL' : "MIC PAUSED WHILE I WORK";
+      if (state.listening || state.phase === "listen") return "MIC - LISTENING";
+      return 'MIC - LISTENING FOR "JARVIS"';
+    }
     function paintPhase(phase) {
       state.phase = phase || "idle";
       const extras = [];
@@ -534,9 +622,7 @@
       if (state.phase === "think") $("hint").textContent = "PROCESSING...";
       else if (!state.armed) $("hint").textContent = "TAP BOARD OR SPACE TO TALK";
       else $("hint").textContent = 'SAY "JARVIS" OR TAP SPACE · MIC LIVE';
-      if (state.listening || state.phase === "listen") $("micline").textContent = "MIC - LISTENING";
-      else if (state.armed) $("micline").textContent = 'MIC - LISTENING FOR "JARVIS"';
-      else $("micline").textContent = "MIC - TAP TO ARM";
+      $("micline").textContent = micLine();
       if ($("micBtn")) {
         $("micBtn").classList.toggle("on", !!state.armed);
         $("micBtn").setAttribute("aria-pressed", state.armed ? "true" : "false");
@@ -598,7 +684,7 @@
       if (!line) return;
       if (spokenLock && line !== spokenLock) return;
       const keep = lastSpoken && lastSpoken.length > line.length && lastSpoken.indexOf(line) >= 0;
-      if (!keep) lastSpoken = line;
+      if (!keep) { lastSpoken = line; recentSpoken.push(line); if (recentSpoken.length > 6) recentSpoken.shift(); }
       $("spoken").textContent = lastSpoken;
       paintPhase("speak");
     }
@@ -924,8 +1010,19 @@
     let turnAbort = null;
     let turnGen = 0;
     let spokenLock = "";
+    function showCurrentResponse(target) {
+      const chip = $("chip");
+      if (!chip) return;
+      chip.scrollTop = 0;
+      if (target && typeof target.getBoundingClientRect === "function" &&
+          typeof chip.getBoundingClientRect === "function") {
+        chip.scrollTop = Math.max(0, target.getBoundingClientRect().top - chip.getBoundingClientRect().top);
+      }
+    }
     async function turn(utterance, approved, voice = false) {
       if (!utterance) return;
+      showCurrentResponse();
+      if ($("heard") && $("heard") !== $("spoken")) $("heard").textContent = "› " + String(utterance).slice(0, 160);
       speakHeld = false;
       const isStop = STOP_RE.test(utterance || "");
       if (state.turning && turnAbort) {
@@ -1005,6 +1102,7 @@
                 spokenLock = lineText;
                 state.renderedBusGen = busGen;
               }
+              if (last.done && last.operator_task) evNote(last.operator_task, last.speech_seq);
               if (delta) {
                 heardDelta = true;
                 if (voice) enqueueSpeak(delta);
@@ -1040,6 +1138,7 @@
           state.renderedBusGen = busGen;
           $("spoken").textContent = lineText;
           if (voice) enqueueSpeak(lineText);
+          if (out.operator_task) evNote(out.operator_task, out.speech_seq);
         }
       } catch (e) {
         if (turnGen === gen) {
@@ -1075,6 +1174,8 @@
       if (!text) return false;
       if (STOP_RE.test(text)) return false;
       if (ttsSpeaking() || state.turning) return true;
+      if (Date.now() - lastTtsBusyAt < ECHO_TAIL_MS) return true;
+      if (soundsLikeJarvis(text)) return true;
       if (ECHO_RE.test(text)) return true;
       if (lastSpoken && text.length > 20 && lastSpoken.toLowerCase().indexOf(text.toLowerCase().slice(0, 40)) >= 0) return true;
       return false;
@@ -1086,13 +1187,14 @@
       const woke = WAKE_RE.test(said);
       said = said.replace(WAKE_RE, "").trim() || (woke ? "" : said);
       if (!said) { greet(); return; }
+      if (HUSH_RE.test(said)) { hush(); return; }
       if (state.pending && YES_RE.test(said)) turn(state.pending, true, true);
       else turn(said, false, true);
     }
 
     // FINISH_MS: a pause mid-sentence is not the end of the thought.
     // Buffer final results; interjections (stop / wait) bypass instantly.
-    const FINISH_MS = 900;
+    const FINISH_MS = 1400;  // Evens 10-16 "Jarvis should not interrupt me when I'm talking"
     let finishTimer = 0;
     let pendingHeard = "";
     function clearHeardBuffer() {
@@ -1110,8 +1212,21 @@
         pendingHeard = "";
         finishTimer = 0;
         if (said) handleHeard(said);
-      }, FINISH_MS);
+      }, midSentence(pendingHeard) ? FINISH_MS + MID_SENTENCE_EXTRA_MS : FINISH_MS);
     }
+    function holdFinish() {
+      clearTimeout(finishTimer);
+      finishTimer = setTimeout(() => {
+        const said = pendingHeard;
+        pendingHeard = "";
+        finishTimer = 0;
+        if (said) handleHeard(said);
+      }, midSentence(pendingHeard) ? FINISH_MS + MID_SENTENCE_EXTRA_MS : FINISH_MS);
+    }
+    // Z12 reflex 'finished talking': a trailing and/so/um/comma means he is mid-sentence; wait one more beat.
+    const MID_SENTENCE_EXTRA_MS = 1100;
+    const MID_RE = /(?:\b(?:and|so|but|or|because|then|um+|uh+|er+|like|with|to|the|a|my|of)|,|\.\.\.|-)\s*$/i;
+    function midSentence(t) { return MID_RE.test(String(t || "").trim()); }
 
     function scheduleRestart(ms) {
       clearTimeout(state.restartTimer);
@@ -1141,7 +1256,61 @@
         throw err;
       }
       state.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      try {  // barge-in needs the speaker bleed cancelled; ask for it on the live track
+        for (const t of state.stream.getAudioTracks()) await t.applyConstraints({ echoCancellation: true, noiseSuppression: true });
+      } catch (e) {}
+      startBargeWatch();
       return streamLive();
+    }
+
+    // Z03 barge-in: while Jarvis speaks and the mic is live, sustained voice on the mic (louder than the
+    // echo-cancelled TTS bleed) cuts the speech off and hands the floor back. Mic level only; no audio leaves.
+    // Evens 10-16 "I should be able to interrupt it": the old rule compared the echo-cancelled mic with the RAW TTS
+    // output level, which is always louder, so it almost never fired. Now: mic vs the bleed the mic itself hears
+    // while Jarvis talks (median of the last ~2 s of mic levels during speech).
+    const BARGE = { floor: 0.03, ratio: 2.2, holdMs: 260, tick: 60, bleedWindow: 33 };
+    let bargeTimer = null, bargeSince = 0, micAnalyser = null, micBuf = null;
+    function micLevel(an, buf) {
+      an.getFloatTimeDomainData(buf);
+      let sum = 0;
+      for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+      return Math.sqrt(sum / buf.length);
+    }
+    function bargeHit(mic, bleed, heldMs) {
+      return mic > BARGE.floor && mic > bleed * BARGE.ratio && heldMs >= BARGE.holdMs;
+    }
+    function median(xs) { const a = xs.slice().sort((p, q) => p - q); return a.length ? a[a.length >> 1] : 0; }
+    window.__jarvisBarge = { BARGE, bargeHit };
+    function startBargeWatch() {
+      if (bargeTimer || !streamLive()) return;
+      try {
+        unlockAudio();
+        if (!audioCtx) return;
+        micAnalyser = audioCtx.createAnalyser();
+        micAnalyser.fftSize = 1024;
+        micBuf = new Float32Array(micAnalyser.fftSize);
+        audioCtx.createMediaStreamSource(state.stream).connect(micAnalyser);
+      } catch (e) { micAnalyser = null; return; }
+      let levels = [];
+      bargeTimer = setInterval(() => {
+        if (!micAnalyser || !state.armed || !ttsSpeaking()) { bargeSince = 0; levels = []; return; }
+        const mic = micLevel(micAnalyser, micBuf);
+        const bleed = levels.length >= 8 ? median(levels) : mic;  // first ~0.5 s of speech: learn the bleed
+        levels.push(mic);
+        if (levels.length > BARGE.bleedWindow) levels.shift();
+        const now = Date.now();
+        if (levels.length >= 8 && mic > BARGE.floor && mic > bleed * BARGE.ratio) {
+          if (!bargeSince) bargeSince = now;
+          if (bargeHit(mic, bleed, now - bargeSince)) {
+            bargeSince = 0; levels = [];
+            pressStop();
+            $("spoken").textContent = "Go ahead, I'm listening.";
+            scheduleRestart(RESTART_MIN);  // listen at once so his first words are not lost
+          }
+        } else {
+          bargeSince = 0;
+        }
+      }, BARGE.tick);
     }
 
     function startListen() {
@@ -1175,6 +1344,11 @@
       rec.onresult = (e) => {
         const last = e.results[e.results.length - 1];
         const t = last[0].transcript;
+        if (last.isFinal && HUSH_RE.test((t || "").trim())) {
+          clearHeardBuffer();
+          hush();
+          return;
+        }
         if (last.isFinal && STOP_RE.test((t || "").trim())) {
           clearHeardBuffer();
           handleHeard(t);
@@ -1183,6 +1357,7 @@
         if (ttsSpeaking() || state.turning) return;
         $("spoken").textContent = pendingHeard ? `${pendingHeard} ${t}` : t;
         if (last.isFinal) queueHeard(t);
+        else if (finishTimer && (t || "").trim()) holdFinish();  // he is still talking: the pause clock restarts
       };
       rec.onerror = (e) => {
         const err = (e && e.error) || "";
@@ -1379,6 +1554,14 @@
         String(text || "")
       );
     }
+    // Expressive voice tags ([chuckle], [sigh] …) are for the voice; the card shows plain words (live 10-17: "[chuckle]" on the card).
+    const VOICE_TAG_RE = /\s*\[(laugh|chuckle|gasp|cough|sigh|groan|sniff|shush|clear throat|angry|crying|dramatic|fear|happy|narration|sarcastic|surprised|whispering)\]\s*/gi;
+    function cardText(v) { return String(v == null ? "" : v).replace(VOICE_TAG_RE, " ").replace(/\s{2,}/g, " ").trim(); }
+    (function guardCard() {
+      const el = $("spoken"); const d = Object.getOwnPropertyDescriptor(Node.prototype, "textContent");
+      if (!el || !d) return;
+      Object.defineProperty(el, "textContent", { configurable: true, get() { return d.get.call(el); }, set(v) { d.set.call(el, cardText(v)); } });
+    })();
     function productLine(text) {
       const line = String(text || "").replace(/\*\*/g, "").trim();
       if (!line || isStatusLine(line)) return "";
@@ -1441,7 +1624,8 @@
       if (talk === "openrouter" || wires.openrouter === "talk") mouth = "OPENROUTER";
       else if (talk === "xai" || wires.grok === "talk") mouth = "XAI";
       else if (talk === "grokbot" || wires.grokbot === "live") mouth = "GROKBOT";
-      $("link").textContent = "NEURAL LINK - " + mouth + (model && mouth !== "DARK" ? " · " + model : "");
+      $("link").textContent = "NEURAL LINK - " + mouth + (model && mouth !== "DARK" ? " · " + model : "")
+        + (report && report.credit_empty ? " · NO CREDIT · FREE LOCAL MODEL" : "");  // Z64: say what really answers
     }
     function paintMode(bus, report) {
       if (!$("mode")) return;
@@ -1475,6 +1659,33 @@
     }
 
     let eyesStream = null;
+    // Z39 graph path trace: first click focuses a note and its neighbours; a second note traces the shortest path; the
+    // same note again clears. Pure state so it is testable; painting only recolours nodes and links.
+    let graphSel = { a: null, b: null, near: [], path: [] };
+    function linkEnds(l) { return [l.source && l.source.id !== undefined ? l.source.id : l.source, l.target && l.target.id !== undefined ? l.target.id : l.target]; }
+    function graphPick(sel, id, links) {
+      if (sel.a === id && !sel.b) return { a: null, b: null, near: [], path: [] };
+      const adj = new Map();
+      for (const l of links || []) { const [s, t] = linkEnds(l); if (!adj.has(s)) adj.set(s, []); if (!adj.has(t)) adj.set(t, []); adj.get(s).push(t); adj.get(t).push(s); }
+      if (!sel.a || sel.b) return { a: id, b: null, near: [id].concat(adj.get(id) || []), path: [] };
+      const prev = new Map([[sel.a, null]]); const q = [sel.a];
+      while (q.length && !prev.has(id)) { const cur = q.shift(); for (const nx of adj.get(cur) || []) if (!prev.has(nx)) { prev.set(nx, cur); q.push(nx); } }
+      if (!prev.has(id)) return { a: sel.a, b: id, near: [sel.a, id], path: [] };
+      const path = []; for (let c = id; c !== null; c = prev.get(c)) path.unshift(c);
+      return { a: sel.a, b: id, near: path.slice(), path };
+    }
+    function nodeName(id) {
+      const n = vaultGraph && vaultGraph.graphData().nodes.find((x) => x.id === id);
+      return (n && (n.name || n.id)) || String(id);
+    }
+    function paintGraphSel() {
+      if (!vaultGraph) return;
+      const near = new Set(graphSel.near); const onPath = new Set();
+      for (let i = 1; i < graphSel.path.length; i += 1) onPath.add(graphSel.path[i - 1] + "|" + graphSel.path[i]);
+      const lit = (l) => { const [s, t] = linkEnds(l); return onPath.has(s + "|" + t) || onPath.has(t + "|" + s); };
+      vaultGraph.nodeColor((x) => (graphSel.path.includes(x.id) ? "#ff3df0" : near.size && near.has(x.id) ? "#7dfcff" : near.size ? "rgba(61,255,106,0.25)" : (x.color || "#3dff6a")))
+        .linkColor((l) => (lit(l) ? "#ff3df0" : "rgba(61,255,106,0.28)")).linkWidth((l) => (lit(l) ? 2.5 : 0));
+    }
     async function mountVaultGraph() {
       const host = $("graph");
       let data = { nodes: [], links: [], nodeCount: 0, linkCount: 0 };
@@ -1504,7 +1715,11 @@
         .d3AlphaDecay(0.006)
         .d3VelocityDecay(0.28)
         .onNodeClick((n) => {
-          if ($("spoken") && n && n.name) $("spoken").textContent = n.name;
+          if (!n) return;
+          graphSel = graphPick(graphSel, n.id, vaultGraph.graphData().links);  // Z39: focus, then trace a path
+          paintGraphSel();
+          if ($("spoken") && n.name) $("spoken").textContent = graphSel.path.length > 1
+            ? "Path: " + graphSel.path.map((id) => nodeName(id)).join(" → ") : n.name;
         });
       const ctrls = vaultGraph.controls && vaultGraph.controls();
       if (ctrls) {
@@ -1645,6 +1860,175 @@
         $("spoken").textContent = "Focus failed to reach the face.";
       }
     }
+    // Z09: a meeting pre-brief offer rides the bus like a focus callout; shown and spoken once, when idle.
+    let lastPrebriefGen = null;
+    // Z12 demo 0:10: the named note lights up in the vault graph while he answers.
+    function lightNote(name) {
+      try {
+        if (!vaultGraph || typeof vaultGraph.graphData !== "function") return;
+        const g = vaultGraph.graphData();
+        let n = g.nodes.find((x) => (x.name || "") === name || String(x.id || "").endsWith(name + ".md"));
+        if (!n) { n = { id: name + ".md", name, path: name + ".md" }; g.nodes.push(n); vaultGraph.graphData(g); }
+        g.nodes.forEach((x) => { x.__lit = x === n; });
+        vaultGraph.nodeColor((x) => (x.__lit ? "#ff3df0" : (x.color || "#3dff6a"))).nodeVal((x) => (x.__lit ? 8 : 1));
+        if (typeof vaultGraph.cameraPosition === "function" && n.x !== undefined) {
+          vaultGraph.cameraPosition({ x: n.x * 1.6 + 40, y: n.y * 1.6 + 40, z: n.z * 1.6 + 40 }, n, 1200);
+        }
+        setTimeout(() => { g.nodes.forEach((x) => { x.__lit = false; }); vaultGraph.nodeVal(() => 1); }, 12000);
+      } catch (e) { /* graph optional */ }
+    }
+    let lastReflexTs = 0, reflexHideAt = 0;
+    function paintReflex(bus) {
+      const el = $("reflexcard");
+      if (!el || el === $("spoken")) return;
+      const r = bus && bus.reflex;
+      if (r && Number(r.ts || 0) > lastReflexTs) {
+        lastReflexTs = Number(r.ts);
+        const pc = (v) => Math.round(Number(v || 0) * 100) + "%";
+        const rows = [  // demo D5v4UuvtUXc 0:09: five rows, bar + threshold tick + verdict chip, footer with ms
+          ["Lane", "Which lane takes it?", r.lane_p, 0.5, String(r.lane_class || r.lane || "").toUpperCase().slice(0, 12)],
+          ["Complete", "Has he finished the request?", r.finished, 0.6, r.finished >= 0.6 ? "ACT" : "WAIT"],
+          ["Addressed", "Talking to Jarvis, not narrating?", r.addressed, 0.6, r.addressed >= 0.6 ? "ACT" : "IGNORE"],
+          ["Stakes", "Would acting send, call, delete, or spend?", r.stakes, 0.5, r.stakes >= 0.5 ? "CONFIRM" : "CLEAR"],
+          ["Vault has it", "Does any note directly answer this?", r.vault_hit, 0.6, r.vault_hit >= 0.6 ? "NAMED" : "NONE"],
+        ];
+        const esc = (x) => String(x).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+        el.innerHTML = rows.map(([k, q, p, th, chip]) => `<div class="r"><div><div class="k">${esc(k)}</div><div class="q">${esc(q)}</div></div>`
+          + `<div class="bar"><i style="width:${Math.round(Number(p || 0) * 100)}%"></i><b style="left:${th * 100}%"></b></div>`
+          + `<div>${pc(p)}</div><div class="rxv">${esc(chip)}</div></div>`).join("")
+          + `<div class="foot">● ${r.vault_hit >= 0.6 ? "VAULT HAS IT · NAMED" : "VAULT · NO NOTE"} · ${pc(r.vault_hit)}`
+          + `${r.vault_note ? " · " + esc(String(r.vault_note).toUpperCase().slice(0, 40)) : ""} · ${r.ms} MS</div>`;
+        el.classList.add("on");
+        reflexHideAt = Date.now() + 4000;
+        if (r.vault_note && r.vault_hit >= 0.6) lightNote(String(r.vault_note));  // shown before the answer, then out of its way
+      }
+      if (reflexHideAt && Date.now() > reflexHideAt) { el.classList.remove("on"); reflexHideAt = 0; }
+    }
+    let lastInboxGen = null;
+    let ev = (() => { try { return JSON.parse(localStorage.getItem("jarvis.ev") || "{}") || {}; } catch (e) { return {}; } })();
+    function evNote(task, seq) {
+      if (!task) return;
+      ev = { task: String(task), seq: Math.max(0, Number(seq) || 0) };
+      try { localStorage.setItem("jarvis.ev", JSON.stringify(ev)); } catch (e) {}
+    }
+    function applyEvents(r) {
+      // matrix "eventreplay": lines a job said after its turn returned (or while this Orb was away), each shown once
+      if (!r || !r.task_id) return [];
+      if (r.task_id !== ev.task) { evNote(r.task_id, r.seq); return []; }  // a job this Orb never showed: start at its end
+      const shown = [];
+      for (const l of (r.lines || [])) {
+        if (Number(l.seq) < Number(ev.seq || 0)) continue;
+        const t = productLine(l.text);
+        if (t) { $("spoken").textContent = t; shown.push(t); if (state.armed) enqueueSpeak(t); }
+        ev.seq = Number(l.seq) + 1;
+      }
+      evNote(ev.task, ev.seq);
+      if (r.latest_task_id && r.latest_task_id !== ev.task && !(r.lines || []).length && r.status !== "RUNNING" && r.status !== "QUEUED") {
+        evNote(r.latest_task_id, r.latest_seq);  // that job is over; follow the newest one from its current end
+      }
+      return shown;
+    }
+    async function pollEvents() {
+      if (state.turning) return;
+      const q = ev.task ? "?task=" + encodeURIComponent(ev.task) + "&since=" + (ev.seq || 0) : "";
+      applyEvents(await api("/api/operator/events" + q));
+    }
+    let lastGraphFocusAt = null;
+    function paintOperator(op) {
+      // matrix nodes: driving badge (Z29), tool receipt footer, routing line (gatehud), suggestion chips (Z46)
+      const badge = $("driveBadge"), rc = $("receipt"), ch = $("chips");
+      if (!op || typeof op !== "object") return;
+      if (badge) badge.hidden = !(op.driving && op.driving.tool);
+      const gf = op.graph_focus;
+      if (gf && gf.note && gf.at !== lastGraphFocusAt) { lastGraphFocusAt = gf.at; lightNote(String(gf.note)); }  // Z70
+      if (rc) {
+        const tools = Object.entries(op.tools_run || {}).map(([k, n]) => n > 1 ? k + " ×" + n : k).join(" · ");
+        const pick = op.tier ? (op.tier + (op.kind ? "/" + op.kind : "") + (op.jev && op.jev.ne != null ? " · jev " + op.jev.ne : "")) : "";
+        const cost = op.cost_usd ? "$" + Number(op.cost_usd).toFixed(3) : "";
+        const parts = [tools, pick, cost, op.rev ? "rev " + String(op.rev).slice(0, 7) : "", op.verified === false ? "unverified" : ""].filter(Boolean);
+        rc.textContent = parts.join("  ·  ");
+      }
+      const pb = $("planBoard");  // Z102 / C01: the job's plan, step by step (text only, never HTML)
+      if (pb) {
+        const steps = Array.isArray(op.plan) ? op.plan : [];
+        const mark = { done: "✓", doing: "→", todo: "·", dropped: "–" };
+        pb.hidden = !steps.length;
+        pb.textContent = steps.slice(0, 8).map((x) => (mark[x.status] || "·") + " " + String(x.step || "").slice(0, 80)).join("\n")
+          + (steps.length > 8 ? "\n… " + (steps.length - 8) + " more" : "");
+      }
+      if (ch) {
+        const want = JSON.stringify(op.chips || []);
+        if (ch.dataset.chips !== want) {
+          ch.dataset.chips = want;
+          ch.innerHTML = "";
+          for (const c of (op.chips || [])) {
+            const b = document.createElement("button"); b.type = "button"; b.textContent = c;
+            b.addEventListener("click", (e) => { e.stopPropagation(); turn(c, false, false); });
+            ch.appendChild(b);
+          }
+        }
+      }
+    }
+    function paintInbox(bus) {
+      const el = $("inboxcard");
+      if (!el || el === $("spoken")) return;
+      const ib = bus && bus.inbox;
+      const gen = ib ? Number(ib.gen || 0) : 0;
+      if (el.classList.contains("on") && Number(bus && bus.turn_gen || 0) > Number(el.dataset.turnGen || 0)) {
+        el.classList.remove("on");  // a new turn started: the previous turn's card steps aside
+      }
+      if (lastInboxGen === null) {
+        const first = ib && (ib.items || [])[ib.items.length - 1];
+        // Seed historical cards silently, but retain a future card for bus catch-up.
+        if (!first || first.turn_gen == null || Number(first.turn_gen) <= Number(bus.turn_gen || 0)) {
+          lastInboxGen = gen;
+          return;
+        }
+        lastInboxGen = gen - 1;
+      }
+      if (gen <= lastInboxGen) return;
+      const c = (ib.items || [])[ib.items.length - 1];
+      if (!c) { lastInboxGen = gen; return; }
+      // Cards are bound to the turn that produced them (turn_gen). A card from an older turn,
+      // or a background card while a turn is running, never covers the current reply.
+      // Do not advance lastInboxGen until paint succeeds or the card is permanently stale —
+      // otherwise a same-turn card arriving before bus.turn_gen catches up is lost forever.
+      const cur = Number(bus.turn_gen || 0);
+      if (c.turn_gen !== undefined && c.turn_gen !== null) {
+        const cardGen = Number(c.turn_gen);
+        if (cardGen !== cur) {
+          if (cardGen > cur) return;  // bus lag: retry on the next poll
+          lastInboxGen = gen;  // older turn: drop
+          return;
+        }
+      } else if (!c.background) {
+        lastInboxGen = gen;  // non-background without turn_gen is invalid
+        return;
+      } else if (bus.job_status === "working") {
+        return;  // background while a turn runs: retry when idle
+      }
+      lastInboxGen = gen;
+      el.dataset.turnGen = String(c.turn_gen === undefined || c.turn_gen === null ? cur : c.turn_gen);
+      const esc = (x) => String(x || "").replace(/[&<>]/g, (k) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[k]));
+      el.innerHTML = `<div class="h">JARVIS \u00b7 INBOX</div><div class="t">${esc(c.title)}</div>`
+        + ((c.fields || []).length ? `<div class="f">${(c.fields || []).map(esc).join(" \u00b7 ")}</div>` : "")
+        + `<div>${esc(c.body)}</div>`
+        + `<div class="h" style="margin-top:3px">SAVED TO YOUR VAULT \u00b7 JARVIS-INBOX</div><button type="button">Got it</button>`;
+      el.classList.add("on");
+      const b = el.querySelector("button");
+      if (b) b.onclick = () => el.classList.remove("on");
+    }
+    function paintPrebrief(bus) {
+      const pb = (bus && bus.prebrief) || null;
+      const gen = pb ? Number(pb.gen || 0) : 0;
+      if (lastPrebriefGen === null) { lastPrebriefGen = gen; return; }
+      if (gen > lastPrebriefGen) {
+        lastPrebriefGen = gen;
+        const line = String((pb && pb.line) || "").trim();
+        if (line) pendingNudge = line;
+      }
+      deliverNudge();
+    }
     function paintFocus(bus) {
       const focus = bus && bus.focus && typeof bus.focus === "object" ? bus.focus : null;
       const armed = !!(focus && focus.armed);
@@ -1691,9 +2075,10 @@
       $("spoken").textContent = next ? "Watch…" : "Watch off.";
       try {
         const out = await api("/api/watch", { grab: next, arm: next, gen: busGen, evens: true });
-        $("spoken").textContent = out.spoken || (next
-          ? "Watch is on. Switch to the app you want me to use, then tell me."
-          : "Watch off.");
+        // Z03, demo ud7wzdiM0gk 1:51: the moment sharing starts he says the invite line aloud; barge-in stays armed while he talks.
+        const invite = "I can see your screen and I'm listening, sir. Just talk, and feel free to cut me off.";
+        $("spoken").textContent = next ? invite : (out.spoken || "Watch off.");
+        if (next) { try { enqueueSpeak(invite); } catch (e) { /* voice off */ } }
       } catch (e) {
         $("spoken").textContent = "Watch failed. Screen Recording may be dark.";
         watchArmed = false;
@@ -1768,6 +2153,25 @@
         if (bus.turn_gen < busGen) return;
         busGen = bus.turn_gen;
       }
+      const conversation = $("conversationHistory");
+      if (conversation && Array.isArray(bus.turns)) {
+        const turns = bus.turns.filter(t => t && typeof t.user === "string" && typeof t.jarvis === "string")
+          .slice(-24).map(t => [t.user.slice(0, 8000), t.jarvis.slice(0, 16000)]);
+        const signature = JSON.stringify(turns);
+        if (conversation.dataset.signature !== signature) {
+          const rows = turns.map(([user, answer]) => {
+            const row = document.createElement("p");
+            row.style.whiteSpace = "pre-wrap";
+            row.textContent = "You: " + user + "\nJarvis: " + answer;
+            return row;
+          });
+          conversation.replaceChildren(...rows);
+          conversation.dataset.signature = signature;
+        }
+        const history = $("resultHistory");
+        const results = $("browserResults");
+        if (history) history.hidden = !conversation.children.length && !(results && results.children.length);
+      }
       const done = bus.job_status !== "working";
       if (done) {
         if (state.turning || ttsSpeaking()) return;
@@ -1775,23 +2179,34 @@
         const line = productLine(bus.spoken);
         const now = ($("spoken").textContent || "").trim();
         const newerReply = Number(bus.turn_gen || 0) > Number(state.renderedBusGen || 0);
-        if (line && !bus.mission_delivery_pending && !(bus.tool === "browser_mission" && bus.browser_mission_id && Array.from($("browserResults").children).some(el => el.dataset.missionId === bus.browser_mission_id)) && (newerReply || !now || isStatusLine(now) || isFallbackLine(now) || /^listening\.?$/i.test(now))) {
+        if (line && !bus.mission_delivery_pending && (newerReply || !now || isStatusLine(now) || isFallbackLine(now) || /^listening\.?$/i.test(now))) {
           $("spoken").textContent = line;
           state.renderedBusGen = Number(bus.turn_gen || 0);
+          if (newerReply) showCurrentResponse();
+          if (bus.utterance && $("heard") && $("heard") !== $("spoken")) $("heard").textContent = "› " + String(bus.utterance).slice(0, 160);
+          if (bus.watch && bus.watch.armed && bus.watch.narration && $("heard") && $("heard") !== $("spoken")) $("heard").textContent = "▶ " + String(bus.watch.narration).slice(0, 160);
         }
-        if (bus.tool === "browser_mission" && bus.browser_mission_id &&
-            Array.from($("browserResults").children).some(el => el.dataset.missionId === bus.browser_mission_id) &&
-            $("spoken").textContent === line) $("spoken").textContent = "";
         const pending = bus.mission_delivery_pending;
         if (pending && pending.spoken) {
           const results = $("browserResults");
-          if (results && !Array.from(results.children).some(el => el.dataset.missionId === pending.mission_id)) {
-            const answer = document.createElement("p");
-            answer.dataset.missionId = pending.mission_id;
-            answer.textContent = pending.spoken;
-            results.appendChild(answer);
-            if (bus.browser_mission_id === pending.mission_id) $("spoken").textContent = "";
-            if (state.armed) { enqueueSpeak(pending.spoken); return; }
+          const seen = state.displayedMissionDeliveries || (state.displayedMissionDeliveries = Object.create(null));
+          if (results && !seen[pending.mission_id] && !Array.from(results.children).some(el => el.dataset.missionId === pending.mission_id)) {
+            seen[pending.mission_id] = true;
+            if (!Array.from(results.children).some(el => el.textContent === pending.spoken)) {
+              const answer = document.createElement("p");
+              answer.dataset.missionId = pending.mission_id;
+              answer.textContent = pending.spoken;
+              results.appendChild(answer);
+            }
+            const history = $("resultHistory");
+            if (history) history.hidden = results.children.length === 0 && !(conversation && conversation.children.length);
+            const freshDelivery = Number(pending.gen || 0) >= Number(state.renderedBusGen || 0);
+            state.renderedBusGen = Math.max(Number(state.renderedBusGen || 0), Number(pending.gen || 0));
+            if (freshDelivery) {
+              $("spoken").textContent = productLine(pending.spoken);
+              showCurrentResponse();
+            }
+            if (state.armed && freshDelivery) { enqueueSpeak(pending.spoken); return; }
           }
           api("/api/browser-mission/ack", {mission_id: pending.mission_id, gen: pending.gen}).catch(() => {});
         }
@@ -1817,12 +2232,22 @@
           const line = String(notice.spoken || "");
           if (line) {
             $("spoken").textContent = line;
-            enqueueSpeak(line);
+            // BUS300-P0-002: typed-only / mic-disarmed stays text; speak only when mic is armed.
+            if (state.armed) enqueueSpeak(line);
             fetch("/api/watch/ack", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ event_id: notice.event_id }),
             }).catch(() => {});
+          }
+        }
+        const dGen = Number((bus && bus.detached_gen) || 0);
+        if (dGen && dGen !== detachedShown && Number(bus.turn_gen || 0) === dGen && bus.job_status === "done" && !state.turning) {
+          detachedShown = dGen;
+          const line = String(bus.spoken || "");
+          if (line) {
+            $("spoken").textContent = line;
+            if (state.armed) enqueueSpeak(line);
           }
         }
         reconcilePhase(bus);
@@ -1836,6 +2261,11 @@
         watchArmed = !!watch.armed;
         if ($("watchBtn") && !watchBusy) $("watchBtn").classList.toggle("on", watchArmed);
         paintFocus(bus);
+        paintPrebrief(bus);
+        paintReflex(bus);
+        paintInbox(bus);
+        try { paintOperator(Object.assign({}, await api("/api/operator"))); } catch (o) {}
+        try { await pollEvents(); } catch (o) {}
         paintLights({ health, bus, wires });
       } catch (e) {
         $("link").textContent = "NEURAL LINK - LOCAL FACE ONLY";
@@ -1866,7 +2296,8 @@
     });
     $("typed").addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
-        turn($("typed").value.trim(), false);
+        // BUS300-P0-002: typed = text only (voice=false); mic path alone may speak.
+        turn($("typed").value.trim(), false, false);
         $("typed").value = "";
       }
     });
@@ -1876,7 +2307,7 @@
     $("chip").addEventListener("click", onArmGesture);
     $("board").addEventListener("click", onArmGesture);
     $("mic").addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); pressMic(); });
-    $("stop").addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); pressStop(); });
+    $("stop").addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); turn("stop", false, false); });
     $("hide").addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); hidePresentation(); });
     if ($("eyesBtn")) $("eyesBtn").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); toggleEyes(); });
     if ($("watchBtn")) $("watchBtn").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); clickWatch(); });
@@ -1884,7 +2315,7 @@
     if ($("stopBtn")) $("stopBtn").addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      turn("stop", false);
+      turn("stop", false, false);
     });
     if ($("hideBtn")) $("hideBtn").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); toggleChrome(); });
     if ($("micBtn")) {

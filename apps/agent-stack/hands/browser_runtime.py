@@ -18,11 +18,24 @@ import sys
 import threading
 import time
 import uuid
-from dataclasses import dataclass, field, asdict, replace
+from dataclasses import dataclass, field, asdict, replace, fields
 from pathlib import Path
 from urllib.parse import urlsplit, urljoin, parse_qsl
 import urllib.request
 
+
+
+_WORKERS: dict = {}
+
+
+def _proc_identity(pid):
+    """Start time + command of a PID (ps), or None when it cannot be read; never treated as a mismatch on None."""
+    try:
+        r = subprocess.run(['/bin/ps', '-ww', '-p', str(int(pid)), '-o', 'lstart=', '-o', 'command='],
+                           capture_output=True, text=True, timeout=2)
+        return r.stdout.strip() or None if not r.returncode else None
+    except (OSError, ValueError, subprocess.TimeoutExpired):
+        return None
 
 def profiles():
     name = 'agent_stack_profiles'
@@ -50,13 +63,43 @@ OPERATIONS = ('CLICK', 'OPEN_TAB', 'INPUT', 'SELECT', 'SWITCH_TAB', 'SCROLL', 'N
 TARGET_OPS = {'CLICK', 'OPEN_TAB', 'INPUT', 'SELECT', 'SWITCH_TAB'}
 PACK_VERSION = 'browser.reflex.v1'
 JEV_MODEL = 'typesafe/jev-1.13'
-HARD = re.compile(r'\b(send|post|publish|pay|buy|purchase|checkout|book|delete|remove|accept|agree|deploy|unsubscribe|confirm order|sign in|log in|password)\b', re.I)
+_HARD_WORDS = ('send|post|publish|pay|buy|purchase|checkout|book|delete|remove|accept|agree|deploy|unsubscribe|confirm order|'
+               r'submit|place (?:the |an |my |your )?order|order now|transfer|tweet|donate')
+_LOGIN_WORDS = 'sign in|log in|password'
+HARD = re.compile(r'\b(' + _HARD_WORDS + '|' + _LOGIN_WORDS + r')\b', re.I)
+# Open access ("permission granted" from Evens): logins are allowed; every consequential action in HARD stays refused
+# on targets/URLs (security review 2026-10-15, H6 — post/remove/accept/agree had been dropped).
+HARD_OPEN = re.compile(r'\b(' + _HARD_WORDS + r')\b', re.I)
+OPEN_ACTION_BUDGET, OPEN_TIME_BUDGET = 100, 600
 
 
-def unsafe_mission_intent(objective):
-    # Explicit prohibitions constrain authority; they are not requested actions.
-    constrained=re.sub(r"\b(?:do not|don't|never)\s+(?:"+HARD.pattern.removeprefix(r'\b(').removesuffix(r')\b')+r")\b",'',objective,flags=re.I)
-    return bool(HARD.search(constrained))
+def open_access():
+    """Worker side: the owner's grant is snapshotted into the worker env at mission start; models and pages cannot set it."""
+    return os.environ.get('JARVIS_OPEN_ACCESS') == '1'
+
+
+def hard():
+    return HARD_OPEN if open_access() else HARD
+
+
+def owner_open_access():
+    """Parent side: read the owner's live grant from hands/permissions.py."""
+    name = 'agent_stack_permissions'
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name('permissions.py'))
+        module = importlib.util.module_from_spec(spec); sys.modules[name] = module; spec.loader.exec_module(module)
+    try:
+        return bool(sys.modules[name].open_access())
+    except Exception:
+        return False
+
+
+def unsafe_mission_intent(objective, opened=False):
+    # Explicit prohibitions constrain authority; they are not requested actions. With the owner's grant, logging in is
+    # allowed (HARD_OPEN); every consequential verb still makes the mission unsafe.
+    policy = HARD_OPEN if opened else HARD
+    constrained=re.sub(r"\b(?:do not|don't|never)\s+(?:"+policy.pattern.removeprefix(r'\b(').removesuffix(r')\b')+r")\b",'',objective,flags=re.I)
+    return bool(policy.search(constrained))
 
 
 def digest(value):
@@ -89,7 +132,9 @@ def allowed_url(url, domains, *, local=False):
         private = host == 'localhost' or host.endswith(('.local', '.internal'))
     if private and not local:
         return False
-    return any(host == d.lower() for d in domains)
+    if open_access() and not private:
+        return True
+    return any(host == d.lower().removeprefix('www.') or host.endswith('.' + d.lower().removeprefix('www.')) for d in domains)
 
 
 @dataclass(frozen=True)
@@ -132,11 +177,14 @@ class BrowserFlow:
         if 'artifact_expectations' in value:
             if not isinstance(value['artifact_expectations'],(list,tuple)) or any(not isinstance(x,dict) for x in value['artifact_expectations']): raise ValueError('invalid artifact expectations')
             value['artifact_expectations'] = tuple(value['artifact_expectations'])
+        if open_access():
+            value['action_budget'], value['time_budget'] = OPEN_ACTION_BUDGET, OPEN_TIME_BUDGET
+            value['forbidden_actions'] = tuple(x for x in value.get('forbidden_actions', cls.forbidden_actions) if x.lower() != 'authenticate')
         flow = cls(**value)
         if not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9_.-]{0,99}',flow.flow_id): raise ValueError('invalid flow ID')
         if not flow.flow_id or not flow.objective or not flow.mission_id or not flow.stop_conditions:
             raise ValueError('flow identity, objective and stop conditions required')
-        if HARD.search(flow.starting_route): raise ValueError('policy_denied_starting_route')
+        if hard().search(flow.starting_route): raise ValueError('policy_denied_starting_route')
         if not allowed_url(flow.starting_route, flow.allowed_domains, local=local):
             raise ValueError('starting route outside allowed domains')
         if type(flow.action_budget) is not int or not 1 <= flow.action_budget <= 100:
@@ -148,7 +196,7 @@ class BrowserFlow:
         if flow.text_generation_policy not in ('known_values_only', 'small_model'):
             raise ValueError('invalid text policy')
         validate_recipe(flow.verification_recipe)
-        if flow.verification_recipe.get('kind') == 'provider' and (not allowed_url(flow.verification_recipe['url'],flow.allowed_domains,local=local) or HARD.search(flow.verification_recipe['url'])): raise ValueError('provider endpoint outside read-only scope')
+        if flow.verification_recipe.get('kind') == 'provider' and (not allowed_url(flow.verification_recipe['url'],flow.allowed_domains,local=local) or hard().search(flow.verification_recipe['url'])): raise ValueError('provider endpoint outside read-only scope')
         if flow.artifact_expectations and (flow.verification_recipe.get('kind') != 'artifact' or list(flow.artifact_expectations) != flow.verification_recipe.get('files')):
             raise ValueError('artifact expectations must be independently verified by the artifact recipe')
         if not isinstance(flow.inputs, dict) or any(not isinstance(v, str) for v in flow.inputs.values()):
@@ -276,25 +324,26 @@ def validate_decision(decision, observation, flow, *, policy=True):
         target_text = str(target.get('name','')) + ' ' + str(target.get('href',''))
         if any(re.search(r'\b'+re.escape(str(x))+r'\b', target_text, re.I) for x in flow.forbidden_actions):
             raise ValueError('policy_forbidden_target')
-        if HARD.search(target['name']) or not target.get('visible') or target.get('disabled'):
+        if hard().search(target['name']) or not target.get('visible') or target.get('disabled'):
             raise ValueError('policy_denied_target')
         href = urljoin(observation.url, target.get('href', ''))
         navigation_link = (decision.operation in ('CLICK','OPEN_TAB','SWITCH_TAB') and target.get('role') in ('link','tab')
             and bool(target.get('href')) and urlsplit(href).scheme in ('http', 'https')
-            and urlsplit(href).hostname in flow.allowed_domains and not HARD.search(href)
+            and (urlsplit(href).hostname in flow.allowed_domains or allowed_url(href, flow.allowed_domains)) and not hard().search(href)
             and not urlsplit(href).username and not urlsplit(href).password)
         if decision.operation == 'OPEN_TAB' and target.get('role') != 'link': raise ValueError('policy_open_tab_requires_link')
         if decision.operation == 'SWITCH_TAB' and target.get('role') != 'tab': raise ValueError('policy_switch_requires_current_tab')
         # Links are followed as bounded navigation, never by executing page click handlers.
         local_fixture = urlsplit(observation.url).hostname in ('127.0.0.1','localhost')
         contract = site_action_contract(decision, observation)
-        if not navigation_link and not local_fixture and not contract:
+        if not navigation_link and not local_fixture and not contract and not open_access():
             raise ValueError('policy_requires_site_action_contract')
         # Local test fixtures are explicitly compiled with local=True; they exercise event contracts without external authority.
-        required_readonly = 0 if local_fixture else (.90 if navigation_link or contract else .99)
+        required_readonly = 0 if local_fixture else (.90 if navigation_link or contract or open_access() else .99)
         if not math.isfinite(decision.readonly_probability) or not 0 <= decision.readonly_probability <= 1 or decision.readonly_probability < required_readonly:
             raise ValueError('policy_escalation')
-        if decision.operation == 'INPUT' and target.get('type') == 'password':
+        # While open, a password may be typed only from a value the owner gave in this request (inputs), never generated.
+        if decision.operation == 'INPUT' and target.get('type') == 'password' and not (open_access() and decision.input_key in flow.inputs):
             raise ValueError('credential_input_denied')
     if decision.operation in ('INPUT', 'SELECT') and decision.input_key not in flow.inputs:
         if not (decision.input_key == 'generate' and flow.text_generation_policy == 'small_model'):
@@ -424,7 +473,12 @@ class BrowserFlowCompiler:
 class BrowserPlanner:
     def __init__(self, gateway): self.gateway = gateway
 
-    async def plan(self, objective, mission_id, *, domains=(), local=False):
+    async def plan(self, objective, mission_id, *, domains=(), local=False, required_executors=('browser',)):
+        # Host-owned requirement coverage must not be reduced by a browser plan.
+        # This planner cannot authorize or execute local reads or coding nodes.
+        if (not isinstance(required_executors,(list,tuple)) or not required_executors
+            or any(name!='browser' for name in required_executors)):
+            raise ValueError('mixed_mission_owner_required: browser plan cannot cover required non-browser executors')
         example = asdict(BrowserFlow('site-one', mission_id, 'Read requested information',
             'https://example.com/', ('example.com',), ('Requested text is visible',),
             {'kind': 'dom', 'checks': [{'selector': 'h1', 'exists': True}]}))
@@ -600,7 +654,7 @@ class BrowserUseDriver:
                 target = next(c for c in fresh.candidates if c['id'] == decision.target_id)
                 if target.get('role') == 'link' and target.get('href'):
                     destination = urljoin(fresh.url, target['href'])
-                    if not allowed_url(destination, self.flow.allowed_domains, local=self.local) or HARD.search(destination):
+                    if not allowed_url(destination, self.flow.allowed_domains, local=self.local) or hard().search(destination):
                         raise ValueError('policy_denied_navigation')
                     event = ev.NavigateToUrlEvent(url=destination,new_tab=op=='OPEN_TAB')
                 else:
@@ -651,7 +705,7 @@ class BrowserVerifier:
     async def verify_provider(self, driver, flow):
         recipe=flow.verification_recipe
         url=recipe['url']
-        if not allowed_url(url,flow.allowed_domains,local=driver.local) or HARD.search(url): return {'verified':False,'reason':'provider_outside_scope'}
+        if not allowed_url(url,flow.allowed_domains,local=driver.local) or hard().search(url): return {'verified':False,'reason':'provider_outside_scope'}
         box={}
         cancelled=threading.Event();deadline=time.monotonic()+15
         def fetch():
@@ -667,7 +721,7 @@ class BrowserVerifier:
                 current=url
                 for hop in range(4):
                     if cancelled.is_set() or time.monotonic()>=deadline:raise TimeoutError('provider_deadline')
-                    if not allowed_url(current,flow.allowed_domains,local=driver.local) or HARD.search(current): raise ValueError('provider_redirect_outside_scope')
+                    if not allowed_url(current,flow.allowed_domains,local=driver.local) or hard().search(current): raise ValueError('provider_redirect_outside_scope')
                     parsed=urlsplit(current);port=parsed.port or (443 if parsed.scheme=='https' else 80)
                     addresses=socket.getaddrinfo(parsed.hostname,port,type=socket.SOCK_STREAM)
                     if not addresses or (not driver.local and any(not ipaddress.ip_address(row[4][0]).is_global for row in addresses)):
@@ -1122,7 +1176,10 @@ class BrowserRuntime:
                                 verification_recipe=current_flow.verification_recipe,stop_conditions=list(current_flow.stop_conditions),artifact_expectations=list(current_flow.artifact_expectations),
                                 action_budget=ledger['action_budget']-ledger['used_actions'],retry_budget=retry_remaining,
                                 time_budget=max(1,ledger['time_budget']-(time.monotonic()-ledger['started'])))
-                            proposed['objective']=current_flow.objective+' Recovery guidance: '+str(proposed.get('objective',''))
+                            # The prompt asks for recovery guidance; models return it as its own key (live 8476865 crashed on it).
+                            guidance=str(proposed.pop('recovery_guidance','') or proposed.get('objective',''))
+                            proposed={k:v for k,v in proposed.items() if k in {f.name for f in fields(BrowserFlow)}}
+                            proposed['objective']=current_flow.objective+' Recovery guidance: '+guidance
                             repaired=BrowserFlow.from_dict(proposed,local=self.local)
                             if ledger['time_budget']-(time.monotonic()-ledger['started'])<1:raise TimeoutError('replan_time_budget')
                             autonomous_attempts.append(result);current_flow=repaired
@@ -1211,6 +1268,147 @@ def mission_path(hive, mission_id):
     return Path(hive) / 'browser-missions' / mission_id
 
 
+def durable_parent_json(path,value):
+    """Persist intent before effect, including its rename in the task directory."""
+    missing=[];ancestor=Path(path).parent
+    while not ancestor.exists():missing.append(ancestor);ancestor=ancestor.parent
+    write_json(path,value)
+    with Path(path).open('rb') as stream:os.fsync(stream.fileno())
+    for folder in dict.fromkeys([Path(path).parent,*[p.parent for p in missing]]):
+        directory=os.open(str(folder),os.O_RDONLY|getattr(os,'O_DIRECTORY',0))
+        try:os.fsync(directory)
+        finally:os.close(directory)
+
+
+
+_PARENT_SOURCE_REVIEW_KEY=object()
+class ParentSourceReviewAuthority:
+    def __init__(self,key):
+        if key is not _PARENT_SOURCE_REVIEW_KEY:raise ValueError('independent_source_review_required')
+def parent_source_review_authority():
+    """Host independent reviewer only; never exposed as a model tool."""
+    return ParentSourceReviewAuthority(_PARENT_SOURCE_REVIEW_KEY)
+
+
+def review_parent_source_transition(root, *, authority, evidence):
+    """Independent host maintenance review, never a model tool or step receipt."""
+    import fcntl
+    stack=Path(__file__).resolve().parents[1]
+    if not isinstance(authority,ParentSourceReviewAuthority) or not isinstance(evidence,dict) or not evidence:
+        raise ValueError('independent_source_review_required')
+    root=Path(root)
+    with (root/'worker.lock').open('a') as lock:
+        fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+        request=read_json(root/'request.json')
+        if request.get('worker_kind')!='mixed' or read_json(root/'control.json').get('cancel') or (root/'result.json').exists():raise ValueError('active mixed project required')
+        scope=request.get('project_scope') or {};project=root.parent/str(scope.get('mission_id',''))
+        if read_json(project/'control.json').get('cancel'):raise ValueError('original owner cancelled')
+        old=reviewed_parent_manifest(root,request,request.get('source_manifest') or {});current={name:hashlib.sha256((stack/name).read_bytes()).hexdigest() for name in old}
+        changed={name for name in old if old[name]!=current[name]}
+        allowed={'hands/coding_mission.py','hands/browser_runtime.py','brain/mission_controller.py','brain/pipeline.py','hands/workflow_delivery.py'}
+        if not changed or not changed<=allowed:raise ValueError('source transition outside reviewed control plane')
+        row={'version':1,'authority':'independent_host_source_review','request_sha256':digest(request),'previous':old,'current':current,
+             'reviewed_step_receipts':read_json(root/'state.json').get('step_receipts',{}), 'evidence':evidence}
+        row['digest']=digest(row)
+        path=root/'parent_source_review.json'
+        if path.exists():
+            chain=root/'parent_source_reviews'
+            if chain.is_symlink():raise ValueError('linked source review chain')
+            existing=sorted(chain.glob('*.json')) if chain.exists() else []
+            if len(existing)>=16:raise ValueError('source review chain limit')
+            previous=read_json(existing[-1] if existing else path)
+            row['previous_review_digest']=previous['digest'];row['version']=2
+            row.pop('digest',None);row['digest']=digest(row)
+            path=chain/f'{len(existing)+1:03d}.json'
+            if path.exists():raise ValueError('source review sequence conflict')
+        durable_parent_json(path,row);return row
+
+
+def reviewed_parent_manifest(root,request,manifest):
+    """A task-bound reviewed transition changes executable hashes, never intent/effects."""
+    path=Path(root)/'parent_source_review.json'
+    if not path.exists():return manifest
+    if path.is_symlink():raise ValueError('linked source review')
+    chain=Path(root)/'parent_source_reviews'
+    if chain.is_symlink():raise ValueError('linked source review chain')
+    additions=sorted(chain.glob('*.json')) if chain.exists() else []
+    if len(additions)>16 or [p.name for p in additions]!=[f'{i:03d}.json' for i in range(1,len(additions)+1)]:
+        raise ValueError('invalid source review sequence')
+    previous_digest=None
+    receipts=read_json(Path(root)/'state.json').get('step_receipts',{})
+    allowed={'hands/coding_mission.py','hands/browser_runtime.py','brain/mission_controller.py','brain/pipeline.py','hands/workflow_delivery.py'}
+    for index,item in enumerate([path,*additions]):
+        if item.is_symlink():raise ValueError('linked source review')
+        row=read_json(item);unsigned=dict(row);signature=unsigned.pop('digest',None)
+        current=row.get('current') or {};reviewed=row.get('reviewed_step_receipts')
+        if (signature!=digest(unsigned) or row.get('version')!=(1 if index==0 else 2)
+            or (index>0 and row.get('previous_review_digest')!=previous_digest)
+            or row.get('authority')!='independent_host_source_review' or row.get('request_sha256')!=digest(request)
+            or row.get('previous')!=manifest or set(current)!=set(manifest)
+            or not {name for name in manifest if current[name]!=manifest[name]}<=allowed or not row.get('evidence')):
+            raise ValueError('parent source review changed')
+        if not isinstance(reviewed,dict) or any(receipts.get(key)!=value for key,value in reviewed.items()):
+            raise ValueError('reviewed completed receipts changed')
+        manifest=current;previous_digest=signature
+    return manifest
+
+
+def validate_parent_contract(root):
+    """Validate the host's complete immutable requirements before skipping work."""
+    root=Path(root)
+    if root.is_symlink() or any((root/name).is_symlink() for name in ('request.json','state.json','control.json')):
+        raise ValueError('linked parent state requires review')
+    request=read_json(root/'request.json');state=read_json(root/'state.json')
+    if request.get('mission_id')!=root.name or request.get('worker_kind') not in {'mixed','research_build'}:
+        raise ValueError('workflow parent identity required')
+    steps=request.get('required_steps');outputs=request.get('required_outputs')
+    if not isinstance(steps,list) or not 1<=len(steps)<=64 or not isinstance(outputs,list) or not outputs:
+        raise ValueError('bounded host required-step/output contract required')
+    ids=[s.get('id') for s in steps if isinstance(s,dict)]
+    if len(ids)!=len(steps) or any(not isinstance(n,str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,80}',n) for n in ids) or len(set(ids))!=len(ids):
+        raise ValueError('unique required step IDs required')
+    declared=[];visited=set()
+    for s in steps:
+        if s.get('executor') not in {'browser','workspace_read','coding','delivery','retained_source'} or not isinstance(s.get('outputs'),list) or not s['outputs']:
+            raise ValueError('registered executor and required outputs needed')
+        if any(not isinstance(o,str) or not o for o in s['outputs']):raise ValueError('invalid output identity')
+        declared+=s['outputs']
+        dependencies=s.get('dependencies',[])
+        if not isinstance(dependencies,list) or not set(dependencies)<=visited:
+            raise ValueError('required steps must follow their dependencies')
+        visited.add(s['id'])
+    if any(not isinstance(o,str) or not o for o in outputs) or len(set(outputs))!=len(outputs) or len(set(declared))!=len(declared) or set(declared)!=set(outputs):
+        raise ValueError('required outputs must be covered exactly once')
+    manifest=request.get('source_manifest');stack=Path(__file__).resolve().parents[1]
+    manifest=reviewed_parent_manifest(root,request,manifest) if isinstance(manifest,dict) else manifest
+    if not isinstance(manifest,dict) or any(manifest.get(n)!=sha for n,sha in mission_source_manifest().items()):
+        raise ValueError('parent must freeze browser and controller sources')
+    for name,sha in manifest.items():
+        path=stack/name
+        if Path(name).is_absolute() or '..' in Path(name).parts or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest()!=sha:
+            raise ValueError('parent source changed')
+    receipts=state.get('step_receipts',{})
+    if not isinstance(receipts,dict) or not set(receipts)<=set(ids):raise ValueError('unknown completed parent step')
+    for ident,receipt in receipts.items():
+        step=next(s for s in steps if s['id']==ident)
+        if (not isinstance(receipt,dict) or receipt.get('request_sha256')!=digest(request)
+            or receipt.get('step_sha256')!=digest(step) or receipt.get('outputs')!=step['outputs']):
+            raise ValueError('completed step receipt contract changed')
+        if step['executor'] in {'workspace_read','delivery','retained_source'}:
+            result_path=root/'step_results'/f'{ident}.json'
+        else:
+            if step['executor']=='coding':
+                child=root.parent/str(receipt.get('child_id'))
+                if not re.fullmatch(r'[a-f0-9]{32}',str(receipt.get('child_id'))):raise ValueError('invalid coding child')
+            else:child=mission_path(root.parent.parent,receipt.get('child_id'))
+            result_path=child/'result.json'
+        if result_path.is_symlink() or not result_path.resolve().is_relative_to(root.parent.parent.resolve()):
+            raise ValueError('linked completed child requires review')
+        if digest(read_json(result_path))!=receipt.get('result_sha256'):
+            raise ValueError('completed child result changed')
+    return request,state
+
+
 class BrowserMissionHandle:
     """Process handle subordinate to Face. Durable state survives module reloads.
 
@@ -1219,10 +1417,189 @@ class BrowserMissionHandle:
     """
     def __init__(self, hive): self.hive = Path(hive)
 
+    def continue_parent_step(self, parent_id, step_id):
+        """Host-only continuation of an immutable parent step, never model authority.
+
+        Reserve before launch. A launch without a durable owner receipt is
+        uncertain and must be reconciled, never automatically repeated.
+        """
+        import fcntl
+        stack=Path(__file__).resolve().parents[1]
+        if not re.fullmatch(r'[a-f0-9]{32}',str(parent_id)) or not re.fullmatch(r'[A-Za-z0-9_-]{1,80}',str(step_id)):
+            raise ValueError('invalid parent step identity')
+        parent=self.hive/'coding-missions'/parent_id
+        if parent.is_symlink() or not parent.is_dir() or not parent.resolve().is_relative_to(self.hive.resolve()):raise ValueError('parent mission required')
+        with (parent/'steering.lock').open('a') as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX)
+            validate_parent_contract(parent)
+            request=read_json(parent/'request.json');control=read_json(parent/'control.json')
+            if request.get('mission_id')!=parent_id:raise ValueError('parent identity mismatch')
+            if request.get('worker_kind') not in {'mixed','research_build'}:raise ValueError('workflow parent required')
+            required=request.get('required_steps');outputs=request.get('required_outputs')
+            if not isinstance(required,list) or not required or not isinstance(outputs,list) or not outputs:
+                raise ValueError('host required-step/output contract required')
+            ids=[s.get('id') for s in required if isinstance(s,dict)]
+            if len(ids)!=len(required) or len(set(ids))!=len(ids) or any(not isinstance(n,str) for n in ids):
+                raise ValueError('unique required step IDs required')
+            if any(s.get('executor') not in {'browser','workspace_read','coding','delivery','retained_source'} for s in required):
+                raise ValueError('unregistered required executor')
+            declared=[o for s in required for o in s.get('outputs',[])]
+            if (any(not isinstance(o,str) or not o for o in declared) or len(set(declared))!=len(declared)
+                or set(declared)!=set(outputs)):
+                raise ValueError('required outputs must be covered exactly once')
+            step=next((s for s in required if s['id']==step_id),None)
+            if not step or step.get('executor')!='browser':raise ValueError('browser parent step required')
+            domains=step.get('domains');objective=step.get('objective')
+            if not isinstance(domains,list) or not domains or any(not isinstance(d,str) for d in domains):
+                raise ValueError('bounded browser domains required')
+            authority=profiles().AuthorityEnvelope.from_dict(request.get('authority'),parent_id)
+            if (not authority.permitted_domains or not set(domains)<=set(authority.permitted_domains)
+                or authority.decide('NAVIGATE','browser.read',domains)!='AUTO_EXECUTE'
+                or authority.decide('EXTRACT','browser.read',domains)!='AUTO_EXECUTE'):
+                raise ValueError('parent does not authorize this browser scope')
+            if not isinstance(objective,str) or not objective.strip() or len(objective)>10000 or unsafe_mission_intent(objective,False):
+                raise ValueError('read-only bounded browser step required')
+            if step.get('local'):raise ValueError('local browser scope requires a separate host contract')
+            expected=request.get('source_manifest')
+            if not isinstance(expected,dict) or not expected:raise ValueError('parent source manifest required')
+            if any(expected.get(name)!=sha for name,sha in mission_source_manifest().items()):
+                raise ValueError('parent must freeze browser and controller sources')
+            for name,sha in expected.items():
+                path=(stack/name)
+                if Path(name).is_absolute() or '..' in Path(name).parts or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest()!=sha:
+                    raise ValueError('parent source changed')
+            key={'parent_mission_id':parent_id,'step_id':step_id,'request_sha256':digest(request),'step_sha256':digest(step)}
+            dispatch_policy={'version':1,'effect':'browser.read','after_dispatch':'reconcile_only','retry_known_no_effect':True}
+            reservation_path=parent/'browser_children'/f'{step_id}.json'
+            if (reservation_path.is_symlink() or not reservation_path.resolve().is_relative_to(parent.resolve())):
+                raise ValueError('linked reservation requires review')
+            reservation=read_json(reservation_path);state=read_json(parent/'state.json')
+            state.setdefault('step_receipts',{})
+            state['required_steps']=ids;state['required_outputs']=outputs
+            def save(status,**fields):
+                state.update(status=status,verified=False,task_verified=False,**fields)
+                durable_parent_json(parent/'state.json',state);return dict(state)
+            if reservation and any(reservation.get(k)!=v for k,v in key.items()):
+                raise ValueError('parent step reservation contract changed')
+            if reservation and reservation.get('dispatch_policy')!=dispatch_policy:
+                raise ValueError('stored and current dispatch policy differ')
+            if control.get('cancel'):
+                if reservation:
+                    child=mission_path(self.hive,reservation['child_id'])
+                    if child.is_symlink() or not child.resolve().is_relative_to(self.hive.resolve()) or (child/'control.json').is_symlink():
+                        raise ValueError('linked child state requires review')
+                    if (child/'request.json').exists() and not (child/'result.json').exists():
+                        self.steer(reservation['child_id'],cancel=True)
+                return save('CANCELLED',next_step=step_id)
+            dependencies=step.get('dependencies',[])
+            if not isinstance(dependencies,list) or not set(dependencies)<=set(ids):raise ValueError('invalid parent dependencies')
+            if not set(dependencies)<=set(state['step_receipts']):return save('WAITING_DEPENDENCY',next_step=step_id)
+            prior=state['step_receipts'].get(step_id)
+            if prior:
+                if prior.get('step_sha256')!=key['step_sha256']:raise ValueError('completed step contract changed')
+                return dict(state)  # already advanced; never regress the parent on replay
+            if not reservation:
+                reservation={**key,'child_id':uuid.uuid4().hex,'launch_token':uuid.uuid4().hex,'phase':'RESERVED','dispatch_policy':dispatch_policy}
+                durable_parent_json(reservation_path,reservation)
+            child_id=reservation['child_id'];child=mission_path(self.hive,child_id)
+            if (child.is_symlink() or not child.resolve().is_relative_to(self.hive.resolve())
+                or any((child/name).is_symlink() for name in ('request.json','owner.json','result.json','state.json','control.json'))):
+                raise ValueError('linked child state requires review')
+            child_request=read_json(child/'request.json')
+            if child_request and child_request.get('parent_step')!=key:raise ValueError('reserved child identity mismatch')
+            if child_request and (child_request.get('objective')!=objective or child_request.get('domains')!=domains
+                or child_request.get('flows')!=step.get('flows') or child_request.get('local') is not False
+                or child_request.get('authority')!=json.loads(json.dumps(asdict(profiles().AuthorityEnvelope.browser_read(child_id,domains))))) :
+                raise ValueError('reserved child scope changed')
+            if child_request and (set(child_request)!={'mission_id','objective','domains','local','flows','authority','parent_step','created','open_access','source_manifest','runtime_source_hash'}
+                or child_request.get('mission_id')!=child_id or child_request.get('open_access') is not False
+                or child_request.get('source_manifest')!=mission_source_manifest()
+                or child_request.get('runtime_source_hash')!=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()):
+                raise ValueError('reserved child executor changed')
+            if reservation.get('child_request_sha256') and digest(child_request)!=reservation['child_request_sha256']:
+                raise ValueError('reserved child request changed')
+            result=read_json(child/'result.json')
+            if result:
+                if not child_request or result.get('mission_id')!=child_id:raise ValueError('child result identity mismatch')
+                verification=result.get('mission_verification') or {}
+                accepted_rows=verification.get('accepted',[])
+                accepted={r.get('task_id') for r in accepted_rows if isinstance(r,dict)}
+                required_ids=set(verification.get('required_task_ids') or [])
+                proofs_valid=False
+                try:
+                    raw_flows=result.get('flows')
+                    if not isinstance(raw_flows,list) or not 1<=len(raw_flows)<=20:raise ValueError('bounded result flows required')
+                    # Validate the recorded contract, without applying the
+                    # parent's current global open-mode defaults to child data.
+                    recorded=[BrowserFlow(**row) for row in raw_flows]
+                    flows={f.flow_id:f for f in recorded}
+                    proofs_valid=(len(flows)==len(recorded) and all(f.mission_id==child_id and set(f.allowed_domains)<=set(domains) for f in recorded)
+                        and len(accepted_rows)==len(accepted) and all(
+                        row.get('task_id') in flows and row.get('revision')==flows[row['task_id']].revision
+                        and isinstance(row.get('verifier_id'),str) and bool(row['verifier_id'])
+                        and row.get('contract_digest')==mission_contract().contract_digest(flows[row['task_id']])
+                        for row in accepted_rows))
+                except (ValueError,TypeError,KeyError):pass
+                if (result.get('status')!='VERIFIED' or result.get('verified') is not True
+                    or not result.get('terminal_commit_id') or not proofs_valid
+                    or verification.get('verified') is not True or not required_ids or required_ids!=accepted):
+                    retry=step.get('retry_policy',{'max_attempts':1,'safe_no_effect_only':True})
+                    effect=result.get('effect_receipt')
+                    history=reservation.get('prior_attempts',[])
+                    safe=(result.get('status')=='FAILED' and effect=={'authority':'host_pre_browser_failure',
+                        'request_sha256':digest(child_request),'attempted_browser_effects':0,'retryable':True})
+                    if (safe and isinstance(retry,dict) and set(retry)=={'max_attempts','safe_no_effect_only'}
+                        and retry.get('safe_no_effect_only') is True and type(retry.get('max_attempts')) is int
+                        and 1<=retry['max_attempts']<=3 and len(history)+1<retry['max_attempts']):
+                        history=[*history,{'child_id':child_id,'result_sha256':digest(result),'effect_receipt':effect}]
+                        reservation.update(child_id=uuid.uuid4().hex,launch_token=uuid.uuid4().hex,
+                                           phase='RESERVED',prior_attempts=history)
+                        reservation.pop('child_request_sha256',None)
+                        durable_parent_json(reservation_path,reservation)
+                        return save('READY',next_step=step_id,child_id=reservation['child_id'],
+                                    child_retry_count=len(history),child_failure_history=history)
+                    return save('CHILD_RECOVERY_REQUIRED',next_step=step_id,child_id=child_id,child_failure=result)
+                receipt={**key,'child_id':child_id,'result_sha256':digest(result),'outputs':step.get('outputs',[])}
+                state['step_receipts'][step_id]=receipt
+                remaining=[s['id'] for s in required if s['id'] not in state['step_receipts']]
+                reservation.update(phase='ACCEPTED',result_sha256=receipt['result_sha256']);durable_parent_json(reservation_path,reservation)
+                return save('READY' if remaining else 'AWAITING_PARENT_VERIFICATION',next_step=remaining[0] if remaining else None)
+            if reservation['phase']!='RESERVED':
+                owner=read_json(child/'owner.json')
+                acknowledged=owner.get('launch_token')==reservation['launch_token']
+                return save('WAITING_CHILD' if acknowledged else 'RECONCILIATION_REQUIRED',next_step=step_id,child_id=child_id)
+            python=os.environ.get('JARVIS_BROWSER_PYTHON') or str(Path(__file__).resolve().parents[3]/'.venv-browser/bin/python')
+            if not Path(python).is_file():raise RuntimeError('pinned browser Python unavailable')
+            child.mkdir(parents=True,exist_ok=True)
+            if not child_request:
+                child_request={'mission_id':child_id,'objective':objective,'domains':domains,'local':False,'flows':step.get('flows'),
+                    'authority':asdict(profiles().AuthorityEnvelope.browser_read(child_id,domains)), 'parent_step':key,
+                    'created':time.time(),'open_access':False,'source_manifest':mission_source_manifest(),
+                    'runtime_source_hash':hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+                durable_parent_json(child/'request.json',child_request)
+                durable_parent_json(child/'control.json',{'revision':0,'cancel':False,'cancel_flows':[]})
+                durable_parent_json(child/'state.json',{'mission_id':child_id,'status':'QUEUED','verified':False,'flows':[]})
+            # Preparation may have stopped after writing only request.json.
+            if not (child/'control.json').exists():durable_parent_json(child/'control.json',{'revision':0,'cancel':False,'cancel_flows':[]})
+            if not (child/'state.json').exists():durable_parent_json(child/'state.json',{'mission_id':child_id,'status':'QUEUED','verified':False,'flows':[]})
+            if read_json(child/'control.json').get('cancel'):
+                return save('CHILD_RECOVERY_REQUIRED',next_step=step_id,child_id=child_id,child_failure='child_cancelled_before_dispatch')
+            reservation.update(phase='DISPATCHING',child_request_sha256=digest(child_request));durable_parent_json(reservation_path,reservation)
+            # After this marker, even an exception may have created a worker.
+            # Recovery must reconcile; it cannot treat missing acknowledgement as no effect.
+            with (child/'worker.log').open('ab') as log:
+                process=subprocess.Popen([python,str(Path(__file__).resolve()),'mission',str(child)],
+                    stdin=subprocess.DEVNULL,stdout=log,stderr=log,start_new_session=True,
+                    env={**os.environ,'JARVIS_OPEN_ACCESS':'0'})
+            durable_parent_json(child/'owner.json',{'pid':process.pid,'created':time.time(),'launch_token':reservation['launch_token']})
+            reservation['phase']='DISPATCHED';durable_parent_json(reservation_path,reservation)
+            return save('WAITING_CHILD',next_step=step_id,child_id=child_id)
+
     def start(self, objective, *, domains=(), local=False, flows=None):
         if not isinstance(objective, str) or not objective.strip() or len(objective) > 10000:
             raise ValueError('bounded objective required')
-        if unsafe_mission_intent(objective): raise ValueError('read_only_mission_required')
+        opened = owner_open_access()
+        if unsafe_mission_intent(objective, opened): raise ValueError('read_only_mission_required')  # grant relaxes logins only
         python = os.environ.get('JARVIS_BROWSER_PYTHON') or str(Path(__file__).resolve().parents[3] / '.venv-browser' / 'bin' / 'python')
         if not python or not Path(python).is_file():
             raise RuntimeError('JARVIS_BROWSER_PYTHON must point to the pinned Browser Use environment')
@@ -1230,20 +1607,22 @@ class BrowserMissionHandle:
         root = mission_path(self.hive, mission_id)
         root.mkdir(parents=True)
         request = {'mission_id': mission_id, 'objective': objective, 'domains': list(domains),
-                   'local': local, 'flows': flows, 'authority': asdict(profiles().AuthorityEnvelope.browser_read(mission_id, domains)), 'created': time.time(), 'runtime_source_hash':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), 'source_manifest':mission_source_manifest()}
+                   'local': local, 'flows': flows, 'authority': asdict(profiles().AuthorityEnvelope.browser_read(mission_id, domains)), 'created': time.time(), 'open_access': opened, 'runtime_source_hash':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), 'source_manifest':mission_source_manifest()}
         write_json(root / 'request.json', request)
         write_json(root / 'control.json', {'revision': 0, 'cancel': False, 'cancel_flows': []})
         write_json(root / 'state.json', {'mission_id': mission_id, 'status': 'QUEUED', 'verified': False, 'flows': []})
         with (root / 'worker.log').open('ab') as log:
             process = subprocess.Popen([python, str(Path(__file__).resolve()), 'mission', str(root)],
-                stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
-        write_json(root / 'owner.json', {'pid': process.pid, 'created': time.time()})
+                stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True,
+                env={**os.environ, 'JARVIS_OPEN_ACCESS': '1' if opened else '0'})
+        _WORKERS[mission_id] = process  # kept so status() can poll() (reaps the zombie a crashed worker leaves)
+        write_json(root / 'owner.json', {'pid': process.pid, 'created': time.time(), 'identity': _proc_identity(process.pid)})
         write_json(self.hive / 'browser-missions' / 'latest.json', {'mission_id': mission_id})
         return {'ok': True, 'tool': 'browser_mission', 'mission_id': mission_id, 'task_verified': False,
                 'spoken': 'I’ve started the browser research. I’ll verify each result as the sites finish.',
                 'wires': ['browser_mission'], 'sent': False, 'cites': []}
 
-    def cancel_active(self):
+    def cancel_active(self):  # noqa: D401
         cancelled = []
         for root in (self.hive / 'browser-missions').glob('*'):
             if not root.is_dir() or not (root / 'request.json').exists() or (root / 'result.json').exists():
@@ -1261,10 +1640,17 @@ class BrowserMissionHandle:
         if not state: raise ValueError('unknown mission')
         owner = read_json(root / 'owner.json')
         if state.get('status') not in ('VERIFIED', 'PARTIAL', 'FAILED', 'CANCELLED'):
+            # Concurrency audit 2026-10-16: kill(pid, 0) succeeds on a zombie and on a reused PID, so a crashed worker
+            # read as QUEUED. Poll our own child, and compare the recorded process identity.
+            proc = _WORKERS.get(mission_id)
             try:
                 pid = owner.get('pid')
                 if not isinstance(pid, int) or pid <= 0: raise ProcessLookupError()
+                if proc is not None and proc.pid == pid and proc.poll() is not None: raise ProcessLookupError()
                 os.kill(pid, 0)
+                was = owner.get('identity')
+                now = _proc_identity(pid) if was else None
+                if was and now and now != was: raise ProcessLookupError()
             except (ProcessLookupError, PermissionError, TypeError):
                 state.update(status='FAILED', verified=False, terminal_reason='worker_unavailable')
         return state
@@ -1331,7 +1717,8 @@ def outcome_label(event):
 
 def mission_source_manifest():
     stack = Path(__file__).resolve().parents[1]
-    names = ('hands/browser_runtime.py', 'brain/mission_controller.py',
+    names = ('hands/browser_runtime.py', 'hands/coding_mission.py','hands/workspace_read.py','hands/workflow_execution.py',
+             'hands/workflow_delivery.py','hands/workflow_read_access.py','hands/permissions.py','brain/pipeline.py','brain/mission_controller.py',
              'brain/profiles.py', 'brain/mission_contract.py')
     return {name:hashlib.sha256((stack/name).read_bytes()).hexdigest() for name in names}
 
@@ -1402,7 +1789,9 @@ def pipeline_tool(args, utterance, hive):
         return {'ok': True, 'tool':'browser_mission', 'spoken':spoken, 'mission_id':mission_id,
                 'task_verified':bool(state.get('verified')) and state.get('status')=='VERIFIED', 'evidence':state, 'sent':False, 'wires':['browser_mission'], 'cites':[]}
     except (ValueError, RuntimeError, OSError, KeyError) as exc:
-        return {'ok': False, 'tool':'browser_mission', 'spoken':'Browser research is unavailable: ' + str(exc),
+        hint = (' Say "permission granted" and I will try again without that limit.'
+                if not owner_open_access() and re.search(r'outside', str(exc)) else '')  # a grant never lifts post/buy/submit
+        return {'ok': False, 'tool':'browser_mission', 'spoken':'Browser research is unavailable: ' + str(exc) + hint,
                 'task_verified':False, 'sent':False, 'wires':['browser_mission'], 'cites':[]}
 
 

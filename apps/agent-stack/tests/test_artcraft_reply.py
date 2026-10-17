@@ -30,7 +30,7 @@ class ArtCraftReplyTest(unittest.TestCase):
         serve_src = (STACK / "face/serve.py").read_text()
         self.assertGreaterEqual(online.OPENROUTER_ATTEMPT_SEC, 18.0)
         self.assertLess(online.OPENROUTER_WALL_SEC, 25.0)
-        self.assertIn("TURN_WALL_SEC = 25.0", serve_src)
+        self.assertRegex(serve_src, r"TURN_WALL_SEC = .*25\.0")  # env-overridable, default 25 s
 
 
 if __name__ == "__main__":

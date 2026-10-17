@@ -48,8 +48,8 @@ _WATCH_STATUS = re.compile(
 _EVENT_BUS = None
 _PIPELINE = None
 
-_BOOK: dict[tuple[str, str], dict] = {}
-_KILLED: set[str] = set()
+_BOOK: dict[tuple, dict] = {}
+_KILLED: set[tuple] = set()
 _SEQ = 0
 _KILLER = None
 _LOCK = threading.Lock()
@@ -73,9 +73,19 @@ def _now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def _pending_card() -> bool:
+    try:
+        import json as _j
+        return _j.loads((Path.home() / ".jarvis" / "phone_sim.json").read_text()).get("state") == "CONFIRM"
+    except Exception:  # noqa: BLE001
+        return False
+
+
 def parse_stop(utterance: str) -> tuple[str, str, str] | None:
     """Return (verb, scope, target). Bare stop/cancel stays scope speak."""
     match = _STOP.match((utterance or "").strip())
+    if match and match.group("verb").lower() == "cancel" and not match.group("scope") and _pending_card():
+        return None  # Z40: a pending confirm card consumes 'cancel' before the generic stop
     if not match:
         return None
     verb = (match.group("verb") or "stop").lower()
@@ -499,28 +509,41 @@ def _next_id() -> str:
     return f"cancel-{_SEQ}"
 
 
+def _bus_io():
+    """The shared bus writer (per-hive RLock + flock + atomic replace). Concurrency audit 2026-10-16: this module wrote
+    the bus with its own lock and a truncate-then-write, losing turn generations and un-cancelling stopped turns."""
+    import sys
+    name = "agent_stack_bus_io"
+    mod = sys.modules.get(name)
+    if mod is None or not hasattr(mod, "mutate_bus"):
+        spec = importlib.util.spec_from_file_location(name, Path(__file__).resolve().parents[1] / "memory" / "bus_io.py")
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod); sys.modules[name] = mod
+    return mod
+
+
 def _read_bus(hive: Path) -> dict:
-    path = hive / "bus" / "state.json"
-    if not path.is_file():
-        return {}
-    try:
-        data = json.loads(path.read_text(encoding="utf-8") or "{}")
-    except json.JSONDecodeError:
-        return {}
-    return data if isinstance(data, dict) else {}
+    return _bus_io().load_json(Path(hive) / "bus" / "state.json")
+
+
+# The only bus keys this module owns. Watch code reads a snapshot, edits these, then writes back ONLY these onto a fresh
+# copy under the shared lock, so it can never roll back turn_gen / cancel_gen / turns written meanwhile.
+OWNED_KEYS = ("watches", "watch", "watch_active", "watch_seq", "watch_notice", "spoken", "phase", "speak", "jobs")
 
 
 def _write_bus(hive: Path, bus: dict) -> None:
-    path = hive / "bus" / "state.json"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(bus, indent=2) + "\n", encoding="utf-8")
+    owned = {k: bus[k] for k in OWNED_KEYS if k in bus}
+
+    def apply(fresh: dict) -> dict:
+        fresh.update(owned)
+        return fresh
+    _bus_io().mutate_bus(Path(hive), apply)
 
 
 def _patch(hive: Path, mutator) -> dict:
-    bus = _read_bus(hive)
-    mutator(bus)
-    _write_bus(hive, bus)
-    return bus
+    def apply(bus: dict) -> dict:
+        mutator(bus)
+        return bus
+    return _bus_io().mutate_bus(Path(hive), apply)
 
 
 def load_world(hive: Path) -> dict:
@@ -567,10 +590,10 @@ def _resolve_target(scope: str, target: str, world: dict) -> str:
     return "current"
 
 
-def _kill_tool_once(tool_id: str, killer) -> bool:
-    if tool_id in _KILLED:
+def _kill_tool_once(tool_id: str, killer, gen: int = 0) -> bool:
+    if (tool_id, gen) in _KILLED:
         return False
-    _KILLED.add(tool_id)
+    _KILLED.add((tool_id, gen))
     if killer is None:
         return False
     return bool(killer(tool_id))
@@ -628,7 +651,9 @@ def cancel_once(scope: str, target: str = "", *, hive: Path, killer=None) -> dic
             return _stop_watch_locked(hive, target)
         world = load_world(hive)
         resolved = _resolve_target(name, target, world)
-        key = (name, resolved)
+        # Concurrency audit 2026-10-16: keyed only by (scope, target), Stop worked once per process lifetime; a new
+        # turn is a new thing to stop.
+        key = (name, resolved, _bus_io().bus_gen(_read_bus(hive)))
         if key in _BOOK:
             return _already(_BOOK[key])
         cancel_id = _next_id()
@@ -650,19 +675,19 @@ def cancel_once(scope: str, target: str = "", *, hive: Path, killer=None) -> dic
             spoken = "Stopped speaking."
         elif name == "tool":
             if resolved == world["active_tool"]:
-                killed = _kill_tool_once(resolved, use_killer)
+                killed = _kill_tool_once(resolved, use_killer, key[2])
             spoken = "Stopped that tool."
         elif name == "job":
             _mark_job(hive, resolved)
             if world["tool_owner_job"] == resolved:
-                killed = _kill_tool_once(str(world["active_tool"]), use_killer)
+                killed = _kill_tool_once(str(world["active_tool"]), use_killer, key[2])
             spoken = "Stopped that job."
         else:
             owned = list(world["missions"].get(resolved, {}).get("jobs") or [])
             for job_id in owned:
                 _mark_job(hive, job_id)
             if world["tool_owner_job"] in owned:
-                killed = _kill_tool_once(str(world["active_tool"]), use_killer)
+                killed = _kill_tool_once(str(world["active_tool"]), use_killer, key[2])
             spoken = "Stopped that mission."
         jobs = {job_id: _job_status(hive, str(job_id), world) for job_id in world["jobs"]}
         receipt = {

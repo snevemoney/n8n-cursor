@@ -14,13 +14,68 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_PATH = ROOT / "logs" / "jarvis-turns.jsonl"
 _LOCK = threading.Lock()
+import sys as _sys
+_BOOT_ID = getattr(_sys, "_jarvis_boot_id", None) or os.urandom(6).hex()  # one per Face process (shared with pipeline)
+_sys._jarvis_boot_id = _BOOT_ID
+_REV: list = []
+
+
+def release_rev() -> str | None:
+    """The git short rev the running code came from (read once, no subprocess): which build produced this row."""
+    if not _REV:
+        rev = None
+        try:
+            git = ROOT / ".git"
+            if git.is_file():  # audit 10-16: a git worktree's .git is a file -> rev was always null
+                git = Path((git.read_text(encoding="utf-8").split(":", 1)[1]).strip())
+                if not git.is_absolute():
+                    git = (ROOT / git).resolve()
+            head = (git / "HEAD").read_text(encoding="utf-8").strip()
+            if head.startswith("ref: "):
+                ref = head[5:]
+                p = git / ref
+                if p.is_file():
+                    rev = p.read_text(encoding="utf-8").strip()
+                else:
+                    common = git / "commondir"  # worktree: refs live in the main .git
+                    base = (git / common.read_text(encoding="utf-8").strip()).resolve() if common.is_file() else git
+                    p = base / ref
+                    if p.is_file():
+                        rev = p.read_text(encoding="utf-8").strip()
+                    else:
+                        for line in (base / "packed-refs").read_text(encoding="utf-8").splitlines():
+                            if line.endswith(" " + ref):
+                                rev = line.split()[0]
+            else:
+                rev = head
+        except OSError:
+            rev = None
+        if not rev:
+            try:
+                import subprocess
+                rev = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True,
+                                     timeout=10).stdout.strip() or None
+            except (OSError, subprocess.SubprocessError):
+                rev = None
+        _REV.append(rev[:12] if rev else None)
+    return _REV[0]
 
 
 def log_path() -> Path | None:
     raw = (os.environ.get("JARVIS_TURN_LOG") or "").strip()
     if raw.lower() in {"0", "off", "false", "no"}:
         return None
-    return Path(raw).expanduser() if raw else DEFAULT_PATH
+    if raw:
+        return Path(raw).expanduser()
+    if _under_tests():  # tests never write Evens's real log; they get a per-process temp file
+        import tempfile
+        return Path(tempfile.gettempdir()) / f"jarvis-turns-test-{os.getpid()}.jsonl"
+    return DEFAULT_PATH
+
+
+def _under_tests() -> bool:
+    import sys
+    return "_pytest" in sys.modules or "unittest" in sys.modules
 
 
 _CHEAP_RE = __import__("re").compile(r"mini|flash|haiku|small|nano|lite|8b|7b|3b", __import__("re").I)
@@ -33,6 +88,9 @@ def cost_bucket(model: str | None) -> str:
     return "cheap" if _CHEAP_RE.search(str(model)) else "frontier"
 
 
+_SUMMARY_KEYS = {"executor", "dispatched", "advisory_only", "approval_pending", "task_verified", "outcome"}
+
+
 def build_row(*, started: float, ended: float, events: list[dict], talk: dict | None, inject: dict | None,
               first_ms: int | None = None) -> dict:
     tools: list[str] = []
@@ -41,6 +99,7 @@ def build_row(*, started: float, ended: float, events: list[dict], talk: dict | 
         if verb and verb not in tools and verb != "think":
             tools.append(verb)
     final = events[-1] if events else {}
+    meta = final.get("hand_loop_meta") if isinstance(final.get("hand_loop_meta"), dict) else {}
     talk = talk if isinstance(talk, dict) and float(talk.get("t") or 0) >= started else {}
     inject = inject if isinstance(inject, dict) and float(inject.get("t") or 0) >= started else {}
     return {
@@ -55,14 +114,34 @@ def build_row(*, started: float, ended: float, events: list[dict], talk: dict | 
         "tool_ms": next((int(ev["tool_ms"]) for ev in reversed(events) if isinstance(ev.get("tool_ms"), (int, float))), None),
         "est_tokens_in": talk.get("est_tokens_in"),
         "est_tokens_out": talk.get("est_tokens_out"),
+        # OpenRouter's own usage report for this turn (tokens + billed USD); None = not metered, never estimated.
+        "usage_tokens_in": (talk.get("usage") or {}).get("tokens_in"),
+        "usage_tokens_out": (talk.get("usage") or {}).get("tokens_out"),
+        "usage_cost_usd": (talk.get("usage") or {}).get("cost_usd"),
+        "usage_gen_id": (talk.get("usage") or {}).get("gen_id") or None,
         "injected_context": list(talk.get("injected") or inject.get("files") or []),
+        # Privacy audit 2026-10-16: names only. Vault note headings are note content, so they are not logged.
         "retrieved": [
-            {"file": str(r.get("file") or ""), "heading": str(r.get("heading") or "")[:120]}
+            {"file": str(r.get("file") or "")}
             for r in (talk.get("retrieved") or []) if isinstance(r, dict)
         ],
         "tools": tools,
+        # Mac review 2026-10-16: one row per hand the turn ran (name, ok, fixed failure code), not only the last verb.
+        "hands": [{"tool": str(st.get("tool") or ""), "ok": bool(st.get("ok")), "error_class": st.get("error_class")}
+                  for st in (meta.get("steps") or []) if isinstance(st, dict)][:12] or None,
+        "stop_reason": meta.get("stop_reason"),
+        "error_class": final.get("error_class"),
+        "task_verified": final.get("task_verified") if isinstance(final.get("task_verified"), bool) else None,
+        "boot_id": _BOOT_ID,
+        "rev": release_rev(),
         "verb": final.get("verb"),
         "ok": bool(final.get("ok", True)),
+        "task_verified": final.get("task_verified") is True,
+        # Executor name, booleans and outcome code only; any other key (or text) is dropped.
+        "execution_summary": {k: v for k, v in final["execution_summary"].items()
+                              if k in _SUMMARY_KEYS and (v is None or isinstance(v, (bool, int, str)))}
+                             if isinstance(final.get("execution_summary"), dict) else None,
+        "awaiting_approval": final.get("outcome") == "AWAITING_APPROVAL",
         "outcome": final.get("outcome"),
         "gen": final.get("gen"),
         "finish_reason": talk.get("finish_reason") or None,
@@ -75,14 +154,31 @@ def build_row(*, started: float, ended: float, events: list[dict], talk: dict | 
     }
 
 
+def _masked(line: str) -> str:
+    """Canvas sig_z99: a key he says or pastes never lands in the turn log (same scrubber as replies and receipts)."""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("turn_log_scrub", Path(__file__).with_name("document_context.py"))
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        out = mod.scrub_text(line)
+        return out[0] if isinstance(out, tuple) else out
+    except Exception:  # noqa: BLE001 - never write a row we could not mask
+        return json.dumps({"masking_failed": True})
+
+
 def append(row: dict, path: Path | None = None) -> Path | None:
     dest = path or log_path()
     if dest is None:
         return None
     try:
         dest.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            if dest.stat().st_size > 20 * 1024 * 1024:  # one previous file kept; no unbounded growth (audit 2026-10-16)
+                os.replace(dest, dest.with_name(dest.name + ".1"))
+        except OSError:
+            pass
         with _LOCK, dest.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+            fh.write(_masked(json.dumps(row, ensure_ascii=False, sort_keys=True)) + "\n")
     except OSError:
         return None
     return dest

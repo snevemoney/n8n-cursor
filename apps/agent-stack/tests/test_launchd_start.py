@@ -29,6 +29,8 @@ class LaunchdStartTest(unittest.TestCase):
         bad = []
         for pkg in PACKAGES:
             for path in (STACK / pkg).glob("*.py"):
+                if path.name.startswith("test_"):
+                    continue  # tests run under pytest from the stack root; launchd only loads runtime modules
                 tree = ast.parse(path.read_text(encoding="utf-8"))
                 # A package-style import with an `except ImportError` path-load fallback is launchd-safe.
                 guarded = {id(n) for t in ast.walk(tree) if isinstance(t, ast.Try)

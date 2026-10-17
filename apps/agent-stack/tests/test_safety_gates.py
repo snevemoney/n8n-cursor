@@ -126,7 +126,7 @@ class ConfirmGateTest(unittest.TestCase):
             ask = "Ask Jev whether the tunnel is healthy."
             first = P.run_tool({"tool": "desk_dispatch", "args": {}}, ask, hive=hive, retrieve_roots=None)
             self.assertTrue(first.get("awaiting_confirm"))
-            cards = hive / ".hive" / "bus" / "desk_cards"
+            cards = hive / "bus" / "desk_cards"  # 2026-10-16: cards live on the same hive bus the turn uses
             self.assertFalse(cards.exists() and any(cards.glob("*.json")))
             self.assertIsNone(P.confirm_take(hive, "what time is it"))  # any other turn drops it
             P.run_tool({"tool": "desk_dispatch", "args": {}}, ask, hive=hive, retrieve_roots=None)
@@ -158,7 +158,8 @@ class ConfirmGateTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             P.confirm_arm(Path(tmp), "screen_see", {}, "Describe my screen.")
             with mock.patch.object(P.time, "time", return_value=time.time() + P.CONFIRM_TTL_SEC + 5):
-                self.assertIsNone(P.confirm_take(Path(tmp), "yes"))
+                got = P.confirm_take(Path(tmp), "yes")  # expired: named back to the owner, never executed
+                self.assertTrue(got is None or (got["tool"] == "say" and "not executed" in got["speak"]))
 
 
 if __name__ == "__main__":

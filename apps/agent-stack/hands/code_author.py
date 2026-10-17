@@ -51,20 +51,29 @@ def wants_author(utterance: str) -> bool:
 
 def author(ask: str) -> dict:
     builder = BUILDER
-    text = CHAT(builder, "Write Python for this request. Reply with exactly two fenced python blocks: first the code, "
-                         "then a short test using plain assert statements. No prose, no I/O, no network.\nRequest: " + ask)
+    brief = ("Write Python for this request. Reply with exactly two fenced python blocks: first the code, "
+             "then a short test using plain assert statements. No prose, no I/O, no network.\nRequest: " + ask)
+    text = CHAT(builder, brief)
     blocks = _FENCE.findall(text or "")
+    if not blocks:  # one retry on the other family; the critic is re-picked from whoever built it
+        builder = critic_for(builder)
+        blocks = _FENCE.findall(CHAT(builder, brief) or "")
     if not blocks:
         return {"ok": False, "builder_model": builder,
                 "spoken": "I couldn't write that code just now (the builder model gave no code), so nothing ran."}
     code, test = blocks[0].strip(), (blocks[1].strip() if len(blocks) > 1 else "")
     critic = critic_for(builder)
-    verdict = CHAT(critic, "Review this Python and its test for bugs in two short sentences. Start with LGTM or ISSUE.\n\n"
-                           f"```python\n{code}\n```\n```python\n{test}\n```") or "critic unavailable"
+    import os as _os
+    import threading as _th
+    _box: dict = {}
+    _t = _th.Thread(target=lambda: _box.update(v=CHAT(critic, "Review this Python and its test for bugs in two short sentences. Start with LGTM or ISSUE.\n\n"
+                                                       f"```python\n{code}\n```\n```python\n{test}\n```")), daemon=True)
+    _t.start(); _t.join(float(_os.environ.get("JARVIS_CRITIC_SEC") or 15))  # the turn wall is 60 s; a slow critic must not sink it
+    verdict = _box.get("v") or ("critic did not finish in time; nothing runs until you confirm" if _t.is_alive() else "critic unavailable")
     verdict = " ".join(str(verdict).split())
     verdict = (re.match(r"(.{1,140}?[.!?])(\s|$)", verdict) or re.match(r"(.{1,140})", verdict)).group(1)
     name = (re.search(r"^\s*def\s+(\w+)", code, re.M) or re.search(r"(\w+)", code)).group(1)
-    spoken = (f"I wrote {name} with a test; nothing has run. Say \"confirm\" and I'll run it in the sandbox. "
+    spoken = (f"I wrote {name} with a test; nothing has run. Say \"confirm\" to run it in the sandbox. "
               f"A critic from a different model family reviewed it ({critic.split('/')[-1]}; builder {builder.split('/')[-1]}): {verdict}")
     return {"ok": True, "code": code, "test": test, "builder_model": builder, "critic_model": critic,
             "verdict": verdict, "spoken": spoken}

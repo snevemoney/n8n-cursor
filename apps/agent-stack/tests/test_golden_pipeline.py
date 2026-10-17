@@ -60,7 +60,8 @@ class GoldenPipelineTest(unittest.TestCase):
             self.assertLess(len(prompt), 2000)
             return {
                 "tool": "vault_read",
-                "args": {"query": "what Jarvis can do"},
+                # Vault search no longer matches on a single shared word (3f7250a41), so the model's query names what the note says.
+                "args": {"query": "Jarvis read vault Safari status"},
                 "speak": "From the store I can read the vault, look at Safari, ask the repo, or report status.",
             }
 
@@ -175,7 +176,7 @@ class GoldenPipelineTest(unittest.TestCase):
             _ = fake_send
         self.assertEqual(sent, [])
         self.assertEqual(out.get("verb"), "refuse_hard_step")
-        self.assertIn("Proposal only", out.get("spoken") or "")
+        self.assertIn("your OK first", out.get("spoken") or "")  # Evens 10-15: ask first, nothing ran
         self.assertNotIn("I will send it now", out.get("spoken") or "")
         self.assertFalse(out.get("ask"))
 
@@ -508,7 +509,7 @@ class GoldenPipelineTest(unittest.TestCase):
                 },
             )
         self.assertEqual(out.get("verb"), "refuse_hard_step")
-        self.assertIn("Proposal only", out.get("spoken") or "")
+        self.assertIn("your OK first", out.get("spoken") or "")  # Evens 10-15: ask first, nothing ran
         self.assertNotIn("I will publish it", out.get("spoken") or "")
 
     def test_14_xai_mouth_when_cursor_dark(self) -> None:

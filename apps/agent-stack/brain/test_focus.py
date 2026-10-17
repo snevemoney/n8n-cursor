@@ -95,6 +95,22 @@ class FocusSessionTest(unittest.TestCase):
         self.assertEqual(bus["focus"]["drifts"], 2)
         self.assertGreater(bus["focus"]["on_target_sec"], 0)
 
+    def test_assist_offers_help_only_in_enabled_apps_when_the_window_shows_trouble(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="focus-assist-") as tmp:
+            hive = self._hive(tmp)
+            PIPE.focus_arm(hive, minutes=30, front_fn=_front("Xcode"))
+            PIPE.mutate_bus(hive, lambda b: {**b, "watch": {"allow": ["Xcode"]}})
+            calm = PIPE.focus_tick(hive, front_fn=_front("Xcode", "Jarvis — main.swift"), now=None)
+            offer = PIPE.focus_tick(hive, front_fn=_front("Xcode", "Build Failed — 3 errors"))
+            again = PIPE.focus_tick(hive, front_fn=_front("Xcode", "Build Failed — 3 errors"))
+            PIPE.focus_arm(hive, minutes=30, front_fn=_front("Terminal"))
+            other = PIPE.focus_tick(hive, front_fn=_front("Terminal", "zsh — Traceback (most recent call last)"))
+        self.assertIsNone(calm)
+        self.assertIn("Build Failed", (offer or {}).get("callout") or "")
+        self.assertIn("Want me to take a look", (offer or {}).get("callout") or "")
+        self.assertIsNone(again)
+        self.assertIsNone(other)  # Terminal was never enabled for watching
+
     def test_relief_holds_the_callout_but_counts_the_drift(self) -> None:
         with tempfile.TemporaryDirectory(prefix="focus-relief-") as tmp:
             hive = self._hive(tmp)

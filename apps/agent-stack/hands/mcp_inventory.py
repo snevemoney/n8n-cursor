@@ -21,7 +21,7 @@ DEFAULT_PATHS = [
     ("codex", HOME / ".codex" / "config.toml"),
 ]
 NAME_OK = re.compile(r"^[\w.\- @/]{1,64}$")
-MAX_NAMES = 60
+MAX_NAMES = 200
 
 
 def _json_names(data) -> list[str]:

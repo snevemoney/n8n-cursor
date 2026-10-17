@@ -13,13 +13,16 @@ import re
 import threading
 import time
 from pathlib import Path
+_VAULT_ROOT = Path(os.environ.get("JARVIS_VAULT_DIR") or os.environ.get("JARVIS_VAULT") or next(
+    (p for p in (Path.home() / "Vaults/My_Billion_Dollar_Vault", Path.home() / "Documents/My_Billion_Dollar_Vault") if p.is_dir()),
+    Path.home() / "Vaults/My_Billion_Dollar_Vault")).expanduser()  # Evens 10-17: the vault lives in ~/Vaults now
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 HIVE = ROOT / "docs/hive/outer-heaven/.hive"
 REPO_OH = ROOT / "docs/hive/outer-heaven"
 # Public repo: no absolute user paths. JARVIS_VAULT_DIR overrides; HOME-relative default.
-DEFAULT_VAULT = Path(os.environ.get("JARVIS_VAULT_DIR") or (Path.home() / "Documents/My_Billion_Dollar_Vault")).expanduser()
+DEFAULT_VAULT = _VAULT_ROOT
 LANES = ROOT / "scripts/hive/business-lanes.json"
 
 ALLOW_REL = (
@@ -124,7 +127,7 @@ LEAK_RE = re.compile(
     r"watch later funnels|"
     r"catalog bump|"
     r"one-person-marketing|"
-    r"`[a-z0-9-]{8,}`|"
+    r"`(?!(?:gev|jev|gods-eye|artcraft)-|[a-z]+craft-cli)[a-z0-9-]{8,}`|"
     r"\[\[+|"
     r"\bno-skill\b|"
     r"\*\*source:\*\*|"
@@ -187,6 +190,9 @@ STOP = {
     "said",
     "ask",
     "asked",
+    # Request filler ("Jarvis, can you pull up my X"): matching on these returned unrelated notes.
+    "jarvis", "can", "could", "would", "will", "pull", "bring", "show", "find", "open", "get",
+    "up", "let", "see", "look", "sir", "hey",
 }
 TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9'-]{2,}|\d{1,4}", re.I)
 VAULT_SUMMARY_RE = re.compile(
@@ -567,6 +573,24 @@ def _file_score(path: Path, text: str, words: list[str], query: str) -> int:
             score += 80
         if path.name == "OPERATOR_MEMORY.md" or rel.replace("\\", "/").endswith("OPERATOR_MEMORY.md"):
             score -= 20
+    # Title/folder and phrase boosts (live: "pull up my social bios" lost to VAULT_MAP on the named-note bonus).
+    path_words = set(re.findall(r"[a-z0-9]+", path_blob))
+    head_words = set(re.findall(r"[a-z0-9]+", head_blob))
+    content_words = [w for w in words if len(w) >= 4]
+    path_hits = [w for w in content_words if w in path_words or w.rstrip("s") in path_words]
+    if content_words and len(path_hits) == len(content_words):
+        score += 40
+    elif len(path_hits) >= 2:
+        score += 20
+    for a_w, b_w in zip(words, words[1:]):
+        if re.search(rf"\b{re.escape(a_w)}[\s_-]+{re.escape(b_w)}", path_blob):
+            score += 30
+        elif re.search(rf"\b{re.escape(a_w)}[\s_-]+{re.escape(b_w)}", head_blob):
+            score += 20
+    covered = [w for w in content_words if _token_hit(w, blob)]
+    named_bonus = 28 if not path_hits and len(covered) * 2 >= len(content_words) else 0
+    if len(content_words) >= 2 and len(covered) < 2:
+        return min(score, 5)  # one shared word is not a match for a multi-word ask
     if rel in NAMED_NOTE_RELS or path.name in {
         "OPERATOR_MEMORY.md",
         "NORTH_STAR.md",
@@ -574,7 +598,7 @@ def _file_score(path: Path, text: str, words: list[str], query: str) -> int:
         "WEEKLY_SCOREBOARD.md",
         "VAULT_MAP.md",
     }:
-        score += 28
+        score += named_bonus
     stem = re.sub(r"[-_]", " ", path.stem.lower())
     score += sum(16 for part in stem.split() if len(part) >= 4 and part in words)
     if path.stem.lower() in words:

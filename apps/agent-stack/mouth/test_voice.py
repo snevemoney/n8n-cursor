@@ -24,6 +24,12 @@ def _load():
 
 
 MOD = _load()
+# tests never read Evens's own voice/personality settings (Evens 10-17: ~/.config/brain/voice.txt holds his pick)
+MOD.VOICE_FILE = Path(__file__).resolve().parent / "no-such-voice.txt"
+MOD._personality_voice = lambda: ""
+MOD.voicebox_up = lambda timeout=2.0: False   # tests never start or talk to Voicebox
+MOD.ensure_voicebox = lambda: False
+os.environ.pop("AGENT_STACK_KOKORO_VOICE", None)
 
 
 class VoiceTest(unittest.TestCase):
@@ -478,3 +484,49 @@ class VoiceTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class VoiceBlend(unittest.TestCase):  # Evens 10-17 chose blend_lewis50_michael50
+    def test_blend_spec_is_accepted_and_averaged(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("voice_blend_t", __file__.replace("test_voice.py", "voice.py"))
+        V = importlib.util.module_from_spec(spec); spec.loader.exec_module(V)
+        self.assertTrue(V.VOICE_SPEC.fullmatch("bm_lewis:50+am_michael:50")); self.assertFalse(V.VOICE_SPEC.fullmatch("rm -rf"))
+        class E:
+            def get_voice_style(self, n): return {"bm_lewis": 2.0, "am_michael": 4.0}[n]
+        self.assertEqual(V.voice_style(E(), "bm_lewis:50+am_michael:50"), 3.0)
+        self.assertEqual(V.voice_style(E(), "bm_lewis"), "bm_lewis")
+
+
+class SpokenCut(unittest.TestCase):  # live 10-17: essays were read aloud and cut mid-word at 400 chars
+    def test_long_text_is_spoken_in_whole_sentences_then_handed_to_the_board(self):
+        long = ("The first finding is clear. " * 30).strip()
+        out = MOD.spoken_cut(long)
+        self.assertTrue(out.endswith(" The rest is on the board."))
+        self.assertLess(len(out), 400)
+        self.assertTrue(out.replace(" The rest is on the board.", "").endswith("clear."))
+        self.assertEqual(MOD.spoken_cut("Short line."), "Short line.")
+        self.assertIn("The rest is on the board", MOD.speakable("word " * 200))
+
+
+class Performed(unittest.TestCase):  # Evens 10-17: v3-like lines through Voicebox/Chatterbox Turbo; Kokoro for the rest
+    def test_tags_mark_a_performed_line_and_are_stripped_for_kokoro(self):
+        self.assertTrue(MOD.performed("Good evening. [chuckle] It passed."))
+        self.assertFalse(MOD.performed("Good evening. It passed."))
+        self.assertEqual(MOD.strip_tags("Good evening. [chuckle] It passed. [sigh]"), "Good evening. It passed.")
+        self.assertEqual(MOD.speakable_keep_tags("**Good** evening. [clear throat] It passed."), "Good evening. [clear throat] It passed.")
+
+    def test_voicebox_down_falls_back_to_kokoro_without_tags(self):
+        seen = []
+        with unittest.mock.patch.object(MOD, "_voicebox_bytes", return_value=b""), \
+             unittest.mock.patch.object(MOD, "_elevenlabs_bytes", return_value=b""), \
+             unittest.mock.patch.object(MOD, "_kokoro_bytes", side_effect=lambda t: seen.append(t) or b"RIFF"), \
+             unittest.mock.patch.object(MOD, "dry", return_value=False):
+            audio, mime = MOD.tts_audio("Good evening. [chuckle] It passed.")
+        self.assertEqual((audio, mime), (b"RIFF", "audio/wav")); self.assertEqual(seen, ["Good evening. It passed."])
+
+    def test_voicebox_up_takes_the_performed_line(self):
+        with unittest.mock.patch.object(MOD, "_voicebox_bytes", return_value=b"RIFFvb") as vb, \
+             unittest.mock.patch.object(MOD, "dry", return_value=False):
+            audio, mime = MOD.tts_audio("Good evening. [chuckle] It passed.")
+        self.assertEqual((audio, mime), (b"RIFFvb", "audio/wav")); self.assertIn("[chuckle]", vb.call_args[0][0])

@@ -1,0 +1,4713 @@
+{
+ "source": "Jarvis System Matrix — Finished State (owner canvas)",
+ "counts": {
+  "lanes": 16,
+  "nodes": 365,
+  "links": 629
+ },
+ "lanes": [
+  {
+   "id": "in",
+   "title": "Inputs",
+   "nodes": [
+    {
+     "id": "typed",
+     "label": "Typed Orb text"
+    },
+    {
+     "id": "mic",
+     "label": "Mic → speech-to-text"
+    },
+    {
+     "id": "wake",
+     "label": "Wake word “hey jarvis”"
+    },
+    {
+     "id": "watch",
+     "label": "Watch screen frames"
+    },
+    {
+     "id": "drop",
+     "label": "File / image drop"
+    },
+    {
+     "id": "sched",
+     "label": "Scheduled loops"
+    },
+    {
+     "id": "brief",
+     "label": "Proactive briefings"
+    },
+    {
+     "id": "phone",
+     "label": "Phone calls"
+    },
+    {
+     "id": "telegram",
+     "label": "Telegram text + voice"
+    },
+    {
+     "id": "glasses",
+     "label": "Glasses / AR input"
+    },
+    {
+     "id": "sig_z04",
+     "label": "Z04 · Share ends sight"
+    },
+    {
+     "id": "sig_z06",
+     "label": "Z06 · Hotline PIN"
+    },
+    {
+     "id": "sig_z07",
+     "label": "Z07 · Outbound calls"
+    },
+    {
+     "id": "sig_z08",
+     "label": "Z08 · Telegram voice"
+    },
+    {
+     "id": "sig_z09",
+     "label": "Z09 · Meeting prep"
+    },
+    {
+     "id": "sig_z19",
+     "label": "Z19 · Realtime duplex"
+    },
+    {
+     "id": "sig_z20",
+     "label": "Z20 · Morning brief"
+    },
+    {
+     "id": "sig_z21",
+     "label": "Z21 · Away mode"
+    },
+    {
+     "id": "sig_z31",
+     "label": "Z31 · Hands-free ear"
+    },
+    {
+     "id": "sig_z40",
+     "label": "Z40 · Two-phase call"
+    },
+    {
+     "id": "sig_z42",
+     "label": "Z42 · Approval by call"
+    },
+    {
+     "id": "sig_z55",
+     "label": "Z55 · Sense switches"
+    },
+    {
+     "id": "sig_z62",
+     "label": "Z62 · Briefing sanity"
+    },
+    {
+     "id": "sig_z64",
+     "label": "Z64 · Mode truth"
+    },
+    {
+     "id": "sig_z86",
+     "label": "Z86 · Automation spec"
+    },
+    {
+     "id": "sig_z108",
+     "label": "Z108 · Wake/sleep state"
+    },
+    {
+     "id": "sig_z113",
+     "label": "Z113 · Phone-stack claim"
+    },
+    {
+     "id": "sig_x06",
+     "label": "X06 · Local wake"
+    },
+    {
+     "id": "sig_x10",
+     "label": "X10 · Voice HUD states"
+    },
+    {
+     "id": "sig_x26",
+     "label": "X26 · SMS + reports"
+    },
+    {
+     "id": "sig_x35",
+     "label": "X35 · Ambient Omi"
+    },
+    {
+     "id": "sig_x36",
+     "label": "X36 · Brief + automate"
+    },
+    {
+     "id": "sig_n02",
+     "label": "N02 · Wake + local LLM"
+    }
+   ]
+  },
+  {
+   "id": "face",
+   "title": "Face · Orb :4018",
+   "nodes": [
+    {
+     "id": "serve",
+     "label": "Face server :4018"
+    },
+    {
+     "id": "sse",
+     "label": "Reply stream (SSE)"
+    },
+    {
+     "id": "orb",
+     "label": "Orb app (native)"
+    },
+    {
+     "id": "pane",
+     "label": "Result cards"
+    },
+    {
+     "id": "stop",
+     "label": "Stop / barge-in"
+    },
+    {
+     "id": "tts",
+     "label": "Voice out"
+    },
+    {
+     "id": "eyes",
+     "label": "Eyes (camera)"
+    },
+    {
+     "id": "jobtruth",
+     "label": "Truthful job status"
+    },
+    {
+     "id": "historyscroll",
+     "label": "History + scroll"
+    },
+    {
+     "id": "eventreplay",
+     "label": "Reconnect event replay"
+    },
+    {
+     "id": "sig_z03",
+     "label": "Z03 · Barge-in + sight"
+    },
+    {
+     "id": "sig_z13",
+     "label": "Z13 · Voice + skin"
+    },
+    {
+     "id": "sig_z18",
+     "label": "Z18 · Webcam eyes"
+    },
+    {
+     "id": "sig_z53",
+     "label": "Z53 · One filler"
+    },
+    {
+     "id": "sig_z61",
+     "label": "Z61 · TTS cleanup"
+    },
+    {
+     "id": "sig_z69",
+     "label": "Z69 · Drop stale speech"
+    },
+    {
+     "id": "sig_z74",
+     "label": "Z74 · Show-first card"
+    },
+    {
+     "id": "sig_z75",
+     "label": "Z75 · Hush behavior"
+    },
+    {
+     "id": "sig_z81",
+     "label": "Z81 · Slow-tool status"
+    },
+    {
+     "id": "sig_z97",
+     "label": "Z97 · Score dashboard"
+    },
+    {
+     "id": "sig_z102",
+     "label": "Z102 · Stage board"
+    },
+    {
+     "id": "sig_x07",
+     "label": "X07 · Voice parameters"
+    },
+    {
+     "id": "sig_x20",
+     "label": "X20 · Desk camera"
+    },
+    {
+     "id": "sig_n01",
+     "label": "N01 · Offline voice"
+    }
+   ]
+  },
+  {
+   "id": "hud",
+   "title": "Orb HUD + senses",
+   "nodes": [
+    {
+     "id": "graph3d",
+     "label": "3D vault graph"
+    },
+    {
+     "id": "particles",
+     "label": "Particle orb motion"
+    },
+    {
+     "id": "pointer",
+     "label": "Red arrow · blue cursor"
+    },
+    {
+     "id": "takeover",
+     "label": "Takeover / handback"
+    },
+    {
+     "id": "chips",
+     "label": "Suggestion chips"
+    },
+    {
+     "id": "gatehud",
+     "label": "Live routing bars"
+    },
+    {
+     "id": "receiptcard",
+     "label": "Tool receipt footer"
+    },
+    {
+     "id": "driving",
+     "label": "Driving badge + hands-off"
+    },
+    {
+     "id": "cursorbinding",
+     "label": "Cursor ↔ action link"
+    },
+    {
+     "id": "sig_z01",
+     "label": "Z01 · Narrated takeover"
+    },
+    {
+     "id": "sig_z02",
+     "label": "Z02 · Pointer pill"
+    },
+    {
+     "id": "sig_z23",
+     "label": "Z23 · Graph browsing"
+    },
+    {
+     "id": "sig_z28",
+     "label": "Z28 · Tool-run card"
+    },
+    {
+     "id": "sig_z29",
+     "label": "Z29 · Driving badge"
+    },
+    {
+     "id": "sig_z39",
+     "label": "Z39 · Graph path trace"
+    },
+    {
+     "id": "sig_z43",
+     "label": "Z43 · Graph controls"
+    },
+    {
+     "id": "sig_z44",
+     "label": "Z44 · Provenance footer"
+    },
+    {
+     "id": "sig_z46",
+     "label": "Z46 · Suggestion chips"
+    },
+    {
+     "id": "sig_z49",
+     "label": "Z49 · Live gate HUD"
+    },
+    {
+     "id": "sig_z70",
+     "label": "Z70 · Voice graph focus"
+    },
+    {
+     "id": "sig_x40",
+     "label": "X40 · Graph reasoning"
+    }
+   ]
+  },
+  {
+   "id": "brain",
+   "title": "Brain · turn",
+   "nodes": [
+    {
+     "id": "pipe",
+     "label": "Router (pipeline.py)"
+    },
+    {
+     "id": "jev",
+     "label": "Jev advisory router"
+    },
+    {
+     "id": "fabric",
+     "label": "Decision Fabric (shadow)"
+    },
+    {
+     "id": "reflex",
+     "label": "Phrase routes (reflex5)"
+    },
+    {
+     "id": "loop",
+     "label": "Multi-step tool loop"
+    },
+    {
+     "id": "guard",
+     "label": "Invented-path guard"
+    },
+    {
+     "id": "persona",
+     "label": "Persona + reply"
+    },
+    {
+     "id": "model",
+     "label": "Talk model (locked)"
+    },
+    {
+     "id": "saylor",
+     "label": "164 Saylor courses"
+    },
+    {
+     "id": "shared",
+     "label": "Shared context read"
+    },
+    {
+     "id": "dials",
+     "label": "Personality dials"
+    },
+    {
+     "id": "lapse",
+     "label": "Lapsed-question follow-up"
+    },
+    {
+     "id": "dupguard",
+     "label": "Duplicate-action guard"
+    },
+    {
+     "id": "honesty",
+     "label": "Promise + cost guards"
+    },
+    {
+     "id": "toolcontract",
+     "label": "Typed tool contracts"
+    },
+    {
+     "id": "methodchoice",
+     "label": "CLI / API / GUI choice"
+    },
+    {
+     "id": "skillrun",
+     "label": "Native skill execution"
+    },
+    {
+     "id": "providerrecovery",
+     "label": "Provider retry handling"
+    },
+    {
+     "id": "repomap",
+     "label": "Semantic repo map"
+    },
+    {
+     "id": "pluginregistry",
+     "label": "Action/plugin registry"
+    },
+    {
+     "id": "sig_z12",
+     "label": "Z12 · Five decisions"
+    },
+    {
+     "id": "sig_z14",
+     "label": "Z14 · Metered cost"
+    },
+    {
+     "id": "sig_z25",
+     "label": "Z25 · Date + fetch cap"
+    },
+    {
+     "id": "sig_z26",
+     "label": "Z26 · Persona dials"
+    },
+    {
+     "id": "sig_z34",
+     "label": "Z34 · Follow-up offer"
+    },
+    {
+     "id": "sig_z35",
+     "label": "Z35 · Empty paid tank"
+    },
+    {
+     "id": "sig_z36",
+     "label": "Z36 · Cost by feature"
+    },
+    {
+     "id": "sig_z41",
+     "label": "Z41 · Data dependencies"
+    },
+    {
+     "id": "sig_z45",
+     "label": "Z45 · Same-language work"
+    },
+    {
+     "id": "sig_z47",
+     "label": "Z47 · Persona scope"
+    },
+    {
+     "id": "sig_z51",
+     "label": "Z51 · Duplicate check"
+    },
+    {
+     "id": "sig_z52",
+     "label": "Z52 · One missing slot"
+    },
+    {
+     "id": "sig_z56",
+     "label": "Z56 · Lapsed question"
+    },
+    {
+     "id": "sig_z59",
+     "label": "Z59 · Ping etiquette"
+    },
+    {
+     "id": "sig_z66",
+     "label": "Z66 · Review → do"
+    },
+    {
+     "id": "sig_z67",
+     "label": "Z67 · No invented stats"
+    },
+    {
+     "id": "sig_z72",
+     "label": "Z72 · Facts + one quip"
+    },
+    {
+     "id": "sig_z51_batch6",
+     "label": "Z51/B6 · Gate-only act"
+    },
+    {
+     "id": "sig_z98",
+     "label": "Z98 · Cost before click"
+    },
+    {
+     "id": "sig_z107",
+     "label": "Z107 · Optional modules"
+    },
+    {
+     "id": "sig_z109",
+     "label": "Z109 · Stage providers"
+    },
+    {
+     "id": "sig_z110",
+     "label": "Z110 · Plugin catalog"
+    },
+    {
+     "id": "sig_z112",
+     "label": "Z112 · Routine routing"
+    },
+    {
+     "id": "sig_z114",
+     "label": "Z114 · Closed decisions"
+    },
+    {
+     "id": "sig_z115",
+     "label": "Z115 · Local intent"
+    },
+    {
+     "id": "sig_x08",
+     "label": "X08 · Prepaid ceiling"
+    },
+    {
+     "id": "sig_x09",
+     "label": "X09 · Operator persona"
+    }
+   ]
+  },
+  {
+   "id": "jobs",
+   "title": "Brain · jobs",
+   "nodes": [
+    {
+     "id": "mission",
+     "label": "Mission controller"
+    },
+    {
+     "id": "oldctrl",
+     "label": "Oct 12 controller (unused)"
+    },
+    {
+     "id": "resume",
+     "label": "Checkpoint + resume"
+    },
+    {
+     "id": "perms",
+     "label": "Owner approvals"
+    },
+    {
+     "id": "graph",
+     "label": "Persistent task graph"
+    },
+    {
+     "id": "conc",
+     "label": "Background concurrency"
+    },
+    {
+     "id": "heal",
+     "label": "Self-healing loop"
+    },
+    {
+     "id": "longowner",
+     "label": "Long-running task owner"
+    },
+    {
+     "id": "steering",
+     "label": "Mid-task steering"
+    },
+    {
+     "id": "effectretry",
+     "label": "Effect-aware retries"
+    },
+    {
+     "id": "scopedauthority",
+     "label": "Task / standing grants"
+    },
+    {
+     "id": "recoveryhost",
+     "label": "Protected recovery host"
+    },
+    {
+     "id": "sig_z27",
+     "label": "Z27 · Update cadence"
+    },
+    {
+     "id": "sig_z57",
+     "label": "Z57 · Slot readback"
+    },
+    {
+     "id": "sig_z60",
+     "label": "Z60 · Approval record"
+    },
+    {
+     "id": "sig_z79",
+     "label": "Z79 · MCP scopes"
+    },
+    {
+     "id": "sig_z88",
+     "label": "Z88 · Off-Mac routine"
+    },
+    {
+     "id": "sig_z96",
+     "label": "Z96 · Scope upfront"
+    },
+    {
+     "id": "sig_z57b",
+     "label": "Z57b · Readback confidence"
+    },
+    {
+     "id": "sig_x03",
+     "label": "X03 · Interview → file"
+    },
+    {
+     "id": "sig_x24",
+     "label": "X24 · Own compute box"
+    },
+    {
+     "id": "sig_x28",
+     "label": "X28 · Per-task modes"
+    },
+    {
+     "id": "sig_x39",
+     "label": "X39 · Project resume"
+    },
+    {
+     "id": "sig_c01",
+     "label": "C01 · Voice task board"
+    }
+   ]
+  },
+  {
+   "id": "mac",
+   "title": "Hands · Mac + files",
+   "nodes": [
+    {
+     "id": "wsr",
+     "label": "Read files + folders"
+    },
+    {
+     "id": "macread",
+     "label": "Finder / Preview"
+    },
+    {
+     "id": "see",
+     "label": "Screen + vision"
+    },
+    {
+     "id": "act",
+     "label": "Clicks + keys"
+    },
+    {
+     "id": "win",
+     "label": "Mac apps + displays"
+    },
+    {
+     "id": "term",
+     "label": "Shell + terminal"
+    },
+    {
+     "id": "bg",
+     "label": "Background desktop"
+    },
+    {
+     "id": "grokdesk",
+     "label": "Drive Grok Bot desktop"
+    },
+    {
+     "id": "nativewrite",
+     "label": "Native write + patch"
+    },
+    {
+     "id": "axcontrol",
+     "label": "Accessibility targeting"
+    },
+    {
+     "id": "observations",
+     "label": "Observation IDs + expiry"
+    },
+    {
+     "id": "guigestures",
+     "label": "Scroll + drag coverage"
+    },
+    {
+     "id": "inputlease",
+     "label": "Foreground input lease"
+    },
+    {
+     "id": "devnative",
+     "label": "Dev / prod native parity"
+    },
+    {
+     "id": "appworkflow",
+     "label": "Installed-app workflows"
+    },
+    {
+     "id": "appfocus",
+     "label": "App-scoped focus assist"
+    },
+    {
+     "id": "sig_z05",
+     "label": "Z05 · Takeover speed"
+    },
+    {
+     "id": "sig_z15",
+     "label": "Z15 · Read + translate"
+    },
+    {
+     "id": "sig_z16",
+     "label": "Z16 · Holo-hands"
+    },
+    {
+     "id": "sig_z17",
+     "label": "Z17 · Focus lock"
+    },
+    {
+     "id": "sig_z54",
+     "label": "Z54 · No-source sight"
+    },
+    {
+     "id": "sig_z73",
+     "label": "Z73 · Gesture grammar"
+    },
+    {
+     "id": "sig_x19",
+     "label": "X19 · Hand-pinned HUD"
+    },
+    {
+     "id": "sig_x21",
+     "label": "X21 · See then compare"
+    },
+    {
+     "id": "sig_x44",
+     "label": "X44 · Outside-vault drafts"
+    },
+    {
+     "id": "sig_c03",
+     "label": "C03 · Live app edit"
+    }
+   ]
+  },
+  {
+   "id": "research",
+   "title": "Hands · Research",
+   "nodes": [
+    {
+     "id": "web",
+     "label": "Web search"
+    },
+    {
+     "id": "saved",
+     "label": "Saved-video research"
+    },
+    {
+     "id": "corpus",
+     "label": "2,681-source corpus"
+    },
+    {
+     "id": "methods",
+     "label": "Method catalog"
+    },
+    {
+     "id": "zubair",
+     "label": "Zubair full-watch"
+    },
+    {
+     "id": "nate",
+     "label": "Nate Herk tapes"
+    },
+    {
+     "id": "xbook",
+     "label": "X bookmarks"
+    },
+    {
+     "id": "origin",
+     "label": "Primary-source check"
+    },
+    {
+     "id": "yt",
+     "label": "yt-dlp lookup"
+    },
+    {
+     "id": "harnessstudy",
+     "label": "Public harness study"
+    },
+    {
+     "id": "markstudy",
+     "label": "Mark-LV parity study"
+    },
+    {
+     "id": "markadoption",
+     "label": "Mark-LV capability port"
+    },
+    {
+     "id": "signaltoskill",
+     "label": "Signal → tested skill"
+    },
+    {
+     "id": "sig_z63",
+     "label": "Z63 · Premise check"
+    },
+    {
+     "id": "sig_z68",
+     "label": "Z68 · Researched critique"
+    },
+    {
+     "id": "sig_x16",
+     "label": "X16 · Source quality"
+    },
+    {
+     "id": "sig_x22",
+     "label": "X22 · Intake + dedupe"
+    },
+    {
+     "id": "sig_x37",
+     "label": "X37 · News → ideas"
+    },
+    {
+     "id": "sig_m_stt",
+     "label": "M-STT · Gap audit v1"
+    },
+    {
+     "id": "sig_m_stt2",
+     "label": "M-STT2 · Chunk + retry v2"
+    },
+    {
+     "id": "sig_c06",
+     "label": "C06 · Unproven iPad claim"
+    },
+    {
+     "id": "sig_coverage_scope",
+     "label": "CORPUS · Coverage gap"
+    },
+    {
+     "id": "sig_unrecovered_methods",
+     "label": "PENDING · Lost IDs"
+    },
+    {
+     "id": "sig_source_transfer",
+     "label": "SOURCE · Transfer gap"
+    }
+   ]
+  },
+  {
+   "id": "browser",
+   "title": "Hands · Browser",
+   "nodes": [
+    {
+     "id": "safari",
+     "label": "Browser missions"
+    },
+    {
+     "id": "pw",
+     "label": "Full browser automation"
+    },
+    {
+     "id": "authbrowser",
+     "label": "Owner browser sessions"
+    },
+    {
+     "id": "dombridge",
+     "label": "DOM / CDP bridge"
+    },
+    {
+     "id": "checkeddownload",
+     "label": "Verified file download"
+    },
+    {
+     "id": "webhelpers",
+     "label": "Reusable web helpers"
+    }
+   ]
+  },
+  {
+   "id": "coding",
+   "title": "Hands · Coding",
+   "nodes": [
+    {
+     "id": "ws",
+     "label": "Frozen job workspace"
+    },
+    {
+     "id": "worker",
+     "label": "Coding worker"
+    },
+    {
+     "id": "author",
+     "label": "Code writing"
+    },
+    {
+     "id": "run",
+     "label": "Tests (sandbox)"
+    },
+    {
+     "id": "git",
+     "label": "Commit on own branch"
+    },
+    {
+     "id": "push",
+     "label": "Push + PR"
+    },
+    {
+     "id": "ci",
+     "label": "CI checks"
+    },
+    {
+     "id": "clis",
+     "label": "Drive Cursor / Claude / Codex"
+    },
+    {
+     "id": "install",
+     "label": "Install + learn tools"
+    },
+    {
+     "id": "processhandles",
+     "label": "Managed process handles"
+    },
+    {
+     "id": "outputchannels",
+     "label": "Full stdout + stderr"
+    },
+    {
+     "id": "dirtyoverlay",
+     "label": "Approved dirty overlays"
+    },
+    {
+     "id": "rollback",
+     "label": "Candidate rollback"
+    },
+    {
+     "id": "modellockcheck",
+     "label": "Model-config integrity"
+    },
+    {
+     "id": "startupcheck",
+     "label": "Startup diagnostics"
+    },
+    {
+     "id": "sig_z100",
+     "label": "Z100 · Setup prompt"
+    },
+    {
+     "id": "sig_z106",
+     "label": "Z106 · Setup wizard"
+    },
+    {
+     "id": "sig_z116",
+     "label": "Z116 · Chores → PR"
+    },
+    {
+     "id": "sig_x18",
+     "label": "X18 · Project folders"
+    },
+    {
+     "id": "sig_x25",
+     "label": "X25 · Personal-data apps"
+    }
+   ]
+  },
+  {
+   "id": "conn",
+   "title": "Hands · Connectors",
+   "nodes": [
+    {
+     "id": "inv",
+     "label": "MCP inventory"
+    },
+    {
+     "id": "call",
+     "label": "MCP tools + calls"
+    },
+    {
+     "id": "note",
+     "label": "Headless Obsidian note"
+    },
+    {
+     "id": "obs",
+     "label": "Obsidian via MCP_DOCKER"
+    },
+    {
+     "id": "n8n",
+     "label": "n8n MCP"
+    },
+    {
+     "id": "host",
+     "label": "Hostinger MCP"
+    },
+    {
+     "id": "gws",
+     "label": "Gmail / Calendar"
+    },
+    {
+     "id": "mcpschemas",
+     "label": "MCP schemas + call IDs"
+    },
+    {
+     "id": "mcpreconnect",
+     "label": "MCP reconnect + auth"
+    },
+    {
+     "id": "credentialhandles",
+     "label": "Credential handles"
+    },
+    {
+     "id": "sig_z22",
+     "label": "Z22 · MCP connection"
+    },
+    {
+     "id": "sig_z33",
+     "label": "Z33 · Draft-only mail"
+    },
+    {
+     "id": "sig_z37",
+     "label": "Z37 · Tool armory"
+    },
+    {
+     "id": "sig_z77",
+     "label": "Z77 · Connect → online"
+    },
+    {
+     "id": "sig_z78",
+     "label": "Z78 · Custom MCP"
+    },
+    {
+     "id": "sig_z84",
+     "label": "Z84 · Tool-gap truth"
+    },
+    {
+     "id": "sig_z89",
+     "label": "Z89 · Row enrichment"
+    },
+    {
+     "id": "sig_z91",
+     "label": "Z91 · Column schema"
+    },
+    {
+     "id": "sig_z93",
+     "label": "Z93 · Tool preflight"
+    },
+    {
+     "id": "sig_z52_batch6",
+     "label": "Z52/B6 · Gate as MCP"
+    },
+    {
+     "id": "sig_z99",
+     "label": "Z99 · Private key setup"
+    },
+    {
+     "id": "sig_z103",
+     "label": "Z103 · Comment → DM"
+    },
+    {
+     "id": "sig_z117",
+     "label": "Z117 · Usage sign-in"
+    },
+    {
+     "id": "sig_x43",
+     "label": "X43 · Schedule judgment"
+    }
+   ]
+  },
+  {
+   "id": "creative",
+   "title": "Hands · Creative",
+   "nodes": [
+    {
+     "id": "craft",
+     "label": "ArtCraft bridge"
+    },
+    {
+     "id": "apps",
+     "label": "12 ArtCraft workflows"
+    },
+    {
+     "id": "demo",
+     "label": "Professional demo"
+    },
+    {
+     "id": "queue",
+     "label": "Creative queue"
+    },
+    {
+     "id": "gates",
+     "label": "Brand + audio gates"
+    },
+    {
+     "id": "remotion",
+     "label": "Remotion / HyperFrames"
+    },
+    {
+     "id": "wealthvid",
+     "label": "Wealth daily video"
+    },
+    {
+     "id": "artifactchain",
+     "label": "Editable artifact chain"
+    },
+    {
+     "id": "multimodalreview",
+     "label": "Visual/audio inspection"
+    },
+    {
+     "id": "sig_z30",
+     "label": "Z30 · Screen critique"
+    },
+    {
+     "id": "sig_z65",
+     "label": "Z65 · Critique rubric"
+    },
+    {
+     "id": "sig_z92",
+     "label": "Z92 · Concrete critique"
+    },
+    {
+     "id": "sig_z94",
+     "label": "Z94 · Scroll-video asset"
+    },
+    {
+     "id": "sig_z101",
+     "label": "Z101 · Approve/edit/redo"
+    },
+    {
+     "id": "sig_z104",
+     "label": "Z104 · Character form"
+    },
+    {
+     "id": "sig_z105",
+     "label": "Z105 · Minimal edit"
+    },
+    {
+     "id": "sig_c04",
+     "label": "C04 · Product-UI hero"
+    },
+    {
+     "id": "sig_c05",
+     "label": "C05 · Chat video FX"
+    }
+   ]
+  },
+  {
+   "id": "agents",
+   "title": "Multi-agent",
+   "nodes": [
+    {
+     "id": "desk",
+     "label": "Desk job cards"
+    },
+    {
+     "id": "unreach",
+     "label": "17-desk card coverage"
+    },
+    {
+     "id": "deleg",
+     "label": "Real worker delegation"
+    },
+    {
+     "id": "plat",
+     "label": "Platform hand-off"
+    },
+    {
+     "id": "native17",
+     "label": "17 native specialisms"
+    },
+    {
+     "id": "minimaldelegation",
+     "label": "Direct work by default"
+    },
+    {
+     "id": "sig_z24",
+     "label": "Z24 · Optional specialists"
+    },
+    {
+     "id": "sig_z95",
+     "label": "Z95 · Specialist synthesis"
+    },
+    {
+     "id": "sig_x27",
+     "label": "X27 · Agent office UI"
+    },
+    {
+     "id": "sig_x30",
+     "label": "X30 · Parallel specialists"
+    }
+   ]
+  },
+  {
+   "id": "memory",
+   "title": "Memory",
+   "nodes": [
+    {
+     "id": "rem",
+     "label": "Remember / forget"
+    },
+    {
+     "id": "ret",
+     "label": "Retrieval + doc context"
+    },
+    {
+     "id": "vaultread",
+     "label": "Obsidian second brain"
+    },
+    {
+     "id": "chats",
+     "label": "All-platform chats"
+    },
+    {
+     "id": "inbox",
+     "label": "JARVIS-INBOX notes"
+    },
+    {
+     "id": "scars",
+     "label": "Lessons (scars)"
+    },
+    {
+     "id": "rcpt",
+     "label": "Receipts log"
+    },
+    {
+     "id": "toolhistory",
+     "label": "Structured tool history"
+    },
+    {
+     "id": "compact",
+     "label": "Task context compaction"
+    },
+    {
+     "id": "procedures",
+     "label": "Verified learned skills"
+    },
+    {
+     "id": "memoryauthority",
+     "label": "Scoped memory authority"
+    },
+    {
+     "id": "provenancememory",
+     "label": "Source-linked memory"
+    },
+    {
+     "id": "sig_z10",
+     "label": "Z10 · Lookup chain"
+    },
+    {
+     "id": "sig_z11",
+     "label": "Z11 · Result writeback"
+    },
+    {
+     "id": "sig_z32",
+     "label": "Z32 · Entity + format"
+    },
+    {
+     "id": "sig_z38",
+     "label": "Z38 · Inbox capture"
+    },
+    {
+     "id": "sig_z48",
+     "label": "Z48 · Pattern recall"
+    },
+    {
+     "id": "sig_z58",
+     "label": "Z58 · Work recap"
+    },
+    {
+     "id": "sig_z71",
+     "label": "Z71 · Value precedence"
+    },
+    {
+     "id": "sig_z76",
+     "label": "Z76 · Entity ack"
+    },
+    {
+     "id": "sig_z82",
+     "label": "Z82 · Find-confirm-fetch"
+    },
+    {
+     "id": "sig_z83",
+     "label": "Z83 · State grounding"
+    },
+    {
+     "id": "sig_z90",
+     "label": "Z90 · Match then enrich"
+    },
+    {
+     "id": "sig_z111",
+     "label": "Z111 · Stable prefix"
+    },
+    {
+     "id": "sig_x04",
+     "label": "X04 · Routing readback"
+    },
+    {
+     "id": "sig_x11",
+     "label": "X11 · Compile at ingest"
+    },
+    {
+     "id": "sig_x12",
+     "label": "X12 · Weekly wiki lint"
+    },
+    {
+     "id": "sig_x13",
+     "label": "X13 · Daily compilation"
+    },
+    {
+     "id": "sig_x14",
+     "label": "X14 · Topic per file"
+    },
+    {
+     "id": "sig_x15",
+     "label": "X15 · Answer → wiki"
+    },
+    {
+     "id": "sig_x17",
+     "label": "X17 · Vault CLI search"
+    },
+    {
+     "id": "sig_x29",
+     "label": "X29 · Project brain"
+    },
+    {
+     "id": "sig_x32",
+     "label": "X32 · Memory bootstrap"
+    },
+    {
+     "id": "sig_x33",
+     "label": "X33 · Daily summary"
+    },
+    {
+     "id": "sig_x34",
+     "label": "X34 · PARA + metadata"
+    },
+    {
+     "id": "sig_x38",
+     "label": "X38 · Vault hygiene"
+    },
+    {
+     "id": "sig_x41",
+     "label": "X41 · Vault commands"
+    },
+    {
+     "id": "sig_x42",
+     "label": "X42 · Intent vs action"
+    },
+    {
+     "id": "sig_x45",
+     "label": "X45 · Self-extend tools"
+    },
+    {
+     "id": "sig_x46",
+     "label": "X46 · Graduate ideas"
+    }
+   ]
+  },
+  {
+   "id": "out",
+   "title": "Outputs",
+   "nodes": [
+    {
+     "id": "reply",
+     "label": "Spoken Orb reply"
+    },
+    {
+     "id": "vrec",
+     "label": "Verified result receipt"
+    },
+    {
+     "id": "ocommit",
+     "label": "Feature commit"
+    },
+    {
+     "id": "oart",
+     "label": "Jarvis demo delivery"
+    },
+    {
+     "id": "onote",
+     "label": "Jarvis note delivery"
+    },
+    {
+     "id": "opr",
+     "label": "Jarvis-opened PR"
+    },
+    {
+     "id": "opres",
+     "label": "Finished results in Orb"
+    },
+    {
+     "id": "delbundle",
+     "label": "Deliverable + evidence"
+    },
+    {
+     "id": "sig_c02",
+     "label": "C02 · Measured check"
+    }
+   ]
+  },
+  {
+   "id": "ext",
+   "title": "Platforms + shared memory (cross-share)",
+   "nodes": [
+    {
+     "id": "codex",
+     "label": "Codex"
+    },
+    {
+     "id": "claude",
+     "label": "Claude Code"
+    },
+    {
+     "id": "cursor",
+     "label": "Cursor"
+    },
+    {
+     "id": "chatgpt",
+     "label": "ChatGPT"
+    },
+    {
+     "id": "grok",
+     "label": "17 Grok desks"
+    },
+    {
+     "id": "box",
+     "label": "Grok box"
+    },
+    {
+     "id": "onebrain",
+     "label": "ONE-BRAIN tiny-active"
+    },
+    {
+     "id": "vault",
+     "label": "Obsidian vault"
+    },
+    {
+     "id": "github",
+     "label": "GitHub n8n-cursor"
+    },
+    {
+     "id": "worktrees",
+     "label": "Jarvis code copies"
+    },
+    {
+     "id": "icloud",
+     "label": "iCloud Drive"
+    },
+    {
+     "id": "studio",
+     "label": "ArtCraft Studio"
+    },
+    {
+     "id": "slack",
+     "label": "Slack #hive"
+    },
+    {
+     "id": "vps",
+     "label": "VPS + n8n"
+    },
+    {
+     "id": "sig_x31",
+     "label": "X31 · Shared vault"
+    }
+   ]
+  },
+  {
+   "id": "verify",
+   "title": "Verification, acceptance + risks",
+   "nodes": [
+    {
+     "id": "wd",
+     "label": "Watchdog desk"
+    },
+    {
+     "id": "sc",
+     "label": "Stream C (stand-in)"
+    },
+    {
+     "id": "gate",
+     "label": "Face delivery gate"
+    },
+    {
+     "id": "audit",
+     "label": "Engineering audit"
+    },
+    {
+     "id": "s30",
+     "label": "score30 · 17 probes"
+    },
+    {
+     "id": "evals",
+     "label": "3,500 scenarios · 25k trials"
+    },
+    {
+     "id": "held",
+     "label": "Protected holdout"
+    },
+    {
+     "id": "orbacc",
+     "label": "Live Orb acceptance"
+    },
+    {
+     "id": "risk",
+     "label": "Secret file in vault"
+    },
+    {
+     "id": "noopsuccess",
+     "label": "Skipped-action success"
+    },
+    {
+     "id": "phraseprobe",
+     "label": "Phrase-only probe gap"
+    },
+    {
+     "id": "faultcampaign",
+     "label": "Recovery fault trials"
+    },
+    {
+     "id": "releaseidentity",
+     "label": "Installed release ID"
+    },
+    {
+     "id": "fixedbenchmark",
+     "label": "Fixed-model trials"
+    },
+    {
+     "id": "unseentransfer",
+     "label": "Unseen task transfer"
+    },
+    {
+     "id": "reusechecks",
+     "label": "Reuse-rights checks"
+    },
+    {
+     "id": "untrustedboundary",
+     "label": "Untrusted inputs"
+    },
+    {
+     "id": "sig_z50",
+     "label": "Z50 · Router A/B trial"
+    },
+    {
+     "id": "sig_z85",
+     "label": "Z85 · Model comparison"
+    },
+    {
+     "id": "sig_z87",
+     "label": "Z87 · Event check"
+    },
+    {
+     "id": "sig_x01",
+     "label": "X01 · Evidence audit"
+    },
+    {
+     "id": "sig_x02",
+     "label": "X02 · Route probes"
+    },
+    {
+     "id": "sig_x05",
+     "label": "X05 · Usefulness tests"
+    },
+    {
+     "id": "sig_x23",
+     "label": "X23 · Score calibration"
+    }
+   ]
+  }
+ ],
+ "links": [
+  {
+   "from": "typed",
+   "to": "serve",
+   "label": "POST /api/turn"
+  },
+  {
+   "from": "mic",
+   "to": "serve",
+   "label": "transcript"
+  },
+  {
+   "from": "wake",
+   "to": "mic",
+   "label": "gate built; mic unverified"
+  },
+  {
+   "from": "watch",
+   "to": "serve",
+   "label": "frames"
+  },
+  {
+   "from": "drop",
+   "to": "serve",
+   "label": "file"
+  },
+  {
+   "from": "sched",
+   "to": "pipe",
+   "label": "timer"
+  },
+  {
+   "from": "brief",
+   "to": "pipe",
+   "label": "calendar"
+  },
+  {
+   "from": "phone",
+   "to": "pipe",
+   "label": "on hold"
+  },
+  {
+   "from": "telegram",
+   "to": "pipe",
+   "label": "unbuilt by choice"
+  },
+  {
+   "from": "glasses",
+   "to": "orb",
+   "label": "AR idea"
+  },
+  {
+   "from": "serve",
+   "to": "sse",
+   "label": "stream"
+  },
+  {
+   "from": "sse",
+   "to": "orb",
+   "label": "race P0-001"
+  },
+  {
+   "from": "orb",
+   "to": "pane",
+   "label": "cards"
+  },
+  {
+   "from": "stop",
+   "to": "pipe",
+   "label": "cancel"
+  },
+  {
+   "from": "tts",
+   "to": "orb",
+   "label": "voice"
+  },
+  {
+   "from": "eyes",
+   "to": "pipe",
+   "label": "camera still"
+  },
+  {
+   "from": "mission",
+   "to": "jobtruth",
+   "label": "identity + heartbeat"
+  },
+  {
+   "from": "jobtruth",
+   "to": "orb",
+   "label": "status race remains"
+  },
+  {
+   "from": "orb",
+   "to": "graph3d",
+   "label": "vault graph"
+  },
+  {
+   "from": "orb",
+   "to": "particles",
+   "label": "talk motion"
+  },
+  {
+   "from": "pointer",
+   "to": "orb",
+   "label": "overlay"
+  },
+  {
+   "from": "takeover",
+   "to": "act",
+   "label": "handback"
+  },
+  {
+   "from": "driving",
+   "to": "takeover",
+   "label": "hands-off"
+  },
+  {
+   "from": "chips",
+   "to": "orb",
+   "label": "suggestions"
+  },
+  {
+   "from": "jev",
+   "to": "gatehud",
+   "label": "panel built"
+  },
+  {
+   "from": "gatehud",
+   "to": "orb",
+   "label": "graph match open"
+  },
+  {
+   "from": "rcpt",
+   "to": "receiptcard",
+   "label": "tools run"
+  },
+  {
+   "from": "receiptcard",
+   "to": "orb",
+   "label": "footer"
+  },
+  {
+   "from": "serve",
+   "to": "pipe",
+   "label": "turn"
+  },
+  {
+   "from": "pipe",
+   "to": "jev",
+   "label": "advice"
+  },
+  {
+   "from": "pipe",
+   "to": "fabric",
+   "label": "shadow"
+  },
+  {
+   "from": "fabric",
+   "to": "jev",
+   "label": "typed"
+  },
+  {
+   "from": "pipe",
+   "to": "reflex",
+   "label": "phrases"
+  },
+  {
+   "from": "pipe",
+   "to": "loop",
+   "label": "pick tool"
+  },
+  {
+   "from": "loop",
+   "to": "guard",
+   "label": "preserve partial results"
+  },
+  {
+   "from": "guard",
+   "to": "reply",
+   "label": "honest skip candidate"
+  },
+  {
+   "from": "pipe",
+   "to": "persona",
+   "label": "talk"
+  },
+  {
+   "from": "persona",
+   "to": "model",
+   "label": "locked model"
+  },
+  {
+   "from": "persona",
+   "to": "reply",
+   "label": "speak"
+  },
+  {
+   "from": "saylor",
+   "to": "persona",
+   "label": "courses"
+  },
+  {
+   "from": "dials",
+   "to": "persona",
+   "label": "humor/honesty"
+  },
+  {
+   "from": "lapse",
+   "to": "orb",
+   "label": "lapsed-question card"
+  },
+  {
+   "from": "dupguard",
+   "to": "loop",
+   "label": "before sends"
+  },
+  {
+   "from": "honesty",
+   "to": "reply",
+   "label": "no fake done"
+  },
+  {
+   "from": "pipe",
+   "to": "shared",
+   "label": "context"
+  },
+  {
+   "from": "pipe",
+   "to": "mission",
+   "label": "keep the job"
+  },
+  {
+   "from": "oldctrl",
+   "to": "mission",
+   "label": "never integrated"
+  },
+  {
+   "from": "mission",
+   "to": "resume",
+   "label": "checkpoint"
+  },
+  {
+   "from": "mission",
+   "to": "perms",
+   "label": "approval"
+  },
+  {
+   "from": "mission",
+   "to": "graph",
+   "label": "subtasks"
+  },
+  {
+   "from": "mission",
+   "to": "conc",
+   "label": "owned background worker"
+  },
+  {
+   "from": "heal",
+   "to": "mission",
+   "label": "bounded recovery"
+  },
+  {
+   "from": "loop",
+   "to": "wsr",
+   "label": "read"
+  },
+  {
+   "from": "loop",
+   "to": "macread",
+   "label": "reveal/open"
+  },
+  {
+   "from": "loop",
+   "to": "see",
+   "label": "look"
+  },
+  {
+   "from": "loop",
+   "to": "act",
+   "label": "click"
+  },
+  {
+   "from": "act",
+   "to": "win",
+   "label": "apps / window helpers"
+  },
+  {
+   "from": "act",
+   "to": "term",
+   "label": "shell + terminal"
+  },
+  {
+   "from": "act",
+   "to": "bg",
+   "label": "background"
+  },
+  {
+   "from": "loop",
+   "to": "grokdesk",
+   "label": "send task"
+  },
+  {
+   "from": "loop",
+   "to": "web",
+   "label": "search"
+  },
+  {
+   "from": "loop",
+   "to": "yt",
+   "label": "result retained"
+  },
+  {
+   "from": "loop",
+   "to": "safari",
+   "label": "browse"
+  },
+  {
+   "from": "loop",
+   "to": "pw",
+   "label": "automate"
+  },
+  {
+   "from": "loop",
+   "to": "call",
+   "label": "MCP"
+  },
+  {
+   "from": "loop",
+   "to": "desk",
+   "label": "card"
+  },
+  {
+   "from": "loop",
+   "to": "rem",
+   "label": "remember"
+  },
+  {
+   "from": "mission",
+   "to": "saved",
+   "label": "research"
+  },
+  {
+   "from": "corpus",
+   "to": "saved",
+   "label": "historical source index"
+  },
+  {
+   "from": "methods",
+   "to": "saved",
+   "label": "methods"
+  },
+  {
+   "from": "zubair",
+   "to": "methods",
+   "label": "13 videos"
+  },
+  {
+   "from": "nate",
+   "to": "methods",
+   "label": "82 tapes"
+  },
+  {
+   "from": "xbook",
+   "to": "methods",
+   "label": "1,095 posts"
+  },
+  {
+   "from": "saved",
+   "to": "origin",
+   "label": "pick source"
+  },
+  {
+   "from": "web",
+   "to": "origin",
+   "label": "repo search"
+  },
+  {
+   "from": "origin",
+   "to": "ws",
+   "label": "frozen source revision"
+  },
+  {
+   "from": "ws",
+   "to": "worker",
+   "label": "isolated candidate"
+  },
+  {
+   "from": "worker",
+   "to": "author",
+   "label": "batches"
+  },
+  {
+   "from": "author",
+   "to": "run",
+   "label": "tests"
+  },
+  {
+   "from": "run",
+   "to": "git",
+   "label": "commit"
+  },
+  {
+   "from": "worker",
+   "to": "clis",
+   "label": "optional CLI adapter"
+  },
+  {
+   "from": "install",
+   "to": "loop",
+   "label": "repo/tool installer"
+  },
+  {
+   "from": "git",
+   "to": "push",
+   "label": "push"
+  },
+  {
+   "from": "push",
+   "to": "ci",
+   "label": "checks"
+  },
+  {
+   "from": "git",
+   "to": "ocommit",
+   "label": "Codex direct candidate"
+  },
+  {
+   "from": "run",
+   "to": "vrec",
+   "label": "receipt"
+  },
+  {
+   "from": "git",
+   "to": "craft",
+   "label": "demo stage"
+  },
+  {
+   "from": "craft",
+   "to": "apps",
+   "label": "12 apps"
+  },
+  {
+   "from": "apps",
+   "to": "demo",
+   "label": "render"
+  },
+  {
+   "from": "demo",
+   "to": "oart",
+   "label": "export"
+  },
+  {
+   "from": "queue",
+   "to": "craft",
+   "label": "pieces"
+  },
+  {
+   "from": "gates",
+   "to": "queue",
+   "label": "LUFS · brand"
+  },
+  {
+   "from": "remotion",
+   "to": "demo",
+   "label": "alt renderer"
+  },
+  {
+   "from": "wealthvid",
+   "to": "remotion",
+   "label": "daily video"
+  },
+  {
+   "from": "craft",
+   "to": "note",
+   "label": "docs stage"
+  },
+  {
+   "from": "note",
+   "to": "onote",
+   "label": "write + read back"
+  },
+  {
+   "from": "onote",
+   "to": "opres",
+   "label": "present"
+  },
+  {
+   "from": "oart",
+   "to": "opres",
+   "label": "present"
+  },
+  {
+   "from": "push",
+   "to": "opr",
+   "label": "PR"
+  },
+  {
+   "from": "obs",
+   "to": "note",
+   "label": "old path"
+  },
+  {
+   "from": "inv",
+   "to": "call",
+   "label": "list"
+  },
+  {
+   "from": "call",
+   "to": "n8n",
+   "label": "401"
+  },
+  {
+   "from": "call",
+   "to": "host",
+   "label": "401"
+  },
+  {
+   "from": "call",
+   "to": "gws",
+   "label": "connector"
+  },
+  {
+   "from": "desk",
+   "to": "unreach",
+   "label": "17-card candidate"
+  },
+  {
+   "from": "desk",
+   "to": "deleg",
+   "label": "delegate"
+  },
+  {
+   "from": "deleg",
+   "to": "plat",
+   "label": "hand off"
+  },
+  {
+   "from": "ret",
+   "to": "pipe",
+   "label": "recall"
+  },
+  {
+   "from": "vaultread",
+   "to": "ret",
+   "label": "second brain"
+  },
+  {
+   "from": "chats",
+   "to": "ret",
+   "label": "search"
+  },
+  {
+   "from": "inbox",
+   "to": "rem",
+   "label": "361 notes"
+  },
+  {
+   "from": "rem",
+   "to": "scars",
+   "label": "lesson"
+  },
+  {
+   "from": "reply",
+   "to": "rcpt",
+   "label": "log"
+  },
+  {
+   "from": "onebrain",
+   "to": "shared",
+   "label": "tiny-active"
+  },
+  {
+   "from": "desk",
+   "to": "grok",
+   "label": "9 targets"
+  },
+  {
+   "from": "box",
+   "to": "grok",
+   "label": "desk memory"
+  },
+  {
+   "from": "codex",
+   "to": "ws",
+   "label": "revision frozen"
+  },
+  {
+   "from": "icloud",
+   "to": "ws",
+   "label": "historical hydration risk"
+  },
+  {
+   "from": "worktrees",
+   "to": "ws",
+   "label": "provenance not rechecked"
+  },
+  {
+   "from": "github",
+   "to": "ws",
+   "label": "source"
+  },
+  {
+   "from": "studio",
+   "to": "craft",
+   "label": "save + open"
+  },
+  {
+   "from": "vault",
+   "to": "vaultread",
+   "label": "live vault"
+  },
+  {
+   "from": "vault",
+   "to": "note",
+   "label": "vault path"
+  },
+  {
+   "from": "plat",
+   "to": "codex",
+   "label": "delegate"
+  },
+  {
+   "from": "plat",
+   "to": "claude",
+   "label": "delegate"
+  },
+  {
+   "from": "plat",
+   "to": "cursor",
+   "label": "delegate"
+  },
+  {
+   "from": "clis",
+   "to": "codex",
+   "label": "CLI"
+  },
+  {
+   "from": "rem",
+   "to": "onebrain",
+   "label": "durable memory"
+  },
+  {
+   "from": "scars",
+   "to": "onebrain",
+   "label": "lessons shared"
+  },
+  {
+   "from": "chatgpt",
+   "to": "codex",
+   "label": "directives"
+  },
+  {
+   "from": "claude",
+   "to": "codex",
+   "label": "review + handoff"
+  },
+  {
+   "from": "codex",
+   "to": "serve",
+   "label": "ownership handed off"
+  },
+  {
+   "from": "cursor",
+   "to": "onebrain",
+   "label": "digest + lock"
+  },
+  {
+   "from": "slack",
+   "to": "desk",
+   "label": "sends locked"
+  },
+  {
+   "from": "vps",
+   "to": "host",
+   "label": "down / 401"
+  },
+  {
+   "from": "rcpt",
+   "to": "sc",
+   "label": "evidence"
+  },
+  {
+   "from": "sc",
+   "to": "gate",
+   "label": "WAITING"
+  },
+  {
+   "from": "wd",
+   "to": "sc",
+   "label": "stopped"
+  },
+  {
+   "from": "audit",
+   "to": "gate",
+   "label": "NOT READY"
+  },
+  {
+   "from": "s30",
+   "to": "evals",
+   "label": "scale up"
+  },
+  {
+   "from": "held",
+   "to": "evals",
+   "label": "holdout"
+  },
+  {
+   "from": "opres",
+   "to": "orbacc",
+   "label": "acceptance"
+  },
+  {
+   "from": "ci",
+   "to": "gate",
+   "label": "failing"
+  },
+  {
+   "from": "wd",
+   "to": "heal",
+   "label": "independent review"
+  },
+  {
+   "from": "risk",
+   "to": "vault",
+   "label": "rotate (T6)"
+  },
+  {
+   "from": "pane",
+   "to": "historyscroll",
+   "label": "recorded UI repair"
+  },
+  {
+   "from": "historyscroll",
+   "to": "orb",
+   "label": "observed scroll/history"
+  },
+  {
+   "from": "mission",
+   "to": "eventreplay",
+   "label": "durable event sequence"
+  },
+  {
+   "from": "eventreplay",
+   "to": "sse",
+   "label": "resume after disconnect"
+  },
+  {
+   "from": "pointer",
+   "to": "cursorbinding",
+   "label": "overlay around action"
+  },
+  {
+   "from": "cursorbinding",
+   "to": "act",
+   "label": "real input separate"
+  },
+  {
+   "from": "loop",
+   "to": "toolcontract",
+   "label": "shared call/results"
+  },
+  {
+   "from": "toolcontract",
+   "to": "call",
+   "label": "MCP schemas"
+  },
+  {
+   "from": "loop",
+   "to": "methodchoice",
+   "label": "dynamic method choice"
+  },
+  {
+   "from": "methodchoice",
+   "to": "appworkflow",
+   "label": "CLI/API/GUI route"
+  },
+  {
+   "from": "loop",
+   "to": "skillrun",
+   "label": "invoke procedure"
+  },
+  {
+   "from": "skillrun",
+   "to": "saylor",
+   "label": "existing knowledge input"
+  },
+  {
+   "from": "model",
+   "to": "providerrecovery",
+   "label": "preserve locked stack"
+  },
+  {
+   "from": "providerrecovery",
+   "to": "resume",
+   "label": "retry without lost goal"
+  },
+  {
+   "from": "wsr",
+   "to": "repomap",
+   "label": "symbol/reference index"
+  },
+  {
+   "from": "repomap",
+   "to": "author",
+   "label": "ranked code context"
+  },
+  {
+   "from": "methods",
+   "to": "pluginregistry",
+   "label": "offline module registry"
+  },
+  {
+   "from": "pluginregistry",
+   "to": "toolcontract",
+   "label": "executable registration"
+  },
+  {
+   "from": "mission",
+   "to": "longowner",
+   "label": "owned retained job"
+  },
+  {
+   "from": "longowner",
+   "to": "serve",
+   "label": "outlive reply turn"
+  },
+  {
+   "from": "stop",
+   "to": "steering",
+   "label": "interrupt/continue state"
+  },
+  {
+   "from": "steering",
+   "to": "longowner",
+   "label": "preserve ongoing goal"
+  },
+  {
+   "from": "resume",
+   "to": "effectretry",
+   "label": "reconcile before retry"
+  },
+  {
+   "from": "effectretry",
+   "to": "call",
+   "label": "avoid duplicate effects"
+  },
+  {
+   "from": "perms",
+   "to": "scopedauthority",
+   "label": "task vs standing grant"
+  },
+  {
+   "from": "scopedauthority",
+   "to": "toolcontract",
+   "label": "consistent authority"
+  },
+  {
+   "from": "heal",
+   "to": "recoveryhost",
+   "label": "survive faulty candidate"
+  },
+  {
+   "from": "recoveryhost",
+   "to": "rollback",
+   "label": "protected recovery route"
+  },
+  {
+   "from": "loop",
+   "to": "nativewrite",
+   "label": "direct filesystem work"
+  },
+  {
+   "from": "nativewrite",
+   "to": "wsr",
+   "label": "discover/read/edit chain"
+  },
+  {
+   "from": "see",
+   "to": "axcontrol",
+   "label": "native UI information"
+  },
+  {
+   "from": "axcontrol",
+   "to": "act",
+   "label": "element-targeted action"
+  },
+  {
+   "from": "see",
+   "to": "observations",
+   "label": "fresh observation ID"
+  },
+  {
+   "from": "observations",
+   "to": "cursorbinding",
+   "label": "same target/evidence"
+  },
+  {
+   "from": "act",
+   "to": "guigestures",
+   "label": "extended input coverage"
+  },
+  {
+   "from": "guigestures",
+   "to": "appworkflow",
+   "label": "operate beyond launch"
+  },
+  {
+   "from": "conc",
+   "to": "inputlease",
+   "label": "serialize desktop effects"
+  },
+  {
+   "from": "inputlease",
+   "to": "takeover",
+   "label": "yield/release input"
+  },
+  {
+   "from": "pointer",
+   "to": "devnative",
+   "label": "same native helper"
+  },
+  {
+   "from": "devnative",
+   "to": "orbacc",
+   "label": "controlled native replay"
+  },
+  {
+   "from": "win",
+   "to": "appworkflow",
+   "label": "installed-app discovery"
+  },
+  {
+   "from": "appworkflow",
+   "to": "artifactchain",
+   "label": "create/save/reopen"
+  },
+  {
+   "from": "watch",
+   "to": "appfocus",
+   "label": "enabled apps only"
+  },
+  {
+   "from": "appfocus",
+   "to": "steering",
+   "label": "offer scoped assistance"
+  },
+  {
+   "from": "safari",
+   "to": "authbrowser",
+   "label": "authorized login context"
+  },
+  {
+   "from": "authbrowser",
+   "to": "dombridge",
+   "label": "structured interaction"
+  },
+  {
+   "from": "dombridge",
+   "to": "pw",
+   "label": "full browser bridge"
+  },
+  {
+   "from": "safari",
+   "to": "checkeddownload",
+   "label": "recorded download test"
+  },
+  {
+   "from": "checkeddownload",
+   "to": "vrec",
+   "label": "checksum matched"
+  },
+  {
+   "from": "dombridge",
+   "to": "webhelpers",
+   "label": "learn repeatable action"
+  },
+  {
+   "from": "webhelpers",
+   "to": "procedures",
+   "label": "tested reusable helper"
+  },
+  {
+   "from": "term",
+   "to": "processhandles",
+   "label": "start/poll/stop handle"
+  },
+  {
+   "from": "processhandles",
+   "to": "longowner",
+   "label": "retain long process"
+  },
+  {
+   "from": "term",
+   "to": "outputchannels",
+   "label": "stderr can be hidden"
+  },
+  {
+   "from": "outputchannels",
+   "to": "toolhistory",
+   "label": "incomplete error evidence"
+  },
+  {
+   "from": "ws",
+   "to": "dirtyoverlay",
+   "label": "approved uncommitted state"
+  },
+  {
+   "from": "dirtyoverlay",
+   "to": "releaseidentity",
+   "label": "overlay digest"
+  },
+  {
+   "from": "heal",
+   "to": "rollback",
+   "label": "isolated repair candidates"
+  },
+  {
+   "from": "rollback",
+   "to": "gate",
+   "label": "review before promotion"
+  },
+  {
+   "from": "worker",
+   "to": "modellockcheck",
+   "label": "config-preservation checks"
+  },
+  {
+   "from": "modellockcheck",
+   "to": "model",
+   "label": "locked configuration"
+  },
+  {
+   "from": "pluginregistry",
+   "to": "startupcheck",
+   "label": "offline setup checks"
+  },
+  {
+   "from": "startupcheck",
+   "to": "serve",
+   "label": "complete runtime preflight"
+  },
+  {
+   "from": "call",
+   "to": "mcpschemas",
+   "label": "validate calls/results"
+  },
+  {
+   "from": "mcpschemas",
+   "to": "toolcontract",
+   "label": "shared result contract"
+  },
+  {
+   "from": "call",
+   "to": "mcpreconnect",
+   "label": "OAuth/connection code"
+  },
+  {
+   "from": "mcpreconnect",
+   "to": "n8n",
+   "label": "historical 401 unresolved"
+  },
+  {
+   "from": "mcpreconnect",
+   "to": "host",
+   "label": "historical 401 unresolved"
+  },
+  {
+   "from": "scopedauthority",
+   "to": "credentialhandles",
+   "label": "opaque auth use"
+  },
+  {
+   "from": "credentialhandles",
+   "to": "mcpreconnect",
+   "label": "authenticate without reveal"
+  },
+  {
+   "from": "loop",
+   "to": "toolhistory",
+   "label": "retained observations"
+  },
+  {
+   "from": "toolhistory",
+   "to": "ret",
+   "label": "context for next action"
+  },
+  {
+   "from": "toolhistory",
+   "to": "compact",
+   "label": "loss-aware compaction"
+  },
+  {
+   "from": "compact",
+   "to": "longowner",
+   "label": "long-session context"
+  },
+  {
+   "from": "skillrun",
+   "to": "procedures",
+   "label": "verify then retain skill"
+  },
+  {
+   "from": "procedures",
+   "to": "onebrain",
+   "label": "native procedural memory"
+  },
+  {
+   "from": "rem",
+   "to": "memoryauthority",
+   "label": "temporary vs permanent"
+  },
+  {
+   "from": "memoryauthority",
+   "to": "shared",
+   "label": "preserve owner intent"
+  },
+  {
+   "from": "origin",
+   "to": "provenancememory",
+   "label": "source evidence"
+  },
+  {
+   "from": "provenancememory",
+   "to": "ret",
+   "label": "retrieve with provenance"
+  },
+  {
+   "from": "craft",
+   "to": "artifactchain",
+   "label": "editable save/reopen"
+  },
+  {
+   "from": "artifactchain",
+   "to": "multimodalreview",
+   "label": "inspect real output"
+  },
+  {
+   "from": "gates",
+   "to": "multimodalreview",
+   "label": "existing queue checks"
+  },
+  {
+   "from": "multimodalreview",
+   "to": "delbundle",
+   "label": "verified delivery set"
+  },
+  {
+   "from": "chatgpt",
+   "to": "harnessstudy",
+   "label": "completed reference research"
+  },
+  {
+   "from": "harnessstudy",
+   "to": "loop",
+   "label": "selective mechanism transfer"
+  },
+  {
+   "from": "origin",
+   "to": "markstudy",
+   "label": "source/license investigated"
+  },
+  {
+   "from": "markstudy",
+   "to": "markadoption",
+   "label": "keep/adapt/replace decision"
+  },
+  {
+   "from": "markadoption",
+   "to": "pluginregistry",
+   "label": "candidate feature transfer"
+  },
+  {
+   "from": "reusechecks",
+   "to": "markadoption",
+   "label": "rights + compatibility first"
+  },
+  {
+   "from": "corpus",
+   "to": "signaltoskill",
+   "label": "complete learning workflow"
+  },
+  {
+   "from": "signaltoskill",
+   "to": "procedures",
+   "label": "reproduce/test/integrate"
+  },
+  {
+   "from": "grok",
+   "to": "native17",
+   "label": "transfer specialist methods"
+  },
+  {
+   "from": "native17",
+   "to": "skillrun",
+   "label": "skills, not 17 handoffs"
+  },
+  {
+   "from": "loop",
+   "to": "minimaldelegation",
+   "label": "Jarvis uses tools directly"
+  },
+  {
+   "from": "minimaldelegation",
+   "to": "deleg",
+   "label": "optional justified exception"
+  },
+  {
+   "from": "artifactchain",
+   "to": "delbundle",
+   "label": "source/export/readback"
+  },
+  {
+   "from": "note",
+   "to": "delbundle",
+   "label": "note + evidence"
+  },
+  {
+   "from": "delbundle",
+   "to": "opres",
+   "label": "finished result in Orb"
+  },
+  {
+   "from": "win",
+   "to": "noopsuccess",
+   "label": "skipped native execution"
+  },
+  {
+   "from": "noopsuccess",
+   "to": "vrec",
+   "label": "false verified flag"
+  },
+  {
+   "from": "orbacc",
+   "to": "phraseprobe",
+   "label": "wording ≠ outcome"
+  },
+  {
+   "from": "phraseprobe",
+   "to": "unseentransfer",
+   "label": "replace acceptance criterion"
+  },
+  {
+   "from": "resume",
+   "to": "faultcampaign",
+   "label": "inject controlled failures"
+  },
+  {
+   "from": "faultcampaign",
+   "to": "evals",
+   "label": "independent trial results"
+  },
+  {
+   "from": "modellockcheck",
+   "to": "releaseidentity",
+   "label": "loaded release manifest"
+  },
+  {
+   "from": "releaseidentity",
+   "to": "orbacc",
+   "label": "test installed revision"
+  },
+  {
+   "from": "model",
+   "to": "fixedbenchmark",
+   "label": "same model/config/budget"
+  },
+  {
+   "from": "fixedbenchmark",
+   "to": "evals",
+   "label": "measure harness effects"
+  },
+  {
+   "from": "held",
+   "to": "unseentransfer",
+   "label": "separate task families"
+  },
+  {
+   "from": "unseentransfer",
+   "to": "evals",
+   "label": "generalization evidence"
+  },
+  {
+   "from": "install",
+   "to": "reusechecks",
+   "label": "revision/license inspection"
+  },
+  {
+   "from": "reusechecks",
+   "to": "origin",
+   "label": "traceable rights evidence"
+  },
+  {
+   "from": "memoryauthority",
+   "to": "untrustedboundary",
+   "label": "source is not authority"
+  },
+  {
+   "from": "untrustedboundary",
+   "to": "scopedauthority",
+   "label": "cross-tool policy consistency"
+  },
+  {
+   "from": "takeover",
+   "to": "sig_z01",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z01",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "pointer",
+   "to": "sig_z02",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z02",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "stop",
+   "to": "sig_z03",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z03",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "watch",
+   "to": "sig_z04",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z04",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "act",
+   "to": "sig_z05",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z05",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "phone",
+   "to": "sig_z06",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z06",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "phone",
+   "to": "sig_z07",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z07",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "telegram",
+   "to": "sig_z08",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z08",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "brief",
+   "to": "sig_z09",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z09",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "ret",
+   "to": "sig_z10",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z10",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "provenancememory",
+   "to": "sig_z11",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z11",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "reflex",
+   "to": "sig_z12",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z12",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "tts",
+   "to": "sig_z13",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z13",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "honesty",
+   "to": "sig_z14",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z14",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "see",
+   "to": "sig_z15",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z15",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "guigestures",
+   "to": "sig_z16",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z16",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "appfocus",
+   "to": "sig_z17",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z17",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "eyes",
+   "to": "sig_z18",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z18",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "mic",
+   "to": "sig_z19",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z19",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "brief",
+   "to": "sig_z20",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z20",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "phone",
+   "to": "sig_z21",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z21",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "mcpreconnect",
+   "to": "sig_z22",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z22",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "graph3d",
+   "to": "sig_z23",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z23",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "native17",
+   "to": "sig_z24",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z24",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "shared",
+   "to": "sig_z25",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z25",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "dials",
+   "to": "sig_z26",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z26",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "steering",
+   "to": "sig_z27",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z27",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "receiptcard",
+   "to": "sig_z28",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z28",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "driving",
+   "to": "sig_z29",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z29",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "multimodalreview",
+   "to": "sig_z30",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z30",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "wake",
+   "to": "sig_z31",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z31",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "ret",
+   "to": "sig_z32",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z32",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "gws",
+   "to": "sig_z33",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z33",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "lapse",
+   "to": "sig_z34",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z34",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "providerrecovery",
+   "to": "sig_z35",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z35",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "honesty",
+   "to": "sig_z36",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z36",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "inv",
+   "to": "sig_z37",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z37",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "inbox",
+   "to": "sig_z38",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z38",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "graph3d",
+   "to": "sig_z39",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z39",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "phone",
+   "to": "sig_z40",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z40",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "loop",
+   "to": "sig_z41",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z41",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "phone",
+   "to": "sig_z42",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z42",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "graph3d",
+   "to": "sig_z43",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z43",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "receiptcard",
+   "to": "sig_z44",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z44",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "persona",
+   "to": "sig_z45",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z45",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "chips",
+   "to": "sig_z46",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z46",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "persona",
+   "to": "sig_z47",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z47",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "ret",
+   "to": "sig_z48",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z48",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "gatehud",
+   "to": "sig_z49",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z49",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "fixedbenchmark",
+   "to": "sig_z50",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z50",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "dupguard",
+   "to": "sig_z51",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z51",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "honesty",
+   "to": "sig_z52",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z52",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "pane",
+   "to": "sig_z53",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z53",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "see",
+   "to": "sig_z54",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z54",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "watch",
+   "to": "sig_z55",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z55",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "lapse",
+   "to": "sig_z56",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z56",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "scopedauthority",
+   "to": "sig_z57",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z57",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "rcpt",
+   "to": "sig_z58",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z58",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "persona",
+   "to": "sig_z59",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z59",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "perms",
+   "to": "sig_z60",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z60",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "tts",
+   "to": "sig_z61",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z61",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "phone",
+   "to": "sig_z62",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z62",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "web",
+   "to": "sig_z63",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z63",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "mic",
+   "to": "sig_z64",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z64",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "multimodalreview",
+   "to": "sig_z65",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z65",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "loop",
+   "to": "sig_z66",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z66",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "honesty",
+   "to": "sig_z67",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z67",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "web",
+   "to": "sig_z68",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z68",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "stop",
+   "to": "sig_z69",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z69",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "graph3d",
+   "to": "sig_z70",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z70",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "memoryauthority",
+   "to": "sig_z71",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z71",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "persona",
+   "to": "sig_z72",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z72",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "guigestures",
+   "to": "sig_z73",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z73",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "pane",
+   "to": "sig_z74",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z74",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "stop",
+   "to": "sig_z75",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z75",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "ret",
+   "to": "sig_z76",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z76",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "mcpreconnect",
+   "to": "sig_z77",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z77",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "call",
+   "to": "sig_z78",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z78",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "scopedauthority",
+   "to": "sig_z79",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z79",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "jobtruth",
+   "to": "sig_z81",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z81",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "ret",
+   "to": "sig_z82",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z82",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "provenancememory",
+   "to": "sig_z83",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z83",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "inv",
+   "to": "sig_z84",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z84",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "fixedbenchmark",
+   "to": "sig_z85",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z85",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "sched",
+   "to": "sig_z86",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z86",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "orbacc",
+   "to": "sig_z87",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z87",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "conc",
+   "to": "sig_z88",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z88",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "call",
+   "to": "sig_z89",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z89",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "ret",
+   "to": "sig_z90",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z90",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "mcpschemas",
+   "to": "sig_z91",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z91",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "multimodalreview",
+   "to": "sig_z92",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z92",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "mcpreconnect",
+   "to": "sig_z93",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z93",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "remotion",
+   "to": "sig_z94",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z94",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "native17",
+   "to": "sig_z95",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z95",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "scopedauthority",
+   "to": "sig_z96",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z96",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "pane",
+   "to": "sig_z97",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z97",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "reflex",
+   "to": "sig_z51_batch6",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z51_batch6",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "call",
+   "to": "sig_z52_batch6",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z52_batch6",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "scopedauthority",
+   "to": "sig_z57b",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z57b",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "honesty",
+   "to": "sig_z98",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z98",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "credentialhandles",
+   "to": "sig_z99",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z99",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "startupcheck",
+   "to": "sig_z100",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z100",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "queue",
+   "to": "sig_z101",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z101",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "jobtruth",
+   "to": "sig_z102",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z102",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "call",
+   "to": "sig_z103",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z103",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "artifactchain",
+   "to": "sig_z104",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z104",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "artifactchain",
+   "to": "sig_z105",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z105",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "startupcheck",
+   "to": "sig_z106",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z106",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "pluginregistry",
+   "to": "sig_z107",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z107",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "wake",
+   "to": "sig_z108",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z108",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "model",
+   "to": "sig_z109",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z109",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "pluginregistry",
+   "to": "sig_z110",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z110",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "compact",
+   "to": "sig_z111",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z111",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "providerrecovery",
+   "to": "sig_z112",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z112",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "phone",
+   "to": "sig_z113",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z113",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "reflex",
+   "to": "sig_z114",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z114",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "jev",
+   "to": "sig_z115",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z115",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "push",
+   "to": "sig_z116",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z116",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "credentialhandles",
+   "to": "sig_z117",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_z117",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "audit",
+   "to": "sig_x01",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x01",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "phraseprobe",
+   "to": "sig_x02",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x02",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "resume",
+   "to": "sig_x03",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x03",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "ret",
+   "to": "sig_x04",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x04",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "unseentransfer",
+   "to": "sig_x05",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x05",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "wake",
+   "to": "sig_x06",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x06",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "tts",
+   "to": "sig_x07",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x07",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "honesty",
+   "to": "sig_x08",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x08",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "persona",
+   "to": "sig_x09",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x09",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "mic",
+   "to": "sig_x10",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x10",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "provenancememory",
+   "to": "sig_x11",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x11",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "vaultread",
+   "to": "sig_x12",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x12",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "vaultread",
+   "to": "sig_x13",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x13",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "vaultread",
+   "to": "sig_x14",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x14",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "rem",
+   "to": "sig_x15",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x15",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "origin",
+   "to": "sig_x16",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x16",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "ret",
+   "to": "sig_x17",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x17",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "ws",
+   "to": "sig_x18",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x18",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "guigestures",
+   "to": "sig_x19",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x19",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "eyes",
+   "to": "sig_x20",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x20",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "see",
+   "to": "sig_x21",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x21",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "saved",
+   "to": "sig_x22",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x22",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "fixedbenchmark",
+   "to": "sig_x23",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x23",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "longowner",
+   "to": "sig_x24",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x24",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "worker",
+   "to": "sig_x25",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x25",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "phone",
+   "to": "sig_x26",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x26",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "desk",
+   "to": "sig_x27",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x27",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "scopedauthority",
+   "to": "sig_x28",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x28",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "vaultread",
+   "to": "sig_x29",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x29",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "minimaldelegation",
+   "to": "sig_x30",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x30",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "onebrain",
+   "to": "sig_x31",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x31",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "chats",
+   "to": "sig_x32",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x32",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "rem",
+   "to": "sig_x33",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x33",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "vaultread",
+   "to": "sig_x34",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x34",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "watch",
+   "to": "sig_x35",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x35",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "brief",
+   "to": "sig_x36",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x36",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "web",
+   "to": "sig_x37",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x37",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "vaultread",
+   "to": "sig_x38",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x38",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "resume",
+   "to": "sig_x39",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x39",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "graph3d",
+   "to": "sig_x40",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x40",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "procedures",
+   "to": "sig_x41",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x41",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "ret",
+   "to": "sig_x42",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x42",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "gws",
+   "to": "sig_x43",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x43",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "nativewrite",
+   "to": "sig_x44",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x44",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "procedures",
+   "to": "sig_x45",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x45",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "rem",
+   "to": "sig_x46",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_x46",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "tts",
+   "to": "sig_n01",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_n01",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "wake",
+   "to": "sig_n02",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_n02",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "saved",
+   "to": "sig_m_stt",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_m_stt",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "saved",
+   "to": "sig_m_stt2",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_m_stt2",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "steering",
+   "to": "sig_c01",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_c01",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "vrec",
+   "to": "sig_c02",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_c02",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "appworkflow",
+   "to": "sig_c03",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_c03",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "artifactchain",
+   "to": "sig_c04",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_c04",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "craft",
+   "to": "sig_c05",
+   "label": "source-method mapping"
+  },
+  {
+   "from": "methods",
+   "to": "sig_c05",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "corpus",
+   "to": "sig_c06",
+   "label": "evidence / coverage"
+  },
+  {
+   "from": "methods",
+   "to": "sig_c06",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "corpus",
+   "to": "sig_coverage_scope",
+   "label": "evidence / coverage"
+  },
+  {
+   "from": "methods",
+   "to": "sig_coverage_scope",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "corpus",
+   "to": "sig_unrecovered_methods",
+   "label": "evidence / coverage"
+  },
+  {
+   "from": "methods",
+   "to": "sig_unrecovered_methods",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "signaltoskill",
+   "to": "sig_source_transfer",
+   "label": "evidence / coverage"
+  },
+  {
+   "from": "methods",
+   "to": "sig_source_transfer",
+   "label": "recovered ledger record"
+  },
+  {
+   "from": "sig_n02",
+   "to": "sig_z108",
+   "label": "same wake source"
+  },
+  {
+   "from": "sig_z51_batch6",
+   "to": "sig_z51",
+   "label": "ID reused; distinct methods"
+  },
+  {
+   "from": "sig_z52_batch6",
+   "to": "sig_z52",
+   "label": "ID reused; distinct methods"
+  },
+  {
+   "from": "sig_z57",
+   "to": "sig_z57b",
+   "label": "readback confidence variant"
+  },
+  {
+   "from": "sig_m_stt",
+   "to": "sig_m_stt2",
+   "label": "v2 supersedes v1 settings"
+  },
+  {
+   "from": "sig_z101",
+   "to": "sig_z102",
+   "label": "approval and stage workflow"
+  },
+  {
+   "from": "sig_x11",
+   "to": "sig_x16",
+   "label": "compile needs source quality"
+  },
+  {
+   "from": "sig_x33",
+   "to": "sig_x44",
+   "label": "alternative write policies"
+  },
+  {
+   "from": "sig_x41",
+   "to": "sig_x45",
+   "label": "extend command set"
+  },
+  {
+   "from": "sig_x45",
+   "to": "sig_x46",
+   "label": "graduate method"
+  },
+  {
+   "from": "sig_c01",
+   "to": "sig_c02",
+   "label": "task status needs evidence"
+  },
+  {
+   "from": "sig_coverage_scope",
+   "to": "sig_unrecovered_methods",
+   "label": "unrecovered evidence"
+  },
+  {
+   "from": "sig_coverage_scope",
+   "to": "sig_source_transfer",
+   "label": "full transfer unproven"
+  }
+ ]
+}

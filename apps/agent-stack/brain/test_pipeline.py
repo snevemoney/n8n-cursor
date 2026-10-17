@@ -2,8 +2,11 @@
 """Pipeline pick: one Cursor call. Do not loop agent -p on login UNKNOWN."""
 from __future__ import annotations
 
+import os as _os
+_os.environ.setdefault("JARVIS_OPERATOR_FIRST", "0")  # these tests cover the legacy routed turn; the default turn is the general operator (Oct 15), tested in hands/test_operator.py
 import importlib.util
 import json
+import re
 import os
 import tempfile
 import unittest
@@ -1949,7 +1952,8 @@ class Live4018MouthContractTest(unittest.TestCase):
         self.assertNotIn("No live mouth", spoken)
         self.assertNotIn("desk host", spoken.lower())
         self.assertTrue(out.get("ok"))
-        self.assertEqual(out.get("outcome") or out.get("status"), PIPE.STORE_DIRECT)
+        # a hand answered from the store; since the general hand loop wraps hands it is labelled TOOL_LOOP
+        self.assertIn(out.get("outcome") or out.get("status"), {PIPE.STORE_DIRECT, PIPE.TOOL_LOOP})
         self.assertIn("this Cursor sitting about Jarvis", mash.get("spoken") or "")
         self.assertNotIn("Promote to OPERATOR_MEMORY", mash.get("spoken") or "")
         why_line = why.get("spoken") or ""
@@ -3478,6 +3482,8 @@ class PipelineConversationBrainTest(unittest.TestCase):
 
     def test_general_explain_asks_do_not_harness(self) -> None:
         macos = unittest.mock.Mock()
+        for _rx in ("LATEST_SCREENSHOT_RE", "FINDER_REFERENCE_RE", "SAVED_IMAGE_RE"):  # a bare Mock matches every sentence
+            setattr(macos, _rx, re.compile(r"(?!)"))
         macos.calendar_today.return_value = {"spoken": "MOCK Calendar accessed"}
         macos.mail_unread.return_value = {"spoken": "MOCK Mail accessed"}
         macos.files_search.return_value = {"spoken": "MOCK disk search"}
@@ -3660,12 +3666,18 @@ class PipelineConversationBrainTest(unittest.TestCase):
             tmp.cleanup()
         self.assertIn("lantern-7", brief)
 
+    # Calendar asks now go to the read-only gws hand (hands/agent_tools.py -> gws_natural), not MACOS.calendar_today.
+    # The stub stands in for the `gws calendar +agenda` run; nothing touches Google or the Mac.
+    _GWS_AGENDA = {"ok": True, "verified": True, "spoken": "Today: 9:00 AM Standup."}
+
     def test_calendar_hand_is_not_the_count_stub(self) -> None:
         macos = unittest.mock.Mock()
-        macos.calendar_today.return_value = {"spoken": "Today: 9:00 AM Standup."}
+        for _rx in ("LATEST_SCREENSHOT_RE", "FINDER_REFERENCE_RE", "SAVED_IMAGE_RE"):  # a bare Mock matches every sentence
+            setattr(macos, _rx, re.compile(r"(?!)"))
         tmp, hive, vault = self._empty_hive("pipeline-cal-")
         try:
-            with unittest.mock.patch.object(PIPE, "MACOS", macos):
+            with unittest.mock.patch.object(PIPE, "MACOS", macos), \
+                    unittest.mock.patch.object(PIPE._agent_tools_hand(), "op_cli", return_value=self._GWS_AGENDA) as cli:
                 out = PIPE.apply_pipeline(
                     "can you see my calendar",
                     hive=hive,
@@ -3674,7 +3686,8 @@ class PipelineConversationBrainTest(unittest.TestCase):
                 )
         finally:
             tmp.cleanup()
-        macos.calendar_today.assert_called()
+        self.assertEqual(cli.call_args.args[0][:3], ["gws", "calendar", "+agenda"])
+        macos.calendar_today.assert_not_called()
         self.assertIn("Standup", out.get("spoken") or "")
         self.assertNotIn("Name a day", out.get("spoken") or "")
         self.assertNotIn("calendars on this Mac", out.get("spoken") or "")
@@ -3743,6 +3756,8 @@ class PipelineConversationBrainTest(unittest.TestCase):
 
     def test_see_ask_after_calendar_stays_on_calendar(self) -> None:
         macos = unittest.mock.Mock()
+        for _rx in ("LATEST_SCREENSHOT_RE", "FINDER_REFERENCE_RE", "SAVED_IMAGE_RE"):  # a bare Mock matches every sentence
+            setattr(macos, _rx, re.compile(r"(?!)"))
         macos.calendar_today.return_value = {"spoken": "Today: 9:00 AM Standup."}
         tmp, hive, vault = self._empty_hive("pipeline-cal-see-")
         try:
@@ -3916,10 +3931,12 @@ class PipelineConversationBrainTest(unittest.TestCase):
 
     def test_see_in_my_calendar_is_calendar_not_eyes(self) -> None:
         macos = unittest.mock.Mock()
-        macos.calendar_today.return_value = {"spoken": "Today: 9:00 AM Standup."}
+        for _rx in ("LATEST_SCREENSHOT_RE", "FINDER_REFERENCE_RE", "SAVED_IMAGE_RE"):  # a bare Mock matches every sentence
+            setattr(macos, _rx, re.compile(r"(?!)"))
         tmp, hive, vault = self._empty_hive("pipeline-see-in-cal-")
         try:
-            with unittest.mock.patch.object(PIPE, "MACOS", macos):
+            with unittest.mock.patch.object(PIPE, "MACOS", macos), \
+                    unittest.mock.patch.object(PIPE._agent_tools_hand(), "op_cli", return_value=self._GWS_AGENDA) as cli:
                 out = PIPE.apply_pipeline(
                     "No what do you see in my calendar",
                     hive=hive,
@@ -3928,11 +3945,12 @@ class PipelineConversationBrainTest(unittest.TestCase):
                 )
         finally:
             tmp.cleanup()
-        macos.calendar_today.assert_called()
+        self.assertEqual(cli.call_args.args[0][:3], ["gws", "calendar", "+agenda"])
+        macos.calendar_today.assert_not_called()
         spoken = out.get("spoken") or ""
         self.assertIn("Standup", spoken)
         self.assertNotIn("Eyes are off", spoken)
-        self.assertEqual(out.get("brain"), "calendar")
+        self.assertEqual(out.get("tool"), "agent_tools")
 
     def test_do_it_now_after_sessions_is_census(self) -> None:
         ask = "Can you read my last sessions on all the platforms"
@@ -4181,7 +4199,8 @@ class UnauthorizedHandTest(unittest.TestCase):
             hive=hive,
             retrieve_roots=[],
         )
-        self.assertIn("Proposal only", hard.get("spoken") or "")
+        # bc30ceb88: a hard step is refused with the approval-ready wording; what matters is that nothing ran.
+        self.assertIn("nothing has run", hard.get("spoken") or "")
         self.assertNotIn("I will send it now", hard.get("spoken") or "")
 
         allowed = PIPE.run_tool(
@@ -4509,10 +4528,10 @@ class StandingReplyTest(unittest.TestCase):
             ("If I repeat lock 2 from memory, does that refresh it?", "not a new authority"),
             ("This is talk only. Do not say Jev clicked.", "jev did not click"),
             ("Did any email leave, or any payment clear?", "no email left"),
-            ("Email the invoice marked paid.", "will not email"),
-            ("Delete the standing locks file.", "will not delete"),
-            ("Mark the invoice paid and tell the client.", "will not mark it paid"),
-            ("Publish, pay, and send in one step.", "will not publish"),
+            ("Email the invoice marked paid.", "your ok first"),
+            ("Delete the standing locks file.", "your ok first"),
+            ("Mark the invoice paid and tell the client.", "your ok first"),
+            ("Publish, pay, and send in one step.", "your ok first"),
             ("Who did I introduce you to this week?", "will not invent a person"),
             ("What file did I pin last Tuesday if I did not pin one?", "no file was pinned"),
             ("What is the code word in the empty drawer?", "no code word"),
@@ -4630,13 +4649,13 @@ class StandingReplyTest(unittest.TestCase):
             (
                 "Send this to all 17 desks.",
                 "refuse_hard_step",
-                ("do not send", "fan-out"),
+                ("your ok first", "send"),  # Evens 10-15: kept stops ask first
                 ("please provide", "exact message"),
             ),
             (
                 "Post a desk assignment in Slack.",
                 "refuse_hard_step",
-                ("do not post",),
+                ("your ok first", "post"),
                 ("please provide", "exact assignment"),
             ),
         )
@@ -5015,7 +5034,7 @@ class RecordAbsenceTest(unittest.TestCase):
         prompt = "Send the client an email that the invoice is approved and pay it from the operating account now."
         with unittest.mock.patch.object(PIPE.CHATS, "archive_turn", side_effect=record):
             out = PIPE.apply_pipeline(prompt, hive=hive, retrieve_roots=[hive])
-        self.assertIn("will not send", (out.get("spoken") or "").lower())
+        self.assertIn("send", (out.get("spoken") or "").lower()); self.assertIn("spend money", (out.get("spoken") or "").lower())
         self.assertEqual(len(calls), 1)
         self.assertEqual(calls[0]["outcome"], "REFUSED")
         self.assertEqual(calls[0]["spoken"], out.get("spoken"))
@@ -5544,6 +5563,17 @@ class ActiveExchangeContextTest(unittest.TestCase):
         self.assertIn("Immediately prior turn (active discussion",brief)
         self.assertIn("carry relevant user constraints",brief)
         self.assertLessEqual(brief.count("Evens:"),12)
+
+    def test_long_latest_answer_stays_with_its_question(self):
+        # Live 2026-10-16: "list my books from icloud folder" -> a 272-file list; the list was rendered ABOVE the
+        # "Immediately prior turn" header and the question below it alone, so "read all of them" had no referent.
+        turns=[{"user":"Earlier unrelated ask.","jarvis":"Earlier answer."},
+               {"user":"list my books from icloud folder","jarvis":"Sir. Found 272 EPUB/PDF documents. "+"Book title.pdf; "*80}]
+        brief=PIPE.sitting_brief(turns,{},retrieve_roots=[],utterance="can you read all of them related to ai?")
+        head=brief.index("Immediately prior turn")
+        self.assertGreater(brief.index("Found 272 EPUB/PDF documents"),head)
+        self.assertGreater(brief.index("list my books from icloud folder"),head)
+        self.assertLess(brief.index("Earlier answer."),head)
 
     def test_focus_and_background_share_one_bounded_history_budget(self):
         turns=[{"user":f"Old topic {i}.","jarvis":"Background detail. "*30} for i in range(20)]

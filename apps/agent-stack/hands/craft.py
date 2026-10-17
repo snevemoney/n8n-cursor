@@ -34,7 +34,23 @@ APPS = (
 )
 BIN = Path(os.environ.get("CRAFT_BIN_DIR") or Path.home() / ".local" / "bin")
 # Relative save paths land here, not in the repo.
-WORKDIR = Path(os.environ.get("CRAFT_WORKDIR") or Path.home() / "Documents" / "Craft")
+# ArtCraft Studio tiers: 00 Private (default job work), 01 Internal (methods/WIP), 02 Public (sanitised drafts).
+STUDIO = Path.home() / "ArtCraft Studio"
+WORKDIR = Path(os.environ.get("CRAFT_WORKDIR") or STUDIO / "00 Private" / "Projects" / "Jarvis")
+RECENTS = Path.home() / ".local" / "bin" / "artcraft-recents-sync.py"
+
+
+def add_to_recents(path: str) -> None:
+    """After a save/export, put the file in the app's recents (Evens's rule). Best effort, never raises."""
+    try:
+        full = Path(path).expanduser()
+        if not full.is_absolute():
+            full = WORKDIR / full
+        if full.exists() and RECENTS.is_file():
+            subprocess.run(["python3", str(RECENTS), "--add", str(full)], stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=30, check=False)
+    except Exception:  # noqa: BLE001
+        pass
 MAX_STEPS = 8
 CALL_TIMEOUT = 60.0
 # Face holds its wall while craft is open, so the hand owns the ceiling.
@@ -182,7 +198,13 @@ class _Session:
                 parts.append(str(block.get("text") or ""))
             elif isinstance(block, dict):
                 parts.append(f"[{block.get('type')}]")
-        return {"ok": not res.get("isError"), "answered": True, "text": "\n".join(parts).strip()}
+        ok = not res.get("isError")
+        if ok and SAVE_RE.search(name or ""):
+            for v in (params or {}).values():
+                if isinstance(v, str) and "." in v:
+                    add_to_recents(v)
+                    break
+        return {"ok": ok, "answered": True, "text": "\n".join(parts).strip()}
 
     def observe(self) -> dict:
         if not self.inspect_tool:
@@ -326,6 +348,24 @@ def _timed_out(got: dict) -> bool:
     return "timeout" in str(got.get("spoken") or got.get("error") or "").lower()
 
 
+BARE_OPEN_RE = re.compile(r"^\s*(?:please\s+)?(?:open|launch|start|bring\s+up|pull\s+up)\s+(?:the\s+|my\s+)?[\w\s-]{0,24}?craft\b[\s.!?]*$", re.I)
+FILE_NAMED_RE = re.compile(r"[\w~/.-]+\.(?:pdf|docx?|pptx?|xlsx?|png|jpe?g|md|txt|csv)\b", re.I)
+
+
+def _guessed_path(tool: str, params: dict, task: str) -> str:
+    """A doc_open/file path the model made up: not in the ask and not on disk."""
+    if not re.search(r"open|load|read", tool or "", re.I):
+        return ""
+    for key in ("path", "file", "filename", "doc"):
+        val = str((params or {}).get(key) or "").strip()
+        if not val:
+            continue
+        if Path(val).expanduser().name.lower() in (task or "").lower() or Path(val).expanduser().exists():
+            return ""
+        return Path(val).name
+    return ""
+
+
 def run(args: dict, utterance: str, *, model_fn, session_fn=session, budget_sec: float | None = None) -> dict:
     """Observe → act → observe again, at most MAX_STEPS acts and budget_sec. Returns a hand result.
 
@@ -334,7 +374,11 @@ def run(args: dict, utterance: str, *, model_fn, session_fn=session, budget_sec:
     """
     deadline = time.monotonic() + (BUDGET_SEC if budget_sec is None else budget_sec)
     app = str((args or {}).get("app") or "").strip().lower()
-    task = str((args or {}).get("task") or utterance or "").strip()
+    # Privacy audit 2026-10-16: a model-chosen task (after reading web pages or files) must not replace the owner's
+    # words. The task arg is used only when it is part of what the owner said (the fixed route's own trimming).
+    picked = str((args or {}).get("task") or "").strip()
+    said = str(utterance or "").strip()
+    task = picked if picked and (not said or picked.lower() in said.lower()) else (said or picked)
     if app not in APPS:
         return {"ok": False, "wire": "craft", "spoken": f"I do not have a Craft app called {app or 'that'}.", "steps": []}
     if not task:
@@ -351,6 +395,10 @@ def run(args: dict, utterance: str, *, model_fn, session_fn=session, budget_sec:
             "spoken": f"That ask includes {verb}, and {verb} stays yours. I did not touch {app}. Say the part without it and I will do that.",
             "steps": [],
         }
+    if BARE_OPEN_RE.match(task) and not FILE_NAMED_RE.search(task):
+        # Live 2026-10-13: "open the PDF craft" made the model invent doc_open craft.pdf (ENOENT).
+        # Opening the app is not opening a file: ask which file instead of guessing one.
+        return {"ok": True, "wire": "craft", "spoken": f"{app} is ready. Which file should I open? Say its name or drop it on the Orb.", "steps": []}
     try:
         live = session_fn(app)
     except (CraftError, OSError) as exc:
@@ -407,6 +455,10 @@ def run(args: dict, utterance: str, *, model_fn, session_fn=session, budget_sec:
             params = call.get("args") if isinstance(call.get("args"), dict) else {}
             if name not in allowed:
                 stopped = f"The model picked {name}, which {app} does not offer. I stopped."
+                break
+            guessed = _guessed_path(name, params, task)
+            if guessed:
+                stopped = f"I won't open {guessed}: you didn't name that file and it isn't on disk. Which file do you mean?"
                 break
             refusal = hard_step(app, name, params)
             if refusal:

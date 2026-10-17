@@ -116,6 +116,15 @@ QUESTIONS: dict[str, dict[str, Any]] = {
                          "criteria": {"true": "complete", "false": "cut off or missing what to act on"}},
     "hard_step_hint": {"type": "noul", "instructions": "Does it ask to send, pay, deploy, merge, publish or delete something?",
                        "criteria": {"true": "yes", "false": "no"}},
+    # Evens 10-16: "make jev classify which model to use" (per-prompt best-value routing from his signals)
+    "model_tier": {"type": "choice", "instructions": "Which model tier does doing this request well need?",
+                   "criteria": {"cheap": "a short answer, a lookup, opening an app, site or file, listing or reading one thing",
+                                "mid": "several steps, working a web page or app on screen, a code fix, research with judgment",
+                                "frontier": "architecture, taste or money decisions, a long ambiguous build or design"}},
+    "task_kind": {"type": "choice", "instructions": "What kind of work is it mostly?",
+                  "criteria": {"chat": "talk or a quick answer", "screen": "operating apps or web pages on the screen",
+                               "code": "writing, fixing or running code", "research": "finding and comparing information",
+                               "creative": "video, animation, images, slides or writing with taste", "files": "files and folders"}},
 }
 assert len(QUESTIONS) <= MAX_QUESTIONS
 
@@ -179,7 +188,14 @@ def _summarize(answers: dict[str, Any]) -> dict[str, Any]:
     conf = h.get("confidence")
     return {"handler": h.get("choice"), "confidence": round(float(conf), 3) if isinstance(conf, (int, float)) else None,
             "needs_expensive": noul("needs_expensive"), "addressed": noul("addressed_to_jarvis"),
-            "complete": noul("request_complete"), "hard_hint": noul("hard_step_hint")}
+            "complete": noul("request_complete"), "hard_hint": noul("hard_step_hint"),
+            "model_tier": (answers.get("model_tier") or {}).get("choice"), "model_tier_conf": _conf(answers.get("model_tier")),
+            "task_kind": (answers.get("task_kind") or {}).get("choice")}
+
+
+def _conf(answer) -> float | None:
+    c = (answer or {}).get("confidence")
+    return round(float(c), 3) if isinstance(c, (int, float)) else None
 
 
 # --- 5. decision cache -----------------------------------------------------------------------------

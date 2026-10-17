@@ -11,6 +11,7 @@ import argparse
 import ctypes
 import hashlib
 import math
+import sys
 import ctypes.util
 import importlib.util
 import json
@@ -1289,15 +1290,18 @@ def mac_click(
         if up:
             lib.CFRelease(up)
         return {"ok": False, "wire": "mac_act", "spoken": "UNKNOWN. Mouse click is dark. Allow Accessibility."}
+    shown = _jarvis_cursor_glide(px, py)  # Evens sees Jarvis's blue cursor travel to the target before the click lands
     if hive is not None and not _mac_act_proven(hive=hive, gen=gen, gate=gate):
         lib.CFRelease(down)
         lib.CFRelease(up)
+        _jarvis_cursor_signal("TERM")
         return stopped
+    _jarvis_cursor_signal("USR1")
     lib.CGEventPost(0, down)
     lib.CGEventPost(0, up)
     lib.CFRelease(down)
     lib.CFRelease(up)
-    return {"ok": True, "wire": "mac_act", "op": "click", "spoken": "I clicked."}
+    return {"ok": True, "wire": "mac_act", "op": "click", "spoken": "I clicked.", "jarvis_cursor": shown}
 
 
 def _borrow_ax_field(focus):
@@ -1527,6 +1531,41 @@ def _watch_policy():
     mod = importlib.util.module_from_spec(spec)
     exec(compile(source, str(path), "exec"), mod.__dict__)
     return mod
+
+
+def _pointer_hand():
+    name = "agent_stack_pointer"
+    if name not in sys.modules:
+        import importlib.util as _iu
+        spec = _iu.spec_from_file_location(name, Path(__file__).with_name("pointer.py"))
+        mod = _iu.module_from_spec(spec); sys.modules[name] = mod; spec.loader.exec_module(mod)
+    return sys.modules[name]
+
+
+def _jarvis_cursor_glide(px: float, py: float) -> bool:
+    """Best effort: the blue Jarvis cursor appears at his pointer, glides to (px, py) and holds; never blocks a click."""
+    try:
+        ph = _pointer_hand()
+        if not ph.live():
+            return False
+        try:
+            frm = tuple(ph.cursor_display()["cursor"])
+        except Exception:  # noqa: BLE001
+            frm = (px, py)
+        if not ph.cursor_start(frm, (px, py), 3):
+            return False
+        import time as _t
+        _t.sleep(ph.GLIDE_SEC)
+        return True
+    except Exception:  # noqa: BLE001 — the cursor is a visual aid; Watch gates still decide the click
+        return False
+
+
+def _jarvis_cursor_signal(sig: str) -> None:
+    try:
+        _pointer_hand().cursor_signal(sig)
+    except Exception:  # noqa: BLE001
+        pass
 
 
 def _mac_act_proven(*, hive: Path | None, gen: int | None, gate, consume: bool = False) -> bool:

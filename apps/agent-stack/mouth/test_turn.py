@@ -59,7 +59,7 @@ class MouthDoorTest(unittest.TestCase):
         self.assertIn("cancel_tts", SCRIPT.read_text(encoding="utf-8"))
 
     def test_desktop_off_action_does_not_fall_through_to_conversation(self) -> None:
-        for utterance in ("click the Calculator button", "please type this into the window"):
+        for utterance in ("please type this into the window",):  # a named click goes to the Z02 confirm-gated hand (below)
             with self.subTest(utterance=utterance), tempfile.TemporaryDirectory(prefix="desktop-off-") as tmp:
                 hive = Path(tmp)
                 (hive / "bus").mkdir()
@@ -69,6 +69,15 @@ class MouthDoorTest(unittest.TestCase):
                 self.assertFalse(out["ok"])
                 self.assertEqual(out["execution"]["reason"], "desktop_not_armed")
                 self.assertFalse(MOD.load_json(hive / "bus" / "state.json")["watch"]["armed"])
+
+    def test_desktop_off_named_click_is_confirm_gated_pointer(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="desktop-off-click-") as tmp:
+            hive = Path(tmp)
+            (hive / "bus").mkdir()
+            (hive / "bus" / "state.json").write_text(json.dumps({"watch": {"armed": False}}))
+            with patch.object(MOD.PIPELINE, "apply_pipeline_iter", side_effect=AssertionError("action fell through into conversation")):
+                out = MOD.apply_turn("click the Calculator button", hive=hive)
+            self.assertNotIn("Clicked", out.get("spoken") or "")  # never clicks without a confirm (and never outside the live Face)
 
     def test_door_terminal_replaces_previous_response_evidence(self) -> None:
         with tempfile.TemporaryDirectory(prefix="door-evidence-") as tmp:

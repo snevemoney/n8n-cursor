@@ -286,6 +286,25 @@ def _pdf_first_page(path: Path) -> str:
     return (proc.stdout or "").strip()[:4000]
 
 
+def _scrub_secret_values(text: str) -> str:
+    try:
+        spec = importlib.util.spec_from_file_location("agent_stack_workspace_read_drop", Path(__file__).resolve().parents[1] / "hands" / "workspace_read.py")
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        return mod.scrub_text(text)
+    except Exception:  # noqa: BLE001 - if the scrubber can't load, keep nothing rather than raw keys
+        return ""
+
+
+def _secret_drop(src: Path) -> bool:
+    """Secret stores never go on the bus: the shared permissions check, by the given and the resolved path."""
+    try:
+        spec = importlib.util.spec_from_file_location("agent_stack_permissions_drop", Path(__file__).resolve().parents[1] / "hands" / "permissions.py")
+        perm = importlib.util.module_from_spec(spec); spec.loader.exec_module(perm)
+        return bool(perm.is_secret_path(str(src)) or perm.is_secret_path(str(src.resolve())))
+    except Exception:  # noqa: BLE001 — if the check cannot run, refuse rather than read blind
+        return True
+
+
 def save_drop(paths: list, *, hive: Path | None = None, gen: int | None = None) -> dict:
     """Store a dropped file on the bus. Never execute. Never open."""
     dest_hive = hive if hive is not None else HIVE
@@ -297,6 +316,7 @@ def save_drop(paths: list, *, hive: Path | None = None, gen: int | None = None) 
     src = Path(names[0]).expanduser()
     if not src.is_file():
         return {"ok": False, "wire": "drop", "spoken": "UNKNOWN. That drop is not a file on disk."}
+    secret_drop = _secret_drop(src)  # Evens 10-16: flag, never stop (it was refused here)
     try:
         size = src.stat().st_size
     except OSError:
@@ -334,6 +354,8 @@ def save_drop(paths: list, *, hive: Path | None = None, gen: int | None = None) 
             ".csv": "text/csv",
         }[suffix]
         text = _plain_text(src)
+    if secret_drop and text:
+        text = _scrub_secret_values(text)  # the values stay masked on the bus and in model context
     payload = {
         "ok": True,
         "wire": "drop",
@@ -344,7 +366,8 @@ def save_drop(paths: list, *, hive: Path | None = None, gen: int | None = None) 
         "text": text,
         "still": still,
         "captured_at": now_iso(),
-        "spoken": f"I have {src.name} on the bus. Same conversation.",
+        "spoken": ("Heads up, this file holds secrets (keys or passwords); their values stay masked. " if secret_drop else "")
+                  + f"I have {src.name} on the bus. Same conversation.",
     }
     def apply(bus: dict) -> dict:
         turns = bus.get("turns") if isinstance(bus.get("turns"), list) else []
@@ -374,6 +397,8 @@ def set_watch_arm(
         else "Watch off."
     )
 
+    cleared: list = []
+
     def apply(bus: dict) -> dict:
         watch = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}
         if armed and not evens and not bool(watch.get("armed")):
@@ -386,6 +411,11 @@ def set_watch_arm(
         else:
             watch["held"] = False
             watch["spoken"] = "Watch off."
+            # Z04 "share ends sight": when watching stops, what was seen is cleared, not kept on the bus
+            shot = (watch.get("screen") or {}).get("path") if isinstance(watch.get("screen"), dict) else ""
+            for k in ("frame_id", "captured_at", "state", "safari", "screen"):
+                watch.pop(k, None)
+            cleared.append(shot)
         bus["watch"] = watch
         bus["updated_at"] = now_iso()
         return bus
@@ -393,6 +423,13 @@ def set_watch_arm(
     bus = act_if_current(dest_hive, gen, apply, evens=evens)
     if bus is None:
         return _denied("watch")
+    for shot in cleared:  # the screenshot file goes too, but only one inside this hive's bus folder
+        try:
+            sp = Path(shot or "").resolve()
+            if shot and (Path(dest_hive) / "bus").resolve() in sp.parents and sp.is_file():
+                sp.unlink()
+        except OSError:
+            pass
     watch = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}
     actually = bool(watch.get("armed"))
     return {

@@ -1,0 +1,20 @@
+/** Z39: click a note to focus its neighbours, click another to trace the shortest path, same note again clears. */
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+const html = fs.readFileSync(path.join(__dirname, 'pane.html'), 'utf8');
+const s = html.indexOf('    function linkEnds(l)'); const e = html.indexOf('    function nodeName(id)', s);
+assert.ok(s > 0 && e > s);
+const ctx = {}; vm.createContext(ctx); vm.runInContext(html.slice(s, e), ctx);
+const links = JSON.stringify([{ source: 'A', target: 'B' }, { source: { id: 'B' }, target: { id: 'C' } }, { source: 'C', target: 'D' }, { source: 'A', target: 'E' }, { source: 'X', target: 'Y' }]);
+const pick = (sel, id) => JSON.parse(JSON.stringify(vm.runInContext(`graphPick(${JSON.stringify(sel)}, ${JSON.stringify(id)}, ${links})`, ctx)));
+let sel = pick({ a: null, b: null, near: [], path: [] }, 'A');
+assert.deepStrictEqual(sel.near.sort(), ['A', 'B', 'E']); assert.deepStrictEqual(sel.path, []);
+sel = pick(sel, 'D');
+assert.deepStrictEqual(sel.path, ['A', 'B', 'C', 'D'], 'shortest path A→D');
+const none = pick(pick({ a: null, b: null, near: [], path: [] }, 'A'), 'X');
+assert.deepStrictEqual(none.path, [], 'no path between unconnected notes');
+const cleared = pick(pick({ a: null, b: null, near: [], path: [] }, 'A'), 'A');
+assert.strictEqual(cleared.a, null, 'same note again clears');
+console.log('ok graph path');

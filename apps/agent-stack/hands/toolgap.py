@@ -1,0 +1,25 @@
+"""Z84 (dCK 10:49): an ask that names an app Jarvis has no tool for -> say so plainly ("<App> isn't in your
+arsenal yet") instead of improvising. App list is deliberately small; inventory = configured MCP servers."""
+from __future__ import annotations
+
+import re
+
+APPS = {"figma": "Figma", "notion": "Notion", "canva": "Canva", "airtable": "Airtable", "trello": "Trello", "asana": "Asana",
+        "hubspot": "HubSpot", "salesforce": "Salesforce", "shopify": "Shopify", "quickbooks": "QuickBooks", "stripe": "Stripe",
+        "zapier": "Zapier", "mailchimp": "Mailchimp", "clickup": "ClickUp", "monday": "Monday.com", "linkedin": "LinkedIn",
+        "instagram": "Instagram", "tiktok": "TikTok", "dropbox": "Dropbox", "zoom": "Zoom", "spotify": "Spotify"}
+# Only actions that need the service's own connection. Opening, reading or checking a site works in Safari and the
+# operator can drive the browser (live 10-16: "open LinkedIn" / "open Notion in Safari" got "isn't in your arsenal").
+ACT_RE = re.compile(r"\b(?:post|update|create|add|send|change|edit|publish|upload|sync|import|export)\b", re.I)
+
+
+def gap(utterance: str, inventory_names: list[str]) -> str | None:
+    low = (utterance or "").lower()
+    if not ACT_RE.search(low) or re.match(r"^\W*(?:hey\s+)?(?:jarvis\W*)?(?:please\s+)?(?:write|draft|compose|critique|rewrite)\b", low):
+        return None  # Z83: 'write a LinkedIn post' is a writing ask, not a LinkedIn action
+    have = " ".join(n.lower() for n in inventory_names or [])
+    for key, name in APPS.items():
+        if re.search(rf"\b{key}\b", low) and key not in have:
+            return (f"{name} isn't in your arsenal yet, sir, so I can't reach it from here and I won't guess. "
+                    f"Connect {name} as a tool (an MCP server or a Zapier action) and I'll use it.")
+    return None
