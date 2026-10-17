@@ -1646,6 +1646,12 @@ def _idle_until_spoken_to(task) -> bool:
             # before doing anything. Each request gets its own budget on top of what the session already spent.
             st.update(status="RUNNING", step=0, turn_at=time.time(), pending_cap=False,
                       cost_cap=round(float(st.get("cost_usd") or 0) + HX.JOB_COST_CAP, 2))
+            # live 10-17: five cheap Calculator/Finder requests ran on the Sonnet pin because they joined an idle session
+            # that kept the FIRST request's model. Every new request gets its own pick (cheap-first per request).
+            line = next((r.get("text") for r in task.rows("inbox.jsonl")[-1:]), "") or str(msgs[-1].get("content") or "")
+            pick = choose_model(str(line)[:2000])
+            st.update(tier=pick["tier"], model=pick["model"], chain=pick.get("chain") or [pick["model"]],
+                      kind=pick.get("kind", "any"), model_why=pick["why"], jev=pick.get("jev") or {})
             task.write("state.json", st)
             return True
         time.sleep(1.0)
@@ -1943,7 +1949,11 @@ def status(hive: Path, task_id: str | None = None) -> dict:
     if not task_id or not (root / task_id).exists():
         return {"status": "NONE"}
     task = Task(root / task_id)
-    return {**task.read("state.json"), "goal": task.read("request.json", {}).get("goal", "")}
+    st = task.read("state.json")
+    if st.get("status") in ("RUNNING", "QUEUED", "IDLE") and st.get("pid") and not _alive(st.get("pid")):
+        # matrix 10-16 "jobtruth": two records said RUNNING while their PIDs were gone. What he is told is the truth.
+        st = {**st, "status": "STALLED", "recorded_status": st["status"], "worker_alive": False}
+    return {**st, "goal": task.read("request.json", {}).get("goal", "")}
 
 
 if __name__ == "__main__":

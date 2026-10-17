@@ -254,6 +254,35 @@ class OpenableRows(unittest.TestCase):  # live 10-17: Finder rows refused AXPres
         self.assertEqual([c.get("action") for c in calls if c.get("op") == "ax_act"], ["AXPress", "AXOpen"])
 
 
+class TruthfulStatus(unittest.TestCase):  # matrix "jobtruth": RUNNING with a dead PID was reported as running
+    def test_a_running_record_with_a_dead_worker_is_stalled(self):
+        d = Path(tempfile.mkdtemp()); (d / "operator-tasks" / "t1").mkdir(parents=True)
+        (d / "operator-tasks" / "t1" / "state.json").write_text(json.dumps({"task_id": "t1", "status": "RUNNING", "pid": 999999999}))
+        (d / "operator-tasks" / "latest.json").write_text(json.dumps({"task_id": "t1"}))
+        st = O.status(d)
+        self.assertEqual(st["status"], "STALLED"); self.assertEqual(st["recorded_status"], "RUNNING"); self.assertFalse(O.running(d))
+
+
+class RepickPerRequest(unittest.TestCase):  # live 10-17: cheap requests inherited the Sonnet pick of the idle session they joined
+    def test_idle_wake_repicks_the_model_for_the_new_line(self):
+        d = Path(tempfile.mkdtemp()); task = O.Task(d / "t"); task.path.mkdir(parents=True)
+        task.write("state.json", {"status": "IDLE", "tier": "owner", "model": "anthropic/claude-sonnet-5.5", "cost_usd": 0.5})
+        task.write("messages.json", [])
+        (task.path / "inbox.jsonl").write_text(json.dumps({"at": 1, "text": "click 12 times 7"}) + "\n")
+        with mock.patch.object(O, "IDLE_S", 3), mock.patch.object(O, "_jev_tier", return_value={"tier": "cheap", "conf": 0.95, "kind": "screen"}), \
+             mock.patch.object(O, "_owner_model", return_value="anthropic/claude-sonnet-5.5"):
+            self.assertTrue(O._idle_until_spoken_to(task))
+        st = task.read("state.json")
+        self.assertEqual(st["tier"], "cheap"); self.assertEqual(st["model"], "deepseek/deepseek-v4-flash")
+
+
+class ShellExitTruth(unittest.TestCase):  # matrix "honesty"/"term": the cwd printf must not mask a failing command
+    def test_failing_command_reports_its_exit_code(self):
+        tools = O.Tools(Path(tempfile.mkdtemp()))
+        got = tools.shell({"command": "false"})
+        self.assertTrue(got["text"].startswith("exit 1"), got["text"][:80])
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")

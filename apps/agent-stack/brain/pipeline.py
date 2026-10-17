@@ -6818,6 +6818,8 @@ def _operator_line(state: dict) -> str:
         return "I need you before I continue: " + str(state.get("summary") or "")
     if status in ("RUNNING", "QUEUED"):
         return f"I'm working on it (step {state.get('step', 0)}). It keeps going in the background; ask me how it's going anytime."
+    if status == "STALLED":
+        return "That job's worker is gone, so it is not running any more. Ask me to pick it up and I'll resume it from where it stopped."
     if status == "MODEL_UNAVAILABLE":
         return ("That task stopped at its first step because my model call failed. The task is saved; "
                 "ask me again and I'll start it over.")
