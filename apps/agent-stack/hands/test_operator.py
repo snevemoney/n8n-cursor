@@ -475,6 +475,8 @@ class SlowToolStatus(unittest.TestCase):  # Z81
             O.step_once(task, Tl(), model(0.6))
         lines = [r["text"] for r in task.rows("speech.jsonl")]
         self.assertEqual(lines, ["Still on it; that command is taking a moment."])
+        self.assertTrue(task.rows("speech.jsonl")[0].get("filler"))
+        self.assertTrue(all(w in O.SLOW_WORDS for w in ("find_files", "grep", "read_file")))
 
 
 class VoiceSpeed(unittest.TestCase):  # X07
@@ -525,6 +527,20 @@ class AnswerTheQuestion(unittest.TestCase):  # live 10-17: "What time is it?" ->
         self.assertEqual(self._gate("What time is it?", "It's 5:21 in the morning, sir."), "")
         self.assertEqual(self._gate("Quelle heure est-il ?", "Il est 5 h 21, samedi 17 octobre."), "")
         self.assertEqual(self._gate("Open Calculator", "Opened Calculator."), "")  # not a question
+
+
+class FillerNeverSilencesTheAnswer(unittest.TestCase):  # live 10-17: the time he asked for was never spoken
+    def test_done_summary_is_spoken_after_a_filler(self):
+        d = Path(tempfile.mkdtemp()); task = O.Task(d / "t"); task.path.mkdir(parents=True)
+        task.write("state.json", {"status": "RUNNING", "turn_at": 1}); task.write("request.json", {"goal": "What time is it?"})
+        task.speak("Still on it; the file search is taking a moment.", filler=True)
+        task.trace({"event": "tool", "tool": "shell", "args": {}, "at": 2})
+        task.write("messages.json", [{"role": "user", "content": "What time is it?"}])
+        model = lambda m, t: {"ok": True, "calls": [{"tool": "done", "args": {"summary": "It's 5:37 in the morning, sir.", "evidence": "date"}, "call_id": "c"}]}
+        with mock.patch.object(O, "_authority") as au:
+            au.return_value.authorize.return_value = ("allow", "")
+            O.step_once(task, mock.Mock(), model)
+        self.assertEqual([r["text"] for r in task.rows("speech.jsonl")][-1], "It's 5:37 in the morning, sir.")
 
 
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"

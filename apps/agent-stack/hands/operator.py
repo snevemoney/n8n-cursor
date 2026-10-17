@@ -68,6 +68,7 @@ SYSTEM = (
     "bring_to_front only when he allows it. It refuses with a code (minimized_or_hidden_window, off_space_or_ax_unresolved, "
     "element_outside_target_window, stale token): read the code, re-snapshot, and use the exact element action it names; "
     "never guess a pixel. Windows parked in Stage Manager's side strip are thumbnails: say so instead of clicking blind. "
+    "For the time or date, his Mac's clock (shell `date`) is the answer; no web check. "
     "Answer in the language he used (English or French), with the same tools and checks either way (Z45). If a "
     "high-stakes detail is missing and nothing on his Mac or vault has it, ask exactly one fill-in question instead of "
     "guessing (Z52). After finishing something that has a natural next step, offer it in one short line (Z34). "
@@ -454,7 +455,9 @@ TOOLS = [
     _fn("say", "Say something to Evens right now and keep working: your answer to a plain question, what you are "
                "about to do, or what you just found. Speak plain English, one or two sentences.", {"text": S}, ["text"]),
     _fn("ask_owner", "Stop and ask Evens a question or for an OK.", {"question": S}, ["question"]),
-    _fn("done", "Finish: summary of what was done and the evidence.", {"summary": S, "evidence": S}, ["summary"]),
+    _fn("done", "Finish. summary = what he hears: the answer or the result itself, said the way you would say it to him "
+        "(\"It's 5:37 in the morning, sir.\"), never a report about your work (\"Reported the time\"). evidence = the proof.",
+        {"summary": S, "evidence": S}, ["summary"]),
 ]
 
 
@@ -1238,10 +1241,11 @@ class Task:
                 (self.path / "inbox.jsonl").write_text("")
         return [x for x in lines if str(x).strip()]
 
-    def speak(self, line: str) -> None:
-        """One spoken line, now. The Face streams these while the loop keeps working."""
+    def speak(self, line: str, filler: bool = False) -> None:
+        """One spoken line, now. The Face streams these while the loop keeps working. A filler ("still on it") never
+        stands in for the answer (live 10-17: the slow-tool line silenced the time he asked for)."""
         with (self.path / "speech.jsonl").open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"at": time.time(), "text": plain(line)}) + "\n")
+            fh.write(json.dumps({"at": time.time(), "text": plain(line), **({"filler": True} if filler else {})}) + "\n")
 
     def rows(self, name: str) -> list:
         out = []
@@ -1625,7 +1629,7 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
             else:
                 if name in DRIVING_TOOLS:
                     task.write("state.json", {**task.read("state.json"), "driving": {"tool": name, "since": time.time()}})
-                slow = threading.Timer(SLOW_TOOL_S, lambda: task.speak(slow_line(name)))  # Z81: never silent on a slow tool
+                slow = threading.Timer(SLOW_TOOL_S, lambda: task.speak(slow_line(name), filler=True))  # Z81: never silent on a slow tool
                 slow.daemon = True
                 if name not in ("say", "plan", "done", "ask_owner"):
                     slow.start()
@@ -1666,7 +1670,8 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
         status, args = terminal
         state = task.read("state.json")
         line = str(args.get("summary") or args.get("question") or "")
-        spoke = [r for r in task.rows("speech.jsonl") if float(r.get("at") or 0) >= float(state.get("turn_at") or 0)]
+        spoke = [r for r in task.rows("speech.jsonl") if float(r.get("at") or 0) >= float(state.get("turn_at") or 0)
+                 and not r.get("filler")]
         if line.strip() and (status == "WAITING_OWNER" or not spoke):
             # Evens 10-16 "sometimes Jarvis repeats its response twice": say + done carried the same answer and both
             # were spoken. The done summary is spoken only when nothing was said this turn; a question always is.
@@ -1954,7 +1959,10 @@ def takeover_window() -> float:
 SLOW_TOOL_S = float(os.environ.get("JARVIS_SLOW_TOOL_S") or 20)
 SLOW_WORDS = {"shell": "that command", "job": "that job", "web_search": "the search", "fetch_url": "that page",
               "delegate": "the helper", "signal": "the video", "artifact": "the page", "mcp": "that tool",
-              "computer": "the screen", "safari": "Safari", "app": "that app", "app_type": "the typing", "open": "opening it"}
+              "computer": "the screen", "safari": "Safari", "app": "that app", "app_type": "the typing", "open": "opening it",
+              "find_files": "the file search", "grep": "the text search", "list_dir": "that folder", "read_file": "that file",
+              "write_file": "saving", "edit_file": "the edit", "methods": "the method search", "vault_graph": "the vault scan",
+              "schedule": "the schedule", "config": "the setting", "loop": "the loop", "browser": "the browser"}
 
 
 def slow_line(tool: str) -> str:
