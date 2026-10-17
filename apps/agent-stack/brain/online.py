@@ -1747,6 +1747,16 @@ def with_cache_marks(messages: list[dict], model: str) -> list[dict]:
     return out
 
 
+MAX_TOKENS_STEPDOWN = (4000, 1500)
+
+
+def _http_error_text(exc) -> str:
+    try:
+        return exc.read().decode("utf-8", "replace")[:600]
+    except Exception:  # noqa: BLE001 - a body we cannot read is just no hint
+        return ""
+
+
 def call_openrouter_messages(
     messages: list[dict],
     tools: list[dict],
@@ -1778,13 +1788,22 @@ def call_openrouter_messages(
         }
         if not allow_reasoning:
             body["reasoning"] = {"enabled": False}  # Opus 5.5 refuses this ("reasoning is mandatory"): operator opts out
-        try:
-            data = _http_json(OPENROUTER_URL, data=body, headers=headers, timeout=attempt_sec)
-        except urllib.error.HTTPError as exc:
-            last_err = f"{mid}: http {exc.code}"
-            continue
-        except (urllib.error.URLError, TimeoutError, OSError) as exc:
-            last_err = f"{mid}: {type(exc).__name__}"
+        data = None
+        # live 10-17: a low balance refuses a 12000-token ceiling ("requires more credits, or fewer max_tokens") while
+        # the same model answers at 4000; step the ceiling down on the same model before giving up on it
+        for cap in (body["max_tokens"], *[c for c in MAX_TOKENS_STEPDOWN if c < body["max_tokens"]]):
+            body["max_tokens"] = cap
+            try:
+                data = _http_json(OPENROUTER_URL, data=body, headers=headers, timeout=attempt_sec)
+                break
+            except urllib.error.HTTPError as exc:
+                last_err = f"{mid}: http {exc.code}"
+                if exc.code != 402 or "max_tokens" not in _http_error_text(exc):
+                    break
+            except (urllib.error.URLError, TimeoutError, OSError) as exc:
+                last_err = f"{mid}: {type(exc).__name__}"
+                break
+        if data is None:
             continue
         choice = ((data.get("choices") or [{}])[0]) if isinstance(data, dict) else {}
         msg = choice.get("message") if isinstance(choice.get("message"), dict) else {}

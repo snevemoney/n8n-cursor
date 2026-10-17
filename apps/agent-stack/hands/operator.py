@@ -366,6 +366,8 @@ TOOLS = [
     _fn("read_file", "Read a text file (or a line range).", {"path": S, "start_line": I, "max_lines": I}, ["path"]),
     _fn("write_file", "Create or overwrite a file with content.", {"path": S, "content": S}, ["path", "content"]),
     _fn("edit_file", "Replace one exact text occurrence in a file.", {"path": S, "old": S, "new": S}, ["path", "old", "new"]),
+    _fn("undo", "Take back your own newest file writes/edits in this job (steps=N, default 1): old files come back, files "
+        "you created go to the Trash. A file changed since you wrote it is left alone.", {"steps": I}, []),
     _fn("list_dir", "List a folder.", {"path": S}, ["path"]),
     _fn("find_files", "Find files by name glob under a folder.", {"pattern": S, "under": S}, ["pattern"]),
     _fn("grep", "Search file contents for a regex under a path.", {"pattern": S, "path": S}, ["pattern", "path"]),
@@ -516,6 +518,7 @@ SD = _load("safari_dom", "safari_dom.py")
 WH = _load("web_helpers", "web_helpers.py")
 PR = _load("pattern_recall", "pattern_recall.py")
 SV = _load("scroll_video", "scroll_video.py")
+UJ = _load("undo_journal", "undo_journal.py")
 WEB_HELPERS = CONFIG_DIR / "web-helpers"
 
 
@@ -631,8 +634,7 @@ class Tools:
 
     def write_file(self, a):
         p = _path(a["path"], self.cwd)
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(str(a["content"]))
+        UJ.write(self.dir, p, str(a["content"]))  # keeps the old bytes so undo can take it back
         ok = p.read_text() == str(a["content"])
         return {"text": f"wrote {p} ({len(str(a['content']))} chars); read back {'matches' if ok else 'DIFFERS'}"}
 
@@ -642,8 +644,11 @@ class Tools:
         n = text.count(str(a["old"]))
         if n != 1:
             return {"text": f"edit refused: the old text occurs {n} times in {p} (needs exactly 1)"}
-        p.write_text(text.replace(str(a["old"]), str(a["new"])))
+        UJ.write(self.dir, p, text.replace(str(a["old"]), str(a["new"])))
         return {"text": f"edited {p}"}
+
+    def undo(self, a):
+        return {"text": "; ".join(UJ.undo(self.dir, int(a.get("steps") or 1))) + "."}
 
     def list_dir(self, a):
         p = _path(a["path"], self.cwd)
@@ -2143,7 +2148,7 @@ class input_lease:
         return False
 
 
-ACTING_TOOLS = {"web_helper", "scroll_video", "computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app", "schedule", "focus"}
+ACTING_TOOLS = {"undo", "web_helper", "scroll_video", "computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app", "schedule", "focus"}
 
 
 # Evens 10-17 "Jarvis is still not always talking plain English": the card read "Used app_type to create and type into
