@@ -1189,7 +1189,8 @@ for _t, _env in (("cheap", "JARVIS_TIER_CHEAP"), ("mid", "JARVIS_TIER_MID"), ("f
     if os.environ.get(_env):  # one-model override per tier
         POOLS[_t] = {"any": [os.environ[_env].strip()]}
 TIER_MODELS = {t: POOLS[t]["any"][0] for t in TIERS}
-CHEAP_FIRST = (os.environ.get("JARVIS_CHEAP_FIRST") or "1") != "0"  # Evens 10-17 "make it cost 0.01 or less"
+CHEAP_FIRST = (os.environ.get("JARVIS_CHEAP_FIRST") or "1") != "0"
+CHEAP_ESCALATE_STEPS = int(os.environ.get("JARVIS_CHEAP_ESCALATE_STEPS") or 8)  # Evens 10-17 "make it cost 0.01 or less"
 JEV_MIN_CONF = 0.6  # below it Jev has no opinion and the job goes UP a tier, never down (jev-preflight rule)
 SCORES = Path.home() / "Library" / "Caches" / "jarvis" / "model-scores.json"
 MIN_SAMPLES = 3
@@ -1242,9 +1243,15 @@ def _jev_tier(goal: str) -> dict | None:
         pf = jev.start(goal, live=True)
         live = pf.result(wait=True) if pf is not None else None
         tier = (live or {}).get("model_tier")
+        conf = float((live or {}).get("model_tier_conf") or 0)
+        ne = (live or {}).get("needs_expensive")
+        if tier not in TIERS and isinstance(ne, (int, float)):
+            # live 10-17: Jev answered in 0.3 s but without model_tier, so every job fell to the Sonnet pin ($0.05 for one line)
+            tier = "cheap" if ne < 0.35 else "mid" if ne < 0.7 else "frontier"
+            conf = round(max(ne, 1 - ne), 3)
         if tier in TIERS:
             kind = (live or {}).get("task_kind")
-            return {"tier": tier, "conf": float((live or {}).get("model_tier_conf") or 0), "kind": kind if kind in KINDS else "any"}
+            return {"tier": tier, "conf": conf, "kind": kind if kind in KINDS else "any"}
     except Exception:  # noqa: BLE001
         return None
     return None
@@ -1542,6 +1549,14 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
             if now.get("tier") != tier or now.get("kind") != kind:  # it moved for eyes
                 tier, kind = now.get("tier"), now.get("kind") or kind
                 model_fn = fixed_fn or _model_fn(tier, now.get("chain"))
+            owner_pin = _owner_model() if CHEAP_FIRST else ""
+            if status is None and tier == "cheap" and owner_pin and now.get("step", 0) >= CHEAP_ESCALATE_STEPS:
+                # cheap-first safety net: a job still going after N cheap steps is not cheap; his pinned model takes it
+                now.update(tier="owner", model=owner_pin, chain=[owner_pin], model_why=f"still working after {CHEAP_ESCALATE_STEPS} cheap steps")
+                task.write("state.json", now); task.trace({"event": "escalate", "to": "owner", "model": owner_pin})
+                tier = "owner"
+                model_fn = fixed_fn if fixed_fn else _model_fn(tier, [owner_pin])
+                continue
             if status == "MODEL_UNAVAILABLE" and tier in TIERS and next_tier(tier):
                 # the cheaper model failed: escalate ONE tier and keep the same job (match-model-to-task)
                 record_outcome(kind, str(now.get("model") or ""), False)

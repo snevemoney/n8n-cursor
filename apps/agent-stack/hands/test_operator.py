@@ -221,6 +221,20 @@ class OneBlueCursor(unittest.TestCase):  # Evens 10-17: cua's cursor in Jarvis b
         self.assertFalse(O.OWN_CURSOR)
 
 
+class JevNeedsExpensive(unittest.TestCase):  # live 10-17: Jev omitted model_tier; needs_expensive still says cheap
+    def test_tier_is_derived_from_needs_expensive(self):
+        class PF:
+            def __init__(self, live): self.live = live
+            def result(self, wait=True): return self.live
+        class J:
+            live = {"handler": "tool", "confidence": 1.0, "needs_expensive": 0.19, "model_tier": None}
+            @classmethod
+            def start(cls, g, live=True): return PF(cls.live)
+        with mock.patch.object(O, "_load_brain", return_value=J):
+            got = O._jev_tier("type a line")
+        self.assertEqual(got["tier"], "cheap"); self.assertGreaterEqual(got["conf"], O.JEV_MIN_CONF)
+
+
 class CheapFirst(unittest.TestCase):  # Evens 10-17: $0.01 or less for simple jobs, even with his Sonnet pin
     def test_cheap_jobs_skip_the_pin_and_real_work_keeps_it(self):
         with mock.patch.object(O, "_owner_model", return_value="anthropic/claude-sonnet-5.5"), \
