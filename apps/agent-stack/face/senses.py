@@ -397,6 +397,8 @@ def set_watch_arm(
         else "Watch off."
     )
 
+    cleared: list = []
+
     def apply(bus: dict) -> dict:
         watch = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}
         if armed and not evens and not bool(watch.get("armed")):
@@ -409,6 +411,11 @@ def set_watch_arm(
         else:
             watch["held"] = False
             watch["spoken"] = "Watch off."
+            # Z04 "share ends sight": when watching stops, what was seen is cleared, not kept on the bus
+            shot = (watch.get("screen") or {}).get("path") if isinstance(watch.get("screen"), dict) else ""
+            for k in ("frame_id", "captured_at", "state", "safari", "screen"):
+                watch.pop(k, None)
+            cleared.append(shot)
         bus["watch"] = watch
         bus["updated_at"] = now_iso()
         return bus
@@ -416,6 +423,13 @@ def set_watch_arm(
     bus = act_if_current(dest_hive, gen, apply, evens=evens)
     if bus is None:
         return _denied("watch")
+    for shot in cleared:  # the screenshot file goes too, but only one inside this hive's bus folder
+        try:
+            sp = Path(shot or "").resolve()
+            if shot and (Path(dest_hive) / "bus").resolve() in sp.parents and sp.is_file():
+                sp.unlink()
+        except OSError:
+            pass
     watch = bus.get("watch") if isinstance(bus.get("watch"), dict) else {}
     actually = bool(watch.get("armed"))
     return {
