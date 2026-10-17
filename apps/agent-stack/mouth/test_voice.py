@@ -494,3 +494,14 @@ class VoiceBlend(unittest.TestCase):  # Evens 10-17 chose blend_lewis50_michael5
             def get_voice_style(self, n): return {"bm_lewis": 2.0, "am_michael": 4.0}[n]
         self.assertEqual(V.voice_style(E(), "bm_lewis:50+am_michael:50"), 3.0)
         self.assertEqual(V.voice_style(E(), "bm_lewis"), "bm_lewis")
+
+
+class SpokenCut(unittest.TestCase):  # live 10-17: essays were read aloud and cut mid-word at 400 chars
+    def test_long_text_is_spoken_in_whole_sentences_then_handed_to_the_board(self):
+        long = ("The first finding is clear. " * 30).strip()
+        out = MOD.spoken_cut(long)
+        self.assertTrue(out.endswith(" The rest is on the board."))
+        self.assertLess(len(out), 400)
+        self.assertTrue(out.replace(" The rest is on the board.", "").endswith("clear."))
+        self.assertEqual(MOD.spoken_cut("Short line."), "Short line.")
+        self.assertIn("The rest is on the board", MOD.speakable("word " * 200))

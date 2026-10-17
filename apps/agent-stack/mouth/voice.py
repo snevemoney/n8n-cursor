@@ -698,7 +698,21 @@ def speakable(text: str) -> str:
     t = re.sub(r"(?m)^\s*(?:[-*\u2022]|\d+[.)])\s+", "", t)
     t = re.sub(r"(?m)^\s*\|.*\|\s*$", "", t)  # table rows are for the card
     t = _SHOUT.sub(lambda m: m.group(0).lower(), t)
-    return re.sub(r"[ \t]+", " ", re.sub(r"\n{2,}", "\n", t)).strip()
+    t = re.sub(r"[ \t]+", " ", re.sub(r"\n{2,}", "\n", t)).strip()
+    return spoken_cut(t)
+
+
+SPOKEN_CAP = 360  # live 10-17: 11 of 93 spoken lines were over 400 chars (one 3,784) and TEXT_CAP cut them mid-word
+
+
+def spoken_cut(t: str, cap: int = SPOKEN_CAP) -> str:
+    """The voice says whole sentences up to the cap; the rest stays on the board (the card shows the full text)."""
+    if len(t) <= cap:
+        return t
+    head = t[:cap]
+    stop = max(head.rfind(". "), head.rfind("! "), head.rfind("? "), head.rfind(".\n"))
+    head = head[:stop + 1] if stop > cap // 3 else head.rsplit(" ", 1)[0] + "…"
+    return head.strip() + " The rest is on the board."
 
 
 def tts_audio(text: str, *, gen: int | None = None, hive: Path | None = None) -> tuple[bytes, str]:

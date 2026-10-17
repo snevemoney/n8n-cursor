@@ -6811,8 +6811,9 @@ def _operator_hand():
 def _operator_line(state: dict) -> str:
     status = str(state.get("status") or "")
     if status in ("DONE", "IDLE"):  # IDLE = done and still listening (live 10-16: "the task ended as idle after 1 steps")
-        evidence = str(state.get("evidence") or "").strip()
-        return (str(state.get("summary") or "Done.").strip() + (f" Evidence: {evidence}" if evidence else ""))[:1200]
+        # live 10-17: "Evidence: /Users/.../file.html ..." was read aloud (one line 3,784 chars); paths and links stay
+        # on the card (the state keeps `evidence`), the voice gets the summary.
+        return str(state.get("summary") or "Done.").strip()[:1200]
     if status == "WAITING_OWNER":
         return "I need you before I continue: " + str(state.get("summary") or "")
     if status in ("RUNNING", "QUEUED"):
