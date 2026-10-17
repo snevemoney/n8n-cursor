@@ -424,6 +424,8 @@ TOOLS = [
     _fn("vault_graph", "His Obsidian vault's link graph: op=focus name=<note> puts that note on his Orb graph; op=backlinks|links "
         "name=<note>; op=orphans|dead_ends|unresolved|tags for the whole vault. Read-only.",
         {"op": S, "name": S}, ["op"]),
+    _fn("repo_map", "Ranked map of a code repo: which files define the most-used functions and classes. Read it before "
+        "editing an unfamiliar repo. path=<folder> focus=<optional path part, e.g. hands/>.", {"path": S, "focus": S}, ["path"]),
     _fn("focus", "Focus lock (Z17): op=start minutes=N locks on the app he is in now, counts drift and gives a stand-down "
         "score at the end; op=stop ends it now. Only when he asks for focus.", {"op": S, "minutes": I}, ["op"]),
     _fn("schedule", "Scheduled read-only loops he asks for (the Face's loop runner runs them; cards land in his Orb inbox): "
@@ -1052,6 +1054,9 @@ class Tools:
             t = Task(self.dir)  # Z70: the Orb lights this note (orb_view carries it)
             t.write("state.json", {**t.read("state.json"), "graph_focus": {"note": got["note"], "at": time.time()}})
         return {"text": got["text"]}
+
+    def repo_map(self, a):
+        return {"text": _clip(_load("repo_map", "repo_map.py").answer(str(a.get("path") or self.cwd), str(a.get("focus") or ""))["text"])}
 
     def focus(self, a):
         pipe = _load_brain("pipeline")
