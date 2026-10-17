@@ -153,6 +153,29 @@ class CompletionTruth(OperatorLoop):  # matrix audit 10-16: success must be real
         pop.assert_called_once()
 
 
+class SpokenOnce(OperatorLoop):  # live 10-17: say + done 12 ms apart were both spoken; "Hello Jarvis" got re-greeted; a line arrived 3x
+    def test_done_summary_is_silent_when_anything_was_said_this_turn(self):
+        model = scripted([("say", {"text": "The page is on your screen now."})],
+                         [("done", {"summary": "The GitHub results are on your screen in Safari.", "evidence": "tab 3"})])
+        task = O.Task.create(self.hive, "show it")
+        O.run(task.path, model_fn=model)
+        self.assertEqual(len(task.rows("speech.jsonl")), 1)
+
+    def test_idle_resume_is_a_plain_line_not_an_interruption(self):
+        msgs = [{"role": "system"}, {"role": "user"}, {"role": "assistant"}, {"role": "tool"}]
+        self.assertEqual(O.inbox_note({"status": "RUNNING", "turn_at": O.time.time()}, msgs), "")          # just resumed
+        self.assertIn("While you were working", O.inbox_note({"status": "RUNNING", "turn_at": O.time.time() - 60}, msgs))
+        self.assertEqual(O.inbox_note({"status": "IDLE", "turn_at": 0}, msgs), "")
+
+    def test_same_line_twice_within_twenty_seconds_is_one_line(self):
+        task = O.Task.create(self.hive, "search for open source versions of 11 labs")
+        O.tell(self.hive, "Search for open source versions of 11 labs in my browser")
+        got = O.tell(self.hive, "search for open source versions of 11 labs in my browser.")
+        self.assertTrue(got.get("duplicate"))
+        self.assertEqual(len(task.rows("inbox.jsonl")), 1)
+        self.assertFalse(O.tell(self.hive, "and open the first one").get("duplicate"))
+
+
 class SelfConfig(OperatorLoop):  # Evens 10-17: Jarvis has access to its own configs and changes what makes sense
     def test_set_get_history_and_refusals(self):
         d = self.home / "cfg"; pers = self.home / "pers"; pers.mkdir(); (pers / "alfred.md").write_text("voice: bm_george\n# A")

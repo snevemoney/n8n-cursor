@@ -1190,15 +1190,26 @@ def _model_fn(tier: str = "mid", chain: list | None = None):
         messages, tools, model_chain=chain, max_tokens=12000, allow_reasoning=True, attempt_sec=120.0))
 
 
+MID_WORK_S = 8.0
+
+
+def inbox_note(state: dict, messages: list) -> str:
+    """The "while you were working" wrapper only when he really spoke mid-work. Live 10-17: an idle session wrapped his
+    plain "Hello Jarvis" as an interruption and he got re-greeted; the wrapper also made every line sound like a backlog."""
+    mid_work = state.get("status") == "RUNNING" and time.time() - float(state.get("turn_at") or 0) > MID_WORK_S and len(messages) > 3
+    if not mid_work:
+        return ""
+    return ("(While you were working, Evens added the following. Acknowledge it in one short line with say, put each "
+            "request on your plan, merge it into this job if it is related, otherwise do it after or alongside; drop "
+            "nothing.)\n")
+
+
 def step_once(task: Task, tools: Tools, model_fn) -> str | None:
     """One model turn plus its tool calls. Returns a terminal status or None to continue."""
     messages = task.read("messages.json")
     new = task.drain_inbox()
     if new:
-        note = ("(While you were working, Evens added the following. Acknowledge it in one short line with say, put each "
-                "request on your plan, merge it into this job if it is related, otherwise do it after or alongside; drop "
-                "nothing.)\n" if task.read("state.json").get("status") == "RUNNING" and len(messages) > 3 else "")
-        messages.append({"role": "user", "content": note + "\n".join(f"- {x}" if len(new) > 1 else x for x in new)})
+        messages.append({"role": "user", "content": inbox_note(task.read("state.json"), messages) + "\n".join(f"- {x}" if len(new) > 1 else x for x in new)})
         task.write("messages.json", messages)
     if len(messages) > HX.COMPACT_AT:
         messages = HX.compact(messages, task.rows("trace.jsonl"))
@@ -1323,7 +1334,7 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
         state = task.read("state.json")
         line = str(args.get("summary") or args.get("question") or "")
         spoke = [r for r in task.rows("speech.jsonl") if float(r.get("at") or 0) >= float(state.get("turn_at") or 0)]
-        if line.strip() and (status == "WAITING_OWNER" or not any(_repeats(line, r.get("text", "")) for r in spoke)):
+        if line.strip() and (status == "WAITING_OWNER" or not spoke):
             # Evens 10-16 "sometimes Jarvis repeats its response twice": say + done carried the same answer and both
             # were spoken. The done summary is spoken only when nothing was said this turn; a question always is.
             task.speak(line.strip())
@@ -1635,9 +1646,34 @@ def tell(hive: Path, line: str) -> dict:
     # Evens 10-16: lines he says while Jarvis works must never be lost. They used to be appended to messages.json while
     # a step was running, and the step's own save overwrote them. Now they wait in an inbox that every step drains.
     with FileLock(task.path / "messages.lock"):
+        if duplicate_line(task, str(line)):
+            return {"ok": True, "task_id": tid, "duplicate": True}
         with (task.path / "inbox.jsonl").open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"at": time.time(), "text": str(line)[:4000]}) + "\n")
     return {"ok": True, "task_id": tid}
+
+
+DUP_S = 20.0
+
+
+def duplicate_line(task, line: str) -> bool:
+    """Live 10-17: the Orb delivered the same request three times (recognition restarts); the same words within 20 s
+    are one line. Compared against the inbox and the last user message."""
+    norm = re.sub(r"[^a-z0-9 ]+", "", line.lower()).strip()
+    if not norm:
+        return False
+    now = time.time()
+    for r in task.rows("inbox.jsonl")[-5:]:
+        if now - float(r.get("at") or 0) < DUP_S and re.sub(r"[^a-z0-9 ]+", "", str(r.get("text", "")).lower()).strip() == norm:
+            return True
+    msgs = task.read("messages.json", [])
+    last = next((m for m in reversed(msgs) if m.get("role") == "user"), None)
+    st = task.read("state.json")
+    if last and now - float(st.get("turn_at") or 0) < DUP_S:
+        body = str(last.get("content") or "").split(")\n")[-1]
+        if re.sub(r"[^a-z0-9 ]+", "", body.lower()).strip() == norm:
+            return True
+    return False
 
 
 class FileLock:
