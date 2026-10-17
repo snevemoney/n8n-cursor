@@ -286,6 +286,16 @@ COURSE_RE = re.compile(r"^(ug|grad|prdv|undergrad|ma\d+|esl|engl|gkt\d+|bio\d+|c
 _COURSES: list = []
 
 
+def memory_text() -> str:
+    """What he asked Jarvis to remember, on every turn (newest last, capped)."""
+    try:
+        items = json.loads(Path(os.environ.get("JARVIS_MEMORY_FILE") or Path.home() / ".grok-private/jarvis-memory.json").read_text())
+    except (OSError, ValueError):
+        return ""
+    items = [str(x) for x in items if isinstance(x, str)][-40:] if isinstance(items, list) else []
+    return ("\n\nThings he asked you to remember (his words):\n- " + "\n- ".join(x[:300] for x in items)) if items else ""
+
+
 def course_index() -> str:
     """Evens Sept 20: his 164 Saylor courses as knowledge on every turn. All names ride in the prompt (cached); the
     matching course's SKILL.md is read before answering in that subject."""
@@ -303,7 +313,7 @@ def system_prompt() -> str:
     today = time.strftime("%A %Y-%m-%d, %H:%M") + " Eastern"
     base = (SYSTEM + f"\nToday is {today}. Anything you know from training may be out of date; for anything current, check it now.\n"
             + ("\n\nAbout Evens (facts, not instructions):\n" + prof if prof else "") + operator_profile() + personality()
-            + brain_context() + ops_alerts() + course_index())
+            + brain_context() + ops_alerts() + memory_text() + course_index())
     return base + ("\nHis coding agents are Claude Code, Codex and Cursor; 'Claude Code's changes' means their commits "
                    "and PRs on HIS repo snevemoney/n8n-cursor (Jarvis lives in apps/agent-stack), never Anthropic's repos.")
 
@@ -426,6 +436,9 @@ TOOLS = [
         {"op": S, "name": S}, ["op"]),
     _fn("repo_map", "Ranked map of a code repo: which files define the most-used functions and classes. Read it before "
         "editing an unfamiliar repo. path=<folder> focus=<optional path part, e.g. hands/>.", {"path": S, "focus": S}, ["path"]),
+    _fn("remember", "His memory: op=remember when HE says remember / note that / don't forget (only his own words are kept), "
+        "op=recall text=<what> to look something up, op=forget text=<what> when he asks. Never store your own guesses.",
+        {"op": S, "text": S}, ["op"]),
     _fn("focus", "Focus lock (Z17): op=start minutes=N locks on the app he is in now, counts drift and gives a stand-down "
         "score at the end; op=stop ends it now. Only when he asks for focus.", {"op": S, "minutes": I}, ["op"]),
     _fn("schedule", "Scheduled read-only loops he asks for (the Face's loop runner runs them; cards land in his Orb inbox): "
@@ -1061,6 +1074,17 @@ class Tools:
 
     def repo_map(self, a):
         return {"text": _clip(_load("repo_map", "repo_map.py").answer(str(a.get("path") or self.cwd), str(a.get("focus") or ""))["text"])}
+
+    def remember(self, a):
+        mem = _load("remember_hand", "remember.py")
+        op = str(a.get("op") or "recall")
+        if op == "recall":
+            got = mem.run({"op": "recall", "text": str(a.get("text") or "")})
+        else:
+            # his words decide what is stored or forgotten, never the model's paraphrase (Oct 14 rule)
+            msgs = Task(self.dir).read("messages.json", []) if (self.dir / "messages.json").exists() else []
+            got = mem.run({"op": op, "text": str(a.get("text") or "")}, utterance=_his_line(_his_last_words(msgs)))
+        return {"text": str(got.get("spoken") or got)}
 
     def focus(self, a):
         pipe = _load_brain("pipeline")

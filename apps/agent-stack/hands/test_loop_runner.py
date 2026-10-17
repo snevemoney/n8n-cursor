@@ -90,3 +90,27 @@ class MorningBrief(unittest.TestCase):  # Z20 / X36: a daily brief at a set time
         with mock.patch.object(R, "PRIVATE", d), mock.patch.object(R, "SHARED", d):
             ok, text = R.check("reports my morning brief")
         self.assertTrue(ok); self.assertIn("1 decisions wait", text); self.assertIn("OpenRouter is at $0", text); self.assertIn("1 red: No backup.", text); self.assertIn("1 amber, 1 of them yours", text)
+
+
+class WeeklyVaultLint(unittest.TestCase):  # X12
+    def setUp(self):
+        global L, R
+        L = _load("agent_stack_loop_test_w", "hands/loop.py")
+        R = _load("agent_stack_loop_runner_test_w", "hands/loop_runner.py")
+
+    def test_weekly_loop_runs_only_on_its_day(self):
+        from datetime import datetime
+        d = Path(tempfile.mkdtemp())
+        with mock.patch.dict(os.environ, {"JARVIS_LOOPS_FILE": str(d / "loops.json")}):
+            got = L.run({"op": "start", "what": "reports my vault lint", "at": "07:00", "weekday": "monday"})
+            self.assertTrue(got["ok"], got); self.assertIn("every Monday at 07:00", got["spoken"])
+            chk = lambda w: (True, "lint")
+            self.assertEqual(R.tick(L, now=datetime(2026, 10, 18, 8, 0), checker=chk), [])          # Sunday
+            self.assertEqual(len(R.tick(L, now=datetime(2026, 10, 19, 8, 0), checker=chk)), 1)     # Monday
+            self.assertFalse(L.run({"op": "start", "what": "reports my vault lint", "at": "07:00", "weekday": "someday"})["ok"])
+
+    def test_lint_reads_the_link_graph(self):
+        v = Path(tempfile.mkdtemp()); (v / "A.md").write_text("[[B]] [[Gone]]"); (v / "B.md").write_text("x"); (v / "C.md").write_text("y")
+        with mock.patch.dict(os.environ, {"JARVIS_VAULT": str(v)}):
+            ok, text = R.check("reports my vault lint")
+        self.assertTrue(ok); self.assertIn("3 notes, 1 with no links, 1 dead ends, 1 missing link targets", text)

@@ -598,6 +598,25 @@ class McpSteps(unittest.TestCase):  # canvas "apps": stateful servers need new -
         self.assertTrue(got.get("gated")); sess2.assert_not_called()   # a send anywhere in the list stops all steps
 
 
+class RememberTool(unittest.TestCase):  # memory wired to the operator brain; only his words are stored
+    def test_his_words_are_kept_and_reach_the_prompt(self):
+        d = Path(tempfile.mkdtemp()); task = O.Task(d / "t"); task.path.mkdir(parents=True)
+        with mock.patch.dict(os.environ, {"JARVIS_MEMORY_FILE": str(d / "mem.json")}):
+            task.write("messages.json", [{"role": "user", "content": "Remember that my sister's birthday is March 3"}])
+            tools = O.Tools(task.path)
+            self.assertIn("remember", tools.remember({"op": "remember", "text": "his sister loves jazz and lives in Paris"})["text"].lower())
+            stored = json.loads((d / "mem.json").read_text())
+            self.assertEqual(stored, ["my sister's birthday is March 3"])   # his words, not the model's embellishment
+            self.assertIn("my sister's birthday is March 3", O.memory_text())
+            self.assertIn("March 3", tools.remember({"op": "recall", "text": "birthday"})["text"])
+            task.write("messages.json", [{"role": "user", "content": "Do this.\n\nEvens's exact words: Remember that the gate code is blue"}])
+            tools.remember({"op": "remember", "text": "x"})
+            self.assertIn("the gate code is blue", json.loads((d / "mem.json").read_text()))
+            task.write("messages.json", [{"role": "user", "content": "What's the weather?"}])
+            self.assertIn("didn't ask me to remember", tools.remember({"op": "remember", "text": "invented fact"})["text"])
+            self.assertEqual(json.loads((d / "mem.json").read_text()), ["my sister's birthday is March 3", "the gate code is blue"])
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")

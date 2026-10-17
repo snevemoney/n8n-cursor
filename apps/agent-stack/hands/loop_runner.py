@@ -92,7 +92,21 @@ def _brief(_m) -> tuple[bool, str]:
     return True, " ".join(parts)[:900]
 
 
+def _vault_lint(_m) -> tuple[bool, str]:
+    """X12 weekly vault lint from the link graph: orphans, dead ends, missing link targets (read-only)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("vault_graph_lint", Path(__file__).with_name("vault_graph.py"))
+    vg = importlib.util.module_from_spec(spec); spec.loader.exec_module(vg)
+    g = vg.build()
+    n = len(g["notes"])
+    orphans = sum(1 for k in g["notes"] if not g["in"].get(k) and not g["out"].get(k))
+    dead = sum(1 for k in g["notes"] if g["in"].get(k) and not g["out"].get(k))
+    top = ", ".join(f"{t} ({c})" for t, c in g["unresolved"].most_common(3))
+    return True, f"Vault lint: {n} notes, {orphans} with no links, {dead} dead ends, {len(g['unresolved'])} missing link targets (most linked: {top})."
+
+
 CHECKS = (
+    (re.compile(r"\bvault\b", re.I), _vault_lint),
     (re.compile(r"\bbrief(?:ing)?\b", re.I), _brief),
     (re.compile(r"\b(?:disk\s+space|disk|storage)\b", re.I), _disk),
     (re.compile(r"\bbattery\b", re.I), lambda m: _run(["pmset", "-g", "batt"])),
@@ -139,6 +153,8 @@ def tick(loop_mod, *, now: datetime | None = None, notify=None, checker=check) -
             if int(r.get("runs") or 0) >= int(r.get("max_runs") or 1):
                 r["status"] = "done"; changed = True; continue
             last = r.get("last_run")
+            if r.get("weekday") and now.strftime("%a").lower()[:3] != r["weekday"]:
+                continue  # X12 weekly: only on its day
             if r.get("at"):
                 hh, mm = (int(x) for x in str(r["at"]).split(":"))
                 due_at = now.replace(hour=hh, minute=mm, second=0, microsecond=0)
