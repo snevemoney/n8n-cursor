@@ -2470,7 +2470,7 @@ def _fingerprint(name: str, args: dict) -> str:
     return name + ":" + json.dumps(args or {}, sort_keys=True, default=str)
 
 
-APPROVALS = CONFIG_DIR / "approvals.jsonl"
+APPROVALS = Path(os.environ.get("JARVIS_APPROVALS_FILE") or Path.home() / ".config/brain/approvals.jsonl")  # tests use a temp file
 
 
 def record_approval(job: str, what: str, fingerprint: str, words: str, channel: str = "orb") -> None:
