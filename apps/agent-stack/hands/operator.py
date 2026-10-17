@@ -982,6 +982,43 @@ def _load_brain(name: str):
     return mod
 
 
+def _local():
+    mod = sys.modules.get("op_local_model")
+    if mod is None:
+        spec = importlib.util.spec_from_file_location("op_local_model", Path(__file__).with_name("local_model.py"))
+        mod = importlib.util.module_from_spec(spec); sys.modules["op_local_model"] = mod; spec.loader.exec_module(mod)
+    return mod
+
+
+def _goal_of(messages: list) -> str:
+    for m in reversed(messages):
+        if m.get("role") == "user" and isinstance(m.get("content"), str) and m["content"].strip():
+            return m["content"]
+    return ""
+
+
+def _with_local_fallback(paid_fn):
+    """Evens 10-16: no OpenRouter credits (HTTP 402) -> the free local model takes the turn for small things; anything
+    beyond it gets "This free local model can't ___. Add credits to OpenRouter to continue with more capable models." """
+    def fn(messages, tools):
+        got = paid_fn(messages, tools)
+        if got.get("ok") or "402" not in str(got.get("error") or ""):
+            return got
+        L = _local()
+        say = lambda text: {"ok": True, "tool": "", "args": {}, "call_id": "", "text": text, "model": "local:" + L.LOCAL_MODEL}
+        if not L.ready():
+            return say("OpenRouter has no credits, and the free local model isn't installed yet. " + L.ADD_CREDITS)
+        goal = _goal_of(messages)
+        why = L.cant(goal)
+        if why:
+            return say(why)
+        last_user = max((i for i, m in enumerate(messages) if m.get("role") == "user" and isinstance(m.get("content"), str)), default=0)
+        if sum(1 for m in messages[last_user:] if m.get("role") == "assistant") >= L.LOCAL_STEP_CAP:
+            return say(f"This free local model can't finish long multi-step tasks. {L.ADD_CREDITS}")
+        return L.call(messages, tools)
+    return fn
+
+
 def _model_fn(tier: str = "mid", chain: list | None = None):
     online_spec = importlib.util.spec_from_file_location("op_online", STACK / "brain" / "online.py")
     online = sys.modules.get("op_online")
@@ -996,8 +1033,8 @@ def _model_fn(tier: str = "mid", chain: list | None = None):
         chain = (owner,)
     else:
         chain = tuple(chain or pool(tier, "any"))  # the job's pool; the next one only answers if the first errors
-    return lambda messages, tools: online.call_openrouter_messages(messages, tools, model_chain=chain, max_tokens=12000,
-                                                                   allow_reasoning=True, attempt_sec=120.0)
+    return _with_local_fallback(lambda messages, tools: online.call_openrouter_messages(
+        messages, tools, model_chain=chain, max_tokens=12000, allow_reasoning=True, attempt_sec=120.0))
 
 
 def step_once(task: Task, tools: Tools, model_fn) -> str | None:
