@@ -543,6 +543,19 @@ class FillerNeverSilencesTheAnswer(unittest.TestCase):  # live 10-17: the time h
         self.assertEqual([r["text"] for r in task.rows("speech.jsonl")][-1], "It's 5:37 in the morning, sir.")
 
 
+class ApprovalRecord(unittest.TestCase):  # Z60
+    def test_his_yes_is_recorded_with_what_it_covers(self):
+        d = Path(tempfile.mkdtemp()); root = d / "operator-tasks"; task = O.Task(root / "t1"); task.path.mkdir(parents=True)
+        task.write("state.json", {"task_id": "t1", "status": "WAITING_OWNER", "pid": os.getpid(), "pending_ok": "fp123", "pending_what": "that sends an email to Bob"})
+        (root / "latest.json").write_text(json.dumps({"task_id": "t1"}))
+        with mock.patch.object(O, "APPROVALS", d / "approvals.jsonl"), mock.patch.object(O, "running", return_value=True):
+            O.tell(d, "yes, send it")
+        rec = json.loads((d / "approvals.jsonl").read_text().splitlines()[0])
+        self.assertEqual((rec["who"], rec["covers"], rec["scope"], rec["channel"]), ("Evens", "fp123", "this one call", "orb"))
+        self.assertIn("email to Bob", rec["what"]); self.assertEqual(rec["words"], "yes, send it")
+        self.assertEqual(task.read("state.json")["granted"], "fp123")
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")

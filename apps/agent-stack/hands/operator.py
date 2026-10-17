@@ -2125,6 +2125,22 @@ def _fingerprint(name: str, args: dict) -> str:
     return name + ":" + json.dumps(args or {}, sort_keys=True, default=str)
 
 
+APPROVALS = CONFIG_DIR / "approvals.jsonl"
+
+
+def record_approval(job: str, what: str, fingerprint: str, words: str, channel: str = "orb") -> None:
+    """Z60: every yes he gives to a kept stop is written down: who, what, the exact call it covers, his words, the
+    channel, when. One call only (the fingerprint); nothing standing is created."""
+    try:
+        APPROVALS.parent.mkdir(parents=True, exist_ok=True)
+        with APPROVALS.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"at": time.strftime("%Y-%m-%d %H:%M:%S"), "who": "Evens", "job": job, "what": what[:300],
+                                 "covers": fingerprint, "scope": "this one call", "words": _scrub(words)[:300],
+                                 "channel": channel}) + "\n")
+    except OSError:
+        pass
+
+
 def tell(hive: Path, line: str) -> dict:
     """Evens speaks while the loop works: his line joins THAT conversation (never a second job). Like talking to
     Claude Code mid-task (Evens 10-16: "it is still not a complete harness")."""
@@ -2140,6 +2156,7 @@ def tell(hive: Path, line: str) -> dict:
         task.write("state.json", st)
     if st.get("pending_ok") and YES_RE.search(str(line)):
         task.write("state.json", {**st, "granted": st["pending_ok"]})  # his yes covers the one action he was asked about
+        record_approval(tid, st.get("pending_what") or "", st["pending_ok"], str(line))
     # Evens 10-16: lines he says while Jarvis works must never be lost. They used to be appended to messages.json while
     # a step was running, and the step's own save overwrote them. Now they wait in an inbox that every step drains.
     with FileLock(task.path / "messages.lock"):
