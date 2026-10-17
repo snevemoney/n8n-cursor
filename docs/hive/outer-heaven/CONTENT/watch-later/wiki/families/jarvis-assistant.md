@@ -1,0 +1,12 @@
+# Family: jarvis-assistant
+- **pushback-personality-system-prompt** — Configure persona system prompts to actively challenge flawed user assumptions rather than acting as a compliant yes-man. ([FiOTrxq9ckM](../../packets/FiOTrxq9ckM/LEARNED.md), 02:08)
+- **Voice-to-Text Dictation Layer with Glaido** — Uses Glaido system-wide voice-to-text dictation overlay to dictate high-velocity prompts without typing bottlenecks. ([IVx8OSMbTss](../../packets/IVx8OSMbTss/LEARNED.md), 03:01)
+- **Mobile Session Management via Claude Code Remote Control** — Monitors, manages, and prompts long-running CLI coding agent sessions remotely from a mobile browser. ([IVx8OSMbTss](../../packets/IVx8OSMbTss/LEARNED.md), 35:23)
+- **Uninterrupted Querying via `/btw` Side-Chat Command** — Uses the `/btw` side-chat command in Claude Code to ask side questions without breaking the active agent task or orchestrator reasoning chain. ([IVx8OSMbTss](../../packets/IVx8OSMbTss/LEARNED.md), 57:35)
+- **gui_first_run_onboarding_modal** — Configure API credentials and host target OS via interactive startup wizard. ([SEyqYWQbGxc](../../packets/SEyqYWQbGxc/LEARNED.md), 03:40)
+- **Keep classifier output distinct from explanatory prose** — Do not attribute generated explanations to a model that returned only labels and confidence. ([_0RRAUw-mT0](../../packets/_0RRAUw-mT0/LEARNED.md), 16:00)
+- **Expose reflex activity in a local operator view** — Make the reflex layer inspectable rather than wholly invisible. ([_0RRAUw-mT0](../../packets/_0RRAUw-mT0/LEARNED.md), 13:58; 16:44; 16:52)
+- **Automated Focus Lock & Screen Drift Enforcement** — Monitors active screen content and tab focus to enforce task focus and deliver automated audio callouts upon distraction. ([mitzci4FsOg](../../packets/mitzci4FsOg/LEARNED.md), 06:50)
+- **Telegram Remote Control Assistant Bridge** — Links the central assistant system to a Telegram bot interface for voice message and text commands remotely. ([mitzci4FsOg](../../packets/mitzci4FsOg/LEARNED.md), 08:53)
+- **Automated Invoice Drafting and PDF Drive Upload** — Extracts invoice items during chat conversation, compiles a formatted PDF, and uploads it to Google Drive. ([mitzci4FsOg](../../packets/mitzci4FsOg/LEARNED.md), 09:27)
+- **Camera Vision Setup Monitoring ("JARVIS Eyes")** — Captures live web camera frames to allow visual inspection of the physical desk workspace and environment. ([mitzci4FsOg](../../packets/mitzci4FsOg/LEARNED.md), 05:13)

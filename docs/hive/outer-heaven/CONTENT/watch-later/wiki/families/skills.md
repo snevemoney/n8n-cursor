@@ -1,0 +1,5 @@
+# Family: skills
+- **Local Folder Slash Skill Deployment (.claude/skills/)** — Extends Claude Code functionality by dropping structured subfolders containing SKILL.md into the workspace .claude/skills directory. ([HfEu7XPUnAU](../../packets/HfEu7XPUnAU/LEARNED.md), 07:59)
+- **Fast Single-Pass Snapshot Command (/trade-quick)** — Performs a fast 60-second snapshot analysis without spawning parallel subagents using a single direct web search pass. ([HfEu7XPUnAU](../../packets/HfEu7XPUnAU/LEARNED.md), 11:04)
+- **Self-Describing Plugin Auto-Registration** — Scans the dedicated `plugins/` folder during startup and dynamically registers self-describing tool modules into the agent's function registry without modifying `main.py`. ([K_cha25S4Qo](../../packets/K_cha25S4Qo/LEARNED.md), 00:00)
+- **Skill Architecture with Explicit Stopping Conditions** — Build reusable agent skills with explicit inputs, processes, outputs, and safety stopping conditions for edge cases. ([z6jFqt0QwIE](../../packets/z6jFqt0QwIE/LEARNED.md), 08:30)

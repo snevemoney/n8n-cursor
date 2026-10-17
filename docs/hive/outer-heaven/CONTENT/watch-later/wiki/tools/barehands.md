@@ -1,0 +1,12 @@
+# Tool / repo: barehands
+- used in **modular-component-selection-pattern** ([FiOTrxq9ckM](../../packets/FiOTrxq9ckM/LEARNED.md))
+- used in **barehands-touchless-spatial-overlay** ([FiOTrxq9ckM](../../packets/FiOTrxq9ckM/LEARNED.md))
+- used in **two-hand-pinch-zoom-scaling** ([FiOTrxq9ckM](../../packets/FiOTrxq9ckM/LEARNED.md))
+- used in **closed-fist-3d-perspective-tilt** ([FiOTrxq9ckM](../../packets/FiOTrxq9ckM/LEARNED.md))
+- used in **radial-satellite-menu-navigation** ([FiOTrxq9ckM](../../packets/FiOTrxq9ckM/LEARNED.md))
+- used in **interactive-3d-glb-ar-rendering** ([FiOTrxq9ckM](../../packets/FiOTrxq9ckM/LEARNED.md))
+- used in **flick-gesture-window-dismissal** ([FiOTrxq9ckM](../../packets/FiOTrxq9ckM/LEARNED.md))
+- used in **voice-to-spatial-media-projection** ([FiOTrxq9ckM](../../packets/FiOTrxq9ckM/LEARNED.md))
+- used in **remote-claw-raycast-targeting** ([FiOTrxq9ckM](../../packets/FiOTrxq9ckM/LEARNED.md))
+- used in **in-situ-markdown-reading-in-ar** ([FiOTrxq9ckM](../../packets/FiOTrxq9ckM/LEARNED.md))
+- used in **top-bar-tap-window-close** ([FiOTrxq9ckM](../../packets/FiOTrxq9ckM/LEARNED.md))

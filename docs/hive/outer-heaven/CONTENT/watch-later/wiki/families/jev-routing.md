@@ -1,0 +1,11 @@
+# Family: jev-routing
+- **jev_system_1_decision_layer** — Uses a dedicated lightweight probability decision model (Jev) as a System 1 reflex layer to perform structured evaluations before LLM text generation. ([D5v4UuvtUXc](../../packets/D5v4UuvtUXc/LEARNED.md), 00:29)
+- **jev_prepass_routing** — Intercepts user utterances to perform sub-second classification across query lanes before prompting the primary chat model. ([D5v4UuvtUXc](../../packets/D5v4UuvtUXc/LEARNED.md), 02:11)
+- **jev_high_stakes_confirmation_gatekeeper** — Action safety filter that halts automated execution when Jev detects high-risk actions like sending email or spending money. ([D5v4UuvtUXc](../../packets/D5v4UuvtUXc/LEARNED.md), 01:00)
+- **dark_vault_missing_parameter_handler** — Detects insufficient local knowledge coverage ('DARK' status) and triggers parameter clarification prompts. ([D5v4UuvtUXc](../../packets/D5v4UuvtUXc/LEARNED.md), 09:08)
+- **jev-reflex-routing** — Intercept simple reflex-style utility commands locally using zero-cost pattern matching before triggering large language model brains. ([U-LXFzu6sGU](../../packets/U-LXFzu6sGU/LEARNED.md), 10:21)
+- **Separate decision routing from prose generation** — Use a bounded decision layer before a stronger writing model. ([_0RRAUw-mT0](../../packets/_0RRAUw-mT0/LEARNED.md), 02:52; 07:54; description)
+- **Place an optional reflex layer before the main assistant** — Use a small decision service for rapid control decisions before deeper processing. ([_0RRAUw-mT0](../../packets/_0RRAUw-mT0/LEARNED.md), 16:44; 16:48)
+- **multilingual_voice_switch_routing** — Route response voice synthesis into a selected target language while preserving English speech input. ([acsXZP3SA6w](../../packets/acsXZP3SA6w/LEARNED.md), 00:27)
+- **jev_multitier_model_router** — Route incoming requests across local, fast, or frontier model tiers based on Jev decision complexity scoring. ([fMV6JKkQVfE](../../packets/fMV6JKkQVfE/LEARNED.md), 01:04)
+- **Three-Tier Model Cost Routing** — Route agent tasks across a 3-tier model hierarchy based on complexity and cost to minimize API expenditure. ([z6jFqt0QwIE](../../packets/z6jFqt0QwIE/LEARNED.md), 04:12)

@@ -1,0 +1,7 @@
+# Family: prompt-engineering
+- **agent_prompt_firmographic_enrichment_pattern** — Prompt an AI agent to execute a two-step lookup using MCP tools to resolve business identifiers before extracting firmographics. ([57EkKWCsu_4](../../packets/57EkKWCsu_4/LEARNED.md), 05:00)
+- **jarvis-system-prompt-pack-setup** — Configure multi-prompt agent system packs with Anthropic API credentials for voice and task execution. ([84CkBM_jF4g](../../packets/84CkBM_jF4g/LEARNED.md), 10:15)
+- **claude_code_multi_stage_prompt_pack_execution** — Generate complete full-stack web applications by pasting structured sequential prompt packs into Claude Code CLI. ([9dgBRv6bTkw](../../packets/9dgBRv6bTkw/LEARNED.md), 00:36)
+- **time_aware_butler_persona_prompting** — Configures assistant system prompt to alter greetings dynamically based on local time and user context. ([Acw0NtkyNtM](../../packets/Acw0NtkyNtM/LEARNED.md), 09:00)
+- **jev_structured_odds_classification** — Query Jev to receive explicit probability distributions across predefined categories without generating prose. ([fMV6JKkQVfE](../../packets/fMV6JKkQVfE/LEARNED.md), 01:40)
+- **Natural Language Agent Workflow Construction Prompt Pattern** — Structure a detailed single prompt directing an AI agent to build, sample-test, verify, publish, and link a complete multi-app workflow via `zapier:build-workflows`. ([rW3eyvrSqio](../../packets/rW3eyvrSqio/LEARNED.md), 10:50)

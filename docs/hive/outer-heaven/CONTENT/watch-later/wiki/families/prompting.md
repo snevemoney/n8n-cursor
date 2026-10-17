@@ -1,0 +1,6 @@
+# Family: prompting
+- **the_butler_character_prompt_pattern** — System prompt pattern ('The Butler') establishing a formal, concise, receipt-aware assistant identity. ([D5v4UuvtUXc](../../packets/D5v4UuvtUXc/LEARNED.md), 02:11)
+- **Catalyst Impact Timeline Prompt Pattern** — Formats upcoming company or system events into a structured impact matrix showing event date, catalyst description, and expected direction/impact magnitude. ([HfEu7XPUnAU](../../packets/HfEu7XPUnAU/LEARNED.md), 05:40)
+- **Structured Risk Matrix & Position Sizing Prompt Rule** — Enforces output formatting rules requiring exact entry zones, stop loss levels, target exits, position sizing percentages, and threat mitigation tables. ([HfEu7XPUnAU](../../packets/HfEu7XPUnAU/LEARNED.md), 05:48)
+- **Higgsfield Preset Category Template Selection** — Browsing and selecting pre-designed motion graphic category templates (SaaS, Localization, Presentation, Whiteboard) from a web portal to seed prompt generation. ([yb7srue9Q3g](../../packets/yb7srue9Q3g/LEARNED.md), 02:48)
+- **Structured Time-Anchored Motion Graphic Prompting** — Authoring multi-stage motion prompts with strict target canvas specifications (duration, resolution, fps), layer non-flattening requirements, and timestamped choreography breakdowns. ([yb7srue9Q3g](../../packets/yb7srue9Q3g/LEARNED.md), 05:44)

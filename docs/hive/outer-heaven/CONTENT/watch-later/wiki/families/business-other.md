@@ -1,0 +1,4 @@
+# Family: business-other
+- **Prompt IP & Experience-Based Moat Strategy** — Bakes domain-specific heuristics, founder insights, and interview knowledge into system prompts to create software defensibility beyond UI features. ([IVx8OSMbTss](../../packets/IVx8OSMbTss/LEARNED.md), 1:06:21)
+- **Watermark-Gated Freemium Product Trial Strategy** — Structures SaaS pricing to deliver 1 free output with a watermark badge while gating watermark removal and unlimited usage behind paid recurring tiers. ([IVx8OSMbTss](../../packets/IVx8OSMbTss/LEARNED.md), 2:05:07)
+- **Micro-Creator Sponsorship Distribution Strategy** — Sponsors niche micro-creators ($250–$500) with warm, engaged audiences for early customer acquisition instead of spending on un-optimized cold ad campaigns. ([IVx8OSMbTss](../../packets/IVx8OSMbTss/LEARNED.md), 2:14:28)
