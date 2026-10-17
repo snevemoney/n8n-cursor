@@ -34,6 +34,13 @@ CLI_MACHINE = re.compile(r"(?:^|\s)(?:sudo|mkfs|dd|shutdown|reboot|halt|diskutil
 # 10-17 security pass: these ran with no question asked
 CLI_SYSTEM_SETTING = re.compile(r"(?:^|\s)defaults\s+(?:write|delete)\s+(?:-g\b|NSGlobalDomain|com\.apple\.)", re.I)
 CLI_PIPE_EXEC = re.compile(r"\|\s*(?:sudo\s+)?(?:ba|z|da|k)?sh\b|\b(?:ba|z)?sh\s+<\(\s*(?:curl|wget)|\b(?:curl|wget)\b[^|;&]*\|\s*(?:python3?|perl|ruby|node)\s*-?\s*(?:$|[;&|])", re.I)
+# 10-17 security pass: login items, shell startup files, schedules and agent settings make code run on their own later
+_PERSIST = (r"Library/Launch(?:Agents|Daemons)/|/\.(?:zshrc|zprofile|zshenv|zlogin|bashrc|bash_profile|profile)$|"
+            r"/\.claude/settings[^/]*\.json$|/\.claude\.json$|/\.cursor/mcp\.json$|/\.codex/config\.toml$|/\.mcp\.json$")
+PERSIST_PATH = re.compile(_PERSIST)
+CLI_PERSIST = re.compile(r"(?:>>?|\btee\b(?:\s+-a)?|\bcp\b|\bmv\b|\bln\b)[^|;&]*(?:Library/Launch(?:Agents|Daemons)|\.(?:zshrc|zprofile|zshenv|bashrc|bash_profile|profile)\b|"
+                         r"\.claude/settings|\.claude\.json|\.cursor/mcp\.json|\.codex/config\.toml)|\bcrontab\s+(?!-l\b)\S|\|\s*crontab\b|"
+                         r"\blaunchctl\s+(?:load|bootstrap|enable)\b|\bosascript\b[^|;&]*login item", re.I)
 CLI_TRASH = re.compile(r"(?:^|\s)(?:mv\b[^|;&]*\.Trash\b|trash\s)", re.I)
 SECRET_ARG = re.compile(r"(^|/)(\.env[^/]*|\.ssh|\.aws|\.gnupg|\.netrc|\.pgpass|\.docker|\.kube|\.git-credentials|"
                         r"id_(?:rsa|dsa|ecdsa|ed25519)[^/]*|[^/]*\.(?:pem|key|p12|kdbx)|credentials[^/]*|secrets?(?:\.[a-z0-9]+)?|"
@@ -100,6 +107,8 @@ def authorize(tool: str, args: dict, *, home: Path | None = None) -> tuple[str, 
             return ASK, "that command changes a macOS system setting"
         if CLI_TRASH.search(cmd):
             return ASK, "that command moves files to the Trash"
+        if CLI_PERSIST.search(cmd):
+            return ASK, "that command makes something run on its own or changes how your agents are set up"
         if cli_needs_owner(cmd):
             return ASK, "that command sends, spends, deletes or pushes"
         if SECRET_READ_CMD.search(cmd) or any(is_secret_path(w) for seg in _segments(cmd) for w in seg[1:] if _looks_like_path(w)):
@@ -115,6 +124,8 @@ def authorize(tool: str, args: dict, *, home: Path | None = None) -> tuple[str, 
                 return DENY, "system files are off limits"
             if not resolved.startswith(str(home.resolve())):
                 return ASK, "that writes outside your home folder"
+            if PERSIST_PATH.search(resolved):
+                return ASK, "that makes something run on its own or changes how your agents are set up"
         if is_secret_path(path):
             return ALLOW, "flag: that file holds secrets"  # Evens 10-16: flag, never stop
         return ALLOW, ""

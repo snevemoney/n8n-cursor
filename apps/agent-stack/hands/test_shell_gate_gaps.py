@@ -16,3 +16,17 @@ class ShellGateGaps(unittest.TestCase):  # 10-17 security pass: these ran with n
             self.assertEqual(A.authorize("shell", {"command": c})[0], "allow", c)
 
 if __name__ == "__main__": unittest.main()
+
+
+class PersistenceNeedsHisOk(unittest.TestCase):  # login items, shell startup files, schedules, agent settings
+    def test_writes_that_make_code_run_later_ask(self):
+        H = str(Path.home())
+        for p in (H + "/Library/LaunchAgents/com.x.plist", H + "/.zshrc", H + "/.claude/settings.json"):
+            self.assertEqual(A.authorize("write_file", {"path": p})[0], "ask", p)
+        for c in ("cp x.plist ~/Library/LaunchAgents/", "crontab -l | { cat; echo x; } | crontab -", "echo x >> ~/.zshrc",
+                  "launchctl load ~/Library/LaunchAgents/x.plist"):
+            self.assertEqual(A.authorize("shell", {"command": c})[0], "ask", c)
+
+    def test_reading_them_is_fine(self):
+        for c in ("crontab -l", "cat ~/.zshrc", "ls ~/Library/LaunchAgents"):
+            self.assertEqual(A.authorize("shell", {"command": c})[0], "allow", c)
