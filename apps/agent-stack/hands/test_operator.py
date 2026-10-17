@@ -508,6 +508,23 @@ class CourseIndex(unittest.TestCase):  # Saylor: all his courses known on every 
         self.assertNotIn("react-patterns", got)
 
 
+class AnswerTheQuestion(unittest.TestCase):  # live 10-17: "What time is it?" -> "Proved the current time."
+    def _gate(self, goal, summary):
+        d = Path(tempfile.mkdtemp()); task = O.Task(d / "t"); task.path.mkdir(parents=True)
+        task.write("request.json", {"goal": goal}); task.write("state.json", {"turn_at": 1})
+        task.trace({"event": "tool", "tool": "shell", "args": {}, "at": 2})
+        return O._done_gate(task, "done", {"summary": summary, "evidence": "date said 05:21"})
+
+    def test_a_report_about_the_work_is_sent_back(self):
+        self.assertIn("answer itself", self._gate("What time is it?", "Proved the current time."))
+        self.assertIn("answer itself", self._gate("Quelle heure est-il ?", "Verified the time."))
+
+    def test_the_answer_itself_passes(self):
+        self.assertEqual(self._gate("What time is it?", "It's 5:21 in the morning, sir."), "")
+        self.assertEqual(self._gate("Quelle heure est-il ?", "Il est 5 h 21, samedi 17 octobre."), "")
+        self.assertEqual(self._gate("Open Calculator", "Opened Calculator."), "")  # not a question
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")

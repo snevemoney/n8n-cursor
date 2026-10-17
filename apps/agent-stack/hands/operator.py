@@ -1906,6 +1906,18 @@ def _unread_cited(text: str, rows: list) -> list:
     return [c for c in cited if c not in opened]
 
 
+QUESTION_RE = re.compile(r"\?\s*$|^\s*(?:what|when|who|whom|whose|where|which|why|how|is|are|was|were|do|does|did|can|could|"
+                         r"will|would|should|quel(?:le)?s?|quand|qui|où|ou|comment|pourquoi|combien|est-ce)\b", re.I)
+META_DONE_RE = re.compile(r"\s*(?:sir[,.]?\s*)?(?:i\s+)?(?:proved|verified|confirmed|checked|completed|finished|done|answered|"
+                          r"retrieved|got|found|determined|looked up|provided)\b(?:\s+(?:the|his|your|a|an))?\s+[\w\s'-]{0,40}[.!]?\s*$", re.I)
+
+
+def _his_line(goal: str) -> str:
+    """The words he said (the goal may carry a wrapper and 'Evens's exact words: …')."""
+    m = re.search(r"Evens's exact words:\s*(.+)$", goal or "", re.S)
+    return (m.group(1) if m else goal or "").strip().splitlines()[-1] if (m or goal) else ""
+
+
 ACTION_RE = re.compile(r"\b(open|click|press|type|save|create|make|rename|move|delete|install|run|build|deploy|send|"
                        r"write|edit|fix|download|upload|play|switch|turn (?:on|off)|navigate|scroll|drag)\b", re.I)
 RESEARCH_RE = re.compile(r"\b(research|look up|latest|current(?:ly)?|right now|this week|compare|comparison|"
@@ -2051,6 +2063,11 @@ def _done_gate(task, name: str, args: dict) -> str:
     elif RESEARCH_RE.search(goal) and n < 2 and _unread_cited(summary + " " + wrote, rows):
         why = ("Before you finish: you cite pages you never opened in this job: " + ", ".join(_unread_cited(summary + " " + wrote, rows)[:5])
                + ". Open each one and correct anything taken from search snippets.")
+    elif QUESTION_RE.search(_his_line(goal)) and META_DONE_RE.match(summary) and n < 2:
+        # live 10-17: "What time is it?" -> date said 05:21, but he heard "Proved the current time."
+        why = ("Before you finish: he asked a question. Your summary reports on your work instead of answering it. "
+               "Call done again with the answer itself, the way you would say it to him (for example: \"It's 5:21 in the "
+               "morning, sir.\"), and keep the proof in evidence.")
     elif ACTION_RE.search(goal) and not acted and n < 2 and not st.get("told_into"):
         # matrix "vrec"/"honesty": a request to do something was closed with prose and no tool ever acted
         why = ("Before you finish: he asked you to do something, and no tool acted this turn. Do it (app, computer, "
