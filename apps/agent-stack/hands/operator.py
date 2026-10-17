@@ -413,6 +413,9 @@ TOOLS = [
         "last N days (default 7). Writes the one-page report to Ops Watch and returns it.", {"days": I}, []),
     _fn("readiness", "Can you actually work right now: model budget, the free local model, Mac permissions, disk. Check it "
         "before a long or paid run (video, image generation, a big research job) and tell him plainly if something blocks it.", {}, []),
+    _fn("deliver", "Hand him a finished deliverable: title, files=[paths], note. Copies the files into one dated folder in "
+        "his Jarvis Deliveries with a manifest and readme; each file is checked (video plays, image size, PDF pages, text). "
+        "Say where it is and whether every check passed.", {"title": S, "files": {"type": "array", "items": S}, "note": S}, ["title", "files"]),
     _fn("web_helper", "Reuse a Safari procedure that already worked. save name=... steps=[safari actions, label=<visible "
         "text> instead of ref, {var} for values] expect=<text the page shows when it worked> about=...; run name=... "
         "vars={...}; list. Save only steps you just saw succeed. Each step passes the same checks as a safari call.",
@@ -528,6 +531,7 @@ SV = _load("scroll_video", "scroll_video.py")
 UJ = _load("undo_journal", "undo_journal.py")
 CBF = _load("cost_by_feature", "cost_by_feature.py")
 RDY = _load("readiness", "readiness.py")
+DLV = _load("deliver", "deliver.py")
 COST_PAGE = Path.home() / "ArtCraft Studio/00 Private/Studio Operations/Ops Watch/Cost by feature.md"
 WEB_HELPERS = CONFIG_DIR / "web-helpers"
 
@@ -1021,6 +1025,14 @@ class Tools:
     def readiness(self, a):
         got = RDY.report()
         return {"text": f"{got['state']}: {got['spoken']}\n" + "\n".join(f"- {k}: {v['state']} — {v['line']}" for k, v in got["rows"].items())}
+
+    def deliver(self, a):
+        try:
+            got = DLV.bundle(str(a.get("title") or ""), a.get("files") or [], str(a.get("note") or ""))
+        except (ValueError, OSError) as exc:
+            return {"text": f"deliver: {exc}"}
+        return {"text": ("Delivered, every file checked: " if got["ok"] else "Delivered, but a check failed: ") + got["folder"]
+                        + "\n" + "\n".join(f"- {r['file']}: {r['check']}" for r in got["files"])}
 
     def recall(self, a):
         try:
@@ -2220,7 +2232,7 @@ class input_lease:
         return False
 
 
-ACTING_TOOLS = {"undo", "web_helper", "scroll_video", "computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app", "schedule", "focus"}
+ACTING_TOOLS = {"deliver", "undo", "web_helper", "scroll_video", "computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app", "schedule", "focus"}
 
 
 # Evens 10-17 "Jarvis is still not always talking plain English": the card read "Used app_type to create and type into
