@@ -424,6 +424,8 @@ TOOLS = [
     _fn("vault_graph", "His Obsidian vault's link graph: op=focus name=<note> puts that note on his Orb graph; op=backlinks|links "
         "name=<note>; op=orphans|dead_ends|unresolved|tags for the whole vault. Read-only.",
         {"op": S, "name": S}, ["op"]),
+    _fn("focus", "Focus lock (Z17): op=start minutes=N locks on the app he is in now, counts drift and gives a stand-down "
+        "score at the end; op=stop ends it now. Only when he asks for focus.", {"op": S, "minutes": I}, ["op"]),
     _fn("schedule", "Scheduled read-only loops he asks for (the Face's loop runner runs them; cards land in his Orb inbox): "
         "op=start what='checks disk space' every_min=15 | op=start what='reports my morning brief' at='06:00' (daily) | "
         "op=list | op=cancel id=<id or what>. Only checks and briefs, never actions.",
@@ -1050,6 +1052,12 @@ class Tools:
             t = Task(self.dir)  # Z70: the Orb lights this note (orb_view carries it)
             t.write("state.json", {**t.read("state.json"), "graph_focus": {"note": got["note"], "at": time.time()}})
         return {"text": got["text"]}
+
+    def focus(self, a):
+        pipe = _load_brain("pipeline")
+        hive = STACK.parents[1] / "docs/hive/outer-heaven/.hive"
+        got = pipe.focus_stand_down(hive) if str(a.get("op")) == "stop" else pipe.focus_arm(hive, int(a.get("minutes") or 0) or None)
+        return {"text": str(got.get("spoken") or got.get("summary") or got)}
 
     def schedule(self, a):
         got = _load("loop_hand", "loop.py").run({k: v for k, v in a.items() if v not in (None, "")})
@@ -2012,7 +2020,7 @@ class input_lease:
         return False
 
 
-ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app", "schedule"}
+ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app", "schedule", "focus"}
 
 
 # Evens 10-17 "Jarvis is still not always talking plain English": the card read "Used app_type to create and type into

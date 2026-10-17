@@ -556,6 +556,18 @@ class ApprovalRecord(unittest.TestCase):  # Z60
         self.assertEqual(task.read("state.json")["granted"], "fp123")
 
 
+class FocusTool(unittest.TestCase):  # Z17: the operator brain can start and stop a focus lock
+    def test_focus_start_and_stop_reach_the_focus_session(self):
+        fake = mock.Mock(); fake.focus_arm.return_value = {"spoken": "Locked on Pages, sir. 1 minute on the clock."}
+        fake.focus_stand_down.return_value = {"spoken": "Standing down, sir. 1 of 1 minute on target, 0 drifts."}
+        tools = O.Tools(Path(tempfile.mkdtemp()))
+        with mock.patch.object(O, "_load_brain", return_value=fake):
+            self.assertIn("Locked on Pages", tools.focus({"op": "start", "minutes": 1})["text"])
+            self.assertIn("Standing down", tools.focus({"op": "stop"})["text"])
+        fake.focus_arm.assert_called_once(); self.assertEqual(fake.focus_arm.call_args[0][1], 1)
+        self.assertIn("focus", O.ACTING_TOOLS)
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")

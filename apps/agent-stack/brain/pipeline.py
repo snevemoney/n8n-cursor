@@ -4655,7 +4655,7 @@ def focus_summary_line(focus: dict) -> str:
     on_min = min(on_min, total)
     drifts = int(focus.get("drifts") or 0)
     noun = "drift" if drifts == 1 else "drifts"
-    return f"Standing down, sir. {on_min} of {total} minutes on target — {drifts} {noun}."
+    return f"Standing down, sir. {on_min} of {total} minute{'' if total == 1 else 's'} on target, {drifts} {noun}."
 
 
 def focus_arm(hive: Path, minutes: int | None = None, front_fn=None) -> dict:
@@ -4703,7 +4703,7 @@ def focus_arm(hive: Path, minutes: int | None = None, front_fn=None) -> dict:
             "ok": True,
             "wire": "focus",
             "spoken": (
-                f"{mins} minutes on the clock, sir. "
+                f"{mins} minute{'' if mins == 1 else 's'} on the clock, sir. "
                 "Go to your work — I'll lock on the first app you settle in."
             ),
         }
@@ -4711,7 +4711,7 @@ def focus_arm(hive: Path, minutes: int | None = None, front_fn=None) -> dict:
     return {
         "ok": True,
         "wire": "focus",
-        "spoken": f"Locked on {where}, sir. {mins} minutes on the clock. Drift and I'll say so.",
+        "spoken": f"Locked on {where}, sir. {mins} minute{'' if mins == 1 else 's'} on the clock. Drift and I'll say so.",
     }
 
 
