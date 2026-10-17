@@ -79,6 +79,7 @@ def classify(url: str) -> dict:
     m = X_RE.search(url)
     if m:
         return {"kind": "x", "id": f"x-{m.group(2)}", "url": f"https://x.com/{m.group(1)}/status/{m.group(2)}"}
+    url = re.sub(r"(\.git)?/*(?:[?#].*)?$", "", url.strip())  # one row per page: a/b, a/b.git and a/b/ are the same
     slug = re.sub(r"[^a-z0-9]+", "-", re.sub(r"^https?://(www\.)?", "", url.lower())).strip("-")[:60]
     return {"kind": "web", "id": f"web-{slug}", "url": url}
 
@@ -714,12 +715,13 @@ OUTPUT FORMAT (this replaces the JSON shape above): JSON Lines, one JSON object 
 {"kind":"learned_md","text":"one section (or part of one) of the markdown analysis"}  -- sections A..K in order
 {"kind":"method", ...the method fields above...}  -- one line per method
 {"kind":"capability", ...the capability fields above...}  -- one line per capability
+{"kind":"link","url":"https://...","what":"repo / tool / post / article / site","why":"one line: why it was mentioned"}  -- one line per repo, tool, post, article or site shown on screen, spoken, or in the description (Evens 10-16: every link found along the way is a signal; give the GitHub URL when a repo is named)
 A long answer may be continued in another message: just keep writing lines."""
 
 
 def parse_extract_rows(text: str) -> dict:
     """learned_md / methods / capabilities from JSON Lines; a row cut by the output limit loses only that row."""
-    dec, at, learned, methods, caps, stype, guides, checks = json.JSONDecoder(), 0, [], [], [], "", [], []
+    dec, at, learned, methods, caps, stype, guides, checks, links = json.JSONDecoder(), 0, [], [], [], "", [], [], []
     while True:
         at = text.find("{", at)
         if at < 0:
@@ -745,6 +747,8 @@ def parse_extract_rows(text: str) -> dict:
             guides.append(obj)
         elif kind == "check" and obj.get("text"):
             checks.append(obj)
+        elif kind == "link" and str(obj.get("url") or "").startswith("http"):
+            links.append(obj)
     out = {"learned_md": "\n\n".join(learned), "methods": methods, "capabilities": caps}
     if stype:
         out["studio_type"] = stype
@@ -752,7 +756,33 @@ def parse_extract_rows(text: str) -> dict:
         out["guidelines"] = guides
     if checks:
         out["checks"] = checks
+    if links:
+        out["links"] = links
     return out
+
+
+def found_links(sig: dict, got: dict, ext: dict, packet: Path) -> list:
+    """Every repo, post, tool or article the video pointed at becomes a row on the shared signals list (rule §15) and a
+    LINKS.md in the packet. The video's own id and links already learned are skipped by the list itself."""
+    rows = list(ext.get("links") or []) + [{"url": u, "what": "description link", "why": ""} for u in (got.get("links") or [])]
+    seen, keep = {sig["id"]}, []
+    for r in rows:
+        c = classify(str(r["url"]))
+        if c["id"] in seen:
+            continue
+        seen.add(c["id"]); keep.append({**r, "url": c["url"], "id": c["id"], "source": c["kind"]})
+    if not keep:
+        return []
+    (packet / "LINKS.md").write_text("# Links found in this signal\n\n" + "\n".join(
+        f"- {r['url']} — {r.get('what', '')}: {r.get('why', '')}" for r in keep))
+    try:
+        L = _load("agent_stack_signal_ledger", "signal_ledger.py")
+        L.shared(worktree(), lambda t: [L.add(t, r["url"], title=str(r.get("why") or r.get("what") or "")[:120],
+                                             source=r["source"], added=f"found in {sig['id']}") for r in keep],
+                 f"signals list: {len(keep)} links found in {sig['id']}")
+    except Exception as exc:  # noqa: BLE001 - the packet keeps LINKS.md either way
+        log(f"{sig['id']}: links not added to the shared list: {exc}")
+    return keep
 
 
 BLOCKED = re.compile(r"(?i)private|unavailable|not available|permission|forbidden|\b40[34]\b|cannot (?:access|open)|"
@@ -1149,7 +1179,7 @@ def _ingest(url: str, force: bool = False, lens: str = "", fps: float = 0.0) -> 
             except Exception as exc:  # noqa: BLE001 - the packet is saved; the filing failure is reported
                 ext["studio_path"] = f"not filed in ArtCraft Studio: {exc}"
         ledger({"event": "packet", "id": sig["id"], "methods": len(ext["methods"]), "path": str(d), "coverage": ext.get("coverage")})
-        extra = [classify(u)["url"] for u in got.get("links") or [] if classify(u)["kind"] == "youtube"]
+        extra = [r["url"] for r in found_links(sig, got, ext, d)]
         return {"id": sig["id"], "status": "DONE", "methods": len(ext["methods"]), "packet": str(d), "also_signals": extra,
                 "studio": ext.get("studio_path"),
                 "text": f"{got.get('title')}: {len(ext['methods'])} methods, packet {d}"}

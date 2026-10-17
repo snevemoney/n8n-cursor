@@ -505,5 +505,29 @@ class PaidUnavailableWaits(unittest.TestCase):  # live 10-16 21:05: free used up
                 w.ask("x")
 
 
+class FoundLinks(unittest.TestCase):  # Evens 10-16: repos/posts/tools mentioned in a video are signals too (rule §15)
+    def test_link_rows_are_parsed(self):
+        out = S.parse_extract_rows('{"kind":"method","name":"m"}\n{"kind":"link","url":"https://github.com/a/b","what":"repo","why":"shown"}\n{"kind":"link","url":"nope"}')
+        self.assertEqual([l["url"] for l in out["links"]], ["https://github.com/a/b"])
+
+    def test_found_links_go_to_the_shared_list_once_each(self):
+        import tempfile
+        d = Path(tempfile.mkdtemp())
+        added = []
+        class FakeL:
+            @staticmethod
+            def add(rows, url, title="", source="", added_at=None, **k): added.append((url, source)); return {}
+            @staticmethod
+            def shared(root, fn, msg, push=True): return fn({})
+        sig = {"id": "abcdefghij0", "url": "https://www.youtube.com/watch?v=abcdefghij0"}
+        got = {"links": ["https://youtu.be/zzzzzzzzzzz?t=4", "https://www.youtube.com/watch?v=abcdefghij0"]}
+        ext = {"links": [{"url": "https://github.com/a/b", "what": "repo", "why": "x"}, {"url": "https://github.com/a/b.git", "what": "repo", "why": "dup"}]}
+        with mock.patch.object(S, "_load", return_value=FakeL), mock.patch.object(S, "worktree", return_value=d):
+            keep = S.found_links(sig, got, ext, d)
+        self.assertEqual(sorted(u for u, _ in added), ["https://github.com/a/b", "https://www.youtube.com/watch?v=zzzzzzzzzzz"])
+        self.assertEqual(len(keep), 2)                       # the video itself and the .git duplicate are skipped
+        self.assertIn("github.com/a/b", (d / "LINKS.md").read_text())
+
+
 if __name__ == "__main__":
     unittest.main()
