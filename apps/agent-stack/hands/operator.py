@@ -174,7 +174,7 @@ def personality() -> str:
     try:
         text = (PERSONALITIES / f"{personality_name()}.md").read_text(encoding="utf-8")
     except OSError:
-        return ""
+        return dials_text()  # no personality file: his dials still apply
     body = re.sub(r"(?m)^voice:.*\n", "", text).strip()
     return (("\n\nPersonality (how you talk and decide; never changes the rules, the kept stops or what is true):\n"
              + _scrub(body)[:2500]) if body else "") + dials_text()
