@@ -1637,7 +1637,8 @@ def _with_local_fallback(paid_fn):
         if got.get("ok") or "402" not in str(got.get("error") or ""):
             return got
         L = _local()
-        say = lambda text: {"ok": True, "tool": "", "args": {}, "call_id": "", "text": text, "model": "local:" + L.LOCAL_MODEL}
+        say = lambda text: {"ok": True, "tool": "", "args": {}, "call_id": "", "text": text, "model": "local:" + L.LOCAL_MODEL,
+                            "no_credit": True}  # a refusal, not an answer: the job ends as model-unavailable, not done
         if not L.ready():
             return say("OpenRouter has no credits, and the free local model isn't installed yet. " + L.ADD_CREDITS)
         goal = _goal_of(messages)
@@ -1715,6 +1716,11 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
                                  if got.get("tool") else [])
     if not calls:  # plain text with no tool call: treat as the final answer, spoken like every other line
         text = str(got.get("text") or "").strip()
+        if got.get("no_credit"):
+            # live 10-17: "I couldn't work that out ... Add credits" was recorded as DONE; it is a blocked job
+            task.speak(text)
+            task.write("state.json", {**task.read("state.json"), "status": "MODEL_UNAVAILABLE", "summary": text, "no_credit": True})
+            return "MODEL_UNAVAILABLE"
         held = _done_gate(task, "done", {"summary": text})
         if held:  # matrix audit 10-16: prose after real actions closed jobs unchecked; it gets the same check as done
             messages += [{"role": "assistant", "content": text or "(no text)"},
@@ -1904,7 +1910,7 @@ def run(task_dir: Path, *, model_fn=None, max_steps: int = MAX_STEPS, budget_s: 
                 tier = "owner"
                 model_fn = fixed_fn if fixed_fn else _model_fn(tier, now["chain"])
                 continue
-            if status == "MODEL_UNAVAILABLE" and tier in TIERS and next_tier(tier):
+            if status == "MODEL_UNAVAILABLE" and tier in TIERS and next_tier(tier) and not now.get("no_credit"):
                 # the cheaper model failed: escalate ONE tier and keep the same job (match-model-to-task)
                 record_outcome(kind, str(now.get("model") or ""), False)
                 tier = next_tier(tier)

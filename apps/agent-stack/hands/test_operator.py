@@ -276,6 +276,17 @@ class OpenableRows(unittest.TestCase):  # live 10-17: Finder rows refused AXPres
         self.assertEqual([c.get("action") for c in calls if c.get("op") == "ax_act"], ["AXPress", "AXOpen"])
 
 
+class NoCreditIsNotDone(unittest.TestCase):  # live 10-17: "I couldn't ... Add credits" closed jobs as DONE
+    def test_the_local_refusal_ends_the_job_as_model_unavailable_spoken_once(self):
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        task = O.Task.create(Path(tmp.name), "translate the page")
+        line = "I couldn't work that out with the free local model. Add credits to OpenRouter."
+        model = lambda m, t: {"ok": True, "tool": "", "text": line, "no_credit": True}
+        state = O.run(task.path, model_fn=model)
+        self.assertEqual(state["status"], "MODEL_UNAVAILABLE"); self.assertEqual(state["summary"], line)
+        self.assertEqual([r["text"] for r in task.rows("speech.jsonl")].count(line), 1)
+
+
 class TruthfulStatus(unittest.TestCase):  # matrix "jobtruth": RUNNING with a dead PID was reported as running
     def test_a_running_record_with_a_dead_worker_is_stalled(self):
         d = Path(tempfile.mkdtemp()); (d / "operator-tasks" / "t1").mkdir(parents=True)
