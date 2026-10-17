@@ -434,3 +434,31 @@ def prepare(mission_id,*,source_receipt,scratch_root,active_fn,runtime_baseline=
                 'partial_working_copy':str(target) if target and target.exists() else None,
                 'actions':[{'kind':'partial_owned_working_copy'}] if target and target.exists() else [],
                 'spoken':'The project working copy could not be prepared safely. The original source was not changed; no implementation was run.'}
+
+
+def _git_out(repo,*args):
+    return subprocess.run(['/usr/bin/git','-c','core.fsmonitor=false','-C',str(repo),*args],
+                          capture_output=True,text=True,check=True).stdout
+
+
+def overlay_manifest(repo,approved):
+    """Canvas dirtyoverlay: digest the owner-approved uncommitted tracked edits so a release can carry them reproducibly."""
+    repo=Path(repo).resolve();modified=set(_git_out(repo,'diff','--name-only','HEAD').split('\n'))-{''}
+    files={}
+    for rel in sorted(set(approved)):
+        path=_source_relative(rel)
+        if rel not in modified:raise WorkspaceBlocked('overlay_not_a_tracked_change')
+        if any(p.startswith('.env') for p in path.parts):raise WorkspaceBlocked('overlay_secret_path')
+        files[rel]=_regular_bytes(repo/path)[1]
+    manifest={'version':1,'base_revision':_git_out(repo,'rev-parse','HEAD').strip(),'files':files}
+    return {**manifest,'digest':_bundle_digest(manifest)}
+
+
+def verify_overlay(repo,manifest):
+    """True only when HEAD and every approved file still match the manifest byte for byte."""
+    repo=Path(repo).resolve();unsigned={k:v for k,v in manifest.items() if k!='digest'}
+    if _bundle_digest(unsigned)!=manifest.get('digest'):raise WorkspaceBlocked('overlay_manifest_changed')
+    if _git_out(repo,'rev-parse','HEAD').strip()!=manifest['base_revision']:raise WorkspaceBlocked('overlay_base_moved')
+    for rel,row in manifest['files'].items():
+        if _regular_bytes(repo/_source_relative(rel))[1]!=row:raise WorkspaceBlocked('overlay_file_changed')
+    return True
