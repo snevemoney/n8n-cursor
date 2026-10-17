@@ -535,7 +535,13 @@ class _FreeWatcher:
         self.free = True
 
     def ask(self, prompt: str) -> str:
-        t = self.s.ask(prompt)
+        import urllib.error
+        try:
+            t = self.s.ask(prompt)
+        except urllib.error.HTTPError as exc:
+            if exc.code == 429:  # free-tier quota for now: pause the queue, resume on its next run
+                raise BudgetWait("Google free tier rate limit reached; resuming on the next run") from exc
+            raise
         ledger({"event": "model", "model": "google/" + G.MODEL, "free": True, "watch": True, "chars": len(t),
                 "usage": {"cost": 0, "prompt_tokens": getattr(self.s, "input_tokens", 0)}})
         return t
@@ -1079,8 +1085,10 @@ def write_packet(sig: dict, got: dict, ext: dict, work: Path) -> Path:
         vc = ext["visual_check"]; sp = vc.get("spot_check") or {}
         (d / "VISUAL-CHECK.md").write_text(
             f"# Visual log check — {sig['id']}\n\n- Rows: {vc.get('rows')}\n- Gaps over {MAX_VISUAL_GAP_S} s with no row: "
-            f"{', '.join(vc.get('gaps') or []) or 'none'}\n- Independent spot-check (separate watch): {sp.get('matched')}/{sp.get('checked')} "
-            f"rows match the video{(' · error: ' + sp['error']) if sp.get('error') else ''}\n\n"
+            f"{', '.join(vc.get('gaps') or []) or 'none'}\n- Independent spot-check (separate watch): "
+            + ("not run — this video is not in the 1-in-10 quality sample" if sp.get("sampled") is False else
+               f"{sp.get('matched')}/{sp.get('checked')} rows match the video{(' · error: ' + sp['error']) if sp.get('error') else ''}")
+            + "\n\n"
             + "".join(f"- {c.get('start')}: {'MATCH' if c.get('matches') else 'MISMATCH'} — {c.get('actual', '')}\n" for c in sp.get("details") or []))
     (d / "capabilities.jsonl").write_text("".join(json.dumps({**c, "source_id": sig["id"]}) + "\n" for c in ext.get("capabilities") or []))
     (d / "methods.jsonl").write_text("\n".join(json.dumps({**m, "source_id": sig["id"]}) for m in ext["methods"]) + "\n")
@@ -1097,16 +1105,16 @@ def free_gb(path: Path = Path.home()) -> float:
     return shutil.disk_usage(path).free / 1e9
 
 
-def ingest(url: str, force: bool = False, lens: str = "") -> dict:
+def ingest(url: str, force: bool = False, lens: str = "", fps: float = 0.0) -> dict:
     """One signal at a time (a lock queues parallel asks), so downloads never pile up on his disk."""
     import fcntl
     CACHE.mkdir(parents=True, exist_ok=True)
     with open(CACHE / "ingest.lock", "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        return _ingest(url, force, lens)
+        return _ingest(url, force, lens, fps)
 
 
-def _ingest(url: str, force: bool = False, lens: str = "") -> dict:
+def _ingest(url: str, force: bool = False, lens: str = "", fps: float = 0.0) -> dict:
     sig = classify(url.strip())
     if sig["id"] in known_ids() and not force:
         return {"id": sig["id"], "status": "ALREADY", "text": f"{sig['id']} is already a packet; nothing to do"}
@@ -1116,6 +1124,7 @@ def _ingest(url: str, force: bool = False, lens: str = "") -> dict:
     try:
         got = youtube(sig, work) if sig["kind"] == "youtube" else x_post(sig, work) if sig["kind"] == "x" else web_page(sig, work)
         got["lens"] = lens
+        got["fps"] = fps
         log(f"{sig['id']}: extracting methods")
         ext = extract(sig, got)
         d = write_packet(sig, got, ext, work)
@@ -1129,6 +1138,8 @@ def _ingest(url: str, force: bool = False, lens: str = "") -> dict:
         return {"id": sig["id"], "status": "DONE", "methods": len(ext["methods"]), "packet": str(d), "also_signals": extra,
                 "studio": ext.get("studio_path"),
                 "text": f"{got.get('title')}: {len(ext['methods'])} methods, packet {d}"}
+    except BudgetWait:
+        raise  # not a failure: the queue waits for tomorrow's free time
     except Exception as exc:  # noqa: BLE001 - the operator reads the reason and tries another way
         ledger({"event": "failed", "id": sig["id"], "error": str(exc)[:500]})
         return {"id": sig["id"], "status": "FAILED", "text": f"{sig['id']} failed: {exc}"}

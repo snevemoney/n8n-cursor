@@ -460,5 +460,26 @@ class FreeFirst(unittest.TestCase):  # Evens 10-16: $0-20 without lowering quali
         self.assertTrue(10 <= n <= 35, n)
 
 
+class BudgetPassesThrough(unittest.TestCase):
+    def test_budget_wait_reaches_the_queue_instead_of_counting_as_a_failure(self):
+        with mock.patch.object(S, "youtube", return_value={"title": "t", "watch": True, "duration": 60}), \
+             mock.patch.object(S, "extract", side_effect=S.BudgetWait("free tier full")), \
+             mock.patch.object(S, "known_ids", return_value=set()):
+            with self.assertRaises(S.BudgetWait):
+                S._ingest("https://www.youtube.com/watch?v=abcdefghij0", force=True)
+
+
+class FreeRateLimit(unittest.TestCase):
+    def test_429_on_the_free_tier_pauses_the_queue(self):
+        import urllib.error
+        class Sess:
+            def __init__(self, *a, **k): pass
+            def ask(self, p): raise urllib.error.HTTPError("u", 429, "Too Many Requests", {}, None)
+        with mock.patch.object(S.G, "VideoSession", Sess):
+            w = S._FreeWatcher("u", 60, 1.0)
+            with self.assertRaises(S.BudgetWait):
+                w.ask("x")
+
+
 if __name__ == "__main__":
     unittest.main()
