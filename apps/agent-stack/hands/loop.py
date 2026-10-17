@@ -23,7 +23,7 @@ MAX_EVERY = 24 * 60
 # Allowlist, not just a denylist: a loop must open with a read verb and name a known read-only subject.
 ALLOW_RE = re.compile(
     r"^(?:checks?|watch(?:es)?|monitors?|reports?|looks?\s+at|tells?\s+me)\s+(?:on\s+|the\s+|my\s+|if\s+|whether\s+)*"
-    r"(?:free\s+)?(?:vault\s+(?:lint|health|links?)|morning\s+brief(?:ing)?|daily\s+brief(?:ing)?|brief(?:ing)?|disk\s+space|disk|storage|memory|ram|cpu|load|battery|uptime|healthz?|"
+    r"(?:free\s+)?(?:vault\s+(?:lint|health|links?)|daily\s+summary|work\s+recap|morning\s+brief(?:ing)?|daily\s+brief(?:ing)?|brief(?:ing)?|disk\s+space|disk|storage|memory|ram|cpu|load|battery|uptime|healthz?|"
     r"(?:the\s+)?(?:face|jarvis|service|server|site|vps|ci|build|tests?|pr\s*#?\d+|pull\s+request\s*#?\d+|port\s+\d+)"
     r"(?:\s+(?:status|health|is\s+up|is\s+down|passing|green))?)\b[\w\s,.%#-]{0,120}$",
     re.I,

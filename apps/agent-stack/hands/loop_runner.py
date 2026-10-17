@@ -51,6 +51,10 @@ def _health(m) -> tuple[bool, str]:
 PRIVATE = Path.home() / "ArtCraft Studio/00 Private/Studio Operations"
 SHARED = Path.home() / ".grok-shared"
 STALE_DAYS = 14
+TASKS = Path(__file__).resolve().parents[3] / "docs/hive/outer-heaven/.hive/operator-tasks"
+_VAULT = next((v for v in (Path.home() / "Vaults/My_Billion_Dollar_Vault", Path.home() / "Documents/My_Billion_Dollar_Vault") if v.is_dir()),
+              Path.home() / "Vaults/My_Billion_Dollar_Vault")
+DAILY = _VAULT / "00_Outer_Heaven/JARVIS-INBOX/daily"
 
 
 def _lines(path: Path, n: int, pat: str = r"^\s*[-*] ") -> list[str]:
@@ -106,6 +110,38 @@ def _brief(_m) -> tuple[bool, str]:
     return True, " ".join(parts)[:900]
 
 
+def _daily_summary(_m, now: float | None = None) -> tuple[bool, str]:
+    """X33 / Z58: one note a day of what Jarvis did (jobs, how they ended, billed cost), from the job files, no model.
+    The day's first note is kept; later runs that day only report it."""
+    import datetime as _dt
+    now = now or time.time()
+    day = _dt.date.fromtimestamp(now)
+    start = time.mktime(day.timetuple())
+    jobs = []
+    for d in TASKS.iterdir() if TASKS.is_dir() else []:
+        try:
+            st = json.loads((d / "state.json").read_text())
+        except (OSError, ValueError):
+            continue
+        if start <= float(st.get("started") or 0) < start + 86400:
+            jobs.append(st)
+    jobs.sort(key=lambda st: float(st.get("started") or 0))
+    cost = sum(float(st.get("cost_usd") or 0) for st in jobs)
+    done = sum(1 for st in jobs if st.get("status") in ("DONE", "IDLE"))
+    line = f"Today Jarvis ran {len(jobs)} jobs, {done} finished, ${cost:.2f} billed."
+    note = DAILY / f"{day.isoformat()}.md"
+    if note.exists():
+        return True, line + " Today's note was already written."
+    rows = [f"- {time.strftime('%H:%M', time.localtime(float(st.get('started') or 0)))} · {st.get('status')} · "
+            f"${float(st.get('cost_usd') or 0):.4f} · {_cut(' '.join(str(st.get('summary') or '(no summary)').split()), 160)}" for st in jobs]
+    try:
+        DAILY.mkdir(parents=True, exist_ok=True)
+        note.write_text(f"---\ntype: daily-summary\nupdated-by: jarvis\ndate: {day.isoformat()}\n---\n# Jarvis, {day.isoformat()}\n\n{line}\n\n" + "\n".join(rows) + "\n")
+    except OSError as exc:
+        return False, f"{line} Could not save today's note: {exc}."
+    return True, line + " Saved today's note in the Jarvis inbox."
+
+
 def _vault_lint(_m) -> tuple[bool, str]:
     """X12 weekly vault lint from the link graph: orphans, dead ends, missing link targets (read-only)."""
     import importlib.util
@@ -120,6 +156,7 @@ def _vault_lint(_m) -> tuple[bool, str]:
 
 
 CHECKS = (
+    (re.compile(r"\b(?:daily\s+summary|work\s+recap)\b", re.I), _daily_summary),
     (re.compile(r"\bvault\b", re.I), _vault_lint),
     (re.compile(r"\bbrief(?:ing)?\b", re.I), _brief),
     (re.compile(r"\b(?:disk\s+space|disk|storage)\b", re.I), _disk),

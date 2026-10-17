@@ -1,6 +1,7 @@
 """Owner canvas 'Scheduled loops' + honesty audit 2026-10-16: a registered loop really runs; nothing claims it runs
 when no runner is alive; expired loops are not listed as active."""
 import importlib.util
+import json
 import os
 import tempfile
 import time
@@ -124,3 +125,23 @@ class WeeklyVaultLint(unittest.TestCase):  # X12
         with mock.patch.dict(os.environ, {"JARVIS_VAULT": str(v)}):
             ok, text = R.check("reports my vault lint")
         self.assertTrue(ok); self.assertIn("3 notes, 1 with no links, 1 dead ends, 1 missing link targets", text)
+
+
+class DailySummary(unittest.TestCase):  # X33 / Z58: one note a day of what Jarvis did, first note kept
+    def test_one_note_per_day_from_the_job_files(self):
+        R = _load("agent_stack_loop_runner_test_d", "hands/loop_runner.py")
+        L = _load("agent_stack_loop_test_d", "hands/loop.py")
+        d = Path(tempfile.mkdtemp()); tasks = d / "tasks"; now = time.time()
+        for name, st in (("a", {"started": now - 60, "status": "DONE", "cost_usd": 0.02, "summary": "Opened the PDF and read page 2."}),
+                         ("b", {"started": now - 120, "status": "WAITING_OWNER", "summary": "Asked about the invoice."}),
+                         ("old", {"started": now - 3 * 86400, "status": "DONE", "cost_usd": 9})):
+            (tasks / name).mkdir(parents=True); (tasks / name / "state.json").write_text(json.dumps(st))
+        with mock.patch.object(R, "TASKS", tasks), mock.patch.object(R, "DAILY", d / "daily"):
+            ok, line = R._daily_summary(None, now=now)
+            note = next((d / "daily").iterdir()).read_text()
+            again = R._daily_summary(None, now=now)[1]
+        self.assertTrue(ok); self.assertIn("2 jobs, 1 finished, $0.02 billed", line)
+        self.assertIn("type: daily-summary", note); self.assertIn("Opened the PDF and read page 2.", note); self.assertNotIn("$9", note)
+        self.assertIn("already written", again)
+        with mock.patch.dict(os.environ, {"JARVIS_LOOPS_FILE": str(d / "loops.json")}):
+            self.assertTrue(L.run({"op": "start", "what": "reports my daily summary", "at": "21:00"})["ok"])
