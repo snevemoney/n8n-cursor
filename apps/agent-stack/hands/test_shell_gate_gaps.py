@@ -62,3 +62,13 @@ class SensitiveAppsAsk(unittest.TestCase):
             self.assertEqual(A.authorize("app", {"action": "press", "app": app, "ref": 3})[0], "ask", app)
             self.assertEqual(A.authorize("app", {"action": "read", "app": app})[0], "allow", app)
         self.assertEqual(A.authorize("app", {"action": "press", "app": "Calculator", "ref": 3})[0], "allow")
+
+
+class CuaDriverInSensitiveApps(unittest.TestCase):  # open access lets cua-driver write; never in system/password settings
+    def test_writes_ask_reads_do_not(self):
+        from unittest import mock
+        with mock.patch.object(A, "_app_of_pid", lambda pid: "/System/Applications/System Settings.app/Contents/MacOS/System Settings"):
+            self.assertEqual(A.authorize("mcp", {"server": "cua-driver", "tool": "click", "arguments": {"pid": 111}})[0], "ask")
+            self.assertEqual(A.authorize("mcp", {"server": "cua-driver", "tool": "get_window_state", "arguments": {"pid": 111}})[0], "allow")
+        with mock.patch.object(A, "_app_of_pid", lambda pid: "/System/Applications/Calculator.app/Contents/MacOS/Calculator"):
+            self.assertEqual(A.authorize("mcp", {"server": "cua-driver", "tool": "click", "arguments": {"pid": 222}})[0], "allow")

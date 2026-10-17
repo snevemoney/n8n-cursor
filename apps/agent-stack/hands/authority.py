@@ -43,6 +43,17 @@ CLI_PERSIST = re.compile(r"(?:>>?|\btee\b(?:\s+-a)?|\bcp\b|\bmv\b|\bln\b)[^|;&]*
                          r"\blaunchctl\s+(?:load|bootstrap|enable)\b|\bosascript\b[^|;&]*login item", re.I)
 SENSITIVE_APP = re.compile(r"\b(?:system settings|system preferences|keychain access|passwords|1password|bitwarden|"
                            r"com\.apple\.(?:systempreferences|keychainaccess|passwords))\b", re.I)
+CUA_READ = re.compile(r"^(?:get_|list_|check_|health|verify_|zoom|parse_)", re.I)
+
+
+def _app_of_pid(pid: str) -> str:
+    try:
+        import subprocess as _sp
+        return _sp.run(["ps", "-p", pid, "-o", "comm="], capture_output=True, text=True, timeout=5).stdout.strip()
+    except Exception:  # noqa: BLE001 - unknown process: no extra gate (the cua write gate still applies)
+        return ""
+
+
 RUNNABLE_RE = re.compile(r"\.(?:command|sh|zsh|bash|tool|terminal|pkg|mpkg|scpt|applescript|workflow|jar|py)$", re.I)
 PAGE_EXFIL = re.compile(r"\b(?:fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource|importScripts|indexedDB|localStorage|"
                         r"sessionStorage|caches)\b|document\.cookie|window\.open|(?:location|location\.href)\s*=|\.submit\s*\(|"
@@ -150,6 +161,11 @@ def authorize(tool: str, args: dict, *, home: Path | None = None) -> tuple[str, 
         return ASK, "that runs page code that could read your logins or send data off the page"
     if tool == "signal" and str(args.get("action") or "") == "push":
         return ASK, "that pushes the signal packets to his public GitHub repo"
+    if tool == "mcp" and str(args.get("server") or "") == "cua-driver" and not CUA_READ.match(str(args.get("tool") or "")):
+        # open access lets cua-driver click/type without asking; never inside system or password settings
+        pid = str((args.get("arguments") or {}).get("pid") or "")
+        if pid.isdigit() and SENSITIVE_APP.search(_app_of_pid(pid)):
+            return ASK, "that changes a system, security or password setting"
     if tool == "mcp" and MCP_STOP.search(str(args.get("tool") or "")):
         return ASK, "that MCP tool sends, publishes, deletes, pays or pushes"
     return ALLOW, ""
