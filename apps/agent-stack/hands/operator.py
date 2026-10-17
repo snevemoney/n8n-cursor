@@ -409,6 +409,8 @@ TOOLS = [
     _fn("scroll_video", "Make a scroll-scrubbed website video: src=video file, out_dir=folder, seconds (max 30), start. "
         "Writes clip.mp4 (720p, every frame a keyframe so scrolling seeks instantly) and index.html; reports what ffprobe "
         "measured.", {"src": S, "out_dir": S, "seconds": I, "start": I}, ["src", "out_dir"]),
+    _fn("cost_report", "What his jobs really cost (OpenRouter's billed amounts), by kind of work, model and tool, over the "
+        "last N days (default 7). Writes the one-page report to Ops Watch and returns it.", {"days": I}, []),
     _fn("web_helper", "Reuse a Safari procedure that already worked. save name=... steps=[safari actions, label=<visible "
         "text> instead of ref, {var} for values] expect=<text the page shows when it worked> about=...; run name=... "
         "vars={...}; list. Save only steps you just saw succeed. Each step passes the same checks as a safari call.",
@@ -521,6 +523,8 @@ WH = _load("web_helpers", "web_helpers.py")
 PR = _load("pattern_recall", "pattern_recall.py")
 SV = _load("scroll_video", "scroll_video.py")
 UJ = _load("undo_journal", "undo_journal.py")
+CBF = _load("cost_by_feature", "cost_by_feature.py")
+COST_PAGE = Path.home() / "ArtCraft Studio/00 Private/Studio Operations/Ops Watch/Cost by feature.md"
 WEB_HELPERS = CONFIG_DIR / "web-helpers"
 
 
@@ -998,6 +1002,17 @@ class Tools:
             return {"text": f"scroll video: {exc}"}
         return {"text": ("made" if got["ok"] else "made, but the check failed") + f": {got['page']} with {got['clip']} "
                         f"({got['height']}p, {got['seconds']} s, {got['keyframes']}/{got['frames']} keyframes, {got['bytes']} bytes)"}
+
+    def cost_report(self, a):
+        tasks = self.dir.parent if self.dir.parent.name == "operator-tasks" else STACK.parents[1] / "docs/hive/outer-heaven/.hive/operator-tasks"
+        page = CBF.report(tasks, days=int(a.get("days") or 7))
+        try:
+            COST_PAGE.parent.mkdir(parents=True, exist_ok=True)
+            COST_PAGE.write_text(page)
+            where = f"\n(saved to {COST_PAGE})"
+        except OSError as exc:
+            where = f"\n(could not save the page: {exc})"
+        return {"text": _clip(page + where)}
 
     def recall(self, a):
         try:
