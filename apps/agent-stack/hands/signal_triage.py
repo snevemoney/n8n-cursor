@@ -23,7 +23,7 @@ DEEP = re.compile(r"(?i)\b(jarvis|agent(ic|s)?|claude|codex|cursor|copilot|gpt|o
                   r"ai\b|a\.i\.|vibe ?cod\w*|cod(e|ing)|python|javascript|typescript|api|github|repo|prompt\w*|rag\b|"
                   r"workflow|zapier|make\.com|supabase|vercel|lovable|bolt|windsurf|ollama|local model|open.?source|"
                   r"browser.?use|computer.?use|voice ai|second brain|obsidian|notion|saas|no.?code|deploy|server|"
-                  r"skill(s)?\b|tool(s)?\b.*(ai|agent)|build(ing)? (an?|my|your) )")
+                  r"skill(s)?\b|tool(s)?\b.*(ai|agent)|build(ing)? (an?|my|your) |design patterns?|software|programm\w*)")
 DEEP_CHANNELS = re.compile(r"(?i)nate herk|zubair|cole medin|tech with tim|robonuggets|syntax|chase ai|simon scrapes|"
                            r"ai jason|matthew berman|wes roth|all about ai|david ondrej|liam ottley|greg isenberg|"
                            r"fireship|theo|primeagen|indydevdan|ai search|sam witteveen|prompt engineering")
@@ -33,7 +33,7 @@ STUDIO = re.compile(r"(?i)\b(motion graphics?|mograph|after effects|kinetic typ\
                     r"thumbnail|capcut|remotion|lottie|rive\b)")
 BIZ = re.compile(r"(?i)\b(business|startup|founder|ceo|entrepreneur\w*|marketing|sales|agency|clients?|offer|funnel|"
                  r"ecommerce|e-commerce|dropship\w*|amazon fba|shopify|side hustle|make money|revenue|profit|"
-                 r"invest\w*|stocks?|etf|portfolio|wealth|finance|tax(es)?|real estate|crypto|bitcoin|trading)")
+                 r"invest\w*|money|stocks?|etf|portfolio|wealth|finance|tax(es)?|real estate|crypto|bitcoin|trading)")
 LIGHT_CHANNELS = re.compile(r"(?i)valuetainment|pbd podcast|diary of a ceo|kevin samuels|joe rogan|lex fridman|"
                             r"impaulsive|flagrant|full send|club shay shay|breakfast club|podcast")
 SKIP = re.compile(r"(?i)\b(gameplay|let'?s play|walkthrough|speedrun|gaming|game theory|film theory|food theory|"
@@ -46,6 +46,10 @@ SKIP_CHANNELS = re.compile(r"(?i)gameranx|game theorists|film theorists|food the
 STUDIO_MAKING = re.compile(r"(?i)\b(animation|animated|3d|vfx|edit\w*)\b.*\b(tutorial|how (i|to)|made|making|breakdown|"
                            r"workflow|process|course|tips)\b|\b(tutorial|how (i|to)|made|making|breakdown)\b.*\b(animation|"
                            r"animated|3d|vfx|commercial|edit\w*)\b")
+STRONG_WORK = re.compile(r"(?i)\b(claude|codex|grok|openai|chatgpt|gpt|llm|ai|a\.i\.|agentic|ai agents?|mcp|n8n|coding|"
+                         r"python|design patterns?|software|programming|tutorial|course|money|business|startup)\b")
+GAMES = re.compile(r"(?i)\b(gameplay|let'?s play|walkthrough|speedrun|gaming|ps5|xbox|nintendo|switch|3ds|fortnite|gta|"
+                   r"call of duty|elden ring|pokemon|mario|dlc)\b")  # a game title stays skipped even with a work word
 GOSSIP = re.compile(r"(?i)\b(highlights?|drama|prank|vlog|tier list|diss|beef|exposed|fan calls?|caught|cheat(ed|ing)|"
                     r"reacts?|reaction|roast(ed)?|mukbang|challenge)\b")
 LENS_FPS = {"deep": 1.0, "biz": 1.0, "studio": 5.0, "light": 0.2, "later": 0.0, "skip": 0.0}
@@ -63,14 +67,17 @@ def seconds(length: str) -> int:
 def classify(video: dict) -> dict:
     title, channel = str(video.get("title") or ""), str(video.get("channel") or "")
     hay = f"{title} · {channel}"
-    if GOSSIP.search(hay) or SKIP_CHANNELS.search(channel):
+    # Evens 10-16 "why 428 skipped??": one gossip word ("cheating", "reacts") hid Claude Code and design-pattern videos;
+    # a work topic in the title now wins over the word. Pure entertainment channels are still skipped.
+    work = STRONG_WORK.search(title)
+    if SKIP_CHANNELS.search(channel) or (GOSSIP.search(hay) and not work):
         tier, prio, why = "skip", 9, "entertainment/gossip"
     elif STUDIO.search(title) or STUDIO_MAKING.search(title):
         tier, prio, why = "studio", 2, "design/motion craft in the title"
     elif DEEP_CHANNELS.search(channel) or DEEP.search(title):
         tier, why = "deep", ("AI/automation creator" if DEEP_CHANNELS.search(channel) else "AI/agents/coding in the title")
         prio = 1 if re.search(r"(?i)jarvis|agent|claude|codex|computer.?use|browser.?use|mcp|zubair", hay) else 2
-    elif SKIP.search(title):
+    elif SKIP.search(title) and (not work or GAMES.search(title)):
         tier, prio, why = "skip", 9, "entertainment/gaming"
     elif LIGHT_CHANNELS.search(channel):
         tier, prio, why = "light", 5, "podcast/interview (talking heads)"

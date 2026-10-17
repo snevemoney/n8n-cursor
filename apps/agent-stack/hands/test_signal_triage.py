@@ -51,6 +51,16 @@ class Tighter(unittest.TestCase):  # first real run: 1,184 'light' videos, enter
     def test_gossip_and_highlights_are_skipped(self):
         self.assertEqual(T.classify(v("Logan Paul Fan Calls In to Demand Apology", "H3 Podcast Highlights"))["tier"], "skip")
 
+    def test_a_work_topic_beats_a_gossip_word(self):  # Evens 10-16 "why 428 skipped??": real work videos were lost
+        self.assertEqual(T.classify(v("Claude Code + FB Ads is F***ing CHEATING (full tutorial)", "Folu ilori"))["tier"], "deep")
+        self.assertEqual(T.classify(v("8 Design Patterns | Prime Reacts", "The PrimeTime"))["tier"], "deep")
+        self.assertNotEqual(T.classify(v("The Virtues of Strong Money | Episode 7", "Saylor University"))["tier"], "skip")
+        self.assertEqual(T.classify(v("Logan Paul Fan Calls In to Demand Apology", "H3 Podcast Highlights"))["tier"], "skip")
+        self.assertEqual(T.classify(v("How to Get Ripped During Quarantine", "The Infographics Show"))["tier"], "skip")
+        self.assertEqual(T.classify(v("Helldivers 2 Server Issues And Transparency - Luke Reacts", "Luke"))["tier"], "skip")
+        self.assertEqual(T.classify(v("MARVEL PHASE 4 FULL SLATE REVEAL | Disney Investor Day", "X"))["tier"], "skip")
+        self.assertEqual(T.classify(v("DOUBLE MONEY, DLC UPDATE & DISCOUNTS | GTA Online Weekly Update", "TGG"))["tier"], "skip")
+
     def test_unrecognised_videos_wait_in_later(self):
         r = T.classify(v("A day at the lake", "Some Channel"))
         self.assertEqual(r["tier"], "later"); self.assertEqual(r["fps"], 0.0)
