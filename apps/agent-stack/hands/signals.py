@@ -1198,6 +1198,11 @@ def _ingest(url: str, force: bool = False, lens: str = "", fps: float = 0.0) -> 
                 ext["studio_path"] = f"not filed in ArtCraft Studio: {exc}"
         ledger({"event": "packet", "id": sig["id"], "methods": len(ext["methods"]), "path": str(d), "coverage": ext.get("coverage")})
         _wiki_log("ingest", f"{sig['id']} | {str(got.get('title') or '')[:80]} | {len(ext['methods'])} methods")
+        try:  # Karpathy integrate: fold the packet into the family and tool pages (wiki_integrate.py)
+            W = _load("agent_stack_wiki_integrate", "wiki_integrate.py")
+            W.integrate(d, worktree() / "docs/hive/outer-heaven/CONTENT/watch-later/wiki")
+        except Exception as exc:  # noqa: BLE001 - the packet is saved either way
+            log(f"{sig['id']}: wiki integrate skipped: {exc}")
         extra = [r["url"] for r in found_links(sig, got, ext, d)]
         return {"id": sig["id"], "status": "DONE", "methods": len(ext["methods"]), "packet": str(d), "also_signals": extra,
                 "studio": ext.get("studio_path"),
