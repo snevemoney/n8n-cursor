@@ -1,6 +1,7 @@
 """Evens 2026-10-16: a free local model keeps Jarvis working when OpenRouter has no credits; anything beyond it gets
 "This free local model can't ___. Add credits to OpenRouter to continue with more capable models." """
 import importlib.util
+import json
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -91,6 +92,30 @@ class Fallback(unittest.TestCase):
         with mock.patch.object(L, "call") as local:
             self.assertEqual(O._with_local_fallback(paid)(msgs("hi"), TOOLS)["text"], "hi")
         local.assert_not_called()
+
+
+class Light(unittest.TestCase):  # live 10-16: qwen3:4b froze his 8 GB Mac — small context, short brief, unload when idle
+    def test_request_is_small_and_unloads_when_idle(self):
+        sent = {}
+        def post(url, data, headers=None, timeout=0):
+            sent["url"] = url; sent.update(data)
+            return {"message": {"content": "ok"}}
+        long_system = "x" * 30000
+        m = [{"role": "system", "content": long_system}] + [{"role": "user", "content": f"turn {i}"} for i in range(30)]
+        with mock.patch.object(L, "_post", side_effect=post):
+            L.call(m, TOOLS)
+        self.assertTrue(sent["url"].endswith("/api/chat"))
+        self.assertEqual(sent["keep_alive"], L.KEEP_ALIVE)
+        self.assertLessEqual(sent["options"]["num_ctx"], 4096)
+        self.assertLess(len(json.dumps(sent["messages"])), 9000)      # short brief, recent turns only
+        self.assertIn("turn 29", json.dumps(sent["messages"]))         # newest turn kept
+        self.assertFalse(sent.get("think", True))
+
+    def test_native_tool_calls_are_read(self):
+        reply = {"message": {"tool_calls": [{"function": {"name": "open", "arguments": {"target": "Calculator"}}}]}}
+        with mock.patch.object(L, "_post", return_value=reply):
+            got = L.call(msgs("open calculator"), TOOLS)
+        self.assertEqual(got["calls"][0]["tool"], "open"); self.assertEqual(got["calls"][0]["args"], {"target": "Calculator"})
 
 
 if __name__ == "__main__":

@@ -19,7 +19,13 @@ ADD_CREDITS = "Add credits to OpenRouter to continue with more capable models."
 SAFE_TOOLS = {"read_file", "list_dir", "find_files", "grep", "job", "web_search", "fetch_url", "safari", "app",
               "methods", "plan", "open", "say", "ask_owner", "done"}
 LOCAL_STEP_CAP = 12
-NO_THINK = "/no_think"  # qwen3: answer directly (faster, fewer tokens on a small Mac)
+NUM_CTX = 4096          # live 10-16: the full prompt (~7k tokens) made Ollama reserve too much memory and froze the Mac
+KEEP_ALIVE = "30s"      # free the model's memory 30 s after the last answer
+KEEP_TURNS = 8
+BRIEF = ("You are Jarvis, Evens's Mac assistant, running on a small free local model because OpenRouter has no credits. "
+         "Speak plain, short English. Use a tool only when it does what he asked (open apps, his Safari, native apps, read "
+         "files, quick web lookups). Never pretend you did something. If a request needs more than you can do, say: "
+         "\"This free local model can't <what>. Add credits to OpenRouter to continue with more capable models.\"")
 
 # What the small model cannot do well, by what he asks for. Order matters: first match names the reason.
 BEYOND = (
@@ -58,31 +64,50 @@ def ready() -> bool:
         return False
 
 
-def _text_only(messages: list) -> list:
-    out = []
-    for m in messages:
+def _compact(messages: list) -> list:
+    """Short brief + the newest turns, text only, for a small model in little memory."""
+    rest = [m for m in messages if m.get("role") != "system"][-KEEP_TURNS:]
+    while rest and rest[0].get("role") == "tool":
+        rest = rest[1:]
+    out = [{"role": "system", "content": BRIEF}]
+    for m in rest:
         c = m.get("content")
         if isinstance(c, list):
             parts = [p.get("text", "") for p in c if isinstance(p, dict) and p.get("type") == "text"]
             if any(isinstance(p, dict) and p.get("type") == "image_url" for p in c):
                 parts.append("[a screenshot was here; the free local model cannot see images]")
             c = "\n".join(x for x in parts if x)
-        out.append({**m, "content": c})
-    if out and out[0].get("role") == "system":
-        out[0] = {**out[0], "content": f"{out[0]['content']}\n\nYou are running on a small free local model. Keep answers short. {NO_THINK}"}
+        row = {"role": m.get("role"), "content": str(c or "")[:1500]}
+        if m.get("tool_calls"):
+            row["tool_calls"] = [{"function": {"name": (tc.get("function") or {}).get("name"),
+                                               "arguments": _args((tc.get("function") or {}).get("arguments"))}}
+                                 for tc in m["tool_calls"] if isinstance(tc, dict)]
+        out.append(row)
     return out
 
 
+def _args(raw) -> dict:
+    if isinstance(raw, dict):
+        return raw
+    try:
+        v = json.loads(raw or "{}")
+        return v if isinstance(v, dict) else {}
+    except ValueError:
+        return {}
+
+
 def call(messages: list, tools: list) -> dict:
-    """One operator turn on the local model, in the same shape as online.call_openrouter_messages."""
+    """One operator turn on the local model (Ollama native chat: small context, unloads when idle), returned in the
+    same shape as online.call_openrouter_messages."""
     safe = [t for t in tools if (t.get("function") or {}).get("name") in SAFE_TOOLS]
     try:
-        data = _post(LOCAL_BASE + "/v1/chat/completions",
-                     {"model": LOCAL_MODEL, "messages": _text_only(messages), "tools": safe, "tool_choice": "auto",
-                      "temperature": 0.2, "max_tokens": 1500})
+        data = _post(LOCAL_BASE + "/api/chat",
+                     {"model": LOCAL_MODEL, "messages": _compact(messages), "tools": safe, "stream": False,
+                      "think": False, "keep_alive": KEEP_ALIVE, "options": {"num_ctx": NUM_CTX, "temperature": 0.2,
+                                                                          "num_predict": 800}})
     except Exception as exc:  # noqa: BLE001
         return {"ok": False, "unknown": True, "error": f"local model: {type(exc).__name__}"}
-    msg = ((data.get("choices") or [{}])[0].get("message") or {})
+    msg = data.get("message") or ((data.get("choices") or [{}])[0].get("message") or {})
     calls = []
     for i, tc in enumerate(msg.get("tool_calls") or []):
         fn = tc.get("function") or {}
@@ -90,11 +115,7 @@ def call(messages: list, tools: list) -> dict:
         if name not in SAFE_TOOLS:
             return {"ok": True, "tool": "", "args": {}, "call_id": "", "model": "local:" + LOCAL_MODEL,
                     "text": f"This free local model can't use {name or 'that tool'}. {ADD_CREDITS}"}
-        try:
-            args = json.loads(fn.get("arguments") or "{}")
-        except ValueError:
-            args = {}
-        calls.append({"tool": name, "args": args if isinstance(args, dict) else {}, "call_id": str(tc.get("id") or f"local_{i}")})
+        calls.append({"tool": name, "args": _args(fn.get("arguments")), "call_id": str(tc.get("id") or f"local_{i}")})
     if calls:
         return {"ok": True, "calls": calls, "tool": calls[0]["tool"], "args": calls[0]["args"],
                 "call_id": calls[0]["call_id"], "text": "", "model": "local:" + LOCAL_MODEL}
