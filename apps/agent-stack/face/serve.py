@@ -675,6 +675,17 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/jobs":
             self._json(200, {"jobs": observe_jobs()})
             return
+        if path == "/api/operator":  # matrix: receiptcard, gatehud, driving, chips (read-only view of the live job)
+            try:
+                spec = importlib.util.spec_from_file_location("agent_stack_operator_view", ROOT / "apps/agent-stack/hands/operator.py")
+                mod = sys.modules.get("agent_stack_operator_view")
+                if mod is None:
+                    mod = importlib.util.module_from_spec(spec); sys.modules["agent_stack_operator_view"] = mod; spec.loader.exec_module(mod)
+                view = mod.orb_view(HIVE)
+            except Exception as exc:  # noqa: BLE001 - the Orb must paint even if the view fails
+                view = {"error": str(exc)[:200]}
+            self._json(200, {**view, "rev": _release_rev()})
+            return
         if path == "/api/stack":
             stack = dict(load_json(HIVE / "agent-stack.json"))
             stack["notes_indexed"] = _notes_indexed()

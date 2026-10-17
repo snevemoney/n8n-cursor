@@ -340,6 +340,17 @@
       .orb, #board { animation: none !important; }
     }
     /* Ported from main: Face controls (Mic / Stop / Hide). */
+    #driveBadge {
+      position: fixed; z-index: 7; top: 14px; left: 50%; transform: translateX(-50%);
+      background: rgba(10, 2, 2, .85); color: #ffb3b3; border: 1px solid rgba(255, 90, 90, .6);
+      font: 11px "Share Tech Mono", ui-monospace, monospace; letter-spacing: .14em; padding: 6px 12px;
+      animation: drivePulse 1.2s ease-in-out infinite;
+    }
+    @keyframes drivePulse { 50% { border-color: rgba(255, 90, 90, 1); } }
+    #receipt { font: 10px "Share Tech Mono", ui-monospace, monospace; color: rgba(190, 255, 205, .55); letter-spacing: .08em; margin-top: 6px; min-height: 12px; }
+    #chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    #chips button { background: rgba(2, 10, 6, .7); color: var(--mint, #3dff6a); border: 1px solid rgba(61, 255, 106, .35);
+      font: 10px "Share Tech Mono", ui-monospace, monospace; letter-spacing: .1em; padding: 4px 8px; cursor: pointer; }
     .controls {
       position: fixed; z-index: 6; left: 28px; bottom: 48px;
       display: flex; gap: 8px; pointer-events: auto;
@@ -417,8 +428,11 @@
     <div class="mark" id="mark">J.A.R.V.I.S.</div>
     <div class="line" id="heard" style="opacity:.6;font-size:.8em"></div>
     <div class="line" id="spoken"></div>
+      <div id="chips" aria-label="suggestions"></div>
+      <div id="receipt" aria-label="tool receipt"></div>
       <details id="resultHistory" hidden><summary>Earlier updates</summary><div id="conversationHistory"></div><div id="browserResults"></div></details>
   </div>
+  <div id="driveBadge" role="status" hidden>JARVIS IS DRIVING · touch the mouse or keyboard to take over</div>
   <div class="controls" id="controls">
     <button type="button" id="mic">Mic</button>
     <button type="button" id="stop">Stop</button>
@@ -1828,6 +1842,31 @@
       if (reflexHideAt && Date.now() > reflexHideAt) { el.classList.remove("on"); reflexHideAt = 0; }
     }
     let lastInboxGen = null;
+    function paintOperator(op) {
+      // matrix nodes: driving badge (Z29), tool receipt footer, routing line (gatehud), suggestion chips (Z46)
+      const badge = $("driveBadge"), rc = $("receipt"), ch = $("chips");
+      if (!op || typeof op !== "object") return;
+      if (badge) badge.hidden = !(op.driving && op.driving.tool);
+      if (rc) {
+        const tools = Object.entries(op.tools_run || {}).map(([k, n]) => n > 1 ? k + " ×" + n : k).join(" · ");
+        const pick = op.tier ? (op.tier + (op.kind ? "/" + op.kind : "") + (op.jev && op.jev.ne !== undefined ? " · jev " + op.jev.ne : "")) : "";
+        const cost = op.cost_usd ? "$" + Number(op.cost_usd).toFixed(3) : "";
+        const parts = [tools, pick, cost, op.rev ? "rev " + String(op.rev).slice(0, 7) : "", op.verified === false ? "unverified" : ""].filter(Boolean);
+        rc.textContent = parts.join("  ·  ");
+      }
+      if (ch) {
+        const want = JSON.stringify(op.chips || []);
+        if (ch.dataset.chips !== want) {
+          ch.dataset.chips = want;
+          ch.innerHTML = "";
+          for (const c of (op.chips || [])) {
+            const b = document.createElement("button"); b.type = "button"; b.textContent = c;
+            b.addEventListener("click", (e) => { e.stopPropagation(); turn(c, false, false); });
+            ch.appendChild(b);
+          }
+        }
+      }
+    }
     function paintInbox(bus) {
       const el = $("inboxcard");
       if (!el || el === $("spoken")) return;
@@ -2123,6 +2162,7 @@
         paintPrebrief(bus);
         paintReflex(bus);
         paintInbox(bus);
+        try { paintOperator(Object.assign({}, await api("/api/operator"))); } catch (o) {}
         paintLights({ health, bus, wires });
       } catch (e) {
         $("link").textContent = "NEURAL LINK - LOCAL FACE ONLY";

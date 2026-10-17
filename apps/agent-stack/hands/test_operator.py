@@ -2,6 +2,7 @@
 real results go back, until done. A scripted model stands in for the live one; tools run for real in a temp home."""
 import importlib.util
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -302,6 +303,25 @@ class PersonalityDials(unittest.TestCase):  # Z26
             self.assertIn("humor 100%", O.dials_text())
             self.assertIn("never changes", O.personality())
             bad = tools.config({"key": "honesty", "action": "set", "value": "250"}); self.assertNotIn("250%", O.dials_text())
+
+
+class DrivingAndTakeover(unittest.TestCase):  # Z29: badge while driving, hands off the moment he touches the mouse
+    def test_owner_touched_reads_hid_idle(self):
+        self.assertTrue(O.owner_touched(0.5)); self.assertFalse(O.owner_touched(30))
+
+    def test_orb_view_lists_tools_run_pick_and_chips(self):
+        d = Path(tempfile.mkdtemp()); (d / "operator-tasks" / "t1").mkdir(parents=True)
+        (d / "operator-tasks" / "t1" / "state.json").write_text(json.dumps({"task_id": "t1", "status": "RUNNING", "pid": os.getpid(), "turn_at": 1,
+                                                                             "tier": "cheap", "model": "deepseek/deepseek-v4-flash", "jev": {"tier": "cheap", "ne": 0.13},
+                                                                             "driving": {"tool": "app", "since": 5}, "cost_usd": 0.004}))
+        (d / "operator-tasks" / "t1" / "request.json").write_text(json.dumps({"goal": "click 12 times 7 in Calculator"}))
+        (d / "operator-tasks" / "latest.json").write_text(json.dumps({"task_id": "t1"}))
+        with (d / "operator-tasks" / "t1" / "trace.jsonl").open("w") as fh:
+            for tool in ("app", "app", "say", "app"):
+                fh.write(json.dumps({"event": "tool", "tool": tool, "at": 2}) + "\n")
+        v = O.orb_view(d)
+        self.assertEqual(v["tools_run"], {"app": 3}); self.assertEqual(v["driving"]["tool"], "app")
+        self.assertEqual(v["jev"]["ne"], 0.13); self.assertIn("How is it going?", v["chips"]); self.assertIn("click 12 times 7 in Calculator", v["chips"])
 
 
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"

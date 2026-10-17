@@ -1513,11 +1513,21 @@ def step_once(task: Task, tools: Tools, model_fn) -> str | None:
                               "yes, make exactly the same call again and it will go through."}
         elif not hasattr(Tools, name) or name.startswith("_"):
             result = {"text": f"unknown tool {name}"}
+        elif name in DRIVING_TOOLS and owner_touched():
+            # Z29 (matrix "takeover"/"driving"): his hand on the mouse or keyboard means hands off, at once.
+            task.trace({"event": "takeover", "tool": name})
+            task.speak("You took over, so my hands are off. Say go on when you want me to continue.")
+            terminal = ("WAITING_OWNER", {"question": "you took over; say go on to continue"})
+            result = {"text": "not run: Evens is using the mouse or keyboard; wait for his go on"}
         else:
+            if name in DRIVING_TOOLS:
+                task.write("state.json", {**task.read("state.json"), "driving": {"tool": name, "since": time.time()}})
             try:
                 result = getattr(tools, name)(args)
             except Exception as exc:  # noqa: BLE001 — every failure is data for the model
                 result = {"text": f"error: {type(exc).__name__}: {exc}"}
+            if name in DRIVING_TOOLS:
+                task.write("state.json", {**task.read("state.json"), "driving": None})
         if decision == "allow" and str(why).startswith("flag"):
             # Evens 10-16: secrets are flagged, never a stop; values stay masked in messages, trace and the model
             result = {**result, "text": "Heads up: this holds secrets; values are masked. " + _scrub(str(result.get("text") or ""))}
@@ -1788,6 +1798,23 @@ RESEARCH_RE = re.compile(r"\b(research|look up|latest|current(?:ly)?|right now|t
                          r"most popular|top \d+|stars|price|prices|news|what'?s new|review of)\b", re.I)
 CANT_RE = re.compile(r"\b(i\s+can(?:'|no)?t|cannot|i\s+don'?t\s+have\s+(?:access|a\s+way|the\s+ability)|unable\s+to|"
                      r"isn'?t\s+available|not\s+available|no\s+\w+(?:\s+\w+)?\s+tool|outside\s+what\s+i\s+can)\b", re.I)
+DRIVING_TOOLS = {"app", "computer", "app_type", "safari", "open"}   # the ones that move things on his Mac
+TAKEOVER_S = float(os.environ.get("JARVIS_TAKEOVER_S") or 2.0)
+
+
+def owner_touched(idle_s: float | None = None) -> bool:
+    """True when his mouse or keyboard moved in the last TAKEOVER_S seconds (HIDIdleTime, no permission needed).
+    Jarvis's own AX actions and app_type produce no HID events, so any recent event is his."""
+    try:
+        if idle_s is None:
+            out = subprocess.run(["ioreg", "-c", "IOHIDSystem", "-d", "4"], capture_output=True, text=True, timeout=5).stdout
+            m = re.search(r'"HIDIdleTime" = (\d+)', out)
+            idle_s = int(m.group(1)) / 1e9 if m else 1e9
+        return idle_s < TAKEOVER_S
+    except Exception:  # noqa: BLE001
+        return False
+
+
 ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config", "loop", "app_type", "app"}
 
 
@@ -1976,6 +2003,33 @@ def status(hive: Path, task_id: str | None = None) -> dict:
         # matrix 10-16 "jobtruth": two records said RUNNING while their PIDs were gone. What he is told is the truth.
         st = {**st, "status": "STALLED", "recorded_status": st["status"], "worker_alive": False}
     return {**st, "goal": task.read("request.json", {}).get("goal", "")}
+
+
+def orb_view(hive: Path) -> dict:
+    """What the Orb shows beside the card (matrix: receiptcard, gatehud, driving, chips): tools run this turn, the
+    model pick, cost, the driving flag and a few chips to tap. Read-only; never the model's own words."""
+    st = status(hive)
+    tid = str(st.get("task_id") or "")
+    tools_run: dict = {}
+    if tid:
+        task = Task(Path(hive) / "operator-tasks" / tid)
+        since = float(st.get("turn_at") or 0)
+        for r in task.rows("trace.jsonl"):
+            if r.get("event") == "tool" and float(r.get("at") or 0) >= since and r.get("tool") not in ("say", "done", "plan"):
+                tools_run[r["tool"]] = tools_run.get(r["tool"], 0) + 1
+    goals = []
+    root = Path(hive) / "operator-tasks"
+    if root.is_dir():
+        for d in sorted(root.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True)[:8]:
+            g = str((json.loads((d / "request.json").read_text()).get("goal") if (d / "request.json").exists() else "") or "").split("\n")[0].strip()
+            if g and g not in goals and len(g) < 90 and g.lower() not in ("stop", "go on"):
+                goals.append(g)
+    chips = (["How is it going?"] if st.get("status") in ("RUNNING", "QUEUED") else []) + \
+            (["Go on"] if st.get("status") == "WAITING_OWNER" else []) + ["Good morning, what's on today?"] + goals[:2]
+    jev = st.get("jev") or {}
+    return {"status": st.get("status"), "step": st.get("step"), "cost_usd": st.get("cost_usd"), "tier": st.get("tier"),
+            "model": st.get("model"), "kind": st.get("kind"), "jev": {k: jev.get(k) for k in ("tier", "ne", "picked") if k in jev},
+            "driving": st.get("driving"), "verified": st.get("verified"), "tools_run": tools_run, "chips": chips[:4]}
 
 
 if __name__ == "__main__":
