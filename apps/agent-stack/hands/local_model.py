@@ -100,6 +100,10 @@ def _args(raw) -> dict:
         return {}
 
 
+REASONING_RE = re.compile(r"\s*(?:okay|ok|alright|hmm|so)[,.]?\s+(?:let'?s|let me|so|i need|first)\b|\s*(?:let me (?:think|figure|see|break)|"
+                          r"first,? i (?:need|should|will)|the user (?:is|wants|asked|said|mentioned|wrote)|i need to (?:figure|check|think))\b", re.I)
+
+
 def call(messages: list, tools: list) -> dict:
     """One operator turn on the local model (Ollama native chat: small context, unloads when idle), returned in the
     same shape as online.call_openrouter_messages."""
@@ -124,5 +128,9 @@ def call(messages: list, tools: list) -> dict:
         return {"ok": True, "calls": calls, "tool": calls[0]["tool"], "args": calls[0]["args"],
                 "call_id": calls[0]["call_id"], "text": "", "model": "local:" + LOCAL_MODEL}
     text = re.sub(r"(?s)^.*</think>", "", str(msg.get("content") or "")).strip()  # drop leftover reasoning
+    if REASONING_RE.match(text):
+        # live 10-17: with credits at $0 the local model's thinking ("Okay, let's break this down. The user is saying…")
+        # was spoken to Evens. Thinking is never a reply.
+        text = f"I couldn't work that out with the free local model. {ADD_CREDITS}"
     return {"ok": bool(text), "tool": "", "args": {}, "call_id": "", "text": text, "model": "local:" + LOCAL_MODEL,
             **({} if text else {"unknown": True, "error": "local model: empty"})}

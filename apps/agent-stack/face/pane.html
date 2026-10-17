@@ -1539,6 +1539,14 @@
         String(text || "")
       );
     }
+    // Expressive voice tags ([chuckle], [sigh] …) are for the voice; the card shows plain words (live 10-17: "[chuckle]" on the card).
+    const VOICE_TAG_RE = /\s*\[(laugh|chuckle|gasp|cough|sigh|groan|sniff|shush|clear throat|angry|crying|dramatic|fear|happy|narration|sarcastic|surprised|whispering)\]\s*/gi;
+    function cardText(v) { return String(v == null ? "" : v).replace(VOICE_TAG_RE, " ").replace(/\s{2,}/g, " ").trim(); }
+    (function guardCard() {
+      const el = $("spoken"); const d = Object.getOwnPropertyDescriptor(Node.prototype, "textContent");
+      if (!el || !d) return;
+      Object.defineProperty(el, "textContent", { configurable: true, get() { return d.get.call(el); }, set(v) { d.set.call(el, cardText(v)); } });
+    })();
     function productLine(text) {
       const line = String(text || "").replace(/\*\*/g, "").trim();
       if (!line || isStatusLine(line)) return "";

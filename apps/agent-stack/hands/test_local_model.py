@@ -132,3 +132,21 @@ class NoThinking(unittest.TestCase):  # live 10-16: think=false was ignored; 38 
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ThinkingIsNeverAReply(unittest.TestCase):  # live 10-17: the local model's reasoning was spoken to Evens
+    def test_reasoning_text_becomes_an_honest_line(self):
+        leaked = ["Okay, let's try to figure this out. The user wants me to click the link on example.com",
+                  "Okay, let's see. The user is asking why I'm slow",
+                  "Okay, let's break this down. The user is saying that the same approach won't work",
+                  "The user wants me to open Safari", "First, I need to check if Safari is open"]
+        for text in leaked:
+            with mock.patch.object(L, "_post", return_value={"message": {"content": text}}):
+                got = L.call([{"role": "user", "content": "x"}], [])
+            self.assertNotIn("The user", got["text"]); self.assertIn("free local model", got["text"])
+
+    def test_a_real_answer_passes(self):
+        with mock.patch.object(L, "_post", return_value={"message": {"content": "Sir, it is 5:12 in the morning."}}):
+            self.assertEqual(L.call([{"role": "user", "content": "time?"}], [])["text"], "Sir, it is 5:12 in the morning.")
+        with mock.patch.object(L, "_post", return_value={"message": {"content": "Okay, done. The file is saved."}}):
+            self.assertEqual(L.call([{"role": "user", "content": "x"}], [])["text"], "Okay, done. The file is saved.")
