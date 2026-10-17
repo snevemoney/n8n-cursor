@@ -38,6 +38,9 @@ SYSTEM = (
     "You are Jarvis, Evens's assistant on his Mac. You work the way Claude Code, Codex and the other frontier agents "
     "work: ONE agent in a loop. You read the whole conversation, decide, use tools, check the real result, and keep "
     "going until the thing is actually done. There is no other brain behind you and nobody to hand work to.\n"
+    "Your own settings: you may change them with config when the situation calls for it (a quieter voice late at night, a "
+    "cheaper model for a long dull job, a tighter learning budget when credits are low) — say what you changed and why; "
+    "keys, rules and kept stops are not settings. "
     "Talking: use say whenever you have something for him — the answer to a plain question (answer it and finish; do "
     "not open tools for arithmetic or general knowledge), what you are about to do, what you just found, or a snag. "
     "Speak like a capable colleague: plain English, short, no markdown, no file slugs, no model names, no step numbers, "
@@ -237,6 +240,16 @@ def system_prompt() -> str:
                    "and PRs on HIS repo snevemoney/n8n-cursor (Jarvis lives in apps/agent-stack), never Anthropic's repos.")
 
 
+CONFIG_DIR = Path.home() / ".config/brain"
+CONFIG_KEYS = {  # key -> (file, validator regex). Jarvis may change these; nothing else (no keys, rules, stops, plists).
+    "voice": ("voice.txt", r"[abmf][fm]_[a-z]+(?::\d{1,3})?(?:\+[abmf][fm]_[a-z]+(?::\d{1,3})?)*"),
+    "personality": ("personality.txt", r"[a-z0-9-]{1,40}"),
+    "model": ("", r"[A-Za-z0-9 ._:/-]{2,80}"),
+    "signal_budget_usd": ("signal-budget.txt", r"\d{1,3}(?:\.\d{1,2})?"),
+}
+CONFIG_LOG = CONFIG_DIR / "config-history.jsonl"
+
+
 def _fn(name, desc, props, required=()):
     return {"type": "function", "function": {"name": name, "description": desc,
             "parameters": {"type": "object", "properties": props, "required": list(required)}}}
@@ -313,6 +326,11 @@ TOOLS = [
          "again": B, "lens": {"type": "string", "enum": ["auto", "learn", "studio"]}},
         ["action"]),
     _fn("open", "Open an app by name or a file/folder/URL with its default app.", {"target": S}, ["target"]),
+    _fn("config", "Read or change your own settings when the situation calls for it (Evens 10-17): voice (a Kokoro voice "
+        "or blend), personality (a file name in Personalities), model (your brain for the next 30 min), signal_budget_usd "
+        "(paid cap for the learning queue). Say what you changed and why. Keys, rules and kept stops are not settings.",
+        {"action": {"type": "string", "enum": ["get", "set", "history"]}, "key": {"type": "string", "enum": list(CONFIG_KEYS)},
+         "value": S, "why": S}, ["action"]),
     _fn("artifact", "Publish or update a living artifact for Evens (dashboard, tracker, flowchart, plan, roadmap, score, "
         "report, index, SOP, brief...): a named HTML/Markdown/CSV/JSON/SVG page in ArtCraft Studio that he can open; the same "
         "name updates it in place and keeps the previous versions. Opens it in his browser on the first publish or when open=true.",
@@ -818,6 +836,42 @@ class Tools:
         if a.get("keys"):
             return self._hands({"op": "key", "keys": str(a["keys"])})
         return self._hands({"op": "type", "text": str(a.get("text") or "")})
+
+    def config(self, a):
+        key, action = str(a.get("key") or ""), str(a.get("action") or "get")
+        if action == "history":
+            rows = CONFIG_LOG.read_text().splitlines()[-20:] if CONFIG_LOG.exists() else []
+            return {"text": "\n".join(rows) or "no changes yet"}
+        if key not in CONFIG_KEYS:
+            return {"text": f"not a setting you can change: {key or '(none)'}; settings are {', '.join(CONFIG_KEYS)}"}
+        fname, pat = CONFIG_KEYS[key]
+        if key == "model":
+            bm = _load("brain_model", "brain_model.py")
+            if action == "get":
+                return {"text": f"model: {bm.current() or 'default (' + bm.default_model() + ')'}"}
+            got = bm.set_model(str(a.get("value") or ""), by="jarvis", reason=str(a.get("why") or ""))
+            self._log_config(key, "", str(a.get("value") or ""), str(a.get("why") or ""))
+            return {"text": str(got.get("spoken") or got)}
+        f = CONFIG_DIR / fname
+        old = f.read_text().strip() if f.exists() else ""
+        if action == "get":
+            return {"text": f"{key}: {old or '(default)'}"}
+        val = str(a.get("value") or "").strip()
+        if not re.fullmatch(pat, val):
+            return {"text": f"refused: {val!r} is not a valid {key}"}
+        if key == "personality" and not (PERSONALITIES / f"{val}.md").is_file():
+            return {"text": f"refused: no personality file named {val}; available: " + ", ".join(sorted(p.stem for p in PERSONALITIES.glob("*.md") if p.stem != "README"))}
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        f.write_text(val + "\n")
+        self._log_config(key, old, val, str(a.get("why") or ""))
+        return {"text": f"{key}: {old or '(default)'} -> {val}. Takes effect on the next turn (voice: next spoken line). Logged; say 'undo' to restore {old or 'the default'}."}
+
+    def _log_config(self, key: str, old: str, new: str, why: str) -> None:
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+        with CONFIG_LOG.open("a") as fh:
+            fh.write(json.dumps({"at": time.strftime("%Y-%m-%d %H:%M"), "key": key, "old": old, "new": new, "why": why[:200],
+                                 "by": "jarvis", "task": self.dir.name}) + "\n")
+        Task(self.root).trace({"event": "config", "key": key, "old": old, "new": new, "why": why[:200]})
 
     def artifact(self, a):
         """Evens 10-16: interactive artifacts that update as we build. One folder per artifact, newest file is the page,
@@ -1493,7 +1547,7 @@ RESEARCH_RE = re.compile(r"\b(research|look up|latest|current(?:ly)?|right now|t
                          r"most popular|top \d+|stars|price|prices|news|what'?s new|review of)\b", re.I)
 CANT_RE = re.compile(r"\b(i\s+can(?:'|no)?t|cannot|i\s+don'?t\s+have\s+(?:access|a\s+way|the\s+ability)|unable\s+to|"
                      r"isn'?t\s+available|not\s+available|no\s+\w+(?:\s+\w+)?\s+tool|outside\s+what\s+i\s+can)\b", re.I)
-ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact"}
+ACTING_TOOLS = {"computer", "safari", "open", "shell", "write_file", "edit_file", "mcp", "signal", "artifact", "config"}
 
 
 def _done_gate(task, name: str, args: dict) -> str:

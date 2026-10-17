@@ -488,7 +488,14 @@ SOURCE: {title} ({meta})"""
 GAP_ROUNDS = 3
 
 
-SIGNAL_BUDGET_USD = float(os.environ.get("JARVIS_SIGNAL_BUDGET_USD") or 20)   # Evens 10-16: $0-20 for the whole Watch Later
+def _budget_setting() -> str:
+    try:  # Evens 10-17: Jarvis may change its own settings (config tool) -> ~/.config/brain/signal-budget.txt
+        return (Path.home() / ".config/brain/signal-budget.txt").read_text().strip()
+    except OSError:
+        return ""
+
+
+SIGNAL_BUDGET_USD = float(os.environ.get("JARVIS_SIGNAL_BUDGET_USD") or _budget_setting() or 20)   # Evens 10-16: $0-20 for the whole Watch Later
 BUDGET_SINCE = float(os.environ.get("JARVIS_SIGNAL_BUDGET_SINCE") or 1792198800)  # 2026-10-16 21:00 ET: start of the $20 budget
 
 

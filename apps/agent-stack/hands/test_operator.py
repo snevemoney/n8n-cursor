@@ -153,6 +153,21 @@ class CompletionTruth(OperatorLoop):  # matrix audit 10-16: success must be real
         pop.assert_called_once()
 
 
+class SelfConfig(OperatorLoop):  # Evens 10-17: Jarvis has access to its own configs and changes what makes sense
+    def test_set_get_history_and_refusals(self):
+        d = self.home / "cfg"; pers = self.home / "pers"; pers.mkdir(); (pers / "alfred.md").write_text("voice: bm_george\n# A")
+        with mock.patch.object(O, "CONFIG_DIR", d), mock.patch.object(O, "CONFIG_LOG", d / "h.jsonl"), mock.patch.object(O, "PERSONALITIES", pers):
+            t = O.Tools(O.Task.create(self.hive, "cfg").path)
+            self.assertIn("(default)", t.config({"action": "get", "key": "voice"})["text"])
+            self.assertIn("-> bm_lewis:50+am_michael:50", t.config({"action": "set", "key": "voice", "value": "bm_lewis:50+am_michael:50", "why": "he chose it"})["text"])
+            self.assertIn("refused", t.config({"action": "set", "key": "voice", "value": "rm -rf /"})["text"])
+            self.assertIn("refused", t.config({"action": "set", "key": "personality", "value": "nope"})["text"])
+            self.assertIn("-> alfred", t.config({"action": "set", "key": "personality", "value": "alfred"})["text"])
+            self.assertIn("not a setting", t.config({"action": "set", "key": "OPENROUTER_API_KEY", "value": "x"})["text"])
+            self.assertEqual((d / "voice.txt").read_text().strip(), "bm_lewis:50+am_michael:50")
+            self.assertEqual(len(t.config({"action": "history"})["text"].splitlines()), 2)
+
+
 class Personalities(unittest.TestCase):  # Evens 10-17: personalities and their voices are files; one line switches them
     def test_switch_by_name_and_voice_line(self):
         d = Path(tempfile.mkdtemp()); (d / "alfred.md").write_text("voice: bm_george\n# Alfred\nWarm and dry.")

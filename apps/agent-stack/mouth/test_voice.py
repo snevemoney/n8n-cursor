@@ -24,6 +24,10 @@ def _load():
 
 
 MOD = _load()
+# tests never read Evens's own voice/personality settings (Evens 10-17: ~/.config/brain/voice.txt holds his pick)
+MOD.VOICE_FILE = Path(__file__).resolve().parent / "no-such-voice.txt"
+MOD._personality_voice = lambda: ""
+os.environ.pop("AGENT_STACK_KOKORO_VOICE", None)
 
 
 class VoiceTest(unittest.TestCase):
@@ -478,3 +482,15 @@ class VoiceTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class VoiceBlend(unittest.TestCase):  # Evens 10-17 chose blend_lewis50_michael50
+    def test_blend_spec_is_accepted_and_averaged(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("voice_blend_t", __file__.replace("test_voice.py", "voice.py"))
+        V = importlib.util.module_from_spec(spec); spec.loader.exec_module(V)
+        self.assertTrue(V.VOICE_SPEC.fullmatch("bm_lewis:50+am_michael:50")); self.assertFalse(V.VOICE_SPEC.fullmatch("rm -rf"))
+        class E:
+            def get_voice_style(self, n): return {"bm_lewis": 2.0, "am_michael": 4.0}[n]
+        self.assertEqual(V.voice_style(E(), "bm_lewis:50+am_michael:50"), 3.0)
+        self.assertEqual(V.voice_style(E(), "bm_lewis"), "bm_lewis")

@@ -55,7 +55,7 @@ def _personality_voice() -> str:
     try:
         name = (Path.home() / ".config/brain/personality.txt").read_text().strip()
         folder = Path(os.environ.get("JARVIS_PERSONALITIES") or Path.home() / "ArtCraft Studio/00 Private/Context References/Personalities")
-        m = re.search(r"(?m)^voice:\s*([abmf][fm]_[a-z]+)", (folder / f"{name}.md").read_text())
+        m = re.search(r"(?m)^voice:\s*([abmf][fm]_[a-z]+(?:[:+][a-z_:0-9]+)*)", (folder / f"{name}.md").read_text())
         return m.group(1) if m else ""
     except OSError:
         return ""
@@ -65,9 +65,21 @@ def kokoro_voice() -> str:
     """The Kokoro voice to speak with: env, then ~/.config/brain/voice.txt, then the default. No code change to switch."""
     for cand in (os.environ.get("AGENT_STACK_KOKORO_VOICE"), VOICE_FILE.read_text().strip() if VOICE_FILE.is_file() else "",
                  _personality_voice()):
-        if cand and re.fullmatch(r"[abmf][fm]_[a-z]+", cand.strip()):
+        if cand and VOICE_SPEC.fullmatch(cand.strip()):
             return cand.strip()
     return KOKORO_VOICE
+
+
+VOICE_SPEC = re.compile(r"[abmf][fm]_[a-z]+(?::\d{1,3})?(?:\+[abmf][fm]_[a-z]+(?::\d{1,3})?)*")
+
+
+def voice_style(engine, spec: str):
+    """A Kokoro voice name, or a blend "bm_lewis:50+am_michael:50" averaged into one style vector."""
+    if "+" not in spec:
+        return spec.split(":")[0]
+    parts = [(p.split(":")[0], float(p.split(":")[1]) if ":" in p else 1.0) for p in spec.split("+")]
+    total = sum(w for _, w in parts) or 1.0
+    return sum(engine.get_voice_style(name) * (w / total) for name, w in parts)
 TARQUIN_VOICE_ID = "7cOBG34AiHrAzs842Rdi"
 ELEVEN_V3 = "eleven_v3"
 ELEVEN_TTV_V3 = "eleven_ttv_v3"
@@ -435,7 +447,7 @@ def _kokoro_engine():
 
 def _kokoro_once(text: str) -> bytes:
     engine = _kokoro_engine()
-    samples, rate = engine.create(text[:TEXT_CAP], voice=kokoro_voice(), speed=1.0, lang="en-gb")
+    samples, rate = engine.create(text[:TEXT_CAP], voice=voice_style(engine, kokoro_voice()), speed=1.0, lang="en-gb")
     return _wav_bytes(samples, rate)
 
 
@@ -459,7 +471,7 @@ def worker_loop() -> None:
                 from kokoro_onnx import Kokoro
 
                 engine = Kokoro(str(KOKORO_MODEL), str(KOKORO_VOICES))
-            samples, rate = engine.create(text[:TEXT_CAP], voice=kokoro_voice(), speed=1.0, lang="en-gb")
+            samples, rate = engine.create(text[:TEXT_CAP], voice=voice_style(engine, kokoro_voice()), speed=1.0, lang="en-gb")
             audio = _wav_bytes(samples, rate)
             print(json.dumps({"ok": True, "mime": "audio/wav", "b64": base64.b64encode(audio).decode("ascii")}), flush=True)
         except Exception as exc:  # noqa: BLE001 — worker must stay up
