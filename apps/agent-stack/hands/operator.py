@@ -1626,7 +1626,12 @@ def _idle_until_spoken_to(task) -> bool:
             return False
         msgs = task.read("messages.json", [])
         if (len(msgs) > seen and msgs[-1].get("role") == "user") or task.rows("inbox.jsonl"):
-            st = task.read("state.json"); st.update(status="RUNNING", step=0, turn_at=time.time()); task.write("state.json", st)
+            st = task.read("state.json")
+            # live 10-17: a new request to an idle session hit the ceiling of the LAST job ("cost 1.52 so far, say go on")
+            # before doing anything. Each request gets its own budget on top of what the session already spent.
+            st.update(status="RUNNING", step=0, turn_at=time.time(), pending_cap=False,
+                      cost_cap=round(float(st.get("cost_usd") or 0) + HX.JOB_COST_CAP, 2))
+            task.write("state.json", st)
             return True
         time.sleep(1.0)
     st = task.read("state.json")

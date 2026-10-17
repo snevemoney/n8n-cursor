@@ -221,6 +221,18 @@ class OneBlueCursor(unittest.TestCase):  # Evens 10-17: cua's cursor in Jarvis b
         self.assertFalse(O.OWN_CURSOR)
 
 
+class FreshBudgetPerRequest(unittest.TestCase):  # live 10-17: a new test line joined the idle $1.52 bunny job and was paused at once
+    def test_idle_session_woken_by_a_new_line_gets_its_own_budget(self):
+        d = Path(tempfile.mkdtemp()); task = O.Task(d / "t"); task.path.mkdir(parents=True)
+        task.write("state.json", {"status": "IDLE", "cost_usd": 1.52, "cost_cap": 1.5, "pending_cap": True})
+        (task.path / "inbox.jsonl").write_text(json.dumps({"at": 1, "text": "new request"}) + "\n")  # what tell() writes
+        with mock.patch.object(O, "IDLE_S", 3), mock.patch.object(O, "_release_rev", return_value="", create=True):
+            self.assertTrue(O._idle_until_spoken_to(task))
+        st = task.read("state.json")
+        self.assertEqual(st["status"], "RUNNING"); self.assertFalse(st["pending_cap"])
+        self.assertFalse(O.HX.over_cap(st)); self.assertAlmostEqual(st["cost_cap"], 1.52 + O.HX.JOB_COST_CAP, 2)
+
+
 class PlainEnglish(unittest.TestCase):  # Evens 10-17: his card read "Used app_type to create and type into /private"
     def test_his_screenshot_line_becomes_words_and_a_file_name(self):
         got = O.plain("Sir. Used app_type to create and type into /private/tmp/claude-501/-Users-evenslouis/fab/jarvis-bg-test4.txt in the background.")
